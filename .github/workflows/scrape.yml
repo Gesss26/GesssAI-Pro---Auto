@@ -34,11 +34,11 @@ jobs:
           node scrape.js
       
       - name: Commit and push updated data
-        run: |
-          git config --local user.email "github-actions[bot]@users.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add public/data/matches.json
-          git diff --staged --quiet || git commit -m "🔄 Aggiornamento automatico dati FBref [skip ci]"
-          git push
+  run: |
+    git config --local user.email "github-actions[bot]@users.github.com"
+    git config --local user.name "github-actions[bot]"
+    git add data/matches.json  # ← CAMBIA DA public/data a data
+    git diff --staged --quiet || git commit -m "🔄 Aggiornamento automatico dati FBref [skip ci]"
+    git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
