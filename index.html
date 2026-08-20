@@ -2467,12 +2467,12 @@ const MatchTabHistory = ({ match, onSelect }) => {
       <div className="match-info">📅 {formattedDate} - ⏰ {match.ora || 'TBD'}</div>
       <div className="teams-row">
         <div className="team">
-          <TeamLogo teamName={match.casa} championship={match.campionato} size={50} />
+          <TeamLogo teamName={match.casa} championship={match.campionato} size={60} />
           <div className="team-name" style={{fontSize: '16px'}}>{match.casa || 'Casa'}</div>
         </div>
         <div className="score"><span className={scoreClass}>{match.golCasa || 0} - {match.golOspite || 0}</span></div>
         <div className="team">
-          <TeamLogo teamName={match.ospiti} championship={match.campionato} size={50} />
+          <TeamLogo teamName={match.ospiti} championship={match.campionato} size={60} />
           <div className="team-name" style={{fontSize: '16px'}}>{match.ospiti || 'Ospite'}</div>
         </div>
       </div>
