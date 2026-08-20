@@ -15,8 +15,7 @@ from crawl4ai_cloud import AsyncWebCrawler
 # ============================================
 
 # 🔑 INSERISCI QUI LA TUA API KEY DI CRAWL4AI CLOUD
-API_KEY = "sk_live_8pxScR5n1rxFFS952gUQQuIkbiMVFni7N4QiR1oalYQ"  # <-- SOSTITUISCI CON LA TUA API KEY
-
+API_KEY = os.environ.get('CRAWL4AI_API_KEY', 'sk_live_8pxScR5n1rxFFS952gUQQuIkbiMVFni7N4QiR1oalYQ')
 # Rileva se siamo su GitHub Actions
 IN_GITHUB_ACTIONS = os.environ.get('GITHUB_ACTIONS') == 'true'
 
