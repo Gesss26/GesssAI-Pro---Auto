@@ -247,7 +247,7 @@ async function scrapeAllLeagues() {
 // ============================================================
 
 function saveMatchesToFile(matches) {
-  const dataPath = path.join(__dirname, '../../public/data/matches.json');
+  const dataPath = path.join(__dirname, '../../data/matches.json');
   const dir = path.dirname(dataPath);
   
   if (!fs.existsSync(dir)) {
