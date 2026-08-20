@@ -3,6 +3,7 @@ const cheerio = require('cheerio');
 const fs = require('fs');
 const path = require('path');
 const cron = require('node-cron');
+const fetch = require('node-fetch');
 
 // ============================================================
 // CONFIGURAZIONE
@@ -10,13 +11,13 @@ const cron = require('node-cron');
 
 const CONFIG = {
   userAgents: [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/138.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/138.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/138.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
   ],
-  concurrency: 3,
-  delayBetweenRequests: 1500,
-  maxRetries: 3,
+  concurrency: 2,  // Ridotto per evitare blocchi
+  delayBetweenRequests: 3000,  // Aumentato
+  maxRetries: 5,  // Aumentato
   timeout: 30000,
 };
 
@@ -110,37 +111,92 @@ const LEAGUE_FOLDER_MAP = {
 // ============================================================
 
 async function scrapeLeague(league) {
-  // Usa l'URL già completo dalla lista
   const url = league.url;
   
   console.log(`🌐 Scaricamento: ${league.name} → ${url}`);
   
   for (let attempt = 1; attempt <= CONFIG.maxRetries; attempt++) {
     try {
+      // HEADERS COMPLETI PER SEMBRARE UN BROWSER VERO
       const headers = {
-        'User-Agent': CONFIG.userAgents[Math.floor(Math.random() * CONFIG.userAgents.length)],
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Accept-Language': 'en-US,en;q=0.9,it;q=0.8',
         'Accept-Encoding': 'gzip, deflate, br',
         'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Cache-Control': 'max-age=0',
+        'sec-ch-ua': '"Not)A;Brand";v="99", "Google Chrome";v="138", "Chromium";v="138"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
       };
       
-      const response = await axios.get(url, {
-        headers,
-        timeout: CONFIG.timeout,
-        decompress: true,
+      // ============================================================
+      // RICHIESTA CON FETCH (invece di axios)
+      // ============================================================
+      const response = await fetch(url, {
+        headers: headers,
+        referrer: 'https://www.google.com/',
+        signal: AbortSignal.timeout(CONFIG.timeout),
       });
       
-      const $ = cheerio.load(response.data);
+      // Controlla se la risposta è OK
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      // Leggi il contenuto come testo
+      const html = await response.text();
+      
+      // Se l'HTML è troppo corto, probabilmente è un blocco
+      if (html.length < 10000) {
+        console.warn(`⚠️ HTML troppo corto per ${league.name} (${html.length} bytes), potrebbe essere bloccato`);
+        if (attempt < CONFIG.maxRetries) {
+          const waitTime = attempt * 5000 + Math.random() * 3000;
+          console.log(`   ⏳ Attendo ${Math.round(waitTime/1000)}s prima di riprovare...`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          continue;
+        }
+      }
+      
+      const $ = cheerio.load(html);
       const results = [];
       
-      // Cerca la tabella schedule
-      const table = $('#div_schedule table');
+      // ============================================================
+      // CERCA LA TABELLA - PIÙ SELETTORI
+      // ============================================================
+      let table = $('#div_schedule table');
+      if (table.length === 0) {
+        table = $('table.stats_table');
+      }
+      if (table.length === 0) {
+        table = $('table[data-cols]');
+      }
+      if (table.length === 0) {
+        // Cerca qualsiasi tabella con risultati
+        table = $('table tbody tr').first().closest('table');
+      }
+      
       if (table.length === 0) {
         console.warn(`⚠️ Tabella non trovata per ${league.name}`);
+        // Salva l'HTML per debug
+        const debugPath = path.join(__dirname, '../../debug', `debug-${league.name}.html`);
+        const debugDir = path.dirname(debugPath);
+        if (!fs.existsSync(debugDir)) {
+          fs.mkdirSync(debugDir, { recursive: true });
+        }
+        fs.writeFileSync(debugPath, html);
+        console.log(`💾 HTML salvato in debug/debug-${league.name}.html`);
         return results;
       }
       
+      // ============================================================
+      // ESTRAZIONE DATI
+      // ============================================================
       table.find('tbody tr').each((_, row) => {
         const $row = $(row);
         if ($row.hasClass('spacer')) return;
@@ -154,6 +210,7 @@ async function scrapeLeague(league) {
         const scoreText = $(cells[2]).text().trim();
         const awayTeam = $(cells[3]).text().trim();
         
+        // Estrai gol dal risultato
         let homeGoals = null, awayGoals = null;
         const scoreMatch = scoreText.match(/(\d+)–(\d+)/);
         if (scoreMatch) {
@@ -161,7 +218,7 @@ async function scrapeLeague(league) {
           awayGoals = parseInt(scoreMatch[2]);
         }
         
-        // Se la data è vuota o non ha anno, salta
+        // Verifica che la partita sia valida
         if (!date || !date.match(/\d{4}/)) return;
         if (!homeTeam || !awayTeam) return;
         
@@ -182,7 +239,9 @@ async function scrapeLeague(league) {
     } catch (error) {
       console.warn(`⚠️ Tentativo ${attempt}/${CONFIG.maxRetries} fallito per ${league.name}: ${error.message}`);
       if (attempt < CONFIG.maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+        const waitTime = attempt * 4000 + Math.random() * 3000;
+        console.log(`   ⏳ Attendo ${Math.round(waitTime/1000)}s prima di riprovare...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
       }
     }
   }
@@ -249,8 +308,12 @@ function deduplicateMatches(matches) {
 async function scrapeAllLeagues() {
   console.log('🚀 Avvio scraping FBref...');
   console.log(`📊 Campionati da scrapare: ${LEAGUES.length}`);
-  const startTime = Date.now();
   
+  // Attesa iniziale per evitare blocchi
+  console.log('⏳ Attendere 3 secondi prima di iniziare...');
+  await new Promise(resolve => setTimeout(resolve, 3000));
+  
+  const startTime = Date.now();
   const allResults = [];
   const chunks = [];
   
@@ -259,7 +322,10 @@ async function scrapeAllLeagues() {
     chunks.push(LEAGUES.slice(i, i + CONFIG.concurrency));
   }
   
-  for (const chunk of chunks) {
+  for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
+    const chunk = chunks[chunkIndex];
+    console.log(`\n📦 Chunk ${chunkIndex + 1}/${chunks.length} (${chunk.map(l => l.name).join(', ')})`);
+    
     const promises = chunk.map(league => 
       scrapeLeague(league).then(matches => 
         matches.map(m => ({ ...m, campionato: league.name }))
@@ -269,8 +335,11 @@ async function scrapeAllLeagues() {
     const chunkResults = await Promise.all(promises);
     allResults.push(...chunkResults.flat());
     
-    if (chunks.indexOf(chunk) < chunks.length - 1) {
-      await new Promise(resolve => setTimeout(resolve, CONFIG.delayBetweenRequests));
+    // Attesa tra chunk
+    if (chunkIndex < chunks.length - 1) {
+      const waitTime = CONFIG.delayBetweenRequests + Math.random() * 2000;
+      console.log(`   ⏳ Attendo ${Math.round(waitTime/1000)}s prima del prossimo chunk...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
     }
   }
   
@@ -279,7 +348,7 @@ async function scrapeAllLeagues() {
   // Deduplica
   const uniqueMatches = deduplicateMatches(allResults);
   
-  console.log(`✅ Scraping completato in ${duration}s`);
+  console.log(`\n✅ Scraping completato in ${duration}s`);
   console.log(`📊 Trovate ${uniqueMatches.length} partite uniche`);
   
   return uniqueMatches;
