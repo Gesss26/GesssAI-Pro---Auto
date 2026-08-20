@@ -16,18 +16,17 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'  # ← CAMBIA DA 18 A 20!
       
       - name: Install dependencies
         run: |
           cd backend
           npm install
-          cd ..
       
       - name: Run scraper
         run: |
           cd backend
-          node server.js --scrape-only
+          node scrape.js
       
       - name: Commit and push updated data
         run: |
