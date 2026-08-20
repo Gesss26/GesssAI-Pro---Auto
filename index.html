@@ -841,20 +841,17 @@ const { useState, useEffect, useMemo, useRef, useCallback } = React;
 // Carica dati dal backend
 async function loadScrapedData() {
   try {
-    // GitHub Pages usa il nome del repository nel percorso
-    const basePath = window.location.pathname.includes('/GesssAI-Pro---Auto/') 
-      ? '/GesssAI-Pro---Auto' 
-      : '';
-    const response = await fetch(`${basePath}/data/matches.json`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    if (data.matches && data.matches.length > 0) {
-      console.log(`📊 Caricate ${data.matches.length} partite dal backend`);
-      return data;
+    console.log('📂 Cerco di caricare data/matches.json...');
+    const response = await fetch('./data/matches.json');
+    if (!response.ok) {
+      console.error('❌ File non trovato:', response.status);
+      return null;
     }
-    return null;
+    const data = await response.json();
+    console.log('✅ Dati caricati:', data.matches?.length || 0, 'partite');
+    return data;
   } catch (error) {
-    console.warn('⚠️ Errore caricamento dati:', error.message);
+    console.error('❌ Errore:', error.message);
     return null;
   }
 }
@@ -873,15 +870,21 @@ async function forceScrape() {
   }
 }
 
-// Stato scraper
 async function checkScraperStatus() {
-  try {
-    const response = await fetch('/api/status');
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return await response.json();
-  } catch (error) {
-    return null;
+  return {
+    lastUpdate: new Date().toISOString(),
+    matchCount: 0,
+    isStatic: true
+  };
+}
+
+async function forceScrape() {
+  console.log('🔄 Ricarico dati da GitHub Pages...');
+  const data = await loadScrapedData();
+  if (data && window.updateAppData) {
+    window.updateAppData(data);
   }
+  return { success: true };
 }
 
 // ============================================================
@@ -3708,10 +3711,24 @@ function App() {
   const [selectedMatchId, setSelectedMatchId] = useState(null);
   const [statsSubTab, setStatsSubTab] = useState('Classifica');
   const [viewMode, setViewMode] = useState(() => {
-    const saved = localStorage.getItem('ft_view_mode');
+  const saved = localStorage.getItem('ft_view_mode');
     return saved || 'pc';
   });
   const [selectedFamiglie, setSelectedFamiglie] = useState(initial.selectedFamiglie || ['dc_under','mg_casa_ospite','over']);
+  useEffect(() => {
+    // Carica i dati all'avvio
+    const loadData = async () => {
+      const data = await loadScrapedData();
+      if (data && data.matches && data.matches.length > 0) {
+        setMatches(data.matches);
+        setChampionships(data.championships || []);
+        console.log(`✅ Caricate ${data.matches.length} partite!`);
+      } else {
+        console.warn('⚠️ Nessun dato trovato');
+      }
+    };
+    loadData();
+  }, []);
 
   // ============================================================
   // FUNZIONE PER AGGIORNARE DATI DAL BACKEND
