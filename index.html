@@ -1532,13 +1532,13 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
   };
   
   const getTeamFileName = (name, useUnderscore = false) => {
-  if (!name) return '';
-  const clean = name.replace(/[<>:"/\\|?*]/g, '').trim();
-  if (useUnderscore) {
-    return clean.replace(/\s+/g, '_') + '.png';
-  }
-  return clean + '.png';
-};
+    if (!name) return '';
+    const clean = name.replace(/[<>:"/\\|?*]/g, '').trim();
+    if (useUnderscore) {
+      return clean.replace(/\s+/g, '_') + '.png';
+    }
+    return clean + '.png';
+  };
   
   const getInitials = (name) => {
     if (!name) return '??';
@@ -1576,7 +1576,6 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
   }
   
   const leagueFolder = getLeagueFolder(championship);
-  const fileName = getTeamFileName(teamName);
   const logoPath = `/GesssAI-Pro---Auto/logos/${leagueFolder}/${tryUnderscore 
     ? teamName.replace(/\s+/g, '_') + '.png'
     : teamName + '.png'}`;
@@ -1585,7 +1584,14 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
     <img
       src={logoPath}
       alt={teamName}
-      // ... props ...
+      style={{
+        width: size,
+        height: size,
+        objectFit: 'contain',
+        display: 'block',
+        margin: '0 auto',
+        borderRadius: '4px'
+      }}
       onError={() => {
         if (!tryUnderscore) {
           setTryUnderscore(true);
