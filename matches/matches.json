@@ -2,75 +2,75 @@
   "championships": [
     {
       "name": "Allsvenskan",
-      "importedAt": "2026-08-19T19:14:37.500714"
+      "importedAt": "2026-08-20T13:52:18.153782"
     },
     {
       "name": "Austrian Bundesliga",
-      "importedAt": "2026-08-19T19:14:37.500720"
+      "importedAt": "2026-08-20T13:52:18.153788"
     },
     {
       "name": "Bundesliga",
-      "importedAt": "2026-08-19T19:14:37.500722"
+      "importedAt": "2026-08-20T13:52:18.153790"
     },
     {
       "name": "Chinese Super League",
-      "importedAt": "2026-08-19T19:14:37.500723"
+      "importedAt": "2026-08-20T13:52:18.153791"
     },
     {
       "name": "Danish Superliga",
-      "importedAt": "2026-08-19T19:14:37.500724"
+      "importedAt": "2026-08-20T13:52:18.153792"
     },
     {
       "name": "Eliteserien",
-      "importedAt": "2026-08-19T19:14:37.500725"
+      "importedAt": "2026-08-20T13:52:18.153793"
     },
     {
       "name": "Eredivisie",
-      "importedAt": "2026-08-19T19:14:37.500725"
+      "importedAt": "2026-08-20T13:52:18.153793"
     },
     {
       "name": "Ireland Premier",
-      "importedAt": "2026-08-19T19:14:37.500726"
+      "importedAt": "2026-08-20T13:52:18.153794"
     },
     {
       "name": "J1 League",
-      "importedAt": "2026-08-19T19:14:37.500727"
+      "importedAt": "2026-08-20T13:52:18.153795"
     },
     {
       "name": "K League 1",
-      "importedAt": "2026-08-19T19:14:37.500728"
+      "importedAt": "2026-08-20T13:52:18.153796"
     },
     {
       "name": "La Liga",
-      "importedAt": "2026-08-19T19:14:37.500729"
+      "importedAt": "2026-08-20T13:52:18.153797"
     },
     {
       "name": "Ligue 1",
-      "importedAt": "2026-08-19T19:14:37.500729"
+      "importedAt": "2026-08-20T13:52:18.153798"
     },
     {
       "name": "Premier League",
-      "importedAt": "2026-08-19T19:14:37.500730"
+      "importedAt": "2026-08-20T13:52:18.153798"
     },
     {
       "name": "Russian PL",
-      "importedAt": "2026-08-19T19:14:37.500731"
+      "importedAt": "2026-08-20T13:52:18.153799"
     },
     {
       "name": "Serie A",
-      "importedAt": "2026-08-19T19:14:37.500732"
+      "importedAt": "2026-08-20T13:52:18.153800"
     },
     {
       "name": "Serie B",
-      "importedAt": "2026-08-19T19:14:37.500732"
+      "importedAt": "2026-08-20T13:52:18.153800"
     },
     {
       "name": "Swiss Super League",
-      "importedAt": "2026-08-19T19:14:37.500733"
+      "importedAt": "2026-08-20T13:52:18.153801"
     },
     {
       "name": "Veikkausliiga",
-      "importedAt": "2026-08-19T19:14:37.500734"
+      "importedAt": "2026-08-20T13:52:18.153802"
     }
   ],
   "matches": [
@@ -10937,9 +10937,9 @@
       "ora": "19:35(13:35)",
       "casa": "Shanghai Port",
       "ospiti": "Dalian Yingbo",
-      "stato": "Futura",
-      "golCasa": 0,
-      "golOspite": 0,
+      "stato": "Giocata",
+      "golCasa": 1,
+      "golOspite": 1,
       "citta": "N/D"
     },
     {
@@ -33739,8 +33739,8 @@
       "ora": "21:00",
       "casa": "Atlético Madrid",
       "ospiti": "Málaga",
-      "stato": "Futura",
-      "golCasa": 0,
+      "stato": "Giocata",
+      "golCasa": 2,
       "golOspite": 0,
       "citta": "N/D"
     },
@@ -58523,6 +58523,19 @@
       "citta": "N/D"
     },
     {
+      "id": "Swiss Super League_15_09_2026_Grasshopper_Sion",
+      "campionato": "Swiss Super League",
+      "round": "4",
+      "data": "15/09/2026",
+      "ora": "19:00",
+      "casa": "Grasshopper",
+      "ospiti": "Sion",
+      "stato": "Futura",
+      "golCasa": 0,
+      "golOspite": 0,
+      "citta": "N/D"
+    },
+    {
       "id": "Swiss Super League_16_01_2027_Basel_Vaduz",
       "campionato": "Swiss Super League",
       "round": "19",
@@ -58595,6 +58608,19 @@
       "ora": "",
       "casa": "Young Boys",
       "ospiti": "Lugano",
+      "stato": "Futura",
+      "golCasa": 0,
+      "golOspite": 0,
+      "citta": "N/D"
+    },
+    {
+      "id": "Swiss Super League_16_09_2026_Lugano_St._Gallen",
+      "campionato": "Swiss Super League",
+      "round": "4",
+      "data": "16/09/2026",
+      "ora": "19:00",
+      "casa": "Lugano",
+      "ospiti": "St. Gallen",
       "stato": "Futura",
       "golCasa": 0,
       "golOspite": 0,
@@ -58959,32 +58985,6 @@
       "ora": "14:00",
       "casa": "Young Boys",
       "ospiti": "Vaduz",
-      "stato": "Futura",
-      "golCasa": 0,
-      "golOspite": 0,
-      "citta": "N/D"
-    },
-    {
-      "id": "Swiss Super League_23_08_2026_Grasshopper_Sion",
-      "campionato": "Swiss Super League",
-      "round": "4",
-      "data": "23/08/2026",
-      "ora": "16:30",
-      "casa": "Grasshopper",
-      "ospiti": "Sion",
-      "stato": "Futura",
-      "golCasa": 0,
-      "golOspite": 0,
-      "citta": "N/D"
-    },
-    {
-      "id": "Swiss Super League_23_08_2026_Lugano_St._Gallen",
-      "campionato": "Swiss Super League",
-      "round": "4",
-      "data": "23/08/2026",
-      "ora": "16:30",
-      "casa": "Lugano",
-      "ospiti": "St. Gallen",
       "stato": "Futura",
       "golCasa": 0,
       "golOspite": 0,
@@ -61210,5 +61210,5 @@
     "mg_casa_ospite",
     "over"
   ],
-  "exportedAt": "2026-08-19T19:14:37.500736"
+  "exportedAt": "2026-08-20T13:52:18.153803"
 }
