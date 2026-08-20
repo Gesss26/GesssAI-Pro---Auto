@@ -873,20 +873,6 @@ async function loadScrapedData() {
   }
 }
 
-// Forza aggiornamento scraping
-async function forceScrape() {
-  try {
-    const response = await fetch('/api/scrape', { method: 'POST' });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const result = await response.json();
-    console.log(`✅ Scraping: ${result.data?.matches?.length || 0} partite`);
-    return result;
-  } catch (error) {
-    console.error('❌ Errore scraping:', error);
-    return null;
-  }
-}
-
 async function checkScraperStatus() {
   return {
     lastUpdate: new Date().toISOString(),
