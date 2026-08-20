@@ -1,45 +1,43 @@
-name: Scraping FBref Automatico
+name: Scraping FBref (Python)
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
-  workflow_dispatch:
-
-permissions:
-  contents: write
-  actions: read
+    - cron: '0 */6 * * *'  # Ogni 6 ore
+  workflow_dispatch:         # Permette di eseguire manualmente
 
 jobs:
   scrape:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest  # Windows per compatibilità con il tuo script
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
+        
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      
-      - name: Install dependencies
+          python-version: '3.10'
+          
+      - name: Installa Chrome
         run: |
-          cd backend
-          npm install
-      
-      - name: Run scraper
+          choco install googlechrome -y
+          
+      - name: Installa dipendenze Python
         run: |
-          cd backend
-          node scrape.js
-      
-      - name: Commit and push updated data
+          pip install pandas openpyxl beautifulsoup4 selenium webdriver-manager lxml python-dateutil
+          
+      - name: Esegui scraping
         run: |
-          git config --local user.email "github-actions[bot]@users.github.com"
-          git config --local user.name "github-actions[bot]"
+          python scarica.py
+          
+      - name: Copia il JSON nella cartella data
+        run: |
+          Copy-Item -Path "d:\ai\excel\GesssAI_Input.json" -Destination "data\matches.json" -Force
+          
+      - name: Commit e push dei dati
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/matches.json
-          git diff --staged --quiet || git commit -m "🔄 Aggiornamento automatico dati FBref [skip ci]"
+          git commit -m "Aggiornamento automatico dati FBref [skip ci]" || echo "Nessuna modifica"
           git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
