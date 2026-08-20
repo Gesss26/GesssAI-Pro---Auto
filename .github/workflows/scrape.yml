@@ -5,6 +5,11 @@ on:
     - cron: '0 */6 * * *'
   workflow_dispatch:
 
+# IMPORTANTE: Dai i permessi di scrittura
+permissions:
+  contents: write
+  actions: read
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
@@ -35,3 +40,5 @@ jobs:
           git add public/data/matches.json
           git diff --staged --quiet || git commit -m "🔄 Aggiornamento automatico dati FBref [skip ci]"
           git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
