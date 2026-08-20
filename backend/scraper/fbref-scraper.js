@@ -26,61 +26,30 @@ const CONFIG = {
 // ============================================================
 
 const LEAGUES = [
-  // Allsvenskan (Svezia) - SENZA STAGIONE
-  { id: '29', name: 'Allsvenskan', url: 'https://fbref.com/en/comps/29/schedule/Allsvenskan-Scores-and-Fixtures' },
+  // 🔵 IN CORSO - URL SENZA STAGIONE
+  { name: 'Allsvenskan', url: 'https://fbref.com/en/comps/29/schedule/Allsvenskan-Scores-and-Fixtures' },
+  { name: 'Eliteserien', url: 'https://fbref.com/en/comps/28/schedule/Eliteserien-Scores-and-Fixtures' },
+  { name: 'Danish Superliga', url: 'https://fbref.com/en/comps/50/schedule/Danish-Superliga-Scores-and-Fixtures' },
+  { name: 'Pro League', url: 'https://fbref.com/en/comps/34/schedule/Belgian-Pro-League-Scores-and-Fixtures' },
+  { name: 'Premier Division', url: 'https://fbref.com/en/comps/80/schedule/League-of-Ireland-Premier-Division-Scores-and-Fixtures' },
+  { name: 'J1 League', url: 'https://fbref.com/en/comps/25/schedule/J1-League-Scores-and-Fixtures' },
+  { name: 'K League 1', url: 'https://fbref.com/en/comps/55/schedule/K-League-1-Scores-and-Fixtures' },
+  { name: 'Swiss Super League', url: 'https://fbref.com/en/comps/57/schedule/Swiss-Super-League-Scores-and-Fixtures' },
+  { name: 'Veikkausliiga', url: 'https://fbref.com/en/comps/43/schedule/Veikkausliiga-Scores-and-Fixtures' },
+  { name: 'Russian Premier League', url: 'https://fbref.com/en/comps/30/schedule/Russian-Premier-League-Scores-and-Fixtures' },
+  { name: 'Chinese Super League', url: 'https://fbref.com/en/comps/62/schedule/Chinese-Super-League-Scores-and-Fixtures' },
+  { name: 'Austrian Bundesliga', url: 'https://fbref.com/en/comps/56/schedule/Austrian-Bundesliga-Scores-and-Fixtures' },
+  { name: 'Eredivisie', url: 'https://fbref.com/en/comps/23/schedule/Eredivisie-Scores-and-Fixtures' },
+  { name: 'Primeira Liga', url: 'https://fbref.com/en/comps/32/schedule/Primeira-Liga-Scores-and-Fixtures' },
   
-  // Austrian Bundesliga (Austria) - SENZA STAGIONE
-  { id: '56', name: 'Austrian Bundesliga', url: 'https://fbref.com/en/comps/56/schedule/Austrian-Bundesliga-Scores-and-Fixtures' },
-
-  // Bundesliga (Germania) - CON STAGIONE 2026-2027
-  { id: '20', name: 'Bundesliga', url: 'https://fbref.com/en/comps/20/2026-2027/schedule/2026-2027-Bundesliga-Scores-and-Fixtures' },
-  
-  // Chinese Super League (Cina) - SENZA STAGIONE
-  { id: '62', name: 'Chinese Super League', url: 'https://fbref.com/en/comps/62/schedule/Chinese-Super-League-Scores-and-Fixtures' },
-  
-  // Danish Superliga (Danimarca) - SENZA STAGIONE
-  { id: '50', name: 'Danish Superliga', url: 'https://fbref.com/en/comps/50/schedule/Danish-Superliga-Scores-and-Fixtures' },
-  
-  // Eliteserien (Norvegia) - SENZA STAGIONE
-  { id: '28', name: 'Eliteserien', url: 'https://fbref.com/en/comps/28/schedule/Eliteserien-Scores-and-Fixtures' },
-  
-  // Eredivisie (Paesi Bassi) - SENZA STAGIONE
-  { id: '23', name: 'Eredivisie', url: 'https://fbref.com/en/comps/23/schedule/Eredivisie-Scores-and-Fixtures' },
-  
-  // La Liga (Spagna) - CON STAGIONE 2026-2027
-  { id: '12', name: 'La Liga', url: 'https://fbref.com/en/comps/12/2026-2027/schedule/2026-2027-La-Liga-Scores-and-Fixtures' },
-
-  // Ligue 1 (Francia) - CON STAGIONE 2026-2027
-  { id: '13', name: 'Ligue 1', url: 'https://fbref.com/en/comps/13/2026-2027/schedule/2026-2027-Ligue-1-Scores-and-Fixtures' },
-  
-  // League of Ireland Premier Division (Irlanda) - SENZA STAGIONE
-  { id: '80', name: 'Premier Division', url: 'https://fbref.com/en/comps/80/schedule/League-of-Ireland-Premier-Division-Scores-and-Fixtures' },
-  
-  // J1 League (Giappone) - SENZA STAGIONE
-  { id: '25', name: 'J1 League', url: 'https://fbref.com/en/comps/25/schedule/J1-League-Scores-and-Fixtures' },
-  
-  // K League 1 (Corea del Sud) - SENZA STAGIONE
-  { id: '55', name: 'K League 1', url: 'https://fbref.com/en/comps/55/schedule/K-League-1-Scores-and-Fixtures' },
-
-  // Premier League (Inghilterra) - CON STAGIONE 2026-2027
-  { id: '9', name: 'Premier League', url: 'https://fbref.com/en/comps/9/2026-2027/schedule/2026-2027-Premier-League-Scores-and-Fixtures' },
-  
-  // Russian Premier League (Russia) - SENZA STAGIONE
-  { id: '30', name: 'Russian Premier League', url: 'https://fbref.com/en/comps/30/schedule/Russian-Premier-League-Scores-and-Fixtures' },
-
-  // Serie A (Italia) - CON STAGIONE 2026-2027
-  { id: '11', name: 'Serie A', url: 'https://fbref.com/en/comps/11/2026-2027/schedule/2026-2027-Serie-A-M-Scores-and-Fixtures' },
-
-  // Serie B (Italia) - CON STAGIONE 2026-2027
-  { id: '18', name: 'Serie B', url: 'https://fbref.com/en/comps/18/2026-2027/schedule/2026-2027-Serie-B-M-Scores-and-Fixtures' },
-  
-  // Swiss Super League (Svizzera) - SENZA STAGIONE
-  { id: '57', name: 'Swiss Super League', url: 'https://fbref.com/en/comps/57/schedule/Swiss-Super-League-Scores-and-Fixtures' },
-  
-  // Veikkausliiga (Finlandia) - SENZA STAGIONE
-  { id: '43', name: 'Veikkausliiga', url: 'https://fbref.com/en/comps/43/schedule/Veikkausliiga-Scores-and-Fixtures' }
+  // 🟡 FUTURI - URL CON STAGIONE 2026-2027
+  { name: 'Serie A', url: 'https://fbref.com/en/comps/11/2026-2027/schedule/2026-2027-Serie-A-Scores-and-Fixtures' },
+  { name: 'Serie B', url: 'https://fbref.com/en/comps/18/2026-2027/schedule/2026-2027-Serie-B-Scores-and-Fixtures' },
+  { name: 'Premier League', url: 'https://fbref.com/en/comps/9/2026-2027/schedule/2026-2027-Premier-League-Scores-and-Fixtures' },
+  { name: 'Bundesliga', url: 'https://fbref.com/en/comps/20/2026-2027/schedule/2026-2027-Bundesliga-Scores-and-Fixtures' },
+  { name: 'La Liga', url: 'https://fbref.com/en/comps/12/2026-2027/schedule/2026-2027-La-Liga-Scores-and-Fixtures' },
+  { name: 'Ligue 1', url: 'https://fbref.com/en/comps/13/2026-2027/schedule/2026-2027-Ligue-1-Scores-and-Fixtures' },
 ];
-
 // ============================================================
 // Mappatura per nomi cartelle loghi
 // ============================================================
