@@ -2361,12 +2361,12 @@ const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie, weatherData }
       {weatherData && <div className="match-info"><WeatherBadge weatherData={weatherData} city={getCityForMatch(match.casa, match.campionato)} /></div>}
       <div className="teams-row">
         <div className="team">
-          <TeamLogo teamName={match.casa} championship={match.campionato} size={30} />
+          <TeamLogo teamName={match.casa} championship={match.campionato} size={20} />
           <div className="team-name">{match.casa || 'Casa'}</div>
         </div>
         <div className="vs">VS</div>
         <div className="team">
-          <TeamLogo teamName={match.ospiti} championship={match.campionato} size={30} />
+          <TeamLogo teamName={match.ospiti} championship={match.campionato} size={20} />
           <div className="team-name">{match.ospiti || 'Ospite'}</div>
         </div>
       </div>
@@ -2461,12 +2461,12 @@ const MatchTabHistory = ({ match, onSelect }) => {
       <div className="match-info">📅 {formattedDate} - ⏰ {match.ora || 'TBD'}</div>
       <div className="teams-row">
         <div className="team">
-          <TeamLogo teamName={match.casa} championship={match.campionato} size={26} />
+          <TeamLogo teamName={match.casa} championship={match.campionato} size={20} />
           <div className="team-name" style={{fontSize: '16px'}}>{match.casa || 'Casa'}</div>
         </div>
         <div className="score"><span className={scoreClass}>{match.golCasa || 0} - {match.golOspite || 0}</span></div>
         <div className="team">
-          <TeamLogo teamName={match.ospiti} championship={match.campionato} size={26} />
+          <TeamLogo teamName={match.ospiti} championship={match.campionato} size={20} />
           <div className="team-name" style={{fontSize: '16px'}}>{match.ospiti || 'Ospite'}</div>
         </div>
       </div>
@@ -2561,12 +2561,12 @@ const MatchDetail = ({ match, allMatches }) => {
         </div>
         <div style={{display:'flex', justifyContent:'center', gap:'20px', fontSize:'24px', fontWeight:'bold', margin:'12px 0', alignItems:'center'}}>
           <div style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
-            <TeamLogo teamName={match.casa} championship={match.campionato} size={45} />
+            <TeamLogo teamName={match.casa} championship={match.campionato} size={20} />
             <span style={{marginTop:'8px', color: getChampColor(match.campionato)}}>{match.casa}</span>
           </div>
           <span style={{color:'var(--text-muted)', fontSize:'20px'}}>VS</span>
           <div style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
-            <TeamLogo teamName={match.ospiti} championship={match.campionato} size={45} />
+            <TeamLogo teamName={match.ospiti} championship={match.campionato} size={20} />
             <span style={{marginTop:'8px', color: getChampColor(match.campionato)}}>{match.ospiti}</span>
           </div>
         </div>
@@ -5400,9 +5400,9 @@ const HomeWidget = ({ matches, onSelectMatch, setTab, selectedFamiglie }) => {
                   <div style={{flex: '0 0 auto', display: 'flex', alignItems: 'center', gap: '8px'}}>
                     <span style={{fontSize: '14px', fontWeight: 'bold', color: champColor, minWidth: '30px'}}>#{idx + 2}</span>
                     <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
-                      <TeamLogo teamName={match.casa} championship={match.campionato} size={18} />
+                      <TeamLogo teamName={match.casa} championship={match.campionato} size={20} />
                       <div><div style={{fontWeight: 'bold', fontSize: '13px', color: 'var(--text)'}}>{match.casa} vs {match.ospiti}</div><div style={{fontSize: '10px', color: 'var(--text-muted)'}}>{match.campionato} • {formatDateEU(match.data)}</div></div>
-                      <TeamLogo teamName={match.ospiti} championship={match.campionato} size={18} />
+                      <TeamLogo teamName={match.ospiti} championship={match.campionato} size={20} />
                     </div>
                   </div>
                   <div style={{display: 'flex', flexWrap: 'wrap', gap: '4px', flex: '1', minWidth: '180px'}}>
