@@ -835,38 +835,42 @@
 const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
 // ============================================================
-// INTEGRAZIONE CON BACKEND SCRAPER
+// CARICAMENTO DATI - UNA SOLA VOLTA ALL'AVVIO
 // ============================================================
 
-// Carica dati dal backend
-async function loadScrapedData() {
-  try {
-    console.log('📂 Cerco di caricare data/matches.json...');
-    
-    // Prova percorsi diversi
-    const paths = [
-      './data/matches.json',
-      'data/matches.json',
-      '/Gesss26/data/matches.json',
-      '../data/matches.json'
-    ];
-    
-    for (const path of paths) {
-      try {
-        console.log(`  Tentativo: ${path}`);
-        const response = await fetch(path);
-        if (response.ok) {
-          const data = await response.json();
-          console.log(`✅ Caricato da: ${path}`, data.matches?.length || 0, 'partite');
-          return data;
-        }
-      } catch (e) {
-        console.log(`  ❌ Fallito: ${path}`);
+let dataLoaded = false;
+
+async function loadScrapedData(forceReload = false) {
+  if (!forceReload && dataLoaded) {
+    console.log('📂 Dati già caricati, utilizzo cache...');
+    try {
+      const cached = localStorage.getItem('ft_matches');
+      if (cached) {
+        const matches = JSON.parse(cached);
+        const championships = JSON.parse(localStorage.getItem('ft_champs') || '[]');
+        return { matches, championships };
       }
+    } catch (e) {}
+    return null;
+  }
+  
+  try {
+    console.log('📂 Caricamento /Gesss26/data/matches.json...');
+    const response = await fetch('/Gesss26/data/matches.json');
+    if (!response.ok) {
+      console.error('❌ File non trovato:', response.status);
+      return null;
+    }
+    const data = await response.json();
+    console.log('✅ Dati caricati:', data.matches?.length || 0, 'partite');
+    
+    if (data.matches) {
+      localStorage.setItem('ft_matches', JSON.stringify(data.matches));
+      localStorage.setItem('ft_champs', JSON.stringify(data.championships || []));
     }
     
-    console.error('❌ Nessun percorso valido trovato');
-    return null;
+    dataLoaded = true;
+    return data;
   } catch (error) {
     console.error('❌ Errore:', error.message);
     return null;
@@ -883,7 +887,7 @@ async function checkScraperStatus() {
 
 async function forceScrape() {
   console.log('🔄 Ricarico dati da GitHub Pages...');
-  const data = await loadScrapedData();
+  const data = await loadScrapedData(true);
   if (data && window.updateAppData) {
     window.updateAppData(data);
   }
@@ -1498,7 +1502,7 @@ const getHeatmapColorClass = (pct) => {
 // FUNZIONI PER LOGHI SQUADRE (VERSIONE CON FILE PNG)
 // ============================================================
 
-const TeamLogo = ({ teamName, championship, size = 40, className = '' }) => {
+const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
   const [hasError, setHasError] = useState(false);
   const [tryUnderscore, setTryUnderscore] = useState(false);
   
@@ -1552,7 +1556,7 @@ const TeamLogo = ({ teamName, championship, size = 40, className = '' }) => {
         style={{
           width: size,
           height: size,
-          fontSize: Math.max(size * 0.35, 10),
+          fontSize: Math.max(size * 0.28, 8),
           display: 'flex !important',
           alignItems: 'center',
           justifyContent: 'center',
@@ -2110,7 +2114,7 @@ const Standings = ({ matches, filterChampionship, highlightTeams = [] }) => {
                 <td className="pos">{row.pos}</td>
                 <td>
                   <div className="team-name-cell">
-                    <TeamLogo teamName={row.name} championship={champToShow || 'Tutti'} size={24} />
+                    <TeamLogo teamName={row.name} championship={champToShow || 'Tutti'} size={18} />
                     <span className="team-name">{row.name}</span>
                   </div>
                 </td>
@@ -2357,12 +2361,12 @@ const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie, weatherData }
       {weatherData && <div className="match-info"><WeatherBadge weatherData={weatherData} city={getCityForMatch(match.casa, match.campionato)} /></div>}
       <div className="teams-row">
         <div className="team">
-          <TeamLogo teamName={match.casa} championship={match.campionato} size={40} />
+          <TeamLogo teamName={match.casa} championship={match.campionato} size={30} />
           <div className="team-name">{match.casa || 'Casa'}</div>
         </div>
         <div className="vs">VS</div>
         <div className="team">
-          <TeamLogo teamName={match.ospiti} championship={match.campionato} size={40} />
+          <TeamLogo teamName={match.ospiti} championship={match.campionato} size={30} />
           <div className="team-name">{match.ospiti || 'Ospite'}</div>
         </div>
       </div>
@@ -2457,12 +2461,12 @@ const MatchTabHistory = ({ match, onSelect }) => {
       <div className="match-info">📅 {formattedDate} - ⏰ {match.ora || 'TBD'}</div>
       <div className="teams-row">
         <div className="team">
-          <TeamLogo teamName={match.casa} championship={match.campionato} size={35} />
+          <TeamLogo teamName={match.casa} championship={match.campionato} size={26} />
           <div className="team-name" style={{fontSize: '16px'}}>{match.casa || 'Casa'}</div>
         </div>
         <div className="score"><span className={scoreClass}>{match.golCasa || 0} - {match.golOspite || 0}</span></div>
         <div className="team">
-          <TeamLogo teamName={match.ospiti} championship={match.campionato} size={35} />
+          <TeamLogo teamName={match.ospiti} championship={match.campionato} size={26} />
           <div className="team-name" style={{fontSize: '16px'}}>{match.ospiti || 'Ospite'}</div>
         </div>
       </div>
@@ -2557,12 +2561,12 @@ const MatchDetail = ({ match, allMatches }) => {
         </div>
         <div style={{display:'flex', justifyContent:'center', gap:'20px', fontSize:'24px', fontWeight:'bold', margin:'12px 0', alignItems:'center'}}>
           <div style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
-            <TeamLogo teamName={match.casa} championship={match.campionato} size={40} />
+            <TeamLogo teamName={match.casa} championship={match.campionato} size={45} />
             <span style={{marginTop:'8px', color: getChampColor(match.campionato)}}>{match.casa}</span>
           </div>
           <span style={{color:'var(--text-muted)', fontSize:'20px'}}>VS</span>
           <div style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
-            <TeamLogo teamName={match.ospiti} championship={match.campionato} size={40} />
+            <TeamLogo teamName={match.ospiti} championship={match.campionato} size={45} />
             <span style={{marginTop:'8px', color: getChampColor(match.campionato)}}>{match.ospiti}</span>
           </div>
         </div>
@@ -3669,14 +3673,16 @@ const loadState = () => {
       selectedFamiglie: JSON.parse(localStorage.getItem('ft_selected_famiglie') || '["dc_under","mg_casa_ospite","over"]'),
     };
     
-    // Prova a caricare dal backend in background
-    loadScrapedData().then(data => {
-      if (data && data.matches && data.matches.length > 0) {
-        if (window.updateAppData) {
-          window.updateAppData(data);
+    // Carica i dati all'avvio (UNA SOLA VOLTA)
+    if (localData.matches.length === 0) {
+      loadScrapedData().then(data => {
+        if (data && data.matches && data.matches.length > 0) {
+          if (window.updateAppData) {
+            window.updateAppData(data);
+          }
         }
-      }
-    });
+      });
+    }
     
     return localData;
   } catch(e) { 
@@ -3718,8 +3724,9 @@ function App() {
     return saved || 'pc';
   });
   const [selectedFamiglie, setSelectedFamiglie] = useState(initial.selectedFamiglie || ['dc_under','mg_casa_ospite','over']);
+  
+  // Carica dati all'avvio (UNA SOLA VOLTA)
   useEffect(() => {
-    // Carica i dati all'avvio
     const loadData = async () => {
       const data = await loadScrapedData();
       if (data && data.matches && data.matches.length > 0) {
@@ -3870,7 +3877,6 @@ function App() {
 
           {tab === 'Home' && (
             <div>
-              <ScraperStatus />
               <HomeWidget matches={matches} onSelectMatch={selectMatch} setTab={setTab} selectedFamiglie={selectedFamiglie} />
               <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '16px'}}>
                 <div><h3 style={{marginBottom: '12px'}}>📊 Statistiche Rapide</h3><div className="perf-grid" style={{gridTemplateColumns: '1fr 1fr'}}>
@@ -4291,89 +4297,6 @@ function App() {
   // Modalità PC - rendering normale
   return renderAppContent();
 }
-
-// ============================================================
-// COMPONENTE SCRAPER STATUS
-// ============================================================
-
-const ScraperStatus = () => {
-  const [status, setStatus] = useState(null);
-  const [updating, setUpdating] = useState(false);
-  
-  useEffect(() => {
-    checkScraperStatus().then(setStatus);
-    const interval = setInterval(() => {
-      checkScraperStatus().then(setStatus);
-    }, 60000);
-    return () => clearInterval(interval);
-  }, []);
-  
-  const handleScrape = async () => {
-    setUpdating(true);
-    const result = await forceScrape();
-    if (result && result.success) {
-      const data = await loadScrapedData();
-      if (data && window.updateAppData) {
-        window.updateAppData(data);
-      }
-    }
-    setUpdating(false);
-  };
-  
-  return (
-    <div className="card" style={{ 
-      background: 'var(--surface)',
-      border: status?.lastUpdate ? '2px solid var(--win)' : '2px solid var(--border)',
-      padding: '12px 16px',
-      marginBottom: '16px'
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '24px' }}>🔄</span>
-          <div>
-            <div style={{ fontWeight: 'bold', fontSize: '14px' }}>
-              Scraping FBref
-              {status?.lastUpdate && (
-                <span style={{ fontSize: '12px', color: 'var(--win)', marginLeft: '8px' }}>
-                  ✅ Aggiornato
-                </span>
-              )}
-            </div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-              {status?.lastUpdate 
-                ? `Ultimo: ${new Date(status.lastUpdate).toLocaleString()}`
-                : '⚠️ Nessun dato caricato'
-              }
-              {status?.nextUpdate && (
-                <span style={{ marginLeft: '12px' }}>
-                  ⏰ Prossimo: {new Date(status.nextUpdate).toLocaleString()}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-            {status?.matchCount || 0} partite
-          </span>
-          <button 
-            className="btn" 
-            onClick={handleScrape}
-            disabled={updating}
-            style={{ 
-              padding: '6px 16px',
-              fontSize: '13px',
-              background: updating ? 'var(--text-muted)' : 'var(--accent)',
-              cursor: updating ? 'default' : 'pointer'
-            }}
-          >
-            {updating ? '⏳ Aggiornamento...' : '🔄 Aggiorna ora'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // ============================================================
 // COMPONENTI MANCANTI (Heatmap, FileImporter, TeamMatchesHistory, HomeWidget)
@@ -5201,7 +5124,7 @@ const TeamMatchesHistory = ({ teamName, championship, allMatches }) => {
   return (
     <div className="card" style={{padding: '12px'}}>
       <h4 style={{color: getChampColor(teamName), marginBottom:'12px', display: 'flex', alignItems: 'center', gap: '8px'}}>
-        <TeamLogo teamName={teamName} championship={championship} size={28} />
+        <TeamLogo teamName={teamName} championship={championship} size={20} />
         {teamName}
         <span style={{fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'normal', marginLeft: 'auto'}}>
           {teamMatches.length} partite
@@ -5444,10 +5367,10 @@ const HomeWidget = ({ matches, onSelectMatch, setTab, selectedFamiglie }) => {
               <div style={{display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap'}}>
                 <span style={{background: 'var(--accent)', color: '#000', padding: '2px 12px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold'}}>⭐ TOP PICK 💣</span>
                 <div style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
-                  <TeamLogo teamName={giocateDelGiorno[0].casa} championship={giocateDelGiorno[0].campionato} size={24} />
+                  <TeamLogo teamName={giocateDelGiorno[0].casa} championship={giocateDelGiorno[0].campionato} size={18} />
                   <span style={{fontWeight: 'bold', color: 'var(--text)'}}>{giocateDelGiorno[0].casa}</span>
                   <span style={{color: 'var(--text-muted)'}}>vs</span>
-                  <TeamLogo teamName={giocateDelGiorno[0].ospiti} championship={giocateDelGiorno[0].campionato} size={24} />
+                  <TeamLogo teamName={giocateDelGiorno[0].ospiti} championship={giocateDelGiorno[0].campionato} size={18} />
                   <span style={{fontWeight: 'bold', color: 'var(--text)'}}>{giocateDelGiorno[0].ospiti}</span>
                 </div>
                 <span style={{color: 'var(--text-muted)', fontSize: '13px'}}>{formatDateEU(giocateDelGiorno[0].data)}</span>
@@ -5477,9 +5400,9 @@ const HomeWidget = ({ matches, onSelectMatch, setTab, selectedFamiglie }) => {
                   <div style={{flex: '0 0 auto', display: 'flex', alignItems: 'center', gap: '8px'}}>
                     <span style={{fontSize: '14px', fontWeight: 'bold', color: champColor, minWidth: '30px'}}>#{idx + 2}</span>
                     <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
-                      <TeamLogo teamName={match.casa} championship={match.campionato} size={20} />
+                      <TeamLogo teamName={match.casa} championship={match.campionato} size={18} />
                       <div><div style={{fontWeight: 'bold', fontSize: '13px', color: 'var(--text)'}}>{match.casa} vs {match.ospiti}</div><div style={{fontSize: '10px', color: 'var(--text-muted)'}}>{match.campionato} • {formatDateEU(match.data)}</div></div>
-                      <TeamLogo teamName={match.ospiti} championship={match.campionato} size={20} />
+                      <TeamLogo teamName={match.ospiti} championship={match.campionato} size={18} />
                     </div>
                   </div>
                   <div style={{display: 'flex', flexWrap: 'wrap', gap: '4px', flex: '1', minWidth: '180px'}}>
@@ -5517,6 +5440,17 @@ const HomeWidget = ({ matches, onSelectMatch, setTab, selectedFamiglie }) => {
 // ============================================================
 // AVVIA APP
 // ============================================================
+
+// Carica i dati all'avvio
+console.log('🚀 Avvio GesssAI-Pro...');
+loadScrapedData().then(data => {
+  if (data && data.matches && data.matches.length > 0) {
+    console.log(`✅ ${data.matches.length} partite caricate all'avvio`);
+    if (window.updateAppData) {
+      window.updateAppData(data);
+    }
+  }
+});
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
