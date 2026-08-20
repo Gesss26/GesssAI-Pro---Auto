@@ -20,29 +20,70 @@ const CONFIG = {
   timeout: 30000,
 };
 
-// Mappatura campionati FBref
+// ============================================================
+// LISTA DEI 36 SITI (AGGIORNATA DA scarica.py)
+// ============================================================
+
 const LEAGUES = [
-  { id: '11', name: 'Serie A', season: '2026-2027' },
-  { id: '9', name: 'Premier League', season: '2026-2027' },
-  { id: '20', name: 'Bundesliga', season: '2026-2027' },
-  { id: '12', name: 'La Liga', season: '2026-2027' },
-  { id: '13', name: 'Ligue 1', season: '2026-2027' },
-  { id: '23', name: 'Eredivisie', season: '2026-2027' },
-  { id: '29', name: 'Allsvenskan', season: '2026-2027' },
-  { id: '28', name: 'Eliteserien', season: '2026-2027' },
-  { id: '50', name: 'Danish Superliga', season: '2026-2027' },
-  { id: '56', name: 'Austrian Bundesliga', season: '2026-2027' },
-  { id: '57', name: 'Swiss Super League', season: '2026-2027' },
-  { id: '62', name: 'Chinese Super League', season: '2026-2027' },
-  { id: '25', name: 'J1 League', season: '2026-2027' },
-  { id: '55', name: 'K League 1', season: '2026-2027' },
-  { id: '30', name: 'Russian Premier League', season: '2026-2027' },
-  { id: '43', name: 'Veikkausliiga', season: '2026-2027' },
-  { id: '80', name: 'Premier Division', season: '2026-2027' },
-  { id: '18', name: 'Serie B', season: '2026-2027' },
+  // Allsvenskan (Svezia) - SENZA STAGIONE
+  { id: '29', name: 'Allsvenskan', url: 'https://fbref.com/en/comps/29/schedule/Allsvenskan-Scores-and-Fixtures' },
+  
+  // Austrian Bundesliga (Austria) - SENZA STAGIONE
+  { id: '56', name: 'Austrian Bundesliga', url: 'https://fbref.com/en/comps/56/schedule/Austrian-Bundesliga-Scores-and-Fixtures' },
+
+  // Bundesliga (Germania) - CON STAGIONE 2026-2027
+  { id: '20', name: 'Bundesliga', url: 'https://fbref.com/en/comps/20/2026-2027/schedule/2026-2027-Bundesliga-Scores-and-Fixtures' },
+  
+  // Chinese Super League (Cina) - SENZA STAGIONE
+  { id: '62', name: 'Chinese Super League', url: 'https://fbref.com/en/comps/62/schedule/Chinese-Super-League-Scores-and-Fixtures' },
+  
+  // Danish Superliga (Danimarca) - SENZA STAGIONE
+  { id: '50', name: 'Danish Superliga', url: 'https://fbref.com/en/comps/50/schedule/Danish-Superliga-Scores-and-Fixtures' },
+  
+  // Eliteserien (Norvegia) - SENZA STAGIONE
+  { id: '28', name: 'Eliteserien', url: 'https://fbref.com/en/comps/28/schedule/Eliteserien-Scores-and-Fixtures' },
+  
+  // Eredivisie (Paesi Bassi) - SENZA STAGIONE
+  { id: '23', name: 'Eredivisie', url: 'https://fbref.com/en/comps/23/schedule/Eredivisie-Scores-and-Fixtures' },
+  
+  // La Liga (Spagna) - CON STAGIONE 2026-2027
+  { id: '12', name: 'La Liga', url: 'https://fbref.com/en/comps/12/2026-2027/schedule/2026-2027-La-Liga-Scores-and-Fixtures' },
+
+  // Ligue 1 (Francia) - CON STAGIONE 2026-2027
+  { id: '13', name: 'Ligue 1', url: 'https://fbref.com/en/comps/13/2026-2027/schedule/2026-2027-Ligue-1-Scores-and-Fixtures' },
+  
+  // League of Ireland Premier Division (Irlanda) - SENZA STAGIONE
+  { id: '80', name: 'Premier Division', url: 'https://fbref.com/en/comps/80/schedule/League-of-Ireland-Premier-Division-Scores-and-Fixtures' },
+  
+  // J1 League (Giappone) - SENZA STAGIONE
+  { id: '25', name: 'J1 League', url: 'https://fbref.com/en/comps/25/schedule/J1-League-Scores-and-Fixtures' },
+  
+  // K League 1 (Corea del Sud) - SENZA STAGIONE
+  { id: '55', name: 'K League 1', url: 'https://fbref.com/en/comps/55/schedule/K-League-1-Scores-and-Fixtures' },
+
+  // Premier League (Inghilterra) - CON STAGIONE 2026-2027
+  { id: '9', name: 'Premier League', url: 'https://fbref.com/en/comps/9/2026-2027/schedule/2026-2027-Premier-League-Scores-and-Fixtures' },
+  
+  // Russian Premier League (Russia) - SENZA STAGIONE
+  { id: '30', name: 'Russian Premier League', url: 'https://fbref.com/en/comps/30/schedule/Russian-Premier-League-Scores-and-Fixtures' },
+
+  // Serie A (Italia) - CON STAGIONE 2026-2027
+  { id: '11', name: 'Serie A', url: 'https://fbref.com/en/comps/11/2026-2027/schedule/2026-2027-Serie-A-M-Scores-and-Fixtures' },
+
+  // Serie B (Italia) - CON STAGIONE 2026-2027
+  { id: '18', name: 'Serie B', url: 'https://fbref.com/en/comps/18/2026-2027/schedule/2026-2027-Serie-B-M-Scores-and-Fixtures' },
+  
+  // Swiss Super League (Svizzera) - SENZA STAGIONE
+  { id: '57', name: 'Swiss Super League', url: 'https://fbref.com/en/comps/57/schedule/Swiss-Super-League-Scores-and-Fixtures' },
+  
+  // Veikkausliiga (Finlandia) - SENZA STAGIONE
+  { id: '43', name: 'Veikkausliiga', url: 'https://fbref.com/en/comps/43/schedule/Veikkausliiga-Scores-and-Fixtures' }
 ];
 
+// ============================================================
 // Mappatura per nomi cartelle loghi
+// ============================================================
+
 const LEAGUE_FOLDER_MAP = {
   'Premier League': 'Premier_League',
   'Serie A': 'Serie_A',
@@ -69,7 +110,10 @@ const LEAGUE_FOLDER_MAP = {
 // ============================================================
 
 async function scrapeLeague(league) {
-  const url = `https://fbref.com/en/comps/${league.id}/${league.season}/schedule/${league.season}-Scores-and-Fixtures`;
+  // Usa l'URL già completo dalla lista
+  const url = league.url;
+  
+  console.log(`🌐 Scaricamento: ${league.name} → ${url}`);
   
   for (let attempt = 1; attempt <= CONFIG.maxRetries; attempt++) {
     try {
@@ -85,8 +129,6 @@ async function scrapeLeague(league) {
         headers,
         timeout: CONFIG.timeout,
         decompress: true,
-        // Se hai proxy, aggiungi qui
-        // proxy: { host: 'proxy.host', port: 8080 }
       });
       
       const $ = cheerio.load(response.data);
@@ -206,6 +248,7 @@ function deduplicateMatches(matches) {
 
 async function scrapeAllLeagues() {
   console.log('🚀 Avvio scraping FBref...');
+  console.log(`📊 Campionati da scrapare: ${LEAGUES.length}`);
   const startTime = Date.now();
   
   const allResults = [];
@@ -269,6 +312,7 @@ function saveMatchesToFile(matches) {
   
   fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
   console.log(`💾 Salvataggio completato: ${dataPath}`);
+  console.log(`📊 ${matches.length} partite salvate`);
   
   return data;
 }
@@ -279,6 +323,7 @@ function saveMatchesToFile(matches) {
 
 async function runScraper() {
   try {
+    console.log('🔄 Avvio runScraper()...');
     const matches = await scrapeAllLeagues();
     const data = saveMatchesToFile(matches);
     return { success: true, data };
@@ -307,5 +352,9 @@ function scheduleScraper() {
   
   console.log('⏰ Scraper programmato ogni 6 ore');
 }
+
+// ============================================================
+// ESPORTAZIONE
+// ============================================================
 
 module.exports = { runScraper, scheduleScraper, scrapeAllLeagues };
