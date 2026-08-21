@@ -1498,11 +1498,12 @@ const getHeatmapColorClass = (pct) => {
   return 'heatmap-pct-red heatmap-bg-red';
 };
 
-// SOSTITUISCI LA FUNZIONE TeamLogo con questa versione corretta
+// SOSTITUISCI COMPLETAMENTE IL COMPONENTE TeamLogo con questa versione
 
 const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
   const [hasError, setHasError] = useState(false);
   const [tryUnderscore, setTryUnderscore] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   const getLeagueFolder = (champ) => {
     if (!champ) return '';
@@ -1529,15 +1530,6 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
     return map[champ] || champ.replace(/ /g, '_');
   };
   
-  const getTeamFileName = (name, useUnderscore = false) => {
-    if (!name) return '';
-    const clean = name.replace(/[<>:"/\\|?*]/g, '').trim();
-    if (useUnderscore) {
-      return clean.replace(/\s+/g, '_') + '.png';
-    }
-    return clean + '.png';
-  };
-  
   const getInitials = (name) => {
     if (!name) return '??';
     const words = name.split(' ');
@@ -1546,6 +1538,7 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
     return words.map(w => w[0]).join('').substring(0, 3).toUpperCase();
   };
   
+  // Se non c'è campionato o è "Tutti" o ha avuto errore, mostra fallback
   if (!championship || championship === 'Tutti' || hasError) {
     const initials = getInitials(teamName);
     return (
@@ -1579,6 +1572,27 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
     : teamName + '.png';
   const logoPath = `/GesssAI-Pro---Auto/logos/${leagueFolder}/${fileName}`;
   
+  // Se è in caricamento, mostra un placeholder
+  if (loading) {
+    return (
+      <div 
+        style={{
+          width: size,
+          height: size,
+          borderRadius: '50%',
+          background: 'var(--surface)',
+          border: '2px solid var(--border)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
+        <span style={{ fontSize: Math.max(size * 0.2, 6), color: 'var(--text-muted)' }}>⏳</span>
+      </div>
+    );
+  }
+  
   return (
     <img
       src={logoPath}
@@ -1595,10 +1609,13 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
         flexShrink: 0,
         maxWidth: size,
         maxHeight: size,
+        background: 'var(--surface)',
       }}
       className={`team-logo ${className}`}
       loading="lazy"
+      onLoad={() => setLoading(false)}
       onError={() => {
+        setLoading(false);
         if (!tryUnderscore) {
           setTryUnderscore(true);
         } else {
