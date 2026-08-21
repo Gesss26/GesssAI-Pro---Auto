@@ -1348,11 +1348,18 @@ const deduplicateMatches = (matches) => {
 const getCountryFlagHtml = (champName) => {
   if (!champName) return '<span class="flag-emoji">🌍</span>';
   
+  // 🔥 PRIORITA' MASSIMA - Controlla prima se contiene "Ireland" o "Irish"
+  // Questo risolve il problema: "Ireland Premier League" → IRLANDA, non Inghilterra
+  if (champName.toLowerCase().includes('ireland') || 
+      champName.toLowerCase().includes('irish') ||
+      champName.toLowerCase().includes('premier division')) {
+    return `<img src="https://flagcdn.com/ie.svg" alt="IE" class="flag-icon" width="20" height="15" loading="lazy" style="display:inline-block; vertical-align:middle; margin-right:6px; width:20px; height:15px; border-radius:2px; object-fit:cover; box-shadow: 0 1px 2px rgba(0,0,0,0.3);" />`;
+  }
+  
   // MAPPA PRECISA - corrispondenza ESATTA per nome
   const exactMatchMap = {
     'Premier League': 'GB',
     'Russian Premier League': 'RU',
-    'Ireland Premier Leaugue': 'IE',
     'Serie A': 'IT',
     'Serie B': 'IT',
     'Bundesliga': 'DE',
@@ -1372,25 +1379,21 @@ const getCountryFlagHtml = (champName) => {
     'Swiss Super League': 'CH',
     'Austrian Bundesliga': 'AT',
     'Chinese Super League': 'CN',
-    'Premier Division': 'IE',  // <-- IRLANDA
+    'Premier Division': 'IE',
     'Besta deild': 'IS',
     'Liga Portugal Betclic': 'PT',
     'Veikkausliiga': 'FI'
   };
   
-  // Prima controlla corrispondenza ESATTA
+  // Controlla corrispondenza ESATTA
   if (exactMatchMap[champName]) {
     const codeLower = exactMatchMap[champName].toLowerCase();
     return `<img src="https://flagcdn.com/${codeLower}.svg" alt="${exactMatchMap[champName]}" class="flag-icon" width="20" height="15" loading="lazy" style="display:inline-block; vertical-align:middle; margin-right:6px; width:20px; height:15px; border-radius:2px; object-fit:cover; box-shadow: 0 1px 2px rgba(0,0,0,0.3);" />`;
   }
   
   // MAPPA PARZIALE - controlla se il nome contiene queste parole
-  // ORDINE: le parole più specifiche e lunghe PRIMA
   const partialMatchMap = {
-    // Campionati specifici (più lunghe prima per evitare falsi positivi)
     'Russian Premier League': 'RU',
-    'Ireland Premier Leaugue': 'IE',
-    'Premier League': 'GB',
     'Chinese Super League': 'CN',
     'Swiss Super League': 'CH',
     'Austrian Bundesliga': 'AT',
@@ -1400,7 +1403,6 @@ const getCountryFlagHtml = (champName) => {
     'Championship': 'GB',
     'Besta deild': 'IS',
     'Veikkausliiga': 'FI',
-    // Parole singole (controllo più generico)
     'Serie': 'IT',
     'Bundesliga': 'DE',
     'Ligue': 'FR',
@@ -1413,8 +1415,22 @@ const getCountryFlagHtml = (champName) => {
     'Liga MX': 'MX',
     'Brasileirão': 'BR',
     'J1 League': 'JP',
-    'K League': 'KR'
+    'K League': 'KR',
+    'Premier': 'GB'  // <-- Questo viene dopo "Ireland" e "Premier Division"
   };
+  
+  // Ordina le chiavi per lunghezza decrescente
+  const sortedKeys = Object.keys(partialMatchMap).sort((a, b) => b.length - a.length);
+  
+  for (const key of sortedKeys) {
+    if (champName.includes(key)) {
+      const codeLower = partialMatchMap[key].toLowerCase();
+      return `<img src="https://flagcdn.com/${codeLower}.svg" alt="${partialMatchMap[key]}" class="flag-icon" width="20" height="15" loading="lazy" style="display:inline-block; vertical-align:middle; margin-right:6px; width:20px; height:15px; border-radius:2px; object-fit:cover; box-shadow: 0 1px 2px rgba(0,0,0,0.3);" />`;
+    }
+  }
+  
+  return '<span class="flag-emoji">🌍</span>';
+};
   
   // Ordina le chiavi per lunghezza decrescente (più specifiche prima)
   const sortedKeys = Object.keys(partialMatchMap).sort((a, b) => b.length - a.length);
