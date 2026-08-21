@@ -1532,13 +1532,13 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
   };
   
   const getTeamFileName = (name, useUnderscore = false) => {
-  if (!name) return '';
-  const clean = name.replace(/[<>:"/\\|?*]/g, '').trim();
-  if (useUnderscore) {
-    return clean.replace(/\s+/g, '_') + '.png';
-  }
-  return clean + '.png';
-};
+    if (!name) return '';
+    const clean = name.replace(/[<>:"/\\|?*]/g, '').trim();
+    if (useUnderscore) {
+      return clean.replace(/\s+/g, '_') + '.png';
+    }
+    return clean + '.png';
+  };
   
   const getInitials = (name) => {
     if (!name) return '??';
@@ -1548,6 +1548,7 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
     return words.map(w => w[0]).join('').substring(0, 3).toUpperCase();
   };
   
+  // Se non c'è campionato o c'è un errore, mostra il fallback
   if (!championship || championship === 'Tutti' || hasError) {
     const initials = getInitials(teamName);
     return (
@@ -1557,7 +1558,7 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
           width: size,
           height: size,
           fontSize: Math.max(size * 0.28, 8),
-          display: 'flex !important',
+          display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           margin: '0 auto',
@@ -1576,7 +1577,6 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
   }
   
   const leagueFolder = getLeagueFolder(championship);
-  const fileName = getTeamFileName(teamName);
   const logoPath = `/GesssAI-Pro---Auto/logos/${leagueFolder}/${tryUnderscore 
     ? teamName.replace(/\s+/g, '_') + '.png'
     : teamName + '.png'}`;
@@ -1585,7 +1585,17 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
     <img
       src={logoPath}
       alt={teamName}
-      // ... props ...
+      width={size}
+      height={size}
+      style={{
+        width: size,
+        height: size,
+        objectFit: 'contain',
+        display: 'block',
+        borderRadius: '4px',
+        flexShrink: 0,
+      }}
+      className={`team-logo ${className}`}
       onError={() => {
         if (!tryUnderscore) {
           setTryUnderscore(true);
