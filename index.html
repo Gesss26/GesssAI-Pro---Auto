@@ -1350,9 +1350,9 @@ const getCountryFlagHtml = (champName) => {
   
   // 🔥 PRIORITA' MASSIMA - Controlla prima se contiene "Ireland" o "Irish"
   // Questo risolve il problema: "Ireland Premier League" → IRLANDA, non Inghilterra
-  if (champName.toLowerCase().includes('ireland') || 
-      champName.toLowerCase().includes('irish') ||
-      champName.toLowerCase().includes('premier division')) {
+  if (champName.toLowerCase().includes('Ireland') || 
+      champName.toLowerCase().includes('Irish') ||
+      champName.toLowerCase().includes('Premier division')) {
     return `<img src="https://flagcdn.com/ie.svg" alt="IE" class="flag-icon" width="20" height="15" loading="lazy" style="display:inline-block; vertical-align:middle; margin-right:6px; width:20px; height:15px; border-radius:2px; object-fit:cover; box-shadow: 0 1px 2px rgba(0,0,0,0.3);" />`;
   }
   
