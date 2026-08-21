@@ -1489,7 +1489,17 @@ const parseDate = (dateStr, timeStr = '00:00') => {
 };
 
 // ============================================================
-// COMPONENTE TeamLogo - CORRETTO
+// FUNZIONI PER I COLORI DELLA HEATMAP
+// ============================================================
+const getHeatmapColorClass = (pct) => {
+  if (pct > 90) return 'heatmap-pct-bomb heatmap-bg-bomb';
+  if (pct >= 61) return 'heatmap-pct-green heatmap-bg-green';
+  if (pct >= 31) return 'heatmap-pct-white heatmap-bg-white';
+  return 'heatmap-pct-red heatmap-bg-red';
+};
+
+// ============================================================
+// FUNZIONI PER LOGHI SQUADRE (VERSIONE CON FILE PNG)
 // ============================================================
 
 const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
@@ -1517,15 +1527,18 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
       'Russian Premier League': 'Russian_Premier_League',
       'Veikkausliiga': 'Veikkausliiga',
       'Premier Division': 'Premier_Division',
-      'Liga Portugal Betclic': 'Liga_Portugal_Betclic',
-      'Pro League': 'Pro_League',
-      'Championship': 'Championship',
-      'Liga MX': 'Liga_MX',
-      'Brasileirão': 'Brasileirao',
-      'Besta deild': 'Besta_deild',
     };
     return map[champ] || champ.replace(/ /g, '_');
   };
+  
+  const getTeamFileName = (name, useUnderscore = false) => {
+  if (!name) return '';
+  const clean = name.replace(/[<>:"/\\|?*]/g, '').trim();
+  if (useUnderscore) {
+    return clean.replace(/\s+/g, '_') + '.png';
+  }
+  return clean + '.png';
+};
   
   const getInitials = (name) => {
     if (!name) return '??';
@@ -1535,7 +1548,6 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
     return words.map(w => w[0]).join('').substring(0, 3).toUpperCase();
   };
   
-  // Se non c'è campionato o è "Tutti" o ha avuto errore, mostra fallback
   if (!championship || championship === 'Tutti' || hasError) {
     const initials = getInitials(teamName);
     return (
@@ -1545,7 +1557,7 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
           width: size,
           height: size,
           fontSize: Math.max(size * 0.28, 8),
-          display: 'flex',
+          display: 'flex !important',
           alignItems: 'center',
           justifyContent: 'center',
           margin: '0 auto',
@@ -1563,40 +1575,17 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
     );
   }
   
-  // Pulisci il nome della squadra per il nome del file
-  const cleanTeamName = teamName.replace(/[<>:"/\\|?*]/g, '').trim();
-  
-  // Costruisci il percorso del logo
   const leagueFolder = getLeagueFolder(championship);
-  
-  // Prova prima con il nome esatto, poi con underscore
-  const fileName = tryUnderscore 
-    ? cleanTeamName.replace(/\s+/g, '_') + '.png'
-    : cleanTeamName + '.png';
-  
-  // PERCORSO LOGO
-  const logoPath = `logos/${leagueFolder}/${fileName}`;
+  const fileName = getTeamFileName(teamName);
+  const logoPath = `/GesssAI-Pro---Auto/logos/${leagueFolder}/${tryUnderscore 
+    ? teamName.replace(/\s+/g, '_') + '.png'
+    : teamName + '.png'}`;
   
   return (
     <img
       src={logoPath}
       alt={teamName}
-      width={size}
-      height={size}
-      style={{
-        width: size,
-        height: size,
-        objectFit: 'contain',
-        display: 'block',
-        margin: '0 auto',
-        borderRadius: '4px',
-        flexShrink: 0,
-        maxWidth: size,
-        maxHeight: size,
-        background: 'var(--surface)',
-      }}
-      className={`team-logo ${className}`}
-      loading="lazy"
+      // ... props ...
       onError={() => {
         if (!tryUnderscore) {
           setTryUnderscore(true);
