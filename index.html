@@ -1489,10 +1489,8 @@ const parseDate = (dateStr, timeStr = '00:00') => {
 };
 
 // ============================================================
-// FUNZIONI PER I COLORI DELLA HEATMAP
+// COMPONENTE TeamLogo - CORRETTO
 // ============================================================
-
-// SOSTITUISCI COMPLETAMENTE IL COMPONENTE TeamLogo con questa versione
 
 const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
   const [hasError, setHasError] = useState(false);
@@ -1524,8 +1522,6 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
       'Championship': 'Championship',
       'Liga MX': 'Liga_MX',
       'Brasileirão': 'Brasileirao',
-      'Swiss Super League': 'Swiss_Super_League',
-      'Premier Division': 'Premier_Division',
       'Besta deild': 'Besta_deild',
     };
     return map[champ] || champ.replace(/ /g, '_');
@@ -1578,7 +1574,7 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
     ? cleanTeamName.replace(/\s+/g, '_') + '.png'
     : cleanTeamName + '.png';
   
-  // PERCORSO LOGO (senza slash iniziale)
+  // PERCORSO LOGO
   const logoPath = `logos/${leagueFolder}/${fileName}`;
   
   return (
