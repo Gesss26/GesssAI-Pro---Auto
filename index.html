@@ -1498,7 +1498,9 @@ const getHeatmapColorClass = (pct) => {
   return 'heatmap-pct-red heatmap-bg-red';
 };
 
-// SOSTITUISCI COMPLETAMENTE IL COMPONENTE TeamLogo con questa versione
+// ============================================================
+// FUNZIONI PER LOGHI SQUADRE (VERSIONE CON FILE PNG)
+// ============================================================
 
 const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
   const [hasError, setHasError] = useState(false);
@@ -1616,28 +1618,6 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
       onLoad={() => setLoading(false)}
       onError={() => {
         setLoading(false);
-        if (!tryUnderscore) {
-          setTryUnderscore(true);
-        } else {
-          setHasError(true);
-        }
-      }}
-    />
-  );
-};
-  
-  const leagueFolder = getLeagueFolder(championship);
-  const fileName = getTeamFileName(teamName);
-  const logoPath = `/GesssAI-Pro---Auto/logos/${leagueFolder}/${tryUnderscore 
-    ? teamName.replace(/\s+/g, '_') + '.png'
-    : teamName + '.png'}`;
-  
-  return (
-    <img
-      src={logoPath}
-      alt={teamName}
-      // ... props ...
-      onError={() => {
         if (!tryUnderscore) {
           setTryUnderscore(true);
         } else {
