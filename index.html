@@ -1578,7 +1578,7 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
     ? cleanTeamName.replace(/\s+/g, '_') + '.png'
     : cleanTeamName + '.png';
   
-  // PERCORSO CORRETTO: logos/Serie_A/Milan.png
+  // PERCORSO LOGO (senza slash iniziale)
   const logoPath = `logos/${leagueFolder}/${fileName}`;
   
   return (
