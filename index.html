@@ -1492,6 +1492,8 @@ const parseDate = (dateStr, timeStr = '00:00') => {
 // FUNZIONI PER I COLORI DELLA HEATMAP
 // ============================================================
 
+// SOSTITUISCI COMPLETAMENTE IL COMPONENTE TeamLogo con questa versione
+
 const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
   const [hasError, setHasError] = useState(false);
   const [tryUnderscore, setTryUnderscore] = useState(false);
@@ -1517,6 +1519,14 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
       'Russian Premier League': 'Russian_Premier_League',
       'Veikkausliiga': 'Veikkausliiga',
       'Premier Division': 'Premier_Division',
+      'Liga Portugal Betclic': 'Liga_Portugal_Betclic',
+      'Pro League': 'Pro_League',
+      'Championship': 'Championship',
+      'Liga MX': 'Liga_MX',
+      'Brasileirão': 'Brasileirao',
+      'Swiss Super League': 'Swiss_Super_League',
+      'Premier Division': 'Premier_Division',
+      'Besta deild': 'Besta_deild',
     };
     return map[champ] || champ.replace(/ /g, '_');
   };
@@ -1568,8 +1578,8 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
     ? cleanTeamName.replace(/\s+/g, '_') + '.png'
     : cleanTeamName + '.png';
   
-  // USIAMO IL PERCORSO CORRETTO
-  const logoPath = `/GesssAI-Pro---Auto/logos/${leagueFolder}/${fileName}`;
+  // PERCORSO CORRETTO: logos/Serie_A/Milan.png
+  const logoPath = `logos/${leagueFolder}/${fileName}`;
   
   return (
     <img
