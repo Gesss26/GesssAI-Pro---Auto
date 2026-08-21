@@ -1491,21 +1491,10 @@ const parseDate = (dateStr, timeStr = '00:00') => {
 // ============================================================
 // FUNZIONI PER I COLORI DELLA HEATMAP
 // ============================================================
-const getHeatmapColorClass = (pct) => {
-  if (pct > 90) return 'heatmap-pct-bomb heatmap-bg-bomb';
-  if (pct >= 61) return 'heatmap-pct-green heatmap-bg-green';
-  if (pct >= 31) return 'heatmap-pct-white heatmap-bg-white';
-  return 'heatmap-pct-red heatmap-bg-red';
-};
-
-// ============================================================
-// FUNZIONI PER LOGHI SQUADRE (VERSIONE CON FILE PNG)
-// ============================================================
 
 const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
   const [hasError, setHasError] = useState(false);
   const [tryUnderscore, setTryUnderscore] = useState(false);
-  const [loading, setLoading] = useState(true);
   
   const getLeagueFolder = (champ) => {
     if (!champ) return '';
@@ -1568,32 +1557,19 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
     );
   }
   
-  const leagueFolder = getLeagueFolder(championship);
-  const fileName = tryUnderscore 
-    ? teamName.replace(/\s+/g, '_') + '.png'
-    : teamName + '.png';
-  const logoPath = `/GesssAI-Pro---Auto/logos/${leagueFolder}/${fileName}`;
+  // Pulisci il nome della squadra per il nome del file
+  const cleanTeamName = teamName.replace(/[<>:"/\\|?*]/g, '').trim();
   
-  // Se è in caricamento, mostra un placeholder
-  if (loading) {
-    return (
-      <div 
-        style={{
-          width: size,
-          height: size,
-          borderRadius: '50%',
-          background: 'var(--surface)',
-          border: '2px solid var(--border)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}
-      >
-        <span style={{ fontSize: Math.max(size * 0.2, 6), color: 'var(--text-muted)' }}>⏳</span>
-      </div>
-    );
-  }
+  // Costruisci il percorso del logo
+  const leagueFolder = getLeagueFolder(championship);
+  
+  // Prova prima con il nome esatto, poi con underscore
+  const fileName = tryUnderscore 
+    ? cleanTeamName.replace(/\s+/g, '_') + '.png'
+    : cleanTeamName + '.png';
+  
+  // USIAMO IL PERCORSO CORRETTO
+  const logoPath = `/GesssAI-Pro---Auto/logos/${leagueFolder}/${fileName}`;
   
   return (
     <img
@@ -1615,9 +1591,7 @@ const TeamLogo = ({ teamName, championship, size = 30, className = '' }) => {
       }}
       className={`team-logo ${className}`}
       loading="lazy"
-      onLoad={() => setLoading(false)}
       onError={() => {
-        setLoading(false);
         if (!tryUnderscore) {
           setTryUnderscore(true);
         } else {
