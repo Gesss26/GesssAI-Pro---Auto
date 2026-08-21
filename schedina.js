@@ -4,24 +4,13 @@
 // + SINCRONIZZATO CON IL RANGE GIORNI DEL PALINSESTO
 // ============================================================
 
-// AGGIUNGI GG_NG ALLE FAMIGLIE GLOBALI
-if (typeof window !== 'undefined' && window.FAMIGLIE_GIOCATE) {
-  window.FAMIGLIE_GIOCATE['gg_ng'] = {
-    id: 'gg_ng',
-    label: 'GG - NG',
-    icon: '⚽',
-    desc: 'Goal-Goal / No Goal',
-    options: ['GG', 'NG']
-  };
-}
-
 const SchedinaComponent = ({ 
   matches, 
   championships, 
   selectedFamiglie, 
   onSelectMatch, 
   showAlert,
-  palinsestoGiorniRange = 1
+  palinsestoGiorniRange = 1  // Valore dal Palinsesto (default 1)
 }) => {
   // Stato per i campionati selezionati (array di nomi)
   const [campionatiSelezionati, setCampionatiSelezionati] = useState([]);
@@ -37,6 +26,7 @@ const SchedinaComponent = ({
     } catch { return []; }
   });
   const [numeroPartiteDaSelezionare, setNumeroPartiteDaSelezionare] = useState(5);
+  // INIZIALIZZA CON IL VALORE DEL PALINSESTO
   const [giorniRange, setGiorniRange] = useState(palinsestoGiorniRange);
   const [filtroOrario, setFiltroOrario] = useState('dopo_ora');
 
@@ -47,8 +37,8 @@ const SchedinaComponent = ({
 
   // All'avvio: seleziona tutti i campionati di default
   useEffect(() => {
-    if (campionatiSelezionati.length === 0 && championships && championships.length > 0) {
-      setCampionatiSelezionati(championships.map(c => c.name || c));
+    if (campionatiSelezionati.length === 0 && championships.length > 0) {
+      setCampionatiSelezionati(championships.map(c => c.name));
     }
   }, [championships]);
 
@@ -107,10 +97,12 @@ const SchedinaComponent = ({
     const todayStr = getTodayStr();
     const matchDate = normalizeDate(match.data);
     
+    // Se la partita non è oggi, non la escludiamo
     if (matchDate !== todayStr) {
       return false;
     }
     
+    // Se la partita è oggi, controlliamo l'orario
     const timeParts = match.ora.split(':');
     if (timeParts.length < 2) return false;
     
@@ -121,22 +113,27 @@ const SchedinaComponent = ({
     const matchTotalMinutes = matchHour * 60 + matchMinutes;
     const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
     
+    // Se l'orario della partita è già passato, la escludiamo
     return matchTotalMinutes <= currentTotalMinutes;
   };
 
   // ============================================================
   // OTTIENI LE PARTITE - STESSA IDENTICA LOGICA DEL PALINSESTO
+  // + ESCLUSIONE PARTITE GIÀ INIZIATE
   // ============================================================
   const getPartiteDisponibili = useCallback(() => {
     const todayStr = getTodayStr();
     const maxDateStr = addDaysToDateStr(todayStr, giorniRange);
     
+    // Prendi le partite Future (come nel Palinsesto)
     let partite = matches.filter(m => m.stato === 'Futura');
     
+    // Filtra per campionati selezionati
     if (campionatiSelezionati.length > 0) {
       partite = partite.filter(m => campionatiSelezionati.includes(m.campionato));
     }
     
+    // FILTRO DATA: da oggi a oggi+giorniRange (IDENTICO AL PALINSESTO)
     partite = partite.filter(m => {
       if (!m.data) return false;
       const normalized = normalizeDate(m.data);
@@ -144,8 +141,9 @@ const SchedinaComponent = ({
       return normalized >= todayStr && normalized <= maxDateStr;
     });
     
-    // ESCLUSIONE PARTITE GIÀ INIZIATE
+    // ⭐ ESCLUSIONE PARTITE GIÀ INIZIATE (ORARIO PASSATO)
     partite = partite.filter(m => {
+      // Se la partita non ha orario, la teniamo (non possiamo verificare)
       if (!m.ora || m.ora === 'TBD' || m.ora === 'N/D') {
         return true;
       }
@@ -153,12 +151,14 @@ const SchedinaComponent = ({
       const matchDate = normalizeDate(m.data);
       const now = new Date();
       const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
-      const todayStrLocal = getTodayStr();
+      const todayStr = getTodayStr();
       
-      if (matchDate !== todayStrLocal) {
+      // Se la partita non è oggi, la teniamo (è futura)
+      if (matchDate !== todayStr) {
         return true;
       }
       
+      // Se la partita è oggi, controlliamo l'orario
       const timeParts = m.ora.split(':');
       if (timeParts.length < 2) return true;
       
@@ -168,9 +168,11 @@ const SchedinaComponent = ({
       
       const matchTotalMinutes = matchHour * 60 + matchMinutes;
       
+      // TENIAMO solo le partite con orario FUTURO (non ancora iniziate)
       return matchTotalMinutes > currentTotalMinutes;
     });
     
+    // FILTRO ORARIO: "dopo ora" - IDENTICO AL PALINSESTO
     if (filtroOrario === 'dopo_ora') {
       const now = new Date();
       const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
@@ -194,6 +196,7 @@ const SchedinaComponent = ({
       });
     }
     
+    // Ordina per data (come nel Palinsesto)
     partite.sort((a, b) => {
       const dateA = normalizeDate(a.data);
       const dateB = normalizeDate(b.data);
@@ -267,22 +270,20 @@ const SchedinaComponent = ({
     
     let score = 0;
     let giocatePct = [];
-    if (selectedFamiglie && selectedFamiglie.length > 0) {
-      selectedFamiglie.forEach(familyId => {
-        let best = null;
-        if (familyId === 'gg_ng') {
-          const ggNgResult = calcolaGG_NG(stats);
-          if (ggNgResult) {
-            best = { ...ggNgResult, pct: ggNgResult.pct };
-          }
-        } else {
-          best = getBestBetForFamily(familyId, stats, homeRange, awayRange, homeMG, awayMG, mgTot);
+    selectedFamiglie.forEach(familyId => {
+      let best = null;
+      if (familyId === 'gg_ng') {
+        const ggNgResult = calcolaGG_NG(stats);
+        if (ggNgResult) {
+          best = { ...ggNgResult, pct: ggNgResult.pct };
         }
-        if (best && best.pct > 0) {
-          giocatePct.push(best.pct);
-        }
-      });
-    }
+      } else {
+        best = getBestBetForFamily(familyId, stats, homeRange, awayRange, homeMG, awayMG, mgTot);
+      }
+      if (best && best.pct > 0) {
+        giocatePct.push(best.pct);
+      }
+    });
     if (giocatePct.length > 0) {
       score = Math.round(giocatePct.reduce((s, g) => s + g, 0) / giocatePct.length);
     }
@@ -309,10 +310,19 @@ const SchedinaComponent = ({
     });
   }, [getPartiteDisponibili, giocateSelezionate]);
 
+  // Funzione per determinare il numero di partite da prendere (con casualità estrema)
+  const getNumeroPartiteDaPrendere = (limiteMax = 10) => {
+    if (casualitaLevel > 80) {
+      return Math.min(numeroPartiteDaSelezionare, limiteMax, partiteDisponibili.length, 10);
+    } else {
+      return Math.min(numeroPartiteDaSelezionare, limiteMax, partiteDisponibili.length, 10);
+    }
+  };
+
   // Seleziona un numero personalizzato di partite
   const selezionaNumeroPartite = (n) => {
     if (partiteDisponibili.length === 0) {
-      if (showAlert) showAlert('info', 'ℹ️ Nessuna partita disponibile.');
+      showAlert('info', 'ℹ️ Nessuna partita disponibile.');
       return;
     }
     
@@ -330,13 +340,13 @@ const SchedinaComponent = ({
     
     const miglioriOrdinate = ordinaPartitePerDataOra(migliori);
     setPartiteSelezionate(miglioriOrdinate);
-    if (showAlert) showAlert('success', `✅ Selezionate ${miglioriOrdinate.length} partite!${messaggioExtra}`);
+    showAlert('success', `✅ Selezionate ${miglioriOrdinate.length} partite!${messaggioExtra}`);
   };
 
   // RIGENERA
   const rigeneraSchedina = () => {
     if (partiteDisponibili.length === 0) {
-      if (showAlert) showAlert('info', 'ℹ️ Nessuna partita disponibile per rigenerare la schedina.');
+      showAlert('info', 'ℹ️ Nessuna partita disponibile per rigenerare la schedina.');
       return;
     }
 
@@ -347,13 +357,13 @@ const SchedinaComponent = ({
       const selezionate = shuffled.slice(0, numeroPartiteDesiderato);
       const selezionateOrdinate = ordinaPartitePerDataOra(selezionate);
       setPartiteSelezionate(selezionateOrdinate);
-      if (showAlert) showAlert('success', `🎲🎲🎲 CASUALITÀ ESTREMA! ${selezionateOrdinate.length} partite selezionate a caso!`);
+      showAlert('success', `🎲🎲🎲 CASUALITÀ ESTREMA! ${selezionateOrdinate.length} partite selezionate a caso! (rispettato il numero scelto: ${numeroPartiteDesiderato})`);
       return;
     }
 
     const partitePerScore = {};
     partiteDisponibili.forEach(m => {
-      const score = m.score || 0;
+      const score = m.score;
       if (!partitePerScore[score]) partitePerScore[score] = [];
       partitePerScore[score].push(m);
     });
@@ -416,12 +426,13 @@ const SchedinaComponent = ({
       messaggioCasualita = `${selezionateOrdinate.length} partite selezionate (poche variazioni)`;
     }
     
-    if (showAlert) showAlert('success', `🔄 Schedina rigenerata! ${messaggioCasualita} ${emojiCasualita} Livello: ${casualitaLevel}%`);
+    showAlert('success', `🔄 Schedina rigenerata! ${messaggioCasualita} ${emojiCasualita} Livello: ${casualitaLevel}%`);
   };
 
+  // SELEZIONE CASUALE
   const selezionaCasuale = () => {
     if (partiteDisponibili.length === 0) {
-      if (showAlert) showAlert('info', 'ℹ️ Nessuna partita disponibile.');
+      showAlert('info', 'ℹ️ Nessuna partita disponibile.');
       return;
     }
     
@@ -435,7 +446,7 @@ const SchedinaComponent = ({
     if (casualitaLevel > 80) {
       messaggio = `🎲🎲🎲 CASUALITÀ ESTREMA! ${selezionateOrdinate.length} partite selezionate a caso!`;
     }
-    if (showAlert) showAlert('success', messaggio);
+    showAlert('success', messaggio);
   };
 
   const togglePartita = (match) => {
@@ -446,7 +457,7 @@ const SchedinaComponent = ({
         nuovePartite = prev.filter(m => m.id !== match.id);
       } else {
         if (prev.length >= 10) {
-          if (showAlert) showAlert('error', '⚠️ Massimo 10 partite per schedina!');
+          showAlert('error', '⚠️ Massimo 10 partite per schedina!');
           return prev;
         }
         nuovePartite = [...prev, match];
@@ -458,7 +469,7 @@ const SchedinaComponent = ({
   // CREA SCHEDINA
   const creaSchedina = () => {
     if (partiteSelezionate.length < 2) {
-      if (showAlert) showAlert('error', '⚠️ Seleziona almeno 2 partite per creare la schedina!');
+      showAlert('error', '⚠️ Seleziona almeno 2 partite per creare la schedina!');
       return;
     }
     
@@ -507,14 +518,14 @@ const SchedinaComponent = ({
     setSchedineSalvate(salvate);
     
     setLoading(false);
-    if (showAlert) showAlert('success', `🎯 Schedina creata! ${schedina.length} partite dal ${formatDateEU(dataInizio)} al ${formatDateEU(dataFine)} - Media score: ${mediaScore}%`);
+    showAlert('success', `🎯 Schedina creata! ${schedina.length} partite dal ${formatDateEU(dataInizio)} al ${formatDateEU(dataFine)} - Media score: ${mediaScore}%`);
     setShowSchedinaModal(true);
   };
 
   const resettaSchedina = () => {
     setPartiteSelezionate([]);
     setSchedinaCreata(null);
-    if (showAlert) showAlert('info', '🔄 Schedina resettata');
+    showAlert('info', '🔄 Schedina resettata');
   };
 
   const toggleCampionato = (nomeCampionato) => {
@@ -528,9 +539,7 @@ const SchedinaComponent = ({
   };
 
   const selezionaTuttiCampionati = () => {
-    if (championships) {
-      setCampionatiSelezionati(championships.map(c => c.name || c));
-    }
+    setCampionatiSelezionati(championships.map(c => c.name));
   };
 
   const deselezionaTuttiCampionati = () => {
@@ -593,6 +602,7 @@ const SchedinaComponent = ({
     const pctGG = Math.round((gg / total) * 100);
     const pctNG = Math.round((ng / total) * 100);
     
+    // Scegli la migliore tra GG e NG
     const migliore = pctGG > pctNG ? 'GG' : 'NG';
     const pctMigliore = Math.max(pctGG, pctNG);
     
@@ -614,6 +624,7 @@ const SchedinaComponent = ({
   // ============================================================
   const formatSchedinaText = (schedina) => {
     if (!schedina || !schedina.partite) {
+      console.error('❌ Schedina non valida per la formattazione');
       return '🎯 Errore nella generazione della schedina';
     }
     
@@ -643,7 +654,7 @@ const SchedinaComponent = ({
     }
     
     if (schedina.campionatiSelezionati && schedina.campionatiSelezionati.length > 0) {
-      const champsDisplay = schedina.campionatiSelezionati.length === (championships ? championships.length : 0) 
+      const champsDisplay = schedina.campionatiSelezionati.length === championships.length 
         ? 'Tutti' 
         : schedina.campionatiSelezionati.join(', ');
       lines.push(`🏆 Campionati: ${champsDisplay}`);
@@ -652,7 +663,7 @@ const SchedinaComponent = ({
     if (schedina.giocateSelezionate && schedina.giocateSelezionate.length > 0) {
       const giocateDisplay = schedina.giocateSelezionate.includes('tutte')
         ? '⭐ Tutte'
-        : schedina.giocateSelezionate.map(id => window.FAMIGLIE_GIOCATE?.[id]?.label || id).join(', ');
+        : schedina.giocateSelezionate.map(id => window.FAMIGLIE_GIOCATE[id]?.label || id).join(', ');
       lines.push(`🎯 Giocate: ${giocateDisplay}`);
     }
     
@@ -695,14 +706,14 @@ const SchedinaComponent = ({
   
   const copySchedinaToClipboard = () => {
     if (!schedinaCreata) {
-      if (showAlert) showAlert('error', '❌ Nessuna schedina da copiare!');
+      showAlert('error', '❌ Nessuna schedina da copiare!');
       return;
     }
     const text = formatSchedinaText(schedinaCreata);
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text)
-        .then(() => { if (showAlert) showAlert('success', '📋 Schedina copiata negli appunti!'); })
-        .catch(() => { if (showAlert) showAlert('error', '❌ Errore nella copia'); });
+        .then(() => showAlert('success', '📋 Schedina copiata negli appunti!'))
+        .catch(() => showAlert('error', '❌ Errore nella copia'));
     } else {
       const textarea = document.createElement('textarea');
       textarea.value = text;
@@ -710,9 +721,9 @@ const SchedinaComponent = ({
       textarea.select();
       try {
         document.execCommand('copy');
-        if (showAlert) showAlert('success', '📋 Schedina copiata negli appunti!');
+        showAlert('success', '📋 Schedina copiata negli appunti!');
       } catch (e) {
-        if (showAlert) showAlert('error', '❌ Errore nella copia');
+        showAlert('error', '❌ Errore nella copia');
       }
       document.body.removeChild(textarea);
     }
@@ -720,7 +731,7 @@ const SchedinaComponent = ({
 
   const shareOnWhatsApp = () => {
     if (!schedinaCreata) {
-      if (showAlert) showAlert('error', '❌ Nessuna schedina da condividere!');
+      showAlert('error', '❌ Nessuna schedina da condividere!');
       return;
     }
     const text = formatSchedinaText(schedinaCreata);
@@ -730,7 +741,7 @@ const SchedinaComponent = ({
 
   const shareOnTelegram = () => {
     if (!schedinaCreata) {
-      if (showAlert) showAlert('error', '❌ Nessuna schedina da condividere!');
+      showAlert('error', '❌ Nessuna schedina da condividere!');
       return;
     }
     const text = formatSchedinaText(schedinaCreata);
@@ -740,7 +751,7 @@ const SchedinaComponent = ({
 
   const salvaSchedinaLocale = () => {
     if (!schedinaCreata) {
-      if (showAlert) showAlert('error', '❌ Nessuna schedina da salvare!');
+      showAlert('error', '❌ Nessuna schedina da salvare!');
       return;
     }
     const now = new Date();
@@ -757,7 +768,7 @@ const SchedinaComponent = ({
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
-    if (showAlert) showAlert('success', `💾 Schedina salvata come ${nomeFile}.txt`);
+    showAlert('success', `💾 Schedina salvata come ${nomeFile}.txt`);
   };
 
   const eliminaSchedinaSalvata = (id) => {
@@ -765,7 +776,7 @@ const SchedinaComponent = ({
     const nuoveSalvate = schedineSalvate.filter(s => s.id !== id);
     localStorage.setItem('ft_schedine_salvate', JSON.stringify(nuoveSalvate));
     setSchedineSalvate(nuoveSalvate);
-    if (showAlert) showAlert('success', '🗑️ Schedina eliminata!');
+    showAlert('success', '🗑️ Schedina eliminata!');
   };
 
   const caricaSchedinaSalvata = (schedina) => {
@@ -782,7 +793,7 @@ const SchedinaComponent = ({
       setGiorniRange(schedina.giorniRange);
     }
     setShowSchedinaModal(true);
-    if (showAlert) showAlert('success', `📂 Schedina caricata! ${schedina.numPartite} partite, media ${schedina.media}%`);
+    showAlert('success', `📂 Schedina caricata! ${schedina.numPartite} partite, media ${schedina.media}%`);
   };
 
   const famiglieDisponibili = [
@@ -798,7 +809,7 @@ const SchedinaComponent = ({
   ];
 
   function hexToRgb(hex) {
-    if (hex && hex.startsWith('#')) {
+    if (hex.startsWith('#')) {
       const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
       return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '243, 156, 18';
     }
@@ -842,8 +853,8 @@ const SchedinaComponent = ({
                 style={{
                   fontSize: '10px',
                   padding: '3px 14px',
-                  background: campionatiSelezionati.length === (championships ? championships.length : 0) ? 'var(--accent)' : 'var(--surface)',
-                  color: campionatiSelezionati.length === (championships ? championships.length : 0) ? '#000' : 'var(--text)',
+                  background: campionatiSelezionati.length === championships.length ? 'var(--accent)' : 'var(--surface)',
+                  color: campionatiSelezionati.length === championships.length ? '#000' : 'var(--text)',
                   border: '1px solid var(--border)',
                   borderRadius: '4px',
                   cursor: 'pointer'
@@ -867,19 +878,18 @@ const SchedinaComponent = ({
                 ❌ Deseleziona
               </button>
               <span style={{fontSize: '11px', color: 'var(--text-muted)', padding: '3px 10px', background: 'var(--surface)', borderRadius: '4px'}}>
-                {campionatiSelezionati.length} / {championships ? championships.length : 0}
+                {campionatiSelezionati.length} / {championships.length}
               </span>
             </div>
           </div>
           <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
-            {championships && championships.map(c => {
-              const nome = c.name || c;
-              const isSelected = campionatiSelezionati.includes(nome);
-              const color = getChampColor(nome);
+            {championships.map(c => {
+              const isSelected = campionatiSelezionati.includes(c.name);
+              const color = getChampColor(c.name);
               return (
                 <button 
-                  key={nome}
-                  onClick={() => toggleCampionato(nome)}
+                  key={c.name}
+                  onClick={() => toggleCampionato(c.name)}
                   style={{
                     padding: '5px 14px',
                     borderRadius: '8px',
@@ -893,7 +903,7 @@ const SchedinaComponent = ({
                     boxShadow: isSelected ? `0 0 12px rgba(${hexToRgb(color)}, 0.15)` : 'none'
                   }}
                 >
-                  {isSelected ? '✅' : '⚪'} {nome}
+                  {isSelected ? '✅' : '⚪'} {c.name}
                 </button>
               );
             })}
@@ -999,12 +1009,12 @@ const SchedinaComponent = ({
           <div style={{fontSize: '10px', color: 'var(--text-muted)', marginTop: '6px', fontStyle: 'italic'}}>
             {giocateSelezionate.includes('tutte') 
               ? '⭐ Analizza TUTTE le famiglie di giocate (incluso GG - NG)'
-              : `📊 Analizza ${giocateSelezionate.length} famiglia/e: ${giocateSelezionate.map(id => window.FAMIGLIE_GIOCATE?.[id]?.label || id).join(', ')}`}
+              : `📊 Analizza ${giocateSelezionate.length} famiglia/e: ${giocateSelezionate.map(id => window.FAMIGLIE_GIOCATE[id]?.label || id).join(', ')}`}
             {giocateSelezionate.includes('gg_ng') && <span style={{marginLeft: '6px', color: '#e74c3c', fontWeight: 'bold'}}>⚽ GG/NG attivo!</span>}
           </div>
         </div>
 
-        {/* SEZIONE 3: FILTRI DATA/ORA */}
+        {/* SEZIONE 3: FILTRI DATA/ORA (COME NEL PALINSESTO) */}
         <div style={{
           marginBottom: '20px', 
           padding: '14px 16px', 
@@ -1190,7 +1200,7 @@ const SchedinaComponent = ({
             <span>📅 Range: <b>{giorniRange} giorno/i</b></span>
             <span>⏰ Solo partite <b>non ancora iniziate</b></span>
             <span>⭐ Media score: <b style={{color: 'var(--accent)'}}>
-              {partiteDisponibili.length > 0 ? Math.round(partiteDisponibili.reduce((s, m) => s + (m.score || 0), 0) / partiteDisponibili.length) : 0}%
+              {partiteDisponibili.length > 0 ? Math.round(partiteDisponibili.reduce((s, m) => s + m.score, 0) / partiteDisponibili.length) : 0}%
             </b></span>
             <span>🎯 Selezionate: <b style={{color: 'var(--win)'}}>{partiteSelezionate.length}</b> / {numeroPartiteDaSelezionare}</span>
             {partiteSelezionate.length > 0 && (
@@ -1457,7 +1467,7 @@ const SchedinaComponent = ({
                 if (confirm('⚠️ Eliminare TUTTE le schedine salvate?')) {
                   localStorage.setItem('ft_schedine_salvate', '[]');
                   setSchedineSalvate([]);
-                  if (showAlert) showAlert('success', '🗑️ Tutte le schedine eliminate!');
+                  showAlert('success', '🗑️ Tutte le schedine eliminate!');
                 }
               }}
               style={{fontSize: '10px', padding: '2px 12px', marginLeft: 'auto'}}
@@ -1510,11 +1520,8 @@ const SchedinaComponent = ({
                     className="btn btn-secondary" 
                     onClick={() => {
                       const text = formatSchedinaText(s);
-                      if (navigator.clipboard) {
-                        navigator.clipboard.writeText(text).then(() => {
-                          if (showAlert) showAlert('success', '📋 Schedina copiata!');
-                        });
-                      }
+                      navigator.clipboard?.writeText?.(text);
+                      showAlert('success', '📋 Schedina copiata!');
                     }}
                     style={{fontSize: '10px', padding: '4px 12px'}}
                   >
@@ -1559,12 +1566,12 @@ const SchedinaComponent = ({
                 )}
                 {schedinaCreata.campionatiSelezionati && (
                   <span>
-                    🏆 {schedinaCreata.campionatiSelezionati.length === (championships ? championships.length : 0) ? 'Tutti i campionati' : schedinaCreata.campionatiSelezionati.join(', ')}
+                    🏆 {schedinaCreata.campionatiSelezionati.length === championships.length ? 'Tutti i campionati' : schedinaCreata.campionatiSelezionati.join(', ')}
                   </span>
                 )}
                 {schedinaCreata.giocateSelezionate && (
                   <span>
-                    🎯 {schedinaCreata.giocateSelezionate.includes('tutte') ? 'Tutte le giocate' : schedinaCreata.giocateSelezionate.map(id => window.FAMIGLIE_GIOCATE?.[id]?.label || id).join(', ')}
+                    🎯 {schedinaCreata.giocateSelezionate.includes('tutte') ? 'Tutte le giocate' : schedinaCreata.giocateSelezionate.map(id => window.FAMIGLIE_GIOCATE[id]?.label || id).join(', ')}
                   </span>
                 )}
                 {schedinaCreata.giorniRange !== undefined && (
@@ -1700,6 +1707,5 @@ const SchedinaComponent = ({
   );
 };
 
-// RENDERIZZA IL COMPONENTE GLOBALMENTE
 window.SchedinaComponent = SchedinaComponent;
-console.log('✅ SchedinaComponent caricato - sincronizzato con il Palinsesto (range giorni) + esclusione partite già iniziate + GG/NG');
+console.log('✅ SchedinaComponent caricato - sincronizzato con il Palinsesto (range giorni) + esclusione partite già iniziate');
