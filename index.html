@@ -1347,41 +1347,86 @@ const deduplicateMatches = (matches) => {
 
 const getCountryFlagHtml = (champName) => {
   if (!champName) return '<span class="flag-emoji">🌍</span>';
+  
+  // MAPPA PRECISA - corrispondenza ESATTA per nome
   const exactMatchMap = {
-    'Premier League': 'GB', 'Russian Premier League': 'RU',
-    'Serie A': 'IT', 'Serie B': 'IT', 'Bundesliga': 'DE',
-    'Ligue 1': 'FR', 'La Liga': 'ES', 'Eredivisie': 'NL',
-    'Primeira Liga': 'PT', 'Allsvenskan': 'SE', 'Eliteserien': 'NO',
-    'Danish Superliga': 'DK', 'Pro League': 'BE', 'Championship': 'GB',
-    'Liga MX': 'MX', 'Brasileirão': 'BR', 'J1 League': 'JP',
-    'K League 1': 'KR', 'Swiss Super League': 'CH', 'Austrian Bundesliga': 'AT',
-    'Chinese Super League': 'CN', 'Premier Division': 'IE',
-    'Besta deild': 'IS', 'Liga Portugal Betclic': 'PT', 'Veikkausliiga': 'FI'
+    'Premier League': 'GB',
+    'Russian Premier League': 'RU',
+    'Serie A': 'IT',
+    'Serie B': 'IT',
+    'Bundesliga': 'DE',
+    'Ligue 1': 'FR',
+    'La Liga': 'ES',
+    'Eredivisie': 'NL',
+    'Primeira Liga': 'PT',
+    'Allsvenskan': 'SE',
+    'Eliteserien': 'NO',
+    'Danish Superliga': 'DK',
+    'Pro League': 'BE',
+    'Championship': 'GB',
+    'Liga MX': 'MX',
+    'Brasileirão': 'BR',
+    'J1 League': 'JP',
+    'K League 1': 'KR',
+    'Swiss Super League': 'CH',
+    'Austrian Bundesliga': 'AT',
+    'Chinese Super League': 'CN',
+    'Premier Division': 'IE',  // <-- IRLANDA
+    'Besta deild': 'IS',
+    'Liga Portugal Betclic': 'PT',
+    'Veikkausliiga': 'FI'
   };
+  
+  // Prima controlla corrispondenza ESATTA
   if (exactMatchMap[champName]) {
     const codeLower = exactMatchMap[champName].toLowerCase();
     return `<img src="https://flagcdn.com/${codeLower}.svg" alt="${exactMatchMap[champName]}" class="flag-icon" width="20" height="15" loading="lazy" style="display:inline-block; vertical-align:middle; margin-right:6px; width:20px; height:15px; border-radius:2px; object-fit:cover; box-shadow: 0 1px 2px rgba(0,0,0,0.3);" />`;
   }
+  
+  // MAPPA PARZIALE - controlla se il nome contiene queste parole
+  // ORDINE: le parole più specifiche e lunghe PRIMA
   const partialMatchMap = {
-    'Russian': 'RU', 'Premier': 'GB', 'Serie': 'IT', 'Bundesliga': 'DE',
-    'Ligue': 'FR', 'La Liga': 'ES', 'Eredivisie': 'NL', 'Primeira': 'PT',
-    'Allsvenskan': 'SE', 'Eliteserien': 'NO', 'Superliga': 'DK',
-    'Pro League': 'BE', 'Championship': 'GB', 'Liga MX': 'MX',
-    'Brasileirão': 'BR', 'J1 League': 'JP', 'K League': 'KR',
-    'Swiss': 'CH', 'Austrian': 'AT', 'Chinese': 'CN',
-    'Premier Division': 'IE', 'Besta deild': 'IS', 'Portugal': 'PT',
-    'Veikkausliiga': 'FI'
+    // Campionati specifici (più lunghe prima per evitare falsi positivi)
+    'Russian Premier League': 'RU',
+    'Premier Division': 'IE',     // <-- IRLANDA - deve essere PRIMA di "Premier"
+    'Premier League': 'GB',
+    'Chinese Super League': 'CN',
+    'Swiss Super League': 'CH',
+    'Austrian Bundesliga': 'AT',
+    'Liga Portugal Betclic': 'PT',
+    'Danish Superliga': 'DK',
+    'Pro League': 'BE',
+    'Championship': 'GB',
+    'Besta deild': 'IS',
+    'Veikkausliiga': 'FI',
+    // Parole singole (controllo più generico)
+    'Serie': 'IT',
+    'Bundesliga': 'DE',
+    'Ligue': 'FR',
+    'La Liga': 'ES',
+    'Eredivisie': 'NL',
+    'Primeira': 'PT',
+    'Allsvenskan': 'SE',
+    'Eliteserien': 'NO',
+    'Superliga': 'DK',
+    'Liga MX': 'MX',
+    'Brasileirão': 'BR',
+    'J1 League': 'JP',
+    'K League': 'KR'
   };
+  
+  // Ordina le chiavi per lunghezza decrescente (più specifiche prima)
   const sortedKeys = Object.keys(partialMatchMap).sort((a, b) => b.length - a.length);
+  
   for (const key of sortedKeys) {
     if (champName.includes(key)) {
       const codeLower = partialMatchMap[key].toLowerCase();
       return `<img src="https://flagcdn.com/${codeLower}.svg" alt="${partialMatchMap[key]}" class="flag-icon" width="20" height="15" loading="lazy" style="display:inline-block; vertical-align:middle; margin-right:6px; width:20px; height:15px; border-radius:2px; object-fit:cover; box-shadow: 0 1px 2px rgba(0,0,0,0.3);" />`;
     }
   }
+  
   return '<span class="flag-emoji">🌍</span>';
 };
-
 const getPercentualeClasse = (valore) => {
   if (valore >= 90) return 'flag-bomb';
   if (valore >= 66.67) return 'flag-green';
