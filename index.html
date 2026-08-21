@@ -2573,12 +2573,12 @@ const MatchDetail = ({ match, allMatches }) => {
         </div>
         <div style={{display:'flex', justifyContent:'center', gap:'20px', fontSize:'24px', fontWeight:'bold', margin:'12px 0', alignItems:'center'}}>
           <div style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
-            <TeamLogo teamName={match.casa} championship={match.campionato} size={20} />
+            <TeamLogo teamName={match.casa} championship={match.campionato} size={50} />
             <span style={{marginTop:'8px', color: getChampColor(match.campionato)}}>{match.casa}</span>
           </div>
           <span style={{color:'var(--text-muted)', fontSize:'20px'}}>VS</span>
           <div style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
-            <TeamLogo teamName={match.ospiti} championship={match.campionato} size={20} />
+            <TeamLogo teamName={match.ospiti} championship={match.campionato} size={50} />
             <span style={{marginTop:'8px', color: getChampColor(match.campionato)}}>{match.ospiti}</span>
           </div>
         </div>
