@@ -1348,88 +1348,150 @@ const deduplicateMatches = (matches) => {
 const getCountryFlagHtml = (champName) => {
   if (!champName) return '<span class="flag-emoji">🌍</span>';
   
-  // 🔥 PRIORITA' MASSIMA - Controlla prima se contiene "Ireland" o "Irish"
-  // Questo risolve il problema: "Ireland Premier League" → IRLANDA, non Inghilterra
-  if (champName.toLowerCase().includes('Ireland') || 
-      champName.toLowerCase().includes('Irish') ||
-      champName.toLowerCase().includes('Premier division')) {
-    return `<img src="https://flagcdn.com/ie.svg" alt="IE" class="flag-icon" width="20" height="15" loading="lazy" style="display:inline-block; vertical-align:middle; margin-right:6px; width:20px; height:15px; border-radius:2px; object-fit:cover; box-shadow: 0 1px 2px rgba(0,0,0,0.3);" />`;
-  }
-  
-  // MAPPA PRECISA - corrispondenza ESATTA per nome
-  const exactMatchMap = {
-    'Premier League': 'GB',
-    'Russian Premier League': 'RU',
+  // 🔥 MAPPA PRECISA NOME → CODICE ISO
+  // Questa è la fonte unica della verità
+  const countryMap = {
+    // ITALIA
     'Serie A': 'IT',
     'Serie B': 'IT',
-    'Bundesliga': 'DE',
-    'Ligue 1': 'FR',
-    'La Liga': 'ES',
-    'Eredivisie': 'NL',
-    'Primeira Liga': 'PT',
-    'Allsvenskan': 'SE',
-    'Eliteserien': 'NO',
-    'Danish Superliga': 'DK',
-    'Pro League': 'BE',
+    'Serie C': 'IT',
+    'Coppa Italia': 'IT',
+    
+    // INGHILTERRA
+    'Premier League': 'GB',
     'Championship': 'GB',
-    'Liga MX': 'MX',
-    'Brasileirão': 'BR',
-    'J1 League': 'JP',
-    'K League 1': 'KR',
-    'Swiss Super League': 'CH',
-    'Austrian Bundesliga': 'AT',
-    'Chinese Super League': 'CN',
-    'Ireland': 'IE',
-    'Besta deild': 'IS',
+    'League One': 'GB',
+    'League Two': 'GB',
+    'FA Cup': 'GB',
+    'EFL Cup': 'GB',
+    
+    // IRLANDA - ATTENZIONE: deve essere PRIMA di "Premier"
+    'Ireland Premier - Stats': 'IE',
+    'Ireland Premier - Schedule': 'IE',
+    'Ireland Premier Division': 'IE',
+    'League of Ireland Premier Division': 'IE',
+    'Irish Premier League': 'IE',
+    'Premier Division': 'IE',  // Attenzione: potrebbe confliggere con altri campionati
+    
+    // GERMANIA
+    'Bundesliga': 'DE',
+    '2. Bundesliga': 'DE',
+    '3. Liga': 'DE',
+    'DFB-Pokal': 'DE',
+    
+    // SPAGNA
+    'La Liga': 'ES',
+    'Segunda División': 'ES',
+    'Copa del Rey': 'ES',
+    
+    // FRANCIA
+    'Ligue 1': 'FR',
+    'Ligue 2': 'FR',
+    'Coupe de France': 'FR',
+    
+    // PAESI BASSI
+    'Eredivisie': 'NL',
+    'Eerste Divisie': 'NL',
+    'KNVB Cup': 'NL',
+    
+    // PORTOGALLO
+    'Primeira Liga': 'PT',
     'Liga Portugal Betclic': 'PT',
-    'Veikkausliiga': 'FI'
+    'Taça de Portugal': 'PT',
+    
+    // SVEZIA
+    'Allsvenskan': 'SE',
+    'Superettan': 'SE',
+    'Svenska Cupen': 'SE',
+    
+    // NORVEGIA
+    'Eliteserien': 'NO',
+    'OBOS-ligaen': 'NO',
+    'NM Cupen': 'NO',
+    
+    // DANIMARCA
+    'Danish Superliga': 'DK',
+    '1. Division': 'DK',
+    'DBU Pokalen': 'DK',
+    
+    // BELGIO
+    'Pro League': 'BE',
+    'Challenger Pro League': 'BE',
+    'Croky Cup': 'BE',
+    
+    // SVIZZERA
+    'Swiss Super League': 'CH',
+    'Challenge League': 'CH',
+    'Schweizer Cup': 'CH',
+    
+    // AUSTRIA
+    'Austrian Bundesliga': 'AT',
+    '2. Liga': 'AT',
+    'ÖFB Cup': 'AT',
+    
+    // RUSSIA
+    'Russian Premier League': 'RU',
+    'Russian Cup': 'RU',
+    
+    // CINA
+    'Chinese Super League': 'CN',
+    'China League One': 'CN',
+    'FA Cup': 'CN',
+    
+    // GIAPPONE
+    'J1 League': 'JP',
+    'J2 League': 'JP',
+    'Emperor\'s Cup': 'JP',
+    
+    // COREA DEL SUD
+    'K League 1': 'KR',
+    'K League 2': 'KR',
+    'Korean FA Cup': 'KR',
+    
+    // FINLANDIA
+    'Veikkausliiga': 'FI',
+    'Ykkönen': 'FI',
+    'Suomen Cup': 'FI',
+    
+    // ISLANDA
+    'Besta deild': 'IS',
+    '1. deild karla': 'IS',
+    'Icelandic Cup': 'IS',
+    
+    // MESSICO
+    'Liga MX': 'MX',
+    'Liga de Expansión': 'MX',
+    'Copa MX': 'MX',
+    
+    // BRASILE
+    'Brasileirão': 'BR',
+    'Série B': 'BR',
+    'Copa do Brasil': 'BR',
+    
+    // STATI UNITI
+    'MLS': 'US',
+    'USL Championship': 'US',
+    'Lamar Hunt U.S. Open Cup': 'US'
   };
   
-  // Controlla corrispondenza ESATTA
-  if (exactMatchMap[champName]) {
-    const codeLower = exactMatchMap[champName].toLowerCase();
-    return `<img src="https://flagcdn.com/${codeLower}.svg" alt="${exactMatchMap[champName]}" class="flag-icon" width="20" height="15" loading="lazy" style="display:inline-block; vertical-align:middle; margin-right:6px; width:20px; height:15px; border-radius:2px; object-fit:cover; box-shadow: 0 1px 2px rgba(0,0,0,0.3);" />`;
+  // 🔥 PRIMO CONTROLLO: Corrispondenza ESATTA
+  if (countryMap[champName]) {
+    const code = countryMap[champName].toLowerCase();
+    return `<img src="https://flagcdn.com/${code}.svg" alt="${countryMap[champName]}" class="flag-icon" width="20" height="15" loading="lazy" style="display:inline-block; vertical-align:middle; margin-right:6px; width:20px; height:15px; border-radius:2px; object-fit:cover; box-shadow: 0 1px 2px rgba(0,0,0,0.3);" />`;
   }
   
-  // MAPPA PARZIALE - controlla se il nome contiene queste parole
-  const partialMatchMap = {
-    'Ireland': 'IE',
-    'Russian': 'RU',
-    'Chinese Super League': 'CN',
-    'Swiss Super League': 'CH',
-    'Austrian Bundesliga': 'AT',
-    'Liga Portugal Betclic': 'PT',
-    'Danish Superliga': 'DK',
-    'Pro League': 'BE',
-    'Championship': 'GB',
-    'Besta deild': 'IS',
-    'Veikkausliiga': 'FI',
-    'Serie': 'IT',
-    'Bundesliga': 'DE',
-    'Ligue': 'FR',
-    'La Liga': 'ES',
-    'Eredivisie': 'NL',
-    'Primeira': 'PT',
-    'Allsvenskan': 'SE',
-    'Eliteserien': 'NO',
-    'Superliga': 'DK',
-    'Liga MX': 'MX',
-    'Brasileirão': 'BR',
-    'J1 League': 'JP',
-    'K League': 'KR',
-    'Premier League': 'GB'
-  };
-  
-  // Ordina le chiavi per lunghezza decrescente
-  const sortedKeys = Object.keys(partialMatchMap).sort((a, b) => b.length - a.length);
+  // 🔥 SECONDO CONTROLLO: Corrispondenza PARZIALE (solo se necessario)
+  // Ordina le chiavi per lunghezza decrescente (più specifiche prima)
+  const sortedKeys = Object.keys(countryMap).sort((a, b) => b.length - a.length);
   
   for (const key of sortedKeys) {
     if (champName.includes(key)) {
-      const codeLower = partialMatchMap[key].toLowerCase();
-      return `<img src="https://flagcdn.com/${codeLower}.svg" alt="${partialMatchMap[key]}" class="flag-icon" width="20" height="15" loading="lazy" style="display:inline-block; vertical-align:middle; margin-right:6px; width:20px; height:15px; border-radius:2px; object-fit:cover; box-shadow: 0 1px 2px rgba(0,0,0,0.3);" />`;
+      const code = countryMap[key].toLowerCase();
+      return `<img src="https://flagcdn.com/${code}.svg" alt="${countryMap[key]}" class="flag-icon" width="20" height="15" loading="lazy" style="display:inline-block; vertical-align:middle; margin-right:6px; width:20px; height:15px; border-radius:2px; object-fit:cover; box-shadow: 0 1px 2px rgba(0,0,0,0.3);" />`;
     }
   }
   
+  // 🔥 SE NESSUN MATCH, bandiera generica
   return '<span class="flag-emoji">🌍</span>';
 };
   
