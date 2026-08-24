@@ -2,51 +2,51 @@
   "championships": [
     {
       "name": "Ireland Premier",
-      "importedAt": "2026-08-24T07:35:00.342371"
+      "importedAt": "2026-08-24T07:38:15.312752"
     },
     {
       "name": "J1 League",
-      "importedAt": "2026-08-24T07:35:00.342376"
+      "importedAt": "2026-08-24T07:38:15.312757"
     },
     {
       "name": "K League 1",
-      "importedAt": "2026-08-24T07:35:00.342378"
+      "importedAt": "2026-08-24T07:38:15.312759"
     },
     {
       "name": "La Liga",
-      "importedAt": "2026-08-24T07:35:00.342379"
+      "importedAt": "2026-08-24T07:38:15.312760"
     },
     {
       "name": "Ligue 1",
-      "importedAt": "2026-08-24T07:35:00.342379"
+      "importedAt": "2026-08-24T07:38:15.312761"
     },
     {
       "name": "Premier League",
-      "importedAt": "2026-08-24T07:35:00.342380"
+      "importedAt": "2026-08-24T07:38:15.312762"
     },
     {
       "name": "Primeira Liga",
-      "importedAt": "2026-08-24T07:35:00.342381"
+      "importedAt": "2026-08-24T07:38:15.312763"
     },
     {
       "name": "Russian PL",
-      "importedAt": "2026-08-24T07:35:00.342382"
+      "importedAt": "2026-08-24T07:38:15.312764"
     },
     {
       "name": "Serie A",
-      "importedAt": "2026-08-24T07:35:00.342383"
+      "importedAt": "2026-08-24T07:38:15.312764"
     },
     {
       "name": "Serie B",
-      "importedAt": "2026-08-24T07:35:00.342384"
+      "importedAt": "2026-08-24T07:38:15.312765"
     },
     {
       "name": "Swiss Super League",
-      "importedAt": "2026-08-24T07:35:00.342384"
+      "importedAt": "2026-08-24T07:38:15.312766"
     },
     {
       "name": "Veikkausliiga",
-      "importedAt": "2026-08-24T07:35:00.342385"
+      "importedAt": "2026-08-24T07:38:15.312767"
     }
   ],
   "matches": [
@@ -3532,5 +3532,5 @@
     "mg_casa_ospite",
     "over"
   ],
-  "exportedAt": "2026-08-24T07:35:00.342387"
+  "exportedAt": "2026-08-24T07:38:15.312769"
 }
