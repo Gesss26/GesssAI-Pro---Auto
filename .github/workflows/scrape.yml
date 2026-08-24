@@ -1,59 +1,67 @@
-name: Scraping FBref con Crawl4AI
+name: Aggiornamento Dati FBref
 
 on:
-  # Esegue automaticamente ogni 6 ore
   schedule:
-    - cron: '0 */6 * * *'
-  
-  # Permette di eseguire manualmente dal pannello Actions
+    # Esegue ogni giorno alle 6:00 UTC (7:00 in Italia)
+    - cron: '0 6 * * *'
+  # Permette il lancio manuale
   workflow_dispatch:
+    inputs:
+      forza_aggiornamento:
+        description: 'Forza aggiornamento'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
 
 jobs:
-  scrape:
+  scrape-and-update:
     runs-on: ubuntu-latest
     
+    permissions:
+      contents: write
+      packages: write
+    
     steps:
-      - name: 📥 Checkout repository
+      - name: 📥 Checkout del repository
         uses: actions/checkout@v4
-        
+        with:
+          fetch-depth: 0
+      
       - name: 🐍 Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          
+          # Rimuovi la cache se non hai requirements.txt
+          # cache: 'pip'
+      
       - name: 📦 Installa dipendenze
         run: |
-          pip install --upgrade pip
-          pip install crawl4ai-cloud-sdk beautifulsoup4 pandas openpyxl lxml
-          
-      - name: 🔑 Configura API Key
-        run: |
-          # Sostituisci la chiave nel file Python
-          sed -i 's/API_KEY = "sk_live_..."/API_KEY = "${{ secrets.CRAWL4AI_API_KEY }}"/' scarica.py
-          
-      - name: 🚀 Esegui scraping
-        run: |
-          python scarica.py
-          
-      - name: 📂 Verifica file generati
-        run: |
-          echo "📊 File generati:"
-          ls -la data/
-          ls -la excel/ 2>/dev/null || echo "excel/ non trovato"
-          
-      - name: 📤 Commit e push dei dati
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Aggiungi il JSON
-          git add data/matches.json || echo "Nessun file data/matches.json"
-          
-          # Verifica se ci sono modifiche
-          if git diff --staged --quiet; then
-            echo "📭 Nessuna modifica da commitare"
+          python -m pip install --upgrade pip
+          # Se hai requirements.txt
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
           else
-            git commit -m "🔄 Aggiornamento automatico dati FBref [skip ci]"
-            git push
-            echo "✅ Dati aggiornati e pushati su GitHub!"
+            # Installa manualmente se requirements.txt non esiste
+            pip install pandas beautifulsoup4 openpyxl crawl4ai_cloud requests lxml
           fi
+      
+      - name: ⚙️ Configura Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: 🚀 Esegui scarica.py
+        run: python scarica.py
+        env:
+          CRAWL4AI_API_KEY: ${{ secrets.CRAWL4AI_API_KEY }}
+          GITHUB_ACTIONS: 'true'
+      
+      - name: 📤 Commit e Push dei dati aggiornati
+        run: |
+          git add data/*.json
+          git add excel/*.xlsx 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "Aggiornamento automatico dati $(date '+%Y-%m-%d %H:%M')"
+          git push origin master
