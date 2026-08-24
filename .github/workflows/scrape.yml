@@ -2,66 +2,83 @@ name: Aggiornamento Dati FBref
 
 on:
   schedule:
-    # Esegue ogni giorno alle 6:00 UTC (7:00 in Italia)
-    - cron: '0 6 * * *'
-  # Permette il lancio manuale
-  workflow_dispatch:
-    inputs:
-      forza_aggiornamento:
-        description: 'Forza aggiornamento'
-        required: false
-        default: 'false'
-        type: choice
-        options:
-          - 'false'
-          - 'true'
+    # Esegue ogni giorno alle 6:00, 12:00, 18:00, 23:00 (UTC)
+    - cron: '0 6,12,18,23 * * *'
+  workflow_dispatch:  # Permette di eseguire manualmente
 
 jobs:
-  scrape-and-update:
+  scrape:
     runs-on: ubuntu-latest
     
-    permissions:
-      contents: write
-      packages: write
-    
     steps:
-      - name: 📥 Checkout del repository
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-      
-      - name: 🐍 Setup Python
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          # Rimuovi la cache se non hai requirements.txt
-          # cache: 'pip'
-      
-      - name: 📦 Installa dipendenze
+          
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # Se hai requirements.txt
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
+          pip install pandas beautifulsoup4 openpyxl requests selenium webdriver-manager lxml
+          
+      - name: Install Chrome and ChromeDriver
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget unzip xvfb
+          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+          
+      - name: Run scraper
+        id: scraper
+        continue-on-error: true
+        run: |
+          xvfb-run python scarica.py
+          
+      - name: Check if matches.json exists
+        id: check_json
+        run: |
+          if [ -f "data/matches.json" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "✅ matches.json trovato!"
+            wc -l data/matches.json
           else
-            # Installa manualmente se requirements.txt non esiste
-            pip install pandas beautifulsoup4 openpyxl crawl4ai_cloud requests lxml
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "❌ matches.json NON trovato!"
           fi
-      
-      - name: ⚙️ Configura Git
+          
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dati-calcio
+          path: |
+            data/matches.json
+            excel/*.xlsx
+            excel/*.json
+            downloads/*.html
+            
+      - name: Commit and push if changed
+        if: steps.check_json.outputs.exists == 'true'
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-      
-      - name: 🚀 Esegui scarica.py
-        run: python scarica.py
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/matches.json
+          git diff --staged --quiet || (git commit -m "Aggiornamento automatico dati $(date '+%Y-%m-%d %H:%M')" && git push)
         env:
-          CRAWL4AI_API_KEY: ${{ secrets.CRAWL4AI_API_KEY }}
-          GITHUB_ACTIONS: 'true'
-      
-      - name: 📤 Commit e Push dei dati aggiornati
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Notification
+        if: always()
         run: |
-          git add data/*.json
-          git add excel/*.xlsx 2>/dev/null || true
-          git diff --staged --quiet || git commit -m "Aggiornamento automatico dati $(date '+%Y-%m-%d %H:%M')"
-          git push origin master
+          if [ "${{ steps.scraper.outcome }}" == "success" ]; then
+            echo "✅ Scraping completato con successo!"
+          else
+            echo "⚠️ Scraping completato con errori"
+          fi
