@@ -1,0 +1,26 @@
+# .gitignore
+
+# Dipendenze Node.js
+node_modules/
+package-lock.json
+
+# File di sistema
+.DS_Store
+Thumbs.db
+
+# File temporanei
+*.log
+*.tmp
+*.swp
+
+# Dati generati (il server li ricrea)
+public/data/matches.json
+
+# File di ambiente
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.iml

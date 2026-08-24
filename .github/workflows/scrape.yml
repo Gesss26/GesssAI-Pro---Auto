@@ -1,0 +1,59 @@
+name: Scraping FBref con Crawl4AI
+
+on:
+  # Esegue automaticamente ogni 6 ore
+  schedule:
+    - cron: '0 */6 * * *'
+  
+  # Permette di eseguire manualmente dal pannello Actions
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          
+      - name: 📦 Installa dipendenze
+        run: |
+          pip install --upgrade pip
+          pip install crawl4ai-cloud-sdk beautifulsoup4 pandas openpyxl lxml
+          
+      - name: 🔑 Configura API Key
+        run: |
+          # Sostituisci la chiave nel file Python
+          sed -i 's/API_KEY = "sk_live_..."/API_KEY = "${{ secrets.CRAWL4AI_API_KEY }}"/' scarica.py
+          
+      - name: 🚀 Esegui scraping
+        run: |
+          python scarica.py
+          
+      - name: 📂 Verifica file generati
+        run: |
+          echo "📊 File generati:"
+          ls -la data/
+          ls -la excel/ 2>/dev/null || echo "excel/ non trovato"
+          
+      - name: 📤 Commit e push dei dati
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Aggiungi il JSON
+          git add data/matches.json || echo "Nessun file data/matches.json"
+          
+          # Verifica se ci sono modifiche
+          if git diff --staged --quiet; then
+            echo "📭 Nessuna modifica da commitare"
+          else
+            git commit -m "🔄 Aggiornamento automatico dati FBref [skip ci]"
+            git push
+            echo "✅ Dati aggiornati e pushati su GitHub!"
+          fi

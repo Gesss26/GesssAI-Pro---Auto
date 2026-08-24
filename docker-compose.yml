@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  gesssai:
+    build: .
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - TZ=Europe/Rome
+    volumes:
+      - ./public/data:/app/public/data
+      - ./public/logos:/app/public/logos
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/status', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
