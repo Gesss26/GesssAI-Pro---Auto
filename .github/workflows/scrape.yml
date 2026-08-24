@@ -2,9 +2,7 @@ name: Scrape Football Data
 
 on:
   schedule:
-    # Esegui ogni giorno alle 8:00 UTC
     - cron: '0 8 * * *'
-  # Permetti esecuzione manuale
   workflow_dispatch:
 
 jobs:
@@ -14,7 +12,9 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      
+      with:
+        token: ${{ secrets.GESSSAI_PRO_AUTO }}  # <- USA IL TUO SECRET!
+        
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
@@ -33,6 +33,6 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add -A
+        git add data/matches.json excel/GesssAI_Input.xlsx excel/GesssAI_Input.json || true
         git diff --staged --quiet || git commit -m "Aggiornamento dati $(date +'%Y-%m-%d %H:%M')"
         git push
