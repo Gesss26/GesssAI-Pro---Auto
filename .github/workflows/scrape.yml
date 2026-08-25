@@ -7,6 +7,9 @@ on:
   workflow_dispatch:
     # Permette l'esecuzione manuale
 
+permissions:
+  contents: write
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
@@ -14,6 +17,9 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GESSSAI_PRO_AUTO }}
+        fetch-depth: 0
     
     - name: Setup Python
       uses: actions/setup-python@v5
@@ -29,11 +35,12 @@ jobs:
       run: |
         mkdir -p excel data
     
-    - name: Run scraper (senza interazione utente)
+    - name: Run scraper
       run: |
-        # Esegue lo script senza input() usando echo per simulare l'invio
-        echo "" | python scarica.py
-      continue-on-error: false
+        # Rimuove la riga dell'input() che causa problemi in CI
+        cp scarica.py scarica_original.py
+        sed -i '/input("🔴 Premere INVIO per uscire...")/d' scarica.py
+        python scarica.py
     
     - name: Check if matches.json exists
       id: check_json
@@ -42,7 +49,10 @@ jobs:
           echo "exists=true" >> $GITHUB_OUTPUT
           echo "✅ matches.json trovato"
           echo "📊 Dimensione: $(du -h data/matches.json | cut -f1)"
-          echo "📊 Numero partite: $(jq '.matches | length' data/matches.json 2>/dev/null || echo 'N/A')"
+          if command -v jq &> /dev/null; then
+            echo "📊 Numero partite: $(jq '.matches | length' data/matches.json)"
+            echo "🏆 Campionati: $(jq '.championships | length' data/matches.json)"
+          fi
         else
           echo "exists=false" >> $GITHUB_OUTPUT
           echo "❌ matches.json non trovato"
@@ -54,45 +64,36 @@ jobs:
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         git add data/matches.json
-        git diff --staged --quiet || git commit -m "Aggiornamento automatico matches.json $(date +'%Y-%m-%d %H:%M')"
-        git push
+        if git diff --staged --quiet; then
+          echo "📝 Nessuna modifica da committare"
+        else
+          git commit -m "Aggiornamento automatico matches.json $(date +'%Y-%m-%d %H:%M')"
+          git push
+          echo "✅ Push effettuato con successo"
+        fi
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GESSSAI_PRO_AUTO }}
     
-    - name: Upload Excel file as artifact
+    - name: Upload artifacts
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: gesssai-excel
-        path: excel/GesssAI_Input.xlsx
-        retention-days: 7
-    
-    - name: Upload matches.json as artifact
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: matches-json
-        path: data/matches.json
-        retention-days: 7
-    
-    - name: Upload logs
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: logs
-        path: |
-          *.log
-          *.txt
-        retention-days: 7
-        if-no-files-found: ignore
-    
-    - name: Upload all data files
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: all-data
+        name: scrape-data
         path: |
           excel/
           data/
-        retention-days: 3
-        if-no-files-found: ignore
+        retention-days: 7
+    
+    - name: Summary
+      if: always()
+      run: |
+        echo "========================================"
+        echo "✅ Scraping completato!"
+        echo "📅 Data: $(date)"
+        if [ -f "data/matches.json" ]; then
+          echo "📊 matches.json generato con successo"
+          echo "📁 Dimensione: $(du -h data/matches.json | cut -f1)"
+        else
+          echo "❌ matches.json NON generato"
+        fi
+        echo "========================================"
