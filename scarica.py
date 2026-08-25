@@ -25,6 +25,7 @@ print("=" * 70)
 print("\n✅ Campionati disponibili e FUNZIONANTI:\n")
 
 # ============================================
+<<<<<<< HEAD
 # LISTA CAMPIONATI (TUTTI E 16)
 # ============================================
 
@@ -45,6 +46,26 @@ LEAGUES = [
     {'name': 'Scottish Premiership', 'url': 'https://fixturedownload.com/results/scottish-premiership-2026'},
     {'name': 'Serie A', 'url': 'https://fixturedownload.com/results/serie-a-2026'},
     {'name': 'Super Lig', 'url': 'https://fixturedownload.com/results/super-lig-2026'},
+=======
+# LISTA CAMPIONATI (SOLO QUELLI CHE FUNZIONANO)
+# ============================================
+
+LEAGUES = [
+    {'name': 'Premier League', 'url': 'https://fixturedownload.com/results/epl-2026'},
+    {'name': 'La Liga', 'url': 'https://fixturedownload.com/results/la-liga-2026'},
+    {'name': 'Bundesliga', 'url': 'https://fixturedownload.com/results/bundesliga-2026'},
+    {'name': 'Ligue 1', 'url': 'https://fixturedownload.com/results/ligue-1-2026'},
+    {'name': 'Serie A', 'url': 'https://fixturedownload.com/results/serie-a-2026'},
+    {'name': 'Eredivisie', 'url': 'https://fixturedownload.com/results/eredivisie-2026'},
+    {'name': 'Primeira Liga', 'url': 'https://fixturedownload.com/results/primeira-liga-2026'},
+    {'name': 'Scottish Premiership', 'url': 'https://fixturedownload.com/results/scottish-premiership-2026'},
+    {'name': 'Super Lig', 'url': 'https://fixturedownload.com/results/super-lig-2026'},
+    {'name': 'Championship', 'url': 'https://fixturedownload.com/results/championship-2026'},
+    {'name': 'EFL League One', 'url': 'https://fixturedownload.com/results/efl-league-one-2026'},
+    {'name': 'EFL League Two', 'url': 'https://fixturedownload.com/results/efl-league-two-2026'},
+    {'name': 'MLS', 'url': 'https://fixturedownload.com/results/mls-2026'},
+    {'name': 'NWSL', 'url': 'https://fixturedownload.com/results/nwsl-2026'},
+>>>>>>> f631f8251f6dc92470e440f0ddec2d30e80f1606
 ]
 
 for league in LEAGUES:
