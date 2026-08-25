@@ -1,75 +1,84 @@
-name: Scrape Matches from MatchesNow
+name: Scrape Calendari Calcio
 
 on:
   schedule:
-    # Esegue ogni giorno alle 6:00 UTC
+    # Esegue ogni giorno alle 3:00 (UTC)
     - cron: '0 6 * * *'
-  workflow_dispatch:  # Permette esecuzione manuale
+  workflow_dispatch:
+    # Permette l'esecuzione manuale
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-          cache: 'pip'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pandas beautifulsoup4 selenium webdriver-manager openpyxl
-
-      - name: Setup Chrome and ChromeDriver
-        uses: nanasess/setup-chromedriver@v2
-        with:
-          chrome-version: 'stable'
-
-      - name: Create directories
-        run: |
-          mkdir -p siti_da_matchesnow
-          mkdir -p excel
-          mkdir -p data
-
-      - name: Run scraper
-        run: |
-          # Esegue lo script in modalità automatica
-          echo "3" | python scarica_matchesnow.py
-        env:
-          # Imposta la variabile per GitHub Actions
-          GITHUB_ACTIONS: true
-
-      - name: Upload artifacts (HTML files)
-        uses: actions/upload-artifact@v4
-        with:
-          name: html-files
-          path: siti_da_matchesnow/*.html
-          retention-days: 7
-
-      - name: Upload artifacts (Excel and JSON)
-        uses: actions/upload-artifact@v4
-        with:
-          name: scraped-data
-          path: |
-            excel/*.xlsx
-            excel/*.json
-            data/*.json
-          retention-days: 30
-
-      - name: Commit and push changes
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add excel/ data/ || true
-          git diff --staged --quiet || (git commit -m "🤖 Aggiornamento automatico dati matches [skip ci]" && git push)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests pandas beautifulsoup4 openpyxl
+    
+    - name: Create directories
+      run: |
+        mkdir -p excel data
+    
+    - name: Run scraper
+      run: |
+        python scarica.py
+      continue-on-error: false
+    
+    - name: Check if matches.json exists
+      id: check_json
+      run: |
+        if [ -f "data/matches.json" ]; then
+          echo "exists=true" >> $GITHUB_OUTPUT
+          echo "✅ matches.json trovato"
+        else
+          echo "exists=false" >> $GITHUB_OUTPUT
+          echo "❌ matches.json non trovato"
+        fi
+    
+    - name: Commit and push matches.json
+      if: steps.check_json.outputs.exists == 'true'
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add data/matches.json
+        git diff --staged --quiet || git commit -m "Aggiornamento automatico matches.json $(date +'%Y-%m-%d %H:%M')"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Upload Excel file as artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: gesssai-excel
+        path: excel/GesssAI_Input.xlsx
+        retention-days: 7
+    
+    - name: Upload matches.json as artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: matches-json
+        path: data/matches.json
+        retention-days: 7
+    
+    - name: Upload logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: logs
+        path: |
+          *.log
+          *.txt
+        retention-days: 7
+        if-no-files-found: ignore
