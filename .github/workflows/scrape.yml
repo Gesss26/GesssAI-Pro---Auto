@@ -1,9 +1,14 @@
-name: Scrape Football Data
+name: Scrape Football Data from matchesnow.co.uk
 
 on:
   schedule:
-    - cron: '0 8 * * *'
+    # Esegui ogni giorno alle 8:00 UTC (9:00 Italia)
+    - cron: '0 6 * * *'
+  # Permetti esecuzione manuale
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   scrape:
@@ -13,8 +18,8 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        token: ${{ secrets.GESSSAI_PRO_AUTO }}  # <- USA IL TUO SECRET!
-        
+        token: ${{ secrets.GESSSAI_PRO_AUTO }}
+      
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
@@ -23,11 +28,20 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pandas beautifulsoup4 requests openpyxl
+        pip install pandas beautifulsoup4 requests openpyxl selenium webdriver-manager
         
+    - name: Setup Chrome
+      uses: browser-actions/setup-chrome@v1
+      
+    - name: Setup ChromeDriver
+      uses: browser-actions/setup-chromedriver@v1
+      
     - name: Run scraper
       run: |
         python scarica.py
+      env:
+        # Forza l'uso di headless per GitHub Actions
+        CHROME_HEADLESS: true
         
     - name: Commit and push if changed
       run: |
