@@ -1,52 +1,75 @@
-name: Scrape Football Data from matchesnow.co.uk
+name: Scrape Matches from MatchesNow
 
 on:
   schedule:
-    # Esegui ogni giorno alle 8:00 UTC (9:00 Italia)
+    # Esegue ogni giorno alle 6:00 UTC
     - cron: '0 6 * * *'
-  # Permetti esecuzione manuale
-  workflow_dispatch:
-
-permissions:
-  contents: write
+  workflow_dispatch:  # Permette esecuzione manuale
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.GESSSAI_PRO_AUTO }}
-      
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pandas beautifulsoup4 requests openpyxl selenium webdriver-manager
-        
-    - name: Setup Chrome
-      uses: browser-actions/setup-chrome@v1
-      
-    - name: Setup ChromeDriver
-      uses: browser-actions/setup-chromedriver@v1
-      
-    - name: Run scraper
-      run: |
-        python scarica.py
-      env:
-        # Forza l'uso di headless per GitHub Actions
-        CHROME_HEADLESS: true
-        
-    - name: Commit and push if changed
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add data/matches.json excel/GesssAI_Input.xlsx excel/GesssAI_Input.json || true
-        git diff --staged --quiet || git commit -m "Aggiornamento dati $(date +'%Y-%m-%d %H:%M')"
-        git push
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas beautifulsoup4 selenium webdriver-manager openpyxl
+
+      - name: Setup Chrome and ChromeDriver
+        uses: nanasess/setup-chromedriver@v2
+        with:
+          chrome-version: 'stable'
+
+      - name: Create directories
+        run: |
+          mkdir -p siti_da_matchesnow
+          mkdir -p excel
+          mkdir -p data
+
+      - name: Run scraper
+        run: |
+          # Esegue lo script in modalità automatica
+          echo "3" | python scarica_matchesnow.py
+        env:
+          # Imposta la variabile per GitHub Actions
+          GITHUB_ACTIONS: true
+
+      - name: Upload artifacts (HTML files)
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-files
+          path: siti_da_matchesnow/*.html
+          retention-days: 7
+
+      - name: Upload artifacts (Excel and JSON)
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraped-data
+          path: |
+            excel/*.xlsx
+            excel/*.json
+            data/*.json
+          retention-days: 30
+
+      - name: Commit and push changes
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add excel/ data/ || true
+          git diff --staged --quiet || (git commit -m "🤖 Aggiornamento automatico dati matches [skip ci]" && git push)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
