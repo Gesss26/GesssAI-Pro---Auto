@@ -2,7 +2,7 @@ name: Scrape Calendari Calcio
 
 on:
   schedule:
-    # Esegue ogni giorno alle 3:00 (UTC)
+    # Esegue ogni giorno alle 6:00 (UTC)
     - cron: '0 6 * * *'
   workflow_dispatch:
     # Permette l'esecuzione manuale
