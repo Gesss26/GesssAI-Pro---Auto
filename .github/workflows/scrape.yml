@@ -29,9 +29,10 @@ jobs:
       run: |
         mkdir -p excel data
     
-    - name: Run scraper
+    - name: Run scraper (senza interazione utente)
       run: |
-        python scarica.py
+        # Esegue lo script senza input() usando echo per simulare l'invio
+        echo "" | python scarica.py
       continue-on-error: false
     
     - name: Check if matches.json exists
@@ -40,6 +41,8 @@ jobs:
         if [ -f "data/matches.json" ]; then
           echo "exists=true" >> $GITHUB_OUTPUT
           echo "✅ matches.json trovato"
+          echo "📊 Dimensione: $(du -h data/matches.json | cut -f1)"
+          echo "📊 Numero partite: $(jq '.matches | length' data/matches.json 2>/dev/null || echo 'N/A')"
         else
           echo "exists=false" >> $GITHUB_OUTPUT
           echo "❌ matches.json non trovato"
@@ -81,4 +84,15 @@ jobs:
           *.log
           *.txt
         retention-days: 7
+        if-no-files-found: ignore
+    
+    - name: Upload all data files
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: all-data
+        path: |
+          excel/
+          data/
+        retention-days: 3
         if-no-files-found: ignore
