@@ -1,4 +1,5 @@
 import os
+import sys
 import re
 import time
 import json
@@ -15,10 +16,21 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 # ============================================
-# CONFIGURAZIONE
+# DETECT ENVIRONMENT
+# ============================================
+IN_GITHUB_ACTIONS = os.environ.get('GITHUB_ACTIONS', 'false').lower() == 'true'
+
+# ============================================
+# CONFIGURAZIONE - CORRETTA PER AMBIENTI
 # ============================================
 
-BASE_DIR = r"d:\ai"
+if IN_GITHUB_ACTIONS:
+    # In GitHub Actions, usa la directory di lavoro corrente
+    BASE_DIR = os.getcwd()
+else:
+    # Percorso locale (Windows)
+    BASE_DIR = r"d:\ai"
+
 download_folder = os.path.join(BASE_DIR, "siti_da_matchesnow")
 output_folder = os.path.join(BASE_DIR, "excel")
 data_folder = os.path.join(BASE_DIR, "data")
@@ -58,7 +70,7 @@ LEAGUES = [
 ]
 
 # ============================================
-# MAPPA PER I NOMI DEI CAMPIONATI (per parsing)
+# MAPPA PER I NOMI DEI CAMPIONATI
 # ============================================
 
 LEAGUE_NAME_MAP = {
@@ -104,9 +116,18 @@ def salva_pagine():
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument('--window-size=1920,1080')
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--disable-blink-features=AutomationControlled')
         options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
         
-        service = Service(ChromeDriverManager().install())
+        if IN_GITHUB_ACTIONS:
+            # In GitHub Actions, usa il chromedriver installato
+            service = Service('/usr/local/bin/chromedriver')
+        else:
+            # Localmente, usa webdriver-manager
+            service = Service(ChromeDriverManager().install())
+            
         driver = webdriver.Chrome(service=service, options=options)
         print("✅ Browser avviato!")
         
@@ -157,6 +178,8 @@ def salva_pagine():
         
     except Exception as e:
         print(f"❌ Errore critico: {e}")
+        import traceback
+        traceback.print_exc()
         return 0, len(LEAGUES)
     finally:
         if driver:
@@ -168,8 +191,6 @@ def salva_pagine():
 
 def estrai_da_file_html(file_path):
     """Estrae i dati da un file HTML salvato da matchesnow"""
-    
-    nome_file = os.path.basename(file_path)
     
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -402,8 +423,13 @@ def crea_file():
     
     if not html_files:
         print(f"\n❌ Nessun file HTML trovato in {download_folder}")
-        print("   📌 Usa l'opzione 2 per salvare le pagine")
-        return
+        print("   📌 Eseguo prima il download delle pagine...")
+        salva_pagine()
+        # Ricarica la lista dopo il download
+        html_files = [f for f in os.listdir(download_folder) if f.endswith('.html')]
+        if not html_files:
+            print("   ❌ Ancora nessun file HTML disponibile!")
+            return
     
     print(f"\n📄 Trovati {len(html_files)} file HTML:")
     for f in html_files:
@@ -535,7 +561,7 @@ def tutto():
     crea_file()
 
 # ============================================
-# MENU PRINCIPALE
+# MENU PRINCIPALE (SOLO PER AMBIENTE LOCALE)
 # ============================================
 
 def menu():
@@ -583,6 +609,29 @@ def menu():
 # ============================================
 
 if __name__ == "__main__":
-    menu()
-    print("\n" + "=" * 70)
-    input("🔴 Premere INVIO per uscire...")
+    print(f"🔍 Ambiente: {'GitHub Actions' if IN_GITHUB_ACTIONS else 'Locale'}")
+    print(f"📁 Directory base: {BASE_DIR}")
+    
+    if IN_GITHUB_ACTIONS:
+        # In GitHub Actions, esegui tutto automaticamente
+        print("\n🔄 Esecuzione in modalità automatica (GitHub Actions)...")
+        print("=" * 70)
+        
+        # Fase 1: Scarica le pagine
+        print("\n📥 FASE 1: Scaricamento pagine HTML")
+        successi, errori = salva_pagine()
+        
+        if successi > 0:
+            # Fase 2: Crea i file
+            print("\n📊 FASE 2: Creazione file Excel e JSON")
+            crea_file()
+            print("\n✅ Processo completato con successo!")
+        else:
+            print(f"\n❌ Nessuna pagina scaricata correttamente ({successi} successi, {errori} errori)")
+            print("   Verifica la connessione a matchesnow.co.uk")
+            sys.exit(1)
+    else:
+        # Modalità interattiva per ambiente locale
+        menu()
+        print("\n" + "=" * 70)
+        input("🔴 Premere INVIO per uscire...")
