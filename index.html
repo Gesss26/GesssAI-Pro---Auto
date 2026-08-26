@@ -1980,44 +1980,72 @@ const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
   const [tryUnderscore, setTryUnderscore] = useState(false);
   
   const getLeagueFolder = (champ) => {
-    if (!champ) return '';
-    const map = {
-      'Premier League': 'Premier_League',
-      'English Premier League': 'Premier_League',
-      'EPL': 'Premier_League',
-      'Serie A': 'Serie_A',
-      'Serie A TIM': 'Serie_A',
-      'Serie A Enilive': 'Serie_A',
-      'Serie B': 'Serie_B',
-      'Bundesliga': 'Bundesliga',
-      '2. Bundesliga': '2_Bundesliga',
-      'La Liga': 'La_Liga',
-      'LaLiga': 'La_Liga',
-      'Ligue 1': 'Ligue_1',
-      'Ligue 2': 'Ligue_2',
-      'Eredivisie': 'Eredivisie',
-      'Championship': 'Championship',
-      'EFL Championship': 'Championship',
-      'League One': 'League_One',
-      'EFL League One': 'League_One',
-      'League Two': 'League_Two',
-      'EFL League Two': 'League_Two',
-      'MLS': 'MLS',
-      'Major League Soccer': 'MLS',
-      'NWSL': 'NWSL',
-      'National Women\'s Soccer League': 'NWSL',
-      'A-League': 'A_League',
-      'A-League Men': 'A_League',  // 👈 AGGIUNTO!
-      'Primeira Liga': 'Primeira_Liga',
-      'Liga Portugal': 'Primeira_Liga',
-      'Scottish Premiership': 'Scottish_Premiership',
-      'Scottish Premier League': 'Scottish_Premiership',
-      'Süper Lig': 'Super_Lig',
-      'Super Lig': 'Super_Lig',
-      'Turkish Süper Lig': 'Super_Lig'
-    };
-    return map[champ] || champ.replace(/ /g, '_');
+  if (!champ) return '';
+  const map = {
+    // INGHILTERRA
+    'Premier League': 'Premier_League',
+    'English Premier League': 'Premier_League',
+    'EPL': 'Premier_League',
+    'Championship': 'Championship',
+    'EFL Championship': 'Championship',
+    'League One': 'EFL_League_One',        // 👈 CORRETTO
+    'EFL League One': 'EFL_League_One',    // 👈 CORRETTO
+    'League Two': 'EFL_League_Two',        // 👈 CORRETTO
+    'EFL League Two': 'EFL_League_Two',    // 👈 CORRETTO
+    
+    // ITALIA
+    'Serie A': 'Serie_A',
+    'Serie A TIM': 'Serie_A',
+    'Serie A Enilive': 'Serie_A',
+    'Serie B': 'Serie_B',
+    
+    // GERMANIA
+    'Bundesliga': 'Bundesliga',
+    '2. Bundesliga': '2_Bundesliga',
+    
+    // SPAGNA
+    'La Liga': 'La_Liga',
+    'LaLiga': 'La_Liga',
+    
+    // FRANCIA
+    'Ligue 1': 'Ligue_1',
+    'Ligue 2': 'Ligue_2',
+    
+    // OLANDA
+    'Eredivisie': 'Eredivisie',
+    
+    // USA
+    'MLS': 'MLS',
+    'Major League Soccer': 'MLS',
+    'NWSL': 'NWSL',
+    'National Women\'s Soccer League': 'NWSL',
+    
+    // AUSTRALIA
+    'A-League': 'A-League_Men',        // 👈 CORRETTO
+    'A-League Men': 'A-League_Men',    // 👈 CORRETTO
+    
+    // PORTOGALLO
+    'Primeira Liga': 'Primeira_Liga',
+    'Liga Portugal': 'Primeira_Liga',
+    
+    // SCOZIA
+    'Scottish Premiership': 'Scottish_Premiership',
+    'Scottish Premier League': 'Scottish_Premiership',
+    
+    // TURCHIA
+    'Süper Lig': 'Super_Lig',
+    'Super Lig': 'Super_Lig',
+    'Turkish Süper Lig': 'Super_Lig',
+    
+    // SVEZIA
+    'Allsvenskan': 'Allsvenskan',      // 👈 AGGIUNTO
+    
+    // COREA
+    'K League 1': 'K_League_1',        // 👈 AGGIUNTO
+    'K League': 'K_League_1',          // 👈 AGGIUNTO
   };
+  return map[champ] || champ.replace(/ /g, '_');
+};
   
   const getTeamFileName = (name, useUnderscore = false) => {
     if (!name) return '';
