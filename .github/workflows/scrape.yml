@@ -3,8 +3,8 @@ name: Scrape Football Data
 
 on:
   schedule:
-    # Esegui ogni giorno alle 8:00 UTC (9:00 Italia)
-    - cron: '0 8 * * *'
+    # Esegui ogni giorno alle 6:00 UTC (9:00 Italia)
+    - cron: '0 6 * * *'
   # Permetti esecuzione manuale
   workflow_dispatch:
 =======
