@@ -3395,16 +3395,48 @@ const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
         </div>
       )}
 
-      <div style={{marginTop: '12px', padding: '10px 14px', background: 'var(--surface)', borderRadius: '6px', border: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '6px', fontSize: '11px', color: 'var(--text-muted)'}}>
-        <div>λ Casa: <span style={{color: 'var(--accent)', fontWeight: 'bold'}}>{mc.lambdaCasa}</span></div>
-        <div>λ Ospite: <span style={{color: 'var(--accent)', fontWeight: 'bold'}}>{mc.lambdaOspite}</span></div>
-        <div>Attacco Casa: <span style={{color: 'var(--win)', fontWeight: 'bold'}}>{mc.homeAttacco}</span></div>
-        <div>Difesa Casa: <span style={{color: 'var(--lose)', fontWeight: 'bold'}}>{mc.homeDifesa}</span></div>
-        <div>Attacco Ospite: <span style={{color: 'var(--win)', fontWeight: 'bold'}}>{mc.awayAttacco}</span></div>
-        <div>Difesa Ospite: <span style={{color: 'var(--lose)', fontWeight: 'bold'}}>{mc.awayDifesa}</span></div>
-        <div>📊 {mc.partiteAnalizzate} partite analizzate</div>
-        <div>🔄 {mc.numSimulations} simulazioni</div>
+      <div style={{marginTop: '12px', background: 'var(--surface)', borderRadius: '6px', border: '1px solid var(--border)', overflow: 'hidden'}}>
+  <div style={{padding: '10px 14px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '6px', fontSize: '11px', color: 'var(--text-muted)', borderBottom: '1px solid var(--border)'}}>
+    <div title="Tasso medio di gol previsti per la squadra di casa. Più alto = più gol.">
+      λ Casa: <span style={{color: 'var(--accent)', fontWeight: 'bold'}}>{mc.lambdaCasa}</span>
+    </div>
+    <div title="Tasso medio di gol previsti per la squadra ospite. Più alto = più gol.">
+      λ Ospite: <span style={{color: 'var(--accent)', fontWeight: 'bold'}}>{mc.lambdaOspite}</span>
+    </div>
+    <div title="Forza offensiva della squadra di casa. >1.0 = attacco forte, <1.0 = attacco debole.">
+      Attacco Casa: <span style={{color: 'var(--win)', fontWeight: 'bold'}}>{mc.homeAttacco}</span>
+    </div>
+    <div title="Solidità difensiva della squadra di casa. Più basso = migliore difesa.">
+      Difesa Casa: <span style={{color: 'var(--lose)', fontWeight: 'bold'}}>{mc.homeDifesa}</span>
+    </div>
+    <div title="Forza offensiva della squadra ospite. >1.0 = attacco forte, <1.0 = attacco debole.">
+      Attacco Ospite: <span style={{color: 'var(--win)', fontWeight: 'bold'}}>{mc.awayAttacco}</span>
+    </div>
+    <div title="Solidità difensiva della squadra ospite. Più basso = migliore difesa.">
+      Difesa Ospite: <span style={{color: 'var(--lose)', fontWeight: 'bold'}}>{mc.awayDifesa}</span>
+    </div>
+    <div style={{gridColumn: '1 / -1', textAlign: 'center'}}>
+      📊 {mc.partiteAnalizzate} partite analizzate • 🔄 {mc.numSimulations} simulazioni
+    </div>
+  </div>
+  
+  {/* SEZIONE DI SPIEGAZIONE VISIBILE */}
+  <div style={{padding: '10px 14px', background: 'rgba(243, 156, 18, 0.05)', borderTop: '1px solid var(--border)'}}>
+    <div style={{fontSize: '11px', color: 'var(--accent)', fontWeight: 'bold', marginBottom: '4px'}}>📖 Cosa significano questi valori?</div>
+    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '4px 16px', fontSize: '10px', color: 'var(--text-muted)'}}>
+      <div><b style={{color: 'var(--accent)'}}>λ Casa</b> = Tasso medio gol previsti per la squadra di casa. Più alto = più gol.</div>
+      <div><b style={{color: 'var(--accent)'}}>λ Ospite</b> = Tasso medio gol previsti per la squadra ospite. Più alto = più gol.</div>
+      <div><b style={{color: 'var(--win)'}}>Attacco</b> = Forza offensiva. &gt;1.0 = attacco forte, &lt;1.0 = attacco debole.</div>
+      <div><b style={{color: 'var(--lose)'}}>Difesa</b> = Solidità difensiva. Più basso = difesa migliore.</div>
+      <div style={{gridColumn: '1 / -1', marginTop: '2px'}}>
+        <span style={{color: 'var(--text-muted)'}}>💡 I valori di Attacco e Difesa sono relativi alla media del campionato (1.0 = media).</span>
+        {mc.partiteAnalizzate < 5 && (
+          <span style={{color: 'var(--draw)', marginLeft: '8px'}}>⚠️ Attenzione: poche partite analizzate ({mc.partiteAnalizzate}), i dati potrebbero non essere rappresentativi.</span>
+        )}
       </div>
+    </div>
+  </div>
+</div>
 
       <div style={{display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '8px', padding: '8px 12px', background: 'var(--surface)', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '11px'}}>
         <span style={{color: '#eb5757'}}>🔴 0% - 33,33%</span>
