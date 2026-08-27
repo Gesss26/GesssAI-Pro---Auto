@@ -8,8 +8,11 @@
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- CARICAMENTO METEO.JS -->
+<script type="text/javascript" src="meteo.js"></script>
 <script type="text/babel" src="schedina.js"></script>
 <style>
+  /* ===== TUTTI GLI STILI ===== */
   :root {
     --bg: #0f1419;
     --surface: #1a2028;
@@ -835,32 +838,39 @@
 const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
 // ============================================================
-// CARICAMENTO DATI - UNA SOLA VOLTA ALL'AVVIO
+// CARICAMENTO DATI - SEMPRE DA FILE, SVUOTA IL DATABASE
 // ============================================================
 
 let dataLoaded = false;
 
 async function loadScrapedData(forceReload = false) {
-  if (!forceReload && dataLoaded) {
-    console.log('📂 Dati già caricati, utilizzo cache...');
-    try {
-      const cached = localStorage.getItem('ft_matches');
-      if (cached) {
-        const matches = JSON.parse(cached);
-        const championships = JSON.parse(localStorage.getItem('ft_champs') || '[]');
-        return { matches, championships };
-      }
-    } catch (e) {}
-    return null;
-  }
+  console.log('📂 Caricamento da /Gesss26/json/matches.json...');
   
   try {
-    console.log('📂 Caricamento /Gesss26/data/matches.json...');
-    const response = await fetch('/Gesss26/data/matches.json');
+    localStorage.removeItem('ft_matches');
+    localStorage.removeItem('ft_champs');
+    
+    const response = await fetch('/Gesss26/json/matches.json');
     if (!response.ok) {
       console.error('❌ File non trovato:', response.status);
-      return null;
+      console.log('📂 Tentativo fallback: /Gesss26/data/matches.json...');
+      const fallbackResponse = await fetch('/Gesss26/data/matches.json');
+      if (!fallbackResponse.ok) {
+        console.error('❌ Nessun file matches.json trovato');
+        return null;
+      }
+      const fallbackData = await fallbackResponse.json();
+      console.log('✅ Dati caricati da fallback:', fallbackData.matches?.length || 0, 'partite');
+      
+      if (fallbackData.matches) {
+        localStorage.setItem('ft_matches', JSON.stringify(fallbackData.matches));
+        localStorage.setItem('ft_champs', JSON.stringify(fallbackData.championships || []));
+      }
+      
+      dataLoaded = true;
+      return fallbackData;
     }
+    
     const data = await response.json();
     console.log('✅ Dati caricati:', data.matches?.length || 0, 'partite');
     
@@ -887,6 +897,9 @@ async function checkScraperStatus() {
 
 async function forceScrape() {
   console.log('🔄 Ricarico dati da GitHub Pages...');
+  localStorage.removeItem('ft_matches');
+  localStorage.removeItem('ft_champs');
+  
   const data = await loadScrapedData(true);
   if (data && window.updateAppData) {
     window.updateAppData(data);
@@ -910,952 +923,77 @@ const THEMES = {
 const MAIN_TABS = ['Home','Palinsesto','Statistiche','Storico','Schedina','Impostazioni'];
 const SETTINGS_TABS = ['Temi','Dati Locali','Importa Campionato','Giocate','Grandezza Caratteri','Città Meteo','Visuale'];
 
+// ============================================================
+// MAPPA COLORI PER CAMPIONATO (NUOVA LISTA)
+// ============================================================
+
 const CHAMPIONSHIP_COLORS = {
-  'Premier League': '#3498db', 'Serie A': '#2ecc71',
-  'Serie B': '#e67e22', 'Bundesliga': '#f39c12', 'Ligue 1': '#9b59b6',
-  'La Liga': '#e74c3c', 'Eredivisie': '#e67e22', 'Primeira Liga': '#34495e',
-  'Allsvenskan': '#e74c3c', 'Eliteserien': '#2980b9', 'Danish Superliga': '#27ae60',
-  'Pro League': '#2980b9', 'Championship': '#6c3483', 'Liga MX': '#16a085',
-  'Brasileirão': '#1abc9c', 'J1 League': '#e74c3c', 'K League 1': '#f39c12',
-  'Swiss Super League': '#8e44ad', 'Austrian Bundesliga': '#2c3e50',
-  'Chinese Super League': '#1a8a3f', 'Premier Division': '#16a085',
-  'Besta deild': '#d35400', 'Liga Portugal Betclic': '#1abc9c',
-  'Veikkausliiga': '#e67e22', 'Russian Premier League': '#c0392b',
-  'A-League': '#1a8a3f', 'A-League Men': '#1a8a3f',
-  'EFL Championship': '#6c3483', 'EFL League One': '#2980b9', 'EFL League Two': '#27ae60',
-  'NWSL': '#e74c3c', 'MLS': '#3498db', 'Scottish Premiership': '#2ecc71',
-  'Süper Lig': '#e67e22', 'Super Lig': '#e67e22', 'Turkish Süper Lig': '#e67e22',
-  'Ligue 2': '#9b59b6', 'League One': '#2980b9', 'League Two': '#27ae60'
+  'Liga Profesional': '#1abc9c',
+  'Liga Profesional Argentina': '#1abc9c',
+  'Jupiler Pro League': '#e74c3c',
+  'Belgian Pro League': '#e74c3c',
+  'Serie A (Brasile)': '#2ecc71',
+  'Serie A BR': '#2ecc71',
+  'Brasileirão': '#2ecc71',
+  'Super League': '#e74c3c',
+  'Chinese Super League': '#e74c3c',
+  'CSL': '#e74c3c',
+  'Premier League': '#3498db',
+  'English Premier League': '#3498db',
+  'EPL': '#3498db',
+  'Championship': '#6c3483',
+  'EFL Championship': '#6c3483',
+  'Premiership': '#2ecc71',
+  'Scottish Premiership': '#2ecc71',
+  'Scottish Premier League': '#2ecc71',
+  'Ligue 1': '#9b59b6',
+  'Ligue 2': '#9b59b6',
+  'Bundesliga': '#f39c12',
+  '2. Bundesliga': '#e67e22',
+  'J1 League': '#e74c3c',
+  'J-League': '#e74c3c',
+  'Serie A (Italia)': '#2ecc71',
+  'Serie A IT': '#2ecc71',
+  'Serie A': '#2ecc71',
+  'Serie A TIM': '#2ecc71',
+  'Serie A Enilive': '#2ecc71',
+  'Serie B': '#e67e22',
+  'Serie B IT': '#e67e22',
+  'Serie C - Girone A': '#3498db',
+  'Serie C - Girone B': '#27ae60',
+  'Serie C - Girone C': '#e74c3c',
+  'Serie A Women': '#9b59b6',
+  'Serie A Women IT': '#9b59b6',
+  'K League 1': '#f39c12',
+  'K League': '#f39c12',
+  'K-League': '#f39c12',
+  'Eerste Divisie': '#e67e22',
+  'Eerste Divisie NL': '#e67e22',
+  'Primeira Liga': '#34495e',
+  'Liga Portugal': '#34495e',
+  'LaLiga': '#e74c3c',
+  'La Liga': '#e74c3c',
+  'Segunda División': '#e67e22',
+  'Süper Lig': '#e67e22',
+  'Super Lig': '#e67e22',
+  'Turkish Süper Lig': '#e67e22',
+  'Major League Soccer': '#3498db',
+  'MLS': '#3498db',
+  'NWSL': '#e74c3c',
+  'National Women\'s Soccer League': '#e74c3c',
+  'A-League': '#1a8a3f',
+  'A-League Men': '#1a8a3f',
+  'Allsvenskan': '#e74c3c',
+  'Eliteserien': '#2980b9',
+  'Danish Superliga': '#27ae60',
+  'Swiss Super League': '#8e44ad',
+  'Austrian Bundesliga': '#2c3e50',
+  'Russian Premier League': '#c0392b',
+  'Liga MX': '#16a085'
 };
 
 // ============================================================
-// MAPPA PAESI PER CAMPIONATO (COMPLETA PER I 16 CAMPIONATI)
-// ============================================================
-
-const CHAMPIONSHIP_COUNTRY = {
-  // AUSTRALIA
-  'A-League': 'AU',
-  'A-League Men': 'AU',
-  
-  // GERMANIA
-  'Bundesliga': 'DE',
-  '2. Bundesliga': 'DE',
-  
-  // INGHILTERRA
-  'Premier League': 'GB',
-  'English Premier League': 'GB',
-  'EPL': 'GB',
-  'Championship': 'GB',
-  'EFL Championship': 'GB',
-  'League One': 'GB',
-  'EFL League One': 'GB',
-  'League Two': 'GB',
-  'EFL League Two': 'GB',
-  
-  // OLANDA
-  'Eredivisie': 'NL',
-  
-  // SPAGNA
-  'La Liga': 'ES',
-  'LaLiga': 'ES',
-  
-  // FRANCIA
-  'Ligue 1': 'FR',
-  'Ligue 2': 'FR',
-  
-  // USA/CANADA
-  'MLS': 'US',
-  'Major League Soccer': 'US',
-  'NWSL': 'US',
-  'National Women\'s Soccer League': 'US',
-  
-  // PORTOGALLO
-  'Primeira Liga': 'PT',
-  'Liga Portugal': 'PT',
-  
-  // SCOZIA
-  'Scottish Premiership': 'GB',
-  'Scottish Premier League': 'GB',
-  
-  // ITALIA
-  'Serie A': 'IT',
-  'Serie A TIM': 'IT',
-  'Serie A Enilive': 'IT',
-  
-  // TURCHIA
-  'Süper Lig': 'TR',
-  'Super Lig': 'TR',
-  'Turkish Süper Lig': 'TR'
-};
-
-// ============================================================
-// MAPPA CITTÀ PER CAMPIONATO (SOLO I 16 CAMPIONATI RICHIESTI)
-// ============================================================
-
-const CITTÀ_PER_CAMPIONATO = {
-  // AUSTRALIA
-  'A-League': 'Sydney',
-  'A-League Men': 'Sydney',
-  
-  // GERMANIA
-  'Bundesliga': 'Berlino',
-  '2. Bundesliga': 'Berlino',
-  
-  // INGHILTERRA
-  'Premier League': 'Londra',
-  'English Premier League': 'Londra',
-  'EPL': 'Londra',
-  'Championship': 'Londra',
-  'EFL Championship': 'Londra',
-  'League One': 'Londra',
-  'EFL League One': 'Londra',
-  'League Two': 'Londra',
-  'EFL League Two': 'Londra',
-  
-  // OLANDA
-  'Eredivisie': 'Amsterdam',
-  
-  // SPAGNA
-  'La Liga': 'Madrid',
-  'LaLiga': 'Madrid',
-  
-  // FRANCIA
-  'Ligue 1': 'Parigi',
-  'Ligue 2': 'Parigi',
-  
-  // USA/CANADA
-  'MLS': 'New York',
-  'Major League Soccer': 'New York',
-  'NWSL': 'New York',
-  'National Women\'s Soccer League': 'New York',
-  
-  // PORTOGALLO
-  'Primeira Liga': 'Lisbona',
-  'Liga Portugal': 'Lisbona',
-  
-  // SCOZIA
-  'Scottish Premiership': 'Glasgow',
-  'Scottish Premier League': 'Glasgow',
-  
-  // ITALIA
-  'Serie A': 'Roma',
-  'Serie A TIM': 'Roma',
-  'Serie A Enilive': 'Roma',
-  
-  // TURCHIA
-  'Süper Lig': 'Istanbul',
-  'Super Lig': 'Istanbul',
-  'Turkish Süper Lig': 'Istanbul'
-};
-
-// ============================================================
-// MAPPA SQUADRE → CITTÀ (PER TUTTI I 16 CAMPIONATI)
-// ============================================================
-
-const TEAM_CITY_MAP = {
-  // ============================================
-  // A-LEAGUE (AUSTRALIA)
-  // ============================================
-  'Adelaide United': 'Adelaide',
-  'Brisbane Roar': 'Brisbane',
-  'Central Coast Mariners': 'Gosford',
-  'Macarthur FC': 'Sydney',
-  'Melbourne City': 'Melbourne',
-  'Melbourne Victory': 'Melbourne',
-  'Newcastle Jets': 'Newcastle',
-  'Perth Glory': 'Perth',
-  'Sydney FC': 'Sydney',
-  'Wellington Phoenix': 'Wellington',
-  'Western Sydney Wanderers': 'Sydney',
-  'Western United': 'Melbourne',
-  
-  // ============================================
-  // BUNDESLIGA (GERMANIA)
-  // ============================================
-  'FC Augsburg': 'Augusta',
-  'Bayer 04 Leverkusen': 'Leverkusen',
-  'FC Bayern München': 'Monaco',
-  'VfL Bochum': 'Bochum',
-  'Borussia Dortmund': 'Dortmund',
-  'Borussia Mönchengladbach': 'Mönchengladbach',
-  'SV Darmstadt 98': 'Darmstadt',
-  'Eintracht Frankfurt': 'Francoforte',
-  'SC Freiburg': 'Friburgo',
-  'FC Heidenheim': 'Heidenheim',
-  'TSG Hoffenheim': 'Sinsheim',
-  '1. FC Köln': 'Colonia',
-  'RB Leipzig': 'Lipsia',
-  '1. FSV Mainz 05': 'Magonza',
-  'VfB Stuttgart': 'Stoccarda',
-  '1. FC Union Berlin': 'Berlino',
-  'SV Werder Bremen': 'Brema',
-  'VfL Wolfsburg': 'Wolfsburg',
-  'SV Elversberg': 'Spiesen-Elversberg',
-  'SC Paderborn 07': 'Paderborn',
-  'Hamburger SV': 'Amburgo',
-  'FC Schalke 04': 'Gelsenkirchen',
-  '1. FC Nürnberg': 'Norimberga',
-  'Fortuna Düsseldorf': 'Düsseldorf',
-  'Hannover 96': 'Hannover',
-  'Karlsruher SC': 'Karlsruhe',
-  'Holstein Kiel': 'Kiel',
-  
-  // ============================================
-  // CHAMPIONSHIP, LEAGUE ONE, LEAGUE TWO (INGHILTERRA)
-  // ============================================
-  'AFC Wimbledon': 'Londra',
-  'Barnsley': 'Barnsley',
-  'Birmingham City': 'Birmingham',
-  'Blackburn Rovers': 'Blackburn',
-  'Blackpool': 'Blackpool',
-  'Bolton Wanderers': 'Bolton',
-  'Bradford City': 'Bradford',
-  'Brentford': 'Londra',
-  'Brighton & Hove Albion': 'Brighton',
-  'Bristol City': 'Bristol',
-  'Bromley': 'Londra',
-  'Burnley': 'Burnley',
-  'Burton Albion': 'Burton upon Trent',
-  'Cambridge United': 'Cambridge',
-  'Cardiff City': 'Cardiff',
-  'Charlton Athletic': 'Londra',
-  'Coventry City': 'Coventry',
-  'Derby County': 'Derby',
-  'Doncaster Rovers': 'Doncaster',
-  'Huddersfield Town': 'Huddersfield',
-  'Hull City': 'Hull',
-  'Leeds United': 'Leeds',
-  'Leicester City': 'Leicester',
-  'Leyton Orient': 'Londra',
-  'Lincoln City': 'Lincoln',
-  'Luton Town': 'Luton',
-  'Mansfield Town': 'Mansfield',
-  'Middlesbrough': 'Middlesbrough',
-  'Millwall': 'Londra',
-  'MK Dons': 'Milton Keynes',
-  'Norwich City': 'Norwich',
-  'Notts County': 'Nottingham',
-  'Nottingham Forest': 'Nottingham',
-  'Oxford United': 'Oxford',
-  'Peterborough United': 'Peterborough',
-  'Plymouth Argyle': 'Plymouth',
-  'Portsmouth': 'Portsmouth',
-  'Preston North End': 'Preston',
-  'Queens Park Rangers': 'Londra',
-  'Reading': 'Reading',
-  'Sheffield United': 'Sheffield',
-  'Sheffield Wednesday': 'Sheffield',
-  'Southampton': 'Southampton',
-  'Stevenage': 'Stevenage',
-  'Stockport County': 'Stockport',
-  'Stoke City': 'Stoke-on-Trent',
-  'Swansea City': 'Swansea',
-  'Watford': 'Watford',
-  'West Bromwich Albion': 'West Bromwich',
-  'West Ham United': 'Londra',
-  'Wigan Athletic': 'Wigan',
-  'Wolverhampton Wanderers': 'Wolverhampton',
-  'Wrexham': 'Wrexham',
-  'Wycombe Wanderers': 'Wycombe',
-  
-  // ============================================
-  // EPL (INGHILTERRA)
-  // ============================================
-  'Arsenal': 'Londra',
-  'Aston Villa': 'Birmingham',
-  'Bournemouth': 'Bournemouth',
-  'Chelsea': 'Londra',
-  'Crystal Palace': 'Londra',
-  'Everton': 'Liverpool',
-  'Fulham': 'Londra',
-  'Ipswich Town': 'Ipswich',
-  'Liverpool': 'Liverpool',
-  'Manchester City': 'Manchester',
-  'Manchester United': 'Manchester',
-  'Newcastle United': 'Newcastle upon Tyne',
-  'Tottenham Hotspur': 'Londra',
-  'Sunderland': 'Sunderland',
-  'Coventry City': 'Coventry',
-  'Hull City': 'Hull',
-  'Leeds United': 'Leeds',
-  'Nottingham Forest': 'Nottingham',
-  
-  // ============================================
-  // EREDIVISIE (OLANDA)
-  // ============================================
-  'Ajax': 'Amsterdam',
-  'AZ Alkmaar': 'Alkmaar',
-  'Feyenoord': 'Rotterdam',
-  'Fortuna Sittard': 'Sittard',
-  'Go Ahead Eagles': 'Deventer',
-  'FC Groningen': 'Groningen',
-  'SC Heerenveen': 'Heerenveen',
-  'Heracles Almelo': 'Almelo',
-  'NAC Breda': 'Breda',
-  'NEC Nijmegen': 'Nijmegen',
-  'PEC Zwolle': 'Zwolle',
-  'PSV Eindhoven': 'Eindhoven',
-  'RKC Waalwijk': 'Waalwijk',
-  'Sparta Rotterdam': 'Rotterdam',
-  'FC Twente': 'Enschede',
-  'FC Utrecht': 'Utrecht',
-  'Vitesse': 'Arnhem',
-  'Willem II': 'Tilburg',
-  
-  // ============================================
-  // LA LIGA (SPAGNA)
-  // ============================================
-  'Alavés': 'Vitoria-Gasteiz',
-  'Athletic Bilbao': 'Bilbao',
-  'Atlético Madrid': 'Madrid',
-  'Barcelona': 'Barcellona',
-  'Celta Vigo': 'Vigo',
-  'Espanyol': 'Barcellona',
-  'Getafe': 'Getafe',
-  'Girona': 'Girona',
-  'Granada': 'Granada',
-  'Las Palmas': 'Las Palmas',
-  'Leganés': 'Leganés',
-  'Mallorca': 'Palma di Maiorca',
-  'Osasuna': 'Pamplona',
-  'Rayo Vallecano': 'Madrid',
-  'Real Betis': 'Siviglia',
-  'Real Madrid': 'Madrid',
-  'Real Sociedad': 'San Sebastián',
-  'Sevilla': 'Siviglia',
-  'Valencia': 'Valencia',
-  'Villarreal': 'Villarreal',
-  'Racing Santander': 'Santander',
-  'Deportivo La Coruña': 'La Coruña',
-  'Elche': 'Elche',
-  'Málaga': 'Málaga',
-  'Zaragoza': 'Zaragoza',
-  'Levante': 'Valencia',
-  
-  // ============================================
-  // LIGUE 1 e LIGUE 2 (FRANCIA)
-  // ============================================
-  'Angers': 'Angers',
-  'Auxerre': 'Auxerre',
-  'Brest': 'Brest',
-  'Clermont Foot': 'Clermont-Ferrand',
-  'Le Havre': 'Le Havre',
-  'Lens': 'Lens',
-  'Lille': 'Lilla',
-  'Lorient': 'Lorient',
-  'Lyon': 'Lione',
-  'Marseille': 'Marsiglia',
-  'Metz': 'Metz',
-  'Monaco': 'Monaco',
-  'Montpellier': 'Montpellier',
-  'Nantes': 'Nantes',
-  'Nice': 'Nizza',
-  'Paris Saint-Germain': 'Parigi',
-  'Reims': 'Reims',
-  'Rennes': 'Rennes',
-  'Strasbourg': 'Strasburgo',
-  'Toulouse': 'Tolosa',
-  'AC Ajaccio': 'Ajaccio',
-  'SC Bastia': 'Bastia',
-  'Bordeaux': 'Bordeaux',
-  'Saint-Étienne': 'Saint-Étienne',
-  'Nancy': 'Nancy',
-  
-  // ============================================
-  // MLS (USA/CANADA)
-  // ============================================
-  'Atlanta United': 'Atlanta',
-  'Austin FC': 'Austin',
-  'Charlotte FC': 'Charlotte',
-  'Chicago Fire': 'Chicago',
-  'Colorado Rapids': 'Denver',
-  'Columbus Crew': 'Columbus',
-  'D.C. United': 'Washington',
-  'FC Cincinnati': 'Cincinnati',
-  'FC Dallas': 'Dallas',
-  'Houston Dynamo': 'Houston',
-  'Inter Miami': 'Miami',
-  'LA Galaxy': 'Los Angeles',
-  'Los Angeles FC': 'Los Angeles',
-  'Minnesota United': 'Minneapolis',
-  'Nashville SC': 'Nashville',
-  'New England Revolution': 'Boston',
-  'New York City FC': 'New York',
-  'New York Red Bulls': 'New York',
-  'Orlando City': 'Orlando',
-  'Philadelphia Union': 'Philadelphia',
-  'Portland Timbers': 'Portland',
-  'Real Salt Lake': 'Salt Lake City',
-  'San Diego FC': 'San Diego',
-  'San Jose Earthquakes': 'San Jose',
-  'Seattle Sounders': 'Seattle',
-  'Sporting Kansas City': 'Kansas City',
-  'St. Louis CITY SC': 'St. Louis',
-  'Toronto FC': 'Toronto',
-  'Vancouver Whitecaps': 'Vancouver',
-  'CF Montréal': 'Montreal',
-  'Red Bull New York': 'New York',
-  
-  // ============================================
-  // NWSL (USA)
-  // ============================================
-  'Angel City FC': 'Los Angeles',
-  'Bay FC': 'San Jose',
-  'Chicago Stars': 'Chicago',
-  'Houston Dash': 'Houston',
-  'Kansas City Current': 'Kansas City',
-  'NJ/NY Gotham FC': 'New York',
-  'North Carolina Courage': 'Raleigh',
-  'Orlando Pride': 'Orlando',
-  'Portland Thorns': 'Portland',
-  'Racing Louisville': 'Louisville',
-  'San Diego Wave': 'San Diego',
-  'Seattle Reign': 'Seattle',
-  'Utah Royals': 'Salt Lake City',
-  'Washington Spirit': 'Washington',
-  
-  // ============================================
-  // PRIMEIRA LIGA (PORTOGALLO)
-  // ============================================
-  'Benfica': 'Lisbona',
-  'Boavista': 'Porto',
-  'Braga': 'Braga',
-  'Casa Pia': 'Lisbona',
-  'Estoril Praia': 'Estoril',
-  'Famalicão': 'Vila Nova de Famalicão',
-  'Farense': 'Faro',
-  'Gil Vicente': 'Barcelos',
-  'Moreirense': 'Moreira de Cónegos',
-  'Nacional': 'Funchal',
-  'Porto': 'Porto',
-  'Rio Ave': 'Vila do Conde',
-  'Santa Clara': 'Ponta Delgada',
-  'Sporting CP': 'Lisbona',
-  'Vitória Guimarães': 'Guimarães',
-  'Vitória Setúbal': 'Setúbal',
-  'Marítimo': 'Funchal',
-  'Portimonense': 'Portimão',
-  
-  // ============================================
-  // SCOTTISH PREMIERSHIP (SCOZIA)
-  // ============================================
-  'Aberdeen': 'Aberdeen',
-  'Celtic': 'Glasgow',
-  'Dundee': 'Dundee',
-  'Dundee United': 'Dundee',
-  'Heart of Midlothian': 'Edimburgo',
-  'Hibernian': 'Edimburgo',
-  'Kilmarnock': 'Kilmarnock',
-  'Motherwell': 'Motherwell',
-  'Rangers': 'Glasgow',
-  'Ross County': 'Dingwall',
-  'St. Johnstone': 'Perth',
-  'St. Mirren': 'Paisley',
-  
-  // ============================================
-  // SERIE A (ITALIA)
-  // ============================================
-  'Atalanta': 'Bergamo',
-  'Bologna': 'Bologna',
-  'Cagliari': 'Cagliari',
-  'Como': 'Como',
-  'Empoli': 'Empoli',
-  'Fiorentina': 'Firenze',
-  'Genoa': 'Genova',
-  'Inter': 'Milano',
-  'Juventus': 'Torino',
-  'Lazio': 'Roma',
-  'Lecce': 'Lecce',
-  'Milan': 'Milano',
-  'Monza': 'Monza',
-  'Napoli': 'Napoli',
-  'Parma': 'Parma',
-  'Roma': 'Roma',
-  'Salernitana': 'Salerno',
-  'Sassuolo': 'Reggio Emilia',
-  'Torino': 'Torino',
-  'Udinese': 'Udine',
-  'Venezia': 'Venezia',
-  'Verona': 'Verona',
-  'Brescia': 'Brescia',
-  'Cremonese': 'Cremona',
-  'Spezia': 'La Spezia',
-  'Palermo': 'Palermo',
-  
-  // ============================================
-  // SÜPER LIG (TURCHIA)
-  // ============================================
-  'Adana Demirspor': 'Adana',
-  'Alanyaspor': 'Alanya',
-  'Antalyaspor': 'Antalya',
-  'Başakşehir': 'Istanbul',
-  'Beşiktaş': 'Istanbul',
-  'Çaykur Rizespor': 'Rize',
-  'Fenerbahçe': 'Istanbul',
-  'Galatasaray': 'Istanbul',
-  'Gaziantep FK': 'Gaziantep',
-  'Göztepe': 'Izmir',
-  'Hatayspor': 'Antakya',
-  'Kasımpaşa': 'Istanbul',
-  'Kayserispor': 'Kayseri',
-  'Konyaspor': 'Konya',
-  'Samsunspor': 'Samsun',
-  'Sivasspor': 'Sivas',
-  'Trabzonspor': 'Trabzon'
-};
-
-// ============================================================
-// COORDINATE PER LE CITTÀ (COMPLETE PER TUTTI I CAMPIONATI)
-// ============================================================
-
-const COORDS = {
-  // AUSTRALIA
-  'Sydney': { lat: -33.8688, lon: 151.2093 },
-  'Melbourne': { lat: -37.8136, lon: 144.9631 },
-  'Brisbane': { lat: -27.4698, lon: 153.0251 },
-  'Perth': { lat: -31.9505, lon: 115.8605 },
-  'Adelaide': { lat: -34.9285, lon: 138.6007 },
-  'Newcastle': { lat: -32.9283, lon: 151.7817 },
-  'Gosford': { lat: -33.4244, lon: 151.3422 },
-  'Wellington': { lat: -41.2865, lon: 174.7762 },
-  
-  // GERMANIA
-  'Berlino': { lat: 52.5200, lon: 13.4050 },
-  'Monaco': { lat: 48.1351, lon: 11.5820 },
-  'Dortmund': { lat: 51.5136, lon: 7.4653 },
-  'Lipsia': { lat: 51.3397, lon: 12.3731 },
-  'Leverkusen': { lat: 51.0458, lon: 6.9746 },
-  'Francoforte': { lat: 50.1109, lon: 8.6821 },
-  'Wolfsburg': { lat: 52.4226, lon: 10.7866 },
-  'Magonza': { lat: 49.9929, lon: 8.2473 },
-  'Mönchengladbach': { lat: 51.1805, lon: 6.4428 },
-  'Friburgo': { lat: 47.9990, lon: 7.8421 },
-  'Stoccarda': { lat: 48.7758, lon: 9.1829 },
-  'Brema': { lat: 53.0793, lon: 8.8017 },
-  'Sinsheim': { lat: 49.2538, lon: 8.8779 },
-  'Augusta': { lat: 48.3705, lon: 10.8978 },
-  'Colonia': { lat: 50.9375, lon: 6.9603 },
-  'Bochum': { lat: 51.4818, lon: 7.2192 },
-  'Darmstadt': { lat: 49.8728, lon: 8.6514 },
-  'Heidenheim': { lat: 48.6764, lon: 10.1541 },
-  'Amburgo': { lat: 53.5511, lon: 9.9937 },
-  'Gelsenkirchen': { lat: 51.5177, lon: 7.0840 },
-  'Norimberga': { lat: 49.4521, lon: 11.0767 },
-  'Düsseldorf': { lat: 51.2277, lon: 6.7735 },
-  'Hannover': { lat: 52.3759, lon: 9.7320 },
-  'Karlsruhe': { lat: 49.0069, lon: 8.4037 },
-  'Kiel': { lat: 54.3233, lon: 10.1228 },
-  'Paderborn': { lat: 51.7184, lon: 8.7597 },
-  'Spiesen-Elversberg': { lat: 49.3167, lon: 7.1333 },
-  
-  // INGHILTERRA
-  'Londra': { lat: 51.5074, lon: -0.1278 },
-  'Manchester': { lat: 53.4808, lon: -2.2426 },
-  'Liverpool': { lat: 53.4084, lon: -2.9916 },
-  'Birmingham': { lat: 52.4862, lon: -1.8904 },
-  'Leeds': { lat: 53.8008, lon: -1.5491 },
-  'Sheffield': { lat: 53.3811, lon: -1.4701 },
-  'Leicester': { lat: 52.6369, lon: -1.1398 },
-  'Nottingham': { lat: 52.9548, lon: -1.1581 },
-  'Southampton': { lat: 50.9097, lon: -1.4044 },
-  'Brighton': { lat: 50.8225, lon: -0.1372 },
-  'Bournemouth': { lat: 50.7192, lon: -1.8808 },
-  'Bristol': { lat: 51.4545, lon: -2.5879 },
-  'Burnley': { lat: 53.7893, lon: -2.2408 },
-  'Cardiff': { lat: 51.4816, lon: -3.1791 },
-  'Coventry': { lat: 52.4068, lon: -1.5197 },
-  'Derby': { lat: 52.9225, lon: -1.4746 },
-  'Hull': { lat: 53.7676, lon: -0.3274 },
-  'Ipswich': { lat: 52.0592, lon: 1.1555 },
-  'Luton': { lat: 51.8787, lon: -0.4200 },
-  'Middlesbrough': { lat: 54.5466, lon: -1.2169 },
-  'Norwich': { lat: 52.6309, lon: 1.2974 },
-  'Plymouth': { lat: 50.3753, lon: -4.1422 },
-  'Portsmouth': { lat: 50.8198, lon: -1.0880 },
-  'Preston': { lat: 53.7632, lon: -2.7031 },
-  'Reading': { lat: 51.4543, lon: -0.9781 },
-  'Sunderland': { lat: 54.9069, lon: -1.3838 },
-  'Swansea': { lat: 51.6214, lon: -3.9438 },
-  'Watford': { lat: 51.6565, lon: -0.3903 },
-  'Wolverhampton': { lat: 52.5870, lon: -2.1311 },
-  'Wrexham': { lat: 53.0430, lon: -2.9925 },
-  'Blackburn': { lat: 53.7476, lon: -2.4827 },
-  'Blackpool': { lat: 53.8175, lon: -3.0357 },
-  'Bolton': { lat: 53.5769, lon: -2.4282 },
-  'Bradford': { lat: 53.7950, lon: -1.7594 },
-  'Barnsley': { lat: 53.5526, lon: -1.4797 },
-  'Doncaster': { lat: 53.5228, lon: -1.1312 },
-  'Huddersfield': { lat: 53.6458, lon: -1.7850 },
-  'Lincoln': { lat: 53.2307, lon: -0.5406 },
-  'Mansfield': { lat: 53.1417, lon: -1.1964 },
-  'Oxford': { lat: 51.7520, lon: -1.2577 },
-  'Peterborough': { lat: 52.5695, lon: -0.2405 },
-  'Stockport': { lat: 53.4106, lon: -2.1575 },
-  'Stoke-on-Trent': { lat: 53.0027, lon: -2.1794 },
-  'Wigan': { lat: 53.5451, lon: -2.6325 },
-  'Wycombe': { lat: 51.6466, lon: -0.8037 },
-  'Burton upon Trent': { lat: 52.8037, lon: -1.6365 },
-  'Cambridge': { lat: 52.2053, lon: 0.1218 },
-  'Milton Keynes': { lat: 52.0406, lon: -0.7594 },
-  'Stevenage': { lat: 51.9038, lon: -0.1966 },
-  'Newcastle upon Tyne': { lat: 54.9783, lon: -1.6174 },
-  'West Bromwich': { lat: 52.5177, lon: -1.9979 },
-  
-  // OLANDA
-  'Amsterdam': { lat: 52.3676, lon: 4.9041 },
-  'Rotterdam': { lat: 51.9244, lon: 4.4777 },
-  'Eindhoven': { lat: 51.4416, lon: 5.4697 },
-  'Alkmaar': { lat: 52.6324, lon: 4.7534 },
-  'Utrecht': { lat: 52.0907, lon: 5.1214 },
-  'Enschede': { lat: 52.2215, lon: 6.8937 },
-  'Heerenveen': { lat: 52.9597, lon: 5.9403 },
-  'Arnhem': { lat: 51.9851, lon: 5.8987 },
-  'Groningen': { lat: 53.2194, lon: 6.5665 },
-  'Nijmegen': { lat: 51.8425, lon: 5.8528 },
-  'Tilburg': { lat: 51.5555, lon: 5.0913 },
-  'Breda': { lat: 51.5719, lon: 4.7683 },
-  'Zwolle': { lat: 52.5167, lon: 6.0833 },
-  'Deventer': { lat: 52.2533, lon: 6.1583 },
-  'Almelo': { lat: 52.3567, lon: 6.6567 },
-  'Waalwijk': { lat: 51.6825, lon: 5.0708 },
-  'Sittard': { lat: 50.9983, lon: 5.8694 },
-  
-  // SPAGNA
-  'Madrid': { lat: 40.4168, lon: -3.7038 },
-  'Barcellona': { lat: 41.3851, lon: 2.1734 },
-  'Siviglia': { lat: 37.3891, lon: -5.9845 },
-  'Bilbao': { lat: 43.2630, lon: -2.9350 },
-  'San Sebastián': { lat: 43.3183, lon: -1.9812 },
-  'Valencia': { lat: 39.4699, lon: -0.3763 },
-  'Villarreal': { lat: 39.9383, lon: -0.1005 },
-  'Pamplona': { lat: 42.8125, lon: -1.6458 },
-  'Vigo': { lat: 42.2406, lon: -8.7207 },
-  'Getafe': { lat: 40.3100, lon: -3.7300 },
-  'Palma di Maiorca': { lat: 39.5696, lon: 2.6502 },
-  'Granada': { lat: 37.1765, lon: -3.5970 },
-  'Girona': { lat: 41.9794, lon: 2.8214 },
-  'Vitoria-Gasteiz': { lat: 42.8467, lon: -2.6716 },
-  'Las Palmas': { lat: 28.1235, lon: -15.4363 },
-  'Leganés': { lat: 40.3275, lon: -3.7642 },
-  'Santander': { lat: 43.4623, lon: -3.8099 },
-  'La Coruña': { lat: 43.3623, lon: -8.4115 },
-  'Elche': { lat: 38.2622, lon: -0.7011 },
-  'Málaga': { lat: 36.7202, lon: -4.4203 },
-  'Zaragoza': { lat: 41.6488, lon: -0.8891 },
-  
-  // FRANCIA
-  'Parigi': { lat: 48.8566, lon: 2.3522 },
-  'Marsiglia': { lat: 43.2965, lon: 5.3698 },
-  'Lione': { lat: 45.7640, lon: 4.8357 },
-  'Lilla': { lat: 50.6292, lon: 3.0573 },
-  'Monaco': { lat: 43.7102, lon: 7.2620 },
-  'Nizza': { lat: 43.7102, lon: 7.2620 },
-  'Rennes': { lat: 48.1173, lon: -1.6778 },
-  'Strasburgo': { lat: 48.5734, lon: 7.7521 },
-  'Nantes': { lat: 47.2184, lon: -1.5536 },
-  'Montpellier': { lat: 43.6108, lon: 3.8767 },
-  'Reims': { lat: 49.2583, lon: 4.0317 },
-  'Tolosa': { lat: 43.6047, lon: 1.4442 },
-  'Bordeaux': { lat: 44.8378, lon: -0.5792 },
-  'Saint-Étienne': { lat: 45.4397, lon: 4.3872 },
-  'Lens': { lat: 50.4319, lon: 2.8318 },
-  'Brest': { lat: 48.3904, lon: -4.4868 },
-  'Angers': { lat: 47.4784, lon: -0.5632 },
-  'Auxerre': { lat: 47.7961, lon: 3.5706 },
-  'Clermont-Ferrand': { lat: 45.7772, lon: 3.0870 },
-  'Le Havre': { lat: 49.4944, lon: 0.1070 },
-  'Lorient': { lat: 47.7485, lon: -3.3658 },
-  'Metz': { lat: 49.1193, lon: 6.1755 },
-  'Ajaccio': { lat: 41.9192, lon: 8.7386 },
-  'Bastia': { lat: 42.6964, lon: 9.4500 },
-  'Nancy': { lat: 48.6921, lon: 6.1844 },
-  
-  // USA/CANADA
-  'New York': { lat: 40.7128, lon: -74.0060 },
-  'Los Angeles': { lat: 34.0522, lon: -118.2437 },
-  'Chicago': { lat: 41.8781, lon: -87.6298 },
-  'Houston': { lat: 29.7604, lon: -95.3698 },
-  'Phoenix': { lat: 33.4484, lon: -112.0740 },
-  'Philadelphia': { lat: 39.9526, lon: -75.1652 },
-  'San Diego': { lat: 32.7157, lon: -117.1611 },
-  'Dallas': { lat: 32.7767, lon: -96.7970 },
-  'San Jose': { lat: 37.3382, lon: -121.8863 },
-  'Austin': { lat: 30.2672, lon: -97.7431 },
-  'Columbus': { lat: 39.9612, lon: -82.9988 },
-  'San Francisco': { lat: 37.7749, lon: -122.4194 },
-  'Charlotte': { lat: 35.2271, lon: -80.8431 },
-  'Indianapolis': { lat: 39.7684, lon: -86.1581 },
-  'Seattle': { lat: 47.6062, lon: -122.3321 },
-  'Denver': { lat: 39.7392, lon: -104.9903 },
-  'Washington': { lat: 38.9072, lon: -77.0369 },
-  'Boston': { lat: 42.3601, lon: -71.0589 },
-  'Nashville': { lat: 36.1627, lon: -86.7816 },
-  'Portland': { lat: 45.5051, lon: -122.6750 },
-  'Las Vegas': { lat: 36.1699, lon: -115.1398 },
-  'Detroit': { lat: 42.3314, lon: -83.0458 },
-  'Memphis': { lat: 35.1495, lon: -90.0490 },
-  'Louisville': { lat: 38.2527, lon: -85.7585 },
-  'Baltimore': { lat: 39.2904, lon: -76.6122 },
-  'Milwaukee': { lat: 43.0389, lon: -87.9065 },
-  'Kansas City': { lat: 39.0997, lon: -94.5786 },
-  'Miami': { lat: 25.7617, lon: -80.1918 },
-  'Atlanta': { lat: 33.7490, lon: -84.3880 },
-  'Orlando': { lat: 28.5383, lon: -81.3792 },
-  'Minneapolis': { lat: 44.9778, lon: -93.2650 },
-  'Cleveland': { lat: 41.4993, lon: -81.6944 },
-  'Pittsburgh': { lat: 40.4406, lon: -79.9959 },
-  'St. Louis': { lat: 38.6270, lon: -90.1994 },
-  'Cincinnati': { lat: 39.1031, lon: -84.5120 },
-  'Salt Lake City': { lat: 40.7608, lon: -111.8910 },
-  'Raleigh': { lat: 35.7796, lon: -78.6382 },
-  'Toronto': { lat: 43.6532, lon: -79.3832 },
-  'Vancouver': { lat: 49.2827, lon: -123.1207 },
-  'Montreal': { lat: 45.5017, lon: -73.5673 },
-  
-  // PORTOGALLO
-  'Lisbona': { lat: 38.7223, lon: -9.1393 },
-  'Porto': { lat: 41.1579, lon: -8.6291 },
-  'Braga': { lat: 41.5454, lon: -8.4265 },
-  'Guimarães': { lat: 41.4426, lon: -8.2918 },
-  'Vila do Conde': { lat: 41.3545, lon: -8.7440 },
-  'Faro': { lat: 37.0162, lon: -7.9328 },
-  'Funchal': { lat: 32.6509, lon: -16.9080 },
-  'Setúbal': { lat: 38.5244, lon: -8.8882 },
-  'Barcelos': { lat: 41.5300, lon: -8.6150 },
-  'Vila Nova de Famalicão': { lat: 41.4110, lon: -8.5200 },
-  'Moreira de Cónegos': { lat: 41.3800, lon: -8.3300 },
-  'Ponta Delgada': { lat: 37.7462, lon: -25.6684 },
-  'Estoril': { lat: 38.7057, lon: -9.3960 },
-  'Portimão': { lat: 37.1367, lon: -8.5370 },
-  
-  // SCOZIA
-  'Glasgow': { lat: 55.8642, lon: -4.2518 },
-  'Edimburgo': { lat: 55.9533, lon: -3.1883 },
-  'Aberdeen': { lat: 57.1497, lon: -2.0943 },
-  'Dundee': { lat: 56.4620, lon: -2.9707 },
-  'Kilmarnock': { lat: 55.6100, lon: -4.4975 },
-  'Motherwell': { lat: 55.7932, lon: -3.9864 },
-  'Dingwall': { lat: 57.5956, lon: -4.4276 },
-  'Perth': { lat: 56.3960, lon: -3.4370 },
-  'Paisley': { lat: 55.8466, lon: -4.4230 },
-  
-  // ITALIA
-  'Roma': { lat: 41.9028, lon: 12.4964 },
-  'Milano': { lat: 45.4642, lon: 9.1900 },
-  'Napoli': { lat: 40.8518, lon: 14.2681 },
-  'Torino': { lat: 45.0703, lon: 7.6869 },
-  'Firenze': { lat: 43.7696, lon: 11.2558 },
-  'Bergamo': { lat: 45.6980, lon: 9.6773 },
-  'Bologna': { lat: 44.4949, lon: 11.3426 },
-  'Genova': { lat: 44.4056, lon: 8.9463 },
-  'Reggio Emilia': { lat: 44.6988, lon: 10.6324 },
-  'Empoli': { lat: 43.7188, lon: 10.9455 },
-  'Salerno': { lat: 40.6823, lon: 14.7700 },
-  'Lecce': { lat: 40.3547, lon: 18.1724 },
-  'Verona': { lat: 45.4384, lon: 10.9916 },
-  'Cagliari': { lat: 39.2238, lon: 9.1217 },
-  'Monza': { lat: 45.5883, lon: 9.2738 },
-  'Parma': { lat: 44.8015, lon: 10.3280 },
-  'Como': { lat: 45.8080, lon: 9.0852 },
-  'Venezia': { lat: 45.4408, lon: 12.3155 },
-  'Udine': { lat: 46.0642, lon: 13.2341 },
-  'Brescia': { lat: 45.5415, lon: 10.2117 },
-  'Cremona': { lat: 45.1363, lon: 10.0191 },
-  'La Spezia': { lat: 44.1025, lon: 9.8241 },
-  'Palermo': { lat: 38.1157, lon: 13.3615 },
-  
-  // TURCHIA
-  'Istanbul': { lat: 41.0082, lon: 28.9784 },
-  'Ankara': { lat: 39.9334, lon: 32.8597 },
-  'Izmir': { lat: 38.4192, lon: 27.1287 },
-  'Antalya': { lat: 36.8841, lon: 30.7056 },
-  'Adana': { lat: 37.0000, lon: 35.3213 },
-  'Gaziantep': { lat: 37.0662, lon: 37.3833 },
-  'Konya': { lat: 37.8714, lon: 32.4846 },
-  'Trabzon': { lat: 41.0027, lon: 39.7168 },
-  'Samsun': { lat: 41.2863, lon: 36.3300 },
-  'Kayseri': { lat: 38.7312, lon: 35.4788 },
-  'Sivas': { lat: 39.7484, lon: 37.0162 },
-  'Rize': { lat: 41.0201, lon: 40.5219 },
-  'Antakya': { lat: 36.2024, lon: 36.1635 },
-  'Alanya': { lat: 36.5441, lon: 31.9892 }
-};
-
-// ============================================================
-// FUNZIONE PER OTTENERE LA CITTÀ DA SQUADRA O CAMPIONATO
-// ============================================================
-
-const getCityForMatch = (teamName, championship) => {
-  if (!teamName) return null;
-  
-  // Prima cerca dalla mappa squadre
-  const cityFromTeam = TEAM_CITY_MAP[teamName];
-  if (cityFromTeam) return cityFromTeam;
-  
-  // Cerca per corrispondenza parziale
-  for (const [key, city] of Object.entries(TEAM_CITY_MAP)) {
-    if (teamName.toLowerCase().includes(key.toLowerCase()) || 
-        key.toLowerCase().includes(teamName.toLowerCase())) {
-      return city;
-    }
-  }
-  
-  // Poi dal campionato
-  if (championship) {
-    const cityFromChamp = CITTÀ_PER_CAMPIONATO[championship];
-    if (cityFromChamp) return cityFromChamp;
-    
-    // Cerca per corrispondenza parziale nel campionato
-    for (const [key, city] of Object.entries(CITTÀ_PER_CAMPIONATO)) {
-      if (championship.toLowerCase().includes(key.toLowerCase()) || 
-          key.toLowerCase().includes(championship.toLowerCase())) {
-        return city;
-      }
-    }
-  }
-  
-  return null;
-};
-
-// ============================================================
-// FUNZIONE PER LE BANDIERE
-// ============================================================
-
-const getCountryFlagHtml = (champName) => {
-  if (!champName) return '<span class="flag-emoji">🌍</span>';
-  
-  // Cerca corrispondenza esatta
-  const exactMatchMap = {
-    'Premier League': 'GB', 'English Premier League': 'GB', 'EPL': 'GB',
-    'Championship': 'GB', 'EFL Championship': 'GB',
-    'League One': 'GB', 'EFL League One': 'GB',
-    'League Two': 'GB', 'EFL League Two': 'GB',
-    'Serie A': 'IT', 'Serie A TIM': 'IT', 'Serie A Enilive': 'IT',
-    'Bundesliga': 'DE', '2. Bundesliga': 'DE',
-    'Ligue 1': 'FR', 'Ligue 2': 'FR',
-    'La Liga': 'ES', 'LaLiga': 'ES',
-    'Eredivisie': 'NL',
-    'Primeira Liga': 'PT', 'Liga Portugal': 'PT',
-    'MLS': 'US', 'Major League Soccer': 'US',
-    'NWSL': 'US', 'National Women\'s Soccer League': 'US',
-    'A-League': 'AU', 'A-League Men': 'AU',
-    'Scottish Premiership': 'GB', 'Scottish Premier League': 'GB',
-    'Süper Lig': 'TR', 'Super Lig': 'TR', 'Turkish Süper Lig': 'TR'
-  };
-  
-  if (exactMatchMap[champName]) {
-    const codeLower = exactMatchMap[champName].toLowerCase();
-    return `<img src="https://flagcdn.com/${codeLower}.svg" alt="${exactMatchMap[champName]}" class="flag-icon" width="20" height="15" loading="lazy" style="display:inline-block; vertical-align:middle; margin-right:6px; width:20px; height:15px; border-radius:2px; object-fit:cover; box-shadow: 0 1px 2px rgba(0,0,0,0.3);" />`;
-  }
-  
-  // Cerca per corrispondenza parziale
-  const partialMatchMap = {
-    'Premier': 'GB', 'Championship': 'GB', 'League': 'GB',
-    'Serie': 'IT', 'Bundesliga': 'DE', 'Ligue': 'FR',
-    'La Liga': 'ES', 'Eredivisie': 'NL', 'Primeira': 'PT',
-    'Liga Portugal': 'PT', 'MLS': 'US', 'NWSL': 'US',
-    'A-League': 'AU', 'Scottish': 'GB', 'Süper Lig': 'TR',
-    'Super Lig': 'TR'
-  };
-  
-  const sortedKeys = Object.keys(partialMatchMap).sort((a, b) => b.length - a.length);
-  for (const key of sortedKeys) {
-    if (champName.includes(key)) {
-      const codeLower = partialMatchMap[key].toLowerCase();
-      return `<img src="https://flagcdn.com/${codeLower}.svg" alt="${partialMatchMap[key]}" class="flag-icon" width="20" height="15" loading="lazy" style="display:inline-block; vertical-align:middle; margin-right:6px; width:20px; height:15px; border-radius:2px; object-fit:cover; box-shadow: 0 1px 2px rgba(0,0,0,0.3);" />`;
-    }
-  }
-  
-  return '<span class="flag-emoji">🌍</span>';
-};
-
-// ============================================================
-// FUNZIONE PER IL METEO (CON LE COORDINATE AGGIORNATE)
-// ============================================================
-
-const fetchWeatherForMatch = async (match) => {
-  if (!match) return null;
-  const city = getCityForMatch(match.casa, match.campionato);
-  if (!city) {
-    console.warn('⚠️ Città non trovata per:', match.casa, match.campionato);
-    return null;
-  }
-  
-  let coord = COORDS[city];
-  if (!coord) {
-    // Prova geocoding se la città non è nella mappa
-    try {
-      const geoRes = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=it&format=json`
-      );
-      if (geoRes.ok) {
-        const geoData = await geoRes.json();
-        if (geoData.results && geoData.results.length > 0) {
-          coord = { lat: geoData.results[0].latitude, lon: geoData.results[0].longitude };
-          console.log(`🌍 Geocodificata ${city} -> ${coord.lat}, ${coord.lon}`);
-        }
-      }
-    } catch (e) { console.warn('Geocoding fallito per', city); }
-  }
-  
-  if (!coord) {
-    coord = { lat: 48.8566, lon: 2.3522 };
-    console.warn(`⚠️ Coordinate non trovate per ${city}, usando Parigi come default`);
-  }
-  
-  let dateToUse;
-  if (match.data && match.data.match(/^\d{2}\/\d{2}\/\d{4}/)) {
-    const parts = match.data.split('/');
-    dateToUse = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-  } else if (match.data && match.data.match(/^\d{4}-\d{2}-\d{2}/)) {
-    dateToUse = match.data;
-  } else {
-    dateToUse = new Date().toISOString().slice(0, 10);
-  }
-  
-  try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${coord.lat}&longitude=${coord.lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode&timezone=auto&start_date=${dateToUse}&end_date=${dateToUse}`;
-    console.log(`🌤️ Richiesta meteo per ${city} (${dateToUse}): ${url}`);
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    if (!data.daily) { console.warn('⚠️ Nessun dato daily per', city); return null; }
-    const weatherCode = data.daily.weathercode?.[0] || 0;
-    return {
-      temp: data.current_weather?.temperature || 0,
-      temp_min: data.daily.temperature_2m_min?.[0] || 0,
-      temp_max: data.daily.temperature_2m_max?.[0] || 0,
-      weather: getWeatherDescription(weatherCode),
-      wind_speed: data.current_weather?.windspeed || 0,
-      rain: data.daily.precipitation_sum?.[0] || 0,
-      forecast_date: dateToUse,
-      city: city
-    };
-  } catch (error) {
-    console.warn('❌ Errore meteo per', city, error.message);
-    return null;
-  }
-};
-
-const getWeatherDescription = (code) => {
-  const weatherCodes = {
-    0: 'Sereno', 1: 'Poco nuvoloso', 2: 'Parzialmente nuvoloso', 3: 'Coperto',
-    45: 'Nebbia', 48: 'Nebbia ghiacciata',
-    51: 'Pioviggine leggera', 53: 'Pioviggine moderata', 55: 'Pioviggine fitta',
-    56: 'Pioviggine gelata leggera', 57: 'Pioviggine gelata fitta',
-    61: 'Pioggia leggera', 63: 'Pioggia moderata', 65: 'Pioggia fitta',
-    66: 'Pioggia gelata leggera', 67: 'Pioggia gelata fitta',
-    71: 'Neve leggera', 73: 'Neve moderata', 75: 'Neve fitta',
-    77: 'Granuli di neve',
-    80: 'Rovesci di pioggia leggeri', 81: 'Rovesci di pioggia moderati', 82: 'Rovesci di pioggia forti',
-    85: 'Rovesci di neve leggeri', 86: 'Rovesci di neve forti',
-    95: 'Temporale leggero', 96: 'Temporale con grandine leggera', 99: 'Temporale con grandine forte'
-  };
-  return weatherCodes[code] || 'Condizioni variabili';
-};
-
-// ============================================================
-// FUNZIONI DI UTILITÀ (RIMANENTI)
+// FUNZIONI DI UTILITÀ
 // ============================================================
 
 const getChampColor = (champName) => {
@@ -1980,80 +1118,77 @@ const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
   const [tryUnderscore, setTryUnderscore] = useState(false);
   
   const getLeagueFolder = (champ) => {
-  if (!champ) return '';
-  const map = {
-    // INGHILTERRA
-    'Premier League': 'Premier_League',
-    'English Premier League': 'Premier_League',
-    'EPL': 'Premier_League',
-    'Championship': 'Championship',
-    'EFL Championship': 'Championship',
-    'League One': 'EFL_League_One',        // 👈 CORRETTO
-    'EFL League One': 'EFL_League_One',    // 👈 CORRETTO
-    'League Two': 'EFL_League_Two',        // 👈 CORRETTO
-    'EFL League Two': 'EFL_League_Two',    // 👈 CORRETTO
-    
-    // ITALIA
-    'Serie A': 'Serie_A',
-    'Serie A TIM': 'Serie_A',
-    'Serie A Enilive': 'Serie_A',
-    'Serie B': 'Serie_B',
-    
-    // GERMANIA
-    'Bundesliga': 'Bundesliga',
-    '2. Bundesliga': '2_Bundesliga',
-    
-    // SPAGNA
-    'La Liga': 'La_Liga',
-    'LaLiga': 'La_Liga',
-    
-    // FRANCIA
-    'Ligue 1': 'Ligue_1',
-    'Ligue 2': 'Ligue_2',
-    
-    // OLANDA
-    'Eredivisie': 'Eredivisie',
-    
-    // USA
-    'MLS': 'MLS',
-    'Major League Soccer': 'MLS',
-    'NWSL': 'NWSL',
-    'National Women\'s Soccer League': 'NWSL',
-    
-    // AUSTRALIA
-    'A-League': 'A-League_Men',        // 👈 CORRETTO
-    'A-League Men': 'A-League_Men',    // 👈 CORRETTO
-    
-    // PORTOGALLO
-    'Primeira Liga': 'Primeira_Liga',
-    'Liga Portugal': 'Primeira_Liga',
-    
-    // SCOZIA
-    'Scottish Premiership': 'Scottish_Premiership',
-    'Scottish Premier League': 'Scottish_Premiership',
-    
-    // TURCHIA
-    'Süper Lig': 'Super_Lig',
-    'Super Lig': 'Super_Lig',
-    'Turkish Süper Lig': 'Super_Lig',
-    
-    // SVEZIA
-    'Allsvenskan': 'Allsvenskan',      // 👈 AGGIUNTO
-    
-    // COREA
-    'K League 1': 'K_League_1',        // 👈 AGGIUNTO
-    'K League': 'K_League_1',          // 👈 AGGIUNTO
-  };
-  return map[champ] || champ.replace(/ /g, '_');
-};
-  
-  const getTeamFileName = (name, useUnderscore = false) => {
-    if (!name) return '';
-    const clean = name.replace(/[<>:"/\\|?*]/g, '').trim();
-    if (useUnderscore) {
-      return clean.replace(/\s+/g, '_') + '.png';
-    }
-    return clean + '.png';
+    if (!champ) return '';
+    const map = {
+      'Premier League': 'Premier_League',
+      'English Premier League': 'Premier_League',
+      'EPL': 'Premier_League',
+      'Championship': 'Championship',
+      'EFL Championship': 'Championship',
+      'League One': 'EFL_League_One',
+      'EFL League One': 'EFL_League_One',
+      'League Two': 'EFL_League_Two',
+      'EFL League Two': 'EFL_League_Two',
+      'Serie A': 'Serie_A',
+      'Serie A TIM': 'Serie_A',
+      'Serie A Enilive': 'Serie_A',
+      'Serie A (Italia)': 'Serie_A',
+      'Serie A IT': 'Serie_A',
+      'Serie B': 'Serie_B',
+      'Serie B IT': 'Serie_B',
+      'Serie C - Girone A': 'Serie_C_Girone_A',
+      'Serie C - Girone B': 'Serie_C_Girone_B',
+      'Serie C - Girone C': 'Serie_C_Girone_C',
+      'Serie A Women': 'Serie_A_Women',
+      'Serie A Women IT': 'Serie_A_Women',
+      'Bundesliga': 'Bundesliga',
+      '2. Bundesliga': '2_Bundesliga',
+      'La Liga': 'La_Liga',
+      'LaLiga': 'La_Liga',
+      'Segunda División': 'Segunda_Division',
+      'Ligue 1': 'Ligue_1',
+      'Ligue 2': 'Ligue_2',
+      'Eredivisie': 'Eredivisie',
+      'Eerste Divisie': 'Eerste_Divisie',
+      'Eerste Divisie NL': 'Eerste_Divisie',
+      'MLS': 'MLS',
+      'Major League Soccer': 'MLS',
+      'NWSL': 'NWSL',
+      'National Women\'s Soccer League': 'NWSL',
+      'A-League': 'A-League_Men',
+      'A-League Men': 'A-League_Men',
+      'Primeira Liga': 'Primeira_Liga',
+      'Liga Portugal': 'Primeira_Liga',
+      'Scottish Premiership': 'Scottish_Premiership',
+      'Scottish Premier League': 'Scottish_Premiership',
+      'Premiership': 'Scottish_Premiership',
+      'Süper Lig': 'Super_Lig',
+      'Super Lig': 'Super_Lig',
+      'Turkish Süper Lig': 'Super_Lig',
+      'Allsvenskan': 'Allsvenskan',
+      'K League 1': 'K_League_1',
+      'K League': 'K_League_1',
+      'K-League': 'K_League_1',
+      'Liga Profesional': 'Liga_Profesional',
+      'Liga Profesional Argentina': 'Liga_Profesional',
+      'Jupiler Pro League': 'Jupiler_Pro_League',
+      'Belgian Pro League': 'Jupiler_Pro_League',
+      'Serie A (Brasile)': 'Serie_A_BR',
+      'Serie A BR': 'Serie_A_BR',
+      'Brasileirão': 'Serie_A_BR',
+      'Super League': 'Super_League',
+      'Chinese Super League': 'Super_League',
+      'CSL': 'Super_League',
+      'J1 League': 'J1_League',
+      'J-League': 'J1_League',
+      'Swiss Super League': 'Swiss_Super_League',
+      'Austrian Bundesliga': 'Austrian_Bundesliga',
+      'Russian Premier League': 'Russian_Premier_League',
+      'Liga MX': 'Liga_MX',
+      'Eliteserien': 'Eliteserien',
+      'Danish Superliga': 'Danish_Superliga'
+    };
+    return map[champ] || champ.replace(/ /g, '_');
   };
   
   const getInitials = (name) => {
@@ -2131,89 +1266,15 @@ window.TeamLogo = TeamLogo;
 // ============================================================
 
 const FAMIGLIE_GIOCATE = {
-  fisse: {
-    id: 'fisse',
-    label: 'FISSE',
-    icon: '🎯',
-    desc: 'Sceglie la migliore tra 1, X, 2',
-    options: ['1', 'X', '2']
-  },
-  dc: {
-    id: 'dc',
-    label: 'DOPPIA CHANCE',
-    icon: '🛡️',
-    desc: 'Sceglie la migliore tra 1X, 12, X2',
-    options: ['1X', '12', 'X2']
-  },
-  over: {
-    id: 'over',
-    label: 'OVER',
-    icon: '⬆️',
-    desc: 'Sceglie la migliore tra Over 1.5, 2.5, 3.5, 4.5',
-    options: ['Over 1.5', 'Over 2.5', 'Over 3.5', 'Over 4.5']
-  },
-  under: {
-    id: 'under',
-    label: 'UNDER',
-    icon: '⬇️',
-    desc: 'Sceglie la migliore tra Under 1.5, 2.5, 3.5, 4.5',
-    options: ['Under 1.5', 'Under 2.5', 'Under 3.5', 'Under 4.5']
-  },
-  multigol: {
-    id: 'multigol',
-    label: 'MULTIGOL',
-    icon: '📊',
-    desc: 'Sceglie la migliore tra 0-2, 1-3, 1-4, 2-5',
-    options: ['0-2', '1-3', '1-4', '2-5']
-  },
-  dc_over: {
-    id: 'dc_over',
-    label: 'DC + OVER',
-    icon: '🔗',
-    desc: 'Sceglie la migliore tra tutte le 12 combinazioni DC+Over',
-    options: [
-      '1X+O1.5', '12+O1.5', 'X2+O1.5',
-      '1X+O2.5', '12+O2.5', 'X2+O2.5',
-      '1X+O3.5', '12+O3.5', 'X2+O3.5',
-      '1X+O4.5', '12+O4.5', 'X2+O4.5'
-    ]
-  },
-  dc_under: {
-    id: 'dc_under',
-    label: 'DC + UNDER',
-    icon: '🔗',
-    desc: 'Sceglie la migliore tra tutte le 12 combinazioni DC+Under',
-    options: [
-      '1X+U1.5', '12+U1.5', 'X2+U1.5',
-      '1X+U2.5', '12+U2.5', 'X2+U2.5',
-      '1X+U3.5', '12+U3.5', 'X2+U3.5',
-      '1X+U4.5', '12+U4.5', 'X2+U4.5'
-    ]
-  },
-  mg_casa_ospite: {
-    id: 'mg_casa_ospite',
-    label: 'MG CASA + OSPITE',
-    icon: '⚔️',
-    desc: 'Sceglie la migliore tra tutte le 16 combinazioni',
-    options: [
-      '0-1+0-1', '0-1+0-2', '0-1+1-3', '0-1+2-5',
-      '0-2+0-1', '0-2+0-2', '0-2+1-3', '0-2+2-5',
-      '1-3+0-1', '1-3+0-2', '1-3+1-3', '1-3+2-5',
-      '2-5+0-1', '2-5+0-2', '2-5+1-3', '2-5+2-5'
-    ]
-  },
-  dc_multigol: {
-    id: 'dc_multigol',
-    label: 'DC + MULTIGOL',
-    icon: '🔗',
-    desc: 'Sceglie la migliore tra tutte le 12 combinazioni DC+MG',
-    options: [
-      '1X+0-2', '12+0-2', 'X2+0-2',
-      '1X+1-3', '12+1-3', 'X2+1-3',
-      '1X+1-4', '12+1-4', 'X2+1-4',
-      '1X+2-5', '12+2-5', 'X2+2-5'
-    ]
-  }
+  fisse: { id: 'fisse', label: 'FISSE', icon: '🎯', desc: 'Sceglie la migliore tra 1, X, 2', options: ['1', 'X', '2'] },
+  dc: { id: 'dc', label: 'DOPPIA CHANCE', icon: '🛡️', desc: 'Sceglie la migliore tra 1X, 12, X2', options: ['1X', '12', 'X2'] },
+  over: { id: 'over', label: 'OVER', icon: '⬆️', desc: 'Sceglie la migliore tra Over 1.5, 2.5, 3.5, 4.5', options: ['Over 1.5', 'Over 2.5', 'Over 3.5', 'Over 4.5'] },
+  under: { id: 'under', label: 'UNDER', icon: '⬇️', desc: 'Sceglie la migliore tra Under 1.5, 2.5, 3.5, 4.5', options: ['Under 1.5', 'Under 2.5', 'Under 3.5', 'Under 4.5'] },
+  multigol: { id: 'multigol', label: 'MULTIGOL', icon: '📊', desc: 'Sceglie la migliore tra 0-2, 1-3, 1-4, 2-5', options: ['0-2', '1-3', '1-4', '2-5'] },
+  dc_over: { id: 'dc_over', label: 'DC + OVER', icon: '🔗', desc: 'Sceglie la migliore tra tutte le 12 combinazioni DC+Over', options: ['1X+O1.5', '12+O1.5', 'X2+O1.5', '1X+O2.5', '12+O2.5', 'X2+O2.5', '1X+O3.5', '12+O3.5', 'X2+O3.5', '1X+O4.5', '12+O4.5', 'X2+O4.5'] },
+  dc_under: { id: 'dc_under', label: 'DC + UNDER', icon: '🔗', desc: 'Sceglie la migliore tra tutte le 12 combinazioni DC+Under', options: ['1X+U1.5', '12+U1.5', 'X2+U1.5', '1X+U2.5', '12+U2.5', 'X2+U2.5', '1X+U3.5', '12+U3.5', 'X2+U3.5', '1X+U4.5', '12+U4.5', 'X2+U4.5'] },
+  mg_casa_ospite: { id: 'mg_casa_ospite', label: 'MG CASA + OSPITE', icon: '⚔️', desc: 'Sceglie la migliore tra tutte le 16 combinazioni', options: ['0-1+0-1', '0-1+0-2', '0-1+1-3', '0-1+2-5', '0-2+0-1', '0-2+0-2', '0-2+1-3', '0-2+2-5', '1-3+0-1', '1-3+0-2', '1-3+1-3', '1-3+2-5', '2-5+0-1', '2-5+0-2', '2-5+1-3', '2-5+2-5'] },
+  dc_multigol: { id: 'dc_multigol', label: 'DC + MULTIGOL', icon: '🔗', desc: 'Sceglie la migliore tra tutte le 12 combinazioni DC+MG', options: ['1X+0-2', '12+0-2', 'X2+0-2', '1X+1-3', '12+1-3', 'X2+1-3', '1X+1-4', '12+1-4', 'X2+1-4', '1X+2-5', '12+2-5', 'X2+2-5'] }
 };
 
 const DEFAULT_FAMIGLIE = ['dc_under', 'mg_casa_ospite', 'over'];
@@ -2545,11 +1606,9 @@ window.getPercentualeClasse = getPercentualeClasse;
 window.getMultigolRange = getMultigolRange;
 window.calcFormAndStats = calcFormAndStats;
 window.getChampColor = getChampColor;
-window.getCountryFlagHtml = getCountryFlagHtml;
 window.formatDateEU = formatDateEU;
 window.normalizeDate = normalizeDate;
 window.parseDate = parseDate;
-window.getCityForMatch = getCityForMatch;
 window.FAMIGLIE_GIOCATE = FAMIGLIE_GIOCATE;
 window.getHeatmapColorClass = getHeatmapColorClass;
 window.TeamLogo = TeamLogo;
@@ -2619,7 +1678,7 @@ const Clock = () => {
 };
 
 // ============================================================
-// COMPONENTE WEATHER BADGE
+// COMPONENTE WEATHER BADGE (USA I DATI DA METEO.JS)
 // ============================================================
 
 const WeatherBadge = ({ weatherData, city }) => {
@@ -2670,43 +1729,6 @@ const Standings = ({ matches, filterChampionship, highlightTeams = [] }) => {
     if (m.casa) allTeams.add(m.casa);
     if (m.ospiti) allTeams.add(m.ospiti);
   });
-  
-  if (allTeams.size < 10) {
-    const predefinedTeams = {
-      'La Liga': ['Alavés', 'Athletic Bilbao', 'Atlético Madrid', 'Barcelona', 'Betis', 'Celta Vigo', 'Dep. A Coruña', 'Elche', 'Espanyol', 'Getafe', 'Granada', 'Levante', 'Málaga', 'Mallorca', 'Osasuna', 'Rayo Vallecano', 'Racing Santander', 'Real Madrid', 'Real Sociedad', 'Sevilla', 'Valencia', 'Villarreal', 'Zaragoza'],
-      'Liga': ['Alavés', 'Athletic Bilbao', 'Atlético Madrid', 'Barcelona', 'Betis', 'Celta Vigo', 'Dep. A Coruña', 'Elche', 'Espanyol', 'Getafe', 'Granada', 'Levante', 'Málaga', 'Mallorca', 'Osasuna', 'Rayo Vallecano', 'Racing Santander', 'Real Madrid', 'Real Sociedad', 'Sevilla', 'Valencia', 'Villarreal', 'Zaragoza'],
-      'Serie A': ['Atalanta', 'Bologna', 'Cagliari', 'Como', 'Empoli', 'Fiorentina', 'Genoa', 'Inter', 'Juventus', 'Lazio', 'Lecce', 'Milan', 'Monza', 'Napoli', 'Parma', 'Roma', 'Salernitana', 'Sassuolo', 'Torino', 'Udinese', 'Verona'],
-      'Premier League': ['Arsenal', 'Aston Villa', 'Bournemouth', 'Brentford', 'Brighton', 'Chelsea', 'Crystal Palace', 'Everton', 'Fulham', 'Liverpool', 'Luton', 'Manchester City', 'Manchester United', 'Newcastle', 'Nottingham Forest', 'Sheffield United', 'Tottenham', 'West Ham', 'Wolverhampton'],
-      'English Premier League': ['Arsenal', 'Aston Villa', 'Bournemouth', 'Brentford', 'Brighton', 'Chelsea', 'Crystal Palace', 'Everton', 'Fulham', 'Liverpool', 'Luton', 'Manchester City', 'Manchester United', 'Newcastle', 'Nottingham Forest', 'Sheffield United', 'Tottenham', 'West Ham', 'Wolverhampton'],
-      'EPL': ['Arsenal', 'Aston Villa', 'Bournemouth', 'Brentford', 'Brighton', 'Chelsea', 'Crystal Palace', 'Everton', 'Fulham', 'Liverpool', 'Luton', 'Manchester City', 'Manchester United', 'Newcastle', 'Nottingham Forest', 'Sheffield United', 'Tottenham', 'West Ham', 'Wolverhampton'],
-      'Bundesliga': ['Augsburg', 'Bayer Leverkusen', 'Bayern Munich', 'Bochum', 'Borussia Dortmund', 'Borussia Mönchengladbach', 'Darmstadt', 'Eintracht Frankfurt', 'Freiburg', 'Heidenheim', 'Hoffenheim', 'Köln', 'Mainz', 'RB Leipzig', 'Stuttgart', 'Union Berlin', 'Werder Bremen', 'Wolfsburg'],
-      'Ligue 1': ['Angers', 'Auxerre', 'Brest', 'Clermont', 'Le Havre', 'Lens', 'Lille', 'Lorient', 'Lyon', 'Marseille', 'Metz', 'Monaco', 'Montpellier', 'Nantes', 'Nice', 'PSG', 'Reims', 'Rennes', 'Strasbourg', 'Toulouse'],
-      'Eredivisie': ['Ajax', 'AZ Alkmaar', 'Feyenoord', 'Fortuna Sittard', 'Go Ahead Eagles', 'Groningen', 'Heerenveen', 'Heracles', 'NAC Breda', 'NEC', 'PEC Zwolle', 'PSV', 'RKC Waalwijk', 'Sparta Rotterdam', 'Twente', 'Utrecht', 'Vitesse', 'Willem II'],
-      'MLS': ['Atlanta United', 'Austin FC', 'Charlotte FC', 'Chicago Fire', 'Colorado Rapids', 'Columbus Crew', 'D.C. United', 'FC Cincinnati', 'FC Dallas', 'Houston Dynamo', 'Inter Miami', 'LA Galaxy', 'Los Angeles FC', 'Minnesota United', 'Nashville SC', 'New England Revolution', 'New York City FC', 'New York Red Bulls', 'Orlando City', 'Philadelphia Union', 'Portland Timbers', 'Real Salt Lake', 'San Diego FC', 'San Jose Earthquakes', 'Seattle Sounders', 'Sporting Kansas City', 'St. Louis CITY SC', 'Toronto FC', 'Vancouver Whitecaps'],
-      'Championship': ['Birmingham City', 'Blackburn Rovers', 'Bolton Wanderers', 'Bristol City', 'Burnley', 'Cardiff City', 'Charlton Athletic', 'Derby County', 'Lincoln City', 'Middlesbrough', 'Millwall', 'Norwich City', 'Portsmouth', 'Preston North End', 'Queens Park Rangers', 'Sheffield United', 'Southampton', 'Stoke City', 'Swansea City', 'Watford', 'West Bromwich Albion', 'West Ham United', 'Wolverhampton Wanderers', 'Wrexham'],
-      'EFL Championship': ['Birmingham City', 'Blackburn Rovers', 'Bolton Wanderers', 'Bristol City', 'Burnley', 'Cardiff City', 'Charlton Athletic', 'Derby County', 'Lincoln City', 'Middlesbrough', 'Millwall', 'Norwich City', 'Portsmouth', 'Preston North End', 'Queens Park Rangers', 'Sheffield United', 'Southampton', 'Stoke City', 'Swansea City', 'Watford', 'West Bromwich Albion', 'West Ham United', 'Wolverhampton Wanderers', 'Wrexham'],
-      'A-League': ['Adelaide United', 'Brisbane Roar', 'Central Coast Mariners', 'Macarthur FC', 'Melbourne City', 'Melbourne Victory', 'Newcastle Jets', 'Perth Glory', 'Sydney FC', 'Wellington Phoenix', 'Western Sydney Wanderers', 'Western United'],
-      'A-League Men': ['Adelaide United', 'Brisbane Roar', 'Central Coast Mariners', 'Macarthur FC', 'Melbourne City', 'Melbourne Victory', 'Newcastle Jets', 'Perth Glory', 'Sydney FC', 'Wellington Phoenix', 'Western Sydney Wanderers', 'Western United'],
-      'Primeira Liga': ['Benfica', 'Boavista', 'Braga', 'Casa Pia', 'Estoril', 'Famalicão', 'Farense', 'Gil Vicente', 'Moreirense', 'Nacional', 'Porto', 'Rio Ave', 'Santa Clara', 'Sporting CP', 'Vitória Guimarães', 'Vitória Setúbal'],
-      'Liga Portugal': ['Benfica', 'Boavista', 'Braga', 'Casa Pia', 'Estoril', 'Famalicão', 'Farense', 'Gil Vicente', 'Moreirense', 'Nacional', 'Porto', 'Rio Ave', 'Santa Clara', 'Sporting CP', 'Vitória Guimarães', 'Vitória Setúbal'],
-      'Scottish Premiership': ['Aberdeen', 'Celtic', 'Dundee', 'Dundee United', 'Heart of Midlothian', 'Hibernian', 'Kilmarnock', 'Motherwell', 'Rangers', 'Ross County', 'St. Johnstone', 'St. Mirren'],
-      'Süper Lig': ['Adana Demirspor', 'Alanyaspor', 'Antalyaspor', 'Başakşehir', 'Beşiktaş', 'Çaykur Rizespor', 'Fenerbahçe', 'Galatasaray', 'Gaziantep FK', 'Göztepe', 'Hatayspor', 'Kasımpaşa', 'Kayserispor', 'Konyaspor', 'Samsunspor', 'Sivasspor', 'Trabzonspor'],
-      'Super Lig': ['Adana Demirspor', 'Alanyaspor', 'Antalyaspor', 'Başakşehir', 'Beşiktaş', 'Çaykur Rizespor', 'Fenerbahçe', 'Galatasaray', 'Gaziantep FK', 'Göztepe', 'Hatayspor', 'Kasımpaşa', 'Kayserispor', 'Konyaspor', 'Samsunspor', 'Sivasspor', 'Trabzonspor'],
-      'Turkish Süper Lig': ['Adana Demirspor', 'Alanyaspor', 'Antalyaspor', 'Başakşehir', 'Beşiktaş', 'Çaykur Rizespor', 'Fenerbahçe', 'Galatasaray', 'Gaziantep FK', 'Göztepe', 'Hatayspor', 'Kasımpaşa', 'Kayserispor', 'Konyaspor', 'Samsunspor', 'Sivasspor', 'Trabzonspor']
-    };
-    
-    let foundTeams = [];
-    for (const [key, teams] of Object.entries(predefinedTeams)) {
-      if (filterChampionship && filterChampionship.toLowerCase().includes(key.toLowerCase())) {
-        foundTeams = teams;
-        break;
-      }
-    }
-    
-    foundTeams.forEach(team => {
-      if (team) allTeams.add(team);
-    });
-  }
   
   if (allTeams.size === 0) {
     return <div className="empty-state">Nessuna squadra trovata per questo campionato.</div>;
@@ -3467,20 +2489,20 @@ const IndiceAffidabilita = ({ teamName, allMatches }) => {
   return (
     <div className="card">
       <h4>🎯 Indice di Affidabilità - {teamName}</h4>
-      <div className="affidabilita-grid">
+      <div className="affidabilita-grid" style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px'}}>
         <div className="affidabilita-item">
-          <div className="affidabilita-value" style={{color: affidabilita > 70 ? 'var(--win)' : 'var(--draw)'}}>{Math.round(affidabilita)}%</div>
-          <div className="affidabilita-label">Affidabilità</div>
+          <div className="affidabilita-value" style={{fontSize: '28px', fontWeight: 'bold', color: affidabilita > 70 ? 'var(--win)' : 'var(--draw)'}}>{Math.round(affidabilita)}%</div>
+          <div className="affidabilita-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>Affidabilità</div>
           <div className="form-bar"><div className="form-bar-fill" style={{width: `${affidabilita}%`, background: affidabilita > 70 ? 'var(--win)' : 'var(--draw)'}} /></div>
         </div>
         <div className="affidabilita-item">
-          <div className="affidabilita-value" style={{color: stabilita > 60 ? 'var(--win)' : 'var(--draw)'}}>{Math.round(stabilita)}%</div>
-          <div className="affidabilita-label">Stabilità</div>
+          <div className="affidabilita-value" style={{fontSize: '28px', fontWeight: 'bold', color: stabilita > 60 ? 'var(--win)' : 'var(--draw)'}}>{Math.round(stabilita)}%</div>
+          <div className="affidabilita-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>Stabilità</div>
           <div className="form-bar"><div className="form-bar-fill" style={{width: `${stabilita}%`, background: stabilita > 60 ? 'var(--win)' : 'var(--draw)'}} /></div>
         </div>
         <div className="affidabilita-item">
-          <div className="affidabilita-value">{count}</div>
-          <div className="affidabilita-label">Partite analizzate</div>
+          <div className="affidabilita-value" style={{fontSize: '28px', fontWeight: 'bold', color: 'var(--accent)'}}>{count}</div>
+          <div className="affidabilita-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>Partite analizzate</div>
           <div style={{fontSize: '11px', color: 'var(--text-muted)'}}>{count < 10 ? '⚠️ Poche partite' : '✅ Campione sufficiente'}</div>
         </div>
       </div>
@@ -5419,13 +4441,13 @@ const HeatmapDetailModal = ({ championship, matches, onClose }) => {
         <button className="close-btn" onClick={onClose}>✖</button>
         <h2 style={{color: getChampColor(championship)}}>📊 {championship}</h2>
         <p style={{color: 'var(--text-muted)', marginBottom: '12px'}}>{champMatches.length} partite giocate analizzate</p>
-        <div className="perf-grid" style={{gridTemplateColumns: '1fr 1fr 1fr'}}>
-          <div className="perf-card"><div className="perf-value" style={{color: getColor(getPct(stats.over15))}}>{getPct(stats.over15)}%</div><div className="perf-label">Over 1.5</div><div className="form-bar"><div className="form-bar-fill" style={{width: `${getPct(stats.over15)}%`, background: getColor(getPct(stats.over15))}} /></div></div>
-          <div className="perf-card"><div className="perf-value" style={{color: getColor(getPct(stats['12under45']))}}>{getPct(stats['12under45'])}%</div><div className="perf-label">12+Under 4.5</div><div className="form-bar"><div className="form-bar-fill" style={{width: `${getPct(stats['12under45'])}%`, background: getColor(getPct(stats['12under45']))}} /></div></div>
-          <div className="perf-card"><div className="perf-value" style={{color: getColor(getPct(stats.multigolCasa13))}}>{getPct(stats.multigolCasa13)}%</div><div className="perf-label">MG Casa 1-3</div><div className="form-bar"><div className="form-bar-fill" style={{width: `${getPct(stats.multigolCasa13)}%`, background: getColor(getPct(stats.multigolCasa13))}} /></div></div>
-          <div className="perf-card"><div className="perf-value" style={{color: getColor(getPct(stats.multigolOspite13))}}>{getPct(stats.multigolOspite13)}%</div><div className="perf-label">MG Ospite 1-3</div><div className="form-bar"><div className="form-bar-fill" style={{width: `${getPct(stats.multigolOspite13)}%`, background: getColor(getPct(stats.multigolOspite13))}} /></div></div>
-          <div className="perf-card"><div className="perf-value" style={{color: getColor(getPct(stats.multigolCasa02))}}>{getPct(stats.multigolCasa02)}%</div><div className="perf-label">MG Casa 0-2</div><div className="form-bar"><div className="form-bar-fill" style={{width: `${getPct(stats.multigolCasa02)}%`, background: getColor(getPct(stats.multigolCasa02))}} /></div></div>
-          <div className="perf-card"><div className="perf-value" style={{color: getColor(getPct(stats.multigolOspite02))}}>{getPct(stats.multigolOspite02)}%</div><div className="perf-label">MG Ospite 0-2</div><div className="form-bar"><div className="form-bar-fill" style={{width: `${getPct(stats.multigolOspite02)}%`, background: getColor(getPct(stats.multigolOspite02))}} /></div></div>
+        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px'}}>
+          <div className="perf-card"><div className="perf-value" style={{fontSize: '28px', fontWeight: 'bold', color: getColor(getPct(stats.over15))}}>{getPct(stats.over15)}%</div><div className="perf-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>Over 1.5</div><div className="form-bar"><div className="form-bar-fill" style={{width: `${getPct(stats.over15)}%`, background: getColor(getPct(stats.over15))}} /></div></div>
+          <div className="perf-card"><div className="perf-value" style={{fontSize: '28px', fontWeight: 'bold', color: getColor(getPct(stats['12under45']))}}>{getPct(stats['12under45'])}%</div><div className="perf-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>12+Under 4.5</div><div className="form-bar"><div className="form-bar-fill" style={{width: `${getPct(stats['12under45'])}%`, background: getColor(getPct(stats['12under45']))}} /></div></div>
+          <div className="perf-card"><div className="perf-value" style={{fontSize: '28px', fontWeight: 'bold', color: getColor(getPct(stats.multigolCasa13))}}>{getPct(stats.multigolCasa13)}%</div><div className="perf-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>MG Casa 1-3</div><div className="form-bar"><div className="form-bar-fill" style={{width: `${getPct(stats.multigolCasa13)}%`, background: getColor(getPct(stats.multigolCasa13))}} /></div></div>
+          <div className="perf-card"><div className="perf-value" style={{fontSize: '28px', fontWeight: 'bold', color: getColor(getPct(stats.multigolOspite13))}}>{getPct(stats.multigolOspite13)}%</div><div className="perf-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>MG Ospite 1-3</div><div className="form-bar"><div className="form-bar-fill" style={{width: `${getPct(stats.multigolOspite13)}%`, background: getColor(getPct(stats.multigolOspite13))}} /></div></div>
+          <div className="perf-card"><div className="perf-value" style={{fontSize: '28px', fontWeight: 'bold', color: getColor(getPct(stats.multigolCasa02))}}>{getPct(stats.multigolCasa02)}%</div><div className="perf-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>MG Casa 0-2</div><div className="form-bar"><div className="form-bar-fill" style={{width: `${getPct(stats.multigolCasa02)}%`, background: getColor(getPct(stats.multigolCasa02))}} /></div></div>
+          <div className="perf-card"><div className="perf-value" style={{fontSize: '28px', fontWeight: 'bold', color: getColor(getPct(stats.multigolOspite02))}}>{getPct(stats.multigolOspite02)}%</div><div className="perf-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>MG Ospite 0-2</div><div className="form-bar"><div className="form-bar-fill" style={{width: `${getPct(stats.multigolOspite02)}%`, background: getColor(getPct(stats.multigolOspite02))}} /></div></div>
         </div>
         <div style={{marginTop: '12px'}}><h4 style={{color: 'var(--accent)', marginBottom: '8px'}}>📋 Ultime partite</h4><div style={{maxHeight: '200px', overflowY: 'auto'}}>{champMatches.slice(-10).reverse().map(m => (<div key={m.id} style={{display: 'flex', justifyContent: 'space-between', padding: '4px 8px', borderBottom: '1px solid var(--border)', fontSize: '13px'}}><span>{m.casa} vs {m.ospiti}</span><span style={{fontWeight: 'bold'}}>{m.golCasa}-{m.golOspite}</span><span style={{fontSize: '11px', color: 'var(--text-muted)'}}>{formatDateEU(m.data)}</span></div>))}</div></div>
       </div>
@@ -5605,7 +4627,7 @@ function App() {
   };
 
   // ============================================================
-  // RENDER DELL'APP
+  // RENDER DELL'APP (continuazione)
   // ============================================================
 
   const renderAppContent = () => {
@@ -5644,10 +4666,10 @@ function App() {
             <div>
               <HomeWidget matches={matches} onSelectMatch={selectMatch} setTab={setTab} selectedFamiglie={selectedFamiglie} />
               <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '16px'}}>
-                <div><h3 style={{marginBottom: '12px'}}>📊 Statistiche Rapide</h3><div className="perf-grid" style={{gridTemplateColumns: '1fr 1fr'}}>
-                  <div className="perf-card"><div className="perf-value" style={{color: 'var(--accent)'}}>{matches.filter(m => m.stato === 'Futura').length}</div><div className="perf-label">Partite Future</div></div>
-                  <div className="perf-card"><div className="perf-value" style={{color: 'var(--win)'}}>{matches.filter(m => m.stato === 'Giocata').length}</div><div className="perf-label">Partite Giocate</div></div>
-                  <div className="perf-card"><div className="perf-value">{championships.length}</div><div className="perf-label">Campionati</div></div>
+                <div><h3 style={{marginBottom: '12px'}}>📊 Statistiche Rapide</h3><div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
+                  <div className="perf-card" style={{background: 'var(--surface)', padding: '12px', borderRadius: '8px', textAlign: 'center'}}><div className="perf-value" style={{fontSize: '28px', fontWeight: 'bold', color: 'var(--accent)'}}>{matches.filter(m => m.stato === 'Futura').length}</div><div className="perf-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>Partite Future</div></div>
+                  <div className="perf-card" style={{background: 'var(--surface)', padding: '12px', borderRadius: '8px', textAlign: 'center'}}><div className="perf-value" style={{fontSize: '28px', fontWeight: 'bold', color: 'var(--win)'}}>{matches.filter(m => m.stato === 'Giocata').length}</div><div className="perf-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>Partite Giocate</div></div>
+                  <div className="perf-card" style={{background: 'var(--surface)', padding: '12px', borderRadius: '8px', textAlign: 'center'}}><div className="perf-value" style={{fontSize: '28px', fontWeight: 'bold'}}>{championships.length}</div><div className="perf-label" style={{fontSize: '12px', color: 'var(--text-muted)'}}>Campionati</div></div>
                 </div></div>
                 <div><h3 style={{marginBottom: '12px'}}>🔥 Campionati Attivi</h3><div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px', maxHeight: '250px', overflowY: 'auto', paddingRight: '8px'}}>
                   {championships.map(c => { const totalMatches = matches.filter(m => m.campionato === c.name).length; const futureMatches = matches.filter(m => m.campionato === c.name && m.stato === 'Futura').length; const color = getChampColor(c.name); return <div key={c.name} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 10px', borderRadius: '6px', background: 'var(--surface)', borderLeft: `3px solid ${color}`, fontSize: '13px'}}><span style={{color: color, fontWeight: 'bold', fontSize: '12px'}}>{c.name}</span><span style={{fontSize: '11px', color: 'var(--text-muted)'}}>{futureMatches} future</span></div>; })}
@@ -6064,8 +5086,14 @@ function App() {
 // AVVIA APP
 // ============================================================
 
-console.log('🚀 Avvio GesssAI-Pro...');
-loadScrapedData().then(data => {
+console.log('🚀 Avvio GesssAI-Pro - Caricamento forzato...');
+
+// Svuota localStorage all'avvio
+localStorage.removeItem('ft_matches');
+localStorage.removeItem('ft_champs');
+
+// Carica il file
+loadScrapedData(true).then(data => {
   if (data && data.matches && data.matches.length > 0) {
     console.log(`✅ ${data.matches.length} partite caricate all'avvio`);
     if (window.updateAppData) {
