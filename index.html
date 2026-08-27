@@ -838,41 +838,44 @@
 const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
 // ============================================================
-// CARICAMENTO DATI - SEMPRE DA FILE, SVUOTA IL DATABASE
+// CARICAMENTO DATI - SEMPRE DA FILE JSON O EXCEL
 // ============================================================
 
 let dataLoaded = false;
 
 async function loadScrapedData(forceReload = false) {
-  console.log('📂 Caricamento da /Gesss26/json/matches.json...');
+  // 🔄 FORZA IL CARICAMENTO DA FILE - SVUOTA LA CACHE
+  console.log('📂 Caricamento dati...');
   
   try {
-    localStorage.removeItem('ft_matches');
-    localStorage.removeItem('ft_champs');
+    // Svuota il localStorage per forzare il caricamento dal file
+    if (forceReload) {
+      localStorage.removeItem('ft_matches');
+      localStorage.removeItem('ft_champs');
+    }
     
-    const response = await fetch('/Gesss26/json/matches.json');
+    // 1. PROVA A CARICARE IL FILE JSON
+    console.log('📂 Tentativo 1: /Gesss26/json/matches.json');
+    let response = await fetch('/Gesss26/json/matches.json');
+    
     if (!response.ok) {
-      console.error('❌ File non trovato:', response.status);
-      console.log('📂 Tentativo fallback: /Gesss26/data/matches.json...');
-      const fallbackResponse = await fetch('/Gesss26/data/matches.json');
-      if (!fallbackResponse.ok) {
-        console.error('❌ Nessun file matches.json trovato');
-        return null;
+      console.log('📂 Tentativo 2: /Gesss26/data/matches.json');
+      response = await fetch('/Gesss26/data/matches.json');
+    }
+    
+    if (!response.ok) {
+      console.log('📂 Tentativo 3: Caricamento da Excel GesssAI_Input.xlsx');
+      // Carica il file Excel
+      const excelData = await loadExcelData();
+      if (excelData) {
+        return excelData;
       }
-      const fallbackData = await fallbackResponse.json();
-      console.log('✅ Dati caricati da fallback:', fallbackData.matches?.length || 0, 'partite');
-      
-      if (fallbackData.matches) {
-        localStorage.setItem('ft_matches', JSON.stringify(fallbackData.matches));
-        localStorage.setItem('ft_champs', JSON.stringify(fallbackData.championships || []));
-      }
-      
-      dataLoaded = true;
-      return fallbackData;
+      console.error('❌ Nessun file matches.json o GesssAI_Input.xlsx trovato');
+      return null;
     }
     
     const data = await response.json();
-    console.log('✅ Dati caricati:', data.matches?.length || 0, 'partite');
+    console.log('✅ Dati caricati da JSON:', data.matches?.length || 0, 'partite');
     
     if (data.matches) {
       localStorage.setItem('ft_matches', JSON.stringify(data.matches));
@@ -883,6 +886,182 @@ async function loadScrapedData(forceReload = false) {
     return data;
   } catch (error) {
     console.error('❌ Errore:', error.message);
+    // Prova a caricare l'Excel come ultima risorsa
+    console.log('📂 Tentativo fallback: Caricamento da Excel GesssAI_Input.xlsx');
+    try {
+      const excelData = await loadExcelData();
+      if (excelData) {
+        return excelData;
+      }
+    } catch (e) {
+      console.error('❌ Errore anche nel caricamento Excel:', e.message);
+    }
+    return null;
+  }
+}
+
+// ============================================================
+// CARICAMENTO DA FILE EXCEL
+// ============================================================
+
+async function loadExcelData() {
+  try {
+    console.log('📂 Caricamento GesssAI_Input.xlsx...');
+    const response = await fetch('/GesssAI_Input.xlsx');
+    if (!response.ok) {
+      console.error('❌ File Excel non trovato:', response.status);
+      return null;
+    }
+    
+    const arrayBuffer = await response.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+    
+    if (jsonData.length === 0) {
+      console.error('❌ Il file Excel è vuoto');
+      return null;
+    }
+    
+    console.log('✅ File Excel caricato con', jsonData.length, 'righe');
+    
+    // Mappa le colonne del file Excel
+    const matches = [];
+    const championshipsSet = new Set();
+    
+    // Cerca le colonne nel file Excel
+    const headers = Object.keys(jsonData[0]);
+    console.log('📊 Colonne trovate:', headers.join(', '));
+    
+    // Mappa dei nomi delle colonne (cerca corrispondenze)
+    const findColumn = (keywords) => {
+      for (const keyword of keywords) {
+        const found = headers.find(h => h.toLowerCase().includes(keyword.toLowerCase()));
+        if (found) return found;
+      }
+      return null;
+    };
+    
+    const colCampionato = findColumn(['campionato', 'league', 'camp', 'championship']);
+    const colGiornata = findColumn(['giornata', 'round', 'giorn', 'wk']);
+    const colData = findColumn(['data', 'date', 'giorno']);
+    const colOra = findColumn(['ora', 'time', 'orario', 'hour']);
+    const colCasa = findColumn(['squadra casa', 'home', 'casa', 'home team', 'home_team']);
+    const colOspite = findColumn(['squadra ospite', 'away', 'ospite', 'away team', 'away_team']);
+    const colGolCasa = findColumn(['gol casa', 'home goals', 'goal casa', 'home_goals']);
+    const colGolOspite = findColumn(['gol ospite', 'away goals', 'goal ospite', 'away_goals']);
+    const colRisultato = findColumn(['risultato', 'result', 'score', 'ris']);
+    const colStato = findColumn(['stato', 'status']);
+    
+    if (!colCampionato || !colData || !colCasa || !colOspite) {
+      console.error('❌ Colonne obbligatorie non trovate. Assicurati di avere: Campionato, Data, Squadra Casa, Squadra Ospite');
+      console.log('📊 Colonne disponibili:', headers.join(', '));
+      return null;
+    }
+    
+    jsonData.forEach((row, index) => {
+      const campionato = row[colCampionato]?.toString().trim() || 'Sconosciuto';
+      const giornata = row[colGiornata]?.toString().trim() || 'N/A';
+      const dataRaw = row[colData]?.toString().trim() || '';
+      const oraRaw = row[colOra]?.toString().trim() || 'TBD';
+      const casa = row[colCasa]?.toString().trim() || '';
+      const ospite = row[colOspite]?.toString().trim() || '';
+      
+      if (!casa || !ospite) {
+        console.warn(`⚠️ Riga ${index + 2} saltata: Squadra casa o ospite mancante`);
+        return;
+      }
+      
+      let dataNormalizzata = normalizeDate(dataRaw);
+      if (!dataNormalizzata) {
+        console.warn(`⚠️ Riga ${index + 2} saltata: Data non valida (${dataRaw})`);
+        return;
+      }
+      
+      let golCasa = 0;
+      let golOspite = 0;
+      let stato = 'Futura';
+      
+      // Controlla se c'è un risultato
+      let risultato = '';
+      if (colRisultato && row[colRisultato]) {
+        const val = row[colRisultato].toString().trim();
+        if (val && val !== '') {
+          const matchResult = val.match(/(\d+)\s*[-–:.]\s*(\d+)/);
+          if (matchResult) {
+            golCasa = parseInt(matchResult[1], 10);
+            golOspite = parseInt(matchResult[2], 10);
+            risultato = `${golCasa}-${golOspite}`;
+            stato = 'Giocata';
+          }
+        }
+      }
+      
+      // Se non c'è risultato, prova a prendere i gol dalle colonne separate
+      if (!risultato && colGolCasa && row[colGolCasa] && row[colGolCasa] !== '') {
+        golCasa = parseFloat(row[colGolCasa]) || 0;
+        if (colGolOspite && row[colGolOspite] !== '') {
+          golOspite = parseFloat(row[colGolOspite]) || 0;
+          stato = 'Giocata';
+          risultato = `${golCasa}-${golOspite}`;
+        }
+      }
+      
+      // Controlla se c'è una colonna stato
+      if (colStato && row[colStato]) {
+        const statoVal = row[colStato].toString().toLowerCase().trim();
+        if (statoVal === 'giocata' || statoVal === 'played' || statoVal === 'finished') {
+          stato = 'Giocata';
+        }
+      }
+      
+      // Se abbiamo un risultato, assicuriamoci che lo stato sia Giocata
+      if (risultato && risultato !== '') {
+        stato = 'Giocata';
+      }
+      
+      const match = {
+        id: Math.random().toString(36).slice(2) + Date.now().toString(36) + index,
+        campionato: campionato,
+        round: giornata,
+        data: dataNormalizzata,
+        ora: oraRaw,
+        casa: casa,
+        ospiti: ospite,
+        stato: stato,
+        golCasa: stato === 'Giocata' ? golCasa : 0,
+        golOspite: stato === 'Giocata' ? golOspite : 0,
+        risultato: stato === 'Giocata' ? `${golCasa}-${golOspite}` : '',
+        citta: 'N/D',
+        _fromExcel: true
+      };
+      
+      matches.push(match);
+      championshipsSet.add(campionato);
+    });
+    
+    if (matches.length === 0) {
+      console.error('❌ Nessuna partita valida trovata nel file Excel');
+      return null;
+    }
+    
+    const championships = Array.from(championshipsSet).map(name => ({
+      name,
+      importedAt: new Date().toISOString()
+    }));
+    
+    console.log(`✅ Caricate ${matches.length} partite dal file Excel (${championships.length} campionati)`);
+    
+    // Salva in localStorage
+    localStorage.setItem('ft_matches', JSON.stringify(matches));
+    localStorage.setItem('ft_champs', JSON.stringify(championships));
+    
+    dataLoaded = true;
+    
+    return { matches, championships };
+    
+  } catch (error) {
+    console.error('❌ Errore nel caricamento Excel:', error.message);
     return null;
   }
 }
@@ -5092,13 +5271,15 @@ console.log('🚀 Avvio GesssAI-Pro - Caricamento forzato...');
 localStorage.removeItem('ft_matches');
 localStorage.removeItem('ft_champs');
 
-// Carica il file
+// Carica il file (JSON o Excel)
 loadScrapedData(true).then(data => {
   if (data && data.matches && data.matches.length > 0) {
     console.log(`✅ ${data.matches.length} partite caricate all'avvio`);
     if (window.updateAppData) {
       window.updateAppData(data);
     }
+  } else {
+    console.warn('⚠️ Nessun dato caricato. Assicurati che il file matches.json o GesssAI_Input.xlsx sia presente.');
   }
 });
 
