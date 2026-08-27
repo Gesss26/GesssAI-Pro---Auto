@@ -838,13 +838,13 @@
 const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
 // ============================================================
-// CARICAMENTO DATI - DA FILE JSON SU GITHUB (RAW URL)
+// CARICAMENTO DATI - DA FILE JSON SU GITHUB PAGES
 // ============================================================
 
 let dataLoaded = false;
 
 async function loadScrapedData(forceReload = false) {
-  console.log('📂 Caricamento dati da JSON su GitHub...');
+  console.log('📂 Caricamento dati da JSON su GitHub Pages...');
   
   try {
     // Svuota il localStorage per forzare il caricamento dal file
@@ -853,34 +853,47 @@ async function loadScrapedData(forceReload = false) {
       localStorage.removeItem('ft_champs');
     }
     
-    // URL RAW di GitHub per il file matches.json
-    const rawUrl = 'https://raw.githubusercontent.com/Gesss26/GesssAI-Pro---Auto/master/json/matches.json';
-    console.log('📂 Caricamento da: ', rawUrl);
+    // Determina il percorso base corretto
+    // Se l'app è su https://gesss26.github.io/GesssAI-Pro---Auto/
+    // il percorso base è /GesssAI-Pro---Auto/
+    const basePath = window.location.pathname.includes('/GesssAI-Pro---Auto/') 
+      ? '/GesssAI-Pro---Auto/' 
+      : '/';
     
-    const response = await fetch(rawUrl);
+    // Percorso corretto per il file JSON su GitHub Pages
+    const jsonPath = `${basePath}json/matches.json`;
+    console.log('📂 Caricamento da: ', jsonPath);
+    
+    // Aggiungi un parametro cache-buster per evitare la cache
+    const cacheBuster = `?t=${Date.now()}`;
+    const response = await fetch(jsonPath + cacheBuster);
     
     if (!response.ok) {
-      console.error('❌ File non trovato su GitHub:', response.status);
+      console.error('❌ File non trovato su GitHub Pages:', response.status);
       
-      // Tentativo fallback con GitHub Pages
-      console.log('📂 Tentativo fallback: GitHub Pages...');
-      const fallbackResponse = await fetch('/GesssAI-Pro---Auto/json/matches.json');
-      if (!fallbackResponse.ok) {
+      // Tentativo con percorso assoluto
+      console.log('📂 Tentativo con percorso assoluto...');
+      const absoluteResponse = await fetch('/GesssAI-Pro---Auto/json/matches.json' + cacheBuster);
+      
+      if (!absoluteResponse.ok) {
         console.error('❌ Fallback fallito');
         return null;
       }
-      const fallbackData = await fallbackResponse.json();
-      console.log('✅ Dati caricati da fallback:', fallbackData.matches?.length || 0, 'partite');
-      if (fallbackData.matches) {
-        localStorage.setItem('ft_matches', JSON.stringify(fallbackData.matches));
-        localStorage.setItem('ft_champs', JSON.stringify(fallbackData.championships || []));
+      
+      const absoluteData = await absoluteResponse.json();
+      console.log('✅ Dati caricati da percorso assoluto:', absoluteData.matches?.length || 0, 'partite');
+      
+      if (absoluteData.matches) {
+        localStorage.setItem('ft_matches', JSON.stringify(absoluteData.matches));
+        localStorage.setItem('ft_champs', JSON.stringify(absoluteData.championships || []));
       }
+      
       dataLoaded = true;
-      return fallbackData;
+      return absoluteData;
     }
     
     const data = await response.json();
-    console.log('✅ Dati caricati da GitHub RAW:', data.matches?.length || 0, 'partite');
+    console.log('✅ Dati caricati da GitHub Pages:', data.matches?.length || 0, 'partite');
     
     if (data.matches) {
       localStorage.setItem('ft_matches', JSON.stringify(data.matches));
