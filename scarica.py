@@ -47,26 +47,25 @@ LEAGUES = [
     {'name': 'Major League Soccer', 'url': 'https://www.matchesio.com/it/competition/major-league-soccer-us/export/json/'},
 ]
 
-# ===== CONFIGURAZIONE GITHUB =====
-GITHUB_REPO_PATH = r"D:\ai\gesssai-pro---auto"
-GITHUB_REMOTE = "origin"
-GITHUB_BRANCH = "master"
-GITHUB_FOLDER = "json"
+# ================================================================
+# ===== CONFIGURAZIONE =====
+# ================================================================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-REPO_JSON_PATH = os.path.join(GITHUB_REPO_PATH, GITHUB_FOLDER)
+# Cartelle di destinazione
+EXCEL_FOLDER = os.path.join(BASE_DIR, "excel")
+JSON_FOLDER = os.path.join(BASE_DIR, "json")
+
+# Crea le cartelle se non esistono
+os.makedirs(EXCEL_FOLDER, exist_ok=True)
+os.makedirs(JSON_FOLDER, exist_ok=True)
 
 # ================================================================
 # ===== DIZIONARIO DI TRADUZIONE PER I NOMI DELLE SQUADRE =====
 # ================================================================
-# Questo dizionario traduce i nomi delle squadre come arrivano da matchesio.com
-# nei nomi che hai nei tuoi file dei loghi.
-# Se vedi un nome che non viene tradotto, aggiungilo qui!
-# ================================================================
 
 TEAM_NAME_MAPPING = {
-    # ============================================================
-    # ITALIA - Serie A
-    # ============================================================
+    # ===== ITALIA - Serie A =====
     'Inter Milan': 'Inter',
     'Inter': 'Inter',
     'AC Milan': 'Milan',
@@ -108,9 +107,7 @@ TEAM_NAME_MAPPING = {
     'Venezia FC': 'Venezia',
     'Venezia': 'Venezia',
     
-    # ============================================================
-    # INGHILTERRA - Premier League
-    # ============================================================
+    # ===== INGHILTERRA - Premier League =====
     'Arsenal FC': 'Arsenal',
     'Arsenal': 'Arsenal',
     'Aston Villa FC': 'Aston Villa',
@@ -153,9 +150,7 @@ TEAM_NAME_MAPPING = {
     'Wolverhampton Wanderers': 'Wolverhampton',
     'Wolves': 'Wolverhampton',
     
-    # ============================================================
-    # SPAGNA - La Liga
-    # ============================================================
+    # ===== SPAGNA - La Liga =====
     'Real Madrid CF': 'Real Madrid',
     'Real Madrid': 'Real Madrid',
     'FC Barcelona': 'Barcelona',
@@ -194,9 +189,7 @@ TEAM_NAME_MAPPING = {
     'CD Leganes': 'Leganes',
     'Leganes': 'Leganes',
     
-    # ============================================================
-    # GERMANIA - Bundesliga
-    # ============================================================
+    # ===== GERMANIA - Bundesliga =====
     'Bayern Munich': 'Bayern Munich',
     'Bayern München': 'Bayern Munich',
     'Borussia Dortmund': 'Borussia Dortmund',
@@ -234,9 +227,7 @@ TEAM_NAME_MAPPING = {
     'FC Koln': 'Koln',
     'Koln': 'Koln',
     
-    # ============================================================
-    # FRANCIA - Ligue 1
-    # ============================================================
+    # ===== FRANCIA - Ligue 1 =====
     'Paris Saint-Germain': 'PSG',
     'PSG': 'PSG',
     'Olympique Marseille': 'Marseille',
@@ -273,273 +264,31 @@ TEAM_NAME_MAPPING = {
     'Clermont': 'Clermont',
     'Le Havre AC': 'Le Havre',
     'Le Havre': 'Le Havre',
-    
-    # ============================================================
-    # OLANDA - Eredivisie
-    # ============================================================
-    'Ajax': 'Ajax',
-    'Ajax Amsterdam': 'Ajax',
-    'PSV': 'PSV',
-    'PSV Eindhoven': 'PSV',
-    'Feyenoord': 'Feyenoord',
-    'FC Twente': 'Twente',
-    'Twente': 'Twente',
-    'AZ Alkmaar': 'AZ',
-    'AZ': 'AZ',
-    'FC Utrecht': 'Utrecht',
-    'Utrecht': 'Utrecht',
-    'Sparta Rotterdam': 'Sparta Rotterdam',
-    'Sparta': 'Sparta Rotterdam',
-    'Go Ahead Eagles': 'Go Ahead Eagles',
-    'NEC': 'NEC',
-    'NEC Nijmegen': 'NEC',
-    'Heracles Almelo': 'Heracles',
-    'Heracles': 'Heracles',
-    'RKC Waalwijk': 'RKC Waalwijk',
-    'Waalwijk': 'RKC Waalwijk',
-    'PEC Zwolle': 'Zwolle',
-    'Zwolle': 'Zwolle',
-    'Heerenveen': 'Heerenveen',
-    'SC Heerenveen': 'Heerenveen',
-    'Almere City': 'Almere City',
-    'Almere': 'Almere City',
-    'FC Volendam': 'Volendam',
-    'Volendam': 'Volendam',
-    'Excelsior': 'Excelsior',
-    'SBV Excelsior': 'Excelsior',
-    
-    # ============================================================
-    # PORTOGALLO - Primeira Liga
-    # ============================================================
-    'Benfica': 'Benfica',
-    'SL Benfica': 'Benfica',
-    'Porto': 'Porto',
-    'FC Porto': 'Porto',
-    'Sporting CP': 'Sporting CP',
-    'Sporting': 'Sporting CP',
-    'Braga': 'Braga',
-    'SC Braga': 'Braga',
-    'Vitoria Guimaraes': 'Vitoria Guimaraes',
-    'Guimaraes': 'Vitoria Guimaraes',
-    'Boavista': 'Boavista',
-    'Boavista FC': 'Boavista',
-    'Famalicao': 'Famalicao',
-    'FC Famalicao': 'Famalicao',
-    'Rio Ave': 'Rio Ave',
-    'Rio Ave FC': 'Rio Ave',
-    'Casa Pia': 'Casa Pia',
-    'Casa Pia AC': 'Casa Pia',
-    'Gil Vicente': 'Gil Vicente',
-    'Gil Vicente FC': 'Gil Vicente',
-    'Estoril': 'Estoril',
-    'Estoril Praia': 'Estoril',
-    'Portimonense': 'Portimonense',
-    'Portimonense SC': 'Portimonense',
-    'Vizela': 'Vizela',
-    'FC Vizela': 'Vizela',
-    'Chaves': 'Chaves',
-    'GD Chaves': 'Chaves',
-    'Arouca': 'Arouca',
-    'FC Arouca': 'Arouca',
-    
-    # ============================================================
-    # SCOZIA - Scottish Premiership
-    # ============================================================
-    'Celtic': 'Celtic',
-    'Celtic FC': 'Celtic',
-    'Rangers': 'Rangers',
-    'Rangers FC': 'Rangers',
-    'Heart of Midlothian': 'Hearts',
-    'Hearts': 'Hearts',
-    'Hibernian': 'Hibernian',
-    'Hibs': 'Hibernian',
-    'Aberdeen': 'Aberdeen',
-    'Aberdeen FC': 'Aberdeen',
-    'Dundee United': 'Dundee United',
-    'Dundee Utd': 'Dundee United',
-    'Kilmarnock': 'Kilmarnock',
-    'Kilmarnock FC': 'Kilmarnock',
-    'St Mirren': 'St Mirren',
-    'St. Mirren': 'St Mirren',
-    'Motherwell': 'Motherwell',
-    'Motherwell FC': 'Motherwell',
-    'St Johnstone': 'St Johnstone',
-    'St. Johnstone': 'St Johnstone',
-    'Ross County': 'Ross County',
-    'Livingston': 'Livingston',
-    'Livingston FC': 'Livingston',
-    
-    # ============================================================
-    # TURCHIA - Süper Lig
-    # ============================================================
-    'Galatasaray': 'Galatasaray',
-    'Galatasaray SK': 'Galatasaray',
-    'Fenerbahce': 'Fenerbahce',
-    'Fenerbahçe': 'Fenerbahce',
-    'Besiktas': 'Besiktas',
-    'Beşiktaş': 'Besiktas',
-    'Trabzonspor': 'Trabzonspor',
-    'Trabzon': 'Trabzonspor',
-    'Basaksehir': 'Basaksehir',
-    'Istanbul Basaksehir': 'Basaksehir',
-    'Sivasspor': 'Sivasspor',
-    'Kasimpasa': 'Kasimpasa',
-    'Kasımpaşa': 'Kasimpasa',
-    'Konyaspor': 'Konyaspor',
-    'Alanyaspor': 'Alanyaspor',
-    'Rizespor': 'Rizespor',
-    'Caykur Rizespor': 'Rizespor',
-    'Gaziantep FK': 'Gaziantep',
-    'Gaziantep': 'Gaziantep',
-    'Antalyaspor': 'Antalyaspor',
-    'Kayserispor': 'Kayserispor',
-    'Fatih Karagumruk': 'Karagumruk',
-    'Karagumruk': 'Karagumruk',
-    'Pendikspor': 'Pendikspor',
-    
-    # ============================================================
-    # BRASILE - Serie A (Brasile)
-    # ============================================================
-    'Flamengo': 'Flamengo',
-    'CR Flamengo': 'Flamengo',
-    'Palmeiras': 'Palmeiras',
-    'SE Palmeiras': 'Palmeiras',
-    'Corinthians': 'Corinthians',
-    'SC Corinthians': 'Corinthians',
-    'Fluminense': 'Fluminense',
-    'Fluminense FC': 'Fluminense',
-    'Atletico Mineiro': 'Atletico Mineiro',
-    'Atlético Mineiro': 'Atletico Mineiro',
-    'Gremio': 'Gremio',
-    'Grêmio': 'Gremio',
-    'Internacional': 'Internacional',
-    'SC Internacional': 'Internacional',
-    'Santos': 'Santos',
-    'Santos FC': 'Santos',
-    'Sao Paulo': 'Sao Paulo',
-    'São Paulo': 'Sao Paulo',
-    'Cruzeiro': 'Cruzeiro',
-    'Cruzeiro EC': 'Cruzeiro',
-    'Botafogo': 'Botafogo',
-    'Botafogo FR': 'Botafogo',
-    'Vasco da Gama': 'Vasco',
-    'Vasco': 'Vasco',
-    'Bahia': 'Bahia',
-    'EC Bahia': 'Bahia',
-    'Cuiaba': 'Cuiaba',
-    'Cuiabá': 'Cuiaba',
-    'Athletico Paranaense': 'Athletico PR',
-    'Athletico PR': 'Athletico PR',
-    
-    # ============================================================
-    # ARGENTINA - Liga Profesional
-    # ============================================================
-    'River Plate': 'River Plate',
-    'River': 'River Plate',
-    'Boca Juniors': 'Boca Juniors',
-    'Boca': 'Boca Juniors',
-    'Independiente': 'Independiente',
-    'Racing Club': 'Racing Club',
-    'Racing': 'Racing Club',
-    'San Lorenzo': 'San Lorenzo',
-    'San Lorenzo de Almagro': 'San Lorenzo',
-    'Velez Sarsfield': 'Velez',
-    'Vélez Sarsfield': 'Velez',
-    'Estudiantes': 'Estudiantes',
-    'Estudiantes LP': 'Estudiantes',
-    'Rosario Central': 'Rosario Central',
-    'Newells Old Boys': 'Newells',
-    'Newell\'s Old Boys': 'Newells',
-    'Lanús': 'Lanus',
-    'Lanus': 'Lanus',
-    'Banfield': 'Banfield',
-    'Defensa y Justicia': 'Defensa',
-    'Defensa': 'Defensa',
-    
-    # ============================================================
-    # BELGIO - Jupiler Pro League
-    # ============================================================
-    'Anderlecht': 'Anderlecht',
-    'RSC Anderlecht': 'Anderlecht',
-    'Club Brugge': 'Club Brugge',
-    'Brugge': 'Club Brugge',
-    'Genk': 'Genk',
-    'Racing Genk': 'Genk',
-    'Gent': 'Gent',
-    'KAA Gent': 'Gent',
-    'Standard Liege': 'Standard Liege',
-    'Standard Liège': 'Standard Liege',
-    'Charleroi': 'Charleroi',
-    'Sporting Charleroi': 'Charleroi',
-    'Mechelen': 'Mechelen',
-    'KV Mechelen': 'Mechelen',
-    'Cercle Brugge': 'Cercle Brugge',
-    'Cercle': 'Cercle Brugge',
-    'Oud-Heverlee Leuven': 'OH Leuven',
-    'OH Leuven': 'OH Leuven',
-    'Union Saint-Gilloise': 'Union SG',
-    'Union SG': 'Union SG',
-    'St Truiden': 'St Truiden',
-    'Sint-Truiden': 'St Truiden',
-    'Westerlo': 'Westerlo',
-    'KVC Westerlo': 'Westerlo',
-    
-    # ============================================================
-    # STATI UNITI - MLS
-    # ============================================================
-    'LA Galaxy': 'LA Galaxy',
-    'Galaxy': 'LA Galaxy',
-    'Inter Miami': 'Inter Miami',
-    'Miami': 'Inter Miami',
-    'New York Red Bulls': 'NY Red Bulls',
-    'Red Bulls': 'NY Red Bulls',
-    'Los Angeles FC': 'LAFC',
-    'LAFC': 'LAFC',
-    'Atlanta United': 'Atlanta United',
-    'Atlanta': 'Atlanta United',
-    'Seattle Sounders': 'Seattle Sounders',
-    'Sounders': 'Seattle Sounders',
-    'Portland Timbers': 'Portland Timbers',
-    'Timbers': 'Portland Timbers',
-    'FC Dallas': 'FC Dallas',
-    'Dallas': 'FC Dallas',
-    'Sporting Kansas City': 'Sporting KC',
-    'Sporting KC': 'Sporting KC',
-    'Austin FC': 'Austin',
-    'Austin': 'Austin',
-    'San Jose Earthquakes': 'San Jose',
-    'San Jose': 'San Jose',
-    'Chicago Fire': 'Chicago Fire',
-    'Fire': 'Chicago Fire',
 }
 
 def translate_team_name(team_name: str) -> str:
-    """
-    Traduce il nome della squadra secondo il dizionario.
-    Se non trova corrispondenza, restituisce il nome originale.
-    """
+    """Traduce il nome della squadra secondo il dizionario."""
     if not team_name:
         return team_name
     
     team_name_clean = team_name.strip()
     
-    # 1. Cerca corrispondenza esatta (case-insensitive)
+    # Corrispondenza esatta
     for key, value in TEAM_NAME_MAPPING.items():
         if team_name_clean.lower() == key.lower():
             return value
     
-    # 2. Cerca corrispondenza parziale (es. "Inter Milan" contiene "Inter")
+    # Corrispondenza parziale
     for key, value in TEAM_NAME_MAPPING.items():
         if key.lower() in team_name_clean.lower():
             return value
         if team_name_clean.lower() in key.lower():
             return value
     
-    # 3. Se non trova, restituisce il nome originale
     return team_name_clean
 
 # ================================================================
-# FINE DIZIONARIO TRADUZIONE
+# ===== FUNZIONI DI UTILITÀ =====
 # ================================================================
 
 def convert_date_to_italian(date_str: str) -> str:
@@ -549,11 +298,9 @@ def convert_date_to_italian(date_str: str) -> str:
     
     date_str = str(date_str)
     
-    # Se è già DD/MM/YYYY
     if re.match(r'^\d{2}/\d{2}/\d{4}$', date_str):
         return date_str
     
-    # Se è YYYY-MM-DD
     match = re.search(r'(\d{4})-(\d{2})-(\d{2})', date_str)
     if match:
         return f"{match.group(3)}/{match.group(2)}/{match.group(1)}"
@@ -565,7 +312,6 @@ def parse_date_for_sorting(date_str: str) -> str:
     if not date_str:
         return '9999-99-99'
     
-    # Se è DD/MM/YYYY
     match = re.search(r'(\d{2})/(\d{2})/(\d{4})', date_str)
     if match:
         return f"{match.group(3)}-{match.group(2)}-{match.group(1)}"
@@ -586,7 +332,6 @@ def parse_matches_from_json(data, league_name: str) -> List[Dict]:
         if not isinstance(match, dict):
             continue
         
-        # === SQUADRE - APPLICA LA TRADUZIONE ===
         home_team = match.get('homeTeam', '') or match.get('home_team', '') or ''
         away_team = match.get('awayTeam', '') or match.get('away_team', '') or ''
         
@@ -594,17 +339,12 @@ def parse_matches_from_json(data, league_name: str) -> List[Dict]:
         home_team = translate_team_name(home_team)
         away_team = translate_team_name(away_team)
         
-        # === DATA ===
         date_raw = match.get('date', '')
         date_str = convert_date_to_italian(date_raw)
         
-        # === ORA ===
         time_str = match.get('time', '')
-        
-        # === GIORNATA ===
         matchday = match.get('matchday', '')
         
-        # === RISULTATO E GOL ===
         result_str = match.get('result', '')
         home_score = ''
         away_score = ''
@@ -621,7 +361,6 @@ def parse_matches_from_json(data, league_name: str) -> List[Dict]:
             else:
                 result = result_str
         
-        # === STATO ===
         status = match.get('status', '').lower()
         
         if status in ['giocata', 'played', 'finished', 'complete', 'completed', 'ft']:
@@ -638,10 +377,8 @@ def parse_matches_from_json(data, league_name: str) -> List[Dict]:
         else:
             status_ita = 'Futura'
         
-        # === CITTÀ E STADIO ===
         city = match.get('city', '')
         stadium = match.get('stadium', '')
-        
         sort_date = parse_date_for_sorting(date_str)
         
         matches.append({
@@ -684,7 +421,7 @@ def fetch_league_json(url: str, league_name: str) -> List[Dict]:
     """Scarica il JSON da un campionato."""
     try:
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
         response = requests.get(url, timeout=30, headers=headers)
         response.raise_for_status()
@@ -697,14 +434,16 @@ def fetch_league_json(url: str, league_name: str) -> List[Dict]:
         print(f"❌ Errore nel download di {league_name}: {e}")
         return []
 
+# ================================================================
+# ===== SALVATAGGIO FILE =====
+# ================================================================
+
 def save_excel(all_matches: List[Dict]) -> str:
-    """Salva i dati in Excel (.xlsx)."""
+    """Salva i dati in Excel (.xlsx) nella cartella excel/."""
     if not all_matches or not EXCEL_AVAILABLE:
         return None
     
     try:
-        os.makedirs(REPO_JSON_PATH, exist_ok=True)
-        
         all_matches = sort_matches_by_date(all_matches)
         
         wb = Workbook()
@@ -738,103 +477,61 @@ def save_excel(all_matches: List[Dict]) -> str:
         for i, width in enumerate(column_widths, 1):
             ws.column_dimensions[chr(64 + i)].width = width
         
-        excel_path = os.path.join(REPO_JSON_PATH, 'GesssAI_Input.xlsx')
-        temp_path = os.path.join(REPO_JSON_PATH, 'GesssAI_Input_temp.xlsx')
-        
-        if os.path.exists(excel_path):
-            try:
-                os.remove(excel_path)
-            except:
-                pass
-        
-        wb.save(temp_path)
+        excel_path = os.path.join(EXCEL_FOLDER, 'GesssAI_Input.xlsx')
+        wb.save(excel_path)
         wb.close()
-        del wb
         
-        time.sleep(1)
-        
-        try:
-            os.rename(temp_path, excel_path)
-        except:
-            excel_path = temp_path
-        
-        return excel_path if os.path.exists(excel_path) else None
+        print(f"   ✅ GesssAI_Input.xlsx salvato in: {excel_path}")
+        return excel_path
         
     except Exception as e:
-        print(f"⚠️ Errore nel salvataggio Excel: {e}")
+        print(f"   ❌ Errore nel salvataggio Excel: {e}")
         return None
 
 def save_json(all_matches: List[Dict]):
-    """Salva i dati in JSON."""
+    """Salva i dati in JSON:
+       - json/GesssAI_Input.json
+       - matches.json (nella root)
+    """
     if not all_matches:
         return None, None
     
     try:
-        os.makedirs(REPO_JSON_PATH, exist_ok=True)
-        
         all_matches = sort_matches_by_date(all_matches)
         
-        json_path = os.path.join(REPO_JSON_PATH, 'GesssAI_Input.json')
-        temp_json_path = os.path.join(REPO_JSON_PATH, 'GesssAI_Input_temp.json')
-        
-        if os.path.exists(json_path):
-            try:
-                os.remove(json_path)
-            except:
-                pass
-        
-        with open(temp_json_path, 'w', encoding='utf-8') as f:
+        # ===== 1. SALVA IN json/GesssAI_Input.json =====
+        json_path = os.path.join(JSON_FOLDER, 'GesssAI_Input.json')
+        with open(json_path, 'w', encoding='utf-8') as f:
             json.dump(all_matches, f, ensure_ascii=False, indent=2)
+        print(f"   ✅ GesssAI_Input.json salvato in: {json_path}")
         
-        try:
-            os.rename(temp_json_path, json_path)
-        except:
-            json_path = temp_json_path
-        
-        raw_json_path = os.path.join(REPO_JSON_PATH, 'matches.json')
-        temp_raw_path = os.path.join(REPO_JSON_PATH, 'matches_temp.json')
-        
-        if os.path.exists(raw_json_path):
-            try:
-                os.remove(raw_json_path)
-            except:
-                pass
-        
-        with open(temp_raw_path, 'w', encoding='utf-8') as f:
+        # ===== 2. SALVA IN ROOT matches.json =====
+        root_json_path = os.path.join(BASE_DIR, 'matches.json')
+        with open(root_json_path, 'w', encoding='utf-8') as f:
             json.dump(all_matches, f, ensure_ascii=False, indent=2)
+        print(f"   ✅ matches.json salvato in: {root_json_path}")
         
-        try:
-            os.rename(temp_raw_path, raw_json_path)
-        except:
-            raw_json_path = temp_raw_path
-        
-        time.sleep(0.5)
-        return json_path, raw_json_path
+        return json_path, root_json_path
         
     except Exception as e:
-        print(f"⚠️ Errore nel salvataggio JSON: {e}")
+        print(f"   ❌ Errore nel salvataggio JSON: {e}")
         return None, None
 
+# ================================================================
+# ===== FUNZIONE PER INVIARE SU GITHUB =====
+# ================================================================
+
 def push_to_github():
-    """Esegue git add, commit e push dei file nel repository."""
-    if not os.path.exists(GITHUB_REPO_PATH):
-        print(f"❌ Repository non trovato in: {GITHUB_REPO_PATH}")
-        return False
-    
+    """Esegue git add, commit e push dei file su GitHub."""
     try:
         current_dir = os.getcwd()
-        os.chdir(GITHUB_REPO_PATH)
-        
-        for f in os.listdir(REPO_JSON_PATH):
-            if 'temp' in f:
-                try:
-                    os.remove(os.path.join(REPO_JSON_PATH, f))
-                except:
-                    pass
+        os.chdir(BASE_DIR)
         
         print("\n🔄 Eseguo git add...")
-        subprocess.run(['git', 'add', GITHUB_FOLDER + '/'], check=True, capture_output=True)
-        print(f"   ✅ File aggiunti")
+        subprocess.run(['git', 'add', 'excel/GesssAI_Input.xlsx'], check=True, capture_output=True)
+        subprocess.run(['git', 'add', 'json/GesssAI_Input.json'], check=True, capture_output=True)
+        subprocess.run(['git', 'add', 'matches.json'], check=True, capture_output=True)
+        print("   ✅ File aggiunti")
         
         print("🔄 Eseguo git commit...")
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M')
@@ -849,13 +546,13 @@ def push_to_github():
         
         print("   ✅ Commit effettuato")
         
-        print(f"🔄 Eseguo git push a {GITHUB_REMOTE}/{GITHUB_BRANCH}...")
-        result = subprocess.run(['git', 'push', GITHUB_REMOTE, GITHUB_BRANCH], 
+        print("🔄 Eseguo git push...")
+        result = subprocess.run(['git', 'push', 'origin', 'master'], 
                               capture_output=True, text=True)
         
         if result.returncode == 0:
             print("\n✅ FILE INVIATI CON SUCCESSO SU GITHUB!")
-            print(f"   📁 Visualizza: https://github.com/Gesss26/GesssAI-Pro---Auto/tree/{GITHUB_BRANCH}/{GITHUB_FOLDER}")
+            print(f"   📁 https://github.com/Gesss26/GesssAI-Pro---Auto")
             os.chdir(current_dir)
             return True
         else:
@@ -867,11 +564,14 @@ def push_to_github():
         print(f"\n❌ Errore: {e}")
         return False
 
+# ================================================================
+# ===== MAIN =====
+# ================================================================
+
 def main():
     print("="*70)
     print("🚀 Avvio download calendari calcio da matchesio.com...")
     print(f"📋 {len(LEAGUES)} campionati da scaricare")
-    print(f"📁 I file verranno salvati in: {REPO_JSON_PATH}")
     print("="*70)
     print("\n🔄 I nomi delle squadre verranno tradotti automaticamente per i loghi!")
     print("="*70)
@@ -879,8 +579,6 @@ def main():
     
     all_matches = []
     errors = []
-    
-    os.makedirs(REPO_JSON_PATH, exist_ok=True)
     
     for i, league in enumerate(LEAGUES, 1):
         league_name = league['name']
@@ -900,57 +598,39 @@ def main():
         time.sleep(0.5)
     
     if all_matches:
-        print("\n💾 Salvataggio file in ordine cronologico per data...")
+        print("\n💾 Salvataggio file...")
         
         excel_path = save_excel(all_matches)
-        json_path, raw_json_path = save_json(all_matches)
+        json_path, root_json_path = save_json(all_matches)
         
-        if excel_path and os.path.exists(excel_path):
-            print(f"   ✅ GesssAI_Input.xlsx ({os.path.getsize(excel_path):,} bytes)")
-        else:
-            print(f"   ❌ GesssAI_Input.xlsx non creato")
+        if excel_path:
+            print(f"\n📁 Cartella excel: {EXCEL_FOLDER}")
+        if json_path:
+            print(f"📁 Cartella json: {JSON_FOLDER}")
+        if root_json_path:
+            print(f"📁 Root: matches.json")
         
-        if json_path and os.path.exists(json_path):
-            print(f"   ✅ GesssAI_Input.json ({os.path.getsize(json_path):,} bytes)")
-        else:
-            print(f"   ❌ GesssAI_Input.json non creato")
-        
-        if raw_json_path and os.path.exists(raw_json_path):
-            print(f"   ✅ matches.json ({os.path.getsize(raw_json_path):,} bytes)")
-        else:
-            print(f"   ❌ matches.json non creato")
+        # Statistiche
+        giocate = sum(1 for m in all_matches if m['stato'] == 'Giocata')
+        future = sum(1 for m in all_matches if m['stato'] == 'Futura')
         
         print("\n" + "="*70)
         print("📊 STATISTICHE FINALI")
         print("="*70)
-        giocate = sum(1 for m in all_matches if m['stato'] == 'Giocata')
-        future = sum(1 for m in all_matches if m['stato'] == 'Futura')
         print(f"   • Partite totali: {len(all_matches):,}")
         print(f"   • Giocate: {giocate:,}")
         print(f"   • Future: {future:,}")
-        
-        print("\n📋 DISTRIBUZIONE PER CAMPIONATO:")
-        league_counts = {}
-        for match in all_matches:
-            league = match['campionato']
-            league_counts[league] = league_counts.get(league, 0) + 1
-        
-        for league, count in sorted(league_counts.items()):
-            print(f"   • {league}: {count:,} partite")
-        
-        print(f"\n📅 Le partite sono in ordine cronologico dalla prima all'ultima data.")
-        
-        if errors:
-            print(f"\n⚠️ Campionati senza partite ({len(errors)}):")
-            for e in errors:
-                print(f"   • {e}")
+        print("="*70)
         
         print("\n📤 INVIO SU GITHUB...")
         push_to_github()
+        
     else:
         print("\n❌ Nessuna partita scaricata.")
     
     print("\n" + "="*70)
+    print("🏁 Script terminato")
+    print("="*70)
 
 if __name__ == "__main__":
     try:
