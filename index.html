@@ -838,13 +838,13 @@
 const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
 // ============================================================
-// CARICAMENTO DATI - SEMPRE DA FILE EXCEL
+// CARICAMENTO DATI - SEMPRE DA FILE EXCEL NELLA CARTELLA JSON
 // ============================================================
 
 let dataLoaded = false;
 
 async function loadScrapedData(forceReload = false) {
-  console.log('📂 Caricamento da GesssAI_Input.xlsx...');
+  console.log('📂 Caricamento da /Gesss26/json/GesssAI_Input.xlsx...');
   
   try {
     // Svuota il localStorage per forzare il caricamento dal file
@@ -853,15 +853,18 @@ async function loadScrapedData(forceReload = false) {
       localStorage.removeItem('ft_champs');
     }
     
-    // Carica il file Excel
+    // Carica il file Excel dalla cartella json
     const excelData = await loadExcelData();
     if (excelData) {
       return excelData;
     }
     
-    // Fallback: prova a caricare il JSON
+    // Fallback: prova a caricare il JSON se l'Excel non viene trovato
     console.log('📂 Tentativo fallback: caricamento da JSON...');
-    const response = await fetch('/Gesss26/json/matches.json');
+    let response = await fetch('/Gesss26/json/matches.json');
+    if (!response.ok) {
+      response = await fetch('/Gesss26/data/matches.json');
+    }
     if (response.ok) {
       const data = await response.json();
       console.log('✅ Dati caricati da JSON fallback:', data.matches?.length || 0, 'partite');
@@ -882,19 +885,41 @@ async function loadScrapedData(forceReload = false) {
 }
 
 // ============================================================
-// CARICAMENTO DA FILE EXCEL
+// CARICAMENTO DA FILE EXCEL NELLA CARTELLA JSON
 // ============================================================
 
 async function loadExcelData() {
   try {
-    console.log('📂 Caricamento GesssAI_Input.xlsx...');
-    const response = await fetch('/GesssAI_Input.xlsx');
+    console.log('📂 Caricamento /Gesss26/json/GesssAI_Input.xlsx...');
+    const response = await fetch('/Gesss26/json/GesssAI_Input.xlsx');
     if (!response.ok) {
       console.error('❌ File Excel non trovato:', response.status);
-      return null;
+      // Prova nella cartella data come fallback
+      console.log('📂 Tentativo fallback: /Gesss26/data/GesssAI_Input.xlsx...');
+      const fallbackResponse = await fetch('/Gesss26/data/GesssAI_Input.xlsx');
+      if (!fallbackResponse.ok) {
+        console.error('❌ File Excel non trovato nemmeno in data');
+        return null;
+      }
+      const fallbackArrayBuffer = await fallbackResponse.arrayBuffer();
+      return processExcelData(fallbackArrayBuffer);
     }
     
     const arrayBuffer = await response.arrayBuffer();
+    return processExcelData(arrayBuffer);
+    
+  } catch (error) {
+    console.error('❌ Errore nel caricamento Excel:', error.message);
+    return null;
+  }
+}
+
+// ============================================================
+// PROCESSO I DATI DEL FILE EXCEL
+// ============================================================
+
+function processExcelData(arrayBuffer) {
+  try {
     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
     const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
@@ -1058,7 +1083,7 @@ async function loadExcelData() {
     return { matches, championships };
     
   } catch (error) {
-    console.error('❌ Errore nel caricamento Excel:', error.message);
+    console.error('❌ Errore nel processare i dati Excel:', error.message);
     return null;
   }
 }
@@ -5248,15 +5273,15 @@ console.log('🚀 Avvio GesssAI-Pro - Caricamento da Excel...');
 localStorage.removeItem('ft_matches');
 localStorage.removeItem('ft_champs');
 
-// Carica il file Excel
+// Carica il file Excel dalla cartella json
 loadScrapedData(true).then(data => {
   if (data && data.matches && data.matches.length > 0) {
-    console.log(`✅ ${data.matches.length} partite caricate all'avvio da GesssAI_Input.xlsx`);
+    console.log(`✅ ${data.matches.length} partite caricate all'avvio da /Gesss26/json/GesssAI_Input.xlsx`);
     if (window.updateAppData) {
       window.updateAppData(data);
     }
   } else {
-    console.warn('⚠️ Nessun dato caricato. Assicurati che il file GesssAI_Input.xlsx sia presente nella cartella principale.');
+    console.warn('⚠️ Nessun dato caricato. Assicurati che il file GesssAI_Input.xlsx sia presente in /Gesss26/json/');
     // Mostra un messaggio all'utente
     const root = document.getElementById('root');
     if (root) {
@@ -5266,7 +5291,7 @@ loadScrapedData(true).then(data => {
           <h2 style="color: #f39c12;">File Excel non trovato</h2>
           <p style="color: #8b949e; max-width: 500px; margin: 20px auto;">
             Assicurati che il file <strong style="color: #e6edf3;">GesssAI_Input.xlsx</strong> 
-            sia presente nella cartella principale del progetto.
+            sia presente nella cartella <strong style="color: #e6edf3;">/Gesss26/json/</strong> del repository.
           </p>
           <p style="color: #8b949e; font-size: 14px;">
             Il file deve contenere le colonne: <br>
