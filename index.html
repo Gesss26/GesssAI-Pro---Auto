@@ -826,6 +826,16 @@
     font-size: 11px;
     padding: 4px 12px;
   }
+
+  /* STILE PER LE SPIEGAZIONI MONTE CARLO */
+  .stat-explanation-tooltip {
+    cursor: help;
+    border-bottom: 1px dashed var(--text-muted);
+  }
+  .stat-explanation-tooltip:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
 </style>
 </head>
 <body>
@@ -1285,6 +1295,52 @@ const getHeatmapColorClass = (pct) => {
 };
 
 // ============================================================
+// SPIEGAZIONE STATISTICHE MONTE CARLO (NUOVA FUNZIONE)
+// ============================================================
+
+const getStatExplanation = (statKey) => {
+  const explanations = {
+    'lambdaCasa': {
+      label: 'λ Casa (Lambda)',
+      description: 'È il tasso medio di gol previsti per la squadra di casa in questa partita specifica, calcolato dalla formula: (Attacco Casa × Difesa Ospite × 1.1). Più alto è il valore, più gol ci si aspetta dalla squadra di casa. Un valore >1.5 indica un attacco prolifico contro una difesa debole.',
+      range: 'Valori tipici: 0.8 - 2.5',
+      cosaGuardare: 'Più alto = più gol previsti per la squadra di casa'
+    },
+    'lambdaOspite': {
+      label: 'λ Ospite (Lambda)',
+      description: 'È il tasso medio di gol previsti per la squadra ospite. Calcolato con: (Attacco Ospite × Difesa Casa × 0.9). Il fattore 0.9 riduce leggermente la previsione per il fattore campo. Valori alti (>1.2) indicano che l\'ospite segnerà con probabilità.',
+      range: 'Valori tipici: 0.6 - 2.0',
+      cosaGuardare: 'Più alto = più gol previsti per la squadra ospite'
+    },
+    'homeAttacco': {
+      label: 'Attacco Casa',
+      description: 'Rappresenta la forza offensiva della squadra di casa rispetto alla media del campionato. Un valore >1.0 indica un attacco superiore alla media (es. 1.2 = 20% più forte della media). Valori <1.0 indicano un attacco debole.',
+      range: 'Valori tipici: 0.5 - 2.0',
+      cosaGuardare: '>1.0 = attacco forte, <1.0 = attacco debole'
+    },
+    'homeDifesa': {
+      label: 'Difesa Casa',
+      description: 'Rappresenta la solidità difensiva della squadra di casa. Più basso è il valore, migliore è la difesa (es. 0.8 = difesa 20% più forte della media). Valori >1.2 indicano una difesa fragile che subisce molti gol.',
+      range: 'Valori tipici: 0.5 - 2.0',
+      cosaGuardare: 'Più basso = difesa migliore'
+    },
+    'awayAttacco': {
+      label: 'Attacco Ospite',
+      description: 'Forza offensiva della squadra ospite. Interpretazione identica all\'Attacco Casa. Valori >1.2 indicano un ospite pericoloso in zona gol.',
+      range: 'Valori tipici: 0.5 - 2.0',
+      cosaGuardare: '>1.0 = attacco forte, <1.0 = attacco debole'
+    },
+    'awayDifesa': {
+      label: 'Difesa Ospite',
+      description: 'Solidità difensiva della squadra ospite. Più basso è il valore, meglio difende. Se è >1.2, la difesa ospite è vulnerabile e subirà molti gol.',
+      range: 'Valori tipici: 0.5 - 2.0',
+      cosaGuardare: 'Più basso = difesa migliore'
+    }
+  };
+  return explanations[statKey] || null;
+};
+
+// ============================================================
 // FUNZIONI PER LOGHI SQUADRE (VERSIONE CORRETTA)
 // ============================================================
 
@@ -1300,6 +1356,10 @@ const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
       'EPL': 'Premier_League',
       'Championship': 'Championship',
       'EFL Championship': 'Championship',
+      'League One': 'EFL_League_One',
+      'EFL League One': 'EFL_League_One',
+      'League Two': 'EFL_League_Two',
+      'EFL League Two': 'EFL_League_Two',
       'Serie A': 'Serie_A',
       'Serie A TIM': 'Serie_A',
       'Serie A Enilive': 'Serie_A',
@@ -1313,7 +1373,7 @@ const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
       'Serie A Women': 'Serie_A_Women',
       'Serie A Women IT': 'Serie_A_Women',
       'Bundesliga': 'Bundesliga',
-      '2. Bundesliga': '2. Bundesliga',
+      '2. Bundesliga': '2_Bundesliga',
       'La Liga': 'La_Liga',
       'LaLiga': 'La_Liga',
       'Segunda División': 'Segunda_Division',
@@ -4798,7 +4858,7 @@ function App() {
   };
 
   // ============================================================
-  // RENDER DELL'APP (continuazione)
+  // RENDER DELL'APP
   // ============================================================
 
   const renderAppContent = () => {
@@ -4868,11 +4928,11 @@ function App() {
                 <div className="form-group" style={{maxWidth: '300px', marginBottom: '0', flex: '1'}}>
                   <label>Filtra per Campionato</label>
                   <select value={selectedChamp} onChange={e => setSelectedChamp(e.target.value)}>
-  <option value="Tutti">Tutti</option>
-  {championships
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
-</select>
+                    <option value="Tutti">Tutti</option>
+                    {championships
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+                  </select>
                 </div>
                 <div className="form-group" style={{maxWidth: '200px', marginBottom: '0', flex: '1'}}>
                   <label>Range Giorni</label>
