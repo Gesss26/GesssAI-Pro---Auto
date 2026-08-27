@@ -838,13 +838,13 @@
 const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
 // ============================================================
-// CARICAMENTO DATI - DA FILE JSON NELLA CARTELLA JSON
+// CARICAMENTO DATI - DA FILE JSON SU GITHUB (RAW URL)
 // ============================================================
 
 let dataLoaded = false;
 
 async function loadScrapedData(forceReload = false) {
-  console.log('📂 Caricamento dati da JSON...');
+  console.log('📂 Caricamento dati da JSON su GitHub...');
   
   try {
     // Svuota il localStorage per forzare il caricamento dal file
@@ -853,22 +853,34 @@ async function loadScrapedData(forceReload = false) {
       localStorage.removeItem('ft_champs');
     }
     
-    // Prova a caricare il JSON dalla cartella json
-    console.log('📂 Tentativo 1: /Gesss26/json/matches.json');
-    let response = await fetch('/Gesss26/json/matches.json');
+    // URL RAW di GitHub per il file matches.json
+    const rawUrl = 'https://raw.githubusercontent.com/Gesss26/GesssAI-Pro---Auto/master/json/matches.json';
+    console.log('📂 Caricamento da: ', rawUrl);
+    
+    const response = await fetch(rawUrl);
     
     if (!response.ok) {
-      console.log('📂 Tentativo 2: /Gesss26/data/matches.json');
-      response = await fetch('/Gesss26/data/matches.json');
-    }
-    
-    if (!response.ok) {
-      console.error('❌ Nessun file matches.json trovato');
-      return null;
+      console.error('❌ File non trovato su GitHub:', response.status);
+      
+      // Tentativo fallback con GitHub Pages
+      console.log('📂 Tentativo fallback: GitHub Pages...');
+      const fallbackResponse = await fetch('/GesssAI-Pro---Auto/json/matches.json');
+      if (!fallbackResponse.ok) {
+        console.error('❌ Fallback fallito');
+        return null;
+      }
+      const fallbackData = await fallbackResponse.json();
+      console.log('✅ Dati caricati da fallback:', fallbackData.matches?.length || 0, 'partite');
+      if (fallbackData.matches) {
+        localStorage.setItem('ft_matches', JSON.stringify(fallbackData.matches));
+        localStorage.setItem('ft_champs', JSON.stringify(fallbackData.championships || []));
+      }
+      dataLoaded = true;
+      return fallbackData;
     }
     
     const data = await response.json();
-    console.log('✅ Dati caricati da JSON:', data.matches?.length || 0, 'partite');
+    console.log('✅ Dati caricati da GitHub RAW:', data.matches?.length || 0, 'partite');
     
     if (data.matches) {
       localStorage.setItem('ft_matches', JSON.stringify(data.matches));
@@ -5062,16 +5074,16 @@ function App() {
 // AVVIA APP
 // ============================================================
 
-console.log('🚀 Avvio GesssAI-Pro - Caricamento da JSON...');
+console.log('🚀 Avvio GesssAI-Pro - Caricamento da GitHub...');
 
 // Svuota localStorage all'avvio per forzare il caricamento
 localStorage.removeItem('ft_matches');
 localStorage.removeItem('ft_champs');
 
-// Carica il file JSON
+// Carica il file JSON da GitHub
 loadScrapedData(true).then(data => {
   if (data && data.matches && data.matches.length > 0) {
-    console.log(`✅ ${data.matches.length} partite caricate all'avvio da /Gesss26/json/matches.json`);
+    console.log(`✅ ${data.matches.length} partite caricate all'avvio da GitHub!`);
     if (window.updateAppData) {
       window.updateAppData(data);
     }
@@ -5083,10 +5095,14 @@ loadScrapedData(true).then(data => {
       root.innerHTML = `
         <div style="text-align: center; padding: 50px; color: #e6edf3; background: #0f1419; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
           <div style="font-size: 64px; margin-bottom: 20px;">📂</div>
-          <h2 style="color: #f39c12;">File JSON non trovato</h2>
+          <h2 style="color: #f39c12;">Caricamento dati...</h2>
           <p style="color: #8b949e; max-width: 500px; margin: 20px auto;">
-            Assicurati che il file <strong style="color: #e6edf3;">matches.json</strong> 
-            sia presente nella cartella <strong style="color: #e6edf3;">/Gesss26/json/</strong> del repository.
+            Il file <strong style="color: #e6edf3;">matches.json</strong> non è stato trovato.
+          </p>
+          <p style="color: #8b949e; font-size: 14px;">
+            Verifica che il repository sia pubblico e che il file esista in:
+            <br>
+            <strong style="color: #e6edf3;">/json/matches.json</strong>
           </p>
           <button onclick="window.location.reload()" style="margin-top: 20px; padding: 12px 30px; background: #f39c12; color: #000; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer;">
             🔄 Ricarica
