@@ -838,13 +838,13 @@
 const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
 // ============================================================
-// CARICAMENTO DATI - SEMPRE DA FILE EXCEL NELLA CARTELLA JSON
+// CARICAMENTO DATI - DA FILE JSON NELLA CARTELLA JSON
 // ============================================================
 
 let dataLoaded = false;
 
 async function loadScrapedData(forceReload = false) {
-  console.log('📂 Caricamento da /Gesss26/json/GesssAI_Input.xlsx...');
+  console.log('📂 Caricamento dati da JSON...');
   
   try {
     // Svuota il localStorage per forzare il caricamento dal file
@@ -853,237 +853,32 @@ async function loadScrapedData(forceReload = false) {
       localStorage.removeItem('ft_champs');
     }
     
-    // Carica il file Excel dalla cartella json
-    const excelData = await loadExcelData();
-    if (excelData) {
-      return excelData;
-    }
-    
-    // Fallback: prova a caricare il JSON se l'Excel non viene trovato
-    console.log('📂 Tentativo fallback: caricamento da JSON...');
+    // Prova a caricare il JSON dalla cartella json
+    console.log('📂 Tentativo 1: /Gesss26/json/matches.json');
     let response = await fetch('/Gesss26/json/matches.json');
+    
     if (!response.ok) {
+      console.log('📂 Tentativo 2: /Gesss26/data/matches.json');
       response = await fetch('/Gesss26/data/matches.json');
     }
-    if (response.ok) {
-      const data = await response.json();
-      console.log('✅ Dati caricati da JSON fallback:', data.matches?.length || 0, 'partite');
-      if (data.matches) {
-        localStorage.setItem('ft_matches', JSON.stringify(data.matches));
-        localStorage.setItem('ft_champs', JSON.stringify(data.championships || []));
-      }
-      dataLoaded = true;
-      return data;
-    }
     
-    console.error('❌ Nessun file GesssAI_Input.xlsx o matches.json trovato');
-    return null;
-  } catch (error) {
-    console.error('❌ Errore:', error.message);
-    return null;
-  }
-}
-
-// ============================================================
-// CARICAMENTO DA FILE EXCEL NELLA CARTELLA JSON
-// ============================================================
-
-async function loadExcelData() {
-  try {
-    console.log('📂 Caricamento /Gesss26/json/GesssAI_Input.xlsx...');
-    const response = await fetch('/Gesss26/json/GesssAI_Input.xlsx');
     if (!response.ok) {
-      console.error('❌ File Excel non trovato:', response.status);
-      // Prova nella cartella data come fallback
-      console.log('📂 Tentativo fallback: /Gesss26/data/GesssAI_Input.xlsx...');
-      const fallbackResponse = await fetch('/Gesss26/data/GesssAI_Input.xlsx');
-      if (!fallbackResponse.ok) {
-        console.error('❌ File Excel non trovato nemmeno in data');
-        return null;
-      }
-      const fallbackArrayBuffer = await fallbackResponse.arrayBuffer();
-      return processExcelData(fallbackArrayBuffer);
-    }
-    
-    const arrayBuffer = await response.arrayBuffer();
-    return processExcelData(arrayBuffer);
-    
-  } catch (error) {
-    console.error('❌ Errore nel caricamento Excel:', error.message);
-    return null;
-  }
-}
-
-// ============================================================
-// PROCESSO I DATI DEL FILE EXCEL
-// ============================================================
-
-function processExcelData(arrayBuffer) {
-  try {
-    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
-    
-    if (jsonData.length === 0) {
-      console.error('❌ Il file Excel è vuoto');
+      console.error('❌ Nessun file matches.json trovato');
       return null;
     }
     
-    console.log('✅ File Excel caricato con', jsonData.length, 'righe');
+    const data = await response.json();
+    console.log('✅ Dati caricati da JSON:', data.matches?.length || 0, 'partite');
     
-    // Mappa le colonne del file Excel
-    const matches = [];
-    const championshipsSet = new Set();
-    
-    // Cerca le colonne nel file Excel
-    const headers = Object.keys(jsonData[0]);
-    console.log('📊 Colonne trovate:', headers.join(', '));
-    
-    // Mappa dei nomi delle colonne (cerca corrispondenze)
-    const findColumn = (keywords) => {
-      for (const keyword of keywords) {
-        const found = headers.find(h => h.toLowerCase().includes(keyword.toLowerCase()));
-        if (found) return found;
-      }
-      return null;
-    };
-    
-    const colCampionato = findColumn(['campionato', 'league', 'camp', 'championship']);
-    const colGiornata = findColumn(['giornata', 'round', 'giorn', 'wk']);
-    const colData = findColumn(['data', 'date', 'giorno']);
-    const colOra = findColumn(['ora', 'time', 'orario', 'hour']);
-    const colCasa = findColumn(['squadra casa', 'home', 'casa', 'home team', 'home_team']);
-    const colOspite = findColumn(['squadra ospite', 'away', 'ospite', 'away team', 'away_team']);
-    const colGolCasa = findColumn(['gol casa', 'home goals', 'goal casa', 'home_goals', 'gol casa', 'gol home']);
-    const colGolOspite = findColumn(['gol ospite', 'away goals', 'goal ospite', 'away_goals', 'gol ospite', 'gol away']);
-    const colRisultato = findColumn(['risultato', 'result', 'score', 'ris']);
-    const colStato = findColumn(['stato', 'status']);
-    
-    // Se non trova le colonne esatte, prova con le prime colonne disponibili
-    if (!colCampionato && headers.length > 0) {
-      console.log('🔍 Colonne non trovate, uso le prime colonne disponibili...');
+    if (data.matches) {
+      localStorage.setItem('ft_matches', JSON.stringify(data.matches));
+      localStorage.setItem('ft_champs', JSON.stringify(data.championships || []));
     }
-    
-    jsonData.forEach((row, index) => {
-      // Usa le colonne trovate o i nomi predefiniti
-      const campionato = row[colCampionato]?.toString().trim() || 'Sconosciuto';
-      const giornata = row[colGiornata]?.toString().trim() || 'N/A';
-      const dataRaw = row[colData]?.toString().trim() || row['Data']?.toString().trim() || '';
-      const oraRaw = row[colOra]?.toString().trim() || row['Ora']?.toString().trim() || 'TBD';
-      const casa = row[colCasa]?.toString().trim() || row['Squadra Casa']?.toString().trim() || '';
-      const ospite = row[colOspite]?.toString().trim() || row['Squadra Ospite']?.toString().trim() || '';
-      
-      if (!casa || !ospite) {
-        console.warn(`⚠️ Riga ${index + 2} saltata: Squadra casa o ospite mancante`);
-        return;
-      }
-      
-      let dataNormalizzata = normalizeDate(dataRaw);
-      if (!dataNormalizzata) {
-        console.warn(`⚠️ Riga ${index + 2} saltata: Data non valida (${dataRaw})`);
-        return;
-      }
-      
-      let golCasa = 0;
-      let golOspite = 0;
-      let stato = 'Futura';
-      
-      // Controlla se c'è un risultato
-      let risultato = '';
-      
-      // Prova a prendere il risultato dalla colonna Risultato
-      if (colRisultato && row[colRisultato]) {
-        const val = row[colRisultato].toString().trim();
-        if (val && val !== '') {
-          const matchResult = val.match(/(\d+)\s*[-–:.]\s*(\d+)/);
-          if (matchResult) {
-            golCasa = parseInt(matchResult[1], 10);
-            golOspite = parseInt(matchResult[2], 10);
-            risultato = `${golCasa}-${golOspite}`;
-            stato = 'Giocata';
-          }
-        }
-      }
-      
-      // Se non c'è risultato, prova a prendere i gol dalle colonne separate
-      if (!risultato) {
-        let golCasaVal = 0, golOspiteVal = 0;
-        
-        if (colGolCasa && row[colGolCasa] && row[colGolCasa] !== '') {
-          golCasaVal = parseFloat(row[colGolCasa]) || 0;
-        } else if (row['Gol Casa']) {
-          golCasaVal = parseFloat(row['Gol Casa']) || 0;
-        }
-        
-        if (colGolOspite && row[colGolOspite] && row[colGolOspite] !== '') {
-          golOspiteVal = parseFloat(row[colGolOspite]) || 0;
-        } else if (row['Gol Ospite']) {
-          golOspiteVal = parseFloat(row['Gol Ospite']) || 0;
-        }
-        
-        if (golCasaVal > 0 || golOspiteVal > 0) {
-          golCasa = golCasaVal;
-          golOspite = golOspiteVal;
-          risultato = `${golCasa}-${golOspite}`;
-          stato = 'Giocata';
-        }
-      }
-      
-      // Controlla se c'è una colonna stato
-      if (colStato && row[colStato]) {
-        const statoVal = row[colStato].toString().toLowerCase().trim();
-        if (statoVal === 'giocata' || statoVal === 'played' || statoVal === 'finished') {
-          stato = 'Giocata';
-        }
-      }
-      
-      // Se abbiamo un risultato, assicuriamoci che lo stato sia Giocata
-      if (risultato && risultato !== '') {
-        stato = 'Giocata';
-      }
-      
-      const match = {
-        id: Math.random().toString(36).slice(2) + Date.now().toString(36) + index,
-        campionato: campionato,
-        round: giornata,
-        data: dataNormalizzata,
-        ora: oraRaw,
-        casa: casa,
-        ospiti: ospite,
-        stato: stato,
-        golCasa: stato === 'Giocata' ? golCasa : 0,
-        golOspite: stato === 'Giocata' ? golOspite : 0,
-        risultato: stato === 'Giocata' ? `${golCasa}-${golOspite}` : '',
-        citta: 'N/D',
-        _fromExcel: true
-      };
-      
-      matches.push(match);
-      championshipsSet.add(campionato);
-    });
-    
-    if (matches.length === 0) {
-      console.error('❌ Nessuna partita valida trovata nel file Excel');
-      return null;
-    }
-    
-    const championships = Array.from(championshipsSet).map(name => ({
-      name,
-      importedAt: new Date().toISOString()
-    }));
-    
-    console.log(`✅ Caricate ${matches.length} partite dal file Excel (${championships.length} campionati)`);
-    
-    // Salva in localStorage
-    localStorage.setItem('ft_matches', JSON.stringify(matches));
-    localStorage.setItem('ft_champs', JSON.stringify(championships));
     
     dataLoaded = true;
-    
-    return { matches, championships };
-    
+    return data;
   } catch (error) {
-    console.error('❌ Errore nel processare i dati Excel:', error.message);
+    console.error('❌ Errore:', error.message);
     return null;
   }
 }
@@ -5267,35 +5062,31 @@ function App() {
 // AVVIA APP
 // ============================================================
 
-console.log('🚀 Avvio GesssAI-Pro - Caricamento da Excel...');
+console.log('🚀 Avvio GesssAI-Pro - Caricamento da JSON...');
 
 // Svuota localStorage all'avvio per forzare il caricamento
 localStorage.removeItem('ft_matches');
 localStorage.removeItem('ft_champs');
 
-// Carica il file Excel dalla cartella json
+// Carica il file JSON
 loadScrapedData(true).then(data => {
   if (data && data.matches && data.matches.length > 0) {
-    console.log(`✅ ${data.matches.length} partite caricate all'avvio da /Gesss26/json/GesssAI_Input.xlsx`);
+    console.log(`✅ ${data.matches.length} partite caricate all'avvio da /Gesss26/json/matches.json`);
     if (window.updateAppData) {
       window.updateAppData(data);
     }
   } else {
-    console.warn('⚠️ Nessun dato caricato. Assicurati che il file GesssAI_Input.xlsx sia presente in /Gesss26/json/');
+    console.warn('⚠️ Nessun dato caricato.');
     // Mostra un messaggio all'utente
     const root = document.getElementById('root');
     if (root) {
       root.innerHTML = `
         <div style="text-align: center; padding: 50px; color: #e6edf3; background: #0f1419; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
           <div style="font-size: 64px; margin-bottom: 20px;">📂</div>
-          <h2 style="color: #f39c12;">File Excel non trovato</h2>
+          <h2 style="color: #f39c12;">File JSON non trovato</h2>
           <p style="color: #8b949e; max-width: 500px; margin: 20px auto;">
-            Assicurati che il file <strong style="color: #e6edf3;">GesssAI_Input.xlsx</strong> 
+            Assicurati che il file <strong style="color: #e6edf3;">matches.json</strong> 
             sia presente nella cartella <strong style="color: #e6edf3;">/Gesss26/json/</strong> del repository.
-          </p>
-          <p style="color: #8b949e; font-size: 14px;">
-            Il file deve contenere le colonne: <br>
-            <strong style="color: #e6edf3;">Campionato, Data, Squadra Casa, Squadra Ospite</strong>
           </p>
           <button onclick="window.location.reload()" style="margin-top: 20px; padding: 12px 30px; background: #f39c12; color: #000; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer;">
             🔄 Ricarica
