@@ -1,486 +1,389 @@
+import os
+import re
 import json
 import requests
-from datetime import datetime
-from typing import List, Dict
-import os
-import sys
-import subprocess
-import shutil
+import pandas as pd
+from datetime import datetime, timedelta
+from bs4 import BeautifulSoup
 import time
-import re
+import shutil
 
-try:
-    from openpyxl import Workbook
-    from openpyxl.styles import Font, Alignment, PatternFill
-    EXCEL_AVAILABLE = True
-except ImportError:
-    EXCEL_AVAILABLE = False
-    print("⚠️ openpyxl non installato. Installa con: pip install openpyxl")
+# ============================================
+# CONFIGURAZIONE
+# ============================================
 
-# ===== LISTA COMPLETA CAMPIONATI =====
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Crea le cartelle necessarie
+json_folder = os.path.join(BASE_DIR, "json")
+data_folder = os.path.join(BASE_DIR, "data")
+excel_folder = os.path.join(BASE_DIR, "excel")
+
+os.makedirs(json_folder, exist_ok=True)
+os.makedirs(data_folder, exist_ok=True)
+os.makedirs(excel_folder, exist_ok=True)
+
+print("\n" + "=" * 70)
+print("⚽ DOWNLOAD CALENDARI DA FIXTUREDOWNLOAD.COM")
+print("=" * 70)
+print(f"📁 Repository: Gesss26/GesssAI-Pro---Auto")
+print(f"📁 Cartella output: {BASE_DIR}")
+print("=" * 70)
+
+# ============================================
+# LISTA CAMPIONATI - QUELLI CHE FUNZIONANO
+# ============================================
+
 LEAGUES = [
-    {'name': 'Liga Profesional', 'url': 'https://www.matchesio.com/it/competition/liga-profesional-argentina-ar/export/json/'},
-    {'name': 'Jupiler Pro League', 'url': 'https://www.matchesio.com/it/competition/jupiler-pro-league-be/export/json/'},
-    {'name': 'Serie A (Brasile)', 'url': 'https://www.matchesio.com/it/competition/serie-a-br/export/json/'},
-    {'name': 'Super League', 'url': 'https://www.matchesio.com/it/competition/super-league/export/json/'},
-    {'name': 'Premier League', 'url': 'https://www.matchesio.com/it/competition/premier-league-gb-eng/export/json/'},
-    {'name': 'Championship', 'url': 'https://www.matchesio.com/it/competition/championship-gb-eng/export/json/'},
-    {'name': 'Eredivisie', 'url': 'https://www.matchesio.com/it/competition/eredivisie-nl/export/json/'},
-    {'name': 'Ligue 1', 'url': 'https://www.matchesio.com/it/competition/ligue-1-fr/export/json/'},
-    {'name': 'Ligue 2', 'url': 'https://www.matchesio.com/it/competition/ligue-2-fr/export/json/'},
-    {'name': 'Bundesliga', 'url': 'https://www.matchesio.com/it/competition/bundesliga-de/export/json/'},
-    {'name': '2. Bundesliga', 'url': 'https://www.matchesio.com/it/competition/2-bundesliga-de/export/json/'},
-    {'name': 'J1 League', 'url': 'https://www.matchesio.com/it/competition/j1-league/export/json/'},
-    {'name': 'Serie A (Italia)', 'url': 'https://www.matchesio.com/it/competition/serie-a-it/export/json/'},
-    {'name': 'Serie B', 'url': 'https://www.matchesio.com/it/competition/serie-b-it/export/json/'},
-    {'name': 'Serie C - Girone A', 'url': 'https://www.matchesio.com/it/competition/serie-c-girone-a-it/export/json/'},
-    {'name': 'Serie C - Girone B', 'url': 'https://www.matchesio.com/it/competition/serie-c-girone-b-it/export/json/'},
-    {'name': 'Serie C - Girone C', 'url': 'https://www.matchesio.com/it/competition/serie-c-girone-c-it/export/json/'},
-    {'name': 'Serie A Women', 'url': 'https://www.matchesio.com/it/competition/serie-a-women-it/export/json/'},
-    {'name': 'K League 1', 'url': 'https://www.matchesio.com/it/competition/k-league/export/json/'},
-    {'name': 'Eerste Divisie', 'url': 'https://www.matchesio.com/it/competition/eerste-divisie-nl/export/json/'},
-    {'name': 'Primeira Liga', 'url': 'https://www.matchesio.com/it/competition/primeira-liga-pt/export/json/'},
-    {'name': 'Premiership', 'url': 'https://www.matchesio.com/it/competition/premiership-gb-sct/export/json/'},
-    {'name': 'LaLiga', 'url': 'https://www.matchesio.com/it/competition/la-liga-es/export/json/'},
-    {'name': 'Segunda División', 'url': 'https://www.matchesio.com/it/competition/segunda-division-es/export/json/'},
-    {'name': 'Süper Lig', 'url': 'https://www.matchesio.com/it/competition/super-lig-tr/export/json/'},
-    {'name': 'Major League Soccer', 'url': 'https://www.matchesio.com/it/competition/major-league-soccer-us/export/json/'},
+    {'name': 'Premier League', 'url': 'https://fixturedownload.com/results/epl-2026'},
+    {'name': 'La Liga', 'url': 'https://fixturedownload.com/results/la-liga-2026'},
+    {'name': 'Bundesliga', 'url': 'https://fixturedownload.com/results/bundesliga-2026'},
+    {'name': 'Ligue 1', 'url': 'https://fixturedownload.com/results/ligue-1-2026'},
+    {'name': 'Serie A', 'url': 'https://fixturedownload.com/results/serie-a-2026'},
+    {'name': 'Eredivisie', 'url': 'https://fixturedownload.com/results/eredivisie-2026'},
+    {'name': 'Primeira Liga', 'url': 'https://fixturedownload.com/results/primeira-liga-2026'},
+    {'name': 'Scottish Premiership', 'url': 'https://fixturedownload.com/results/scottish-premiership-2026'},
+    {'name': 'Super Lig', 'url': 'https://fixturedownload.com/results/super-lig-2026'},
+    {'name': 'Championship', 'url': 'https://fixturedownload.com/results/championship-2026'},
+    {'name': 'EFL League One', 'url': 'https://fixturedownload.com/results/efl-league-one-2026'},
+    {'name': 'EFL League Two', 'url': 'https://fixturedownload.com/results/efl-league-two-2026'},
+    {'name': 'MLS', 'url': 'https://fixturedownload.com/results/mls-2026'},
+    {'name': 'NWSL', 'url': 'https://fixturedownload.com/results/nwsl-2026'},
 ]
 
-# ===== CONFIGURAZIONE GITHUB =====
-GITHUB_REPO_PATH = r"D:\ai\gesssai-pro---auto"
-GITHUB_REMOTE = "origin"
-GITHUB_BRANCH = "master"
-GITHUB_FOLDER = "json"
-REPO_JSON_PATH = os.path.join(GITHUB_REPO_PATH, GITHUB_FOLDER)
+# ============================================
+# FUNZIONI DI UTILITÀ
+# ============================================
 
-def convert_date_to_italian(date_str: str) -> str:
-    """Converte una data da YYYY-MM-DD a DD/MM/YYYY."""
+def normalize_date(date_str):
+    """Normalizza una data in formato YYYY-MM-DD"""
     if not date_str:
-        return ''
-    date_str = str(date_str)
+        return None
     
-    # Se è già DD/MM/YYYY
-    if re.match(r'^\d{2}/\d{2}/\d{4}$', date_str):
-        return date_str
+    # Se è già in formato YYYY-MM-DD
+    if re.match(r'^\d{4}-\d{2}-\d{2}', date_str):
+        return date_str[:10]
     
-    # Se è YYYY-MM-DD
-    match = re.search(r'(\d{4})-(\d{2})-(\d{2})', date_str)
-    if match:
-        return f"{match.group(3)}/{match.group(2)}/{match.group(1)}"
+    # Se è in formato DD/MM/YYYY
+    if re.match(r'^\d{2}/\d{2}/\d{4}', date_str):
+        parts = date_str.split('/')
+        return f"{parts[2]}-{parts[1]}-{parts[0]}"
+    
+    # Se è un numero seriale Excel
+    if date_str.isdigit():
+        serial = int(date_str)
+        excel_epoch = datetime(1899, 12, 30)
+        date = excel_epoch + timedelta(days=serial)
+        return date.strftime('%Y-%m-%d')
     
     return date_str
 
-def parse_date_for_sorting(date_str: str) -> str:
-    """Converte DD/MM/YYYY in YYYY-MM-DD per l'ordinamento."""
+def parse_date_from_string(date_str):
+    """Converte una stringa data in oggetto datetime"""
     if not date_str:
-        return '9999-99-99'
+        return datetime.min
     
-    # Se è DD/MM/YYYY
-    match = re.search(r'(\d{2})/(\d{2})/(\d{4})', date_str)
-    if match:
-        return f"{match.group(3)}-{match.group(2)}-{match.group(1)}"
+    normalized = normalize_date(date_str)
+    if not normalized:
+        return datetime.min
     
-    return date_str
-
-def parse_matches_from_json(data, league_name: str) -> List[Dict]:
-    """Estrae le partite dal JSON."""
-    matches = []
-    
-    if not isinstance(data, list):
-        print(f"   ⚠️ Il JSON non è una lista, è {type(data)}")
-        return []
-    
-    print(f"   📊 Trovate {len(data)} partite")
-    
-    for match in data:
-        if not isinstance(match, dict):
-            continue
-        
-        # === SQUADRE ===
-        home_team = match.get('homeTeam', '') or match.get('home_team', '') or ''
-        away_team = match.get('awayTeam', '') or match.get('away_team', '') or ''
-        
-        # === DATA ===
-        date_raw = match.get('date', '')
-        date_str = convert_date_to_italian(date_raw)
-        
-        # === ORA ===
-        time_str = match.get('time', '')
-        
-        # === GIORNATA ===
-        matchday = match.get('matchday', '')
-        
-        # === RISULTATO E GOL ===
-        result_str = match.get('result', '')
-        home_score = ''
-        away_score = ''
-        result = ''
-        
-        if result_str:
-            # Gestisce sia "1-1" che "1–1"
-            result_clean = result_str.replace('–', '-')
-            if '-' in result_clean:
-                parts = result_clean.split('-')
-                if len(parts) == 2:
-                    home_score = parts[0].strip()
-                    away_score = parts[1].strip()
-                    result = f"{home_score}–{away_score}"
-            else:
-                result = result_str
-        
-        # === STATO ===
-        status = match.get('status', '').lower()
-        
-        # Mappa lo stato dal JSON allo stato italiano
-        if status in ['giocata', 'played', 'finished', 'complete', 'completed', 'ft']:
-            status_ita = 'Giocata'
-        elif status in ['da giocare', 'scheduled', 'upcoming', 'future', 'not started', '']:
-            if home_score and away_score:
-                status_ita = 'Giocata'
-            else:
-                status_ita = 'Futura'
-        elif status in ['in corso', 'live', 'in progress']:
-            status_ita = 'In corso'
-        elif status in ['posticipata', 'postponed']:
-            status_ita = 'Posticipata'
-        else:
-            status_ita = 'Futura'
-        
-        # === CITTÀ E STADIO ===
-        city = match.get('city', '')
-        stadium = match.get('stadium', '')
-        
-        # Campo per l'ordinamento (non visibile nell'Excel)
-        sort_date = parse_date_for_sorting(date_str)
-        
-        matches.append({
-            'campionato': league_name,
-            'data': date_str,
-            'ora': time_str,
-            'giornata': str(matchday),
-            'squadra_casa': home_team.title() if home_team else '',
-            'squadra_ospite': away_team.title() if away_team else '',
-            'risultato': result,
-            'gol_casa': home_score,
-            'gol_ospite': away_score,
-            'citta': city.title() if city else '',
-            'stadio': stadium,
-            'stato': status_ita,
-            '_sort_date': sort_date  # Campo nascosto per ordinamento
-        })
-    
-    return matches
-
-def sort_matches_by_date(all_matches: List[Dict]) -> List[Dict]:
-    """
-    Ordina le partite per data cronologica.
-    Prima ordina per data (YYYY-MM-DD), poi per campionato.
-    """
-    # Rimuovi eventuali duplicati
-    unique_matches = []
-    seen = set()
-    
-    for match in all_matches:
-        # Crea una chiave unica per ogni partita
-        key = (match['campionato'], match['data'], match['ora'], 
-               match['squadra_casa'], match['squadra_ospite'])
-        if key not in seen:
-            seen.add(key)
-            unique_matches.append(match)
-    
-    # Ordina per data (cronologico) e poi per campionato
-    unique_matches.sort(key=lambda x: (x['_sort_date'], x['campionato']))
-    
-    # Rimuovi i campi di ordinamento
-    for match in unique_matches:
-        match.pop('_sort_date', None)
-    
-    return unique_matches
-
-def fetch_league_json(url: str, league_name: str) -> List[Dict]:
-    """Scarica il JSON da un campionato."""
     try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-        response = requests.get(url, timeout=30, headers=headers)
-        response.raise_for_status()
+        return datetime.strptime(normalized, '%Y-%m-%d')
+    except:
+        return datetime.min
+
+# ============================================
+# FUNZIONE PER SCARICARE I DATI
+# ============================================
+
+def fetch_league_data(league_name, url):
+    """Scarica i dati di un campionato da fixturedownload.com"""
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+    }
+    
+    try:
+        response = requests.get(url, headers=headers, timeout=30)
         
-        data = response.json()
-        matches = parse_matches_from_json(data, league_name)
+        if response.status_code != 200:
+            print(f"   ❌ HTTP {response.status_code}")
+            return None
+        
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Cerca la tabella dei risultati
+        table = None
+        for t in soup.find_all('table'):
+            if 'Round Number' in t.text and 'Date' in t.text:
+                table = t
+                break
+        
+        if not table:
+            print(f"   ⚠️ Tabella non trovata")
+            return None
+        
+        rows = table.find_all('tr')
+        matches = []
+        current_round = ''
+        
+        for row in rows:
+            cells = row.find_all(['td', 'th'])
+            if len(cells) < 5:
+                continue
+            
+            try:
+                round_raw = cells[0].get_text(strip=True) if len(cells) > 0 else ''
+                date_raw = cells[1].get_text(strip=True) if len(cells) > 1 else ''
+                home = cells[3].get_text(strip=True) if len(cells) > 3 else ''
+                away = cells[4].get_text(strip=True) if len(cells) > 4 else ''
+                result = cells[5].get_text(strip=True) if len(cells) > 5 else ''
+                
+                if round_raw == 'Round Number' or home == 'Home Team':
+                    continue
+                
+                if round_raw and round_raw.isdigit():
+                    current_round = round_raw
+                wk = current_round
+                
+                if not home or not away:
+                    continue
+                
+                # Normalizza la data
+                date_normalized = normalize_date(date_raw)
+                if not date_normalized:
+                    continue
+                
+                # Estrai ora
+                time_str = ''
+                if date_raw:
+                    parts = date_raw.split(' ')
+                    if len(parts) >= 2:
+                        date_normalized = normalize_date(parts[0])
+                        time_str = parts[1] if len(parts) > 1 else ''
+                
+                # Analizza il risultato
+                gol_casa = 0
+                gol_ospite = 0
+                stato = 'Futura'
+                risultato = ''
+                
+                if result and result != '-' and result != '':
+                    score_parts = re.findall(r'(\d+)\s*[-–:]\s*(\d+)', result)
+                    if score_parts:
+                        gol_casa = int(score_parts[0][0])
+                        gol_ospite = int(score_parts[0][1])
+                        risultato = f"{gol_casa}-{gol_ospite}"
+                        stato = 'Giocata'
+                
+                matches.append({
+                    'Campionato': league_name,
+                    'Numero Giornata (Wk)': wk,
+                    'Data': date_normalized,
+                    'Ora': time_str,
+                    'Squadra Casa': home,
+                    'Squadra Ospite': away,
+                    'Risultato': risultato,
+                    'Gol Casa': gol_casa,
+                    'Gol Ospite': gol_ospite,
+                    'Stato': stato,
+                })
+                
+            except Exception as e:
+                continue
+        
+        if not matches:
+            print(f"   ⚠️ Nessuna partita trovata")
+            return None
+        
         return matches
+        
     except Exception as e:
-        print(f"❌ Errore nel download di {league_name}: {e}")
-        return []
-
-def save_excel(all_matches: List[Dict]) -> str:
-    """Salva i dati in Excel (.xlsx)."""
-    if not all_matches or not EXCEL_AVAILABLE:
-        return None
-    
-    try:
-        os.makedirs(REPO_JSON_PATH, exist_ok=True)
-        
-        # Ordina le partite per data prima di salvare
-        all_matches = sort_matches_by_date(all_matches)
-        
-        wb = Workbook()
-        ws = wb.active
-        ws.title = "Calcio"
-        
-        headers = ['Campionato', 'Data', 'Ora', 'Giornata', 'Squadra Casa', 'Squadra Ospite', 
-                   'Risultato', 'Gol Casa', 'Gol Ospite', 'Città', 'Stadio', 'Stato']
-        
-        for col, header in enumerate(headers, 1):
-            cell = ws.cell(row=1, column=col, value=header)
-            cell.font = Font(bold=True, color="FFFFFF")
-            cell.fill = PatternFill(start_color="1D4ED8", end_color="1D4ED8", fill_type="solid")
-            cell.alignment = Alignment(horizontal="center", vertical="center")
-        
-        for row, match in enumerate(all_matches, 2):
-            ws.cell(row=row, column=1, value=match['campionato'])
-            ws.cell(row=row, column=2, value=match['data'])
-            ws.cell(row=row, column=3, value=match['ora'])
-            ws.cell(row=row, column=4, value=match['giornata'])
-            ws.cell(row=row, column=5, value=match['squadra_casa'])
-            ws.cell(row=row, column=6, value=match['squadra_ospite'])
-            ws.cell(row=row, column=7, value=match['risultato'])
-            ws.cell(row=row, column=8, value=match['gol_casa'] if match['gol_casa'] else None)
-            ws.cell(row=row, column=9, value=match['gol_ospite'] if match['gol_ospite'] else None)
-            ws.cell(row=row, column=10, value=match['citta'])
-            ws.cell(row=row, column=11, value=match.get('stadio', ''))
-            ws.cell(row=row, column=12, value=match['stato'])
-        
-        column_widths = [25, 15, 10, 10, 22, 22, 12, 10, 10, 18, 25, 12]
-        for i, width in enumerate(column_widths, 1):
-            ws.column_dimensions[chr(64 + i)].width = width
-        
-        excel_path = os.path.join(REPO_JSON_PATH, 'GesssAI_Input.xlsx')
-        temp_path = os.path.join(REPO_JSON_PATH, 'GesssAI_Input_temp.xlsx')
-        
-        if os.path.exists(excel_path):
-            try:
-                os.remove(excel_path)
-            except:
-                pass
-        
-        wb.save(temp_path)
-        wb.close()
-        del wb
-        
-        time.sleep(1)
-        
-        try:
-            os.rename(temp_path, excel_path)
-        except:
-            excel_path = temp_path
-        
-        return excel_path if os.path.exists(excel_path) else None
-    except Exception as e:
-        print(f"⚠️ Errore nel salvataggio Excel: {e}")
+        print(f"   ❌ Errore: {str(e)}")
         return None
 
-def save_json(all_matches: List[Dict]):
-    """Salva i dati in JSON."""
-    if not all_matches:
-        return None, None
-    
-    try:
-        os.makedirs(REPO_JSON_PATH, exist_ok=True)
-        
-        # Ordina le partite per data prima di salvare
-        all_matches = sort_matches_by_date(all_matches)
-        
-        json_path = os.path.join(REPO_JSON_PATH, 'GesssAI_Input.json')
-        temp_json_path = os.path.join(REPO_JSON_PATH, 'GesssAI_Input_temp.json')
-        
-        if os.path.exists(json_path):
-            try:
-                os.remove(json_path)
-            except:
-                pass
-        
-        with open(temp_json_path, 'w', encoding='utf-8') as f:
-            json.dump(all_matches, f, ensure_ascii=False, indent=2)
-        
-        try:
-            os.rename(temp_json_path, json_path)
-        except:
-            json_path = temp_json_path
-        
-        raw_json_path = os.path.join(REPO_JSON_PATH, 'matches.json')
-        temp_raw_path = os.path.join(REPO_JSON_PATH, 'matches_temp.json')
-        
-        if os.path.exists(raw_json_path):
-            try:
-                os.remove(raw_json_path)
-            except:
-                pass
-        
-        with open(temp_raw_path, 'w', encoding='utf-8') as f:
-            json.dump(all_matches, f, ensure_ascii=False, indent=2)
-        
-        try:
-            os.rename(temp_raw_path, raw_json_path)
-        except:
-            raw_json_path = temp_raw_path
-        
-        time.sleep(0.5)
-        
-        return json_path, raw_json_path
-    except Exception as e:
-        print(f"⚠️ Errore nel salvataggio JSON: {e}")
-        return None, None
+# ============================================
+# FUNZIONE PER SCARICARE TUTTI I CAMPIONATI
+# ============================================
 
-def push_to_github():
-    """Esegue git add, commit e push dei file nel repository."""
-    if not os.path.exists(GITHUB_REPO_PATH):
-        print(f"❌ Repository non trovato in: {GITHUB_REPO_PATH}")
-        return False
-    
-    try:
-        current_dir = os.getcwd()
-        os.chdir(GITHUB_REPO_PATH)
-        
-        # Elimina file temporanei
-        for f in os.listdir(REPO_JSON_PATH):
-            if 'temp' in f:
-                try:
-                    os.remove(os.path.join(REPO_JSON_PATH, f))
-                except:
-                    pass
-        
-        print("\n🔄 Eseguo git add...")
-        subprocess.run(['git', 'add', GITHUB_FOLDER + '/'], check=True, capture_output=True)
-        print(f"   ✅ File aggiunti")
-        
-        print("🔄 Eseguo git commit...")
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M')
-        commit_msg = f"Aggiornati dati calcio da matchesio.com ({timestamp})"
-        
-        commit_result = subprocess.run(['git', 'commit', '-m', commit_msg], 
-                                      capture_output=True, text=True)
-        
-        if "nothing to commit" in commit_result.stdout:
-            print("   ℹ️ Nessuna modifica da committare")
-            os.chdir(current_dir)
-            return True
-        
-        print("   ✅ Commit effettuato")
-        
-        print(f"🔄 Eseguo git push a {GITHUB_REMOTE}/{GITHUB_BRANCH}...")
-        result = subprocess.run(['git', 'push', GITHUB_REMOTE, GITHUB_BRANCH], 
-                               capture_output=True, text=True)
-        
-        if result.returncode == 0:
-            print("\n✅ FILE INVIATI CON SUCCESSO SU GITHUB!")
-            print(f"   📁 Visualizza: https://github.com/Gesss26/GesssAI-Pro---Auto/tree/{GITHUB_BRANCH}/{GITHUB_FOLDER}")
-            os.chdir(current_dir)
-            return True
-        else:
-            print(f"\n❌ Errore durante il push: {result.stderr}")
-            os.chdir(current_dir)
-            return False
-    except Exception as e:
-        print(f"\n❌ Errore: {e}")
-        return False
-
-def main():
-    print("="*70)
-    print("🚀 Avvio download calendari calcio da matchesio.com...")
-    print(f"📋 {len(LEAGUES)} campionati da scaricare")
-    print(f"📁 I file verranno salvati in: {REPO_JSON_PATH}")
-    print("="*70)
-    print()
-    
+def scarica_tutti_i_campionati():
+    """Scarica tutti i campionati"""
     all_matches = []
-    errors = []
+    successi = 0
+    errori = 0
     
-    os.makedirs(REPO_JSON_PATH, exist_ok=True)
+    print(f"\n📋 {len(LEAGUES)} campionati da scaricare")
+    print("=" * 70)
     
-    for i, league in enumerate(LEAGUES, 1):
-        league_name = league['name']
-        print(f"⏳ [{i:2d}/{len(LEAGUES)}] Scaricando {league_name}...")
+    for idx, league in enumerate(LEAGUES, 1):
+        print(f"\n⏳ [{idx}/{len(LEAGUES)}] Scaricando {league['name']}...")
+        print(f"   URL: {league['url']}")
         
-        matches = fetch_league_json(league['url'], league_name)
+        matches = fetch_league_data(league['name'], league['url'])
         
         if matches:
             all_matches.extend(matches)
-            giocate = sum(1 for m in matches if m['stato'] == 'Giocata')
-            future = sum(1 for m in matches if m['stato'] == 'Futura')
+            successi += 1
+            giocate = sum(1 for m in matches if m['Stato'] == 'Giocata')
+            future = len(matches) - giocate
             print(f"   ✅ {len(matches)} partite ({giocate} giocate, {future} future)")
         else:
-            errors.append(league_name)
-            print(f"   ❌ Nessuna partita trovata")
+            errori += 1
+            print(f"   ❌ Errore durante il download")
         
-        time.sleep(0.5)
+        time.sleep(1)
     
-    if all_matches:
-        print("\n💾 Salvataggio file in ordine cronologico per data...")
-        
-        excel_path = save_excel(all_matches)
-        json_path, raw_json_path = save_json(all_matches)
-        
-        # Verifica file salvati
-        if excel_path and os.path.exists(excel_path):
-            print(f"   ✅ GesssAI_Input.xlsx ({os.path.getsize(excel_path):,} bytes)")
-        else:
-            print(f"   ❌ GesssAI_Input.xlsx non creato")
-        
-        if json_path and os.path.exists(json_path):
-            print(f"   ✅ GesssAI_Input.json ({os.path.getsize(json_path):,} bytes)")
-        else:
-            print(f"   ❌ GesssAI_Input.json non creato")
-        
-        if raw_json_path and os.path.exists(raw_json_path):
-            print(f"   ✅ matches.json ({os.path.getsize(raw_json_path):,} bytes)")
-        else:
-            print(f"   ❌ matches.json non creato")
-        
-        # Statistiche finali
-        print("\n" + "="*70)
-        print("📊 STATISTICHE FINALI")
-        print("="*70)
-        
-        giocate = sum(1 for m in all_matches if m['stato'] == 'Giocata')
-        future = sum(1 for m in all_matches if m['stato'] == 'Futura')
-        
-        print(f"   • Partite totali: {len(all_matches):,}")
-        print(f"   • Giocate: {giocate:,}")
-        print(f"   • Future: {future:,}")
-        
-        print("\n📋 DISTRIBUZIONE PER CAMPIONATO:")
-        league_counts = {}
-        for match in all_matches:
-            league = match['campionato']
-            league_counts[league] = league_counts.get(league, 0) + 1
-        
-        for league, count in sorted(league_counts.items()):
-            print(f"   • {league}: {count:,} partite")
-        
-        # Mostra le prime e ultime date
-        # Nota: i campi _sort_date sono già stati rimossi da sort_matches_by_date
-        print(f"\n📅 Le partite sono in ordine cronologico dalla prima all'ultima data.")
-        
-        if errors:
-            print(f"\n⚠️ Campionati senza partite ({len(errors)}):")
-            for e in errors:
-                print(f"   • {e}")
-        
-        print("\n📤 INVIO SU GITHUB...")
-        push_to_github()
-    else:
-        print("\n❌ Nessuna partita scaricata.")
+    print("\n" + "=" * 70)
+    print(f"📊 Download completato: {successi} campionati, {errori} errori")
+    print(f"   Totale partite: {len(all_matches)}")
+    print("=" * 70)
     
-    print("\n" + "="*70)
-    input("\n🔄 Premi ENTER per uscire...")
+    return all_matches
 
-if __name__ == "__main__":
+# ============================================
+# FUNZIONE PER SALVARE I DATI
+# ============================================
+
+def salva_dati(matches):
+    """Salva i dati in Excel e JSON"""
+    if not matches:
+        print("❌ Nessun dato da salvare!")
+        return False
+    
+    # Ordina per data
+    matches.sort(key=lambda m: parse_date_from_string(m.get('Data', '')))
+    print(f"📅 {len(matches)} partite ordinate per data")
+    
+    # Crea DataFrame
+    df = pd.DataFrame(matches)
+    
+    # Salva Excel
+    excel_path = os.path.join(excel_folder, "GesssAI_Input.xlsx")
     try:
-        main()
+        df.to_excel(excel_path, index=False)
+        file_size = os.path.getsize(excel_path)
+        print(f"   ✅ GesssAI_Input.xlsx ({file_size:,} bytes) - {excel_path}")
     except Exception as e:
-        print(f"\n❌ ERRORE: {e}")
+        print(f"   ❌ Errore salvataggio Excel: {e}")
+        return False
+    
+    # Crea dati JSON
+    campionati_set = set()
+    matches_data = []
+    
+    for _, row in df.iterrows():
+        campionato = row.get('Campionato', 'Sconosciuto')
+        campionati_set.add(campionato)
+        
+        match_id = f"{campionato}_{row.get('Data', '')}_{row.get('Squadra Casa', '')}_{row.get('Squadra Ospite', '')}"
+        match_id = re.sub(r'[^a-zA-Z0-9_]', '_', match_id)
+        match_id = re.sub(r'_+', '_', match_id)
+        
+        stato = row.get('Stato', 'Futura')
+        if stato == 'Giocata':
+            risultato = f"{row.get('Gol Casa', 0)}-{row.get('Gol Ospite', 0)}"
+        else:
+            risultato = ""
+        
+        match = {
+            "id": match_id,
+            "campionato": campionato,
+            "round": str(row.get('Numero Giornata (Wk)', '')),
+            "data": row.get('Data', ''),
+            "ora": row.get('Ora', ''),
+            "casa": row.get('Squadra Casa', ''),
+            "ospiti": row.get('Squadra Ospite', ''),
+            "stato": stato,
+            "golCasa": int(row.get('Gol Casa', 0)),
+            "golOspite": int(row.get('Gol Ospite', 0)),
+            "risultato": risultato,
+            "citta": "N/D"
+        }
+        matches_data.append(match)
+    
+    data = {
+        "championships": [{"name": c, "importedAt": datetime.now().isoformat()} for c in sorted(campionati_set)],
+        "matches": matches_data,
+        "apiKeys": {},
+        "theme": "Scuro Blu Notte",
+        "customTheme": None,
+        "schedineHistory": [],
+        "selectedFamiglie": ["dc_under", "mg_casa_ospite", "over"],
+        "exportedAt": datetime.now().isoformat()
+    }
+    
+    # Salva JSON in json/
+    json_path = os.path.join(json_folder, "GesssAI_Input.json")
+    try:
+        with open(json_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        print(f"   ✅ GesssAI_Input.json ({os.path.getsize(json_path):,} bytes) - {json_path}")
+    except Exception as e:
+        print(f"   ❌ Errore salvataggio JSON: {e}")
+        return False
+    
+    # Copia in data/matches.json
+    data_json_path = os.path.join(data_folder, "matches.json")
+    try:
+        shutil.copy2(json_path, data_json_path)
+        print(f"   ✅ matches.json copiato in data/ - {data_json_path}")
+    except Exception as e:
+        print(f"   ⚠️ Errore copia matches.json: {e}")
+    
+    # Copia anche nella root (per compatibilità)
+    root_json_path = os.path.join(BASE_DIR, "matches.json")
+    try:
+        shutil.copy2(json_path, root_json_path)
+        print(f"   ✅ matches.json copiato in root - {root_json_path}")
+    except Exception as e:
+        print(f"   ⚠️ Errore copia root: {e}")
+    
+    # Statistiche
+    giocate = len(df[df['Stato'] == 'Giocata'])
+    future = len(df) - giocate
+    campionati = len(campionati_set)
+    
+    print("\n" + "=" * 70)
+    print("📊 STATISTICHE FINALI")
+    print("=" * 70)
+    print(f"   • Partite totali: {len(df):,}")
+    print(f"   • Giocate: {giocate:,}")
+    print(f"   • Future: {future:,}")
+    print(f"   • Campionati: {campionati}")
+    print("=" * 70)
+    
+    return True
+
+# ============================================
+# MAIN
+# ============================================
+
+def main():
+    try:
+        # Scarica tutti i campionati
+        all_matches = scarica_tutti_i_campionati()
+        
+        if all_matches:
+            # Salva i dati
+            success = salva_dati(all_matches)
+            if success:
+                print("\n✅ Download e salvataggio completati con successo!")
+            else:
+                print("\n❌ Errore durante il salvataggio dei dati!")
+        else:
+            print("\n❌ Nessun dato scaricato!")
+    
+    except KeyboardInterrupt:
+        print("\n\n⏹️ Download interrotto dall'utente.")
+    except Exception as e:
+        print(f"\n❌ Errore: {str(e)}")
         import traceback
         traceback.print_exc()
-        input("\n🔄 Premi ENTER per uscire...")
+    
+    print("\n" + "=" * 70)
+    print("🏁 Script terminato")
+    print("=" * 70)
+
+if __name__ == "__main__":
+    main()
