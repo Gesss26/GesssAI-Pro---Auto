@@ -61,233 +61,6 @@ os.makedirs(EXCEL_FOLDER, exist_ok=True)
 os.makedirs(JSON_FOLDER, exist_ok=True)
 
 # ================================================================
-# ===== DIZIONARIO DI TRADUZIONE PER I NOMI DELLE SQUADRE =====
-# ================================================================
-
-TEAM_NAME_MAPPING = {
-    # ===== ITALIA - Serie A =====
-    'Inter Milan': 'Inter',
-    'Inter': 'Inter',
-    'AC Milan': 'Milan',
-    'Milan': 'Milan',
-    'Atalanta BC': 'Atalanta',
-    'Atalanta': 'Atalanta',
-    'Juventus FC': 'Juventus',
-    'Juventus': 'Juventus',
-    'SSC Napoli': 'Napoli',
-    'Napoli': 'Napoli',
-    'AS Roma': 'Roma',
-    'Roma': 'Roma',
-    'SS Lazio': 'Lazio',
-    'Lazio': 'Lazio',
-    'ACF Fiorentina': 'Fiorentina',
-    'Fiorentina': 'Fiorentina',
-    'Bologna FC': 'Bologna',
-    'Bologna': 'Bologna',
-    'Torino FC': 'Torino',
-    'Torino': 'Torino',
-    'Udinese Calcio': 'Udinese',
-    'Udinese': 'Udinese',
-    'Genoa CFC': 'Genoa',
-    'Genoa': 'Genoa',
-    'Hellas Verona': 'Verona',
-    'Verona': 'Verona',
-    'Empoli FC': 'Empoli',
-    'Empoli': 'Empoli',
-    'Cagliari Calcio': 'Cagliari',
-    'Cagliari': 'Cagliari',
-    'US Lecce': 'Lecce',
-    'Lecce': 'Lecce',
-    'AC Monza': 'Monza',
-    'Monza': 'Monza',
-    'Parma Calcio': 'Parma',
-    'Parma': 'Parma',
-    'Como 1907': 'Como',
-    'Como': 'Como',
-    'Venezia FC': 'Venezia',
-    'Venezia': 'Venezia',
-    
-    # ===== INGHILTERRA - Premier League =====
-    'Arsenal FC': 'Arsenal',
-    'Arsenal': 'Arsenal',
-    'Aston Villa FC': 'Aston Villa',
-    'Aston Villa': 'Aston Villa',
-    'AFC Bournemouth': 'Bournemouth',
-    'Bournemouth': 'Bournemouth',
-    'Brentford FC': 'Brentford',
-    'Brentford': 'Brentford',
-    'Brighton & Hove Albion': 'Brighton',
-    'Brighton and Hove Albion': 'Brighton',
-    'Brighton': 'Brighton',
-    'Chelsea FC': 'Chelsea',
-    'Chelsea': 'Chelsea',
-    'Crystal Palace FC': 'Crystal Palace',
-    'Crystal Palace': 'Crystal Palace',
-    'Everton FC': 'Everton',
-    'Everton': 'Everton',
-    'Fulham FC': 'Fulham',
-    'Fulham': 'Fulham',
-    'Ipswich Town': 'Ipswich Town',
-    'Ipswich': 'Ipswich Town',
-    'Leicester City': 'Leicester City',
-    'Leicester': 'Leicester City',
-    'Liverpool FC': 'Liverpool',
-    'Liverpool': 'Liverpool',
-    'Manchester City': 'Manchester City',
-    'Man City': 'Manchester City',
-    'Manchester United': 'Manchester United',
-    'Man United': 'Manchester United',
-    'Newcastle United': 'Newcastle United',
-    'Newcastle': 'Newcastle United',
-    'Nottingham Forest': 'Nottingham Forest',
-    'Nottm Forest': 'Nottingham Forest',
-    'Southampton FC': 'Southampton',
-    'Southampton': 'Southampton',
-    'Tottenham Hotspur': 'Tottenham',
-    'Tottenham': 'Tottenham',
-    'West Ham United': 'West Ham',
-    'West Ham': 'West Ham',
-    'Wolverhampton Wanderers': 'Wolverhampton',
-    'Wolves': 'Wolverhampton',
-    
-    # ===== SPAGNA - La Liga =====
-    'Real Madrid CF': 'Real Madrid',
-    'Real Madrid': 'Real Madrid',
-    'FC Barcelona': 'Barcelona',
-    'Barcelona': 'Barcelona',
-    'Atletico Madrid': 'Atletico Madrid',
-    'Atlético Madrid': 'Atletico Madrid',
-    'Athletic Club': 'Athletic Bilbao',
-    'Athletic Bilbao': 'Athletic Bilbao',
-    'Real Sociedad': 'Real Sociedad',
-    'Real Betis': 'Real Betis',
-    'Betis': 'Real Betis',
-    'Villarreal CF': 'Villarreal',
-    'Villarreal': 'Villarreal',
-    'Valencia CF': 'Valencia',
-    'Valencia': 'Valencia',
-    'Sevilla FC': 'Sevilla',
-    'Sevilla': 'Sevilla',
-    'Girona FC': 'Girona',
-    'Girona': 'Girona',
-    'Getafe CF': 'Getafe',
-    'Getafe': 'Getafe',
-    'CA Osasuna': 'Osasuna',
-    'Osasuna': 'Osasuna',
-    'RC Celta': 'Celta Vigo',
-    'Celta Vigo': 'Celta Vigo',
-    'Rayo Vallecano': 'Rayo Vallecano',
-    'Rayo': 'Rayo Vallecano',
-    'RCD Mallorca': 'Mallorca',
-    'Mallorca': 'Mallorca',
-    'UD Las Palmas': 'Las Palmas',
-    'Las Palmas': 'Las Palmas',
-    'Deportivo Alaves': 'Alaves',
-    'Alaves': 'Alaves',
-    'RCD Espanyol': 'Espanyol',
-    'Espanyol': 'Espanyol',
-    'CD Leganes': 'Leganes',
-    'Leganes': 'Leganes',
-    
-    # ===== GERMANIA - Bundesliga =====
-    'Bayern Munich': 'Bayern Munich',
-    'Bayern München': 'Bayern Munich',
-    'Borussia Dortmund': 'Borussia Dortmund',
-    'Dortmund': 'Borussia Dortmund',
-    'RB Leipzig': 'RB Leipzig',
-    'Leipzig': 'RB Leipzig',
-    'Bayer Leverkusen': 'Bayer Leverkusen',
-    'Leverkusen': 'Bayer Leverkusen',
-    'Eintracht Frankfurt': 'Eintracht Frankfurt',
-    'Frankfurt': 'Eintracht Frankfurt',
-    'SC Freiburg': 'Freiburg',
-    'Freiburg': 'Freiburg',
-    'VfB Stuttgart': 'Stuttgart',
-    'Stuttgart': 'Stuttgart',
-    'VfL Wolfsburg': 'Wolfsburg',
-    'Wolfsburg': 'Wolfsburg',
-    'Mainz 05': 'Mainz',
-    'Mainz': 'Mainz',
-    'FC Augsburg': 'Augsburg',
-    'Augsburg': 'Augsburg',
-    '1. FC Union Berlin': 'Union Berlin',
-    'Union Berlin': 'Union Berlin',
-    'TSG Hoffenheim': 'Hoffenheim',
-    'Hoffenheim': 'Hoffenheim',
-    'Werder Bremen': 'Werder Bremen',
-    'Bremen': 'Werder Bremen',
-    'Borussia Mönchengladbach': 'Borussia Monchengladbach',
-    'Mönchengladbach': 'Borussia Monchengladbach',
-    '1. FC Heidenheim': 'Heidenheim',
-    'Heidenheim': 'Heidenheim',
-    'SV Darmstadt': 'Darmstadt',
-    'Darmstadt': 'Darmstadt',
-    'VfL Bochum': 'Bochum',
-    'Bochum': 'Bochum',
-    'FC Koln': 'Koln',
-    'Koln': 'Koln',
-    
-    # ===== FRANCIA - Ligue 1 =====
-    'Paris Saint-Germain': 'PSG',
-    'PSG': 'PSG',
-    'Olympique Marseille': 'Marseille',
-    'Marseille': 'Marseille',
-    'Olympique Lyonnais': 'Lyon',
-    'Lyon': 'Lyon',
-    'AS Monaco': 'Monaco',
-    'Monaco': 'Monaco',
-    'LOSC Lille': 'Lille',
-    'Lille': 'Lille',
-    'OGC Nice': 'Nice',
-    'Nice': 'Nice',
-    'Stade Rennais': 'Rennes',
-    'Rennes': 'Rennes',
-    'RC Strasbourg': 'Strasbourg',
-    'Strasbourg': 'Strasbourg',
-    'Montpellier HSC': 'Montpellier',
-    'Montpellier': 'Montpellier',
-    'Toulouse FC': 'Toulouse',
-    'Toulouse': 'Toulouse',
-    'Stade de Reims': 'Reims',
-    'Reims': 'Reims',
-    'Stade Brestois': 'Brest',
-    'Brest': 'Brest',
-    'FC Nantes': 'Nantes',
-    'Nantes': 'Nantes',
-    'RC Lens': 'Lens',
-    'Lens': 'Lens',
-    'FC Metz': 'Metz',
-    'Metz': 'Metz',
-    'FC Lorient': 'Lorient',
-    'Lorient': 'Lorient',
-    'Clermont Foot': 'Clermont',
-    'Clermont': 'Clermont',
-    'Le Havre AC': 'Le Havre',
-    'Le Havre': 'Le Havre',
-}
-
-def translate_team_name(team_name: str) -> str:
-    """Traduce il nome della squadra secondo il dizionario."""
-    if not team_name:
-        return team_name
-    
-    team_name_clean = team_name.strip()
-    
-    # Corrispondenza esatta
-    for key, value in TEAM_NAME_MAPPING.items():
-        if team_name_clean.lower() == key.lower():
-            return value
-    
-    # Corrispondenza parziale
-    for key, value in TEAM_NAME_MAPPING.items():
-        if key.lower() in team_name_clean.lower():
-            return value
-        if team_name_clean.lower() in key.lower():
-            return value
-    
-    return team_name_clean
-
-# ================================================================
 # ===== FUNZIONI DI UTILITÀ =====
 # ================================================================
 
@@ -319,7 +92,7 @@ def parse_date_for_sorting(date_str: str) -> str:
     return date_str
 
 def parse_matches_from_json(data, league_name: str) -> List[Dict]:
-    """Estrae le partite dal JSON applicando la traduzione dei nomi."""
+    """Estrae le partite dal JSON."""
     matches = []
     
     if not isinstance(data, list):
@@ -332,12 +105,9 @@ def parse_matches_from_json(data, league_name: str) -> List[Dict]:
         if not isinstance(match, dict):
             continue
         
+        # === SQUADRE - NOMI ORIGINALI DA MATCHESIO ===
         home_team = match.get('homeTeam', '') or match.get('home_team', '') or ''
         away_team = match.get('awayTeam', '') or match.get('away_team', '') or ''
-        
-        # 🔥 APPLICA LA TRADUZIONE DEI NOMI 🔥
-        home_team = translate_team_name(home_team)
-        away_team = translate_team_name(away_team)
         
         date_raw = match.get('date', '')
         date_str = convert_date_to_italian(date_raw)
@@ -386,12 +156,12 @@ def parse_matches_from_json(data, league_name: str) -> List[Dict]:
             'data': date_str,
             'ora': time_str,
             'giornata': str(matchday),
-            'squadra_casa': home_team.title() if home_team else '',
-            'squadra_ospite': away_team.title() if away_team else '',
+            'squadra_casa': home_team,
+            'squadra_ospite': away_team,
             'risultato': result,
             'gol_casa': home_score,
             'gol_ospite': away_score,
-            'citta': city.title() if city else '',
+            'citta': city,
             'stadio': stadium,
             'stato': status_ita,
             '_sort_date': sort_date
@@ -399,8 +169,11 @@ def parse_matches_from_json(data, league_name: str) -> List[Dict]:
     
     return matches
 
-def sort_matches_by_date(all_matches: List[Dict]) -> List[Dict]:
-    """Ordina le partite per data cronologica."""
+def sort_and_clean_matches(all_matches: List[Dict]) -> List[Dict]:
+    """
+    Ordina le partite per data e RIMUOVE il campo _sort_date.
+    """
+    # Rimuovi duplicati
     unique_matches = []
     seen = set()
     for match in all_matches:
@@ -410,10 +183,13 @@ def sort_matches_by_date(all_matches: List[Dict]) -> List[Dict]:
             seen.add(key)
             unique_matches.append(match)
     
-    unique_matches.sort(key=lambda x: (x['_sort_date'], x['campionato']))
+    # Ordina per data
+    unique_matches.sort(key=lambda x: (x.get('_sort_date', '9999-99-99'), x['campionato']))
     
+    # RIMUOVI IL CAMPO _sort_date DA TUTTE LE PARTITE
     for match in unique_matches:
-        match.pop('_sort_date', None)
+        if '_sort_date' in match:
+            del match['_sort_date']
     
     return unique_matches
 
@@ -444,7 +220,8 @@ def save_excel(all_matches: List[Dict]) -> str:
         return None
     
     try:
-        all_matches = sort_matches_by_date(all_matches)
+        # Ordina e pulisci i dati
+        all_matches = sort_and_clean_matches(all_matches)
         
         wb = Workbook()
         ws = wb.active
@@ -460,18 +237,18 @@ def save_excel(all_matches: List[Dict]) -> str:
             cell.alignment = Alignment(horizontal="center", vertical="center")
         
         for row, match in enumerate(all_matches, 2):
-            ws.cell(row=row, column=1, value=match['campionato'])
-            ws.cell(row=row, column=2, value=match['data'])
-            ws.cell(row=row, column=3, value=match['ora'])
-            ws.cell(row=row, column=4, value=match['giornata'])
-            ws.cell(row=row, column=5, value=match['squadra_casa'])
-            ws.cell(row=row, column=6, value=match['squadra_ospite'])
-            ws.cell(row=row, column=7, value=match['risultato'])
-            ws.cell(row=row, column=8, value=match['gol_casa'] if match['gol_casa'] else None)
-            ws.cell(row=row, column=9, value=match['gol_ospite'] if match['gol_ospite'] else None)
-            ws.cell(row=row, column=10, value=match['citta'])
+            ws.cell(row=row, column=1, value=match.get('campionato', ''))
+            ws.cell(row=row, column=2, value=match.get('data', ''))
+            ws.cell(row=row, column=3, value=match.get('ora', ''))
+            ws.cell(row=row, column=4, value=match.get('giornata', ''))
+            ws.cell(row=row, column=5, value=match.get('squadra_casa', ''))
+            ws.cell(row=row, column=6, value=match.get('squadra_ospite', ''))
+            ws.cell(row=row, column=7, value=match.get('risultato', ''))
+            ws.cell(row=row, column=8, value=match.get('gol_casa', ''))
+            ws.cell(row=row, column=9, value=match.get('gol_ospite', ''))
+            ws.cell(row=row, column=10, value=match.get('citta', ''))
             ws.cell(row=row, column=11, value=match.get('stadio', ''))
-            ws.cell(row=row, column=12, value=match['stato'])
+            ws.cell(row=row, column=12, value=match.get('stato', ''))
         
         column_widths = [25, 15, 10, 10, 22, 22, 12, 10, 10, 18, 25, 12]
         for i, width in enumerate(column_widths, 1):
@@ -497,7 +274,8 @@ def save_json(all_matches: List[Dict]):
         return None, None
     
     try:
-        all_matches = sort_matches_by_date(all_matches)
+        # Ordina e pulisci i dati (rimuove _sort_date)
+        all_matches = sort_and_clean_matches(all_matches)
         
         # ===== 1. SALVA IN json/GesssAI_Input.json =====
         json_path = os.path.join(JSON_FOLDER, 'GesssAI_Input.json')
@@ -528,9 +306,20 @@ def push_to_github():
         os.chdir(BASE_DIR)
         
         print("\n🔄 Eseguo git add...")
-        subprocess.run(['git', 'add', 'excel/GesssAI_Input.xlsx'], check=True, capture_output=True)
-        subprocess.run(['git', 'add', 'json/GesssAI_Input.json'], check=True, capture_output=True)
-        subprocess.run(['git', 'add', 'matches.json'], check=True, capture_output=True)
+        
+        # Aggiungi i file uno per uno
+        result = subprocess.run(['git', 'add', 'excel/GesssAI_Input.xlsx'], capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"   ⚠️ Errore git add excel: {result.stderr}")
+        
+        result = subprocess.run(['git', 'add', 'json/GesssAI_Input.json'], capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"   ⚠️ Errore git add json: {result.stderr}")
+        
+        result = subprocess.run(['git', 'add', 'matches.json'], capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"   ⚠️ Errore git add matches: {result.stderr}")
+        
         print("   ✅ File aggiunti")
         
         print("🔄 Eseguo git commit...")
@@ -572,8 +361,6 @@ def main():
     print("="*70)
     print("🚀 Avvio download calendari calcio da matchesio.com...")
     print(f"📋 {len(LEAGUES)} campionati da scaricare")
-    print("="*70)
-    print("\n🔄 I nomi delle squadre verranno tradotti automaticamente per i loghi!")
     print("="*70)
     print()
     
@@ -639,4 +426,6 @@ if __name__ == "__main__":
         print(f"\n❌ ERRORE: {e}")
         import traceback
         traceback.print_exc()
-        input("\n🔄 Premi ENTER per uscire...")
+    
+    # 🔥 TENIAMO APERTA LA FINESTRA 🔥
+    input("\n🔄 Premi ENTER per uscire...")
