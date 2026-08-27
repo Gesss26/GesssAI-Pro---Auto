@@ -838,14 +838,13 @@
 const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
 // ============================================================
-// CARICAMENTO DATI - SEMPRE DA FILE JSON O EXCEL
+// CARICAMENTO DATI - SEMPRE DA FILE EXCEL
 // ============================================================
 
 let dataLoaded = false;
 
 async function loadScrapedData(forceReload = false) {
-  // 🔄 FORZA IL CARICAMENTO DA FILE - SVUOTA LA CACHE
-  console.log('📂 Caricamento dati...');
+  console.log('📂 Caricamento da GesssAI_Input.xlsx...');
   
   try {
     // Svuota il localStorage per forzare il caricamento dal file
@@ -854,48 +853,30 @@ async function loadScrapedData(forceReload = false) {
       localStorage.removeItem('ft_champs');
     }
     
-    // 1. PROVA A CARICARE IL FILE JSON
-    console.log('📂 Tentativo 1: /Gesss26/json/matches.json');
-    let response = await fetch('/Gesss26/json/matches.json');
-    
-    if (!response.ok) {
-      console.log('📂 Tentativo 2: /Gesss26/data/matches.json');
-      response = await fetch('/Gesss26/data/matches.json');
+    // Carica il file Excel
+    const excelData = await loadExcelData();
+    if (excelData) {
+      return excelData;
     }
     
-    if (!response.ok) {
-      console.log('📂 Tentativo 3: Caricamento da Excel GesssAI_Input.xlsx');
-      // Carica il file Excel
-      const excelData = await loadExcelData();
-      if (excelData) {
-        return excelData;
+    // Fallback: prova a caricare il JSON
+    console.log('📂 Tentativo fallback: caricamento da JSON...');
+    const response = await fetch('/Gesss26/json/matches.json');
+    if (response.ok) {
+      const data = await response.json();
+      console.log('✅ Dati caricati da JSON fallback:', data.matches?.length || 0, 'partite');
+      if (data.matches) {
+        localStorage.setItem('ft_matches', JSON.stringify(data.matches));
+        localStorage.setItem('ft_champs', JSON.stringify(data.championships || []));
       }
-      console.error('❌ Nessun file matches.json o GesssAI_Input.xlsx trovato');
-      return null;
+      dataLoaded = true;
+      return data;
     }
     
-    const data = await response.json();
-    console.log('✅ Dati caricati da JSON:', data.matches?.length || 0, 'partite');
-    
-    if (data.matches) {
-      localStorage.setItem('ft_matches', JSON.stringify(data.matches));
-      localStorage.setItem('ft_champs', JSON.stringify(data.championships || []));
-    }
-    
-    dataLoaded = true;
-    return data;
+    console.error('❌ Nessun file GesssAI_Input.xlsx o matches.json trovato');
+    return null;
   } catch (error) {
     console.error('❌ Errore:', error.message);
-    // Prova a caricare l'Excel come ultima risorsa
-    console.log('📂 Tentativo fallback: Caricamento da Excel GesssAI_Input.xlsx');
-    try {
-      const excelData = await loadExcelData();
-      if (excelData) {
-        return excelData;
-      }
-    } catch (e) {
-      console.error('❌ Errore anche nel caricamento Excel:', e.message);
-    }
     return null;
   }
 }
@@ -948,24 +929,24 @@ async function loadExcelData() {
     const colOra = findColumn(['ora', 'time', 'orario', 'hour']);
     const colCasa = findColumn(['squadra casa', 'home', 'casa', 'home team', 'home_team']);
     const colOspite = findColumn(['squadra ospite', 'away', 'ospite', 'away team', 'away_team']);
-    const colGolCasa = findColumn(['gol casa', 'home goals', 'goal casa', 'home_goals']);
-    const colGolOspite = findColumn(['gol ospite', 'away goals', 'goal ospite', 'away_goals']);
+    const colGolCasa = findColumn(['gol casa', 'home goals', 'goal casa', 'home_goals', 'gol casa', 'gol home']);
+    const colGolOspite = findColumn(['gol ospite', 'away goals', 'goal ospite', 'away_goals', 'gol ospite', 'gol away']);
     const colRisultato = findColumn(['risultato', 'result', 'score', 'ris']);
     const colStato = findColumn(['stato', 'status']);
     
-    if (!colCampionato || !colData || !colCasa || !colOspite) {
-      console.error('❌ Colonne obbligatorie non trovate. Assicurati di avere: Campionato, Data, Squadra Casa, Squadra Ospite');
-      console.log('📊 Colonne disponibili:', headers.join(', '));
-      return null;
+    // Se non trova le colonne esatte, prova con le prime colonne disponibili
+    if (!colCampionato && headers.length > 0) {
+      console.log('🔍 Colonne non trovate, uso le prime colonne disponibili...');
     }
     
     jsonData.forEach((row, index) => {
+      // Usa le colonne trovate o i nomi predefiniti
       const campionato = row[colCampionato]?.toString().trim() || 'Sconosciuto';
       const giornata = row[colGiornata]?.toString().trim() || 'N/A';
-      const dataRaw = row[colData]?.toString().trim() || '';
-      const oraRaw = row[colOra]?.toString().trim() || 'TBD';
-      const casa = row[colCasa]?.toString().trim() || '';
-      const ospite = row[colOspite]?.toString().trim() || '';
+      const dataRaw = row[colData]?.toString().trim() || row['Data']?.toString().trim() || '';
+      const oraRaw = row[colOra]?.toString().trim() || row['Ora']?.toString().trim() || 'TBD';
+      const casa = row[colCasa]?.toString().trim() || row['Squadra Casa']?.toString().trim() || '';
+      const ospite = row[colOspite]?.toString().trim() || row['Squadra Ospite']?.toString().trim() || '';
       
       if (!casa || !ospite) {
         console.warn(`⚠️ Riga ${index + 2} saltata: Squadra casa o ospite mancante`);
@@ -984,6 +965,8 @@ async function loadExcelData() {
       
       // Controlla se c'è un risultato
       let risultato = '';
+      
+      // Prova a prendere il risultato dalla colonna Risultato
       if (colRisultato && row[colRisultato]) {
         const val = row[colRisultato].toString().trim();
         if (val && val !== '') {
@@ -998,12 +981,26 @@ async function loadExcelData() {
       }
       
       // Se non c'è risultato, prova a prendere i gol dalle colonne separate
-      if (!risultato && colGolCasa && row[colGolCasa] && row[colGolCasa] !== '') {
-        golCasa = parseFloat(row[colGolCasa]) || 0;
-        if (colGolOspite && row[colGolOspite] !== '') {
-          golOspite = parseFloat(row[colGolOspite]) || 0;
-          stato = 'Giocata';
+      if (!risultato) {
+        let golCasaVal = 0, golOspiteVal = 0;
+        
+        if (colGolCasa && row[colGolCasa] && row[colGolCasa] !== '') {
+          golCasaVal = parseFloat(row[colGolCasa]) || 0;
+        } else if (row['Gol Casa']) {
+          golCasaVal = parseFloat(row['Gol Casa']) || 0;
+        }
+        
+        if (colGolOspite && row[colGolOspite] && row[colGolOspite] !== '') {
+          golOspiteVal = parseFloat(row[colGolOspite]) || 0;
+        } else if (row['Gol Ospite']) {
+          golOspiteVal = parseFloat(row['Gol Ospite']) || 0;
+        }
+        
+        if (golCasaVal > 0 || golOspiteVal > 0) {
+          golCasa = golCasaVal;
+          golOspite = golOspiteVal;
           risultato = `${golCasa}-${golOspite}`;
+          stato = 'Giocata';
         }
       }
       
@@ -1064,26 +1061,6 @@ async function loadExcelData() {
     console.error('❌ Errore nel caricamento Excel:', error.message);
     return null;
   }
-}
-
-async function checkScraperStatus() {
-  return {
-    lastUpdate: new Date().toISOString(),
-    matchCount: 0,
-    isStatic: true
-  };
-}
-
-async function forceScrape() {
-  console.log('🔄 Ricarico dati da GitHub Pages...');
-  localStorage.removeItem('ft_matches');
-  localStorage.removeItem('ft_champs');
-  
-  const data = await loadScrapedData(true);
-  if (data && window.updateAppData) {
-    window.updateAppData(data);
-  }
-  return { success: true };
 }
 
 // ============================================================
@@ -5265,21 +5242,42 @@ function App() {
 // AVVIA APP
 // ============================================================
 
-console.log('🚀 Avvio GesssAI-Pro - Caricamento forzato...');
+console.log('🚀 Avvio GesssAI-Pro - Caricamento da Excel...');
 
-// Svuota localStorage all'avvio
+// Svuota localStorage all'avvio per forzare il caricamento
 localStorage.removeItem('ft_matches');
 localStorage.removeItem('ft_champs');
 
-// Carica il file (JSON o Excel)
+// Carica il file Excel
 loadScrapedData(true).then(data => {
   if (data && data.matches && data.matches.length > 0) {
-    console.log(`✅ ${data.matches.length} partite caricate all'avvio`);
+    console.log(`✅ ${data.matches.length} partite caricate all'avvio da GesssAI_Input.xlsx`);
     if (window.updateAppData) {
       window.updateAppData(data);
     }
   } else {
-    console.warn('⚠️ Nessun dato caricato. Assicurati che il file matches.json o GesssAI_Input.xlsx sia presente.');
+    console.warn('⚠️ Nessun dato caricato. Assicurati che il file GesssAI_Input.xlsx sia presente nella cartella principale.');
+    // Mostra un messaggio all'utente
+    const root = document.getElementById('root');
+    if (root) {
+      root.innerHTML = `
+        <div style="text-align: center; padding: 50px; color: #e6edf3; background: #0f1419; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+          <div style="font-size: 64px; margin-bottom: 20px;">📂</div>
+          <h2 style="color: #f39c12;">File Excel non trovato</h2>
+          <p style="color: #8b949e; max-width: 500px; margin: 20px auto;">
+            Assicurati che il file <strong style="color: #e6edf3;">GesssAI_Input.xlsx</strong> 
+            sia presente nella cartella principale del progetto.
+          </p>
+          <p style="color: #8b949e; font-size: 14px;">
+            Il file deve contenere le colonne: <br>
+            <strong style="color: #e6edf3;">Campionato, Data, Squadra Casa, Squadra Ospite</strong>
+          </p>
+          <button onclick="window.location.reload()" style="margin-top: 20px; padding: 12px 30px; background: #f39c12; color: #000; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer;">
+            🔄 Ricarica
+          </button>
+        </div>
+      `;
+    }
   }
 });
 
