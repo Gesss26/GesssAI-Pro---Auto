@@ -89,19 +89,19 @@ jobs:
           if [ -f "excel/GesssAI_Input.xlsx" ]; then
             echo "📊 Anteprima dei dati scaricati:"
             python -c "
-import pandas as pd
-try:
-    df = pd.read_excel('excel/GesssAI_Input.xlsx')
-    print(f'✅ {len(df)} partite trovate')
-    print(f'🏆 Campionati: {df[\"Campionato\"].nunique()}')
-    print(f'🟢 Giocate: {len(df[df[\"Stato\"] == \"Giocata\"])}')
-    print(f'🔵 Future: {len(df[df[\"Stato\"] == \"Futura\"])}')
-    print('')
-    print('📋 Prime 5 partite:')
-    print(df[['Campionato', 'Data', 'Squadra Casa', 'Squadra Ospite', 'Stato']].head(5).to_string(index=False))
-except Exception as e:
-    print(f'❌ Errore lettura Excel: {e}')
-"
+          import pandas as pd
+          try:
+              df = pd.read_excel('excel/GesssAI_Input.xlsx')
+              print(f'✅ {len(df)} partite trovate')
+              print(f'🏆 Campionati: {df[\"Campionato\"].nunique()}')
+              print(f'🟢 Giocate: {len(df[df[\"Stato\"] == \"Giocata\"])}')
+              print(f'🔵 Future: {len(df[df[\"Stato\"] == \"Futura\"])}')
+              print('')
+              print('📋 Prime 5 partite:')
+              print(df[['Campionato', 'Data', 'Squadra Casa', 'Squadra Ospite', 'Stato']].head(5).to_string(index=False))
+          except Exception as e:
+              print(f'❌ Errore lettura Excel: {e}')
+          "
           fi
           
       - name: 🔄 Commit and push changes
