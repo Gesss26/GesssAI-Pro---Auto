@@ -1326,7 +1326,7 @@ const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
       'Serie B': 'Serie_B',
       'Serie B IT': 'Serie_B',
       'Bundesliga': 'Bundesliga',
-      '2. Bundesliga': '2. Bundesliga',
+      '2. Bundesliga': '2_Bundesliga',
       'La Liga': 'La_Liga',
       'LaLiga': 'La_Liga',
       'Segunda División': 'Segunda_Division',
@@ -2948,7 +2948,120 @@ const simulateMatches = (homeTeam, awayTeam, allMatches, numSimulations = 1000) 
 };
 
 // ============================================================
-// COMPONENTE AI ANALYSIS (SOLO MONTE CARLO, SENZA GROQ)
+// FUNZIONE PER IL RIEPILOGO INTELLIGENTE
+// ============================================================
+
+const generateSummary = (mc, match, allMatches) => {
+  // Calcola xG per le due squadre (dai dati reali)
+  const homeForm = calcFormAndStats(allMatches, match.casa);
+  const awayForm = calcFormAndStats(allMatches, match.ospiti);
+  
+  const xGCasa = parseFloat(homeForm.mediaGolFatti) || 0;
+  const xGOspite = parseFloat(awayForm.mediaGolFatti) || 0;
+  
+  const lambdaCasa = parseFloat(mc.lambdaCasa) || 0;
+  const lambdaOspite = parseFloat(mc.lambdaOspite) || 0;
+  
+  // Calcola differenze
+  const diffLambda = lambdaCasa - lambdaOspite;
+  const diffXG = xGCasa - xGOspite;
+  
+  // Determina se i dati sono affidabili
+  const partiteAnalizzate = mc.partiteAnalizzate || 0;
+  
+  // Determina quale metrica è più affidabile
+  let metricaConsigliata = '';
+  let motivazione = '';
+  
+  if (partiteAnalizzate < 5) {
+    metricaConsigliata = 'xG';
+    motivazione = `⚠️ Solo ${partiteAnalizzate} partite analizzate. I dati λ non sono affidabili. Usa xG come riferimento principale.`;
+  } else if (partiteAnalizzate < 10) {
+    metricaConsigliata = 'xG + λ';
+    motivazione = `ℹ️ ${partiteAnalizzate} partite analizzate. I dati λ sono ancora limitati. Confronta xG e λ per una visione bilanciata.`;
+  } else {
+    metricaConsigliata = 'λ + xG';
+    motivazione = `✅ ${partiteAnalizzate} partite analizzate. I dati λ sono affidabili. Usali come base, confermali con xG.`;
+  }
+  
+  // Determina il favorito
+  let favorito = '';
+  let confidenza = '';
+  
+  const diffMedia = (lambdaCasa + xGCasa) / 2 - (lambdaOspite + xGOspite) / 2;
+  
+  if (diffMedia > 0.5) {
+    favorito = `🏠 ${match.casa}`;
+    confidenza = 'ALTA';
+  } else if (diffMedia > 0.2) {
+    favorito = `🏠 ${match.casa}`;
+    confidenza = 'MEDIA';
+  } else if (diffMedia > -0.2) {
+    favorito = '🤝 Pareggio';
+    confidenza = 'MEDIA';
+  } else if (diffMedia > -0.5) {
+    favorito = `✈️ ${match.ospiti}`;
+    confidenza = 'MEDIA';
+  } else {
+    favorito = `✈️ ${match.ospiti}`;
+    confidenza = 'ALTA';
+  }
+  
+  // Calcola previsione Over/Under
+  const totaleLambda = lambdaCasa + lambdaOspite;
+  const totaleXG = xGCasa + xGOspite;
+  const totaleMedio = (totaleLambda + totaleXG) / 2;
+  
+  let overUnder = '';
+  let overUnderPct = '';
+  
+  if (totaleMedio > 2.8) {
+    overUnder = '⬆️ OVER 2.5';
+    overUnderPct = 'Alta probabilità (≈70%)';
+  } else if (totaleMedio > 2.2) {
+    overUnder = '↕️ OVER/UNDER 2.5';
+    overUnderPct = 'Bilanciato (≈50%)';
+  } else {
+    overUnder = '⬇️ UNDER 2.5';
+    overUnderPct = 'Alta probabilità (≈70%)';
+  }
+  
+  // Probabilità GG (entrambi segnano)
+  const probCasaSegna = Math.min(1, lambdaCasa / 1.5);
+  const probOspiteSegna = Math.min(1, lambdaOspite / 1.5);
+  const probGG = Math.round((probCasaSegna * probOspiteSegna) * 100);
+  
+  let ggGiudizio = '';
+  if (probGG > 60) {
+    ggGiudizio = '✅ BUONA PROBABILITÀ (entrambi segnano)';
+  } else if (probGG > 40) {
+    ggGiudizio = '⚠️ 50/50 (entrambi segnano)';
+  } else {
+    ggGiudizio = '❌ BASSA PROBABILITÀ (entrambi segnano)';
+  }
+  
+  return {
+    xGCasa,
+    xGOspite,
+    lambdaCasa,
+    lambdaOspite,
+    diffLambda,
+    diffXG,
+    partiteAnalizzate,
+    metricaConsigliata,
+    motivazione,
+    favorito,
+    confidenza,
+    overUnder,
+    overUnderPct,
+    probGG,
+    ggGiudizio,
+    totaleMedio
+  };
+};
+
+// ============================================================
+// COMPONENTE AI ANALYSIS (SOLO MONTE CARLO)
 // ============================================================
 
 const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
@@ -3331,11 +3444,10 @@ const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
       )}
 
       {/* ======================================== */}
-      {/* STATISTICHE CON SPIEGAZIONE - VERSIONE MOBILE FRIENDLY */}
+      {/* STATISTICHE CON SPIEGAZIONE */}
       {/* ======================================== */}
       <div style={{marginTop: '16px', background: 'var(--surface)', borderRadius: '8px', border: '1px solid var(--border)', overflow: 'hidden'}}>
         
-        {/* STATISTICHE PRINCIPALI */}
         <div style={{
           padding: '14px 16px', 
           display: 'grid', 
@@ -3377,7 +3489,6 @@ const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
           </div>
         </div>
         
-        {/* SEZIONE DI SPIEGAZIONE - DIMENSIONI RADDOPPIATE */}
         <div style={{
           padding: '16px 18px', 
           background: 'rgba(243, 156, 18, 0.06)', 
@@ -3456,7 +3567,6 @@ const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
             </div>
           </div>
           
-          {/* NOTE AGGIUNTIVE */}
           <div style={{
             marginTop: '12px',
             padding: '12px 16px',
@@ -3514,6 +3624,240 @@ const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
           </div>
         </div>
       </div>
+
+      {/* ======================================== */}
+      {/* PANNELLO RIEPILOGO INTELLIGENTE */}
+      {/* ======================================== */}
+      {(() => {
+        const summary = generateSummary(mc, match, allMatches);
+        
+        return (
+          <div style={{
+            marginTop: '16px',
+            background: 'var(--card)',
+            borderRadius: '10px',
+            border: '2px solid var(--accent)',
+            overflow: 'hidden',
+            boxShadow: '0 4px 20px rgba(243, 156, 18, 0.15)'
+          }}>
+            
+            {/* HEADER */}
+            <div style={{
+              background: 'var(--accent)',
+              padding: '10px 16px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '8px'
+            }}>
+              <span style={{
+                color: '#000',
+                fontWeight: 'bold',
+                fontSize: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                🎯 RIEPILOGO INTELLIGENTE
+              </span>
+              <span style={{
+                color: '#000',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                background: 'rgba(0,0,0,0.15)',
+                padding: '2px 12px',
+                borderRadius: '12px'
+              }}>
+                {summary.partiteAnalizzate} partite analizzate
+              </span>
+            </div>
+            
+            {/* CONTENUTO */}
+            <div style={{padding: '14px 16px'}}>
+              
+              {/* AVVISO AFFIDABILITÀ */}
+              <div style={{
+                padding: '8px 14px',
+                borderRadius: '6px',
+                marginBottom: '12px',
+                background: summary.partiteAnalizzate < 5 ? 'rgba(235, 87, 87, 0.15)' : 
+                             summary.partiteAnalizzate < 10 ? 'rgba(242, 201, 76, 0.15)' : 
+                             'rgba(111, 207, 151, 0.15)',
+                borderLeft: `4px solid ${summary.partiteAnalizzate < 5 ? 'var(--lose)' : 
+                                         summary.partiteAnalizzate < 10 ? 'var(--draw)' : 
+                                         'var(--win)'}`,
+                fontSize: '13px',
+                color: 'var(--text)'
+              }}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                  <span style={{fontSize: '20px'}}>
+                    {summary.partiteAnalizzate < 5 ? '⚠️' : 
+                     summary.partiteAnalizzate < 10 ? 'ℹ️' : 
+                     '✅'}
+                  </span>
+                  <span>{summary.motivazione}</span>
+                </div>
+                <div style={{fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px'}}>
+                  💡 Metriche consigliate: <b style={{color: 'var(--accent)'}}>{summary.metricaConsigliata}</b>
+                </div>
+              </div>
+              
+              {/* CONFRONTO xG vs λ */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '12px',
+                marginBottom: '12px'
+              }}>
+                <div style={{
+                  background: 'var(--surface)',
+                  borderRadius: '8px',
+                  padding: '10px 12px',
+                  border: '1px solid var(--border)'
+                }}>
+                  <div style={{fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px'}}>
+                    🏠 {match.casa}
+                  </div>
+                  <div style={{display: 'flex', gap: '12px', fontSize: '13px'}}>
+                    <div>
+                      <span style={{color: 'var(--text-muted)'}}>xG: </span>
+                      <span style={{color: 'var(--win)', fontWeight: 'bold'}}>{summary.xGCasa.toFixed(1)}</span>
+                    </div>
+                    <div>
+                      <span style={{color: 'var(--text-muted)'}}>λ: </span>
+                      <span style={{color: 'var(--accent)', fontWeight: 'bold'}}>{summary.lambdaCasa.toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <span style={{color: 'var(--text-muted)'}}>Diff: </span>
+                      <span style={{
+                        color: Math.abs(summary.lambdaCasa - summary.xGCasa) > 0.5 ? 'var(--draw)' : 'var(--text-muted)',
+                        fontWeight: 'bold'
+                      }}>
+                        {Math.abs(summary.lambdaCasa - summary.xGCasa) > 0.5 ? '⚠️' : '✅'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div style={{
+                  background: 'var(--surface)',
+                  borderRadius: '8px',
+                  padding: '10px 12px',
+                  border: '1px solid var(--border)'
+                }}>
+                  <div style={{fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px'}}>
+                    ✈️ {match.ospiti}
+                  </div>
+                  <div style={{display: 'flex', gap: '12px', fontSize: '13px'}}>
+                    <div>
+                      <span style={{color: 'var(--text-muted)'}}>xG: </span>
+                      <span style={{color: 'var(--win)', fontWeight: 'bold'}}>{summary.xGOspite.toFixed(1)}</span>
+                    </div>
+                    <div>
+                      <span style={{color: 'var(--text-muted)'}}>λ: </span>
+                      <span style={{color: 'var(--accent)', fontWeight: 'bold'}}>{summary.lambdaOspite.toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <span style={{color: 'var(--text-muted)'}}>Diff: </span>
+                      <span style={{
+                        color: Math.abs(summary.lambdaOspite - summary.xGOspite) > 0.5 ? 'var(--draw)' : 'var(--text-muted)',
+                        fontWeight: 'bold'
+                      }}>
+                        {Math.abs(summary.lambdaOspite - summary.xGOspite) > 0.5 ? '⚠️' : '✅'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* VERDETTO FINALE */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '10px',
+                padding: '12px',
+                background: 'var(--surface)',
+                borderRadius: '8px',
+                border: '2px solid var(--accent)',
+                marginBottom: '12px'
+              }}>
+                <div style={{textAlign: 'center'}}>
+                  <div style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase'}}>🏆 Favorito</div>
+                  <div style={{fontSize: '18px', fontWeight: 'bold', color: 'var(--accent)'}}>
+                    {summary.favorito}
+                  </div>
+                  <div style={{fontSize: '11px', color: summary.confidenza === 'ALTA' ? 'var(--win)' : 'var(--draw)'}}>
+                    Confidenza: {summary.confidenza}
+                  </div>
+                </div>
+                
+                <div style={{textAlign: 'center'}}>
+                  <div style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase'}}>⚽ Over/Under 2.5</div>
+                  <div style={{fontSize: '18px', fontWeight: 'bold', color: 'var(--accent)'}}>
+                    {summary.overUnder}
+                  </div>
+                  <div style={{fontSize: '11px', color: 'var(--text-muted)'}}>
+                    {summary.overUnderPct}
+                  </div>
+                </div>
+                
+                <div style={{textAlign: 'center'}}>
+                  <div style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase'}}>🤝 GG (Entrambi segnano)</div>
+                  <div style={{fontSize: '18px', fontWeight: 'bold', color: summary.probGG > 60 ? 'var(--win)' : summary.probGG > 40 ? 'var(--draw)' : 'var(--lose)'}}>
+                    {summary.probGG}%
+                  </div>
+                  <div style={{fontSize: '11px', color: 'var(--text-muted)'}}>
+                    {summary.ggGiudizio}
+                  </div>
+                </div>
+              </div>
+              
+              {/* RIEPILOGO NUMERI */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+                gap: '6px',
+                fontSize: '12px',
+                color: 'var(--text-muted)'
+              }}>
+                <div style={{background: 'var(--surface)', padding: '6px 10px', borderRadius: '4px', textAlign: 'center'}}>
+                  Totale λ: <b style={{color: 'var(--accent)'}}>{(summary.lambdaCasa + summary.lambdaOspite).toFixed(2)}</b>
+                </div>
+                <div style={{background: 'var(--surface)', padding: '6px 10px', borderRadius: '4px', textAlign: 'center'}}>
+                  Totale xG: <b style={{color: 'var(--win)'}}>{(summary.xGCasa + summary.xGOspite).toFixed(1)}</b>
+                </div>
+                <div style={{background: 'var(--surface)', padding: '6px 10px', borderRadius: '4px', textAlign: 'center'}}>
+                  Media: <b style={{color: 'var(--text)'}}>{summary.totaleMedio.toFixed(2)}</b>
+                </div>
+                <div style={{background: 'var(--surface)', padding: '6px 10px', borderRadius: '4px', textAlign: 'center'}}>
+                  Diff: <b style={{color: Math.abs(summary.diffLambda) > 0.3 ? 'var(--accent)' : 'var(--text-muted)'}}>
+                    {summary.diffLambda > 0 ? '+' : ''}{summary.diffLambda.toFixed(2)}
+                  </b>
+                </div>
+              </div>
+              
+              {/* LEGENDA */}
+              <div style={{
+                marginTop: '10px',
+                padding: '6px 12px',
+                background: 'var(--surface)',
+                borderRadius: '4px',
+                fontSize: '10px',
+                color: 'var(--text-muted)',
+                display: 'flex',
+                gap: '12px',
+                flexWrap: 'wrap'
+              }}>
+                <span>✅ xG = λ → Dati allineati</span>
+                <span>⚠️ xG ≠ λ → Partita anomala, fidati di xG</span>
+                <span>📊 {summary.partiteAnalizzate} partite analizzate</span>
+              </div>
+              
+            </div>
+          </div>
+        );
+      })()}
 
       {/* LEGENDA COLORI */}
       <div style={{display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '8px', padding: '8px 12px', background: 'var(--surface)', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '11px'}}>
@@ -5104,21 +5448,53 @@ function App() {
               <div className="sub-tabs">
                 <button className={statsSubTab === 'Classifica' ? 'active' : ''} onClick={() => setStatsSubTab('Classifica')}>📊 Classifica</button>
                 <button className={statsSubTab === 'Scontri' ? 'active' : ''} onClick={() => setStatsSubTab('Scontri')}>⚔️ Scontri</button>
+                <button className={statsSubTab === 'RiepilogoAI' ? 'active' : ''} onClick={() => setStatsSubTab('RiepilogoAI')}>🤖 Riepilogo AI</button>
                 <button className={statsSubTab === 'Analisi' ? 'active' : ''} onClick={() => setStatsSubTab('Analisi')}>📈 Analisi Avanzata</button>
               </div>
+              
               {statsSubTab === 'Classifica' && (
                 <div className="stats-two-col">
-                  <div>{selectedMatch ? <MatchDetail match={selectedMatch} allMatches={matches} /> : <div className="stats-placeholder"><p>👈 Seleziona una partita dal <b>Palinsesto</b> o dallo <b>Storico</b> per vedere le statistiche dettagliate.</p></div>}</div>
-                  <div>{selectedMatch ? <><h3 style={{marginBottom:'12px', color: getChampColor(selectedMatch.campionato)}}>Classifica - {selectedMatch.campionato}</h3><Standings matches={matches} filterChampionship={selectedMatch.campionato} highlightTeams={[selectedMatch.casa, selectedMatch.ospiti]} /></> : <div className="stats-placeholder"><p>📊 Seleziona una partita per vedere la classifica.</p></div>}</div>
+                  <div>
+                    {selectedMatch ? 
+                      <MatchDetail match={selectedMatch} allMatches={matches} /> : 
+                      <div className="stats-placeholder">
+                        <p>👈 Seleziona una partita dal <b>Palinsesto</b> o dallo <b>Storico</b> per vedere le statistiche dettagliate.</p>
+                      </div>
+                    }
+                  </div>
+                  <div>
+                    {selectedMatch ? 
+                      <>
+                        <h3 style={{marginBottom:'12px', color: getChampColor(selectedMatch.campionato)}}>Classifica - {selectedMatch.campionato}</h3>
+                        <Standings matches={matches} filterChampionship={selectedMatch.campionato} highlightTeams={[selectedMatch.casa, selectedMatch.ospiti]} />
+                      </> : 
+                      <div className="stats-placeholder">
+                        <p>📊 Seleziona una partita per vedere la classifica.</p>
+                      </div>
+                    }
+                  </div>
                 </div>
               )}
+              
               {statsSubTab === 'Scontri' && (
-                <div>{selectedMatch ? <div className="stats-two-col" style={{ gridTemplateColumns: '1fr 1fr' }}><TeamMatchesHistory teamName={selectedMatch.casa} championship={selectedMatch.campionato} allMatches={matches} /><TeamMatchesHistory teamName={selectedMatch.ospiti} championship={selectedMatch.campionato} allMatches={matches} /></div> : <div className="stats-placeholder"><p>👈 Seleziona una partita per vedere lo storico delle due squadre.</p></div>}</div>
+                <div>
+                  {selectedMatch ? 
+                    <div className="stats-two-col" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                      <TeamMatchesHistory teamName={selectedMatch.casa} championship={selectedMatch.campionato} allMatches={matches} />
+                      <TeamMatchesHistory teamName={selectedMatch.ospiti} championship={selectedMatch.campionato} allMatches={matches} />
+                    </div> : 
+                    <div className="stats-placeholder">
+                      <p>👈 Seleziona una partita per vedere lo storico delle due squadre.</p>
+                    </div>
+                  }
+                </div>
               )}
-              {statsSubTab === 'Analisi' && (
+              
+              {statsSubTab === 'RiepilogoAI' && (
                 <div>
                   {selectedMatch ? (
                     <div>
+                      {/* Meteo Professionale */}
                       {(() => {
                         const city = getCityForMatch(selectedMatch.casa, selectedMatch.campionato);
                         const weatherKey = `${selectedMatch.campionato}_${selectedMatch.data}`;
@@ -5126,7 +5502,15 @@ function App() {
                         return <WeatherProfessionale weatherData={weather} city={city} matchDate={selectedMatch.data} />;
                       })()}
                       
-                      <div className="analisi-compact">
+                      {/* Simulazione Poisson+Monte Carlo */}
+                      <AIAnalysis 
+                        match={selectedMatch} 
+                        allMatches={matches} 
+                        selectedFamiglie={selectedFamiglie}
+                      />
+                      
+                      {/* Statistiche delle due squadre */}
+                      <div className="analisi-compact" style={{marginTop: '16px'}}>
                         <div>
                           <RisultatiFrequenti teamName={selectedMatch.casa} allMatches={matches} />
                           <FrequenzaGol teamName={selectedMatch.casa} allMatches={matches} />
@@ -5137,16 +5521,35 @@ function App() {
                           <FrequenzaGol teamName={selectedMatch.ospiti} allMatches={matches} />
                           <IndiceAffidabilita teamName={selectedMatch.ospiti} allMatches={matches} />
                         </div>
-                        <div style={{ gridColumn: '1 / -1' }}>
-                          <AnalisiMeteo matches={matches} weatherCache={weatherCache} />
-                        </div>
-                        <div style={{ gridColumn: '1 / -1' }}>
-                          <AIAnalysis 
-                            match={selectedMatch} 
-                            allMatches={matches} 
-                            selectedFamiglie={selectedFamiglie}
-                          />
-                        </div>
+                      </div>
+                      
+                      {/* Analisi Meteo */}
+                      <AnalisiMeteo matches={matches} weatherCache={weatherCache} />
+                    </div>
+                  ) : (
+                    <div className="stats-placeholder">
+                      <p>👈 Seleziona una partita per vedere il riepilogo AI completo.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {statsSubTab === 'Analisi' && (
+                <div>
+                  {selectedMatch ? (
+                    <div className="analisi-compact">
+                      <div>
+                        <RisultatiFrequenti teamName={selectedMatch.casa} allMatches={matches} />
+                        <FrequenzaGol teamName={selectedMatch.casa} allMatches={matches} />
+                        <IndiceAffidabilita teamName={selectedMatch.casa} allMatches={matches} />
+                      </div>
+                      <div>
+                        <RisultatiFrequenti teamName={selectedMatch.ospiti} allMatches={matches} />
+                        <FrequenzaGol teamName={selectedMatch.ospiti} allMatches={matches} />
+                        <IndiceAffidabilita teamName={selectedMatch.ospiti} allMatches={matches} />
+                      </div>
+                      <div style={{ gridColumn: '1 / -1' }}>
+                        <AnalisiMeteo matches={matches} weatherCache={weatherCache} />
                       </div>
                     </div>
                   ) : (
