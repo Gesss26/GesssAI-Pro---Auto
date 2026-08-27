@@ -4872,9 +4872,11 @@ function App() {
                 <div className="form-group" style={{maxWidth: '300px', marginBottom: '0', flex: '1'}}>
                   <label>Filtra per Campionato</label>
                   <select value={selectedChamp} onChange={e => setSelectedChamp(e.target.value)}>
-                    <option value="Tutti">Tutti</option>
-                    {championships.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
-                  </select>
+  <option value="Tutti">Tutti</option>
+  {championships
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+</select>
                 </div>
                 <div className="form-group" style={{maxWidth: '200px', marginBottom: '0', flex: '1'}}>
                   <label>Range Giorni</label>
