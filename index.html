@@ -857,21 +857,18 @@ async function loadScrapedData(forceReload = false) {
   console.log('📂 Caricamento dati da Excel su GitHub Pages...');
   
   try {
-    // Svuota il localStorage per forzare il caricamento dal file
     if (forceReload) {
       localStorage.removeItem('ft_matches');
       localStorage.removeItem('ft_champs');
     }
     
-    // Prova diversi percorsi per trovare il file Excel
     const paths = [
-      '/GesssAI-Pro---Auto/json/GesssAI_Input.xlsx',
-      '/json/GesssAI_Input.xlsx',
-      'https://gesss26.github.io/GesssAI-Pro---Auto/json/GesssAI_Input.xlsx'
+      '/GesssAI-Pro---Auto/excel/GesssAI_Input.xlsx',
+      '/excel/GesssAI_Input.xlsx',
+      'https://gesss26.github.io/GesssAI-Pro---Auto/excel/GesssAI_Input.xlsx'
     ];
     
     let excelData = null;
-    let lastError = null;
     
     for (const path of paths) {
       try {
@@ -890,7 +887,6 @@ async function loadScrapedData(forceReload = false) {
         }
       } catch (e) {
         console.warn('❌ Errore:', e.message);
-        lastError = e;
       }
     }
     
@@ -898,12 +894,11 @@ async function loadScrapedData(forceReload = false) {
       return excelData;
     }
     
-    // Se l'Excel non funziona, prova a caricare il JSON come fallback
     console.log('📂 Tentativo fallback: caricamento JSON...');
     const jsonPaths = [
-      '/GesssAI-Pro---Auto/json/matches.json',
-      '/json/matches.json',
-      'https://gesss26.github.io/GesssAI-Pro---Auto/json/matches.json'
+      '/GesssAI-Pro---Auto/data/matches.json',
+      '/data/matches.json',
+      'https://gesss26.github.io/GesssAI-Pro---Auto/data/matches.json'
     ];
     
     for (const path of jsonPaths) {
@@ -950,15 +945,11 @@ function processExcelData(arrayBuffer) {
     
     console.log('✅ File Excel caricato con', jsonData.length, 'righe');
     
-    // Mappa le colonne del file Excel
     const matches = [];
     const championshipsSet = new Set();
-    
-    // Cerca le colonne nel file Excel
     const headers = Object.keys(jsonData[0]);
     console.log('📊 Colonne trovate:', headers.join(', '));
     
-    // Mappa dei nomi delle colonne (cerca corrispondenze)
     const findColumn = (keywords) => {
       for (const keyword of keywords) {
         const found = headers.find(h => h.toLowerCase().includes(keyword.toLowerCase()));
@@ -978,13 +969,8 @@ function processExcelData(arrayBuffer) {
     const colRisultato = findColumn(['risultato', 'result', 'score', 'ris']);
     const colStato = findColumn(['stato', 'status']);
     
-    // Verifica che le colonne obbligatorie ci siano
     if (!colCampionato || !colData || !colCasa || !colOspite) {
       console.error('❌ Colonne obbligatorie non trovate. Colonne disponibili:', headers.join(', '));
-      console.log('🔍 Colonna Campionato:', colCampionato);
-      console.log('🔍 Colonna Data:', colData);
-      console.log('🔍 Colonna Squadra Casa:', colCasa);
-      console.log('🔍 Colonna Squadra Ospite:', colOspite);
       return null;
     }
     
@@ -1012,7 +998,6 @@ function processExcelData(arrayBuffer) {
       let stato = 'Futura';
       let risultato = '';
       
-      // Controlla se c'è un risultato nella colonna Risultato
       if (colRisultato && row[colRisultato]) {
         const val = row[colRisultato].toString().trim();
         if (val && val !== '') {
@@ -1026,7 +1011,6 @@ function processExcelData(arrayBuffer) {
         }
       }
       
-      // Se non c'è risultato, prova a prendere i gol dalle colonne separate
       if (!risultato && colGolCasa && row[colGolCasa] !== undefined && row[colGolCasa] !== '') {
         golCasa = parseFloat(row[colGolCasa]) || 0;
         if (colGolOspite && row[colGolOspite] !== undefined && row[colGolOspite] !== '') {
@@ -1038,7 +1022,6 @@ function processExcelData(arrayBuffer) {
         }
       }
       
-      // Controlla se c'è una colonna stato
       if (colStato && row[colStato]) {
         const statoVal = row[colStato].toString().toLowerCase().trim();
         if (statoVal === 'giocata' || statoVal === 'played' || statoVal === 'finished') {
@@ -1078,7 +1061,6 @@ function processExcelData(arrayBuffer) {
     
     console.log(`✅ Caricate ${matches.length} partite dal file Excel (${championships.length} campionati)`);
     
-    // Salva in localStorage
     localStorage.setItem('ft_matches', JSON.stringify(matches));
     localStorage.setItem('ft_champs', JSON.stringify(championships));
     
@@ -1109,65 +1091,41 @@ const MAIN_TABS = ['Home','Palinsesto','Statistiche','Storico','Schedina','Impos
 const SETTINGS_TABS = ['Temi','Dati Locali','Importa Campionato','Giocate','Grandezza Caratteri','Città Meteo','Visuale'];
 
 // ============================================================
-// MAPPA COLORI PER CAMPIONATO (NUOVA LISTA)
+// MAPPA COLORI PER CAMPIONATO
 // ============================================================
 
 const CHAMPIONSHIP_COLORS = {
-  'Liga Profesional': '#1abc9c',
-  'Liga Profesional Argentina': '#1abc9c',
-  'Jupiler Pro League': '#e74c3c',
-  'Belgian Pro League': '#e74c3c',
-  'Serie A (Brasile)': '#2ecc71',
-  'Serie A BR': '#2ecc71',
-  'Brasileirão': '#2ecc71',
-  'Super League': '#e74c3c',
-  'Chinese Super League': '#e74c3c',
-  'CSL': '#e74c3c',
   'Premier League': '#3498db',
   'English Premier League': '#3498db',
   'EPL': '#3498db',
   'Championship': '#6c3483',
   'EFL Championship': '#6c3483',
-  'Premiership': '#2ecc71',
-  'Scottish Premiership': '#2ecc71',
-  'Scottish Premier League': '#2ecc71',
-  'Ligue 1': '#9b59b6',
-  'Ligue 2': '#9b59b6',
+  'EFL League One': '#2980b9',
+  'EFL League Two': '#1abc9c',
+  'La Liga': '#e74c3c',
+  'LaLiga': '#e74c3c',
+  'Segunda División': '#e67e22',
   'Bundesliga': '#f39c12',
   '2. Bundesliga': '#e67e22',
-  'J1 League': '#e74c3c',
-  'J-League': '#e74c3c',
-  'Serie A (Italia)': '#2ecc71',
-  'Serie A IT': '#2ecc71',
+  'Ligue 1': '#9b59b6',
+  'Ligue 2': '#8e44ad',
   'Serie A': '#2ecc71',
   'Serie A TIM': '#2ecc71',
   'Serie A Enilive': '#2ecc71',
   'Serie B': '#e67e22',
-  'Serie B IT': '#e67e22',
-  'Serie C - Girone A': '#3498db',
-  'Serie C - Girone B': '#27ae60',
-  'Serie C - Girone C': '#e74c3c',
-  'Serie A Women': '#9b59b6',
-  'Serie A Women IT': '#9b59b6',
-  'K League 1': '#f39c12',
-  'K League': '#f39c12',
-  'K-League': '#f39c12',
+  'Eredivisie': '#e74c3c',
   'Eerste Divisie': '#e67e22',
-  'Eerste Divisie NL': '#e67e22',
   'Primeira Liga': '#34495e',
   'Liga Portugal': '#34495e',
-  'LaLiga': '#e74c3c',
-  'La Liga': '#e74c3c',
-  'Segunda División': '#e67e22',
-  'Süper Lig': '#e67e22',
+  'Scottish Premiership': '#2ecc71',
+  'Scottish Premier League': '#2ecc71',
+  'Premiership': '#2ecc71',
   'Super Lig': '#e67e22',
-  'Turkish Süper Lig': '#e67e22',
-  'Major League Soccer': '#3498db',
+  'Süper Lig': '#e67e22',
   'MLS': '#3498db',
   'NWSL': '#e74c3c',
-  'National Women\'s Soccer League': '#e74c3c',
-  'A-League': '#1a8a3f',
   'A-League Men': '#1a8a3f',
+  'A-League': '#1a8a3f',
   'Allsvenskan': '#e74c3c',
   'Eliteserien': '#2980b9',
   'Danish Superliga': '#27ae60',
@@ -1295,7 +1253,7 @@ const getHeatmapColorClass = (pct) => {
 };
 
 // ============================================================
-// SPIEGAZIONE STATISTICHE MONTE CARLO (NUOVA FUNZIONE)
+// SPIEGAZIONE STATISTICHE MONTE CARLO
 // ============================================================
 
 const getStatExplanation = (statKey) => {
@@ -1341,7 +1299,7 @@ const getStatExplanation = (statKey) => {
 };
 
 // ============================================================
-// FUNZIONI PER LOGHI SQUADRE (VERSIONE CORRETTA)
+// FUNZIONI PER LOGHI SQUADRE
 // ============================================================
 
 const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
@@ -1367,11 +1325,6 @@ const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
       'Serie A IT': 'Serie_A',
       'Serie B': 'Serie_B',
       'Serie B IT': 'Serie_B',
-      'Serie C - Girone A': 'Serie_C_Girone_A',
-      'Serie C - Girone B': 'Serie_C_Girone_B',
-      'Serie C - Girone C': 'Serie_C_Girone_C',
-      'Serie A Women': 'Serie_A_Women',
-      'Serie A Women IT': 'Serie_A_Women',
       'Bundesliga': 'Bundesliga',
       '2. Bundesliga': '2_Bundesliga',
       'La Liga': 'La_Liga',
@@ -1381,11 +1334,8 @@ const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
       'Ligue 2': 'Ligue_2',
       'Eredivisie': 'Eredivisie',
       'Eerste Divisie': 'Eerste_Divisie',
-      'Eerste Divisie NL': 'Eerste_Divisie',
       'MLS': 'MLS',
-      'Major League Soccer': 'MLS',
       'NWSL': 'NWSL',
-      'National Women\'s Soccer League': 'NWSL',
       'A-League': 'A-League_Men',
       'A-League Men': 'A-League_Men',
       'Primeira Liga': 'Primeira_Liga',
@@ -1397,27 +1347,12 @@ const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
       'Super Lig': 'Super_Lig',
       'Turkish Süper Lig': 'Super_Lig',
       'Allsvenskan': 'Allsvenskan',
-      'K League 1': 'K_League_1',
-      'K League': 'K_League_1',
-      'K-League': 'K_League_1',
-      'Liga Profesional': 'Liga_Profesional',
-      'Liga Profesional Argentina': 'Liga_Profesional',
-      'Jupiler Pro League': 'Jupiler_Pro_League',
-      'Belgian Pro League': 'Jupiler_Pro_League',
-      'Serie A (Brasile)': 'Serie_A_BR',
-      'Serie A BR': 'Serie_A_BR',
-      'Brasileirão': 'Serie_A_BR',
-      'Super League': 'Super_League',
-      'Chinese Super League': 'Super_League',
-      'CSL': 'Super_League',
-      'J1 League': 'J1_League',
-      'J-League': 'J1_League',
+      'Eliteserien': 'Eliteserien',
+      'Danish Superliga': 'Danish_Superliga',
       'Swiss Super League': 'Swiss_Super_League',
       'Austrian Bundesliga': 'Austrian_Bundesliga',
       'Russian Premier League': 'Russian_Premier_League',
-      'Liga MX': 'Liga_MX',
-      'Eliteserien': 'Eliteserien',
-      'Danish Superliga': 'Danish_Superliga'
+      'Liga MX': 'Liga_MX'
     };
     return map[champ] || champ.replace(/ /g, '_');
   };
@@ -1909,7 +1844,7 @@ const Clock = () => {
 };
 
 // ============================================================
-// COMPONENTE WEATHER BADGE (USA I DATI DA METEO.JS)
+// COMPONENTE WEATHER BADGE
 // ============================================================
 
 const WeatherBadge = ({ weatherData, city }) => {
@@ -1938,7 +1873,7 @@ const WeatherBadge = ({ weatherData, city }) => {
 };
 
 // ============================================================
-// COMPONENTE STANDINGS CON LOGHI
+// COMPONENTE STANDINGS
 // ============================================================
 
 const Standings = ({ matches, filterChampionship, highlightTeams = [] }) => {
@@ -3395,49 +3330,192 @@ const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
         </div>
       )}
 
-      <div style={{marginTop: '12px', background: 'var(--surface)', borderRadius: '6px', border: '1px solid var(--border)', overflow: 'hidden'}}>
-  <div style={{padding: '10px 14px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '6px', fontSize: '11px', color: 'var(--text-muted)', borderBottom: '1px solid var(--border)'}}>
-    <div title="Tasso medio di gol previsti per la squadra di casa. Più alto = più gol.">
-      λ Casa: <span style={{color: 'var(--accent)', fontWeight: 'bold'}}>{mc.lambdaCasa}</span>
-    </div>
-    <div title="Tasso medio di gol previsti per la squadra ospite. Più alto = più gol.">
-      λ Ospite: <span style={{color: 'var(--accent)', fontWeight: 'bold'}}>{mc.lambdaOspite}</span>
-    </div>
-    <div title="Forza offensiva della squadra di casa. >1.0 = attacco forte, <1.0 = attacco debole.">
-      Attacco Casa: <span style={{color: 'var(--win)', fontWeight: 'bold'}}>{mc.homeAttacco}</span>
-    </div>
-    <div title="Solidità difensiva della squadra di casa. Più basso = migliore difesa.">
-      Difesa Casa: <span style={{color: 'var(--lose)', fontWeight: 'bold'}}>{mc.homeDifesa}</span>
-    </div>
-    <div title="Forza offensiva della squadra ospite. >1.0 = attacco forte, <1.0 = attacco debole.">
-      Attacco Ospite: <span style={{color: 'var(--win)', fontWeight: 'bold'}}>{mc.awayAttacco}</span>
-    </div>
-    <div title="Solidità difensiva della squadra ospite. Più basso = migliore difesa.">
-      Difesa Ospite: <span style={{color: 'var(--lose)', fontWeight: 'bold'}}>{mc.awayDifesa}</span>
-    </div>
-    <div style={{gridColumn: '1 / -1', textAlign: 'center'}}>
-      📊 {mc.partiteAnalizzate} partite analizzate • 🔄 {mc.numSimulations} simulazioni
-    </div>
-  </div>
-  
-  {/* SEZIONE DI SPIEGAZIONE VISIBILE */}
-  <div style={{padding: '10px 14px', background: 'rgba(243, 156, 18, 0.05)', borderTop: '1px solid var(--border)'}}>
-    <div style={{fontSize: '11px', color: 'var(--accent)', fontWeight: 'bold', marginBottom: '4px'}}>📖 Cosa significano questi valori?</div>
-    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '4px 16px', fontSize: '10px', color: 'var(--text-muted)'}}>
-      <div><b style={{color: 'var(--accent)'}}>λ Casa</b> = Tasso medio gol previsti per la squadra di casa. Più alto = più gol.</div>
-      <div><b style={{color: 'var(--accent)'}}>λ Ospite</b> = Tasso medio gol previsti per la squadra ospite. Più alto = più gol.</div>
-      <div><b style={{color: 'var(--win)'}}>Attacco</b> = Forza offensiva. &gt;1.0 = attacco forte, &lt;1.0 = attacco debole.</div>
-      <div><b style={{color: 'var(--lose)'}}>Difesa</b> = Solidità difensiva. Più basso = difesa migliore.</div>
-      <div style={{gridColumn: '1 / -1', marginTop: '2px'}}>
-        <span style={{color: 'var(--text-muted)'}}>💡 I valori di Attacco e Difesa sono relativi alla media del campionato (1.0 = media).</span>
-        {mc.partiteAnalizzate < 5 && (
-          <span style={{color: 'var(--draw)', marginLeft: '8px'}}>⚠️ Attenzione: poche partite analizzate ({mc.partiteAnalizzate}), i dati potrebbero non essere rappresentativi.</span>
-        )}
+      {/* ======================================== */}
+      {/* STATISTICHE CON SPIEGAZIONE - VERSIONE MOBILE FRIENDLY */}
+      {/* ======================================== */}
+      <div style={{marginTop: '16px', background: 'var(--surface)', borderRadius: '8px', border: '1px solid var(--border)', overflow: 'hidden'}}>
+        
+        {/* STATISTICHE PRINCIPALI */}
+        <div style={{
+          padding: '14px 16px', 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', 
+          gap: '10px', 
+          fontSize: '15px',
+          color: 'var(--text-muted)',
+          borderBottom: '1px solid var(--border)',
+          background: 'var(--card)'
+        }}>
+          <div style={{display: 'flex', flexDirection: 'column', gap: '2px'}}>
+            <span style={{fontSize: '12px', color: 'var(--text-muted)'}}>λ Casa</span>
+            <span style={{color: 'var(--accent)', fontWeight: 'bold', fontSize: '22px'}}>{mc.lambdaCasa}</span>
+          </div>
+          <div style={{display: 'flex', flexDirection: 'column', gap: '2px'}}>
+            <span style={{fontSize: '12px', color: 'var(--text-muted)'}}>λ Ospite</span>
+            <span style={{color: 'var(--accent)', fontWeight: 'bold', fontSize: '22px'}}>{mc.lambdaOspite}</span>
+          </div>
+          <div style={{display: 'flex', flexDirection: 'column', gap: '2px'}}>
+            <span style={{fontSize: '12px', color: 'var(--text-muted)'}}>Attacco Casa</span>
+            <span style={{color: 'var(--win)', fontWeight: 'bold', fontSize: '22px'}}>{mc.homeAttacco}</span>
+          </div>
+          <div style={{display: 'flex', flexDirection: 'column', gap: '2px'}}>
+            <span style={{fontSize: '12px', color: 'var(--text-muted)'}}>Difesa Casa</span>
+            <span style={{color: 'var(--lose)', fontWeight: 'bold', fontSize: '22px'}}>{mc.homeDifesa}</span>
+          </div>
+          <div style={{display: 'flex', flexDirection: 'column', gap: '2px'}}>
+            <span style={{fontSize: '12px', color: 'var(--text-muted)'}}>Attacco Ospite</span>
+            <span style={{color: 'var(--win)', fontWeight: 'bold', fontSize: '22px'}}>{mc.awayAttacco}</span>
+          </div>
+          <div style={{display: 'flex', flexDirection: 'column', gap: '2px'}}>
+            <span style={{fontSize: '12px', color: 'var(--text-muted)'}}>Difesa Ospite</span>
+            <span style={{color: 'var(--lose)', fontWeight: 'bold', fontSize: '22px'}}>{mc.awayDifesa}</span>
+          </div>
+          <div style={{gridColumn: '1 / -1', textAlign: 'center', paddingTop: '6px', borderTop: '1px solid var(--border)', fontSize: '14px'}}>
+            📊 <b style={{color: 'var(--accent)', fontSize: '18px'}}>{mc.partiteAnalizzate}</b> partite analizzate 
+            <span style={{margin: '0 10px'}}>•</span> 
+            🔄 <b style={{color: 'var(--accent)', fontSize: '18px'}}>{mc.numSimulations}</b> simulazioni
+          </div>
+        </div>
+        
+        {/* SEZIONE DI SPIEGAZIONE - DIMENSIONI RADDOPPIATE */}
+        <div style={{
+          padding: '16px 18px', 
+          background: 'rgba(243, 156, 18, 0.06)', 
+          borderTop: '2px solid var(--border)'
+        }}>
+          <div style={{
+            fontSize: '16px', 
+            color: 'var(--accent)', 
+            fontWeight: 'bold', 
+            marginBottom: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <span style={{fontSize: '20px'}}>📖</span> Cosa significano questi valori?
+          </div>
+          
+          <div style={{
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+            gap: '8px 20px', 
+            fontSize: '15px', 
+            color: 'var(--text)',
+            lineHeight: '1.5'
+          }}>
+            <div style={{
+              padding: '8px 12px',
+              background: 'rgba(243, 156, 18, 0.08)',
+              borderRadius: '6px',
+              borderLeft: '3px solid var(--accent)'
+            }}>
+              <b style={{color: 'var(--accent)', fontSize: '16px'}}>λ Casa</b>
+              <span style={{display: 'block', fontSize: '14px', color: 'var(--text-muted)'}}>Tasso medio gol previsti per la squadra di casa. Più alto = più gol.</span>
+              <span style={{display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px'}}>💡 Valore attuale: <b style={{color: 'var(--accent)'}}>{mc.lambdaCasa}</b></span>
+            </div>
+            
+            <div style={{
+              padding: '8px 12px',
+              background: 'rgba(243, 156, 18, 0.08)',
+              borderRadius: '6px',
+              borderLeft: '3px solid var(--accent)'
+            }}>
+              <b style={{color: 'var(--accent)', fontSize: '16px'}}>λ Ospite</b>
+              <span style={{display: 'block', fontSize: '14px', color: 'var(--text-muted)'}}>Tasso medio gol previsti per la squadra ospite. Più alto = più gol.</span>
+              <span style={{display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px'}}>💡 Valore attuale: <b style={{color: 'var(--accent)'}}>{mc.lambdaOspite}</b></span>
+            </div>
+            
+            <div style={{
+              padding: '8px 12px',
+              background: 'rgba(111, 207, 151, 0.08)',
+              borderRadius: '6px',
+              borderLeft: '3px solid var(--win)'
+            }}>
+              <b style={{color: 'var(--win)', fontSize: '16px'}}>Attacco</b>
+              <span style={{display: 'block', fontSize: '14px', color: 'var(--text-muted)'}}>Forza offensiva. <b>&gt;1.0</b> = attacco forte, <b>&lt;1.0</b> = attacco debole.</span>
+              <span style={{display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px'}}>
+                💡 Casa: <b style={{color: 'var(--win)'}}>{mc.homeAttacco}</b> 
+                <span style={{margin: '0 6px'}}>•</span> 
+                Ospite: <b style={{color: 'var(--win)'}}>{mc.awayAttacco}</b>
+              </span>
+            </div>
+            
+            <div style={{
+              padding: '8px 12px',
+              background: 'rgba(235, 87, 87, 0.08)',
+              borderRadius: '6px',
+              borderLeft: '3px solid var(--lose)'
+            }}>
+              <b style={{color: 'var(--lose)', fontSize: '16px'}}>Difesa</b>
+              <span style={{display: 'block', fontSize: '14px', color: 'var(--text-muted)'}}>Solidità difensiva. Più <b>basso</b> = difesa migliore.</span>
+              <span style={{display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px'}}>
+                💡 Casa: <b style={{color: 'var(--lose)'}}>{mc.homeDifesa}</b> 
+                <span style={{margin: '0 6px'}}>•</span> 
+                Ospite: <b style={{color: 'var(--lose)'}}>{mc.awayDifesa}</b>
+              </span>
+            </div>
+          </div>
+          
+          {/* NOTE AGGIUNTIVE */}
+          <div style={{
+            marginTop: '12px',
+            padding: '12px 16px',
+            background: 'var(--card)',
+            borderRadius: '6px',
+            border: '1px solid var(--border)',
+            fontSize: '14px',
+            color: 'var(--text-muted)',
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            gap: '12px'
+          }}>
+            <span>💡 I valori di Attacco e Difesa sono relativi alla <b style={{color: 'var(--text)'}}>media del campionato</b> (1.0 = media).</span>
+            
+            {mc.partiteAnalizzate < 5 && (
+              <span style={{
+                color: 'var(--draw)',
+                fontWeight: 'bold',
+                padding: '4px 14px',
+                background: 'rgba(242, 201, 76, 0.15)',
+                borderRadius: '4px',
+                border: '1px solid var(--draw)',
+                fontSize: '15px'
+              }}>
+                ⚠️ Attenzione: solo <b>{mc.partiteAnalizzate}</b> partite analizzate! I dati potrebbero non essere rappresentativi.
+              </span>
+            )}
+            
+            {mc.partiteAnalizzate >= 5 && mc.partiteAnalizzate < 10 && (
+              <span style={{
+                color: 'var(--draw)',
+                padding: '4px 14px',
+                background: 'rgba(242, 201, 76, 0.10)',
+                borderRadius: '4px',
+                border: '1px solid var(--draw)',
+                fontSize: '14px'
+              }}>
+                ℹ️ {mc.partiteAnalizzate} partite analizzate - campione sufficiente ma ancora limitato.
+              </span>
+            )}
+            
+            {mc.partiteAnalizzate >= 10 && (
+              <span style={{
+                color: 'var(--win)',
+                padding: '4px 14px',
+                background: 'rgba(111, 207, 151, 0.10)',
+                borderRadius: '4px',
+                border: '1px solid var(--win)',
+                fontSize: '14px'
+              }}>
+                ✅ {mc.partiteAnalizzate} partite analizzate - campione affidabile!
+              </span>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
 
+      {/* LEGENDA COLORI */}
       <div style={{display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '8px', padding: '8px 12px', background: 'var(--surface)', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '11px'}}>
         <span style={{color: '#eb5757'}}>🔴 0% - 33,33%</span>
         <span style={{color: '#8b949e'}}>⚪ 33,34% - 66,66%</span>

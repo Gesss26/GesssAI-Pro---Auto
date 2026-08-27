@@ -25,7 +25,7 @@ LEAGUES = [
     {'name': 'Super League', 'url': 'https://www.matchesio.com/it/competition/super-league/export/json/'},
     {'name': 'Premier League', 'url': 'https://www.matchesio.com/it/competition/premier-league-gb-eng/export/json/'},
     {'name': 'Championship', 'url': 'https://www.matchesio.com/it/competition/championship-gb-eng/export/json/'},
-    {'name': 'Eredivisie', 'url': 'https://www.matchesio.com/it/competition/eredivisie-nl/export/json/'},  # <-- NUOVO CAMPIONATO
+    {'name': 'Eredivisie', 'url': 'https://www.matchesio.com/it/competition/eredivisie-nl/export/json/'},
     {'name': 'Ligue 1', 'url': 'https://www.matchesio.com/it/competition/ligue-1-fr/export/json/'},
     {'name': 'Ligue 2', 'url': 'https://www.matchesio.com/it/competition/ligue-2-fr/export/json/'},
     {'name': 'Bundesliga', 'url': 'https://www.matchesio.com/it/competition/bundesliga-de/export/json/'},
@@ -52,14 +52,12 @@ GITHUB_REPO_PATH = r"D:\ai\gesssai-pro---auto"
 GITHUB_REMOTE = "origin"
 GITHUB_BRANCH = "master"
 GITHUB_FOLDER = "json"
-
 REPO_JSON_PATH = os.path.join(GITHUB_REPO_PATH, GITHUB_FOLDER)
 
 def convert_date_to_italian(date_str: str) -> str:
     """Converte una data da YYYY-MM-DD a DD/MM/YYYY."""
     if not date_str:
         return ''
-    
     date_str = str(date_str)
     
     # Se è già DD/MM/YYYY
@@ -182,6 +180,7 @@ def sort_matches_by_date(all_matches: List[Dict]) -> List[Dict]:
     # Rimuovi eventuali duplicati
     unique_matches = []
     seen = set()
+    
     for match in all_matches:
         # Crea una chiave unica per ogni partita
         key = (match['campionato'], match['data'], match['ora'], 
@@ -211,7 +210,6 @@ def fetch_league_json(url: str, league_name: str) -> List[Dict]:
         data = response.json()
         matches = parse_matches_from_json(data, league_name)
         return matches
-        
     except Exception as e:
         print(f"❌ Errore nel download di {league_name}: {e}")
         return []
@@ -279,7 +277,6 @@ def save_excel(all_matches: List[Dict]) -> str:
             excel_path = temp_path
         
         return excel_path if os.path.exists(excel_path) else None
-        
     except Exception as e:
         print(f"⚠️ Errore nel salvataggio Excel: {e}")
         return None
@@ -330,8 +327,8 @@ def save_json(all_matches: List[Dict]):
             raw_json_path = temp_raw_path
         
         time.sleep(0.5)
-        return json_path, raw_json_path
         
+        return json_path, raw_json_path
     except Exception as e:
         print(f"⚠️ Errore nel salvataggio JSON: {e}")
         return None, None
@@ -361,8 +358,9 @@ def push_to_github():
         print("🔄 Eseguo git commit...")
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M')
         commit_msg = f"Aggiornati dati calcio da matchesio.com ({timestamp})"
+        
         commit_result = subprocess.run(['git', 'commit', '-m', commit_msg], 
-                                     capture_output=True, text=True)
+                                      capture_output=True, text=True)
         
         if "nothing to commit" in commit_result.stdout:
             print("   ℹ️ Nessuna modifica da committare")
@@ -373,7 +371,7 @@ def push_to_github():
         
         print(f"🔄 Eseguo git push a {GITHUB_REMOTE}/{GITHUB_BRANCH}...")
         result = subprocess.run(['git', 'push', GITHUB_REMOTE, GITHUB_BRANCH], 
-                              capture_output=True, text=True)
+                               capture_output=True, text=True)
         
         if result.returncode == 0:
             print("\n✅ FILE INVIATI CON SUCCESSO SU GITHUB!")
@@ -384,7 +382,6 @@ def push_to_github():
             print(f"\n❌ Errore durante il push: {result.stderr}")
             os.chdir(current_dir)
             return False
-        
     except Exception as e:
         print(f"\n❌ Errore: {e}")
         return False
@@ -445,8 +442,10 @@ def main():
         print("\n" + "="*70)
         print("📊 STATISTICHE FINALI")
         print("="*70)
+        
         giocate = sum(1 for m in all_matches if m['stato'] == 'Giocata')
         future = sum(1 for m in all_matches if m['stato'] == 'Futura')
+        
         print(f"   • Partite totali: {len(all_matches):,}")
         print(f"   • Giocate: {giocate:,}")
         print(f"   • Future: {future:,}")
