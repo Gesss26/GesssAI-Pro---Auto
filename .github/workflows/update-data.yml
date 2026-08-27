@@ -1,0 +1,145 @@
+name: 🔄 Aggiornamento Automatico Dati
+
+on:
+  schedule:
+    # Esegue ogni giorno alle 6:00 AM (UTC)
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    # Permette di eseguire manualmente il workflow
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4 pandas openpyxl
+          
+      - name: 🗂️ Create directories
+        run: |
+          mkdir -p json
+          mkdir -p excel
+          
+      - name: ⚽ Run scraper
+        run: |
+          python scarica.py
+        env:
+          PYTHONUNBUFFERED: 1
+          
+      - name: 📊 Check generated files
+        run: |
+          echo "📂 Contenuto cartella excel:"
+          ls -la excel/ || echo "❌ Cartella excel vuota o non trovata"
+          echo ""
+          echo "📂 Contenuto cartella json:"
+          ls -la json/ || echo "❌ Cartella json vuota o non trovata"
+          echo ""
+          echo "📂 Contenuto cartella data:"
+          ls -la data/ || echo "❌ Cartella data vuota o non trovata"
+          
+          # Verifica che i file esistano
+          if [ -f "excel/GesssAI_Input.xlsx" ]; then
+            echo "✅ GesssAI_Input.xlsx trovato!"
+          else
+            echo "❌ GesssAI_Input.xlsx NON TROVATO!"
+            exit 1
+          fi
+          
+          if [ -f "json/GesssAI_Input.json" ]; then
+            echo "✅ GesssAI_Input.json trovato!"
+          else
+            echo "❌ GesssAI_Input.json NON TROVATO!"
+            exit 1
+          fi
+          
+          if [ -f "data/matches.json" ]; then
+            echo "✅ matches.json trovato!"
+          else
+            echo "❌ matches.json NON TROVATO!"
+            exit 1
+          fi
+          
+      - name: 📊 Show preview
+        run: |
+          if [ -f "excel/GesssAI_Input.xlsx" ]; then
+            echo "📊 Anteprima dei dati scaricati:"
+            python -c "
+            import pandas as pd
+            try:
+                df = pd.read_excel('excel/GesssAI_Input.xlsx')
+                print(f'✅ {len(df)} partite trovate')
+                print(f'🏆 Campionati: {df[\"Campionato\"].nunique()}')
+                print(f'🟢 Giocate: {len(df[df[\"Stato\"] == \"Giocata\"])}')
+                print(f'🔵 Future: {len(df[df[\"Stato\"] == \"Futura\"])}')
+                print('\n📋 Prime 5 partite:')
+                print(df[['Campionato', 'Data', 'Squadra Casa', 'Squadra Ospite', 'Stato']].head(5).to_string(index=False))
+            except Exception as e:
+                print(f'❌ Errore lettura Excel: {e}')
+            "
+          fi
+          
+      - name: 🔄 Commit and push changes
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          
+          # Aggiungi i file modificati
+          git add excel/GesssAI_Input.xlsx json/GesssAI_Input.json data/matches.json || true
+          
+          # Verifica se ci sono modifiche
+          if git diff --staged --quiet; then
+            echo "📝 Nessuna modifica da committare - i dati sono già aggiornati."
+          else
+            echo "📝 Committing changes..."
+            git commit -m "🔄 Aggiornamento automatico dati $(date '+%Y-%m-%d %H:%M:%S')"
+            git push origin main || git push origin master
+          fi
+          
+      - name: 📦 Upload artifacts (salva i file generati)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dati-scaricati
+          path: |
+            excel/GesssAI_Input.xlsx
+            json/GesssAI_Input.json
+            data/matches.json
+          retention-days: 7
+          
+      - name: 🚀 Deploy to GitHub Pages (se necessario)
+        if: success()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+          
+  deploy-pages:
+    needs: update-data
+    if: success()
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
