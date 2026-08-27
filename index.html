@@ -838,13 +838,13 @@
 const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
 // ============================================================
-// CARICAMENTO DATI - DA FILE JSON SU GITHUB PAGES
+// CARICAMENTO DATI - DA FILE EXCEL NELLA CARTELLA JSON
 // ============================================================
 
 let dataLoaded = false;
 
 async function loadScrapedData(forceReload = false) {
-  console.log('📂 Caricamento dati da JSON su GitHub Pages...');
+  console.log('📂 Caricamento dati da Excel su GitHub Pages...');
   
   try {
     // Svuota il localStorage per forzare il caricamento dal file
@@ -853,57 +853,231 @@ async function loadScrapedData(forceReload = false) {
       localStorage.removeItem('ft_champs');
     }
     
-    // Determina il percorso base corretto
-    // Se l'app è su https://gesss26.github.io/GesssAI-Pro---Auto/
-    // il percorso base è /GesssAI-Pro---Auto/
-    const basePath = window.location.pathname.includes('/GesssAI-Pro---Auto/') 
-      ? '/GesssAI-Pro---Auto/' 
-      : '/';
+    // Prova diversi percorsi per trovare il file Excel
+    const paths = [
+      '/GesssAI-Pro---Auto/json/GesssAI_Input.xlsx',
+      '/json/GesssAI_Input.xlsx',
+      'https://gesss26.github.io/GesssAI-Pro---Auto/json/GesssAI_Input.xlsx'
+    ];
     
-    // Percorso corretto per il file JSON su GitHub Pages
-    const jsonPath = `${basePath}json/matches.json`;
-    console.log('📂 Caricamento da: ', jsonPath);
+    let excelData = null;
+    let lastError = null;
     
-    // Aggiungi un parametro cache-buster per evitare la cache
-    const cacheBuster = `?t=${Date.now()}`;
-    const response = await fetch(jsonPath + cacheBuster);
-    
-    if (!response.ok) {
-      console.error('❌ File non trovato su GitHub Pages:', response.status);
-      
-      // Tentativo con percorso assoluto
-      console.log('📂 Tentativo con percorso assoluto...');
-      const absoluteResponse = await fetch('/GesssAI-Pro---Auto/json/matches.json' + cacheBuster);
-      
-      if (!absoluteResponse.ok) {
-        console.error('❌ Fallback fallito');
-        return null;
+    for (const path of paths) {
+      try {
+        console.log('📂 Tentativo: ', path);
+        const response = await fetch(path);
+        
+        if (response.ok) {
+          console.log('✅ File Excel trovato!');
+          const arrayBuffer = await response.arrayBuffer();
+          excelData = processExcelData(arrayBuffer);
+          if (excelData) {
+            break;
+          }
+        } else {
+          console.warn('❌ File non trovato:', response.status);
+        }
+      } catch (e) {
+        console.warn('❌ Errore:', e.message);
+        lastError = e;
       }
-      
-      const absoluteData = await absoluteResponse.json();
-      console.log('✅ Dati caricati da percorso assoluto:', absoluteData.matches?.length || 0, 'partite');
-      
-      if (absoluteData.matches) {
-        localStorage.setItem('ft_matches', JSON.stringify(absoluteData.matches));
-        localStorage.setItem('ft_champs', JSON.stringify(absoluteData.championships || []));
-      }
-      
-      dataLoaded = true;
-      return absoluteData;
     }
     
-    const data = await response.json();
-    console.log('✅ Dati caricati da GitHub Pages:', data.matches?.length || 0, 'partite');
-    
-    if (data.matches) {
-      localStorage.setItem('ft_matches', JSON.stringify(data.matches));
-      localStorage.setItem('ft_champs', JSON.stringify(data.championships || []));
+    if (excelData) {
+      return excelData;
     }
     
-    dataLoaded = true;
-    return data;
+    // Se l'Excel non funziona, prova a caricare il JSON come fallback
+    console.log('📂 Tentativo fallback: caricamento JSON...');
+    const jsonPaths = [
+      '/GesssAI-Pro---Auto/json/matches.json',
+      '/json/matches.json',
+      'https://gesss26.github.io/GesssAI-Pro---Auto/json/matches.json'
+    ];
+    
+    for (const path of jsonPaths) {
+      try {
+        const response = await fetch(path);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ Dati caricati da JSON fallback:', data.matches?.length || 0, 'partite');
+          if (data.matches) {
+            localStorage.setItem('ft_matches', JSON.stringify(data.matches));
+            localStorage.setItem('ft_champs', JSON.stringify(data.championships || []));
+          }
+          dataLoaded = true;
+          return data;
+        }
+      } catch (e) {
+        console.warn('❌ JSON fallback fallito:', e.message);
+      }
+    }
+    
+    console.error('❌ Nessun file trovato (Excel o JSON)');
+    return null;
+    
   } catch (error) {
     console.error('❌ Errore:', error.message);
+    return null;
+  }
+}
+
+// ============================================================
+// PROCESSO I DATI DEL FILE EXCEL
+// ============================================================
+
+function processExcelData(arrayBuffer) {
+  try {
+    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+    
+    if (jsonData.length === 0) {
+      console.error('❌ Il file Excel è vuoto');
+      return null;
+    }
+    
+    console.log('✅ File Excel caricato con', jsonData.length, 'righe');
+    
+    // Mappa le colonne del file Excel
+    const matches = [];
+    const championshipsSet = new Set();
+    
+    // Cerca le colonne nel file Excel
+    const headers = Object.keys(jsonData[0]);
+    console.log('📊 Colonne trovate:', headers.join(', '));
+    
+    // Mappa dei nomi delle colonne (cerca corrispondenze)
+    const findColumn = (keywords) => {
+      for (const keyword of keywords) {
+        const found = headers.find(h => h.toLowerCase().includes(keyword.toLowerCase()));
+        if (found) return found;
+      }
+      return null;
+    };
+    
+    const colCampionato = findColumn(['campionato', 'league', 'camp', 'championship']);
+    const colGiornata = findColumn(['giornata', 'round', 'giorn', 'wk']);
+    const colData = findColumn(['data', 'date', 'giorno']);
+    const colOra = findColumn(['ora', 'time', 'orario', 'hour']);
+    const colCasa = findColumn(['squadra casa', 'home', 'casa', 'home team', 'home_team']);
+    const colOspite = findColumn(['squadra ospite', 'away', 'ospite', 'away team', 'away_team']);
+    const colGolCasa = findColumn(['gol casa', 'home goals', 'goal casa', 'home_goals']);
+    const colGolOspite = findColumn(['gol ospite', 'away goals', 'goal ospite', 'away_goals']);
+    const colRisultato = findColumn(['risultato', 'result', 'score', 'ris']);
+    const colStato = findColumn(['stato', 'status']);
+    
+    // Verifica che le colonne obbligatorie ci siano
+    if (!colCampionato || !colData || !colCasa || !colOspite) {
+      console.error('❌ Colonne obbligatorie non trovate. Colonne disponibili:', headers.join(', '));
+      console.log('🔍 Colonna Campionato:', colCampionato);
+      console.log('🔍 Colonna Data:', colData);
+      console.log('🔍 Colonna Squadra Casa:', colCasa);
+      console.log('🔍 Colonna Squadra Ospite:', colOspite);
+      return null;
+    }
+    
+    jsonData.forEach((row, index) => {
+      const campionato = row[colCampionato]?.toString().trim() || 'Sconosciuto';
+      const giornata = row[colGiornata]?.toString().trim() || 'N/A';
+      const dataRaw = row[colData]?.toString().trim() || '';
+      const oraRaw = row[colOra]?.toString().trim() || 'TBD';
+      const casa = row[colCasa]?.toString().trim() || '';
+      const ospite = row[colOspite]?.toString().trim() || '';
+      
+      if (!casa || !ospite) {
+        console.warn(`⚠️ Riga ${index + 2} saltata: Squadra casa o ospite mancante`);
+        return;
+      }
+      
+      let dataNormalizzata = normalizeDate(dataRaw);
+      if (!dataNormalizzata) {
+        console.warn(`⚠️ Riga ${index + 2} saltata: Data non valida (${dataRaw})`);
+        return;
+      }
+      
+      let golCasa = 0;
+      let golOspite = 0;
+      let stato = 'Futura';
+      let risultato = '';
+      
+      // Controlla se c'è un risultato nella colonna Risultato
+      if (colRisultato && row[colRisultato]) {
+        const val = row[colRisultato].toString().trim();
+        if (val && val !== '') {
+          const matchResult = val.match(/(\d+)\s*[-–:.]\s*(\d+)/);
+          if (matchResult) {
+            golCasa = parseInt(matchResult[1], 10);
+            golOspite = parseInt(matchResult[2], 10);
+            risultato = `${golCasa}-${golOspite}`;
+            stato = 'Giocata';
+          }
+        }
+      }
+      
+      // Se non c'è risultato, prova a prendere i gol dalle colonne separate
+      if (!risultato && colGolCasa && row[colGolCasa] !== undefined && row[colGolCasa] !== '') {
+        golCasa = parseFloat(row[colGolCasa]) || 0;
+        if (colGolOspite && row[colGolOspite] !== undefined && row[colGolOspite] !== '') {
+          golOspite = parseFloat(row[colGolOspite]) || 0;
+          if (golCasa > 0 || golOspite > 0) {
+            risultato = `${golCasa}-${golOspite}`;
+            stato = 'Giocata';
+          }
+        }
+      }
+      
+      // Controlla se c'è una colonna stato
+      if (colStato && row[colStato]) {
+        const statoVal = row[colStato].toString().toLowerCase().trim();
+        if (statoVal === 'giocata' || statoVal === 'played' || statoVal === 'finished') {
+          stato = 'Giocata';
+        }
+      }
+      
+      const match = {
+        id: Math.random().toString(36).slice(2) + Date.now().toString(36) + index,
+        campionato: campionato,
+        round: giornata,
+        data: dataNormalizzata,
+        ora: oraRaw,
+        casa: casa,
+        ospiti: ospite,
+        stato: stato,
+        golCasa: stato === 'Giocata' ? golCasa : 0,
+        golOspite: stato === 'Giocata' ? golOspite : 0,
+        risultato: stato === 'Giocata' ? `${golCasa}-${golOspite}` : '',
+        citta: 'N/D',
+        _fromExcel: true
+      };
+      
+      matches.push(match);
+      championshipsSet.add(campionato);
+    });
+    
+    if (matches.length === 0) {
+      console.error('❌ Nessuna partita valida trovata nel file Excel');
+      return null;
+    }
+    
+    const championships = Array.from(championshipsSet).map(name => ({
+      name,
+      importedAt: new Date().toISOString()
+    }));
+    
+    console.log(`✅ Caricate ${matches.length} partite dal file Excel (${championships.length} campionati)`);
+    
+    // Salva in localStorage
+    localStorage.setItem('ft_matches', JSON.stringify(matches));
+    localStorage.setItem('ft_champs', JSON.stringify(championships));
+    
+    dataLoaded = true;
+    
+    return { matches, championships };
+    
+  } catch (error) {
+    console.error('❌ Errore nel processare i dati Excel:', error.message);
     return null;
   }
 }
@@ -5087,16 +5261,16 @@ function App() {
 // AVVIA APP
 // ============================================================
 
-console.log('🚀 Avvio GesssAI-Pro - Caricamento da GitHub...');
+console.log('🚀 Avvio GesssAI-Pro - Caricamento da Excel...');
 
 // Svuota localStorage all'avvio per forzare il caricamento
 localStorage.removeItem('ft_matches');
 localStorage.removeItem('ft_champs');
 
-// Carica il file JSON da GitHub
+// Carica il file Excel
 loadScrapedData(true).then(data => {
   if (data && data.matches && data.matches.length > 0) {
-    console.log(`✅ ${data.matches.length} partite caricate all'avvio da GitHub!`);
+    console.log(`✅ ${data.matches.length} partite caricate all'avvio!`);
     if (window.updateAppData) {
       window.updateAppData(data);
     }
@@ -5110,12 +5284,11 @@ loadScrapedData(true).then(data => {
           <div style="font-size: 64px; margin-bottom: 20px;">📂</div>
           <h2 style="color: #f39c12;">Caricamento dati...</h2>
           <p style="color: #8b949e; max-width: 500px; margin: 20px auto;">
-            Il file <strong style="color: #e6edf3;">matches.json</strong> non è stato trovato.
+            Il file <strong style="color: #e6edf3;">GesssAI_Input.xlsx</strong> non è stato trovato.
           </p>
           <p style="color: #8b949e; font-size: 14px;">
-            Verifica che il repository sia pubblico e che il file esista in:
-            <br>
-            <strong style="color: #e6edf3;">/json/matches.json</strong>
+            Il file deve contenere le colonne: <br>
+            <strong style="color: #e6edf3;">Campionato, Data, Squadra Casa, Squadra Ospite</strong>
           </p>
           <button onclick="window.location.reload()" style="margin-top: 20px; padding: 12px 30px; background: #f39c12; color: #000; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer;">
             🔄 Ricarica
