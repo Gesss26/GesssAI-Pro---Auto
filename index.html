@@ -1339,55 +1339,135 @@ const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
   
   const getLeagueFolder = (champ) => {
     if (!champ) return '';
-    const map = {
-      'Premier League': 'Premier_League',
-      'English Premier League': 'Premier_League',
-      'EPL': 'Premier_League',
-      'Championship': 'Championship',
-      'EFL Championship': 'Championship',
-      'League One': 'EFL_League_One',
-      'EFL League One': 'EFL_League_One',
-      'League Two': 'EFL_League_Two',
-      'EFL League Two': 'EFL_League_Two',
-      'Serie A': 'Serie_A',
-      'Serie A TIM': 'Serie_A',
-      'Serie A Enilive': 'Serie_A',
-      'Serie A (Italia)': 'Serie_A',
-      'Serie A IT': 'Serie_A',
-      'Serie B': 'Serie_B',
-      'Serie B IT': 'Serie_B',
-      'Serie C Girone A': 'Serie_C_Girone_A'',
-      'Serie C Girone B': 'Serie_C_Girone_B'',
-      'Serie C Girone C': 'Serie_C_Girone_C'',
-      'Bundesliga': 'Bundesliga',
-      '2. Bundesliga': '2. Bundesliga',
-      'La Liga': 'La_Liga',
-      'LaLiga': 'La_Liga',
-      'Segunda División': 'Segunda_Division',
-      'Ligue 1': 'Ligue_1',
-      'Ligue 2': 'Ligue_2',
-      'Eredivisie': 'Eredivisie',
-      'Eerste Divisie': 'Eerste_Divisie',
-      'MLS': 'MLS',
-      'NWSL': 'NWSL',
-      'A-League': 'A-League_Men',
-      'A-League Men': 'A-League_Men',
-      'Primeira Liga': 'Primeira_Liga',
-      'Liga Portugal': 'Primeira_Liga',
-      'Scottish Premiership': 'Scottish_Premiership',
-      'Scottish Premier League': 'Scottish_Premiership',
-      'Premiership': 'Scottish_Premiership',
-      'Süper Lig': 'Super_Lig',
-      'Super Lig': 'Super_Lig',
-      'Turkish Süper Lig': 'Super_Lig',
-      'Allsvenskan': 'Allsvenskan',
-      'Eliteserien': 'Eliteserien',
-      'Danish Superliga': 'Danish_Superliga',
-      'Swiss Super League': 'Swiss_Super_League',
-      'Austrian Bundesliga': 'Austrian_Bundesliga',
-      'Russian Premier League': 'Russian_Premier_League',
-      'Liga MX': 'Liga_MX'
-    };
+    
+  const map = {
+  // ============================================================
+  // ARGENTINA
+  // ============================================================
+  'Liga Profesional Argentina': 'Liga_Profesional_Argentina',
+  
+  // ============================================================
+  // BELGIO
+  // ============================================================
+  'Jupiler Pro League': 'Jupiler_Pro_League',
+  
+  // ============================================================
+  // BRASILE
+  // ============================================================
+  'Brasileirão Serie A': 'Brasileirao_Serie_A',
+  'Serie A BR': 'Brasileirao_Serie_A',
+  
+  // ============================================================
+  // GRECIA
+  // ============================================================
+  'Super League Grecia': 'Super_League_Grecia',
+  'Super League GR': 'Super_League_Grecia',
+  
+  // ============================================================
+  // INGHILTERRA
+  // ============================================================
+  'Premier League': 'Premier_League',
+  'English Premier League': 'Premier_League',
+  'EPL': 'Premier_League',
+  'EFL Championship': 'Championship',
+  'Championship': 'Championship',
+  'League One': 'EFL_League_One',
+  'EFL League One': 'EFL_League_One',
+  'League Two': 'EFL_League_Two',
+  'EFL League Two': 'EFL_League_Two',
+  
+  // ============================================================
+  // FRANCIA
+  // ============================================================
+  'Ligue 1': 'Ligue_1',
+  'Ligue 2': 'Ligue_2',
+  
+  // ============================================================
+  // GERMANIA
+  // ============================================================
+  'Bundesliga': 'Bundesliga',
+  '2. Bundesliga': '2_Bundesliga',
+  
+  // ============================================================
+  // ITALIA
+  // ============================================================
+  'Serie A': 'Serie_A',
+  'Serie A TIM': 'Serie_A',
+  'Serie A Enilive': 'Serie_A',
+  'Serie A (Italia)': 'Serie_A',
+  'Serie A IT': 'Serie_A',
+  'Serie B': 'Serie_B',
+  'Serie B IT': 'Serie_B',
+  'Serie B (Italia)': 'Serie_B',
+  'Serie C - Girone A': 'Serie_C_Girone_A',
+  'Serie C - Girone B': 'Serie_C_Girone_B',
+  'Serie C - Girone C': 'Serie_C_Girone_C',
+  'Serie A Women': 'Serie_A_Women',
+  
+  // ============================================================
+  // GIAPPONE
+  // ============================================================
+  'J1 League': 'J1_League',
+  
+  // ============================================================
+  // PAESI BASSI
+  // ============================================================
+  'Eredivisie': 'Eredivisie',
+  'Eerste Divisie': 'Eerste_Divisie',
+  
+  // ============================================================
+  // PORTOGALLO
+  // ============================================================
+  'Primeira Liga': 'Primeira_Liga',
+  'Liga Portugal': 'Primeira_Liga',
+  
+  // ============================================================
+  // SCOZIA
+  // ============================================================
+  'Scottish Premiership': 'Scottish_Premiership',
+  'Scottish Premier League': 'Scottish_Premiership',
+  'Premiership': 'Scottish_Premiership',
+  
+  // ============================================================
+  // COREA DEL SUD
+  // ============================================================
+  'K League 1': 'K_League_1',
+  'K League': 'K_League_1',
+  
+  // ============================================================
+  // SPAGNA
+  // ============================================================
+  'La Liga': 'La_Liga',
+  'LaLiga': 'La_Liga',
+  'Segunda División': 'Segunda_Division',
+  
+  // ============================================================
+  // TURCHIA
+  // ============================================================
+  'Süper Lig': 'Super_Lig',
+  'Super Lig': 'Super_Lig',
+  'Turkish Süper Lig': 'Super_Lig',
+  
+  // ============================================================
+  // USA / CANADA
+  // ============================================================
+  'Major League Soccer': 'MLS',
+  'MLS': 'MLS',
+  'NWSL': 'NWSL',
+  
+  // ============================================================
+  // ALTRI CAMPIONATI (già presenti)
+  // ============================================================
+  'A-League': 'A-League_Men',
+  'A-League Men': 'A-League_Men',
+  'Allsvenskan': 'Allsvenskan',
+  'Eliteserien': 'Eliteserien',
+  'Danish Superliga': 'Danish_Superliga',
+  'Swiss Super League': 'Swiss_Super_League',
+  'Austrian Bundesliga': 'Austrian_Bundesliga',
+  'Russian Premier League': 'Russian_Premier_League',
+  'Liga MX': 'Liga_MX'
+};
     return map[champ] || champ.replace(/ /g, '_');
   };
   
