@@ -5563,7 +5563,6 @@ function App() {
                 <button className={statsSubTab === 'Classifica' ? 'active' : ''} onClick={() => setStatsSubTab('Classifica')}>📊 Classifica</button>
                 <button className={statsSubTab === 'Scontri' ? 'active' : ''} onClick={() => setStatsSubTab('Scontri')}>⚔️ Scontri</button>
                 <button className={statsSubTab === 'RiepilogoAI' ? 'active' : ''} onClick={() => setStatsSubTab('RiepilogoAI')}>🤖 Riepilogo AI</button>
-                <button className={statsSubTab === 'Analisi' ? 'active' : ''} onClick={() => setStatsSubTab('Analisi')}>📈 Analisi Avanzata</button>
               </div>
               
               {statsSubTab === 'Classifica' && (
@@ -5643,32 +5642,6 @@ function App() {
                   ) : (
                     <div className="stats-placeholder">
                       <p>👈 Seleziona una partita per vedere il riepilogo AI completo.</p>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              {statsSubTab === 'Analisi' && (
-                <div>
-                  {selectedMatch ? (
-                    <div className="analisi-compact">
-                      <div>
-                        <RisultatiFrequenti teamName={selectedMatch.casa} allMatches={matches} />
-                        <FrequenzaGol teamName={selectedMatch.casa} allMatches={matches} />
-                        <IndiceAffidabilita teamName={selectedMatch.casa} allMatches={matches} />
-                      </div>
-                      <div>
-                        <RisultatiFrequenti teamName={selectedMatch.ospiti} allMatches={matches} />
-                        <FrequenzaGol teamName={selectedMatch.ospiti} allMatches={matches} />
-                        <IndiceAffidabilita teamName={selectedMatch.ospiti} allMatches={matches} />
-                      </div>
-                      <div style={{ gridColumn: '1 / -1' }}>
-                        <AnalisiMeteo matches={matches} weatherCache={weatherCache} />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="stats-placeholder">
-                      <p>👈 Seleziona una partita per vedere l'analisi avanzata.</p>
                     </div>
                   )}
                 </div>
