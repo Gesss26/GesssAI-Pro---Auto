@@ -5849,7 +5849,7 @@ function App() {
                 try {
                   const activeChamps = getActiveChamps();
                   const todayStr = getTodayStr();
-                  // Per 1 giorno mostra solo oggi, per più giorni mostra da oggi a oggi+giorni-1
+                  // Per 1 giorno mostra solo oggi (range 0), per più giorni da oggi a oggi+giorni-1
                   const maxDateStr = addDaysToDateStr(todayStr, selectedGiorni - 1);
                   
                   let futureMatches = matches.filter(m => m.stato === 'Futura');
