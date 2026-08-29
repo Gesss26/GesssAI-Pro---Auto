@@ -643,5 +643,3 @@ if __name__ == "__main__":
         import traceback
         traceback.print_exc()
     
-    # 🔥 TENIAMO APERTA LA FINESTRA 🔥
-    input("\n🔄 Premi ENTER per uscire...")
