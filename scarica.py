@@ -36,7 +36,6 @@ LEAGUES = [
     {'name': 'Serie C - Girone A', 'url': 'https://www.matchesio.com/it/competition/serie-c-girone-a-it/export/json/'},
     {'name': 'Serie C - Girone B', 'url': 'https://www.matchesio.com/it/competition/serie-c-girone-b-it/export/json/'},
     {'name': 'Serie C - Girone C', 'url': 'https://www.matchesio.com/it/competition/serie-c-girone-c-it/export/json/'},
-    {'name': 'Serie A Women', 'url': 'https://www.matchesio.com/it/competition/serie-a-women-it/export/json/'},
     {'name': 'K League 1', 'url': 'https://www.matchesio.com/it/competition/k-league/export/json/'},
     {'name': 'Eerste Divisie', 'url': 'https://www.matchesio.com/it/competition/eerste-divisie-nl/export/json/'},
     {'name': 'Primeira Liga', 'url': 'https://www.matchesio.com/it/competition/primeira-liga-pt/export/json/'},
