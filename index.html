@@ -5709,21 +5709,21 @@ function App() {
   const renderAppContent = () => {
     // Funzione per disegnare i pulsanti giorni (usata sia in Palinsesto che in Schedina)
     const renderGiorniButtons = (selected, onChange) => {
-      const giorniOptions = [1, 2, 3, 4, 5];
-      return (
-        <div className="giorni-filters">
-          {giorniOptions.map(g => (
-            <button
-              key={g}
-              className={`giorno-btn ${selected === g ? 'active' : 'inactive'}`}
-              onClick={() => onChange(g)}
-            >
-              📅 {g} Giorno{g > 1 ? 'ni' : ''}
-            </button>
-          ))}
-        </div>
-      );
-    };
+  const giorniOptions = [1, 2, 3, 4, 5];
+  return (
+    <div className="giorni-filters">
+      {giorniOptions.map(g => (
+        <button
+          key={g}
+          className={`giorno-btn ${selected === g ? 'active' : 'inactive'}`}
+          onClick={() => onChange(g)}
+        >
+          📅 {g} {g === 1 ? 'Giorno' : 'Giorni'}
+        </button>
+      ))}
+    </div>
+  );
+};
 
     // Funzione per disegnare i pulsanti campionati (usata sia in Palinsesto che in Schedina)
     const renderChampFilters = (selectedChampsObj, onToggle, onSelectAll, onClearAll) => {
