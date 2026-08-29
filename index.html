@@ -73,7 +73,7 @@
       pointer-events: none;
     }
     #splashscreen .splash-logo {
-      max-width: 280px;
+      max-width: 320px;
       width: 85%;
       height: auto;
       margin-bottom: 10px;
@@ -1041,7 +1041,6 @@
 
   <!-- ========== SPLASHSCREEN ========== -->
   <div id="splashscreen">
-    <!-- Logo come da tua immagine Splashscreen.png -->
     <svg class="splash-logo" viewBox="0 0 500 180" fill="none" xmlns="http://www.w3.org/2000/svg">
       <text x="30" y="80" font-family="Segoe UI, sans-serif" font-weight="900" font-size="60" fill="#f39c12" letter-spacing="3">GessAI-Pro</text>
       <text x="30" y="125" font-family="Segoe UI, sans-serif" font-weight="300" font-size="22" fill="#8899aa" letter-spacing="8">FOOTBALL TRADER</text>
@@ -1059,7 +1058,7 @@
   <div id="root"></div>
 
   <!-- ============================================================ -->
-  <!-- REACT + CODICE COMPLETO -->
+  <!-- REACT + CODICE COMPLETO (TUTTO IL TUO CODICE ORIGINALE) -->
   <!-- ============================================================ -->
   <script type="text/babel">
     // ============================================================
@@ -1293,7 +1292,7 @@
     }
 
     // ============================================================
-    // COSTANTI E FUNZIONI DI UTILITÀ (COMPLETE)
+    // COSTANTI E FUNZIONI DI UTILITÀ
     // ============================================================
     const THEMES = {
       'Scuro Blu Notte': { bg:'#0f1419', surface:'#1a2028', card:'#232b36', banner:'#2c3642', text:'#e6edf3', textMuted:'#ffff00', accent:'#f39c12', accent2:'#e67e22', border:'#30363d', tabActive:'#f39c12' },
@@ -1648,7 +1647,7 @@
     const DEFAULT_FAMIGLIE = ['dc_under', 'mg_casa_ospite', 'over'];
 
     // ============================================================
-    // FUNZIONI DI CALCOLO STATISTICHE (COMPLETE)
+    // FUNZIONI DI CALCOLO STATISTICHE
     // ============================================================
     const calcFormAndStats = (matches, teamName) => {
       const played = matches
@@ -2258,7 +2257,7 @@
     };
 
     // ============================================================
-    // COMPONENTI DELL'APP (COMPLETI)
+    // COMPONENTI DELL'APP
     // ============================================================
 
     // Clock
@@ -3102,7 +3101,7 @@
       );
     };
 
-    // AIAnalysis (COMPLETO)
+    // AIAnalysis
     const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
       const [monteCarloResult, setMonteCarloResult] = useState(null);
       const [simulationLoading, setSimulationLoading] = useState(false);
