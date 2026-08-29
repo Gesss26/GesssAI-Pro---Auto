@@ -19,19 +19,19 @@ except ImportError:
 
 # ===== LISTA COMPLETA CAMPIONATI =====
 LEAGUES = [
-    {'name': 'Liga Profesional', 'url': 'https://www.matchesio.com/it/competition/liga-profesional-argentina-ar/export/json/'},
+    {'name': 'Liga Profesional Argentina', 'url': 'https://www.matchesio.com/it/competition/liga-profesional-argentina-ar/export/json/'},
     {'name': 'Jupiler Pro League', 'url': 'https://www.matchesio.com/it/competition/jupiler-pro-league-be/export/json/'},
-    {'name': 'Serie A (Brasile)', 'url': 'https://www.matchesio.com/it/competition/serie-a-br/export/json/'},
-    {'name': 'Super League', 'url': 'https://www.matchesio.com/it/competition/super-league/export/json/'},
+    {'name': 'Brasileirão Serie A', 'url': 'https://www.matchesio.com/it/competition/serie-a-br/export/json/'},
+    {'name': 'Super League Grecia', 'url': 'https://www.matchesio.com/it/competition/super-league/export/json/'},
     {'name': 'Premier League', 'url': 'https://www.matchesio.com/it/competition/premier-league-gb-eng/export/json/'},
-    {'name': 'Championship', 'url': 'https://www.matchesio.com/it/competition/championship-gb-eng/export/json/'},
+    {'name': 'EFL Championship', 'url': 'https://www.matchesio.com/it/competition/championship-gb-eng/export/json/'},
     {'name': 'Eredivisie', 'url': 'https://www.matchesio.com/it/competition/eredivisie-nl/export/json/'},
     {'name': 'Ligue 1', 'url': 'https://www.matchesio.com/it/competition/ligue-1-fr/export/json/'},
     {'name': 'Ligue 2', 'url': 'https://www.matchesio.com/it/competition/ligue-2-fr/export/json/'},
     {'name': 'Bundesliga', 'url': 'https://www.matchesio.com/it/competition/bundesliga-de/export/json/'},
     {'name': '2. Bundesliga', 'url': 'https://www.matchesio.com/it/competition/2-bundesliga-de/export/json/'},
     {'name': 'J1 League', 'url': 'https://www.matchesio.com/it/competition/j1-league/export/json/'},
-    {'name': 'Serie A (Italia)', 'url': 'https://www.matchesio.com/it/competition/serie-a-it/export/json/'},
+    {'name': 'Serie A', 'url': 'https://www.matchesio.com/it/competition/serie-a-it/export/json/'},
     {'name': 'Serie B', 'url': 'https://www.matchesio.com/it/competition/serie-b-it/export/json/'},
     {'name': 'Serie C - Girone A', 'url': 'https://www.matchesio.com/it/competition/serie-c-girone-a-it/export/json/'},
     {'name': 'Serie C - Girone B', 'url': 'https://www.matchesio.com/it/competition/serie-c-girone-b-it/export/json/'},
@@ -39,25 +39,234 @@ LEAGUES = [
     {'name': 'K League 1', 'url': 'https://www.matchesio.com/it/competition/k-league/export/json/'},
     {'name': 'Eerste Divisie', 'url': 'https://www.matchesio.com/it/competition/eerste-divisie-nl/export/json/'},
     {'name': 'Primeira Liga', 'url': 'https://www.matchesio.com/it/competition/primeira-liga-pt/export/json/'},
-    {'name': 'Premiership', 'url': 'https://www.matchesio.com/it/competition/premiership-gb-sct/export/json/'},
-    {'name': 'LaLiga', 'url': 'https://www.matchesio.com/it/competition/la-liga-es/export/json/'},
+    {'name': 'Scottish Premiership', 'url': 'https://www.matchesio.com/it/competition/premiership-gb-sct/export/json/'},
+    {'name': 'La Liga', 'url': 'https://www.matchesio.com/it/competition/la-liga-es/export/json/'},
     {'name': 'Segunda División', 'url': 'https://www.matchesio.com/it/competition/segunda-division-es/export/json/'},
     {'name': 'Süper Lig', 'url': 'https://www.matchesio.com/it/competition/super-lig-tr/export/json/'},
     {'name': 'Major League Soccer', 'url': 'https://www.matchesio.com/it/competition/major-league-soccer-us/export/json/'},
 ]
 
 # ================================================================
-# ===== CONFIGURAZIONE =====
+# ===== CARICA LISTA NOMI SQUADRE DA FILE =====
 # ================================================================
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Cartelle di destinazione
-EXCEL_FOLDER = os.path.join(BASE_DIR, "excel")
-JSON_FOLDER = os.path.join(BASE_DIR, "json")
+def load_team_names_from_file():
+    """Carica i nomi delle squadre dal file lista nomi squadre.txt"""
+    team_names = {}
+    current_league = None
+    
+    try:
+        file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lista nomi squadre.txt')
+        
+        if not os.path.exists(file_path):
+            print(f"⚠️ File 'lista nomi squadre.txt' non trovato in: {file_path}")
+            return {}
+        
+        with open(file_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+        
+        for line in lines:
+            line = line.strip()
+            
+            # Salta linee vuote
+            if not line:
+                continue
+            
+            # Rileva il nome del campionato (es. "### Argentina – Liga Profesional")
+            if line.startswith('###'):
+                # Estrai il nome del campionato
+                match = re.search(r'###\s*(.+?)\s*$', line)
+                if match:
+                    current_league = match.group(1).strip()
+                    # Rimuovi eventuali "–" o "-"
+                    current_league = re.sub(r'\s*[–\-]\s*', ' - ', current_league)
+                    if current_league not in team_names:
+                        team_names[current_league] = []
+                continue
+            
+            # Rileva i nomi delle squadre (linee che iniziano con "* ")
+            if line.startswith('*'):
+                team_name = line[1:].strip()
+                if current_league and team_name:
+                    # Evita duplicati
+                    if team_name not in team_names[current_league]:
+                        team_names[current_league].append(team_name)
+        
+        # Stampa statistiche
+        print(f"📋 Caricate {len(team_names)} campionati dal file 'lista nomi squadre.txt':")
+        for league, teams in team_names.items():
+            print(f"   • {league}: {len(teams)} squadre")
+        
+        return team_names
+        
+    except Exception as e:
+        print(f"❌ Errore nel caricamento del file 'lista nomi squadre.txt': {e}")
+        return {}
 
-# Crea le cartelle se non esistono
-os.makedirs(EXCEL_FOLDER, exist_ok=True)
-os.makedirs(JSON_FOLDER, exist_ok=True)
+# ================================================================
+# ===== CARICA LISTA SOSTITUZIONI DA FILE =====
+# ================================================================
+
+def load_team_name_mappings():
+    """
+    Carica le mappature dei nomi delle squadre dal file team_name_mappings.txt
+    Formato: nome_originale|nome_corretto
+    """
+    mappings = {}
+    
+    try:
+        file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'team_name_mappings.txt')
+        
+        if not os.path.exists(file_path):
+            return {}
+        
+        with open(file_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                
+                if '|' in line:
+                    parts = line.split('|')
+                    if len(parts) == 2:
+                        mappings[parts[0].strip()] = parts[1].strip()
+        
+        return mappings
+        
+    except Exception as e:
+        print(f"⚠️ Errore nel caricamento delle mappature: {e}")
+        return {}
+
+# ================================================================
+# ===== FUNZIONI DI CORREZIONE NOMI =====
+# ================================================================
+
+def normalize_team_name(name: str) -> str:
+    """Normalizza un nome di squadra per il confronto"""
+    if not name:
+        return ''
+    
+    # Rimuovi spazi multipli
+    name = ' '.join(name.split())
+    
+    # Converti in minuscolo per il confronto
+    name_lower = name.lower()
+    
+    return name_lower
+
+def find_team_in_list(team_name: str, team_list: List[str]) -> str:
+    """
+    Cerca un nome di squadra in una lista, restituendo il nome corretto.
+    Usa il matching fuzzy per trovare corrispondenze.
+    """
+    if not team_name or not team_list:
+        return team_name
+    
+    team_lower = team_name.lower().strip()
+    
+    # Prima cerca una corrispondenza esatta (case insensitive)
+    for correct_name in team_list:
+        if correct_name.lower() == team_lower:
+            return correct_name
+    
+    # Poi cerca corrispondenze parziali
+    # Rimuovi prefissi comuni come "FC ", "SC ", "SS "
+    prefixes = ['fc ', 'sc ', 'ss ', 'as ', 'ac ', 'us ', 'cd ', 'cf ', 'de ']
+    clean_team = team_lower
+    for prefix in prefixes:
+        if clean_team.startswith(prefix):
+            clean_team = clean_team[len(prefix):]
+            break
+    
+    # Rimuovi suffissi comuni come " fc", " sc", " ss"
+    suffixes = [' fc', ' sc', ' ss', ' as', ' ac', ' cf']
+    for suffix in suffixes:
+        if clean_team.endswith(suffix):
+            clean_team = clean_team[:-len(suffix)]
+            break
+    
+    clean_team = clean_team.strip()
+    
+    # Cerca corrispondenze parziali
+    best_match = None
+    best_score = 0
+    
+    for correct_name in team_list:
+        correct_lower = correct_name.lower()
+        
+        # Corrispondenza esatta dopo la pulizia
+        if clean_team == correct_lower.replace('fc ', '').replace('sc ', '').strip():
+            return correct_name
+        
+        # Corrispondenza parziale (contiene)
+        if clean_team in correct_lower or correct_lower in clean_team:
+            score = len(clean_team) / max(len(correct_lower), 1)
+            if score > best_score:
+                best_score = score
+                best_match = correct_name
+    
+    # Se la corrispondenza è sufficientemente buona (oltre il 60%)
+    if best_match and best_score > 0.6:
+        return best_match
+    
+    return team_name
+
+def correct_team_names_for_league(matches: List[Dict], league_name: str, team_names_dict: Dict) -> List[Dict]:
+    """
+    Corregge i nomi delle squadre per un campionato usando la lista fornita.
+    """
+    if not matches:
+        return matches
+    
+    # Trova il campionato nella lista
+    league_key = None
+    for key in team_names_dict.keys():
+        if key.lower() == league_name.lower():
+            league_key = key
+            break
+        # Controlla se il nome del campionato è contenuto
+        if league_name.lower() in key.lower() or key.lower() in league_name.lower():
+            league_key = key
+            break
+    
+    if not league_key:
+        # Se non trovato, prova a cercare per similarità
+        for key in team_names_dict.keys():
+            # Rimuovi parole comuni per il confronto
+            key_clean = re.sub(r'(campionato|league|serie|division|liga|super|premier|championship|professional|pro|league|1|2|3)', '', key.lower())
+            league_clean = re.sub(r'(campionato|league|serie|division|liga|super|premier|championship|professional|pro|league|1|2|3)', '', league_name.lower())
+            if key_clean.strip() and league_clean.strip() and (key_clean in league_clean or league_clean in key_clean):
+                league_key = key
+                break
+    
+    if not league_key:
+        print(f"   ⚠️ Campionato '{league_name}' non trovato nella lista nomi. Uso nomi originali.")
+        return matches
+    
+    team_list = team_names_dict[league_key]
+    corrected_count = 0
+    
+    for match in matches:
+        # Corregge squadra casa
+        if match.get('squadra_casa'):
+            original = match['squadra_casa']
+            corrected = find_team_in_list(original, team_list)
+            if corrected != original:
+                match['squadra_casa'] = corrected
+                corrected_count += 1
+        
+        # Corregge squadra ospite
+        if match.get('squadra_ospite'):
+            original = match['squadra_ospite']
+            corrected = find_team_in_list(original, team_list)
+            if corrected != original:
+                match['squadra_ospite'] = corrected
+                corrected_count += 1
+    
+    if corrected_count > 0:
+        print(f"   ✅ Corretti {corrected_count} nomi squadre per {league_key}")
+    
+    return matches
 
 # ================================================================
 # ===== FUNZIONI DI UTILITÀ =====
@@ -363,6 +572,11 @@ def main():
     print("="*70)
     print()
     
+    # ===== CARICA I NOMI DELLE SQUADRE =====
+    print("📂 Caricamento lista nomi squadre da 'lista nomi squadre.txt'...")
+    team_names_dict = load_team_names_from_file()
+    print()
+    
     all_matches = []
     errors = []
     
@@ -373,6 +587,9 @@ def main():
         matches = fetch_league_json(league['url'], league_name)
         
         if matches:
+            # ===== CORREGGI I NOMI DELLE SQUADRE =====
+            matches = correct_team_names_for_league(matches, league_name, team_names_dict)
+            
             all_matches.extend(matches)
             giocate = sum(1 for m in matches if m['stato'] == 'Giocata')
             future = sum(1 for m in matches if m['stato'] == 'Futura')
@@ -426,3 +643,5 @@ if __name__ == "__main__":
         import traceback
         traceback.print_exc()
     
+    # 🔥 TENIAMO APERTA LA FINESTRA 🔥
+    input("\n🔄 Premi ENTER per uscire...")
