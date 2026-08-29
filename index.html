@@ -5830,65 +5830,71 @@ function App() {
           )}
 
           {tab === 'Palinsesto' && (
-            <div>
-              <div style={{marginBottom: '12px'}}>
-                {/* PULSANTI GIORNI */}
-                {renderGiorniButtons(selectedGiorni, (val) => setSelectedGiorni(val))}
-                
-                {/* PULSANTI CAMPIONATI */}
-                {renderChampFilters(
-                  selectedChamps,
-                  toggleChamp,
-                  selectAllChamps,
-                  clearAllChamps
-                )}
-              </div>
-              
-              <h2 style={{marginBottom:'14px'}}>📅 Palinsesto - Prossimi {selectedGiorni} Giorno{selectedGiorni > 1 ? 'ni' : ''}</h2>
-              {(() => {
-                try {
-                  const activeChamps = getActiveChamps();
-                  const todayStr = getTodayStr();
-                  // Per 1 giorno mostra solo oggi (range 0), per più giorni da oggi a oggi+giorni-1
-                  const maxDateStr = addDaysToDateStr(todayStr, selectedGiorni - 1);
-                  
-                  let futureMatches = matches.filter(m => m.stato === 'Futura');
-                  
-                  // Filtra per campionati attivi
-                  futureMatches = futureMatches.filter(m => activeChamps.includes(m.campionato));
-                  
-                  // Filtra per range giorni
-                  futureMatches = futureMatches.filter(m => {
-                    if (!m.data) return false;
-                    const normalized = normalizeDate(m.data);
-                    if (!normalized) return false;
-                    return normalized >= todayStr && normalized <= maxDateStr;
-                  });
-                  
-                  futureMatches.sort((a, b) => {
-                    const dateA = normalizeDate(a.data);
-                    const dateB = normalizeDate(b.data);
-                    if (!dateA || !dateB) return 0;
-                    return dateA.localeCompare(dateB);
-                  });
-                  
-                  if (futureMatches.length === 0) {
-                    return <div className="empty-state">Nessuna partita disponibile per i campionati selezionati nelle prossime {selectedGiorni} giornate.</div>;
-                  }
-                  
-                  return <div className="matches-grid">{futureMatches.map(m => { 
-                    const weatherKey = `${m.campionato}_${m.data}`; 
-                    const weather = weatherCache[weatherKey] || null; 
-                    return <MatchTab key={m.id} match={m} allMatches={matches} onSelect={selectMatch} selectedFamiglie={selectedFamiglie} weatherData={weather} />; 
-                  })}</div>;
-                  
-                } catch (e) { 
-                  console.error('Errore rendering Palinsesto:', e); 
-                  return <div className="empty-state">Errore nel caricamento delle partite: {e.message}</div>; 
-                }
-              })()}
-            </div>
-          )}
+  <div>
+    <div style={{marginBottom: '12px'}}>
+      {/* PULSANTI GIORNI */}
+      {renderGiorniButtons(selectedGiorni, (val) => setSelectedGiorni(val))}
+      
+      {/* PULSANTI CAMPIONATI */}
+      {renderChampFilters(
+        selectedChamps,
+        toggleChamp,
+        selectAllChamps,
+        clearAllChamps
+      )}
+    </div>
+    
+    <h2 style={{marginBottom:'14px'}}>📅 Palinsesto - Prossimi {selectedGiorni} Giorno{selectedGiorni > 1 ? 'ni' : ''}</h2>
+    {(() => {
+      try {
+        const activeChamps = getActiveChamps();
+        const todayStr = getTodayStr();
+        // 🔥 CORRETTO: per 1 giorno mostra solo oggi, per più giorni da oggi a oggi+giorni-1
+        const maxDateStr = addDaysToDateStr(todayStr, selectedGiorni - 1);
+        
+        let futureMatches = matches.filter(m => m.stato === 'Futura');
+        
+        // Filtra per campionati attivi
+        if (activeChamps.length > 0) {
+          futureMatches = futureMatches.filter(m => activeChamps.includes(m.campionato));
+        }
+        
+        // 🔥 FILTRO GIORNI CORRETTO
+        futureMatches = futureMatches.filter(m => {
+          if (!m.data) return false;
+          const normalized = normalizeDate(m.data);
+          if (!normalized) return false;
+          return normalized >= todayStr && normalized <= maxDateStr;
+        });
+        
+        futureMatches.sort((a, b) => {
+          const dateA = normalizeDate(a.data);
+          const dateB = normalizeDate(b.data);
+          if (!dateA || !dateB) return 0;
+          return dateA.localeCompare(dateB);
+        });
+        
+        if (futureMatches.length === 0) {
+          let msg = `Nessuna partita disponibile nelle prossime ${selectedGiorni} giornate`;
+          if (activeChamps.length > 0) {
+            msg += ` per i campionati selezionati (${activeChamps.length} selezionati)`;
+          }
+          return <div className="empty-state">{msg}.</div>;
+        }
+        
+        return <div className="matches-grid">{futureMatches.map(m => { 
+          const weatherKey = `${m.campionato}_${m.data}`; 
+          const weather = weatherCache[weatherKey] || null; 
+          return <MatchTab key={m.id} match={m} allMatches={matches} onSelect={selectMatch} selectedFamiglie={selectedFamiglie} weatherData={weather} />; 
+        })}</div>;
+        
+      } catch (e) { 
+        console.error('Errore rendering Palinsesto:', e); 
+        return <div className="empty-state">Errore nel caricamento delle partite: {e.message}</div>; 
+      }
+    })()}
+  </div>
+)}
 
           {tab === 'Statistiche' && (
             <div>
