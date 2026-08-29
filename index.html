@@ -836,6 +836,150 @@
     color: var(--accent);
     border-bottom-color: var(--accent);
   }
+
+  /* STILI PER I PULSANTI CAMPIONATO */
+  .champ-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    width: 100%;
+  }
+  .champ-filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .champ-filter-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+  }
+  .champ-filter-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .champ-filter-btn.active {
+    border-color: var(--accent);
+    color: #000;
+  }
+  .champ-filter-btn.inactive {
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+  }
+  .champ-filter-btn .champ-color-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+  .champ-filter-btn .champ-name {
+    font-size: 11px;
+    line-height: 1.2;
+  }
+  .champ-filter-btn .champ-count {
+    font-size: 9px;
+    opacity: 0.6;
+    margin-left: 4px;
+  }
+  
+  .champ-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-left: auto;
+  }
+  .champ-actions .btn-sm {
+    padding: 6px 14px;
+    font-size: 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .champ-actions .btn-sm:hover {
+    transform: translateY(-1px);
+  }
+  .champ-actions .btn-select-all {
+    background: var(--accent);
+    color: #000;
+  }
+  .champ-actions .btn-select-all:hover {
+    background: var(--accent2);
+  }
+  .champ-actions .btn-clear-all {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .champ-actions .btn-clear-all:hover {
+    background: var(--card);
+  }
+  
+  @media (max-width: 768px) {
+    .champ-filters-row {
+      gap: 6px;
+    }
+    .champ-filter-btn {
+      padding: 4px 10px;
+      font-size: 11px;
+      min-height: 32px;
+    }
+    .champ-filter-btn .champ-name {
+      font-size: 10px;
+    }
+    .champ-actions .btn-sm {
+      padding: 4px 10px;
+      font-size: 11px;
+      min-height: 32px;
+    }
+  }
+  @media (max-width: 480px) {
+    .champ-filters-row {
+      gap: 4px;
+    }
+    .champ-filter-btn {
+      padding: 3px 8px;
+      font-size: 10px;
+      min-height: 28px;
+    }
+    .champ-filter-btn .champ-name {
+      font-size: 9px;
+    }
+    .champ-filter-btn .champ-color-dot {
+      width: 8px;
+      height: 8px;
+      margin-right: 4px;
+    }
+    .champ-actions .btn-sm {
+      padding: 3px 8px;
+      font-size: 10px;
+      min-height: 28px;
+    }
+  }
 </style>
 </head>
 <body>
@@ -1091,7 +1235,7 @@ const MAIN_TABS = ['Home','Palinsesto','Statistiche','Storico','Schedina','Impos
 const SETTINGS_TABS = ['Temi','Dati Locali','Importa Campionato','Giocate','Grandezza Caratteri','Città Meteo','Visuale'];
 
 // ============================================================
-// MAPPA COLORI PER CAMPIONATO
+// MAPPA COLORI PER CAMPIONATO (25 campionati, esclusa Serie A Woman)
 // ============================================================
 
 const CHAMPIONSHIP_COLORS = {
@@ -1131,7 +1275,7 @@ const CHAMPIONSHIP_COLORS = {
   'Serie C - Girone A': '#2980b9',
   'Serie C - Girone B': '#27ae60',
   'Serie C - Girone C': '#c0392b',
-  'Serie A Women': '#e74c3c',
+  // 'Serie A Women' rimossa
   
   // ===== GIAPPONE =====
   'J1 League': '#e74c3c',
@@ -1163,8 +1307,37 @@ const CHAMPIONSHIP_COLORS = {
   // ===== USA/CANADA =====
   'Major League Soccer': '#3498db',
   'MLS': '#3498db',
-  'NWSL': '#e74c3c'
+  // 'NWSL' rimossa
 };
+
+// Lista dei 25 campionati (esclusa Serie A Woman e NWSL)
+const CHAMPIONSHIP_LIST = [
+  'Liga Profesional Argentina',
+  'Jupiler Pro League',
+  'Brasileirão Serie A',
+  'Super League Grecia',
+  'Premier League',
+  'EFL Championship',
+  'Ligue 1',
+  'Ligue 2',
+  'Bundesliga',
+  '2. Bundesliga',
+  'Serie A',
+  'Serie B',
+  'Serie C - Girone A',
+  'Serie C - Girone B',
+  'Serie C - Girone C',
+  'J1 League',
+  'Eerste Divisie',
+  'Eredivisie',
+  'Primeira Liga',
+  'Scottish Premiership',
+  'K League 1',
+  'La Liga',
+  'Segunda División',
+  'Süper Lig',
+  'Major League Soccer'
+];
 
 // ============================================================
 // FUNZIONI DI UTILITÀ
@@ -1402,7 +1575,7 @@ const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
   'Serie C - Girone A': 'Serie_C_Girone_A',
   'Serie C - Girone B': 'Serie_C_Girone_B',
   'Serie C - Girone C': 'Serie_C_Girone_C',
-  'Serie A Women': 'Serie_A_Women',
+  // 'Serie A Women' rimossa
   
   // ============================================================
   // GIAPPONE
@@ -1453,7 +1626,7 @@ const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
   // ============================================================
   'Major League Soccer': 'MLS',
   'MLS': 'MLS',
-  'NWSL': 'NWSL',
+  // 'NWSL' rimossa
   
   // ============================================================
   // ALTRI CAMPIONATI (già presenti)
@@ -5317,6 +5490,41 @@ function App() {
   });
   const [selectedFamiglie, setSelectedFamiglie] = useState(initial.selectedFamiglie || ['dc_under','mg_casa_ospite','over']);
   
+  // Stato per i filtri campionato (pulsanti)
+  const [selectedChamps, setSelectedChamps] = useState(() => {
+    // Inizialmente tutti selezionati
+    const allSelected = {};
+    CHAMPIONSHIP_LIST.forEach(c => { allSelected[c] = true; });
+    return allSelected;
+  });
+
+  // Funzione per gestire il toggle di un campionato
+  const toggleChamp = (champName) => {
+    setSelectedChamps(prev => ({
+      ...prev,
+      [champName]: !prev[champName]
+    }));
+  };
+
+  // Funzione per selezionare tutti
+  const selectAllChamps = () => {
+    const allSelected = {};
+    CHAMPIONSHIP_LIST.forEach(c => { allSelected[c] = true; });
+    setSelectedChamps(allSelected);
+  };
+
+  // Funzione per deselezionare tutti
+  const clearAllChamps = () => {
+    const allUnselected = {};
+    CHAMPIONSHIP_LIST.forEach(c => { allUnselected[c] = false; });
+    setSelectedChamps(allUnselected);
+  };
+
+  // Funzione per ottenere i campionati attivi
+  const getActiveChamps = () => {
+    return Object.keys(selectedChamps).filter(c => selectedChamps[c]);
+  };
+
   useEffect(() => {
     const loadData = async () => {
       const data = await loadScrapedData();
@@ -5492,36 +5700,58 @@ function App() {
 
           {tab === 'Palinsesto' && (
             <div>
-              <div style={{display: 'flex', gap: '12px', marginBottom: '12px', flexWrap: 'wrap', alignItems: 'center'}}>
-                <div className="form-group" style={{maxWidth: '300px', marginBottom: '0', flex: '1'}}>
-                  <label>Filtra per Campionato</label>
-                  <select value={selectedChamp} onChange={e => setSelectedChamp(e.target.value)}>
-                    <option value="Tutti">Tutti</option>
-                    {championships
-                      .sort((a, b) => a.name.localeCompare(b.name))
-                      .map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
-                  </select>
-                </div>
-                <div className="form-group" style={{maxWidth: '200px', marginBottom: '0', flex: '1'}}>
-                  <label>Range Giorni</label>
-                  <select value={daysRange} onChange={e => setDaysRange(parseInt(e.target.value))}>
-                    <option value="0">Oggi (0)</option>
-                    <option value="1">Oggi - Domani (0-1)</option>
-                    <option value="2">Oggi - Dopodomani (0-2)</option>
-                    <option value="3">Oggi - +3 giorni (0-3)</option>
-                    <option value="4">Oggi - +4 giorni (0-4)</option>
-                    <option value="5">Oggi - +5 giorni (0-5)</option>
-                    <option value="6">Oggi - +6 giorni (0-6)</option>
-                  </select>
+              <div style={{marginBottom: '12px'}}>
+                <div className="champ-filters">
+                  <div className="champ-filters-row">
+                    {CHAMPIONSHIP_LIST.map((champ, index) => {
+                      const isActive = selectedChamps[champ] !== false;
+                      const color = getChampColor(champ);
+                      // Dividiamo in 5 righe da 5 pulsanti
+                      const rowIndex = Math.floor(index / 5);
+                      // Mostriamo solo i pulsanti della riga corrente (gestito dal CSS)
+                      return (
+                        <button
+                          key={champ}
+                          className={`champ-filter-btn ${isActive ? 'active' : 'inactive'}`}
+                          style={{
+                            borderColor: isActive ? color : 'var(--border)',
+                            background: isActive ? color : 'var(--surface)',
+                            color: isActive ? '#000' : 'var(--text-muted)',
+                          }}
+                          onClick={() => toggleChamp(champ)}
+                          title={champ}
+                        >
+                          <span className="champ-color-dot" style={{ background: color }} />
+                          <span className="champ-name">{champ.length > 20 ? champ.substring(0, 18) + '…' : champ}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="champ-actions">
+                    <button className="btn-sm btn-select-all" onClick={selectAllChamps}>
+                      ✅ Seleziona Tutti
+                    </button>
+                    <button className="btn-sm btn-clear-all" onClick={clearAllChamps}>
+                      ❌ Svuota Selezione
+                    </button>
+                    <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginLeft: '4px' }}>
+                      ({getActiveChamps().length}/{CHAMPIONSHIP_LIST.length})
+                    </span>
+                  </div>
                 </div>
               </div>
+              
               <h2 style={{marginBottom:'14px'}}>📅 Palinsesto - Prossimi {daysRange + 1} Giorni</h2>
               {(() => {
                 try {
+                  const activeChamps = getActiveChamps();
                   let futureMatches = matches.filter(m => m.stato === 'Futura');
-                  if (selectedChamp !== 'Tutti') { 
-                    futureMatches = futureMatches.filter(m => m.campionato === selectedChamp);
-                  } else {
+                  
+                  // Filtra per campionati attivi
+                  futureMatches = futureMatches.filter(m => activeChamps.includes(m.campionato));
+                  
+                  // Filtra per range giorni se non ci sono campionati attivi
+                  if (activeChamps.length > 0) {
                     const todayStr = getTodayStr();
                     const maxDateStr = addDaysToDateStr(todayStr, daysRange);
                     futureMatches = futureMatches.filter(m => {
@@ -5540,7 +5770,7 @@ function App() {
                   });
                   
                   if (futureMatches.length === 0) {
-                    return <div className="empty-state">Nessuna partita disponibile per questo campionato nella giornata più vicina.</div>;
+                    return <div className="empty-state">Nessuna partita disponibile per i campionati selezionati nella giornata più vicina.</div>;
                   }
                   
                   return <div className="matches-grid">{futureMatches.map(m => { 
