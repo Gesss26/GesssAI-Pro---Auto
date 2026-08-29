@@ -64,7 +64,7 @@
       align-items: center;
       justify-content: center;
       z-index: 9999;
-      transition: opacity 0.6s ease;
+      transition: opacity 0.8s ease;
       padding: 24px;
       text-align: center;
     }
@@ -72,31 +72,28 @@
       opacity: 0;
       pointer-events: none;
     }
-    .splash-logo {
-      max-width: 220px;
-      width: 80%;
+    #splashscreen .splash-logo {
+      max-width: 280px;
+      width: 85%;
       height: auto;
-      margin-bottom: 24px;
-      filter: drop-shadow(0 8px 24px rgba(243, 156, 18, 0.25));
+      margin-bottom: 10px;
     }
-    .splash-title {
-      font-size: clamp(2rem, 8vw, 4rem);
-      font-weight: 800;
-      letter-spacing: 2px;
-      background: linear-gradient(135deg, #f7dc6f, #f39c12, #e67e22);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 6px;
+    #splashscreen .splash-year {
+      font-size: clamp(3rem, 10vw, 6rem);
+      font-weight: 900;
+      color: #f39c12;
+      letter-spacing: 8px;
+      text-shadow: 0 0 40px rgba(243, 156, 18, 0.3);
+      margin-bottom: 4px;
     }
-    .splash-sub {
-      font-size: clamp(0.9rem, 2vw, 1.4rem);
+    #splashscreen .splash-sub {
+      font-size: clamp(1.2rem, 3vw, 2rem);
       color: #aab8c9;
-      letter-spacing: 4px;
-      margin-bottom: 32px;
+      letter-spacing: 6px;
       font-weight: 300;
+      margin-bottom: 30px;
     }
-    .splash-btn {
+    #splashscreen .splash-btn {
       background: #f39c12;
       border: none;
       border-radius: 60px;
@@ -105,25 +102,27 @@
       font-weight: 700;
       color: #0a0e1e;
       cursor: pointer;
-      box-shadow: 0 0 30px rgba(243, 156, 18, 0.5);
-      transition: all 0.25s ease;
-      letter-spacing: 2px;
-      border: 1px solid #f7dc6f;
+      box-shadow: 0 0 40px rgba(243, 156, 18, 0.5);
+      transition: all 0.3s ease;
+      letter-spacing: 3px;
+      border: 2px solid #f7dc6f;
       text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
     }
-    .splash-btn:hover {
+    #splashscreen .splash-btn:hover {
       transform: scale(1.05);
-      box-shadow: 0 0 50px rgba(243, 156, 18, 0.8);
+      box-shadow: 0 0 60px rgba(243, 156, 18, 0.8);
       background: #f7dc6f;
     }
-    .splash-btn:active {
-      transform: scale(0.96);
+    #splashscreen .splash-btn:active {
+      transform: scale(0.95);
     }
-    .splash-footer {
+    #splashscreen .splash-footer {
       margin-top: 40px;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: #4a5a6e;
-      letter-spacing: 1px;
+      letter-spacing: 2px;
     }
 
     /* ========== APP ========== */
@@ -134,7 +133,7 @@
       display: block;
     }
 
-    /* ========== TUTTI GLI STILI ORIGINALI ========== */
+    /* ========== TUTTI GLI STILI ORIGINALI (COMPLETI) ========== */
     .giocata-pct {
       display: inline-block;
       font-weight: bold;
@@ -1042,23 +1041,17 @@
 
   <!-- ========== SPLASHSCREEN ========== -->
   <div id="splashscreen">
-    <svg class="splash-logo" viewBox="0 0 400 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <text x="20" y="80" font-family="Segoe UI, sans-serif" font-weight="800" font-size="68" fill="url(#goldGrad)" letter-spacing="2">GesssAI-Pro</text>
-      <text x="240" y="80" font-family="Segoe UI, sans-serif" font-weight="300" font-size="28" fill="#c0d0e0">v3.0</text>
-      <text x="20" y="110" font-family="Segoe UI, sans-serif" font-weight="400" font-size="18" fill="#6a7e9e" letter-spacing="6">FOOTBALL TRADER</text>
-      <defs>
-        <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#f7dc6f"/>
-          <stop offset="50%" stop-color="#f39c12"/>
-          <stop offset="100%" stop-color="#e67e22"/>
-        </linearGradient>
-      </defs>
+    <!-- Logo come da tua immagine Splashscreen.png -->
+    <svg class="splash-logo" viewBox="0 0 500 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <text x="30" y="80" font-family="Segoe UI, sans-serif" font-weight="900" font-size="60" fill="#f39c12" letter-spacing="3">GessAI-Pro</text>
+      <text x="30" y="125" font-family="Segoe UI, sans-serif" font-weight="300" font-size="22" fill="#8899aa" letter-spacing="8">FOOTBALL TRADER</text>
+      <text x="30" y="165" font-family="Segoe UI, sans-serif" font-weight="200" font-size="14" fill="#4a5a6e" letter-spacing="4">2026 • Analisi &amp; Trading</text>
     </svg>
 
-    <div class="splash-title">2026</div>
+    <div class="splash-year">2026</div>
     <div class="splash-sub">Analisi &amp; Trading</div>
 
-    <button class="splash-btn" id="enterBtn">Clikka per entrare</button>
+    <button class="splash-btn" id="enterBtn">CLIKKA PER ENTRARE</button>
     <div class="splash-footer">© 2026 GesssAI-Pro • Tutti i diritti riservati</div>
   </div>
 
@@ -1066,7 +1059,7 @@
   <div id="root"></div>
 
   <!-- ============================================================ -->
-  <!-- REACT + TUTTO IL CODICE ORIGINALE COMPLETO -->
+  <!-- REACT + CODICE COMPLETO -->
   <!-- ============================================================ -->
   <script type="text/babel">
     // ============================================================
@@ -1075,7 +1068,7 @@
     const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
     // ============================================================
-    // CARICAMENTO DATI - DA FILE EXCEL NELLA CARTELLA JSON
+    // CARICAMENTO DATI - DA FILE EXCEL
     // ============================================================
     let dataLoaded = false;
 
@@ -1300,7 +1293,7 @@
     }
 
     // ============================================================
-    // COSTANTI E FUNZIONI DI UTILITÀ
+    // COSTANTI E FUNZIONI DI UTILITÀ (COMPLETE)
     // ============================================================
     const THEMES = {
       'Scuro Blu Notte': { bg:'#0f1419', surface:'#1a2028', card:'#232b36', banner:'#2c3642', text:'#e6edf3', textMuted:'#ffff00', accent:'#f39c12', accent2:'#e67e22', border:'#30363d', tabActive:'#f39c12' },
@@ -1655,7 +1648,7 @@
     const DEFAULT_FAMIGLIE = ['dc_under', 'mg_casa_ospite', 'over'];
 
     // ============================================================
-    // FUNZIONI DI CALCOLO STATISTICHE
+    // FUNZIONI DI CALCOLO STATISTICHE (COMPLETE)
     // ============================================================
     const calcFormAndStats = (matches, teamName) => {
       const played = matches
@@ -2265,7 +2258,7 @@
     };
 
     // ============================================================
-    // COMPONENTI DELL'APP
+    // COMPONENTI DELL'APP (COMPLETI)
     // ============================================================
 
     // Clock
@@ -3109,7 +3102,7 @@
       );
     };
 
-    // AIAnalysis
+    // AIAnalysis (COMPLETO)
     const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
       const [monteCarloResult, setMonteCarloResult] = useState(null);
       const [simulationLoading, setSimulationLoading] = useState(false);
@@ -5243,7 +5236,7 @@
         root.classList.add('visible');
         setTimeout(() => {
           splash.style.display = 'none';
-        }, 700);
+        }, 800);
       });
     });
 
