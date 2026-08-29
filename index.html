@@ -860,6 +860,7 @@
     align-items: center;
     justify-content: center;
     white-space: nowrap;
+    flex: 0 0 auto;
   }
   .giorno-btn:hover {
     transform: translateY(-1px);
@@ -877,7 +878,7 @@
     border-color: var(--border);
   }
 
-  /* STILI PER I PULSANTI CAMPIONATO */
+  /* STILI PER I PULSANTI CAMPIONATO - GRIGLIA 5x5 */
   .champ-filters-container {
     display: flex;
     flex-direction: column;
@@ -885,14 +886,14 @@
     margin-bottom: 16px;
     width: 100%;
   }
-  .champ-filters-row {
-    display: flex;
-    flex-wrap: wrap;
+  .champ-filters-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
     gap: 6px;
-    align-items: center;
+    width: 100%;
   }
   .champ-filter-btn {
-    padding: 6px 12px;
+    padding: 6px 8px;
     border-radius: 6px;
     border: 2px solid var(--border);
     background: var(--surface);
@@ -906,8 +907,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    flex: 0 0 auto;
-    min-width: 120px;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .champ-filter-btn:hover {
     transform: translateY(-1px);
@@ -933,6 +935,8 @@
   .champ-filter-btn .champ-name {
     font-size: 10px;
     line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .champ-actions {
@@ -940,7 +944,8 @@
     gap: 8px;
     flex-wrap: wrap;
     align-items: center;
-    margin-left: auto;
+    margin-top: 8px;
+    justify-content: flex-start;
   }
   .champ-actions .btn-sm {
     padding: 6px 14px;
@@ -974,18 +979,35 @@
   .champ-actions .btn-clear-all:hover {
     background: var(--card);
   }
+  .champ-count-badge {
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 4px 12px;
+    background: var(--surface);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-weight: 600;
+  }
   
+  @media (max-width: 1024px) {
+    .champ-filters-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
   @media (max-width: 768px) {
     .giorno-btn {
       padding: 6px 14px;
       font-size: 12px;
       min-height: 34px;
     }
+    .champ-filters-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+    }
     .champ-filter-btn {
-      padding: 4px 10px;
+      padding: 4px 6px;
       font-size: 10px;
       min-height: 30px;
-      min-width: 80px;
     }
     .champ-filter-btn .champ-name {
       font-size: 9px;
@@ -995,9 +1017,6 @@
       font-size: 10px;
       min-height: 30px;
     }
-    .champ-filters-row {
-      gap: 4px;
-    }
   }
   @media (max-width: 480px) {
     .giorno-btn {
@@ -1005,11 +1024,14 @@
       font-size: 11px;
       min-height: 30px;
     }
+    .champ-filters-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 4px;
+    }
     .champ-filter-btn {
-      padding: 3px 8px;
+      padding: 3px 6px;
       font-size: 9px;
       min-height: 26px;
-      min-width: 60px;
     }
     .champ-filter-btn .champ-name {
       font-size: 8px;
@@ -5526,7 +5548,6 @@ function App() {
   const [weatherCache, setWeatherCache] = useState({});
   const [heatmapDetailChamp, setHeatmapDetailChamp] = useState(null);
   const [fontSize, setFontSize] = useState(() => { const saved = localStorage.getItem('ft_font_size'); return saved ? parseInt(saved) : 100; });
-  const [daysRange, setDaysRange] = useState(1);
   const [selectedMatchId, setSelectedMatchId] = useState(null);
   const [statsSubTab, setStatsSubTab] = useState('Classifica');
   const [viewMode, setViewMode] = useState(() => {
@@ -5711,8 +5732,8 @@ function App() {
       
       return (
         <div className="champ-filters-container">
-          <div className="champ-filters-row">
-            {CHAMPIONSHIP_LIST.map((champ, index) => {
+          <div className="champ-filters-grid">
+            {CHAMPIONSHIP_LIST.map((champ) => {
               const isActive = selectedChampsObj[champ] !== false;
               const color = getChampColor(champ);
               return (
@@ -5740,8 +5761,8 @@ function App() {
             <button className="btn-sm btn-clear-all" onClick={onClearAll}>
               ❌ Svuota Selezione
             </button>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginLeft: '4px' }}>
-              ({activeCount}/{total})
+            <span className="champ-count-badge">
+              {activeCount}/{total}
             </span>
           </div>
         </div>
@@ -5828,6 +5849,7 @@ function App() {
                 try {
                   const activeChamps = getActiveChamps();
                   const todayStr = getTodayStr();
+                  // Per 1 giorno mostra solo oggi, per più giorni mostra da oggi a oggi+giorni-1
                   const maxDateStr = addDaysToDateStr(todayStr, selectedGiorni - 1);
                   
                   let futureMatches = matches.filter(m => m.stato === 'Futura');
@@ -5851,7 +5873,7 @@ function App() {
                   });
                   
                   if (futureMatches.length === 0) {
-                    return <div className="empty-state">Nessuna partita disponibile per i campionati selezionati nella giornata più vicina.</div>;
+                    return <div className="empty-state">Nessuna partita disponibile per i campionati selezionati nelle prossime {selectedGiorni} giornate.</div>;
                   }
                   
                   return <div className="matches-grid">{futureMatches.map(m => { 
