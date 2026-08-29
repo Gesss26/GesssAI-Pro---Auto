@@ -11,7 +11,11 @@ const SchedinaComponent = ({
   selectedFamiglie, 
   onSelectMatch, 
   showAlert,
-  palinsestoGiorniRange = 1  // Valore dal Palinsesto (default 1)
+  palinsestoGiorniRange = 1,  // Valore dal Palinsesto (default 1)
+  renderGiorniButtons,         // Funzione per renderizzare i pulsanti giorni
+  renderChampFilters,          // Funzione per renderizzare i pulsanti campionati
+  CHAMPIONSHIP_LIST,           // Lista campionati dal Palinsesto
+  getChampColor                // Funzione per ottenere il colore del campionato
 }) => {
   // Stato per i campionati selezionati (array di nomi)
   const [campionatiSelezionati, setCampionatiSelezionati] = useState([]);
@@ -197,7 +201,6 @@ const SchedinaComponent = ({
       });
     }
     
-    // NON ordiniamo più qui - l'ordinamento verrà fatto dopo il calcolo delle percentuali
     return partite;
   }, [matches, campionatiSelezionati, giorniRange, filtroOrario]);
 
@@ -850,11 +853,11 @@ const SchedinaComponent = ({
           </span>
         </h3>
         
-        {/* SEZIONE 1: CAMPIONATI */}
+        {/* SEZIONE 1: CAMPIONATI - IN GRIGLIA 5x5 COME PALINSESTO */}
         <div style={{
           marginBottom: '20px', 
           padding: '14px 16px', 
-          background: 'var(--background)', 
+          background: 'var(--surface)', 
           borderRadius: '10px', 
           border: '2px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
@@ -906,7 +909,14 @@ const SchedinaComponent = ({
               </span>
             </div>
           </div>
-          <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
+          
+          {/* GRIGLIA 5x5 COME PALINSESTO */}
+          <div className="champ-filters-grid" style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(5, 1fr)',
+            gap: '6px',
+            width: '100%'
+          }}>
             {championships.map(c => {
               const isSelected = campionatiSelezionati.includes(c.name);
               const color = getChampColor(c.name);
@@ -914,24 +924,50 @@ const SchedinaComponent = ({
                 <button 
                   key={c.name}
                   onClick={() => toggleCampionato(c.name)}
+                  className={`champ-filter-btn ${isSelected ? 'active' : 'inactive'}`}
                   style={{
-                    padding: '5px 14px',
-                    borderRadius: '8px',
-                    border: isSelected ? `2px solid ${color}` : '1px solid var(--border)',
-                    background: isSelected ? `rgba(${hexToRgb(color)}, 0.12)` : 'var(--surface)',
-                    color: isSelected ? color : 'var(--text-muted)',
+                    padding: '6px 8px',
+                    borderRadius: '6px',
+                    border: isSelected ? `2px solid ${color}` : '2px solid var(--border)',
+                    background: isSelected ? color : 'var(--surface)',
+                    color: isSelected ? '#000' : 'var(--text-muted)',
                     cursor: 'pointer',
-                    fontSize: '12px',
-                    fontWeight: isSelected ? 'bold' : 'normal',
+                    fontSize: '11px',
+                    fontWeight: isSelected ? 'bold' : '600',
                     transition: 'all 0.2s',
-                    boxShadow: isSelected ? `0 0 12px rgba(${hexToRgb(color)}, 0.15)` : 'none'
+                    minHeight: '34px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
                   }}
+                  title={c.name}
                 >
-                  {isSelected ? '✅' : '⚪'} {c.name}
+                  <span className="champ-color-dot" style={{
+                    display: 'inline-block',
+                    width: '10px',
+                    height: '10px',
+                    borderRadius: '50%',
+                    marginRight: '6px',
+                    flexShrink: 0,
+                    background: color
+                  }} />
+                  <span className="champ-name" style={{
+                    fontSize: '10px',
+                    lineHeight: '1.2',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}>
+                    {c.name.length > 20 ? c.name.substring(0, 18) + '…' : c.name}
+                  </span>
                 </button>
               );
             })}
           </div>
+          
           <div style={{fontSize: '10px', color: 'var(--text-muted)', marginTop: '6px', fontStyle: 'italic'}}>
             Seleziona uno o più campionati da cui prendere le partite
           </div>
@@ -941,7 +977,7 @@ const SchedinaComponent = ({
         <div style={{
           marginBottom: '20px', 
           padding: '14px 16px', 
-          background: 'var(--background)', 
+          background: 'var(--surface)', 
           borderRadius: '10px', 
           border: '2px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
@@ -1042,7 +1078,7 @@ const SchedinaComponent = ({
         <div style={{
           marginBottom: '20px', 
           padding: '14px 16px', 
-          background: 'var(--background)', 
+          background: 'var(--surface)', 
           borderRadius: '10px', 
           border: '2px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
@@ -1145,7 +1181,7 @@ const SchedinaComponent = ({
         <div style={{
           marginBottom: '20px', 
           padding: '14px 16px', 
-          background: 'var(--background)', 
+          background: 'var(--surface)', 
           borderRadius: '10px', 
           border: '2px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
@@ -1242,7 +1278,7 @@ const SchedinaComponent = ({
         <div style={{
           marginBottom: '16px', 
           padding: '14px 16px', 
-          background: 'var(--background)', 
+          background: 'var(--surface)', 
           borderRadius: '10px', 
           border: '2px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
