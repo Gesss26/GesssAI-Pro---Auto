@@ -17,6 +17,19 @@ except ImportError:
     EXCEL_AVAILABLE = False
     print("⚠️ openpyxl non installato. Installa con: pip install openpyxl")
 
+# ================================================================
+# ===== CONFIGURAZIONE =====
+# ================================================================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Cartelle di destinazione
+EXCEL_FOLDER = os.path.join(BASE_DIR, "excel")
+JSON_FOLDER = os.path.join(BASE_DIR, "json")
+
+# Crea le cartelle se non esistono
+os.makedirs(EXCEL_FOLDER, exist_ok=True)
+os.makedirs(JSON_FOLDER, exist_ok=True)
+
 # ===== LISTA COMPLETA CAMPIONATI =====
 LEAGUES = [
     {'name': 'Liga Profesional Argentina', 'url': 'https://www.matchesio.com/it/competition/liga-profesional-argentina-ar/export/json/'},
@@ -56,7 +69,7 @@ def load_team_names_from_file():
     current_league = None
     
     try:
-        file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lista nomi squadre.txt')
+        file_path = os.path.join(BASE_DIR, 'lista nomi squadre.txt')
         
         if not os.path.exists(file_path):
             print(f"⚠️ File 'lista nomi squadre.txt' non trovato in: {file_path}")
@@ -115,7 +128,7 @@ def load_team_name_mappings():
     mappings = {}
     
     try:
-        file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'team_name_mappings.txt')
+        file_path = os.path.join(BASE_DIR, 'team_name_mappings.txt')
         
         if not os.path.exists(file_path):
             return {}
@@ -140,19 +153,6 @@ def load_team_name_mappings():
 # ================================================================
 # ===== FUNZIONI DI CORREZIONE NOMI =====
 # ================================================================
-
-def normalize_team_name(name: str) -> str:
-    """Normalizza un nome di squadra per il confronto"""
-    if not name:
-        return ''
-    
-    # Rimuovi spazi multipli
-    name = ' '.join(name.split())
-    
-    # Converti in minuscolo per il confronto
-    name_lower = name.lower()
-    
-    return name_lower
 
 def find_team_in_list(team_name: str, team_list: List[str]) -> str:
     """
