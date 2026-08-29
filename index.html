@@ -837,8 +837,48 @@
     border-bottom-color: var(--accent);
   }
 
+  /* STILI PER I PULSANTI GIORNI */
+  .giorni-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .giorno-btn {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+  }
+  .giorno-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .giorno-btn.active {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(243, 156, 18, 0.3);
+  }
+  .giorno-btn.inactive {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+  }
+
   /* STILI PER I PULSANTI CAMPIONATO */
-  .champ-filters {
+  .champ-filters-container {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -848,7 +888,7 @@
   .champ-filters-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
     align-items: center;
   }
   .champ-filter-btn {
@@ -856,17 +896,18 @@
     border-radius: 6px;
     border: 2px solid var(--border);
     background: var(--surface);
-    color: var(--text);
-    font-size: 12px;
+    color: var(--text-muted);
+    font-size: 11px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
-    min-height: 36px;
+    min-height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
+    min-width: 120px;
   }
   .champ-filter-btn:hover {
     transform: translateY(-1px);
@@ -890,13 +931,8 @@
     flex-shrink: 0;
   }
   .champ-filter-btn .champ-name {
-    font-size: 11px;
+    font-size: 10px;
     line-height: 1.2;
-  }
-  .champ-filter-btn .champ-count {
-    font-size: 9px;
-    opacity: 0.6;
-    margin-left: 4px;
   }
   
   .champ-actions {
@@ -908,13 +944,13 @@
   }
   .champ-actions .btn-sm {
     padding: 6px 14px;
-    font-size: 12px;
+    font-size: 11px;
     border-radius: 6px;
     border: none;
     cursor: pointer;
     font-weight: 600;
     transition: all 0.2s;
-    min-height: 36px;
+    min-height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -940,34 +976,43 @@
   }
   
   @media (max-width: 768px) {
-    .champ-filters-row {
-      gap: 6px;
+    .giorno-btn {
+      padding: 6px 14px;
+      font-size: 12px;
+      min-height: 34px;
     }
     .champ-filter-btn {
       padding: 4px 10px;
-      font-size: 11px;
-      min-height: 32px;
-    }
-    .champ-filter-btn .champ-name {
       font-size: 10px;
-    }
-    .champ-actions .btn-sm {
-      padding: 4px 10px;
-      font-size: 11px;
-      min-height: 32px;
-    }
-  }
-  @media (max-width: 480px) {
-    .champ-filters-row {
-      gap: 4px;
-    }
-    .champ-filter-btn {
-      padding: 3px 8px;
-      font-size: 10px;
-      min-height: 28px;
+      min-height: 30px;
+      min-width: 80px;
     }
     .champ-filter-btn .champ-name {
       font-size: 9px;
+    }
+    .champ-actions .btn-sm {
+      padding: 4px 10px;
+      font-size: 10px;
+      min-height: 30px;
+    }
+    .champ-filters-row {
+      gap: 4px;
+    }
+  }
+  @media (max-width: 480px) {
+    .giorno-btn {
+      padding: 4px 10px;
+      font-size: 11px;
+      min-height: 30px;
+    }
+    .champ-filter-btn {
+      padding: 3px 8px;
+      font-size: 9px;
+      min-height: 26px;
+      min-width: 60px;
+    }
+    .champ-filter-btn .champ-name {
+      font-size: 8px;
     }
     .champ-filter-btn .champ-color-dot {
       width: 8px;
@@ -976,8 +1021,8 @@
     }
     .champ-actions .btn-sm {
       padding: 3px 8px;
-      font-size: 10px;
-      min-height: 28px;
+      font-size: 9px;
+      min-height: 26px;
     }
   }
 </style>
@@ -5498,6 +5543,9 @@ function App() {
     return allSelected;
   });
 
+  // Stato per i giorni (default 1 giorno)
+  const [selectedGiorni, setSelectedGiorni] = useState(1);
+
   // Funzione per gestire il toggle di un campionato
   const toggleChamp = (champName) => {
     setSelectedChamps(prev => ({
@@ -5638,6 +5686,68 @@ function App() {
   // ============================================================
 
   const renderAppContent = () => {
+    // Funzione per disegnare i pulsanti giorni (usata sia in Palinsesto che in Schedina)
+    const renderGiorniButtons = (selected, onChange) => {
+      const giorniOptions = [1, 2, 3, 4, 5];
+      return (
+        <div className="giorni-filters">
+          {giorniOptions.map(g => (
+            <button
+              key={g}
+              className={`giorno-btn ${selected === g ? 'active' : 'inactive'}`}
+              onClick={() => onChange(g)}
+            >
+              📅 {g} Giorno{g > 1 ? 'ni' : ''}
+            </button>
+          ))}
+        </div>
+      );
+    };
+
+    // Funzione per disegnare i pulsanti campionati (usata sia in Palinsesto che in Schedina)
+    const renderChampFilters = (selectedChampsObj, onToggle, onSelectAll, onClearAll) => {
+      const activeCount = Object.values(selectedChampsObj).filter(v => v).length;
+      const total = Object.keys(selectedChampsObj).length;
+      
+      return (
+        <div className="champ-filters-container">
+          <div className="champ-filters-row">
+            {CHAMPIONSHIP_LIST.map((champ, index) => {
+              const isActive = selectedChampsObj[champ] !== false;
+              const color = getChampColor(champ);
+              return (
+                <button
+                  key={champ}
+                  className={`champ-filter-btn ${isActive ? 'active' : 'inactive'}`}
+                  style={{
+                    borderColor: isActive ? color : 'var(--border)',
+                    background: isActive ? color : 'var(--surface)',
+                    color: isActive ? '#000' : 'var(--text-muted)',
+                  }}
+                  onClick={() => onToggle(champ)}
+                  title={champ}
+                >
+                  <span className="champ-color-dot" style={{ background: color }} />
+                  <span className="champ-name">{champ.length > 20 ? champ.substring(0, 18) + '…' : champ}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="champ-actions">
+            <button className="btn-sm btn-select-all" onClick={onSelectAll}>
+              ✅ Seleziona Tutti
+            </button>
+            <button className="btn-sm btn-clear-all" onClick={onClearAll}>
+              ❌ Svuota Selezione
+            </button>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginLeft: '4px' }}>
+              ({activeCount}/{total})
+            </span>
+          </div>
+        </div>
+      );
+    };
+
     return (
       <div>
         <div className="header">
@@ -5701,66 +5811,37 @@ function App() {
           {tab === 'Palinsesto' && (
             <div>
               <div style={{marginBottom: '12px'}}>
-                <div className="champ-filters">
-                  <div className="champ-filters-row">
-                    {CHAMPIONSHIP_LIST.map((champ, index) => {
-                      const isActive = selectedChamps[champ] !== false;
-                      const color = getChampColor(champ);
-                      // Dividiamo in 5 righe da 5 pulsanti
-                      const rowIndex = Math.floor(index / 5);
-                      // Mostriamo solo i pulsanti della riga corrente (gestito dal CSS)
-                      return (
-                        <button
-                          key={champ}
-                          className={`champ-filter-btn ${isActive ? 'active' : 'inactive'}`}
-                          style={{
-                            borderColor: isActive ? color : 'var(--border)',
-                            background: isActive ? color : 'var(--surface)',
-                            color: isActive ? '#000' : 'var(--text-muted)',
-                          }}
-                          onClick={() => toggleChamp(champ)}
-                          title={champ}
-                        >
-                          <span className="champ-color-dot" style={{ background: color }} />
-                          <span className="champ-name">{champ.length > 20 ? champ.substring(0, 18) + '…' : champ}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div className="champ-actions">
-                    <button className="btn-sm btn-select-all" onClick={selectAllChamps}>
-                      ✅ Seleziona Tutti
-                    </button>
-                    <button className="btn-sm btn-clear-all" onClick={clearAllChamps}>
-                      ❌ Svuota Selezione
-                    </button>
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginLeft: '4px' }}>
-                      ({getActiveChamps().length}/{CHAMPIONSHIP_LIST.length})
-                    </span>
-                  </div>
-                </div>
+                {/* PULSANTI GIORNI */}
+                {renderGiorniButtons(selectedGiorni, (val) => setSelectedGiorni(val))}
+                
+                {/* PULSANTI CAMPIONATI */}
+                {renderChampFilters(
+                  selectedChamps,
+                  toggleChamp,
+                  selectAllChamps,
+                  clearAllChamps
+                )}
               </div>
               
-              <h2 style={{marginBottom:'14px'}}>📅 Palinsesto - Prossimi {daysRange + 1} Giorni</h2>
+              <h2 style={{marginBottom:'14px'}}>📅 Palinsesto - Prossimi {selectedGiorni} Giorno{selectedGiorni > 1 ? 'ni' : ''}</h2>
               {(() => {
                 try {
                   const activeChamps = getActiveChamps();
+                  const todayStr = getTodayStr();
+                  const maxDateStr = addDaysToDateStr(todayStr, selectedGiorni - 1);
+                  
                   let futureMatches = matches.filter(m => m.stato === 'Futura');
                   
                   // Filtra per campionati attivi
                   futureMatches = futureMatches.filter(m => activeChamps.includes(m.campionato));
                   
-                  // Filtra per range giorni se non ci sono campionati attivi
-                  if (activeChamps.length > 0) {
-                    const todayStr = getTodayStr();
-                    const maxDateStr = addDaysToDateStr(todayStr, daysRange);
-                    futureMatches = futureMatches.filter(m => {
-                      if (!m.data) return false;
-                      const normalized = normalizeDate(m.data);
-                      if (!normalized) return false;
-                      return normalized >= todayStr && normalized <= maxDateStr;
-                    });
-                  }
+                  // Filtra per range giorni
+                  futureMatches = futureMatches.filter(m => {
+                    if (!m.data) return false;
+                    const normalized = normalizeDate(m.data);
+                    if (!normalized) return false;
+                    return normalized >= todayStr && normalized <= maxDateStr;
+                  });
                   
                   futureMatches.sort((a, b) => {
                     const dateA = normalizeDate(a.data);
@@ -5938,7 +6019,11 @@ function App() {
                   selectedFamiglie={selectedFamiglie}
                   onSelectMatch={selectMatch}
                   showAlert={showAlert}
-                  palinsestoGiorniRange={daysRange}
+                  palinsestoGiorniRange={selectedGiorni}
+                  renderGiorniButtons={renderGiorniButtons}
+                  renderChampFilters={renderChampFilters}
+                  CHAMPIONSHIP_LIST={CHAMPIONSHIP_LIST}
+                  getChampColor={getChampColor}
                 />
               ) : (
                 <div className="alert alert-info">⏳ Caricamento modulo Schedina... Assicurati che il file <b>schedina.js</b> sia presente nella stessa cartella.</div>
