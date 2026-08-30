@@ -66,9 +66,6 @@
     transform: scale(1.06);
     box-shadow: 0 0 60px rgba(243, 156, 18, 0.7);
   }
-  #splashscreen .enter-btn:active {
-    transform: scale(0.95);
-  }
   #splashscreen .splash-footer {
     position: absolute;
     bottom: 30px;
@@ -82,13 +79,8 @@
     font-weight: 600;
   }
   @media (max-width: 600px) {
-    #splashscreen .enter-btn {
-      padding: 14px 36px;
-      font-size: 17px;
-    }
-    #splashscreen .splash-logo {
-      max-height: 55vh;
-    }
+    #splashscreen .enter-btn { padding: 14px 36px; font-size: 17px; }
+    #splashscreen .splash-logo { max-height: 55vh; }
   }
 
   /* ===== NASCONDI L'APP FINCHÉ LO SPLASH NON SPARISCE ===== */
@@ -2903,8 +2895,7 @@ const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie, weatherData }
       
       <div className="tab-header" style={{background: champColor}}>
         <span className="campionato-con-bandiera">
-          <span dangerouslySetInnerHTML={{ __html: flagHtml }} />
-          {match.campionato || 'N/D'}
+          {flagHtml} {match.campionato || 'N/D'}
         </span>
       </div>
       <div className="match-info">{match.campionato || 'N/D'} - Giornata: {match.round || 'N/A'}</div>
@@ -3004,8 +2995,7 @@ const MatchTabHistory = ({ match, onSelect }) => {
     <div className="match-tab-history" style={{borderLeftColor: champColor}} onClick={() => onSelect(match.id)}>
       <div className="tab-header" style={{background: champColor}}>
         <span className="campionato-con-bandiera">
-          <span dangerouslySetInnerHTML={{ __html: flagHtml }} />
-          {match.campionato || 'N/D'}
+          {flagHtml} {match.campionato || 'N/D'}
         </span>
       </div>
       <div className="match-info">{match.campionato || 'N/D'} - Giornata: {match.round || 'N/A'}</div>
@@ -5923,14 +5913,18 @@ function App() {
     const sampleChamps = [
       { name: 'Serie A', importedAt: new Date().toISOString() },
       { name: 'Premier League', importedAt: new Date().toISOString() },
-      { name: 'La Liga', importedAt: new Date().toISOString() }
+      { name: 'La Liga', importedAt: new Date().toISOString() },
+      { name: '2. Bundesliga', importedAt: new Date().toISOString() }
     ];
     
     const sampleMatches = [
       { id: '1', campionato: 'Serie A', round: '1', data: dateStr, ora: '20:45', casa: 'Inter', ospiti: 'Milan', stato: 'Futura', golCasa: 0, golOspite: 0, risultato: '' },
       { id: '2', campionato: 'Premier League', round: '1', data: dateStr, ora: '18:30', casa: 'Manchester City', ospiti: 'Arsenal', stato: 'Futura', golCasa: 0, golOspite: 0, risultato: '' },
       { id: '3', campionato: 'La Liga', round: '1', data: dateStr, ora: '21:00', casa: 'Real Madrid', ospiti: 'Barcelona', stato: 'Futura', golCasa: 0, golOspite: 0, risultato: '' },
-      { id: '4', campionato: 'Premier League', round: '1', data: '2026-01-15', ora: '18:30', casa: 'Liverpool', ospiti: 'Chelsea', stato: 'Giocata', golCasa: 2, golOspite: 1, risultato: '2-1' }
+      { id: '4', campionato: '2. Bundesliga', round: '3', data: dateStr, ora: '11:30', casa: 'Magdeburg', ospiti: 'Holstein Kiel', stato: 'Futura', golCasa: 0, golOspite: 0, risultato: '' },
+      { id: '5', campionato: '2. Bundesliga', round: '3', data: dateStr, ora: '11:30', casa: 'Darmstadt 98', ospiti: 'Hannover 96', stato: 'Futura', golCasa: 0, golOspite: 0, risultato: '' },
+      { id: '6', campionato: '2. Bundesliga', round: '3', data: dateStr, ora: '11:30', casa: 'FC St. Pauli', ospiti: 'Kaiserslautern', stato: 'Futura', golCasa: 0, golOspite: 0, risultato: '' },
+      { id: '7', campionato: 'Premier League', round: '1', data: '2026-01-15', ora: '18:30', casa: 'Liverpool', ospiti: 'Chelsea', stato: 'Giocata', golCasa: 2, golOspite: 1, risultato: '2-1' }
     ];
     
     setChampionships(sampleChamps);
