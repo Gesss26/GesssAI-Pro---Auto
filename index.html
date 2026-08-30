@@ -2717,11 +2717,11 @@ const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie, weatherData }
       </div>
       
       <div className="tab-header" style={{background: champColor}}>
-        <span className="campionato-con-bandiera">
-          <span dangerouslySetInnerHTML={{ __html: flagHtml }} />
-          {match.campionato || 'N/D'}
-        </span>
-      </div>
+  <span className="campionato-con-bandiera">
+    <span dangerouslySetInnerHTML={{ __html: getCountryFlagHtml(match.campionato) }} />
+    {match.campionato || 'N/D'}
+  </span>
+</div>
       <div className="match-info">{match.campionato || 'N/D'} - Giornata: {match.round || 'N/A'}</div>
       <div className="match-info">📅 {formattedDate} - ⏰ {matchTime}</div>
       {weatherData && <div className="match-info"><WeatherBadge weatherData={weatherData} city={getCityForMatch(match.casa, match.campionato)} /></div>}
@@ -2818,11 +2818,11 @@ const MatchTabHistory = ({ match, onSelect }) => {
   return (
     <div className="match-tab-history" style={{borderLeftColor: champColor}} onClick={() => onSelect(match.id)}>
       <div className="tab-header" style={{background: champColor}}>
-        <span className="campionato-con-bandiera">
-          <span dangerouslySetInnerHTML={{ __html: flagHtml }} />
-          {match.campionato || 'N/D'}
-        </span>
-      </div>
+  <span className="campionato-con-bandiera">
+    <span dangerouslySetInnerHTML={{ __html: getCountryFlagHtml(match.campionato) }} />
+    {match.campionato || 'N/D'}
+  </span>
+</div>
       <div className="match-info">{match.campionato || 'N/D'} - Giornata: {match.round || 'N/A'}</div>
       <div className="match-info">📅 {formattedDate} - ⏰ {match.ora || 'TBD'}</div>
       <div className="teams-row">
