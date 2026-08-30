@@ -2610,7 +2610,198 @@ const FamiglieSelector = ({ selectedFamiglie, setSelectedFamiglie, showAlert }) 
 };
 
 // ============================================================
-// COMPONENTE MATCH TAB CON LOGHI
+// FUNZIONE PER LE BANDIERE DEI CAMPIONATI
+// ============================================================
+
+const getCountryFlagHtml = (championship) => {
+  if (!championship) return '🌍';
+  const map = {
+    'Serie A': '🇮🇹', 'Serie B': '🇮🇹', 'Serie C': '🇮🇹',
+    'Premier League': '🇬🇧', 'EFL Championship': '🇬🇧', 'Championship': '🇬🇧',
+    'La Liga': '🇪🇸', 'Segunda División': '🇪🇸',
+    'Bundesliga': '🇩🇪', '2. Bundesliga': '🇩🇪',
+    'Ligue 1': '🇫🇷', 'Ligue 2': '🇫🇷',
+    'Eredivisie': '🇳🇱', 'Eerste Divisie': '🇳🇱',
+    'Primeira Liga': '🇵🇹',
+    'Scottish Premiership': '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+    'Süper Lig': '🇹🇷', 'Super Lig': '🇹🇷',
+    'J1 League': '🇯🇵',
+    'K League 1': '🇰🇷',
+    'Major League Soccer': '🇺🇸', 'MLS': '🇺🇸',
+    'Brasileirão Serie A': '🇧🇷',
+    'Super League Grecia': '🇬🇷',
+    'Liga Profesional Argentina': '🇦🇷',
+    'Jupiler Pro League': '🇧🇪'
+  };
+  for (const [key, flag] of Object.entries(map)) {
+    if (championship.includes(key)) return flag;
+  }
+  return '🌍';
+};
+
+// ============================================================
+// FUNZIONI PER IL METEO (versione semplificata)
+// ============================================================
+
+const getCityForMatch = (teamName, championship) => {
+  // Mappa città semplificata
+  const cityMap = {
+    'Inter': 'Milano', 'Milan': 'Milano', 'AC Milan': 'Milano',
+    'Juventus': 'Torino', 'Torino': 'Torino',
+    'Roma': 'Roma', 'Lazio': 'Roma',
+    'Napoli': 'Napoli',
+    'Fiorentina': 'Firenze',
+    'Bologna': 'Bologna',
+    'Atalanta': 'Bergamo',
+    'Verona': 'Verona',
+    'Genoa': 'Genova', 'Sampdoria': 'Genova',
+    'Udinese': 'Udine',
+    'Sassuolo': 'Reggio Emilia',
+    'Empoli': 'Empoli',
+    'Salernitana': 'Salerno',
+    'Lecce': 'Lecce',
+    'Monza': 'Monza',
+    'Frosinone': 'Frosinone',
+    'Cagliari': 'Cagliari',
+    'Parma': 'Parma',
+    'Como': 'Como',
+    'Venezia': 'Venezia',
+    'Manchester City': 'Manchester',
+    'Manchester United': 'Manchester',
+    'Liverpool': 'Liverpool',
+    'Arsenal': 'London',
+    'Chelsea': 'London',
+    'Tottenham': 'London',
+    'West Ham': 'London',
+    'Crystal Palace': 'London',
+    'Brentford': 'London',
+    'Fulham': 'London',
+    'Aston Villa': 'Birmingham',
+    'Everton': 'Liverpool',
+    'Newcastle': 'Newcastle',
+    'Brighton': 'Brighton',
+    'Barcelona': 'Barcelona',
+    'Real Madrid': 'Madrid',
+    'Atletico Madrid': 'Madrid',
+    'Sevilla': 'Sevilla',
+    'Valencia': 'Valencia',
+    'Villarreal': 'Villarreal',
+    'Athletic Bilbao': 'Bilbao',
+    'Bayern Munich': 'Munich',
+    'Borussia Dortmund': 'Dortmund',
+    'RB Leipzig': 'Leipzig',
+    'Bayer Leverkusen': 'Leverkusen',
+    'PSG': 'Paris',
+    'Marseille': 'Marseille',
+    'Lyon': 'Lyon',
+    'Monaco': 'Monaco',
+    'Ajax': 'Amsterdam',
+    'PSV': 'Eindhoven',
+    'Feyenoord': 'Rotterdam',
+    'Celtic': 'Glasgow',
+    'Rangers': 'Glasgow',
+    'Porto': 'Porto',
+    'Benfica': 'Lisbon',
+    'Sporting': 'Lisbon'
+  };
+  
+  for (const [key, city] of Object.entries(cityMap)) {
+    if (teamName && teamName.toLowerCase().includes(key.toLowerCase())) {
+      return city;
+    }
+  }
+  
+  // Default per campionato
+  if (championship) {
+    if (championship.includes('Serie A') || championship.includes('Serie B')) return 'Roma';
+    if (championship.includes('Premier League')) return 'London';
+    if (championship.includes('La Liga')) return 'Madrid';
+    if (championship.includes('Bundesliga')) return 'Berlin';
+    if (championship.includes('Ligue 1')) return 'Paris';
+    if (championship.includes('Eredivisie')) return 'Amsterdam';
+    if (championship.includes('Primeira Liga')) return 'Lisbon';
+    if (championship.includes('Scottish Premiership')) return 'Glasgow';
+    if (championship.includes('Süper Lig')) return 'Istanbul';
+    if (championship.includes('J1 League')) return 'Tokyo';
+    if (championship.includes('MLS')) return 'New York';
+    if (championship.includes('Brasileirão')) return 'Sao Paulo';
+    if (championship.includes('Super League Grecia')) return 'Athens';
+    if (championship.includes('Liga Profesional Argentina')) return 'Buenos Aires';
+  }
+  
+  return 'Roma';
+};
+
+const fetchWeatherForMatch = async (match) => {
+  try {
+    const city = getCityForMatch(match.casa, match.campionato);
+    const coords = {
+      'Roma': { lat: 41.90, lon: 12.50 },
+      'Milano': { lat: 45.46, lon: 9.19 },
+      'Torino': { lat: 45.07, lon: 7.69 },
+      'Napoli': { lat: 40.85, lon: 14.27 },
+      'Firenze': { lat: 43.77, lon: 11.25 },
+      'Bologna': { lat: 44.49, lon: 11.34 },
+      'Genova': { lat: 44.41, lon: 8.93 },
+      'Verona': { lat: 45.44, lon: 10.99 },
+      'London': { lat: 51.51, lon: -0.13 },
+      'Manchester': { lat: 53.48, lon: -2.24 },
+      'Liverpool': { lat: 53.41, lon: -2.98 },
+      'Madrid': { lat: 40.42, lon: -3.70 },
+      'Barcelona': { lat: 41.39, lon: 2.16 },
+      'Berlin': { lat: 52.52, lon: 13.40 },
+      'Munich': { lat: 48.14, lon: 11.58 },
+      'Paris': { lat: 48.86, lon: 2.35 },
+      'Amsterdam': { lat: 52.37, lon: 4.90 },
+      'Lisbon': { lat: 38.72, lon: -9.14 },
+      'Glasgow': { lat: 55.86, lon: -4.26 },
+      'Istanbul': { lat: 41.01, lon: 28.98 },
+      'Tokyo': { lat: 35.68, lon: 139.69 },
+      'New York': { lat: 40.71, lon: -74.01 },
+      'Sao Paulo': { lat: -23.55, lon: -46.63 },
+      'Athens': { lat: 37.98, lon: 23.73 },
+      'Buenos Aires': { lat: -34.60, lon: -58.38 }
+    };
+    
+    const c = coords[city] || { lat: 41.90, lon: 12.50 };
+    const dateStr = match.data || new Date().toISOString().slice(0, 10);
+    
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_sum,wind_speed_10m_max&timezone=Europe/Rome&start_date=${dateStr}&end_date=${dateStr}`;
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    
+    const data = await response.json();
+    if (!data.daily || !data.daily.time || data.daily.time.length === 0) return null;
+    
+    const idx = 0;
+    const weatherCode = data.daily.weathercode?.[idx] || 0;
+    const weatherMap = {
+      0: 'Sereno', 1: 'Poco nuvoloso', 2: 'Parzialmente nuvoloso', 3: 'Coperto',
+      45: 'Nebbia', 48: 'Nebbia',
+      51: 'Pioviggine leggera', 53: 'Pioviggine moderata', 55: 'Pioviggine fitta',
+      61: 'Pioggia leggera', 63: 'Pioggia moderata', 65: 'Pioggia fitta',
+      71: 'Neve leggera', 73: 'Neve moderata', 75: 'Neve fitta',
+      80: 'Rovesci di pioggia leggeri', 81: 'Rovesci di pioggia moderati', 82: 'Rovesci di pioggia forti',
+      95: 'Temporale leggero', 96: 'Temporale con grandine leggera', 99: 'Temporale con grandine forte'
+    };
+    
+    return {
+      temp: data.daily.temperature_2m_max?.[idx] || 15,
+      temp_min: data.daily.temperature_2m_min?.[idx] || 10,
+      temp_max: data.daily.temperature_2m_max?.[idx] || 20,
+      weather: weatherMap[weatherCode] || 'N/A',
+      rain: data.daily.precipitation_sum?.[idx] || 0,
+      wind_speed: data.daily.wind_speed_10m_max?.[idx] || 3,
+      forecast_date: match.data
+    };
+  } catch (e) {
+    console.warn('Errore fetch meteo:', e);
+    return null;
+  }
+};
+
+// ============================================================
+// COMPONENTE MATCH TAB CON LOGHI E BANDIERA
 // ============================================================
 
 const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie, weatherData }) => {
@@ -2630,12 +2821,6 @@ const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie, weatherData }
   const renderFormSquares = (formStr) => {
     if (!formStr) return <span>N/D</span>;
     return [...formStr].map((letter, idx) => <div key={idx} className={`form-square form-square-${letter}`}>{letter}</div>);
-  };
-  
-  const renderPct = (value) => {
-    const rounded = Math.round(value);
-    const cls = getPercentualeClasse(rounded);
-    return <span className={`giocata-pct ${cls}`}>{rounded}%</span>;
   };
   
   const renderXgValue = (value) => {
@@ -2717,11 +2902,11 @@ const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie, weatherData }
       </div>
       
       <div className="tab-header" style={{background: champColor}}>
-  <span className="campionato-con-bandiera">
-    <span dangerouslySetInnerHTML={{ __html: getCountryFlagHtml(match.campionato) }} />
-    {match.campionato || 'N/D'}
-  </span>
-</div>
+        <span className="campionato-con-bandiera">
+          <span dangerouslySetInnerHTML={{ __html: flagHtml }} />
+          {match.campionato || 'N/D'}
+        </span>
+      </div>
       <div className="match-info">{match.campionato || 'N/D'} - Giornata: {match.round || 'N/A'}</div>
       <div className="match-info">📅 {formattedDate} - ⏰ {matchTime}</div>
       {weatherData && <div className="match-info"><WeatherBadge weatherData={weatherData} city={getCityForMatch(match.casa, match.campionato)} /></div>}
@@ -2803,7 +2988,7 @@ const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie, weatherData }
 };
 
 // ============================================================
-// COMPONENTE MATCH TAB HISTORY CON LOGHI
+// COMPONENTE MATCH TAB HISTORY CON LOGHI E BANDIERA
 // ============================================================
 
 const MatchTabHistory = ({ match, onSelect }) => {
@@ -2818,11 +3003,11 @@ const MatchTabHistory = ({ match, onSelect }) => {
   return (
     <div className="match-tab-history" style={{borderLeftColor: champColor}} onClick={() => onSelect(match.id)}>
       <div className="tab-header" style={{background: champColor}}>
-  <span className="campionato-con-bandiera">
-    <span dangerouslySetInnerHTML={{ __html: getCountryFlagHtml(match.campionato) }} />
-    {match.campionato || 'N/D'}
-  </span>
-</div>
+        <span className="campionato-con-bandiera">
+          <span dangerouslySetInnerHTML={{ __html: flagHtml }} />
+          {match.campionato || 'N/D'}
+        </span>
+      </div>
       <div className="match-info">{match.campionato || 'N/D'} - Giornata: {match.round || 'N/A'}</div>
       <div className="match-info">📅 {formattedDate} - ⏰ {match.ora || 'TBD'}</div>
       <div className="teams-row">
@@ -5649,194 +5834,6 @@ const deduplicateMatches = (matches) => {
 };
 
 // ============================================================
-// FUNZIONI PER IL METEO
-// ============================================================
-
-const getCityForMatch = (teamName, championship) => {
-  // Mappa città semplificata
-  const cityMap = {
-    'Inter': 'Milano', 'Milan': 'Milano', 'AC Milan': 'Milano',
-    'Juventus': 'Torino', 'Torino': 'Torino',
-    'Roma': 'Roma', 'Lazio': 'Roma',
-    'Napoli': 'Napoli',
-    'Fiorentina': 'Firenze',
-    'Bologna': 'Bologna',
-    'Atalanta': 'Bergamo',
-    'Verona': 'Verona',
-    'Genoa': 'Genova', 'Sampdoria': 'Genova',
-    'Udinese': 'Udine',
-    'Sassuolo': 'Reggio Emilia',
-    'Empoli': 'Empoli',
-    'Salernitana': 'Salerno',
-    'Lecce': 'Lecce',
-    'Monza': 'Monza',
-    'Frosinone': 'Frosinone',
-    'Cagliari': 'Cagliari',
-    'Parma': 'Parma',
-    'Como': 'Como',
-    'Venezia': 'Venezia',
-    'Manchester City': 'Manchester',
-    'Manchester United': 'Manchester',
-    'Liverpool': 'Liverpool',
-    'Arsenal': 'London',
-    'Chelsea': 'London',
-    'Tottenham': 'London',
-    'West Ham': 'London',
-    'Crystal Palace': 'London',
-    'Brentford': 'London',
-    'Fulham': 'London',
-    'Aston Villa': 'Birmingham',
-    'Everton': 'Liverpool',
-    'Newcastle': 'Newcastle',
-    'Brighton': 'Brighton',
-    'Barcelona': 'Barcelona',
-    'Real Madrid': 'Madrid',
-    'Atletico Madrid': 'Madrid',
-    'Sevilla': 'Sevilla',
-    'Valencia': 'Valencia',
-    'Villarreal': 'Villarreal',
-    'Athletic Bilbao': 'Bilbao',
-    'Bayern Munich': 'Munich',
-    'Borussia Dortmund': 'Dortmund',
-    'RB Leipzig': 'Leipzig',
-    'Bayer Leverkusen': 'Leverkusen',
-    'PSG': 'Paris',
-    'Marseille': 'Marseille',
-    'Lyon': 'Lyon',
-    'Monaco': 'Monaco',
-    'Ajax': 'Amsterdam',
-    'PSV': 'Eindhoven',
-    'Feyenoord': 'Rotterdam',
-    'Celtic': 'Glasgow',
-    'Rangers': 'Glasgow',
-    'Porto': 'Porto',
-    'Benfica': 'Lisbon',
-    'Sporting': 'Lisbon'
-  };
-  
-  for (const [key, city] of Object.entries(cityMap)) {
-    if (teamName && teamName.toLowerCase().includes(key.toLowerCase())) {
-      return city;
-    }
-  }
-  
-  // Default per campionato
-  if (championship) {
-    if (championship.includes('Serie A') || championship.includes('Serie B')) return 'Roma';
-    if (championship.includes('Premier League')) return 'London';
-    if (championship.includes('La Liga')) return 'Madrid';
-    if (championship.includes('Bundesliga')) return 'Berlin';
-    if (championship.includes('Ligue 1')) return 'Paris';
-    if (championship.includes('Eredivisie')) return 'Amsterdam';
-    if (championship.includes('Primeira Liga')) return 'Lisbon';
-    if (championship.includes('Scottish Premiership')) return 'Glasgow';
-    if (championship.includes('Süper Lig')) return 'Istanbul';
-    if (championship.includes('J1 League')) return 'Tokyo';
-    if (championship.includes('MLS')) return 'New York';
-    if (championship.includes('Brasileirão')) return 'Sao Paulo';
-    if (championship.includes('Super League Grecia')) return 'Athens';
-    if (championship.includes('Liga Profesional Argentina')) return 'Buenos Aires';
-  }
-  
-  return 'Roma';
-};
-
-const fetchWeatherForMatch = async (match) => {
-  try {
-    const city = getCityForMatch(match.casa, match.campionato);
-    // Coordinate approssimative per le città principali
-    const coords = {
-      'Roma': { lat: 41.90, lon: 12.50 },
-      'Milano': { lat: 45.46, lon: 9.19 },
-      'Torino': { lat: 45.07, lon: 7.69 },
-      'Napoli': { lat: 40.85, lon: 14.27 },
-      'Firenze': { lat: 43.77, lon: 11.25 },
-      'Bologna': { lat: 44.49, lon: 11.34 },
-      'Genova': { lat: 44.41, lon: 8.93 },
-      'Verona': { lat: 45.44, lon: 10.99 },
-      'London': { lat: 51.51, lon: -0.13 },
-      'Manchester': { lat: 53.48, lon: -2.24 },
-      'Liverpool': { lat: 53.41, lon: -2.98 },
-      'Madrid': { lat: 40.42, lon: -3.70 },
-      'Barcelona': { lat: 41.39, lon: 2.16 },
-      'Berlin': { lat: 52.52, lon: 13.40 },
-      'Munich': { lat: 48.14, lon: 11.58 },
-      'Paris': { lat: 48.86, lon: 2.35 },
-      'Amsterdam': { lat: 52.37, lon: 4.90 },
-      'Lisbon': { lat: 38.72, lon: -9.14 },
-      'Glasgow': { lat: 55.86, lon: -4.26 },
-      'Istanbul': { lat: 41.01, lon: 28.98 },
-      'Tokyo': { lat: 35.68, lon: 139.69 },
-      'New York': { lat: 40.71, lon: -74.01 },
-      'Sao Paulo': { lat: -23.55, lon: -46.63 },
-      'Athens': { lat: 37.98, lon: 23.73 },
-      'Buenos Aires': { lat: -34.60, lon: -58.38 }
-    };
-    
-    const c = coords[city] || { lat: 41.90, lon: 12.50 };
-    const dateStr = match.data || new Date().toISOString().slice(0, 10);
-    
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_sum,wind_speed_10m_max&timezone=Europe/Rome&start_date=${dateStr}&end_date=${dateStr}`;
-    const response = await fetch(url);
-    if (!response.ok) return null;
-    
-    const data = await response.json();
-    if (!data.daily || !data.daily.time || data.daily.time.length === 0) return null;
-    
-    const idx = 0;
-    const weatherCode = data.daily.weathercode?.[idx] || 0;
-    const weatherMap = {
-      0: 'Sereno', 1: 'Poco nuvoloso', 2: 'Parzialmente nuvoloso', 3: 'Coperto',
-      45: 'Nebbia', 48: 'Nebbia',
-      51: 'Pioviggine leggera', 53: 'Pioviggine moderata', 55: 'Pioviggine fitta',
-      61: 'Pioggia leggera', 63: 'Pioggia moderata', 65: 'Pioggia fitta',
-      71: 'Neve leggera', 73: 'Neve moderata', 75: 'Neve fitta',
-      80: 'Rovesci di pioggia leggeri', 81: 'Rovesci di pioggia moderati', 82: 'Rovesci di pioggia forti',
-      95: 'Temporale leggero', 96: 'Temporale con grandine leggera', 99: 'Temporale con grandine forte'
-    };
-    
-    return {
-      temp: data.daily.temperature_2m_max?.[idx] || 15,
-      temp_min: data.daily.temperature_2m_min?.[idx] || 10,
-      temp_max: data.daily.temperature_2m_max?.[idx] || 20,
-      weather: weatherMap[weatherCode] || 'N/A',
-      rain: data.daily.precipitation_sum?.[idx] || 0,
-      wind_speed: data.daily.wind_speed_10m_max?.[idx] || 3,
-      forecast_date: match.data
-    };
-  } catch (e) {
-    console.warn('Errore fetch meteo:', e);
-    return null;
-  }
-};
-
-const getCountryFlagHtml = (championship) => {
-  if (!championship) return '🌍';
-  const map = {
-    'Serie A': '🇮🇹', 'Serie B': '🇮🇹', 'Serie C': '🇮🇹',
-    'Premier League': '🇬🇧', 'EFL Championship': '🇬🇧', 'Championship': '🇬🇧',
-    'La Liga': '🇪🇸', 'Segunda División': '🇪🇸',
-    'Bundesliga': '🇩🇪', '2. Bundesliga': '🇩🇪',
-    'Ligue 1': '🇫🇷', 'Ligue 2': '🇫🇷',
-    'Eredivisie': '🇳🇱', 'Eerste Divisie': '🇳🇱',
-    'Primeira Liga': '🇵🇹',
-    'Scottish Premiership': '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
-    'Süper Lig': '🇹🇷', 'Super Lig': '🇹🇷',
-    'J1 League': '🇯🇵',
-    'K League 1': '🇰🇷',
-    'Major League Soccer': '🇺🇸', 'MLS': '🇺🇸',
-    'Brasileirão Serie A': '🇧🇷',
-    'Super League Grecia': '🇬🇷',
-    'Liga Profesional Argentina': '🇦🇷',
-    'Jupiler Pro League': '🇧🇪'
-  };
-  for (const [key, flag] of Object.entries(map)) {
-    if (championship.includes(key)) return flag;
-  }
-  return '🌍';
-};
-
-// ============================================================
 // COMPONENTE APP - PARTE FINALE
 // ============================================================
 
@@ -5933,9 +5930,7 @@ function App() {
       { id: '1', campionato: 'Serie A', round: '1', data: dateStr, ora: '20:45', casa: 'Inter', ospiti: 'Milan', stato: 'Futura', golCasa: 0, golOspite: 0, risultato: '' },
       { id: '2', campionato: 'Premier League', round: '1', data: dateStr, ora: '18:30', casa: 'Manchester City', ospiti: 'Arsenal', stato: 'Futura', golCasa: 0, golOspite: 0, risultato: '' },
       { id: '3', campionato: 'La Liga', round: '1', data: dateStr, ora: '21:00', casa: 'Real Madrid', ospiti: 'Barcelona', stato: 'Futura', golCasa: 0, golOspite: 0, risultato: '' },
-      { id: '4', campionato: 'Serie A', round: '1', data: tomorrowStr, ora: '20:45', casa: 'Juventus', ospiti: 'Roma', stato: 'Futura', golCasa: 0, golOspite: 0, risultato: '' },
-      { id: '5', campionato: 'Premier League', round: '1', data: '2026-01-15', ora: '18:30', casa: 'Liverpool', ospiti: 'Chelsea', stato: 'Giocata', golCasa: 2, golOspite: 1, risultato: '2-1' },
-      { id: '6', campionato: 'La Liga', round: '1', data: '2026-01-14', ora: '21:00', casa: 'Atletico Madrid', ospiti: 'Sevilla', stato: 'Giocata', golCasa: 1, golOspite: 1, risultato: '1-1' }
+      { id: '4', campionato: 'Premier League', round: '1', data: '2026-01-15', ora: '18:30', casa: 'Liverpool', ospiti: 'Chelsea', stato: 'Giocata', golCasa: 2, golOspite: 1, risultato: '2-1' }
     ];
     
     setChampionships(sampleChamps);
