@@ -120,6 +120,14 @@
     }
   }
 
+  /* ===== NASCONDI ROOT FINCHE' NON SI CLICCA SUL PULSANTE ===== */
+  #root {
+    display: none;
+  }
+  #root.visible {
+    display: block;
+  }
+
   .giocata-pct {
     display: inline-block;
     font-weight: bold;
@@ -1144,29 +1152,33 @@
 
 <div id="root"></div>
 
-<script type="text/babel">
-// ============================================================
-// REACT IMPORT
-// ============================================================
-const { useState, useEffect, useMemo, useRef, useCallback } = React;
-
-// ============================================================
-// GESTIONE SPLASHSCREEN
-// ============================================================
+<script>
+// ===== GESTIONE SPLASHSCREEN E MOSTRA APP =====
 document.addEventListener('DOMContentLoaded', function() {
-  const splash = document.getElementById('splashscreen');
-  const btn = document.getElementById('splashBtn');
+  var splash = document.getElementById('splashscreen');
+  var root = document.getElementById('root');
+  var btn = document.getElementById('splashBtn');
   
-  if (splash && btn) {
+  if (splash && btn && root) {
     btn.addEventListener('click', function() {
+      // Nascondi lo splashscreen
       splash.classList.add('hidden');
-      // Rimuove lo splashscreen dal DOM dopo la transizione
+      // Mostra l'applicazione
+      root.classList.add('visible');
+      // Rimuovi lo splashscreen dal DOM dopo la transizione
       setTimeout(function() {
         splash.style.display = 'none';
       }, 800);
     });
   }
 });
+</script>
+
+<script type="text/babel">
+// ============================================================
+// REACT IMPORT
+// ============================================================
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
 // ============================================================
 // CARICAMENTO DATI - DA FILE EXCEL NELLA CARTELLA JSON
