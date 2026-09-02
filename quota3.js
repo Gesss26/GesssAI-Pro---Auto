@@ -1,317 +1,913 @@
 // ============================================================
-// COMPONENTE QUOTA 3 (STANDALONE)
+// QUOTA 3 - Componente Autonomo con localStorage
 // ============================================================
 
-const { useState } = React;
+(function() {
+    'use strict';
 
-const Quota3 = ({ showAlert }) => {
-  // Stato principale
-  const [importoBase, setImportoBase] = useState(10);
-  const [importoInput, setImportoInput] = useState(10);
-  const [stepCorrente, setStepCorrente] = useState(0);
-  const [storico, setStorico] = useState([]);
-  const [depositoTotale, setDepositoTotale] = useState(0);
-  const [percorsoAttivo, setPercorsoAttivo] = useState(false);
-  const [partitaCorrente, setPartitaCorrente] = useState(null);
-  const [stepBloccato, setStepBloccato] = useState(false);
-  const [riepilogo, setRiepilogo] = useState('');
+    // ============================================================
+    // STILI INLINE PER IL COMPONENTE
+    // ============================================================
+    const styles = `
+        .quota3-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0;
+        }
+        .quota3-container .card {
+            background: #232b36;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .quota3-container .card h3 {
+            color: #ffff00;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+        .quota3-container .card h4 {
+            color: #f39c12;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        .quota3-container .flex {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+        }
+        .quota3-container .flex-between {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .quota3-container label {
+            font-weight: 600;
+            color: #ffff00;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        .quota3-container input[type="number"] {
+            width: 100%;
+            max-width: 200px;
+            padding: 10px 14px;
+            background: #1a2028;
+            color: #e6edf3;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .quota3-container input[type="number"]:focus {
+            outline: 2px solid #f39c12;
+        }
+        .quota3-container input[type="number"]:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .quota3-container .btn {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .quota3-container .btn:hover {
+            transform: translateY(-2px);
+        }
+        .quota3-container .btn:active {
+            transform: scale(0.95);
+        }
+        .quota3-container .btn-primary {
+            background: #f39c12;
+            color: #000;
+        }
+        .quota3-container .btn-primary:hover {
+            background: #e67e22;
+            box-shadow: 0 4px 20px rgba(243, 156, 18, 0.3);
+        }
+        .quota3-container .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .quota3-container .btn-secondary {
+            background: #2c3642;
+            color: #e6edf3;
+            border: 1px solid #30363d;
+        }
+        .quota3-container .btn-secondary:hover {
+            background: #3b4757;
+        }
+        .quota3-container .btn-success {
+            background: #6fcf97;
+            color: #000;
+        }
+        .quota3-container .btn-success:hover {
+            background: #5bbf8a;
+        }
+        .quota3-container .btn-danger {
+            background: #eb5757;
+            color: #fff;
+        }
+        .quota3-container .btn-danger:hover {
+            background: #d63031;
+        }
+        .quota3-container .btn-sm {
+            padding: 6px 14px;
+            font-size: 13px;
+        }
+        .quota3-container .btn-xs {
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+        .quota3-container .status-box {
+            background: #1a2028;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 12px 0;
+            border-left: 6px solid #f39c12;
+        }
+        .quota3-container .status-box.ended {
+            border-left-color: #eb5757;
+        }
+        .quota3-container .status-box .step-label {
+            font-size: 13px;
+            color: #8b949e;
+        }
+        .quota3-container .status-box .step-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #e6edf3;
+        }
+        .quota3-container .status-box .highlight {
+            color: #f39c12;
+        }
+        .quota3-container .grid-container {
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+        .quota3-container .grid {
+            display: grid;
+            grid-template-columns: 60px 120px 110px 120px 140px;
+            gap: 6px 12px;
+            font-size: 14px;
+            min-width: 550px;
+        }
+        .quota3-container .grid-header {
+            font-weight: 700;
+            color: #ffff00;
+            border-bottom: 2px solid #30363d;
+            padding-bottom: 8px;
+            margin-bottom: 4px;
+        }
+        .quota3-container .grid-item {
+            padding: 8px 4px;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        .quota3-container .grid-item.active-step {
+            background: rgba(243, 156, 18, 0.1);
+            border-radius: 4px;
+        }
+        .quota3-container .grid-item.row-win {
+            background: rgba(0, 255, 136, 0.15) !important;
+            border-radius: 4px;
+            border-left: 4px solid #00ff88;
+            color: #00ff88 !important;
+        }
+        .quota3-container .grid-item.row-win .step-number,
+        .quota3-container .grid-item.row-win .badge-win {
+            color: #00ff88 !important;
+        }
+        .quota3-container .grid-item.row-loss {
+            background: rgba(255, 68, 68, 0.15) !important;
+            border-radius: 4px;
+            border-left: 4px solid #ff4444;
+            color: #ff4444 !important;
+        }
+        .quota3-container .grid-item.row-loss .step-number,
+        .quota3-container .grid-item.row-loss .badge-loss {
+            color: #ff4444 !important;
+        }
+        .quota3-container .step-number {
+            font-weight: 700;
+            font-size: 16px;
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .quota3-container .step-number.active {
+            color: #f39c12;
+            background: rgba(243, 156, 18, 0.2);
+        }
+        .quota3-container .step-number.done {
+            color: #00ff88 !important;
+            background: rgba(0, 255, 136, 0.15);
+            font-weight: 800;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+        .quota3-container .step-number.failed {
+            color: #ff4444 !important;
+            background: rgba(255, 68, 68, 0.15);
+        }
+        .quota3-container .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .quota3-container .badge-win {
+            background: #00ff88;
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+        .quota3-container .badge-loss {
+            background: #ff4444;
+            color: #fff;
+        }
+        .quota3-container .badge-pending {
+            background: #f2c94c;
+            color: #000;
+        }
+        .quota3-container .badge-waiting {
+            background: #8b949e;
+            color: #000;
+        }
+        .quota3-container .badge-empty {
+            color: #8b949e;
+        }
+        .quota3-container .deposit-display {
+            font-size: 32px;
+            font-weight: bold;
+            color: #00ff88;
+        }
+        .quota3-container .summary-box {
+            background: #1a2028;
+            border-radius: 12px;
+            padding: 16px 20px;
+            border: 1px solid #30363d;
+            margin-top: 12px;
+        }
+        .quota3-container .summary-box p {
+            margin: 4px 0;
+        }
+        .quota3-container .summary-box .history-list {
+            font-size: 13px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #30363d;
+        }
+        .quota3-container .summary-box .history-list span {
+            margin-right: 12px;
+        }
+        .quota3-container .summary-box .history-list .win {
+            color: #00ff88;
+        }
+        .quota3-container .summary-box .history-list .loss {
+            color: #ff4444;
+        }
+        .quota3-container .disclaimer {
+            margin-top: 24px;
+            padding: 16px 20px;
+            background: #1a2028;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            font-size: 11px;
+            color: #8b949e;
+            text-align: center;
+            line-height: 1.6;
+        }
+        .quota3-container .disclaimer strong {
+            color: #e6edf3;
+        }
+        .quota3-container .disclaimer .highlight {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            .quota3-container .grid {
+                grid-template-columns: 50px 100px 90px 100px 120px;
+                font-size: 12px;
+                min-width: 460px;
+            }
+            .quota3-container .card {
+                padding: 14px;
+            }
+            .quota3-container .deposit-display {
+                font-size: 26px;
+            }
+            .quota3-container .btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+            .quota3-container input[type="number"] {
+                max-width: 150px;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+            .quota3-container .flex-between {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .quota3-container .flex-between .btn-group {
+                justify-content: center;
+            }
+        }
+        @media (max-width: 500px) {
+            .quota3-container .grid {
+                grid-template-columns: 40px 80px 70px 80px 100px;
+                font-size: 11px;
+                min-width: 370px;
+                gap: 4px 8px;
+            }
+            .quota3-container .grid-item {
+                padding: 6px 2px;
+            }
+            .quota3-container .badge {
+                font-size: 11px;
+                padding: 2px 8px;
+            }
+            .quota3-container .deposit-display {
+                font-size: 22px;
+            }
+        }
+    `;
 
-  // Avvia percorso
-  const avviaPercorso = (importo) => {
-    const val = parseFloat(importo) || 10;
-    setImportoBase(val);
-    setImportoInput(val);
-    setStepCorrente(0);
-    setStorico([]);
-    setDepositoTotale(0);
-    setPercorsoAttivo(true);
-    setStepBloccato(false);
-    setPartitaCorrente(null);
-    setRiepilogo('');
-    
-    const primo = {
-      step: 1,
-      importo: val,
-      quota: val * 3,
-      vincita: 0,
-      deposito: 0,
-      esito: 'in corso'
+    // ============================================================
+    // LOGICA PRINCIPALE
+    // ============================================================
+
+    let containerElement = null;
+    let state = {
+        importoBase: 10,
+        importoInput: 10,
+        stepCorrente: 0,
+        storico: [],
+        depositoTotale: 0,
+        percorsoAttivo: false,
+        partitaCorrente: null,
+        stepBloccato: false,
+        riepilogo: ''
     };
-    setPartitaCorrente(primo);
-    setRiepilogo(`🎯 Step 1: importo €${val.toFixed(2)}, quota €${(val*3).toFixed(2)}. In attesa di esito.`);
-    if (showAlert) showAlert('info', `💰 Nuovo percorso iniziato con €${val.toFixed(2)}`);
-  };
 
-  // Gestione esito
-  const gestisciEsito = (esito) => {
-    if (!partitaCorrente || stepBloccato) return;
-    if (stepCorrente >= 10) {
-      setRiepilogo('🏁 Percorso completato (10 step massimi).');
-      setPercorsoAttivo(false);
-      return;
+    const STORAGE_KEY = 'quota3_data';
+
+    // ============================================================
+    // SALVA/CARICA LOCALSTORAGE
+    // ============================================================
+
+    function salvaState() {
+        try {
+            const data = {
+                importoBase: state.importoBase,
+                stepCorrente: state.stepCorrente,
+                storico: state.storico,
+                depositoTotale: state.depositoTotale,
+                percorsoAttivo: state.percorsoAttivo,
+                partitaCorrente: state.partitaCorrente,
+                stepBloccato: state.stepBloccato,
+                riepilogo: state.riepilogo
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            console.log('💾 Quota3: dati salvati');
+        } catch (e) {
+            console.warn('⚠️ Errore salvataggio:', e);
+        }
     }
 
-    const importo = partitaCorrente.importo;
-    const quota = partitaCorrente.quota;
-    let depositoAggiunto = 0;
-    let nuovoImporto = 0;
-    let nuovoStorico = [...storico];
-
-    if (esito === 'vinta') {
-      const vincita = quota;
-      depositoAggiunto = vincita / 3;
-      nuovoImporto = (vincita * 2) / 3;
-      
-      const record = {
-        step: stepCorrente + 1,
-        importo: importo,
-        quota: quota,
-        vincita: vincita,
-        deposito: depositoAggiunto,
-        esito: 'vinta'
-      };
-      nuovoStorico.push(record);
-      setStorico(nuovoStorico);
-      setDepositoTotale(prev => prev + depositoAggiunto);
-
-      if (stepCorrente + 1 >= 10) {
-        setStepCorrente(9);
-        setPartitaCorrente(null);
-        setStepBloccato(true);
-        setPercorsoAttivo(false);
-        setRiepilogo(`🏁 Percorso completato! Deposito totale: €${(depositoTotale + depositoAggiunto).toFixed(2)}.`);
-        if (showAlert) showAlert('success', `🎉 Percorso completato! Deposito: €${(depositoTotale + depositoAggiunto).toFixed(2)}`);
-        return;
-      }
-
-      const nuovoStep = stepCorrente + 1;
-      setStepCorrente(nuovoStep);
-      setPartitaCorrente({
-        step: nuovoStep + 1,
-        importo: nuovoImporto,
-        quota: nuovoImporto * 3,
-        vincita: 0,
-        deposito: 0,
-        esito: 'in corso'
-      });
-      setStepBloccato(false);
-      setRiepilogo(`✅ Step ${nuovoStep+1}: importo €${nuovoImporto.toFixed(2)}, quota €${(nuovoImporto*3).toFixed(2)}. Deposito +€${depositoAggiunto.toFixed(2)}`);
-      if (showAlert) showAlert('success', `✅ Step vinto! Prossimo importo: €${nuovoImporto.toFixed(2)}`);
-    } else {
-      const record = {
-        step: stepCorrente + 1,
-        importo: importo,
-        quota: quota,
-        vincita: 0,
-        deposito: 0,
-        esito: 'persa'
-      };
-      nuovoStorico.push(record);
-      setStorico(nuovoStorico);
-      setStepBloccato(true);
-      setPercorsoAttivo(false);
-      setPartitaCorrente(null);
-      setRiepilogo(`❌ Step ${stepCorrente+1} perso. Deposito totale: €${depositoTotale.toFixed(2)}. Vuoi ricominciare?`);
-      if (showAlert) showAlert('error', `❌ Step perso! Deposito finale: €${depositoTotale.toFixed(2)}`);
+    function caricaState() {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const data = JSON.parse(saved);
+                state.importoBase = data.importoBase || 10;
+                state.stepCorrente = data.stepCorrente || 0;
+                state.storico = data.storico || [];
+                state.depositoTotale = data.depositoTotale || 0;
+                state.percorsoAttivo = data.percorsoAttivo || false;
+                state.partitaCorrente = data.partitaCorrente || null;
+                state.stepBloccato = data.stepBloccato || false;
+                state.riepilogo = data.riepilogo || '';
+                state.importoInput = state.importoBase;
+                console.log('📂 Quota3: dati caricati da localStorage');
+                return true;
+            }
+        } catch (e) {
+            console.warn('⚠️ Errore caricamento:', e);
+        }
+        return false;
     }
-  };
 
-  // Reset
-  const resetPercorso = () => {
-    setPercorsoAttivo(false);
-    setStepCorrente(0);
-    setStorico([]);
-    setDepositoTotale(0);
-    setPartitaCorrente(null);
-    setStepBloccato(false);
-    setRiepilogo('');
-    setImportoInput(importoBase);
-    if (showAlert) showAlert('info', '🔄 Percorso resettato.');
-  };
+    // ============================================================
+    // FUNZIONI DI UTILITÀ
+    // ============================================================
 
-  // Conferma importo
-  const confermaImporto = () => {
-    if (percorsoAttivo) {
-      if (showAlert) showAlert('warning', '⚠️ Un percorso è già attivo.');
-      return;
+    function formatEuro(val) {
+        return '€' + val.toFixed(2);
     }
-    const val = parseFloat(importoInput) || 10;
-    if (val <= 0) {
-      if (showAlert) showAlert('error', 'Inserisci un importo valido > 0');
-      return;
-    }
-    avviaPercorso(val);
-  };
 
-  const renderStepAttuale = () => {
-    if (!percorsoAttivo && !partitaCorrente && stepCorrente === 0) {
-      return <div className="text-muted">Nessun percorso attivo. Imposta importo e clicca "Conferma".</div>;
+    // ============================================================
+    // RENDER GRIGLIA
+    // ============================================================
+
+    function renderGrid() {
+        const gridContainer = containerElement.querySelector('#gridContainer');
+        if (!gridContainer) return;
+
+        const rows = [];
+        for (let i = 0; i < 10; i++) {
+            const storicoItem = state.storico.find(s => s.step === i + 1);
+            let importo = '';
+            let quota = '';
+            let deposito = '';
+            let esito = '';
+
+            if (storicoItem) {
+                importo = storicoItem.importo.toFixed(2);
+                quota = storicoItem.quota.toFixed(2);
+                deposito = storicoItem.deposito ? storicoItem.deposito.toFixed(2) : '0.00';
+                esito = storicoItem.esito;
+            } else if (i === state.stepCorrente && state.partitaCorrente) {
+                importo = state.partitaCorrente.importo.toFixed(2);
+                quota = state.partitaCorrente.quota.toFixed(2);
+                deposito = '-';
+                esito = 'in corso';
+            } else {
+                importo = '-';
+                quota = '-';
+                deposito = '-';
+                esito = '';
+            }
+
+            let checkCell = '';
+            if (storicoItem) {
+                if (storicoItem.esito === 'vinta') {
+                    checkCell = `<span class="badge badge-win">✅ Vinta</span>`;
+                } else if (storicoItem.esito === 'persa') {
+                    checkCell = `<span class="badge badge-loss">❌ Persa</span>`;
+                } else {
+                    checkCell = `<span class="badge badge-pending">⏳</span>`;
+                }
+            } else if (i === state.stepCorrente && state.partitaCorrente && !state.stepBloccato) {
+                checkCell = `
+                    <div style="display:flex; gap:4px;">
+                        <button class="btn btn-success btn-xs" onclick="Quota3.gestisciEsito('vinta')">✅</button>
+                        <button class="btn btn-danger btn-xs" onclick="Quota3.gestisciEsito('persa')">❌</button>
+                    </div>
+                `;
+            } else if (i === state.stepCorrente && state.stepBloccato) {
+                checkCell = `<span class="badge badge-pending">⏳</span>`;
+            } else {
+                checkCell = `<span class="badge badge-empty">-</span>`;
+            }
+
+            const isActive = i === state.stepCorrente && state.partitaCorrente && !state.stepBloccato;
+            const isDone = storicoItem && storicoItem.esito === 'vinta';
+            const isFailed = storicoItem && storicoItem.esito === 'persa';
+
+            let numClass = 'step-number';
+            let rowClass = '';
+
+            if (isActive) {
+                numClass += ' active';
+                rowClass = 'active-step';
+            } else if (isDone) {
+                numClass += ' done';
+                rowClass = 'row-win';
+            } else if (isFailed) {
+                numClass += ' failed';
+                rowClass = 'row-loss';
+            }
+
+            const stepCell = `<span class="${numClass}">${i + 1}</span>`;
+            
+            rows.push(`
+                <div class="grid-item ${rowClass}">${stepCell}</div>
+                <div class="grid-item ${rowClass}">${importo}</div>
+                <div class="grid-item ${rowClass}">${quota}</div>
+                <div class="grid-item ${rowClass}">${deposito}</div>
+                <div class="grid-item ${rowClass}">${checkCell}</div>
+            `);
+        }
+
+        gridContainer.innerHTML = `
+            <div class="grid-header">Step</div>
+            <div class="grid-header">Importo</div>
+            <div class="grid-header">Quota (x3)</div>
+            <div class="grid-header">Deposito</div>
+            <div class="grid-header">Check</div>
+            ${rows.join('')}
+        `;
     }
-    if (partitaCorrente && !stepBloccato) {
-      const p = partitaCorrente;
-      return (
-        <div style={{background: '#1a2028', borderRadius: '12px', padding: '16px 20px', borderLeft: '6px solid #f39c12', margin: '16px 0'}}>
-          <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center'}}>
-            <div>
-              <strong style={{color: '#ffff00'}}>Step {p.step || stepCorrente+1}</strong>
-              <div>Importo: €{p.importo.toFixed(2)}</div>
-              <div>Quota (x3): €{p.quota.toFixed(2)}</div>
+
+    // ============================================================
+    // RENDER STATO PERCORSO
+    // ============================================================
+
+    function renderStato() {
+        const statusBox = containerElement.querySelector('#statusBox');
+        const depositoDisplay = containerElement.querySelector('#depositoDisplay');
+        if (!statusBox || !depositoDisplay) return;
+
+        let html = '';
+
+        if (!state.percorsoAttivo && !state.partitaCorrente && state.stepCorrente === 0) {
+            html = `
+                <div class="status-box">
+                    <div class="step-label">Nessun percorso attivo</div>
+                    <div class="step-value">Imposta un importo e clicca "Conferma"</div>
+                </div>
+            `;
+        } else if (state.partitaCorrente && !state.stepBloccato) {
+            const p = state.partitaCorrente;
+            html = `
+                <div class="status-box">
+                    <div class="flex-between">
+                        <div>
+                            <div class="step-label">Step ${p.step || state.stepCorrente + 1}</div>
+                            <div class="step-value">Importo: <span class="highlight">${formatEuro(p.importo)}</span></div>
+                            <div class="step-value" style="font-size:14px; color:#8b949e;">Quota (x3): ${formatEuro(p.quota)}</div>
+                        </div>
+                        <div class="btn-group" style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <button class="btn btn-success btn-sm" onclick="Quota3.gestisciEsito('vinta')">✅ Vinta</button>
+                            <button class="btn btn-danger btn-sm" onclick="Quota3.gestisciEsito('persa')">❌ Persa</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else if (state.stepBloccato || !state.percorsoAttivo) {
+            html = `
+                <div class="status-box ended">
+                    <div class="step-label">Percorso terminato (step ${state.stepCorrente + 1}/10)</div>
+                    <div class="step-value" style="font-size:16px;">
+                        Deposito totale: <span class="highlight">${formatEuro(state.depositoTotale)}</span>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+                        <button class="btn btn-success btn-sm" onclick="Quota3.avviaPercorso(${state.importoBase})">✅ Sì, ricomincia</button>
+                        <button class="btn btn-secondary btn-sm" onclick="Quota3.resetPercorso()">❌ No, ferma</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        statusBox.innerHTML = html;
+        depositoDisplay.textContent = formatEuro(state.depositoTotale);
+    }
+
+    // ============================================================
+    // RENDER RIEPILOGO
+    // ============================================================
+
+    function renderRiepilogo() {
+        const riepilogoContainer = containerElement.querySelector('#riepilogoContainer');
+        if (!riepilogoContainer) return;
+
+        let html = '';
+
+        if (state.riepilogo) {
+            html += `
+                <div class="summary-box">
+                    <p><strong>📋 Riepilogo</strong></p>
+                    <p>${state.riepilogo}</p>
+            `;
+
+            if (state.storico.length > 0) {
+                html += `
+                    <div class="history-list">
+                        ${state.storico.map((s, idx) => `
+                            <span class="${s.esito === 'vinta' ? 'win' : 'loss'}">
+                                Step ${s.step}: ${s.esito === 'vinta' ? '✅' : '❌'} 
+                                ${s.esito === 'vinta' ? ` +${formatEuro(s.deposito)}` : ''}
+                            </span>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+        }
+
+        riepilogoContainer.innerHTML = html;
+    }
+
+    // ============================================================
+    // FUNZIONI DI LOGICA
+    // ============================================================
+
+    function avviaPercorso(importo) {
+        const val = parseFloat(importo) || 10;
+        if (val <= 0) {
+            alert('Inserisci un importo valido > 0');
+            return;
+        }
+
+        state.importoBase = val;
+        state.importoInput = val;
+        state.stepCorrente = 0;
+        state.storico = [];
+        state.depositoTotale = 0;
+        state.percorsoAttivo = true;
+        state.stepBloccato = false;
+        state.partitaCorrente = null;
+        state.riepilogo = '';
+
+        const primo = {
+            step: 1,
+            importo: val,
+            quota: val * 3,
+            vincita: 0,
+            deposito: 0,
+            esito: 'in corso'
+        };
+        state.partitaCorrente = primo;
+        state.riepilogo = `🎯 Step 1: importo ${formatEuro(val)}, quota ${formatEuro(val * 3)}. In attesa di esito.`;
+
+        const importoInput = containerElement.querySelector('#importoInput');
+        if (importoInput) importoInput.value = val;
+        
+        salvaState();
+        renderTutto();
+    }
+
+    function gestisciEsito(esito) {
+        if (!state.partitaCorrente || state.stepBloccato) return;
+        if (state.stepCorrente >= 10) {
+            state.riepilogo = '🏁 Percorso completato (10 step massimi).';
+            state.percorsoAttivo = false;
+            salvaState();
+            renderTutto();
+            return;
+        }
+
+        const importo = state.partitaCorrente.importo;
+        const quota = state.partitaCorrente.quota;
+        let depositoAggiunto = 0;
+        let nuovoImporto = 0;
+
+        if (esito === 'vinta') {
+            const vincita = quota;
+            depositoAggiunto = vincita / 3;
+            nuovoImporto = (vincita * 2) / 3;
+
+            const record = {
+                step: state.stepCorrente + 1,
+                importo: importo,
+                quota: quota,
+                vincita: vincita,
+                deposito: depositoAggiunto,
+                esito: 'vinta'
+            };
+            state.storico.push(record);
+            state.depositoTotale += depositoAggiunto;
+
+            if (state.stepCorrente + 1 >= 10) {
+                state.stepCorrente = 9;
+                state.partitaCorrente = null;
+                state.stepBloccato = true;
+                state.percorsoAttivo = false;
+                state.riepilogo = `🏁 Percorso completato! Deposito totale: ${formatEuro(state.depositoTotale)}.`;
+                salvaState();
+                renderTutto();
+                return;
+            }
+
+            const nuovoStep = state.stepCorrente + 1;
+            state.stepCorrente = nuovoStep;
+            state.partitaCorrente = {
+                step: nuovoStep + 1,
+                importo: nuovoImporto,
+                quota: nuovoImporto * 3,
+                vincita: 0,
+                deposito: 0,
+                esito: 'in corso'
+            };
+            state.stepBloccato = false;
+            state.riepilogo = `✅ Step ${nuovoStep+1}: importo ${formatEuro(nuovoImporto)}, quota ${formatEuro(nuovoImporto*3)}. Deposito +${formatEuro(depositoAggiunto)}`;
+
+        } else {
+            const record = {
+                step: state.stepCorrente + 1,
+                importo: importo,
+                quota: quota,
+                vincita: 0,
+                deposito: 0,
+                esito: 'persa'
+            };
+            state.storico.push(record);
+            state.stepBloccato = true;
+            state.percorsoAttivo = false;
+            state.partitaCorrente = null;
+            state.riepilogo = `❌ Step ${state.stepCorrente+1} perso. Deposito totale: ${formatEuro(state.depositoTotale)}. Vuoi ricominciare?`;
+        }
+
+        salvaState();
+        renderTutto();
+    }
+
+    function resetPercorso() {
+        state.percorsoAttivo = false;
+        state.stepCorrente = 0;
+        state.storico = [];
+        state.depositoTotale = 0;
+        state.partitaCorrente = null;
+        state.stepBloccato = false;
+        state.riepilogo = '';
+        state.importoInput = state.importoBase;
+        const importoInput = containerElement.querySelector('#importoInput');
+        if (importoInput) importoInput.value = state.importoBase;
+        salvaState();
+        renderTutto();
+    }
+
+    function confermaImporto() {
+        if (state.percorsoAttivo) {
+            alert('⚠️ Un percorso è già attivo. Resetta o completa prima.');
+            return;
+        }
+        const importoInput = containerElement.querySelector('#importoInput');
+        if (!importoInput) return;
+        const val = parseFloat(importoInput.value) || 10;
+        if (val <= 0) {
+            alert('Inserisci un importo valido > 0');
+            return;
+        }
+        avviaPercorso(val);
+    }
+
+    // ============================================================
+    // RENDER TUTTO
+    // ============================================================
+
+    function renderTutto() {
+        renderGrid();
+        renderStato();
+        renderRiepilogo();
+
+        const btnConferma = containerElement.querySelector('#btnConferma');
+        const importoInput = containerElement.querySelector('#importoInput');
+        
+        if (btnConferma) {
+            btnConferma.disabled = state.percorsoAttivo;
+            btnConferma.textContent = state.percorsoAttivo ? '⏳ In corso...' : 'Conferma';
+        }
+        if (importoInput) {
+            importoInput.disabled = state.percorsoAttivo;
+        }
+    }
+
+    // ============================================================
+    // INIZIALIZZAZIONE
+    // ============================================================
+
+    function init(container) {
+        if (!container) {
+            console.error('❌ Quota3: container non valido');
+            return;
+        }
+
+        containerElement = container;
+        
+        // Aggiungi stili
+        const styleEl = document.createElement('style');
+        styleEl.textContent = styles;
+        containerElement.appendChild(styleEl);
+
+        // Crea HTML
+        containerElement.innerHTML = `
+            <div class="quota3-container">
+                <!-- IMPORTO INIZIALE -->
+                <div class="card">
+                    <div class="flex">
+                        <div style="flex:1; min-width:160px;">
+                            <label>💰 Importo iniziale (€)</label>
+                            <input type="number" id="importoInput" min="1" step="1" value="${state.importoBase}" />
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" id="btnConferma">Conferma</button>
+                        </div>
+                        <div>
+                            <button class="btn btn-secondary" id="btnReset">🔄 Reset</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GRIGLIA STEP -->
+                <div class="card">
+                    <h3>📊 Step (max 10)</h3>
+                    <div class="grid-container">
+                        <div class="grid" id="gridContainer">
+                            <div class="grid-header">Step</div>
+                            <div class="grid-header">Importo</div>
+                            <div class="grid-header">Quota (x3)</div>
+                            <div class="grid-header">Deposito</div>
+                            <div class="grid-header">Check</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STATO PERCORSO -->
+                <div class="card">
+                    <div class="flex-between">
+                        <div>
+                            <h4>📈 Stato percorso</h4>
+                            <div id="statoPercorso" style="margin-top:8px;">
+                                <div class="status-box" id="statusBox">
+                                    <div class="step-label">Nessun percorso attivo</div>
+                                    <div class="step-value">Imposta un importo e clicca "Conferma"</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="min-width:160px; text-align:center;">
+                            <h4>💰 Deposito totale</h4>
+                            <div class="deposit-display" id="depositoDisplay">€0.00</div>
+                        </div>
+                    </div>
+
+                    <div id="riepilogoContainer">
+                        <!-- Riepilogo generato dinamicamente -->
+                    </div>
+                </div>
+
+                <!-- DISCLAIMER -->
+                <div class="disclaimer">
+                    <strong>⚠️ Disclaimer</strong><br />
+                    Le scommesse comportano rischi finanziari. <span class="highlight">Gioca responsabilmente.</span><br />
+                    I dati vengono salvati automaticamente nel browser (localStorage).
+                </div>
             </div>
-            <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
-              <button className="btn btn-success" style={{padding: '6px 14px', fontSize: '14px'}} onClick={() => gestisciEsito('vinta')}>✅ Vinta</button>
-              <button className="btn btn-danger" style={{padding: '6px 14px', fontSize: '14px'}} onClick={() => gestisciEsito('persa')}>❌ Persa</button>
-            </div>
-          </div>
-        </div>
-      );
+        `;
+
+        // Carica stato
+        const loaded = caricaState();
+
+        if (!loaded) {
+            state.importoBase = 10;
+            state.importoInput = 10;
+            const input = containerElement.querySelector('#importoInput');
+            if (input) input.value = 10;
+            resetPercorso();
+        } else {
+            const input = containerElement.querySelector('#importoInput');
+            if (input) input.value = state.importoBase;
+            renderTutto();
+        }
+
+        // Event listeners
+        const btnConferma = containerElement.querySelector('#btnConferma');
+        const btnReset = containerElement.querySelector('#btnReset');
+        const importoInput = containerElement.querySelector('#importoInput');
+
+        if (btnConferma) {
+            btnConferma.addEventListener('click', confermaImporto);
+        }
+        if (btnReset) {
+            btnReset.addEventListener('click', resetPercorso);
+        }
+        if (importoInput) {
+            importoInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    confermaImporto();
+                }
+            });
+        }
+
+        console.log('✅ Quota3 caricato con localStorage');
     }
-    if (stepBloccato || !percorsoAttivo) {
-      return (
-        <div style={{background: '#1a2028', borderRadius: '12px', padding: '16px 20px', borderLeft: '6px solid #eb5757', margin: '16px 0'}}>
-          <p><strong>Percorso terminato</strong> (step {stepCorrente+1}/10)</p>
-          <p>Deposito totale: €{depositoTotale.toFixed(2)}</p>
-          <div style={{display: 'flex', gap: '8px', marginTop: '12px'}}>
-            <button className="btn btn-success" style={{padding: '6px 14px', fontSize: '14px'}} onClick={() => avviaPercorso(importoBase)}>✅ Sì, ricomincia</button>
-            <button className="btn btn-secondary" style={{padding: '6px 14px', fontSize: '14px'}} onClick={resetPercorso}>❌ No, ferma</button>
-          </div>
-        </div>
-      );
+
+    function destroy() {
+        if (containerElement) {
+            containerElement.innerHTML = '';
+            containerElement = null;
+        }
     }
-    return null;
-  };
 
-  // Griglia 10 step
-  const renderGrid = () => {
-    const rows = [];
-    for (let i = 0; i < 10; i++) {
-      const storicoItem = storico.find(s => s.step === i+1);
-      let esito = storicoItem ? storicoItem.esito : (i === stepCorrente && partitaCorrente ? 'in corso' : '');
-      let importo = '';
-      let quota = '';
-      let deposito = '';
-      if (storicoItem) {
-        importo = storicoItem.importo.toFixed(2);
-        quota = storicoItem.quota.toFixed(2);
-        deposito = storicoItem.deposito ? storicoItem.deposito.toFixed(2) : '0.00';
-      } else if (i === stepCorrente && partitaCorrente) {
-        importo = partitaCorrente.importo.toFixed(2);
-        quota = partitaCorrente.quota.toFixed(2);
-        deposito = '-';
-      } else {
-        importo = '-';
-        quota = '-';
-        deposito = '-';
-      }
+    // ============================================================
+    // ESPORTA API PUBBLICA
+    // ============================================================
 
-      let checkCell = '';
-      if (storicoItem) {
-        if (storicoItem.esito === 'vinta') checkCell = <span style={{background: '#6fcf97', color: '#000', padding: '4px 12px', borderRadius: '30px', fontWeight: 'bold', fontSize: '13px'}}>✅ Vinta</span>;
-        else if (storicoItem.esito === 'persa') checkCell = <span style={{background: '#eb5757', color: '#fff', padding: '4px 12px', borderRadius: '30px', fontWeight: 'bold', fontSize: '13px'}}>❌ Persa</span>;
-        else checkCell = <span style={{background: '#f2c94c', color: '#000', padding: '4px 12px', borderRadius: '30px', fontWeight: 'bold', fontSize: '13px'}}>⏳</span>;
-      } else if (i === stepCorrente && partitaCorrente && !stepBloccato) {
-        checkCell = (
-          <span style={{display: 'flex', gap: '4px'}}>
-            <button className="btn btn-success" style={{padding: '4px 10px', fontSize: '12px'}} onClick={() => gestisciEsito('vinta')}>✅</button>
-            <button className="btn btn-danger" style={{padding: '4px 10px', fontSize: '12px'}} onClick={() => gestisciEsito('persa')}>❌</button>
-          </span>
-        );
-      } else {
-        checkCell = <span className="text-muted">-</span>;
-      }
+    window.Quota3 = {
+        init: init,
+        destroy: destroy,
+        avviaPercorso: avviaPercorso,
+        gestisciEsito: gestisciEsito,
+        resetPercorso: resetPercorso,
+        confermaImporto: confermaImporto,
+        renderTutto: renderTutto,
+        salvaState: salvaState,
+        caricaState: caricaState
+    };
 
-      rows.push(
-        <div key={i} style={{padding: '8px 4px', borderBottom: '1px solid #30363d'}}>
-          <span style={{fontWeight: 700, color: i === stepCorrente ? '#f39c12' : '#e6edf3'}}>{i+1}</span>
-        </div>,
-        <div key={`imp-${i}`} style={{padding: '8px 4px', borderBottom: '1px solid #30363d'}}>{importo}</div>,
-        <div key={`quota-${i}`} style={{padding: '8px 4px', borderBottom: '1px solid #30363d'}}>{quota}</div>,
-        <div key={`dep-${i}`} style={{padding: '8px 4px', borderBottom: '1px solid #30363d'}}>{deposito}</div>,
-        <div key={`check-${i}`} style={{padding: '8px 4px', borderBottom: '1px solid #30363d'}}>{checkCell}</div>
-      );
-    }
-    return (
-      <div style={{display: 'grid', gridTemplateColumns: '60px 120px 110px 120px 140px', gap: '6px 12px', fontSize: '14px', margin: '16px 0'}}>
-        <div style={{fontWeight: 700, color: '#ffff00', borderBottom: '2px solid #30363d', paddingBottom: '8px'}}>Step</div>
-        <div style={{fontWeight: 700, color: '#ffff00', borderBottom: '2px solid #30363d', paddingBottom: '8px'}}>Importo</div>
-        <div style={{fontWeight: 700, color: '#ffff00', borderBottom: '2px solid #30363d', paddingBottom: '8px'}}>Quota (x3)</div>
-        <div style={{fontWeight: 700, color: '#ffff00', borderBottom: '2px solid #30363d', paddingBottom: '8px'}}>Deposito</div>
-        <div style={{fontWeight: 700, color: '#ffff00', borderBottom: '2px solid #30363d', paddingBottom: '8px'}}>Check</div>
-        {rows}
-      </div>
-    );
-  };
+    console.log('✅ Quota3 caricato come modulo autonomo');
 
-  return (
-    <div>
-      <div className="card">
-        <div style={{display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'flex-end'}}>
-          <div style={{flex: 1, minWidth: '180px'}}>
-            <label style={{fontWeight: 600, color: '#ffff00', display: 'block', marginBottom: '4px', fontSize: '14px'}}>💰 Importo iniziale (€)</label>
-            <input 
-              type="number" 
-              min="1" 
-              step="1" 
-              value={importoInput} 
-              onChange={(e) => setImportoInput(e.target.value)}
-              disabled={percorsoAttivo}
-              style={{width: '100%', maxWidth: '220px', padding: '12px 16px', background: '#1a2028', color: '#e6edf3', border: '1px solid #30363d', borderRadius: '10px', fontSize: '16px'}}
-            />
-          </div>
-          <div>
-            <button className="btn" onClick={confermaImporto} disabled={percorsoAttivo} style={{padding: '12px 28px'}}>
-              {percorsoAttivo ? '⏳ In corso...' : 'Conferma'}
-            </button>
-          </div>
-          <div>
-            <button className="btn btn-secondary" onClick={resetPercorso} style={{padding: '12px 28px'}}>🔄 Reset</button>
-          </div>
-        </div>
-      </div>
-
-      <div className="card">
-        <h3 style={{color: '#ffff00', marginBottom: '12px'}}>📊 Step (max 10)</h3>
-        <div style={{overflowX: 'auto'}}>
-          {renderGrid()}
-        </div>
-      </div>
-
-      <div className="card">
-        <div style={{display: 'flex', flexWrap: 'wrap', gap: '16px'}}>
-          <div style={{flex: 1, minWidth: '200px'}}>
-            <h4 style={{color: '#f39c12'}}>📈 Stato percorso</h4>
-            {renderStepAttuale()}
-          </div>
-          <div style={{minWidth: '180px'}}>
-            <h4 style={{color: '#f39c12'}}>💰 Deposito totale</h4>
-            <div style={{fontSize: '28px', fontWeight: 'bold', color: '#6fcf97'}}>€{depositoTotale.toFixed(2)}</div>
-          </div>
-        </div>
-
-        {riepilogo && (
-          <div style={{background: '#1a2028', borderRadius: '12px', padding: '16px 20px', border: '1px solid #30363d', marginTop: '16px'}}>
-            <p style={{color: '#e6edf3'}}><strong>📋 Riepilogo</strong></p>
-            <p>{riepilogo}</p>
-            {storico.length > 0 && (
-              <div style={{fontSize: '13px', marginTop: '8px', borderTop: '1px solid #30363d', paddingTop: '8px'}}>
-                {storico.map((s, idx) => (
-                  <span key={idx} style={{marginRight: '12px'}}>
-                    Step {s.step}: {s.esito === 'vinta' ? '✅' : '❌'} 
-                    {s.esito === 'vinta' && ` +€${s.deposito.toFixed(2)}`}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      <div style={{marginTop: '20px', fontSize: '12px', color: '#8b949e', textAlign: 'center', borderTop: '1px solid #30363d', paddingTop: '16px'}}>
-        ⚠️ Le scommesse comportano rischi finanziari. Gioca responsabilmente.
-      </div>
-    </div>
-  );
-};
-
-// Esponi il componente globalmente
-window.Quota3 = Quota3;
-console.log('✅ Quota3 caricato correttamente!');
+})();
