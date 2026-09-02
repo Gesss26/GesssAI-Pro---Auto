@@ -74,7 +74,9 @@
     width: auto;
     height: auto;
     object-fit: contain;
-    border-radius: 12px;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
     margin-bottom: 30px;
   }
   #splashscreen .splash-btn {
@@ -123,9 +125,11 @@
   /* ===== NASCONDI ROOT FINCHE' NON SI CLICCA SUL PULSANTE ===== */
   #root {
     display: none;
+    min-height: 100vh;
+    background: var(--bg);
   }
   #root.visible {
-    display: block;
+    display: block !important;
   }
 
   .giocata-pct {
@@ -1162,13 +1166,13 @@ document.addEventListener('DOMContentLoaded', function() {
   if (splash && btn && root) {
     btn.addEventListener('click', function() {
       // Nascondi lo splashscreen
-      splash.classList.add('hidden');
+      splash.style.display = 'none';
+      splash.style.opacity = '0';
+      splash.style.pointerEvents = 'none';
+      
       // Mostra l'applicazione
+      root.style.display = 'block';
       root.classList.add('visible');
-      // Rimuovi lo splashscreen dal DOM dopo la transizione
-      setTimeout(function() {
-        splash.style.display = 'none';
-      }, 800);
     });
   }
 });
@@ -6383,7 +6387,7 @@ function App() {
 }
 
 // ============================================================
-// AVVIA APP
+// AVVIA APP - MODIFICATO: React viene montato DOPO il click
 // ============================================================
 
 console.log('🚀 Avvio GesssAI-Pro - Caricamento da Excel...');
@@ -6426,3 +6430,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+</script>
+</body>
+</html>
