@@ -159,11 +159,6 @@
             background: #d63031;
             transform: scale(1.05);
         }
-        .quota3-container .btn-check-disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
         .quota3-container .status-box {
             background: #1a2028;
             border-radius: 12px;
@@ -467,17 +462,20 @@
     }
 
     // ============================================================
-    // RENDER GRIGLIA
+    // RENDER GRIGLIA - VERSIONE SEMPLIFICATA
     // ============================================================
 
     function renderGrid() {
-        const gridContainer = containerElement.querySelector('#gridContainer');
-        if (!gridContainer) return;
+        const gridContainer = document.getElementById('gridContainer');
+        if (!gridContainer) {
+            console.error('❌ gridContainer non trovato!');
+            return;
+        }
 
-        // Costruiamo le righe della griglia come in quota3.html
+        // Costruiamo l'HTML della griglia da zero
         let html = '';
-        
-        // Header
+
+        // HEADER
         html += `
             <div class="grid-header">Step</div>
             <div class="grid-header">Importo</div>
@@ -486,15 +484,19 @@
             <div class="grid-header">Check</div>
         `;
 
-        // 10 righe per gli step
+        // RIGHE (10 step)
         for (let i = 0; i < 10; i++) {
             const stepNum = i + 1;
             const storicoItem = state.storico.find(s => s.step === stepNum);
             
-            let importo = '';
-            let quota = '';
-            let deposito = '';
-            let check = '';
+            let importo = '-';
+            let quota = '-';
+            let deposito = '-';
+            let check = '-';
+
+            // Determina lo stato della riga
+            let rowClass = '';
+            let numClass = 'step-number';
 
             if (storicoItem) {
                 // Step già giocato
@@ -504,8 +506,12 @@
                 
                 if (storicoItem.esito === 'vinta') {
                     check = `<span class="badge badge-win">✅ Vinta</span>`;
+                    rowClass = 'row-win';
+                    numClass += ' done';
                 } else if (storicoItem.esito === 'persa') {
                     check = `<span class="badge badge-loss">❌ Persa</span>`;
+                    rowClass = 'row-loss';
+                    numClass += ' failed';
                 } else {
                     check = `<span class="badge badge-pending">⏳</span>`;
                 }
@@ -515,38 +521,18 @@
                 importo = p.importo.toFixed(2);
                 quota = p.quota.toFixed(2);
                 deposito = '-';
+                rowClass = 'active-step';
+                numClass += ' active';
                 
                 check = `
                     <div style="display:flex; gap:4px; flex-wrap:wrap;">
-                        <button class="btn-check-win" onclick="Quota3.gestisciEsito('vinta')">✅ Vinta</button>
-                        <button class="btn-check-loss" onclick="Quota3.gestisciEsito('persa')">❌ Persa</button>
+                        <button class="btn-check-win" onclick="window.Quota3.gestisciEsito('vinta')">✅ Vinta</button>
+                        <button class="btn-check-loss" onclick="window.Quota3.gestisciEsito('persa')">❌ Persa</button>
                     </div>
                 `;
             } else {
-                // Step futuro o non disponibile
-                importo = '-';
-                quota = '-';
-                deposito = '-';
+                // Step futuro
                 check = `<span class="badge badge-empty">-</span>`;
-            }
-
-            // Determina lo stato della riga
-            const isActive = i === state.stepCorrente && state.partitaCorrente && !state.stepBloccato;
-            const isDone = storicoItem && storicoItem.esito === 'vinta';
-            const isFailed = storicoItem && storicoItem.esito === 'persa';
-
-            let numClass = 'step-number';
-            let rowClass = '';
-
-            if (isActive) {
-                numClass += ' active';
-                rowClass = 'active-step';
-            } else if (isDone) {
-                numClass += ' done';
-                rowClass = 'row-win';
-            } else if (isFailed) {
-                numClass += ' failed';
-                rowClass = 'row-loss';
             }
 
             // Aggiungi le celle della riga
@@ -560,6 +546,7 @@
         }
 
         gridContainer.innerHTML = html;
+        console.log('✅ Griglia renderizzata con successo');
     }
 
     // ============================================================
@@ -567,8 +554,8 @@
     // ============================================================
 
     function renderStato() {
-        const statusBox = containerElement.querySelector('#statusBox');
-        const depositoDisplay = containerElement.querySelector('#depositoDisplay');
+        const statusBox = document.getElementById('statusBox');
+        const depositoDisplay = document.getElementById('depositoDisplay');
         if (!statusBox || !depositoDisplay) return;
 
         let html = '';
@@ -591,8 +578,8 @@
                             <div class="step-value" style="font-size:14px; color:#8b949e;">Quota (x3): ${formatEuro(p.quota)}</div>
                         </div>
                         <div class="btn-group" style="display:flex; gap:8px; flex-wrap:wrap;">
-                            <button class="btn btn-success btn-sm" onclick="Quota3.gestisciEsito('vinta')">✅ Vinta</button>
-                            <button class="btn btn-danger btn-sm" onclick="Quota3.gestisciEsito('persa')">❌ Persa</button>
+                            <button class="btn btn-success btn-sm" onclick="window.Quota3.gestisciEsito('vinta')">✅ Vinta</button>
+                            <button class="btn btn-danger btn-sm" onclick="window.Quota3.gestisciEsito('persa')">❌ Persa</button>
                         </div>
                     </div>
                 </div>
@@ -605,8 +592,8 @@
                         Deposito totale: <span class="highlight">${formatEuro(state.depositoTotale)}</span>
                     </div>
                     <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
-                        <button class="btn btn-success btn-sm" onclick="Quota3.avviaPercorso(${state.importoBase})">✅ Sì, ricomincia</button>
-                        <button class="btn btn-secondary btn-sm" onclick="Quota3.resetPercorso()">❌ No, ferma</button>
+                        <button class="btn btn-success btn-sm" onclick="window.Quota3.avviaPercorso(${state.importoBase})">✅ Sì, ricomincia</button>
+                        <button class="btn btn-secondary btn-sm" onclick="window.Quota3.resetPercorso()">❌ No, ferma</button>
                     </div>
                 </div>
             `;
@@ -621,7 +608,7 @@
     // ============================================================
 
     function renderRiepilogo() {
-        const riepilogoContainer = containerElement.querySelector('#riepilogoContainer');
+        const riepilogoContainer = document.getElementById('riepilogoContainer');
         if (!riepilogoContainer) return;
 
         let html = '';
@@ -684,7 +671,7 @@
         state.partitaCorrente = primo;
         state.riepilogo = `🎯 Step 1: importo ${formatEuro(val)}, quota ${formatEuro(val * 3)}. In attesa di esito.`;
 
-        const importoInput = containerElement.querySelector('#importoInput');
+        const importoInput = document.getElementById('importoInput');
         if (importoInput) importoInput.value = val;
         
         salvaState();
@@ -775,7 +762,7 @@
         state.stepBloccato = false;
         state.riepilogo = '';
         state.importoInput = state.importoBase;
-        const importoInput = containerElement.querySelector('#importoInput');
+        const importoInput = document.getElementById('importoInput');
         if (importoInput) importoInput.value = state.importoBase;
         salvaState();
         renderTutto();
@@ -786,7 +773,7 @@
             alert('⚠️ Un percorso è già attivo. Resetta o completa prima.');
             return;
         }
-        const importoInput = containerElement.querySelector('#importoInput');
+        const importoInput = document.getElementById('importoInput');
         if (!importoInput) return;
         const val = parseFloat(importoInput.value) || 10;
         if (val <= 0) {
@@ -805,8 +792,8 @@
         renderStato();
         renderRiepilogo();
 
-        const btnConferma = containerElement.querySelector('#btnConferma');
-        const importoInput = containerElement.querySelector('#importoInput');
+        const btnConferma = document.getElementById('btnConferma');
+        const importoInput = document.getElementById('importoInput');
         
         if (btnConferma) {
             btnConferma.disabled = state.percorsoAttivo;
@@ -821,85 +808,35 @@
     // INIZIALIZZAZIONE
     // ============================================================
 
-    function init(container) {
-        if (!container) {
-            console.error('❌ Quota3: container non valido');
-            return;
-        }
-
+    function init() {
         if (isInitialized) {
             console.log('⚠️ Quota3: già inizializzato');
             return;
         }
 
-        containerElement = container;
+        // Verifica che il container esista
+        const container = document.getElementById('quota3-container');
+        if (!container) {
+            console.error('❌ Container #quota3-container non trovato!');
+            return;
+        }
+
+        // Verifica che gli elementi esistano
+        if (!document.getElementById('gridContainer')) {
+            console.error('❌ gridContainer non trovato!');
+            return;
+        }
+
         isInitialized = true;
         
-        // Aggiungi stili
-        const styleEl = document.createElement('style');
-        styleEl.textContent = styles;
-        containerElement.appendChild(styleEl);
-
-        // Crea HTML
-        containerElement.innerHTML = `
-            <div class="quota3-container">
-                <!-- IMPORTO INIZIALE -->
-                <div class="card">
-                    <div class="flex">
-                        <div style="flex:1; min-width:160px;">
-                            <label>💰 Importo iniziale (€)</label>
-                            <input type="number" id="importoInput" min="1" step="1" value="${state.importoBase}" />
-                        </div>
-                        <div>
-                            <button class="btn btn-primary" id="btnConferma">Conferma</button>
-                        </div>
-                        <div>
-                            <button class="btn btn-secondary" id="btnReset">🔄 Reset</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- GRIGLIA STEP -->
-                <div class="card">
-                    <h3>📊 Step (max 10)</h3>
-                    <div class="grid-container">
-                        <div class="grid" id="gridContainer">
-                            <!-- Le celle vengono generate da renderGrid() -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- STATO PERCORSO -->
-                <div class="card">
-                    <div class="flex-between">
-                        <div>
-                            <h4>📈 Stato percorso</h4>
-                            <div id="statoPercorso" style="margin-top:8px;">
-                                <div class="status-box" id="statusBox">
-                                    <div class="step-label">Nessun percorso attivo</div>
-                                    <div class="step-value">Imposta un importo e clicca "Conferma"</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div style="min-width:160px; text-align:center;">
-                            <h4>💰 Deposito totale</h4>
-                            <div class="deposit-display" id="depositoDisplay">€0.00</div>
-                        </div>
-                    </div>
-
-                    <div id="riepilogoContainer">
-                        <!-- Riepilogo generato dinamicamente -->
-                    </div>
-                </div>
-
-                <!-- DISCLAIMER -->
-                <div class="disclaimer">
-                    <strong>⚠️ Disclaimer</strong><br />
-                    Le scommesse comportano rischi finanziari. <span class="highlight">Gioca responsabilmente.</span><br />
-                    I dati vengono salvati automaticamente nel browser (localStorage).
-                </div>
-            </div>
-        `;
+        // Aggiungi stili se non esistono già
+        let styleEl = document.getElementById('quota3-styles');
+        if (!styleEl) {
+            styleEl = document.createElement('style');
+            styleEl.id = 'quota3-styles';
+            styleEl.textContent = styles;
+            document.head.appendChild(styleEl);
+        }
 
         // Carica stato
         const loaded = caricaState();
@@ -907,19 +844,19 @@
         if (!loaded) {
             state.importoBase = 10;
             state.importoInput = 10;
-            const input = containerElement.querySelector('#importoInput');
+            const input = document.getElementById('importoInput');
             if (input) input.value = 10;
             resetPercorso();
         } else {
-            const input = containerElement.querySelector('#importoInput');
+            const input = document.getElementById('importoInput');
             if (input) input.value = state.importoBase;
             renderTutto();
         }
 
         // Event listeners
-        const btnConferma = containerElement.querySelector('#btnConferma');
-        const btnReset = containerElement.querySelector('#btnReset');
-        const importoInput = containerElement.querySelector('#importoInput');
+        const btnConferma = document.getElementById('btnConferma');
+        const btnReset = document.getElementById('btnReset');
+        const importoInput = document.getElementById('importoInput');
 
         if (btnConferma) {
             btnConferma.addEventListener('click', confermaImporto);
@@ -946,7 +883,7 @@
         const container = document.getElementById('quota3-container');
         if (container && !isInitialized) {
             console.log('🚀 Quota3: auto-inizializzazione in corso...');
-            init(container);
+            init();
         }
     }
 
@@ -963,10 +900,14 @@
     window.Quota3 = {
         init: init,
         destroy: function() {
-            if (containerElement) {
-                containerElement.innerHTML = '';
-                containerElement = null;
-                isInitialized = false;
+            isInitialized = false;
+            const container = document.getElementById('quota3-container');
+            if (container) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        ⏳ Caricamento Quota 3...
+                    </div>
+                `;
             }
         },
         avviaPercorso: avviaPercorso,
