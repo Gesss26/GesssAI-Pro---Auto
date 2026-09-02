@@ -6701,28 +6701,38 @@ function App() {
 }
 
 // ============================================================
-// AVVIA APP - MODIFICATO: React viene montato DOPO il click
+// AVVIA APP - MONTAGGIO IMMEDIATO
 // ============================================================
 
-console.log('🚀 Avvio GesssAI-Pro - Caricamento da Excel...');
+console.log('🚀 Avvio GesssAI-Pro...');
 
-// Svuota localStorage all'avvio per forzare il caricamento
+// Svuota localStorage
 localStorage.removeItem('ft_matches');
 localStorage.removeItem('ft_champs');
 
 // Carica i dati
 loadScrapedData(true).then(data => {
   if (data && data.matches && data.matches.length > 0) {
-    console.log(`✅ ${data.matches.length} partite caricate all'avvio!`);
+    console.log(`✅ ${data.matches.length} partite caricate!`);
     if (window.updateAppData) {
       window.updateAppData(data);
     }
-  } else {
-    console.warn('⚠️ Nessun dato caricato.');
   }
 });
 
-// ⭐ ASPETTA CHE L'UTENTE CLICCHI SUL PULSANTE PRIMA DI MONTARE REACT
+// ⭐ MONTA REACT SUBITO (l'app è nascosta fino al click)
+try {
+  const root = document.getElementById('root');
+  if (root) {
+    root.style.display = 'none';
+    ReactDOM.createRoot(root).render(<App />);
+    console.log('✅ React montato');
+  }
+} catch (err) {
+  console.error('❌ Errore:', err);
+}
+
+// GESTISCE IL CLICK
 document.addEventListener('DOMContentLoaded', function() {
   var splash = document.getElementById('splashscreen');
   var root = document.getElementById('root');
@@ -6730,20 +6740,13 @@ document.addEventListener('DOMContentLoaded', function() {
   
   if (splash && btn && root) {
     btn.addEventListener('click', function() {
-      // Nascondi lo splashscreen
       splash.style.display = 'none';
-      splash.style.opacity = '0';
-      splash.style.pointerEvents = 'none';
-      
-      // Mostra root
       root.style.display = 'block';
       root.classList.add('visible');
-      
-      // ⭐ MONTA REACT SOLO DOPO IL CLICK
-      ReactDOM.createRoot(root).render(<App />);
     });
   }
 });
+
 </script>
 </body>
 </html>
