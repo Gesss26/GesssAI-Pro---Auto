@@ -37,7 +37,149 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
   body { background: var(--bg); color: var(--text); min-height: 100vh; }
-  
+
+  /* ===== SPLASHSCREEN ===== */
+  #splashscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #0a0e1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    padding: 20px;
+  }
+  #splashscreen.hidden {
+    opacity: 0;
+    transform: scale(1.05);
+    pointer-events: none;
+  }
+  #splashscreen .splash-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 90vw;
+    max-height: 90vh;
+    text-align: center;
+  }
+
+  /* ===== LOGO ===== */
+  #splashscreen .splash-logo {
+    max-width: 80vw;
+    max-height: 60vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+    margin-bottom: 40px;
+    background: transparent;
+  }
+
+  /* ===== BOTTONE ORO ===== */
+  #splashscreen .splash-btn {
+    padding: 16px 50px;
+    background: linear-gradient(135deg, #f7dc6f, #f39c12, #e67e22);
+    color: #000;
+    font-weight: 700;
+    font-size: 20px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 30px rgba(243, 156, 18, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+  }
+  #splashscreen .splash-btn::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: rotate(45deg);
+    transition: all 0.5s ease;
+  }
+  #splashscreen .splash-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 40px rgba(243, 156, 18, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  #splashscreen .splash-btn:hover::before {
+    left: 100%;
+  }
+  #splashscreen .splash-btn:active {
+    transform: scale(0.95);
+  }
+
+  #splashscreen .splash-sub {
+    margin-top: 20px;
+    color: #8b949e;
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 300;
+  }
+
+  /* ===== ANIMAZIONE CARICAMENTO ===== */
+  #splashscreen .loader {
+    margin-top: 25px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+  }
+  #splashscreen .loader .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #f39c12;
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  #splashscreen .loader .dot:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  #splashscreen .loader .dot:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+  @keyframes pulse {
+    0%, 80%, 100% { transform: scale(0.4); opacity: 0.3; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  @media (max-width: 768px) {
+    #splashscreen .splash-logo { max-width: 90vw; max-height: 50vh; margin-bottom: 30px; }
+    #splashscreen .splash-btn { padding: 14px 35px; font-size: 17px; }
+    #splashscreen .splash-sub { font-size: 11px; }
+    #splashscreen .loader .dot { width: 8px; height: 8px; }
+  }
+  @media (max-width: 480px) {
+    #splashscreen .splash-logo { max-width: 95vw; max-height: 40vh; margin-bottom: 25px; }
+    #splashscreen .splash-btn { padding: 12px 28px; font-size: 15px; letter-spacing: 1px; }
+    #splashscreen .splash-sub { font-size: 10px; letter-spacing: 2px; }
+  }
+
+  /* ===== NASCONDI ROOT FINCHE' NON SI CLICCA ===== */
+  #root {
+    display: none;
+    min-height: 100vh;
+    background: var(--bg);
+  }
+  #root.visible {
+    display: block !important;
+  }
+
   .giocata-pct {
     display: inline-block;
     font-weight: bold;
@@ -1050,7 +1192,45 @@
 </style>
 </head>
 <body>
+
+<!-- ===== SPLASHSCREEN ===== -->
+<div id="splashscreen">
+  <div class="splash-content">
+    <img src="Splashscreen.png" alt="GesssAI-Pro" class="splash-logo" />
+    <button class="splash-btn" id="splashBtn">✨ Clikka per continuare</button>
+    <div class="splash-sub">v3.0 - Football Trader</div>
+    <div class="loader">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+</div>
+
 <div id="root"></div>
+
+<script>
+// ===== GESTIONE SPLASHSCREEN E MOSTRA APP =====
+document.addEventListener('DOMContentLoaded', function() {
+  var splash = document.getElementById('splashscreen');
+  var root = document.getElementById('root');
+  var btn = document.getElementById('splashBtn');
+  
+  if (splash && btn && root) {
+    btn.addEventListener('click', function() {
+      // Aggiungi la classe hidden per attivare la dissolvenza
+      splash.classList.add('hidden');
+      
+      // Mostra il contenuto principale dopo la dissolvenza
+      setTimeout(function() {
+        splash.style.display = 'none';
+        root.style.display = 'block';
+        root.classList.add('visible');
+      }, 800);
+    });
+  }
+});
+</script>
 
 <script type="text/babel">
 // ============================================================
@@ -1302,39 +1482,24 @@ const MAIN_TABS = ['Home','Palinsesto','Statistiche','Storico','Schedina','Impos
 const SETTINGS_TABS = ['Temi','Dati Locali','Importa Campionato','Giocate','Grandezza Caratteri','Città Meteo','Visuale'];
 
 // ============================================================
-// MAPPA COLORI PER CAMPIONATO (25 campionati, esclusa Serie A Woman)
+// MAPPA COLORI PER CAMPIONATO
 // ============================================================
 
 const CHAMPIONSHIP_COLORS = {
-  // ===== ARGENTINA =====
   'Liga Profesional Argentina': '#3498db',
-  
-  // ===== BELGIO =====
   'Jupiler Pro League': '#e74c3c',
-  
-  // ===== BRASILE =====
   'Brasileirão Serie A': '#2ecc71',
-  
-  // ===== GRECIA =====
   'Super League Grecia': '#2980b9',
-  
-  // ===== INGHILTERRA =====
   'Premier League': '#3498db',
   'Premier League GB': '#3498db',
   'English Premier League': '#3498db',
   'EPL': '#3498db',
   'EFL Championship': '#6c3483',
   'Championship': '#6c3483',
-  
-  // ===== FRANCIA =====
   'Ligue 1': '#9b59b6',
   'Ligue 2': '#8e44ad',
-  
-  // ===== GERMANIA =====
   'Bundesliga': '#f39c12',
   '2. Bundesliga': '#e67e22',
-  
-  // ===== ITALIA =====
   'Serie A': '#2ecc71',
   'Serie A TIM': '#2ecc71',
   'Serie A Enilive': '#2ecc71',
@@ -1342,42 +1507,23 @@ const CHAMPIONSHIP_COLORS = {
   'Serie C - Girone A': '#2980b9',
   'Serie C - Girone B': '#27ae60',
   'Serie C - Girone C': '#c0392b',
-  // 'Serie A Women' rimossa
-  
-  // ===== GIAPPONE =====
   'J1 League': '#e74c3c',
-  
-  // ===== PAESI BASSI =====
   'Eerste Divisie': '#e67e22',
   'Eredivisie': '#e74c3c',
-  
-  // ===== PORTOGALLO =====
   'Primeira Liga': '#34495e',
   'Liga Portugal': '#34495e',
-  
-  // ===== SCOZIA =====
   'Scottish Premiership': '#2ecc71',
   'Premiership': '#2ecc71',
-  
-  // ===== COREA DEL SUD =====
   'K League 1': '#3498db',
-  
-  // ===== SPAGNA =====
   'La Liga': '#e74c3c',
   'LaLiga': '#e74c3c',
   'Segunda División': '#e67e22',
-  
-  // ===== TURCHIA =====
   'Süper Lig': '#e67e22',
   'Super Lig': '#e67e22',
-  
-  // ===== USA/CANADA =====
   'Major League Soccer': '#3498db',
-  'MLS': '#3498db',
-  // 'NWSL' rimossa
+  'MLS': '#3498db'
 };
 
-// Lista dei 25 campionati (esclusa Serie A Woman e NWSL)
 const CHAMPIONSHIP_LIST = [
   'Liga Profesional Argentina',
   'Jupiler Pro League',
@@ -1581,31 +1727,12 @@ const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
     if (!champ) return '';
     
   const map = {
-  // ============================================================
-  // ARGENTINA
-  // ============================================================
   'Liga Profesional Argentina': 'Liga_Profesional_Argentina',
-  
-  // ============================================================
-  // BELGIO
-  // ============================================================
   'Jupiler Pro League': 'Jupiler_Pro_League',
-  
-  // ============================================================
-  // BRASILE
-  // ============================================================
   'Brasileirão Serie A': 'Brasileirao_Serie_A',
   'Serie A BR': 'Brasileirao_Serie_A',
-  
-  // ============================================================
-  // GRECIA
-  // ============================================================
   'Super League Grecia': 'Super_League_Grecia',
   'Super League GR': 'Super_League_Grecia',
-  
-  // ============================================================
-  // INGHILTERRA
-  // ============================================================
   'Premier League': 'Premier_League',
   'English Premier League': 'Premier_League',
   'EPL': 'Premier_League',
@@ -1615,22 +1742,10 @@ const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
   'EFL League One': 'EFL_League_One',
   'League Two': 'EFL_League_Two',
   'EFL League Two': 'EFL_League_Two',
-  
-  // ============================================================
-  // FRANCIA
-  // ============================================================
   'Ligue 1': 'Ligue_1',
   'Ligue 2': 'Ligue_2',
-  
-  // ============================================================
-  // GERMANIA
-  // ============================================================
   'Bundesliga': 'Bundesliga',
   '2. Bundesliga': '2. Bundesliga',
-  
-  // ============================================================
-  // ITALIA
-  // ============================================================
   'Serie A': 'Serie_A',
   'Serie A TIM': 'Serie_A',
   'Serie A Enilive': 'Serie_A',
@@ -1642,62 +1757,24 @@ const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
   'Serie C - Girone A': 'Serie_C_Girone_A',
   'Serie C - Girone B': 'Serie_C_Girone_B',
   'Serie C - Girone C': 'Serie_C_Girone_C',
-  // 'Serie A Women' rimossa
-  
-  // ============================================================
-  // GIAPPONE
-  // ============================================================
   'J1 League': 'J1_League',
-  
-  // ============================================================
-  // PAESI BASSI
-  // ============================================================
   'Eredivisie': 'Eredivisie',
   'Eerste Divisie': 'Eerste_Divisie',
-  
-  // ============================================================
-  // PORTOGALLO
-  // ============================================================
   'Primeira Liga': 'Primeira_Liga',
   'Liga Portugal': 'Primeira_Liga',
-  
-  // ============================================================
-  // SCOZIA
-  // ============================================================
   'Scottish Premiership': 'Scottish_Premiership',
   'Scottish Premier League': 'Scottish_Premiership',
   'Premiership': 'Scottish_Premiership',
-  
-  // ============================================================
-  // COREA DEL SUD
-  // ============================================================
   'K League 1': 'K_League_1',
   'K League': 'K_League_1',
-  
-  // ============================================================
-  // SPAGNA
-  // ============================================================
   'La Liga': 'La_Liga',
   'LaLiga': 'La_Liga',
   'Segunda División': 'Segunda_Division',
-  
-  // ============================================================
-  // TURCHIA
-  // ============================================================
   'Süper Lig': 'Super_Lig',
   'Super Lig': 'Super_Lig',
   'Turkish Süper Lig': 'Super_Lig',
-  
-  // ============================================================
-  // USA / CANADA
-  // ============================================================
   'Major League Soccer': 'MLS',
   'MLS': 'MLS',
-  // 'NWSL' rimossa
-  
-  // ============================================================
-  // ALTRI CAMPIONATI (già presenti)
-  // ============================================================
   'A-League': 'A-League_Men',
   'A-League Men': 'A-League_Men',
   'Allsvenskan': 'Allsvenskan',
