@@ -11,8 +11,6 @@
 <!-- CARICAMENTO METEO.JS -->
 <script type="text/javascript" src="meteo.js"></script>
 <script type="text/babel" src="schedina.js"></script>
-<!-- CARICAMENTO QUOTA 3 -->
-<script type="text/javascript" src="quota3.js"></script>
 <style>
   /* ===== TUTTI GLI STILI ===== */
   :root {
@@ -125,29 +123,6 @@
     transform: scale(0.95);
   }
 
-  /* ===== BOTTONE SVUOTA LOCALSTORAGE ===== */
-  #splashscreen .splash-btn-clear {
-    margin-top: 16px;
-    padding: 10px 30px;
-    background: transparent;
-    color: #8b949e;
-    font-weight: 600;
-    font-size: 14px;
-    border: 1px solid #30363d;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    letter-spacing: 1px;
-  }
-  #splashscreen .splash-btn-clear:hover {
-    color: #eb5757;
-    border-color: #eb5757;
-    transform: scale(1.05);
-  }
-  #splashscreen .splash-btn-clear:active {
-    transform: scale(0.95);
-  }
-
   #splashscreen .splash-sub {
     margin-top: 20px;
     color: #8b949e;
@@ -186,14 +161,12 @@
   @media (max-width: 768px) {
     #splashscreen .splash-logo { max-width: 90vw; max-height: 50vh; margin-bottom: 30px; }
     #splashscreen .splash-btn { padding: 14px 35px; font-size: 17px; }
-    #splashscreen .splash-btn-clear { padding: 8px 20px; font-size: 12px; }
     #splashscreen .splash-sub { font-size: 11px; }
     #splashscreen .loader .dot { width: 8px; height: 8px; }
   }
   @media (max-width: 480px) {
     #splashscreen .splash-logo { max-width: 95vw; max-height: 40vh; margin-bottom: 25px; }
     #splashscreen .splash-btn { padding: 12px 28px; font-size: 15px; letter-spacing: 1px; }
-    #splashscreen .splash-btn-clear { padding: 6px 16px; font-size: 11px; }
     #splashscreen .splash-sub { font-size: 10px; letter-spacing: 2px; }
   }
 
@@ -1225,7 +1198,6 @@
   <div class="splash-content">
     <img src="Splashscreen.png" alt="GesssAI-Pro" class="splash-logo" />
     <button class="splash-btn" id="splashBtn">✨ Clikka per continuare</button>
-    <button class="splash-btn-clear" id="clearStorageBtn">🗑️ Svuota LocalStorage</button>
     <div class="splash-sub">v3.0 - Football Trader</div>
     <div class="loader">
       <div class="dot"></div>
@@ -1243,20 +1215,6 @@ document.addEventListener('DOMContentLoaded', function() {
   var splash = document.getElementById('splashscreen');
   var root = document.getElementById('root');
   var btn = document.getElementById('splashBtn');
-  var clearBtn = document.getElementById('clearStorageBtn');
-  
-  // Pulsante per svuotare il localStorage
-  if (clearBtn) {
-    clearBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      if (confirm('⚠️ Sei sicuro di voler svuotare tutto il localStorage? Perderai tutti i dati salvati!')) {
-        localStorage.clear();
-        alert('✅ LocalStorage svuotato! Ricarica la pagina per ricominciare.');
-        // Ricarica la pagina per applicare il reset
-        window.location.reload();
-      }
-    });
-  }
   
   if (splash && btn && root) {
     btn.addEventListener('click', function() {
@@ -1520,7 +1478,7 @@ const THEMES = {
   'Calcio': { bg:'#1b5e20', surface:'#2e7d32', card:'#388e3c', banner:'#2e7d32', text:'#fff', textMuted:'#ffff00', accent:'#ffc107', accent2:'#ff9800', border:'#1b5e20', tabActive:'#ffc107' },
 };
 
-const MAIN_TABS = ['Home','Palinsesto','Statistiche','Storico','Schedina','Quota 3','Impostazioni'];
+const MAIN_TABS = ['Home','Palinsesto','Statistiche','Storico','Schedina','Impostazioni'];
 const SETTINGS_TABS = ['Temi','Dati Locali','Importa Campionato','Giocate','Grandezza Caratteri','Città Meteo','Visuale'];
 
 // ============================================================
@@ -5650,36 +5608,6 @@ const deduplicateMatches = (matches) => {
 };
 
 // ============================================================
-// COMPONENTE QUOTA 3 - Carica quota3.html in iframe
-// ============================================================
-
-const Quota3Tab = () => {
-  return (
-    <div style={{ 
-      width: '100%', 
-      height: '100%', 
-      minHeight: '700px',
-      background: '#0f1419',
-      borderRadius: '12px',
-      overflow: 'hidden'
-    }}>
-      <iframe
-        src="quota3.html"
-        style={{
-          width: '100%',
-          height: '700px',
-          border: 'none',
-          borderRadius: '12px',
-          background: '#0f1419'
-        }}
-        title="Quota 3"
-        sandbox="allow-scripts allow-same-origin allow-modals"
-      />
-    </div>
-  );
-};
-
-// ============================================================
 // COMPONENTE APP - PARTE FINALE
 // ============================================================
 
@@ -5940,7 +5868,7 @@ function App() {
           {MAIN_TABS.map(t => (
             <button key={t} className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>
               {t === 'Home' && '🏠 '}{t === 'Palinsesto' && '📅 '}{t === 'Statistiche' && '📊 '}
-              {t === 'Storico' && '📜 '}{t === 'Schedina' && '🎯 '}{t === 'Quota 3' && '🎰 '}{t === 'Impostazioni' && '⚙️ '}{t}
+              {t === 'Storico' && '📜 '}{t === 'Schedina' && '🎯 '}{t === 'Impostazioni' && '⚙️ '}{t}
             </button>
           ))}
         </div>
@@ -6205,12 +6133,6 @@ function App() {
               ) : (
                 <div className="alert alert-info">⏳ Caricamento modulo Schedina... Assicurati che il file <b>schedina.js</b> sia presente nella stessa cartella.</div>
               )}
-            </div>
-          )}
-
-          {tab === 'Quota 3' && (
-            <div>
-              <Quota3Tab />
             </div>
           )}
 
