@@ -6387,7 +6387,7 @@ function App() {
 }
 
 // ============================================================
-// AVVIA APP - MODIFICATO: React viene montato DOPO il click
+// AVVIA APP
 // ============================================================
 
 console.log('🚀 Avvio GesssAI-Pro - Caricamento da Excel...');
@@ -6408,7 +6408,7 @@ loadScrapedData(true).then(data => {
   }
 });
 
-// ⭐ ASPETTA CHE L'UTENTE CLICCHI SUL PULSANTE PRIMA DI MONTARE REACT
+// ⭐ ASPETTA CHE TUTTI GLI SCRIPT SIANO CARICATI PRIMA DI MONTARE REACT
 document.addEventListener('DOMContentLoaded', function() {
   var splash = document.getElementById('splashscreen');
   var root = document.getElementById('root');
@@ -6425,8 +6425,21 @@ document.addEventListener('DOMContentLoaded', function() {
       root.style.display = 'block';
       root.classList.add('visible');
       
-      // ⭐ MONTA REACT SOLO DOPO IL CLICK
-      ReactDOM.createRoot(root).render(<App />);
+      // ⭐ ASPETTA CHE REACT E I COMPONENTI SIANO CARICATI
+      setTimeout(function() {
+        try {
+          // Verifica che React sia disponibile
+          if (typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
+            ReactDOM.createRoot(root).render(React.createElement(App));
+          } else {
+            console.error('❌ React non caricato correttamente');
+            root.innerHTML = '<div style="color: #f39c12; text-align: center; padding: 50px;">⏳ Caricamento in corso...</div>';
+          }
+        } catch (err) {
+          console.error('❌ Errore durante il render:', err);
+          root.innerHTML = '<div style="color: #eb5757; text-align: center; padding: 50px;">❌ Errore: ' + err.message + '</div>';
+        }
+      }, 100);
     });
   }
 });
