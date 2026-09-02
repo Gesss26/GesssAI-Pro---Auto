@@ -6387,14 +6387,10 @@ function App() {
 }
 
 // ============================================================
-// AVVIA APP
+// AVVIA APP - ALTERNATIVA
 // ============================================================
 
 console.log('🚀 Avvio GesssAI-Pro - Caricamento da Excel...');
-
-// Svuota localStorage all'avvio per forzare il caricamento
-localStorage.removeItem('ft_matches');
-localStorage.removeItem('ft_champs');
 
 // Carica i dati
 loadScrapedData(true).then(data => {
@@ -6403,12 +6399,23 @@ loadScrapedData(true).then(data => {
     if (window.updateAppData) {
       window.updateAppData(data);
     }
-  } else {
-    console.warn('⚠️ Nessun dato caricato.');
   }
 });
 
-// ⭐ ASPETTA CHE TUTTI GLI SCRIPT SIANO CARICATI PRIMA DI MONTARE REACT
+// MONTA REACT IMMEDIATAMENTE (l'app è nascosta fino al click)
+try {
+  const root = document.getElementById('root');
+  if (root) {
+    // Nascondi root inizialmente
+    root.style.display = 'none';
+    ReactDOM.createRoot(root).render(React.createElement(App));
+    console.log('✅ React montato correttamente');
+  }
+} catch (err) {
+  console.error('❌ Errore mount React:', err);
+}
+
+// GESTISCE IL CLICK PER MOSTRARE L'APP
 document.addEventListener('DOMContentLoaded', function() {
   var splash = document.getElementById('splashscreen');
   var root = document.getElementById('root');
@@ -6416,33 +6423,9 @@ document.addEventListener('DOMContentLoaded', function() {
   
   if (splash && btn && root) {
     btn.addEventListener('click', function() {
-      // Nascondi lo splashscreen
       splash.style.display = 'none';
-      splash.style.opacity = '0';
-      splash.style.pointerEvents = 'none';
-      
-      // Mostra root
       root.style.display = 'block';
       root.classList.add('visible');
-      
-      // ⭐ ASPETTA CHE REACT E I COMPONENTI SIANO CARICATI
-      setTimeout(function() {
-        try {
-          // Verifica che React sia disponibile
-          if (typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
-            ReactDOM.createRoot(root).render(React.createElement(App));
-          } else {
-            console.error('❌ React non caricato correttamente');
-            root.innerHTML = '<div style="color: #f39c12; text-align: center; padding: 50px;">⏳ Caricamento in corso...</div>';
-          }
-        } catch (err) {
-          console.error('❌ Errore durante il render:', err);
-          root.innerHTML = '<div style="color: #eb5757; text-align: center; padding: 50px;">❌ Errore: ' + err.message + '</div>';
-        }
-      }, 100);
     });
   }
 });
-</script>
-</body>
-</html>
