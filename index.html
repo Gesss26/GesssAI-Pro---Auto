@@ -11,6 +11,7 @@
 <!-- CARICAMENTO METEO.JS -->
 <script type="text/javascript" src="meteo.js"></script>
 <script type="text/babel" src="schedina.js"></script>
+<script type="text/babel" src="quota3.js"></script>
 <style>
   /* ===== TUTTI GLI STILI ===== */
   :root {
@@ -99,6 +100,33 @@
   #splashscreen .splash-btn:active {
     transform: scale(0.95);
   }
+
+  /* PULSANTE SVUOTA LOCALSTORAGE */
+  #splashscreen .splash-btn-clear {
+    padding: 10px 30px;
+    background: transparent;
+    color: #eb5757;
+    font-weight: 600;
+    font-size: 14px;
+    border: 2px solid #eb5757;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 12px;
+    background: rgba(235, 87, 87, 0.05);
+  }
+  #splashscreen .splash-btn-clear:hover {
+    background: #eb5757;
+    color: #000;
+    transform: scale(1.05);
+    box-shadow: 0 4px 25px rgba(235, 87, 87, 0.4);
+  }
+  #splashscreen .splash-btn-clear:active {
+    transform: scale(0.95);
+  }
+
   #splashscreen .splash-sub {
     margin-top: 20px;
     color: #8b949e;
@@ -115,6 +143,10 @@
     #splashscreen .splash-btn {
       padding: 12px 32px;
       font-size: 17px;
+    }
+    #splashscreen .splash-btn-clear {
+      padding: 8px 20px;
+      font-size: 12px;
     }
     #splashscreen .splash-sub {
       font-size: 11px;
@@ -1149,6 +1181,7 @@
   <div class="splash-content">
     <img src="Splashscreen.png" alt="GesssAI-Pro" class="splash-logo" />
     <button class="splash-btn" id="splashBtn">Clikka per continuare</button>
+    <button class="splash-btn-clear" id="splashClearBtn">🗑️ Svuota Localstorage</button>
     <div class="splash-sub">v3.0 - Football Trader</div>
   </div>
 </div>
@@ -1161,8 +1194,10 @@ document.addEventListener('DOMContentLoaded', function() {
   var splash = document.getElementById('splashscreen');
   var root = document.getElementById('root');
   var btn = document.getElementById('splashBtn');
+  var clearBtn = document.getElementById('splashClearBtn');
   
   if (splash && btn && root) {
+    // Pulsante per continuare (mostra l'app)
     btn.addEventListener('click', function() {
       // Nascondi lo splashscreen
       splash.style.display = 'none';
@@ -1173,6 +1208,41 @@ document.addEventListener('DOMContentLoaded', function() {
       root.style.display = 'block';
       root.classList.add('visible');
     });
+    
+    // Pulsante per svuotare localStorage
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function(e) {
+        e.stopPropagation(); // Evita che il click si propaghi
+        
+        // Conferma prima di cancellare
+        if (confirm('⚠️ Sei sicuro di voler svuotare TUTTI i dati salvati localmente?\n\nQuesta azione cancellerà:\n• Tutte le partite\n• Tutti i campionati\n• Le impostazioni salvate\n\nI dati verranno ricaricati dal file Excel all\'avvio.')) {
+          // Svuota localStorage
+          localStorage.clear();
+          
+          // Feedback visivo
+          clearBtn.textContent = '✅ Localstorage svuotato!';
+          clearBtn.style.borderColor = '#6fcf97';
+          clearBtn.style.color = '#6fcf97';
+          clearBtn.style.background = 'rgba(111, 207, 151, 0.1)';
+          
+          // Mostra un messaggio di conferma
+          alert('✅ Localstorage svuotato con successo!\n\nI dati verranno ricaricati dal file Excel al prossimo avvio.');
+          
+          // Resetta il bottone dopo 3 secondi
+          setTimeout(function() {
+            clearBtn.textContent = '🗑️ Svuota Localstorage';
+            clearBtn.style.borderColor = '#eb5757';
+            clearBtn.style.color = '#eb5757';
+            clearBtn.style.background = 'rgba(235, 87, 87, 0.05)';
+          }, 3000);
+          
+          // Ricarica la pagina per applicare le modifiche
+          setTimeout(function() {
+            window.location.reload();
+          }, 500);
+        }
+      });
+    }
   }
 });
 </script>
@@ -1431,35 +1501,20 @@ const SETTINGS_TABS = ['Temi','Dati Locali','Importa Campionato','Giocate','Gran
 // ============================================================
 
 const CHAMPIONSHIP_COLORS = {
-  // ===== ARGENTINA =====
   'Liga Profesional Argentina': '#3498db',
-  
-  // ===== BELGIO =====
   'Jupiler Pro League': '#e74c3c',
-  
-  // ===== BRASILE =====
   'Brasileirão Serie A': '#2ecc71',
-  
-  // ===== GRECIA =====
   'Super League Grecia': '#2980b9',
-  
-  // ===== INGHILTERRA =====
   'Premier League': '#3498db',
   'Premier League GB': '#3498db',
   'English Premier League': '#3498db',
   'EPL': '#3498db',
   'EFL Championship': '#6c3483',
   'Championship': '#6c3483',
-  
-  // ===== FRANCIA =====
   'Ligue 1': '#9b59b6',
   'Ligue 2': '#8e44ad',
-  
-  // ===== GERMANIA =====
   'Bundesliga': '#f39c12',
   '2. Bundesliga': '#e67e22',
-  
-  // ===== ITALIA =====
   'Serie A': '#2ecc71',
   'Serie A TIM': '#2ecc71',
   'Serie A Enilive': '#2ecc71',
@@ -1467,42 +1522,23 @@ const CHAMPIONSHIP_COLORS = {
   'Serie C - Girone A': '#2980b9',
   'Serie C - Girone B': '#27ae60',
   'Serie C - Girone C': '#c0392b',
-  // 'Serie A Women' rimossa
-  
-  // ===== GIAPPONE =====
   'J1 League': '#e74c3c',
-  
-  // ===== PAESI BASSI =====
   'Eerste Divisie': '#e67e22',
   'Eredivisie': '#e74c3c',
-  
-  // ===== PORTOGALLO =====
   'Primeira Liga': '#34495e',
   'Liga Portugal': '#34495e',
-  
-  // ===== SCOZIA =====
   'Scottish Premiership': '#2ecc71',
   'Premiership': '#2ecc71',
-  
-  // ===== COREA DEL SUD =====
   'K League 1': '#3498db',
-  
-  // ===== SPAGNA =====
   'La Liga': '#e74c3c',
   'LaLiga': '#e74c3c',
   'Segunda División': '#e67e22',
-  
-  // ===== TURCHIA =====
   'Süper Lig': '#e67e22',
   'Super Lig': '#e67e22',
-  
-  // ===== USA/CANADA =====
   'Major League Soccer': '#3498db',
-  'MLS': '#3498db',
-  // 'NWSL' rimossa
+  'MLS': '#3498db'
 };
 
-// Lista dei 25 campionati (esclusa Serie A Woman e NWSL)
 const CHAMPIONSHIP_LIST = [
   'Liga Profesional Argentina',
   'Jupiler Pro League',
@@ -1705,134 +1741,43 @@ const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
   const getLeagueFolder = (champ) => {
     if (!champ) return '';
     
-  const map = {
-  // ============================================================
-  // ARGENTINA
-  // ============================================================
-  'Liga Profesional Argentina': 'Liga_Profesional',
-    
-  // ============================================================
-  // BELGIO
-  // ============================================================
-  'Jupiler Pro League': 'Jupiler_Pro_League',
-  
-  // ============================================================
-  // BRASILE
-  // ============================================================
-  'Brasileirão Serie A': 'Brasileirao_Serie_A',
-  'Serie A BR': 'Brasileirao_Serie_A',
-  
-  // ============================================================
-  // GRECIA
-  // ============================================================
-  'Super League Grecia': 'Super_League_Grecia',
-  'Super League GR': 'Super_League_Grecia',
-  
-  // ============================================================
-  // INGHILTERRA
-  // ============================================================
-  'Premier League': 'Premier_League',
-  'English Premier League': 'Premier_League',
-  'EPL': 'Premier_League',
-  'EFL Championship': 'Championship',
-  'Championship': 'Championship',
-  'League One': 'EFL_League_One',
-  'EFL League One': 'EFL_League_One',
-  'League Two': 'EFL_League_Two',
-  'EFL League Two': 'EFL_League_Two',
-  
-  // ============================================================
-  // FRANCIA
-  // ============================================================
-  'Ligue 1': 'Ligue_1',
-  'Ligue 2': 'Ligue_2',
-  
-  // ============================================================
-  // GERMANIA
-  // ============================================================
-  'Bundesliga': 'Bundesliga',
-  '2. Bundesliga': '2. Bundesliga',
-  
-  // ============================================================
-  // ITALIA
-  // ============================================================
-  'Serie A': 'Serie_A',
-  'Serie A TIM': 'Serie_A',
-  'Serie A Enilive': 'Serie_A',
-  'Serie A (Italia)': 'Serie_A',
-  'Serie A IT': 'Serie_A',
-  'Serie B': 'Serie_B',
-  'Serie B IT': 'Serie_B',
-  'Serie B (Italia)': 'Serie_B',
-  'Serie C - Girone A': 'Serie_C_Girone_A',
-  'Serie C - Girone B': 'Serie_C_Girone_B',
-  'Serie C - Girone C': 'Serie_C_Girone_C',
-  // 'Serie A Women' rimossa
-  
-  // ============================================================
-  // GIAPPONE
-  // ============================================================
-  'J1 League': 'J1_League',
-  
-  // ============================================================
-  // PAESI BASSI
-  // ============================================================
-  'Eredivisie': 'Eredivisie',
-  'Eerste Divisie': 'Eerste_Divisie',
-  
-  // ============================================================
-  // PORTOGALLO
-  // ============================================================
-  'Primeira Liga': 'Primeira_Liga',
-  'Liga Portugal': 'Primeira_Liga',
-  
-  // ============================================================
-  // SCOZIA
-  // ============================================================
-  'Scottish Premiership': 'Scottish_Premiership',
-  'Scottish Premier League': 'Scottish_Premiership',
-  'Premiership': 'Scottish_Premiership',
-  
-  // ============================================================
-  // COREA DEL SUD
-  // ============================================================
-  'K League 1': 'K_League_1',
-  'K League': 'K_League_1',
-  
-  // ============================================================
-  // SPAGNA
-  // ============================================================
-  'La Liga': 'La_Liga',
-  'LaLiga': 'La_Liga',
-  'Segunda División': 'Segunda_Division',
-  
-  // ============================================================
-  // TURCHIA
-  // ============================================================
-  'Süper Lig': 'Super_Lig',
-  'Super Lig': 'Super_Lig',
-  'Turkish Süper Lig': 'Super_Lig',
-  
-  // ============================================================
-  // USA / CANADA
-  // ============================================================
-  'Major League Soccer': 'MLS',
-  'MLS': 'MLS',
-  // 'NWSL' rimossa
-  
-  // ============================================================
-  // ALTRI CAMPIONATI (già presenti)
-  // ============================================================
-  'A-League': 'A-League_Men',
-  'A-League Men': 'A-League_Men',
-  'Allsvenskan': 'Allsvenskan',
-  'Eliteserien': 'Eliteserien',
-  'Danish Superliga': 'Danish_Superliga',
-  'Swiss Super League': 'Swiss_Super_League',
-  'Austrian Bundesliga': 'Austrian_Bundesliga',
-  'Russian Premier League': 'Russian_Premier_League',
-  'Liga MX': 'Liga_MX'
-};
+    const map = {
+      'Liga Profesional Argentina': 'Liga_Profesional',
+      'Jupiler Pro League': 'Jupiler_Pro_League',
+      'Brasileirão Serie A': 'Brasileirao_Serie_A',
+      'Super League Grecia': 'Super_League_Grecia',
+      'Premier League': 'Premier_League',
+      'English Premier League': 'Premier_League',
+      'EPL': 'Premier_League',
+      'EFL Championship': 'Championship',
+      'Championship': 'Championship',
+      'Ligue 1': 'Ligue_1',
+      'Ligue 2': 'Ligue_2',
+      'Bundesliga': 'Bundesliga',
+      '2. Bundesliga': '2. Bundesliga',
+      'Serie A': 'Serie_A',
+      'Serie A TIM': 'Serie_A',
+      'Serie A Enilive': 'Serie_A',
+      'Serie B': 'Serie_B',
+      'Serie C - Girone A': 'Serie_C_Girone_A',
+      'Serie C - Girone B': 'Serie_C_Girone_B',
+      'Serie C - Girone C': 'Serie_C_Girone_C',
+      'J1 League': 'J1_League',
+      'Eredivisie': 'Eredivisie',
+      'Eerste Divisie': 'Eerste_Divisie',
+      'Primeira Liga': 'Primeira_Liga',
+      'Liga Portugal': 'Primeira_Liga',
+      'Scottish Premiership': 'Scottish_Premiership',
+      'Premiership': 'Scottish_Premiership',
+      'K League 1': 'K_League_1',
+      'La Liga': 'La_Liga',
+      'LaLiga': 'La_Liga',
+      'Segunda División': 'Segunda_Division',
+      'Süper Lig': 'Super_Lig',
+      'Super Lig': 'Super_Lig',
+      'Major League Soccer': 'MLS',
+      'MLS': 'MLS'
+    };
     return map[champ] || champ.replace(/ /g, '_');
   };
   
@@ -2621,7 +2566,6 @@ const FamiglieSelector = ({ selectedFamiglie, setSelectedFamiglie, showAlert }) 
 // ============================================================
 
 const Quota3 = ({ showAlert }) => {
-  // Stato principale
   const [importoBase, setImportoBase] = useState(10);
   const [importoInput, setImportoInput] = useState(10);
   const [stepCorrente, setStepCorrente] = useState(0);
@@ -2632,7 +2576,6 @@ const Quota3 = ({ showAlert }) => {
   const [stepBloccato, setStepBloccato] = useState(false);
   const [riepilogo, setRiepilogo] = useState('');
 
-  // Avvia percorso
   const avviaPercorso = (importo) => {
     const val = parseFloat(importo) || 10;
     setImportoBase(val);
@@ -2658,7 +2601,6 @@ const Quota3 = ({ showAlert }) => {
     if (showAlert) showAlert('info', `💰 Nuovo percorso iniziato con €${val.toFixed(2)}`);
   };
 
-  // Gestione esito
   const gestisciEsito = (esito) => {
     if (!partitaCorrente || stepBloccato) return;
     if (stepCorrente >= 10) {
@@ -2732,7 +2674,6 @@ const Quota3 = ({ showAlert }) => {
     }
   };
 
-  // Reset
   const resetPercorso = () => {
     setPercorsoAttivo(false);
     setStepCorrente(0);
@@ -2745,7 +2686,6 @@ const Quota3 = ({ showAlert }) => {
     if (showAlert) showAlert('info', '🔄 Percorso resettato.');
   };
 
-  // Conferma importo
   const confermaImporto = () => {
     if (percorsoAttivo) {
       if (showAlert) showAlert('warning', '⚠️ Un percorso è già attivo.');
@@ -2796,7 +2736,6 @@ const Quota3 = ({ showAlert }) => {
     return null;
   };
 
-  // Griglia 10 step
   const renderGrid = () => {
     const rows = [];
     for (let i = 0; i < 10; i++) {
@@ -2928,11 +2867,10 @@ const Quota3 = ({ showAlert }) => {
   );
 };
 
-// Esponi il componente globalmente per poterlo usare nell'App
 window.Quota3 = Quota3;
 
 // ============================================================
-// COMPONENTE MATCH TAB CON LOGHI (continua)
+// COMPONENTE MATCH TAB CON LOGHI
 // ============================================================
 
 const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie, weatherData }) => {
@@ -3746,7 +3684,6 @@ const simulateMatches = (homeTeam, awayTeam, allMatches, numSimulations = 1000) 
 // ============================================================
 
 const generateSummary = (mc, match, allMatches) => {
-  // Calcola xG per le due squadre (dai dati reali)
   const homeForm = calcFormAndStats(allMatches, match.casa);
   const awayForm = calcFormAndStats(allMatches, match.ospiti);
   
@@ -3756,14 +3693,10 @@ const generateSummary = (mc, match, allMatches) => {
   const lambdaCasa = parseFloat(mc.lambdaCasa) || 0;
   const lambdaOspite = parseFloat(mc.lambdaOspite) || 0;
   
-  // Calcola differenze
   const diffLambda = lambdaCasa - lambdaOspite;
   const diffXG = xGCasa - xGOspite;
-  
-  // Determina se i dati sono affidabili
   const partiteAnalizzate = mc.partiteAnalizzate || 0;
   
-  // Determina quale metrica è più affidabile
   let metricaConsigliata = '';
   let motivazione = '';
   
@@ -3778,7 +3711,6 @@ const generateSummary = (mc, match, allMatches) => {
     motivazione = `✅ ${partiteAnalizzate} partite analizzate. I dati λ sono affidabili. Usali come base, confermali con xG.`;
   }
   
-  // Determina il favorito
   let favorito = '';
   let confidenza = '';
   
@@ -3801,7 +3733,6 @@ const generateSummary = (mc, match, allMatches) => {
     confidenza = 'ALTA';
   }
   
-  // Calcola previsione Over/Under
   const totaleLambda = lambdaCasa + lambdaOspite;
   const totaleXG = xGCasa + xGOspite;
   const totaleMedio = (totaleLambda + totaleXG) / 2;
@@ -3820,7 +3751,6 @@ const generateSummary = (mc, match, allMatches) => {
     overUnderPct = 'Alta probabilità (≈70%)';
   }
   
-  // Probabilità GG (entrambi segnano)
   const probCasaSegna = Math.min(1, lambdaCasa / 1.5);
   const probOspiteSegna = Math.min(1, lambdaOspite / 1.5);
   const probGG = Math.round((probCasaSegna * probOspiteSegna) * 100);
@@ -4237,11 +4167,7 @@ const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
         </div>
       )}
 
-      {/* ======================================== */}
-      {/* STATISTICHE CON SPIEGAZIONE */}
-      {/* ======================================== */}
       <div style={{marginTop: '16px', background: 'var(--surface)', borderRadius: '8px', border: '1px solid var(--border)', overflow: 'hidden'}}>
-        
         <div style={{
           padding: '14px 16px', 
           display: 'grid', 
@@ -4419,9 +4345,6 @@ const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
         </div>
       </div>
 
-      {/* ======================================== */}
-      {/* PANNELLO RIEPILOGO INTELLIGENTE */}
-      {/* ======================================== */}
       {(() => {
         const summary = generateSummary(mc, match, allMatches);
         
@@ -4434,8 +4357,6 @@ const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
             overflow: 'hidden',
             boxShadow: '0 4px 20px rgba(243, 156, 18, 0.15)'
           }}>
-            
-            {/* HEADER */}
             <div style={{
               background: 'var(--accent)',
               padding: '10px 16px',
@@ -4467,10 +4388,7 @@ const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
               </span>
             </div>
             
-            {/* CONTENUTO */}
             <div style={{padding: '14px 16px'}}>
-              
-              {/* AVVISO AFFIDABILITÀ */}
               <div style={{
                 padding: '8px 14px',
                 borderRadius: '6px',
@@ -4497,7 +4415,6 @@ const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
                 </div>
               </div>
               
-              {/* CONFRONTO xG vs λ */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
@@ -4565,7 +4482,6 @@ const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
                 </div>
               </div>
               
-              {/* VERDETTO FINALE */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -4607,7 +4523,6 @@ const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
                 </div>
               </div>
               
-              {/* RIEPILOGO NUMERI */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
@@ -4631,7 +4546,6 @@ const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
                 </div>
               </div>
               
-              {/* LEGENDA */}
               <div style={{
                 marginTop: '10px',
                 padding: '6px 12px',
@@ -4647,13 +4561,11 @@ const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
                 <span>⚠️ xG ≠ λ → Partita anomala, fidati di xG</span>
                 <span>📊 {summary.partiteAnalizzate} partite analizzate</span>
               </div>
-              
             </div>
           </div>
         );
       })()}
 
-      {/* LEGENDA COLORI */}
       <div style={{display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '8px', padding: '8px 12px', background: 'var(--surface)', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '11px'}}>
         <span style={{color: '#eb5757'}}>🔴 0% - 33,33%</span>
         <span style={{color: '#8b949e'}}>⚪ 33,34% - 66,66%</span>
@@ -5996,18 +5908,14 @@ function App() {
   });
   const [selectedFamiglie, setSelectedFamiglie] = useState(initial.selectedFamiglie || ['dc_under','mg_casa_ospite','over']);
   
-  // Stato per i filtri campionato (pulsanti)
   const [selectedChamps, setSelectedChamps] = useState(() => {
-    // Inizialmente tutti selezionati
     const allSelected = {};
     CHAMPIONSHIP_LIST.forEach(c => { allSelected[c] = true; });
     return allSelected;
   });
 
-  // Stato per i giorni (default 1 giorno)
   const [selectedGiorni, setSelectedGiorni] = useState(1);
 
-  // Funzione per gestire il toggle di un campionato
   const toggleChamp = (champName) => {
     setSelectedChamps(prev => ({
       ...prev,
@@ -6015,21 +5923,18 @@ function App() {
     }));
   };
 
-  // Funzione per selezionare tutti
   const selectAllChamps = () => {
     const allSelected = {};
     CHAMPIONSHIP_LIST.forEach(c => { allSelected[c] = true; });
     setSelectedChamps(allSelected);
   };
 
-  // Funzione per deselezionare tutti
   const clearAllChamps = () => {
     const allUnselected = {};
     CHAMPIONSHIP_LIST.forEach(c => { allUnselected[c] = false; });
     setSelectedChamps(allUnselected);
   };
 
-  // Funzione per ottenere i campionati attivi
   const getActiveChamps = () => {
     return Object.keys(selectedChamps).filter(c => selectedChamps[c]);
   };
@@ -6147,25 +6052,23 @@ function App() {
   // ============================================================
 
   const renderAppContent = () => {
-    // Funzione per disegnare i pulsanti giorni (usata sia in Palinsesto che in Schedina)
     const renderGiorniButtons = (selected, onChange) => {
-  const giorniOptions = [1, 2, 3, 4, 5];
-  return (
-    <div className="giorni-filters">
-      {giorniOptions.map(g => (
-        <button
-          key={g}
-          className={`giorno-btn ${selected === g ? 'active' : 'inactive'}`}
-          onClick={() => onChange(g)}
-        >
-          📅 {g} {g === 1 ? 'Giorno' : 'Giorni'}
-        </button>
-      ))}
-    </div>
-  );
-};
+      const giorniOptions = [1, 2, 3, 4, 5];
+      return (
+        <div className="giorni-filters">
+          {giorniOptions.map(g => (
+            <button
+              key={g}
+              className={`giorno-btn ${selected === g ? 'active' : 'inactive'}`}
+              onClick={() => onChange(g)}
+            >
+              📅 {g} {g === 1 ? 'Giorno' : 'Giorni'}
+            </button>
+          ))}
+        </div>
+      );
+    };
 
-    // Funzione per disegnare i pulsanti campionati (usata sia in Palinsesto che in Schedina)
     const renderChampFilters = (selectedChampsObj, onToggle, onSelectAll, onClearAll) => {
       const activeCount = Object.values(selectedChampsObj).filter(v => v).length;
       const total = Object.keys(selectedChampsObj).length;
@@ -6228,13 +6131,13 @@ function App() {
         </div>
 
         <div className="tabs-nav">
-  {MAIN_TABS.map(t => (
-    <button key={t} className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>
-      {t === 'Home' && '🏠 '}{t === 'Palinsesto' && '📅 '}{t === 'Statistiche' && '📊 '}
-      {t === 'Storico' && '📜 '}{t === 'Schedina' && '🎯 '}{t === 'Quota 3' && '🎯 '}{t === 'Impostazioni' && '⚙️ '}{t}
-    </button>
-  ))}
-</div>
+          {MAIN_TABS.map(t => (
+            <button key={t} className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>
+              {t === 'Home' && '🏠 '}{t === 'Palinsesto' && '📅 '}{t === 'Statistiche' && '📊 '}
+              {t === 'Storico' && '📜 '}{t === 'Schedina' && '🎯 '}{t === 'Quota 3' && '🎯 '}{t === 'Impostazioni' && '⚙️ '}{t}
+            </button>
+          ))}
+        </div>
 
         <div className="container">
           {message && <div className={`alert alert-${message.type}`}>{message.text}</div>}
@@ -6270,71 +6173,65 @@ function App() {
           )}
 
           {tab === 'Palinsesto' && (
-  <div>
-    <div style={{marginBottom: '12px'}}>
-      {/* PULSANTI GIORNI */}
-      {renderGiorniButtons(selectedGiorni, (val) => setSelectedGiorni(val))}
-      
-      {/* PULSANTI CAMPIONATI */}
-      {renderChampFilters(
-        selectedChamps,
-        toggleChamp,
-        selectAllChamps,
-        clearAllChamps
-      )}
-    </div>
-    
-    <h2 style={{marginBottom:'14px'}}>📅 Palinsesto - Prossimi {selectedGiorni} Giorno{selectedGiorni > 1 ? 'ni' : ''}</h2>
-    {(() => {
-      try {
-        const activeChamps = getActiveChamps();
-        const todayStr = getTodayStr();
-        // 🔥 CORRETTO: per 1 giorno mostra solo oggi, per più giorni da oggi a oggi+giorni-1
-        const maxDateStr = addDaysToDateStr(todayStr, selectedGiorni);
-        
-        let futureMatches = matches.filter(m => m.stato === 'Futura');
-        
-        // Filtra per campionati attivi
-        if (activeChamps.length > 0) {
-          futureMatches = futureMatches.filter(m => activeChamps.includes(m.campionato));
-        }
-        
-        // 🔥 FILTRO GIORNI CORRETTO
-        futureMatches = futureMatches.filter(m => {
-          if (!m.data) return false;
-          const normalized = normalizeDate(m.data);
-          if (!normalized) return false;
-          return normalized >= todayStr && normalized <= maxDateStr;
-        });
-        
-        futureMatches.sort((a, b) => {
-          const dateA = normalizeDate(a.data);
-          const dateB = normalizeDate(b.data);
-          if (!dateA || !dateB) return 0;
-          return dateA.localeCompare(dateB);
-        });
-        
-        if (futureMatches.length === 0) {
-          let msg = `Nessuna partita disponibile nelle prossime ${selectedGiorni} giornate`;
-          if (activeChamps.length > 0) {
-            msg += ` per i campionati selezionati (${activeChamps.length} selezionati)`;
-          }
-          return <div className="empty-state">{msg}.</div>;
-        }
-        
-        return <div className="matches-grid">{futureMatches.map(m => { 
-          const weatherKey = `${m.campionato}_${m.data}`; 
-          const weather = weatherCache[weatherKey] || null; 
-          return <MatchTab key={m.id} match={m} allMatches={matches} onSelect={selectMatch} selectedFamiglie={selectedFamiglie} weatherData={weather} />; 
-        })}</div>;
-        
-      } catch (e) { 
-        console.error('Errore rendering Palinsesto:', e); 
-        return <div className="empty-state">Errore nel caricamento delle partite: {e.message}</div>; 
-      }
-    })()}
-  </div>
-)}
+            <div>
+              <div style={{marginBottom: '12px'}}>
+                {renderGiorniButtons(selectedGiorni, (val) => setSelectedGiorni(val))}
+                {renderChampFilters(
+                  selectedChamps,
+                  toggleChamp,
+                  selectAllChamps,
+                  clearAllChamps
+                )}
+              </div>
+              
+              <h2 style={{marginBottom:'14px'}}>📅 Palinsesto - Prossimi {selectedGiorni} Giorno{selectedGiorni > 1 ? 'ni' : ''}</h2>
+              {(() => {
+                try {
+                  const activeChamps = getActiveChamps();
+                  const todayStr = getTodayStr();
+                  const maxDateStr = addDaysToDateStr(todayStr, selectedGiorni);
+                  
+                  let futureMatches = matches.filter(m => m.stato === 'Futura');
+                  
+                  if (activeChamps.length > 0) {
+                    futureMatches = futureMatches.filter(m => activeChamps.includes(m.campionato));
+                  }
+                  
+                  futureMatches = futureMatches.filter(m => {
+                    if (!m.data) return false;
+                    const normalized = normalizeDate(m.data);
+                    if (!normalized) return false;
+                    return normalized >= todayStr && normalized <= maxDateStr;
+                  });
+                  
+                  futureMatches.sort((a, b) => {
+                    const dateA = normalizeDate(a.data);
+                    const dateB = normalizeDate(b.data);
+                    if (!dateA || !dateB) return 0;
+                    return dateA.localeCompare(dateB);
+                  });
+                  
+                  if (futureMatches.length === 0) {
+                    let msg = `Nessuna partita disponibile nelle prossime ${selectedGiorni} giornate`;
+                    if (activeChamps.length > 0) {
+                      msg += ` per i campionati selezionati (${activeChamps.length} selezionati)`;
+                    }
+                    return <div className="empty-state">{msg}.</div>;
+                  }
+                  
+                  return <div className="matches-grid">{futureMatches.map(m => { 
+                    const weatherKey = `${m.campionato}_${m.data}`; 
+                    const weather = weatherCache[weatherKey] || null; 
+                    return <MatchTab key={m.id} match={m} allMatches={matches} onSelect={selectMatch} selectedFamiglie={selectedFamiglie} weatherData={weather} />; 
+                  })}</div>;
+                  
+                } catch (e) { 
+                  console.error('Errore rendering Palinsesto:', e); 
+                  return <div className="empty-state">Errore nel caricamento delle partite: {e.message}</div>; 
+                }
+              })()}
+            </div>
+          )}
 
           {tab === 'Statistiche' && (
             <div>
@@ -6386,7 +6283,6 @@ function App() {
                 <div>
                   {selectedMatch ? (
                     <div>
-                      {/* Meteo Professionale */}
                       {(() => {
                         const city = getCityForMatch(selectedMatch.casa, selectedMatch.campionato);
                         const weatherKey = `${selectedMatch.campionato}_${selectedMatch.data}`;
@@ -6394,14 +6290,12 @@ function App() {
                         return <WeatherProfessionale weatherData={weather} city={city} matchDate={selectedMatch.data} />;
                       })()}
                       
-                      {/* Simulazione Poisson+Monte Carlo */}
                       <AIAnalysis 
                         match={selectedMatch} 
                         allMatches={matches} 
                         selectedFamiglie={selectedFamiglie}
                       />
                       
-                      {/* Statistiche delle due squadre */}
                       <div className="analisi-compact" style={{marginTop: '16px'}}>
                         <div>
                           <RisultatiFrequenti teamName={selectedMatch.casa} allMatches={matches} />
@@ -6415,7 +6309,6 @@ function App() {
                         </div>
                       </div>
                       
-                      {/* Analisi Meteo */}
                       <AnalisiMeteo matches={matches} weatherCache={weatherCache} />
                     </div>
                   ) : (
@@ -6522,11 +6415,12 @@ function App() {
                   <div className="card">
                     <div style={{display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '12px'}}>
                       <button className="btn" onClick={saveLocal}>💾 Scarica Backup JSON</button>
+                      <label className="btn btn-secondary" style={{cursor: 'pointer'}}>
+                        📂 Carica Backup JSON
+                        <input type="file" accept=".json" onChange={(e) => e.target.files[0] && loadLocal(e.target.files[0])} style={{display: 'none'}} />
+                      </label>
                     </div>
                     <p style={{marginBottom:'12px'}}>I dati vengono salvati automaticamente in localStorage.</p>
-                    <hr style={{margin:'14px 0', borderColor:'var(--border)'}}/>
-                    <label style={{display:'block', marginBottom:'6px'}}>📂 Carica Backup JSON</label>
-                    <input type="file" accept=".json" onChange={e => e.target.files[0] && loadLocal(e.target.files[0])} />
                     <hr style={{margin:'14px 0', borderColor:'var(--border)'}}/>
                     <button className="btn btn-danger" onClick={() => { if (confirm('Vuoi davvero resettare TUTTI i dati?')) { localStorage.clear(); setChampionships([]); setMatches([]); showAlert('success', '🗑️ Dati resettati completamente.'); } }}>🗑️ Reset Completo</button>
                   </div>
@@ -6701,52 +6595,38 @@ function App() {
 }
 
 // ============================================================
-// AVVIA APP - MONTAGGIO IMMEDIATO
+// AVVIA APP
 // ============================================================
 
-console.log('🚀 Avvio GesssAI-Pro...');
+console.log('🚀 Avvio GesssAI-Pro - Caricamento da Excel...');
 
-// Svuota localStorage
-localStorage.removeItem('ft_matches');
-localStorage.removeItem('ft_champs');
+// ⭐ NON SVUOTARE LOCALSTORAGE ALL'AVVIO
+// localStorage.removeItem('ft_matches');  ← RIMOSSO
+// localStorage.removeItem('ft_champs');   ← RIMOSSO
 
-// Carica i dati
-loadScrapedData(true).then(data => {
+// Carica i dati SOLO SE non ci sono già in localStorage
+loadScrapedData(false).then(data => {
   if (data && data.matches && data.matches.length > 0) {
-    console.log(`✅ ${data.matches.length} partite caricate!`);
+    console.log(`✅ ${data.matches.length} partite caricate all'avvio!`);
     if (window.updateAppData) {
       window.updateAppData(data);
     }
+  } else {
+    console.warn('⚠️ Nessun dato caricato.');
   }
 });
 
-// ⭐ MONTA REACT SUBITO (l'app è nascosta fino al click)
+// ⭐ MONTA REACT IMMEDIATAMENTE (l'app è nascosta fino al click)
 try {
   const root = document.getElementById('root');
   if (root) {
     root.style.display = 'none';
     ReactDOM.createRoot(root).render(<App />);
-    console.log('✅ React montato');
+    console.log('✅ React montato correttamente');
   }
 } catch (err) {
-  console.error('❌ Errore:', err);
+  console.error('❌ Errore mount React:', err);
 }
-
-// GESTISCE IL CLICK
-document.addEventListener('DOMContentLoaded', function() {
-  var splash = document.getElementById('splashscreen');
-  var root = document.getElementById('root');
-  var btn = document.getElementById('splashBtn');
-  
-  if (splash && btn && root) {
-    btn.addEventListener('click', function() {
-      splash.style.display = 'none';
-      root.style.display = 'block';
-      root.classList.add('visible');
-    });
-  }
-});
-
 </script>
 </body>
 </html>
