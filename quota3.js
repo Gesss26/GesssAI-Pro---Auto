@@ -312,5 +312,6 @@ const Quota3 = ({ showAlert }) => {
   );
 };
 
+// Esponi il componente globalmente
 window.Quota3 = Quota3;
 console.log('✅ Quota3 caricato correttamente!');
