@@ -6392,7 +6392,7 @@ console.log('🚀 Avvio GesssAI-Pro - Caricamento da Excel...');
 localStorage.removeItem('ft_matches');
 localStorage.removeItem('ft_champs');
 
-// Carica il file Excel
+// Carica i dati
 loadScrapedData(true).then(data => {
   if (data && data.matches && data.matches.length > 0) {
     console.log(`✅ ${data.matches.length} partite caricate all'avvio!`);
@@ -6401,30 +6401,28 @@ loadScrapedData(true).then(data => {
     }
   } else {
     console.warn('⚠️ Nessun dato caricato.');
-    // Mostra un messaggio all'utente
-    const root = document.getElementById('root');
-    if (root) {
-      root.innerHTML = `
-        <div style="text-align: center; padding: 50px; color: #e6edf3; background: #0f1419; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-          <div style="font-size: 64px; margin-bottom: 20px;">📂</div>
-          <h2 style="color: #f39c12;">Caricamento dati...</h2>
-          <p style="color: #8b949e; max-width: 500px; margin: 20px auto;">
-            Il file <strong style="color: #e6edf3;">GesssAI_Input.xlsx</strong> non è stato trovato.
-          </p>
-          <p style="color: #8b949e; font-size: 14px;">
-            Il file deve contenere le colonne: <br>
-            <strong style="color: #e6edf3;">Campionato, Data, Squadra Casa, Squadra Ospite</strong>
-          </p>
-          <button onclick="window.location.reload()" style="margin-top: 20px; padding: 12px 30px; background: #f39c12; color: #000; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer;">
-            🔄 Ricarica
-          </button>
-        </div>
-      `;
-    }
   }
 });
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-</script>
-</body>
-</html>
+// ⭐ ASPETTA CHE L'UTENTE CLICCHI SUL PULSANTE PRIMA DI MONTARE REACT
+document.addEventListener('DOMContentLoaded', function() {
+  var splash = document.getElementById('splashscreen');
+  var root = document.getElementById('root');
+  var btn = document.getElementById('splashBtn');
+  
+  if (splash && btn && root) {
+    btn.addEventListener('click', function() {
+      // Nascondi lo splashscreen
+      splash.style.display = 'none';
+      splash.style.opacity = '0';
+      splash.style.pointerEvents = 'none';
+      
+      // Mostra root
+      root.style.display = 'block';
+      root.classList.add('visible');
+      
+      // ⭐ MONTA REACT SOLO DOPO IL CLICK
+      ReactDOM.createRoot(root).render(<App />);
+    });
+  }
+});
