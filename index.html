@@ -11,6 +11,7 @@
 <!-- CARICAMENTO METEO.JS -->
 <script type="text/javascript" src="meteo.js"></script>
 <script type="text/babel" src="schedina.js"></script>
+<script type="text/babel" src="quota3.js"></script>
 <style>
   /* ===== TUTTI GLI STILI ===== */
   :root {
@@ -1420,7 +1421,7 @@ const THEMES = {
   'Calcio': { bg:'#1b5e20', surface:'#2e7d32', card:'#388e3c', banner:'#2e7d32', text:'#fff', textMuted:'#ffff00', accent:'#ffc107', accent2:'#ff9800', border:'#1b5e20', tabActive:'#ffc107' },
 };
 
-const MAIN_TABS = ['Home','Palinsesto','Statistiche','Storico','Schedina','Impostazioni'];
+const MAIN_TABS = ['Home','Palinsesto','Statistiche','Storico','Schedina','Quota 3','Impostazioni'];
 const SETTINGS_TABS = ['Temi','Dati Locali','Importa Campionato','Giocate','Grandezza Caratteri','Città Meteo','Visuale'];
 
 // ============================================================
@@ -5910,13 +5911,13 @@ function App() {
         </div>
 
         <div className="tabs-nav">
-          {MAIN_TABS.map(t => (
-            <button key={t} className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>
-              {t === 'Home' && '🏠 '}{t === 'Palinsesto' && '📅 '}{t === 'Statistiche' && '📊 '}
-              {t === 'Storico' && '📜 '}{t === 'Schedina' && '🎯 '}{t === 'Impostazioni' && '⚙️ '}{t}
-            </button>
-          ))}
-        </div>
+  {MAIN_TABS.map(t => (
+    <button key={t} className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>
+      {t === 'Home' && '🏠 '}{t === 'Palinsesto' && '📅 '}{t === 'Statistiche' && '📊 '}
+      {t === 'Storico' && '📜 '}{t === 'Schedina' && '🎯 '}{t === 'Quota 3' && '🎯 '}{t === 'Impostazioni' && '⚙️ '}{t}
+    </button>
+  ))}
+</div>
 
         <div className="container">
           {message && <div className={`alert alert-${message.type}`}>{message.text}</div>}
@@ -6180,6 +6181,8 @@ function App() {
               )}
             </div>
           )}
+
+          {tab === 'Quota 3' && <Quota3 showAlert={showAlert} />}  
 
           {tab === 'Impostazioni' && (
             <div>
