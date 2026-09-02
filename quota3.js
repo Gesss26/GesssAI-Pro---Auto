@@ -1,87 +1,22 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>GesssAI-Pro v3.0 • Quota 3</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
-  body { background: #0f1419; color: #e6edf3; padding: 20px; }
-  .container { max-width: 1100px; margin: 0 auto; }
-  .card { background: #232b36; border: 1px solid #30363d; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
-  .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
-  .col { flex: 1; min-width: 180px; }
-  label { font-weight: 600; color: #ffff00; display: block; margin-bottom: 4px; font-size: 14px; }
-  input, button { border-radius: 10px; border: none; padding: 12px 16px; font-size: 16px; }
-  input { background: #1a2028; color: #e6edf3; border: 1px solid #30363d; width: 100%; max-width: 220px; }
-  input:focus { outline: 2px solid #f39c12; }
-  .btn { background: #f39c12; color: #000; font-weight: 700; cursor: pointer; transition: 0.2s; border: none; padding: 12px 28px; border-radius: 40px; font-size: 16px; }
-  .btn:hover { background: #e67e22; transform: scale(1.02); }
-  .btn:active { transform: scale(0.97); }
-  .btn-secondary { background: #2c3642; color: #e6edf3; }
-  .btn-secondary:hover { background: #3b4757; }
-  .btn-success { background: #6fcf97; color: #000; }
-  .btn-danger { background: #eb5757; color: #fff; }
-  .btn-sm { padding: 6px 14px; font-size: 14px; }
-  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  .grid { display: grid; grid-template-columns: 60px 120px 100px 110px 120px 140px; gap: 6px 12px; align-items: center; font-size: 14px; margin: 16px 0; }
-  .grid-header { font-weight: 700; color: #ffff00; border-bottom: 2px solid #30363d; padding-bottom: 8px; margin-bottom: 6px; }
-  .grid-item { padding: 6px 4px; border-bottom: 1px solid #30363d; }
-  .status-badge { display: inline-block; padding: 4px 12px; border-radius: 30px; font-weight: 700; font-size: 13px; }
-  .status-win { background: #6fcf97; color: #000; }
-  .status-loss { background: #eb5757; color: #fff; }
-  .status-pending { background: #f2c94c; color: #000; }
-  .deposit-box { background: #1a2028; border-radius: 12px; padding: 16px 20px; border-left: 6px solid #f39c12; margin: 16px 0; }
-  .summary { background: #1a2028; border-radius: 12px; padding: 16px 20px; border: 1px solid #30363d; margin-top: 16px; }
-  .summary p { margin: 6px 0; }
-  .flex { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-  .mt-12 { margin-top: 12px; }
-  .mb-8 { margin-bottom: 8px; }
-  .text-muted { color: #8b949e; }
-  .text-accent { color: #f39c12; }
-  .text-win { color: #6fcf97; }
-  .text-loss { color: #eb5757; }
-  .hidden { display: none; }
-  .tab-bar { display: flex; gap: 4px; background: #1a2028; padding: 6px; border-radius: 14px; margin-bottom: 28px; flex-wrap: wrap; }
-  .tab-btn { background: transparent; border: none; padding: 12px 24px; color: #8b949e; font-weight: 600; border-radius: 10px; cursor: pointer; transition: 0.2s; font-size: 15px; }
-  .tab-btn.active { background: #f39c12; color: #000; }
-  .tab-btn:hover { background: #2c3642; color: #fff; }
-
-  /* tolgo l'aurea quadrata d'oro intorno al logo */
-  .splash-logo { border: none !important; box-shadow: none !important; outline: none !important; }
-  .logo-wrapper { border: none !important; box-shadow: none !important; }
-</style>
-</head>
-<body>
-
-<div id="root"></div>
-
-<!-- React, Babel, XLSX -->
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-<script type="text/babel">
 // ============================================================
 // COMPONENTE QUOTA 3 (STANDALONE)
 // ============================================================
+
+const { useState } = React;
 
 const Quota3 = ({ showAlert }) => {
   // Stato principale
   const [importoBase, setImportoBase] = useState(10);
   const [importoInput, setImportoInput] = useState(10);
-  const [stepCorrente, setStepCorrente] = useState(0);          // 0..9
-  const [storico, setStorico] = useState([]);                  // array { step, importo, quota, vincita, deposito, esito }
+  const [stepCorrente, setStepCorrente] = useState(0);
+  const [storico, setStorico] = useState([]);
   const [depositoTotale, setDepositoTotale] = useState(0);
   const [percorsoAttivo, setPercorsoAttivo] = useState(false);
-  const [partitaCorrente, setPartitaCorrente] = useState(null); // { importo, quota, vincita, deposito, esito }
-  const [stepBloccato, setStepBloccato] = useState(false);      // attesa esito
-
-  // Riepilogo per visualizzazione sotto griglia
+  const [partitaCorrente, setPartitaCorrente] = useState(null);
+  const [stepBloccato, setStepBloccato] = useState(false);
   const [riepilogo, setRiepilogo] = useState('');
 
-  // Funzione per iniziare un nuovo percorso
+  // Avvia percorso
   const avviaPercorso = (importo) => {
     const val = parseFloat(importo) || 10;
     setImportoBase(val);
@@ -93,7 +28,7 @@ const Quota3 = ({ showAlert }) => {
     setStepBloccato(false);
     setPartitaCorrente(null);
     setRiepilogo('');
-    // Crea il primo step
+    
     const primo = {
       step: 1,
       importo: val,
@@ -107,11 +42,11 @@ const Quota3 = ({ showAlert }) => {
     if (showAlert) showAlert('info', `💰 Nuovo percorso iniziato con €${val.toFixed(2)}`);
   };
 
-  // Gestione esito: Vinta o Persa
+  // Gestione esito
   const gestisciEsito = (esito) => {
     if (!partitaCorrente || stepBloccato) return;
     if (stepCorrente >= 10) {
-      setRiepilogo('🏁 Percorso completato (10 step massimi). Puoi iniziare un nuovo percorso.');
+      setRiepilogo('🏁 Percorso completato (10 step massimi).');
       setPercorsoAttivo(false);
       return;
     }
@@ -121,17 +56,12 @@ const Quota3 = ({ showAlert }) => {
     let depositoAggiunto = 0;
     let nuovoImporto = 0;
     let nuovoStorico = [...storico];
-    let esitoLabel = '';
 
     if (esito === 'vinta') {
-      // Vincita = quota intera, 1/3 va in deposito, 2/3 per lo step successivo
-      const vincita = quota; // importo * 3
+      const vincita = quota;
       depositoAggiunto = vincita / 3;
-      nuovoImporto = (vincita * 2) / 3; // 2/3 della vincita
-      esitoLabel = '✅ Vinta';
-      // Aggiorna deposito
-      setDepositoTotale(prev => prev + depositoAggiunto);
-      // Registra nello storico
+      nuovoImporto = (vincita * 2) / 3;
+      
       const record = {
         step: stepCorrente + 1,
         importo: importo,
@@ -142,19 +72,18 @@ const Quota3 = ({ showAlert }) => {
       };
       nuovoStorico.push(record);
       setStorico(nuovoStorico);
+      setDepositoTotale(prev => prev + depositoAggiunto);
 
-      // Se abbiamo raggiunto 10 step, fine
       if (stepCorrente + 1 >= 10) {
         setStepCorrente(9);
         setPartitaCorrente(null);
         setStepBloccato(true);
         setPercorsoAttivo(false);
-        setRiepilogo(`🏁 Percorso completato! Deposito totale: €${(depositoTotale + depositoAggiunto).toFixed(2)}. Hai vinto tutti gli step.`);
+        setRiepilogo(`🏁 Percorso completato! Deposito totale: €${(depositoTotale + depositoAggiunto).toFixed(2)}.`);
         if (showAlert) showAlert('success', `🎉 Percorso completato! Deposito: €${(depositoTotale + depositoAggiunto).toFixed(2)}`);
         return;
       }
 
-      // Prossimo step
       const nuovoStep = stepCorrente + 1;
       setStepCorrente(nuovoStep);
       setPartitaCorrente({
@@ -166,11 +95,9 @@ const Quota3 = ({ showAlert }) => {
         esito: 'in corso'
       });
       setStepBloccato(false);
-      setRiepilogo(`✅ Step ${nuovoStep+1}: importo €${nuovoImporto.toFixed(2)}, quota €${(nuovoImporto*3).toFixed(2)}. In attesa di esito. Deposito +€${depositoAggiunto.toFixed(2)}`);
+      setRiepilogo(`✅ Step ${nuovoStep+1}: importo €${nuovoImporto.toFixed(2)}, quota €${(nuovoImporto*3).toFixed(2)}. Deposito +€${depositoAggiunto.toFixed(2)}`);
       if (showAlert) showAlert('success', `✅ Step vinto! Prossimo importo: €${nuovoImporto.toFixed(2)}`);
-    } else if (esito === 'persa') {
-      // Persa: si ferma il percorso, chiede se ricominciare
-      esitoLabel = '❌ Persa';
+    } else {
       const record = {
         step: stepCorrente + 1,
         importo: importo,
@@ -184,12 +111,12 @@ const Quota3 = ({ showAlert }) => {
       setStepBloccato(true);
       setPercorsoAttivo(false);
       setPartitaCorrente(null);
-      setRiepilogo(`❌ Step ${stepCorrente+1} perso. Percorso terminato. Deposito totale: €${depositoTotale.toFixed(2)}. Vuoi ricominciare?`);
+      setRiepilogo(`❌ Step ${stepCorrente+1} perso. Deposito totale: €${depositoTotale.toFixed(2)}. Vuoi ricominciare?`);
       if (showAlert) showAlert('error', `❌ Step perso! Deposito finale: €${depositoTotale.toFixed(2)}`);
     }
   };
 
-  // Reset / ricomincia
+  // Reset
   const resetPercorso = () => {
     setPercorsoAttivo(false);
     setStepCorrente(0);
@@ -199,13 +126,13 @@ const Quota3 = ({ showAlert }) => {
     setStepBloccato(false);
     setRiepilogo('');
     setImportoInput(importoBase);
-    if (showAlert) showAlert('info', '🔄 Percorso resettato. Imposta un nuovo importo e clicca "Conferma".');
+    if (showAlert) showAlert('info', '🔄 Percorso resettato.');
   };
 
-  // Conferma importo iniziale
+  // Conferma importo
   const confermaImporto = () => {
     if (percorsoAttivo) {
-      if (showAlert) showAlert('warning', '⚠️ Un percorso è già attivo. Resetta o completa prima.');
+      if (showAlert) showAlert('warning', '⚠️ Un percorso è già attivo.');
       return;
     }
     const val = parseFloat(importoInput) || 10;
@@ -216,7 +143,6 @@ const Quota3 = ({ showAlert }) => {
     avviaPercorso(val);
   };
 
-  // Render step attuale
   const renderStepAttuale = () => {
     if (!percorsoAttivo && !partitaCorrente && stepCorrente === 0) {
       return <div className="text-muted">Nessun percorso attivo. Imposta importo e clicca "Conferma".</div>;
@@ -224,16 +150,16 @@ const Quota3 = ({ showAlert }) => {
     if (partitaCorrente && !stepBloccato) {
       const p = partitaCorrente;
       return (
-        <div className="deposit-box">
-          <div className="flex" style={{justifyContent: 'space-between'}}>
+        <div style={{background: '#1a2028', borderRadius: '12px', padding: '16px 20px', borderLeft: '6px solid #f39c12', margin: '16px 0'}}>
+          <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center'}}>
             <div>
               <strong style={{color: '#ffff00'}}>Step {p.step || stepCorrente+1}</strong>
               <div>Importo: €{p.importo.toFixed(2)}</div>
               <div>Quota (x3): €{p.quota.toFixed(2)}</div>
             </div>
-            <div className="btn-group">
-              <button className="btn btn-success btn-sm" onClick={() => gestisciEsito('vinta')}>✅ Vinta</button>
-              <button className="btn btn-danger btn-sm" onClick={() => gestisciEsito('persa')}>❌ Persa</button>
+            <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
+              <button className="btn btn-success" style={{padding: '6px 14px', fontSize: '14px'}} onClick={() => gestisciEsito('vinta')}>✅ Vinta</button>
+              <button className="btn btn-danger" style={{padding: '6px 14px', fontSize: '14px'}} onClick={() => gestisciEsito('persa')}>❌ Persa</button>
             </div>
           </div>
         </div>
@@ -241,12 +167,12 @@ const Quota3 = ({ showAlert }) => {
     }
     if (stepBloccato || !percorsoAttivo) {
       return (
-        <div className="deposit-box" style={{borderLeftColor: '#eb5757'}}>
+        <div style={{background: '#1a2028', borderRadius: '12px', padding: '16px 20px', borderLeft: '6px solid #eb5757', margin: '16px 0'}}>
           <p><strong>Percorso terminato</strong> (step {stepCorrente+1}/10)</p>
           <p>Deposito totale: €{depositoTotale.toFixed(2)}</p>
-          <div className="btn-group mt-12">
-            <button className="btn btn-success btn-sm" onClick={() => avviaPercorso(importoBase)}>✅ Sì, ricomincia</button>
-            <button className="btn btn-secondary btn-sm" onClick={resetPercorso}>❌ No, ferma</button>
+          <div style={{display: 'flex', gap: '8px', marginTop: '12px'}}>
+            <button className="btn btn-success" style={{padding: '6px 14px', fontSize: '14px'}} onClick={() => avviaPercorso(importoBase)}>✅ Sì, ricomincia</button>
+            <button className="btn btn-secondary" style={{padding: '6px 14px', fontSize: '14px'}} onClick={resetPercorso}>❌ No, ferma</button>
           </div>
         </div>
       );
@@ -279,51 +205,48 @@ const Quota3 = ({ showAlert }) => {
 
       let checkCell = '';
       if (storicoItem) {
-        if (storicoItem.esito === 'vinta') checkCell = <span className="status-badge status-win">✅ Vinta</span>;
-        else if (storicoItem.esito === 'persa') checkCell = <span className="status-badge status-loss">❌ Persa</span>;
-        else checkCell = <span className="status-badge status-pending">⏳</span>;
+        if (storicoItem.esito === 'vinta') checkCell = <span style={{background: '#6fcf97', color: '#000', padding: '4px 12px', borderRadius: '30px', fontWeight: 'bold', fontSize: '13px'}}>✅ Vinta</span>;
+        else if (storicoItem.esito === 'persa') checkCell = <span style={{background: '#eb5757', color: '#fff', padding: '4px 12px', borderRadius: '30px', fontWeight: 'bold', fontSize: '13px'}}>❌ Persa</span>;
+        else checkCell = <span style={{background: '#f2c94c', color: '#000', padding: '4px 12px', borderRadius: '30px', fontWeight: 'bold', fontSize: '13px'}}>⏳</span>;
       } else if (i === stepCorrente && partitaCorrente && !stepBloccato) {
         checkCell = (
-          <span className="btn-group" style={{gap: '4px'}}>
-            <button className="btn btn-success btn-sm" style={{padding: '4px 10px', fontSize: '12px'}} onClick={() => gestisciEsito('vinta')}>✅</button>
-            <button className="btn btn-danger btn-sm" style={{padding: '4px 10px', fontSize: '12px'}} onClick={() => gestisciEsito('persa')}>❌</button>
+          <span style={{display: 'flex', gap: '4px'}}>
+            <button className="btn btn-success" style={{padding: '4px 10px', fontSize: '12px'}} onClick={() => gestisciEsito('vinta')}>✅</button>
+            <button className="btn btn-danger" style={{padding: '4px 10px', fontSize: '12px'}} onClick={() => gestisciEsito('persa')}>❌</button>
           </span>
         );
-      } else if (i === stepCorrente && stepBloccato) {
-        checkCell = <span className="status-badge status-pending">⏳</span>;
       } else {
         checkCell = <span className="text-muted">-</span>;
       }
 
       rows.push(
-        <div key={i} className="grid-item">
+        <div key={i} style={{padding: '8px 4px', borderBottom: '1px solid #30363d'}}>
           <span style={{fontWeight: 700, color: i === stepCorrente ? '#f39c12' : '#e6edf3'}}>{i+1}</span>
         </div>,
-        <div key={`imp-${i}`} className="grid-item">{importo}</div>,
-        <div key={`quota-${i}`} className="grid-item">{quota}</div>,
-        <div key={`dep-${i}`} className="grid-item">{deposito}</div>,
-        <div key={`check-${i}`} className="grid-item">{checkCell}</div>
+        <div key={`imp-${i}`} style={{padding: '8px 4px', borderBottom: '1px solid #30363d'}}>{importo}</div>,
+        <div key={`quota-${i}`} style={{padding: '8px 4px', borderBottom: '1px solid #30363d'}}>{quota}</div>,
+        <div key={`dep-${i}`} style={{padding: '8px 4px', borderBottom: '1px solid #30363d'}}>{deposito}</div>,
+        <div key={`check-${i}`} style={{padding: '8px 4px', borderBottom: '1px solid #30363d'}}>{checkCell}</div>
       );
     }
-    // Aggiungo anche la colonna "Data" fittizia (la nascondo visivamente ma tengo struttura)
     return (
-      <>
-        <div className="grid-header" style={{gridColumn: '1 / 2'}}>Step</div>
-        <div className="grid-header" style={{gridColumn: '2 / 3'}}>Importo</div>
-        <div className="grid-header" style={{gridColumn: '3 / 4'}}>Quota (x3)</div>
-        <div className="grid-header" style={{gridColumn: '4 / 5'}}>Deposito</div>
-        <div className="grid-header" style={{gridColumn: '5 / 6'}}>Check</div>
+      <div style={{display: 'grid', gridTemplateColumns: '60px 120px 110px 120px 140px', gap: '6px 12px', fontSize: '14px', margin: '16px 0'}}>
+        <div style={{fontWeight: 700, color: '#ffff00', borderBottom: '2px solid #30363d', paddingBottom: '8px'}}>Step</div>
+        <div style={{fontWeight: 700, color: '#ffff00', borderBottom: '2px solid #30363d', paddingBottom: '8px'}}>Importo</div>
+        <div style={{fontWeight: 700, color: '#ffff00', borderBottom: '2px solid #30363d', paddingBottom: '8px'}}>Quota (x3)</div>
+        <div style={{fontWeight: 700, color: '#ffff00', borderBottom: '2px solid #30363d', paddingBottom: '8px'}}>Deposito</div>
+        <div style={{fontWeight: 700, color: '#ffff00', borderBottom: '2px solid #30363d', paddingBottom: '8px'}}>Check</div>
         {rows}
-      </>
+      </div>
     );
   };
 
   return (
     <div>
       <div className="card">
-        <div className="row">
-          <div className="col">
-            <label>💰 Importo iniziale (€)</label>
+        <div style={{display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'flex-end'}}>
+          <div style={{flex: 1, minWidth: '180px'}}>
+            <label style={{fontWeight: 600, color: '#ffff00', display: 'block', marginBottom: '4px', fontSize: '14px'}}>💰 Importo iniziale (€)</label>
             <input 
               type="number" 
               min="1" 
@@ -331,15 +254,16 @@ const Quota3 = ({ showAlert }) => {
               value={importoInput} 
               onChange={(e) => setImportoInput(e.target.value)}
               disabled={percorsoAttivo}
+              style={{width: '100%', maxWidth: '220px', padding: '12px 16px', background: '#1a2028', color: '#e6edf3', border: '1px solid #30363d', borderRadius: '10px', fontSize: '16px'}}
             />
           </div>
-          <div className="col" style={{display: 'flex', alignItems: 'flex-end'}}>
-            <button className="btn" onClick={confermaImporto} disabled={percorsoAttivo}>
+          <div>
+            <button className="btn" onClick={confermaImporto} disabled={percorsoAttivo} style={{padding: '12px 28px'}}>
               {percorsoAttivo ? '⏳ In corso...' : 'Conferma'}
             </button>
           </div>
-          <div className="col" style={{textAlign: 'right'}}>
-            <button className="btn btn-secondary" onClick={resetPercorso}>🔄 Reset</button>
+          <div>
+            <button className="btn btn-secondary" onClick={resetPercorso} style={{padding: '12px 28px'}}>🔄 Reset</button>
           </div>
         </div>
       </div>
@@ -347,26 +271,24 @@ const Quota3 = ({ showAlert }) => {
       <div className="card">
         <h3 style={{color: '#ffff00', marginBottom: '12px'}}>📊 Step (max 10)</h3>
         <div style={{overflowX: 'auto'}}>
-          <div className="grid" style={{gridTemplateColumns: '60px 120px 110px 120px 140px'}}>
-            {renderGrid()}
-          </div>
+          {renderGrid()}
         </div>
       </div>
 
       <div className="card">
-        <div className="row">
-          <div className="col">
+        <div style={{display: 'flex', flexWrap: 'wrap', gap: '16px'}}>
+          <div style={{flex: 1, minWidth: '200px'}}>
             <h4 style={{color: '#f39c12'}}>📈 Stato percorso</h4>
             {renderStepAttuale()}
           </div>
-          <div className="col" style={{minWidth: '200px'}}>
+          <div style={{minWidth: '180px'}}>
             <h4 style={{color: '#f39c12'}}>💰 Deposito totale</h4>
             <div style={{fontSize: '28px', fontWeight: 'bold', color: '#6fcf97'}}>€{depositoTotale.toFixed(2)}</div>
           </div>
         </div>
 
         {riepilogo && (
-          <div className="summary">
+          <div style={{background: '#1a2028', borderRadius: '12px', padding: '16px 20px', border: '1px solid #30363d', marginTop: '16px'}}>
             <p style={{color: '#e6edf3'}}><strong>📋 Riepilogo</strong></p>
             <p>{riepilogo}</p>
             {storico.length > 0 && (
@@ -390,44 +312,5 @@ const Quota3 = ({ showAlert }) => {
   );
 };
 
-// ============================================================
-// APP PRINCIPALE (con TAB + Quota 3)
-// ============================================================
-
-const App = () => {
-  const [tab, setTab] = useState('Quota 3');
-
-  // Splash e logo rimossi (non richiesti)
-
-  return (
-    <div className="container">
-      <div style={{marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px'}}>
-        <h1 style={{color: '#f39c12', fontSize: '28px', letterSpacing: '1px'}}>GesssAI-Pro v3.0</h1>
-        <span style={{background: '#1a2028', padding: '4px 16px', borderRadius: '30px', color: '#ffff00', fontSize: '14px'}}>Quota 3</span>
-      </div>
-
-      <div className="tab-bar">
-        <button className={`tab-btn ${tab === 'Quota 3' ? 'active' : ''}`} onClick={() => setTab('Quota 3')}>🎯 Quota 3</button>
-        <button className="tab-btn" onClick={() => setTab('Palinsesto')}>📅 Palinsesto</button>
-        <button className="tab-btn" onClick={() => setTab('Statistiche')}>📊 Statistiche</button>
-        <button className="tab-btn" onClick={() => setTab('Schedina')}>🎯 Schedina</button>
-        <button className="tab-btn" onClick={() => setTab('Impostazioni')}>⚙️ Impostazioni</button>
-      </div>
-
-      {tab === 'Quota 3' && <Quota3 showAlert={(type, msg) => console.log(type, msg)} />}
-      {tab !== 'Quota 3' && (
-        <div className="card" style={{textAlign: 'center', padding: '60px 20px', color: '#8b949e'}}>
-          <div style={{fontSize: '48px'}}>📂</div>
-          <p style={{fontSize: '18px', marginTop: '12px'}}>Modulo <strong>{tab}</strong> in fase di caricamento...</p>
-          <p style={{fontSize: '14px'}}>Le funzionalità complete sono disponibili nella tab <strong>Quota 3</strong>.</p>
-        </div>
-      )}
-    </div>
-  );
-};
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-</script>
-
-</body>
-</html>
+window.Quota3 = Quota3;
+console.log('✅ Quota3 caricato correttamente!');
