@@ -10,7 +10,7 @@
     // ============================================================
     const styles = `
         .quota3-container {
-            max-width: 900px;
+            max-width: 100%;
             margin: 0 auto;
             padding: 0;
         }
@@ -189,13 +189,15 @@
         .quota3-container .grid-container {
             overflow-x: auto;
             margin: 12px 0;
+            width: 100%;
         }
         .quota3-container .grid {
             display: grid;
-            grid-template-columns: 60px 120px 110px 120px 150px;
+            grid-template-columns: 60px 110px 100px 100px 1fr;
             gap: 6px 12px;
             font-size: 14px;
-            min-width: 560px;
+            min-width: 480px;
+            width: 100%;
         }
         .quota3-container .grid-header {
             font-weight: 700;
@@ -333,11 +335,12 @@
             color: #f39c12;
             font-weight: bold;
         }
+
         @media (max-width: 768px) {
             .quota3-container .grid {
-                grid-template-columns: 50px 100px 90px 100px 130px;
+                grid-template-columns: 50px 90px 80px 80px 1fr;
                 font-size: 12px;
-                min-width: 470px;
+                min-width: 390px;
             }
             .quota3-container .card {
                 padding: 14px;
@@ -362,20 +365,21 @@
                 justify-content: center;
             }
         }
+
         @media (max-width: 500px) {
             .quota3-container .grid {
-                grid-template-columns: 40px 80px 70px 80px 110px;
+                grid-template-columns: 40px 70px 60px 60px 1fr;
                 font-size: 11px;
-                min-width: 380px;
-                gap: 4px 8px;
+                min-width: 310px;
+                gap: 4px 6px;
             }
             .quota3-container .grid-item {
                 padding: 6px 2px;
                 min-height: 36px;
             }
             .quota3-container .badge {
-                font-size: 11px;
-                padding: 2px 8px;
+                font-size: 10px;
+                padding: 2px 6px;
             }
             .quota3-container .deposit-display {
                 font-size: 22px;
@@ -470,52 +474,60 @@
         const gridContainer = containerElement.querySelector('#gridContainer');
         if (!gridContainer) return;
 
-        const rows = [];
-        // Costruiamo un array di 10 righe (una per step)
+        // Costruiamo le righe della griglia come in quota3.html
+        let html = '';
+        
+        // Header
+        html += `
+            <div class="grid-header">Step</div>
+            <div class="grid-header">Importo</div>
+            <div class="grid-header">Quota (x3)</div>
+            <div class="grid-header">Deposito</div>
+            <div class="grid-header">Check</div>
+        `;
+
+        // 10 righe per gli step
         for (let i = 0; i < 10; i++) {
-            const storicoItem = state.storico.find(s => s.step === i + 1);
+            const stepNum = i + 1;
+            const storicoItem = state.storico.find(s => s.step === stepNum);
+            
             let importo = '';
             let quota = '';
             let deposito = '';
-            let esito = '';
+            let check = '';
 
             if (storicoItem) {
+                // Step già giocato
                 importo = storicoItem.importo.toFixed(2);
                 quota = storicoItem.quota.toFixed(2);
                 deposito = storicoItem.deposito ? storicoItem.deposito.toFixed(2) : '0.00';
-                esito = storicoItem.esito;
-            } else if (i === state.stepCorrente && state.partitaCorrente) {
-                importo = state.partitaCorrente.importo.toFixed(2);
-                quota = state.partitaCorrente.quota.toFixed(2);
-                deposito = '-';
-                esito = 'in corso';
-            } else {
-                importo = '-';
-                quota = '-';
-                deposito = '-';
-                esito = '';
-            }
-
-            let checkCell = '';
-            if (storicoItem) {
+                
                 if (storicoItem.esito === 'vinta') {
-                    checkCell = `<span class="badge badge-win">✅ Vinta</span>`;
+                    check = `<span class="badge badge-win">✅ Vinta</span>`;
                 } else if (storicoItem.esito === 'persa') {
-                    checkCell = `<span class="badge badge-loss">❌ Persa</span>`;
+                    check = `<span class="badge badge-loss">❌ Persa</span>`;
                 } else {
-                    checkCell = `<span class="badge badge-pending">⏳</span>`;
+                    check = `<span class="badge badge-pending">⏳</span>`;
                 }
             } else if (i === state.stepCorrente && state.partitaCorrente && !state.stepBloccato) {
-                checkCell = `
+                // Step corrente in corso
+                const p = state.partitaCorrente;
+                importo = p.importo.toFixed(2);
+                quota = p.quota.toFixed(2);
+                deposito = '-';
+                
+                check = `
                     <div style="display:flex; gap:4px; flex-wrap:wrap;">
                         <button class="btn-check-win" onclick="Quota3.gestisciEsito('vinta')">✅ Vinta</button>
                         <button class="btn-check-loss" onclick="Quota3.gestisciEsito('persa')">❌ Persa</button>
                     </div>
                 `;
-            } else if (i === state.stepCorrente && state.stepBloccato) {
-                checkCell = `<span class="badge badge-pending">⏳</span>`;
             } else {
-                checkCell = `<span class="badge badge-empty">-</span>`;
+                // Step futuro o non disponibile
+                importo = '-';
+                quota = '-';
+                deposito = '-';
+                check = `<span class="badge badge-empty">-</span>`;
             }
 
             // Determina lo stato della riga
@@ -537,27 +549,17 @@
                 rowClass = 'row-loss';
             }
 
-            // Creiamo le 5 celle della riga
-            const stepCell = `<span class="${numClass}">${i + 1}</span>`;
-            
-            rows.push(`
-                <div class="grid-item ${rowClass}">${stepCell}</div>
+            // Aggiungi le celle della riga
+            html += `
+                <div class="grid-item ${rowClass}"><span class="${numClass}">${stepNum}</span></div>
                 <div class="grid-item ${rowClass}">${importo}</div>
                 <div class="grid-item ${rowClass}">${quota}</div>
                 <div class="grid-item ${rowClass}">${deposito}</div>
-                <div class="grid-item ${rowClass}">${checkCell}</div>
-            `);
+                <div class="grid-item ${rowClass}">${check}</div>
+            `;
         }
 
-        // Aggiorna il DOM
-        gridContainer.innerHTML = `
-            <div class="grid-header">Step</div>
-            <div class="grid-header">Importo</div>
-            <div class="grid-header">Quota (x3)</div>
-            <div class="grid-header">Deposito</div>
-            <div class="grid-header">Check</div>
-            ${rows.join('')}
-        `;
+        gridContainer.innerHTML = html;
     }
 
     // ============================================================
@@ -862,11 +864,7 @@
                     <h3>📊 Step (max 10)</h3>
                     <div class="grid-container">
                         <div class="grid" id="gridContainer">
-                            <div class="grid-header">Step</div>
-                            <div class="grid-header">Importo</div>
-                            <div class="grid-header">Quota (x3)</div>
-                            <div class="grid-header">Deposito</div>
-                            <div class="grid-header">Check</div>
+                            <!-- Le celle vengono generate da renderGrid() -->
                         </div>
                     </div>
                 </div>
@@ -944,7 +942,6 @@
     // AUTO-INIZIALIZZAZIONE
     // ============================================================
 
-    // Cerchiamo il container e inizializziamo automaticamente
     function autoInit() {
         const container = document.getElementById('quota3-container');
         if (container && !isInitialized) {
@@ -953,11 +950,9 @@
         }
     }
 
-    // Esegui quando il DOM è pronto
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', autoInit);
     } else {
-        // DOM già pronto
         setTimeout(autoInit, 100);
     }
 
