@@ -5650,55 +5650,31 @@ const deduplicateMatches = (matches) => {
 };
 
 // ============================================================
-// COMPONENTE QUOTA 3 - Integrato nel tab
+// COMPONENTE QUOTA 3 - Carica quota3.html in iframe
 // ============================================================
 
 const Quota3Tab = () => {
-  // Questo componente viene renderizzato quando la tab "Quota 3" è attiva.
-  // Il contenuto viene generato dal file quota3.js che si attacca al DOM.
-  // Usiamo un div contenitore e carichiamo il componente autonomo.
-  
-  useEffect(() => {
-    // Se il componente Quota3 è già stato caricato, lo reinizializziamo
-    if (window.Quota3 && typeof window.Quota3.init === 'function') {
-      // Se esiste già un contenitore, lo ripuliamo e reinseriamo
-      const container = document.getElementById('quota3-container');
-      if (container) {
-        // Svuota il container
-        container.innerHTML = '';
-        // Reinizializza
-        window.Quota3.init(container);
-      }
-    } else {
-      // Se non è stato caricato, proviamo a caricarlo
-      const script = document.createElement('script');
-      script.src = 'quota3.js';
-      script.onload = () => {
-        if (window.Quota3 && typeof window.Quota3.init === 'function') {
-          const container = document.getElementById('quota3-container');
-          if (container) {
-            window.Quota3.init(container);
-          }
-        }
-      };
-      document.head.appendChild(script);
-    }
-    
-    return () => {
-      // Cleanup: se il componente ha un metodo destroy, lo chiamiamo
-      if (window.Quota3 && typeof window.Quota3.destroy === 'function') {
-        window.Quota3.destroy();
-      }
-    };
-  }, []);
-  
   return (
-    <div className="quota3-container">
-      <div id="quota3-container" style={{ minHeight: '400px' }}>
-        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-          ⏳ Caricamento Quota 3...
-        </div>
-      </div>
+    <div style={{ 
+      width: '100%', 
+      height: '100%', 
+      minHeight: '700px',
+      background: '#0f1419',
+      borderRadius: '12px',
+      overflow: 'hidden'
+    }}>
+      <iframe
+        src="quota3.html"
+        style={{
+          width: '100%',
+          height: '700px',
+          border: 'none',
+          borderRadius: '12px',
+          background: '#0f1419'
+        }}
+        title="Quota 3"
+        sandbox="allow-scripts allow-same-origin allow-modals"
+      />
     </div>
   );
 };
