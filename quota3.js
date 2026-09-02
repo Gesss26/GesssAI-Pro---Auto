@@ -128,7 +128,7 @@
             font-size: 12px;
         }
         .quota3-container .btn-check-win {
-            background: #00cc66;
+            background: #6fcf97;
             color: #000;
             border: none;
             padding: 4px 12px;
@@ -137,13 +137,14 @@
             font-weight: bold;
             font-size: 12px;
             transition: all 0.2s;
+            margin: 0 2px;
         }
         .quota3-container .btn-check-win:hover {
-            background: #00e677;
+            background: #5bbf8a;
             transform: scale(1.05);
         }
         .quota3-container .btn-check-loss {
-            background: #ff4444;
+            background: #eb5757;
             color: #fff;
             border: none;
             padding: 4px 12px;
@@ -152,9 +153,10 @@
             font-weight: bold;
             font-size: 12px;
             transition: all 0.2s;
+            margin: 0 2px;
         }
         .quota3-container .btn-check-loss:hover {
-            background: #ff6666;
+            background: #d63031;
             transform: scale(1.05);
         }
         .quota3-container .btn-check-disabled {
@@ -190,10 +192,10 @@
         }
         .quota3-container .grid {
             display: grid;
-            grid-template-columns: 60px 100px 130px 90px 100px 150px;
+            grid-template-columns: 60px 120px 110px 120px 150px;
             gap: 6px 12px;
             font-size: 14px;
-            min-width: 630px;
+            min-width: 560px;
         }
         .quota3-container .grid-header {
             font-weight: 700;
@@ -333,9 +335,9 @@
         }
         @media (max-width: 768px) {
             .quota3-container .grid {
-                grid-template-columns: 50px 80px 100px 70px 80px 120px;
+                grid-template-columns: 50px 100px 90px 100px 130px;
                 font-size: 12px;
-                min-width: 500px;
+                min-width: 470px;
             }
             .quota3-container .card {
                 padding: 14px;
@@ -362,18 +364,18 @@
         }
         @media (max-width: 500px) {
             .quota3-container .grid {
-                grid-template-columns: 35px 65px 80px 55px 60px 100px;
-                font-size: 10px;
-                min-width: 395px;
-                gap: 4px 6px;
+                grid-template-columns: 40px 80px 70px 80px 110px;
+                font-size: 11px;
+                min-width: 380px;
+                gap: 4px 8px;
             }
             .quota3-container .grid-item {
-                padding: 4px 2px;
+                padding: 6px 2px;
                 min-height: 36px;
             }
             .quota3-container .badge {
-                font-size: 10px;
-                padding: 2px 6px;
+                font-size: 11px;
+                padding: 2px 8px;
             }
             .quota3-container .deposit-display {
                 font-size: 22px;
@@ -460,21 +462,6 @@
         return '€' + val.toFixed(2);
     }
 
-    function getTodayStr() {
-        const d = new Date();
-        return String(d.getDate()).padStart(2, '0') + '/' + 
-               String(d.getMonth() + 1).padStart(2, '0') + '/' + 
-               d.getFullYear();
-    }
-
-    function addDaysToDate(days) {
-        const d = new Date();
-        d.setDate(d.getDate() + days);
-        return String(d.getDate()).padStart(2, '0') + '/' + 
-               String(d.getMonth() + 1).padStart(2, '0') + '/' + 
-               d.getFullYear();
-    }
-
     // ============================================================
     // RENDER GRIGLIA
     // ============================================================
@@ -484,84 +471,54 @@
         if (!gridContainer) return;
 
         const rows = [];
-        // Costruiamo l'array di 10 righe (una per step)
+        // Costruiamo un array di 10 righe (una per step)
         for (let i = 0; i < 10; i++) {
-            const stepNum = i + 1;
-            const storicoItem = state.storico.find(s => s.step === stepNum);
-            
-            let giocata = stepNum;
-            let data = '';
-            let euro = '';
+            const storicoItem = state.storico.find(s => s.step === i + 1);
+            let importo = '';
             let quota = '';
             let deposito = '';
-            let check = '';
+            let esito = '';
 
             if (storicoItem) {
-                // Se lo step è già stato giocato, mostriamo i dati storici
-                data = storicoItem.data || '—';
-                euro = formatEuro(storicoItem.importo);
-                quota = formatEuro(storicoItem.quota);
-                deposito = formatEuro(storicoItem.deposito);
-                
+                importo = storicoItem.importo.toFixed(2);
+                quota = storicoItem.quota.toFixed(2);
+                deposito = storicoItem.deposito ? storicoItem.deposito.toFixed(2) : '0.00';
+                esito = storicoItem.esito;
+            } else if (i === state.stepCorrente && state.partitaCorrente) {
+                importo = state.partitaCorrente.importo.toFixed(2);
+                quota = state.partitaCorrente.quota.toFixed(2);
+                deposito = '-';
+                esito = 'in corso';
+            } else {
+                importo = '-';
+                quota = '-';
+                deposito = '-';
+                esito = '';
+            }
+
+            let checkCell = '';
+            if (storicoItem) {
                 if (storicoItem.esito === 'vinta') {
-                    check = `<span class="badge badge-win">✅ Vinta</span>`;
+                    checkCell = `<span class="badge badge-win">✅ Vinta</span>`;
                 } else if (storicoItem.esito === 'persa') {
-                    check = `<span class="badge badge-loss">❌ Persa</span>`;
+                    checkCell = `<span class="badge badge-loss">❌ Persa</span>`;
                 } else {
-                    check = `<span class="badge badge-pending">⏳</span>`;
+                    checkCell = `<span class="badge badge-pending">⏳</span>`;
                 }
             } else if (i === state.stepCorrente && state.partitaCorrente && !state.stepBloccato) {
-                // Step corrente con partita in corso
-                const p = state.partitaCorrente;
-                data = getTodayStr();
-                euro = formatEuro(p.importo);
-                quota = formatEuro(p.quota);
-                deposito = formatEuro(p.deposito);
-                
-                check = `
+                checkCell = `
                     <div style="display:flex; gap:4px; flex-wrap:wrap;">
                         <button class="btn-check-win" onclick="Quota3.gestisciEsito('vinta')">✅ Vinta</button>
                         <button class="btn-check-loss" onclick="Quota3.gestisciEsito('persa')">❌ Persa</button>
                     </div>
                 `;
-            } else if (i < state.stepCorrente && !state.storico.some(s => s.step === stepNum)) {
-                // Step che sono stati saltati (caso di ripristino)
-                data = '—';
-                euro = '—';
-                quota = '—';
-                deposito = '—';
-                check = `<span class="badge badge-empty">-</span>`;
-            } else if (i >= state.stepCorrente && state.percorsoAttivo && !state.stepBloccato && i === state.stepCorrente) {
-                // Step futuro che è il prossimo da giocare (ma non ancora iniziato)
-                const p = state.partitaCorrente;
-                if (p) {
-                    data = getTodayStr();
-                    euro = formatEuro(p.importo);
-                    quota = formatEuro(p.quota);
-                    deposito = formatEuro(p.deposito);
-                    check = `
-                        <div style="display:flex; gap:4px; flex-wrap:wrap;">
-                            <button class="btn-check-win" onclick="Quota3.gestisciEsito('vinta')">✅ Vinta</button>
-                            <button class="btn-check-loss" onclick="Quota3.gestisciEsito('persa')">❌ Persa</button>
-                        </div>
-                    `;
-                } else {
-                    data = '—';
-                    euro = '—';
-                    quota = '—';
-                    deposito = '—';
-                    check = `<span class="badge badge-empty">-</span>`;
-                }
+            } else if (i === state.stepCorrente && state.stepBloccato) {
+                checkCell = `<span class="badge badge-pending">⏳</span>`;
             } else {
-                // Step futuro non ancora raggiunto
-                data = '—';
-                euro = '—';
-                quota = '—';
-                deposito = '—';
-                check = `<span class="badge badge-empty">-</span>`;
+                checkCell = `<span class="badge badge-empty">-</span>`;
             }
 
-            // Determina la classe per la riga
+            // Determina lo stato della riga
             const isActive = i === state.stepCorrente && state.partitaCorrente && !state.stepBloccato;
             const isDone = storicoItem && storicoItem.esito === 'vinta';
             const isFailed = storicoItem && storicoItem.esito === 'persa';
@@ -580,23 +537,23 @@
                 rowClass = 'row-loss';
             }
 
-            const giocataCell = `<span class="${numClass}">${giocata}</span>`;
+            // Creiamo le 5 celle della riga
+            const stepCell = `<span class="${numClass}">${i + 1}</span>`;
             
             rows.push(`
-                <div class="grid-item ${rowClass}">${giocataCell}</div>
-                <div class="grid-item ${rowClass}">${data}</div>
-                <div class="grid-item ${rowClass}">${euro}</div>
+                <div class="grid-item ${rowClass}">${stepCell}</div>
+                <div class="grid-item ${rowClass}">${importo}</div>
                 <div class="grid-item ${rowClass}">${quota}</div>
                 <div class="grid-item ${rowClass}">${deposito}</div>
-                <div class="grid-item ${rowClass}">${check}</div>
+                <div class="grid-item ${rowClass}">${checkCell}</div>
             `);
         }
 
+        // Aggiorna il DOM
         gridContainer.innerHTML = `
-            <div class="grid-header">Giocata</div>
-            <div class="grid-header">Data</div>
-            <div class="grid-header">Euro</div>
-            <div class="grid-header">Quota 3</div>
+            <div class="grid-header">Step</div>
+            <div class="grid-header">Importo</div>
+            <div class="grid-header">Quota (x3)</div>
             <div class="grid-header">Deposito</div>
             <div class="grid-header">Check</div>
             ${rows.join('')}
@@ -639,11 +596,9 @@
                 </div>
             `;
         } else if (state.stepBloccato || !state.percorsoAttivo) {
-            const ultimoStep = state.storico.length > 0 ? state.storico[state.storico.length - 1] : null;
-            const stepMostrato = ultimoStep ? ultimoStep.step : state.stepCorrente + 1;
             html = `
                 <div class="status-box ended">
-                    <div class="step-label">Percorso terminato (step ${stepMostrato}/10)</div>
+                    <div class="step-label">Percorso terminato (step ${state.stepCorrente + 1}/10)</div>
                     <div class="step-value" style="font-size:16px;">
                         Deposito totale: <span class="highlight">${formatEuro(state.depositoTotale)}</span>
                     </div>
@@ -716,13 +671,12 @@
         state.partitaCorrente = null;
         state.riepilogo = '';
 
-        const oggi = getTodayStr();
         const primo = {
             step: 1,
             importo: val,
             quota: val * 3,
+            vincita: 0,
             deposito: 0,
-            data: oggi,
             esito: 'in corso'
         };
         state.partitaCorrente = primo;
@@ -747,7 +701,6 @@
 
         const importo = state.partitaCorrente.importo;
         const quota = state.partitaCorrente.quota;
-        const dataCorrente = state.partitaCorrente.data || getTodayStr();
         let depositoAggiunto = 0;
         let nuovoImporto = 0;
 
@@ -762,7 +715,6 @@
                 quota: quota,
                 vincita: vincita,
                 deposito: depositoAggiunto,
-                data: dataCorrente,
                 esito: 'vinta'
             };
             state.storico.push(record);
@@ -781,13 +733,12 @@
 
             const nuovoStep = state.stepCorrente + 1;
             state.stepCorrente = nuovoStep;
-            const prossimaData = addDaysToDate(nuovoStep);
             state.partitaCorrente = {
                 step: nuovoStep + 1,
                 importo: nuovoImporto,
                 quota: nuovoImporto * 3,
+                vincita: 0,
                 deposito: 0,
-                data: prossimaData,
                 esito: 'in corso'
             };
             state.stepBloccato = false;
@@ -800,7 +751,6 @@
                 quota: quota,
                 vincita: 0,
                 deposito: 0,
-                data: dataCorrente,
                 esito: 'persa'
             };
             state.storico.push(record);
@@ -912,10 +862,9 @@
                     <h3>📊 Step (max 10)</h3>
                     <div class="grid-container">
                         <div class="grid" id="gridContainer">
-                            <div class="grid-header">Giocata</div>
-                            <div class="grid-header">Data</div>
-                            <div class="grid-header">Euro</div>
-                            <div class="grid-header">Quota 3</div>
+                            <div class="grid-header">Step</div>
+                            <div class="grid-header">Importo</div>
+                            <div class="grid-header">Quota (x3)</div>
                             <div class="grid-header">Deposito</div>
                             <div class="grid-header">Check</div>
                         </div>
@@ -1032,7 +981,6 @@
         renderTutto: renderTutto,
         salvaState: salvaState,
         caricaState: caricaState,
-        // Per debug
         getState: function() { return state; }
     };
 
