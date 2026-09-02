@@ -6595,7 +6595,7 @@ function App() {
 }
 
 // ============================================================
-// AVVIA APP
+// AVVIA APP - MODIFICATO: React viene montato DOPO il click
 // ============================================================
 
 console.log('🚀 Avvio GesssAI-Pro - Caricamento da Excel...');
@@ -6616,17 +6616,67 @@ loadScrapedData(false).then(data => {
   }
 });
 
-// ⭐ MONTA REACT IMMEDIATAMENTE (l'app è nascosta fino al click)
-try {
-  const root = document.getElementById('root');
-  if (root) {
-    root.style.display = 'none';
-    ReactDOM.createRoot(root).render(<App />);
-    console.log('✅ React montato correttamente');
+// ⭐ ASPETTA CHE L'UTENTE CLICCHI SUL PULSANTE PRIMA DI MONTARE REACT
+document.addEventListener('DOMContentLoaded', function() {
+  var splash = document.getElementById('splashscreen');
+  var root = document.getElementById('root');
+  var btn = document.getElementById('splashBtn');
+  var clearBtn = document.getElementById('splashClearBtn');
+  
+  if (splash && btn && root) {
+    // Pulsante per continuare (mostra l'app E MONTA REACT)
+    btn.addEventListener('click', function() {
+      // Nascondi lo splashscreen
+      splash.style.display = 'none';
+      splash.style.opacity = '0';
+      splash.style.pointerEvents = 'none';
+      
+      // Mostra l'applicazione
+      root.style.display = 'block';
+      root.classList.add('visible');
+      
+      // ⭐ MONTA REACT SOLO DOPO IL CLICK
+      try {
+        if (typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
+          ReactDOM.createRoot(root).render(<App />);
+          console.log('✅ React montato dopo il click');
+        } else {
+          console.error('❌ React non disponibile');
+          root.innerHTML = '<div style="color: #f39c12; text-align: center; padding: 50px;">⏳ Caricamento in corso...</div>';
+        }
+      } catch (err) {
+        console.error('❌ Errore:', err);
+        root.innerHTML = '<div style="color: #eb5757; text-align: center; padding: 50px;">❌ Errore: ' + err.message + '</div>';
+      }
+    });
+    
+    // Pulsante per svuotare localStorage
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        
+        if (confirm('⚠️ Sei sicuro di voler svuotare TUTTI i dati salvati localmente?\n\nQuesta azione cancellerà:\n• Tutte le partite\n• Tutti i campionati\n• Le impostazioni salvate\n\nI dati verranno ricaricati dal file Excel all\'avvio.')) {
+          localStorage.clear();
+          
+          clearBtn.textContent = '✅ Localstorage svuotato!';
+          clearBtn.style.borderColor = '#6fcf97';
+          clearBtn.style.color = '#6fcf97';
+          clearBtn.style.background = 'rgba(111, 207, 151, 0.1)';
+          
+          alert('✅ Localstorage svuotato con successo!\n\nI dati verranno ricaricati dal file Excel al prossimo avvio.');
+          
+          setTimeout(function() {
+            clearBtn.textContent = '🗑️ Svuota Localstorage';
+            clearBtn.style.borderColor = '#eb5757';
+            clearBtn.style.color = '#eb5757';
+            clearBtn.style.background = 'rgba(235, 87, 87, 0.05)';
+          }, 3000);
+          
+          setTimeout(function() {
+            window.location.reload();
+          }, 500);
+        }
+      });
+    }
   }
-} catch (err) {
-  console.error('❌ Errore mount React:', err);
-}
-</script>
-</body>
-</html>
+});
