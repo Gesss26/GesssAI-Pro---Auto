@@ -6315,14 +6315,19 @@ loadScrapedData(false).then(data => {
   }
 });
 
-// ⭐ MONTA REACT SOLO SE NON È GIÀ STATO MONTATO
-document.addEventListener('DOMContentLoaded', function() {
+// ⭐ MONTA REACT SUBITO (l'app è nascosta fino al click)
+try {
   const root = document.getElementById('root');
-  if (root && !root._reactMounted) {
-    // Non montiamo React qui perché lo montiamo dopo il click
-    console.log('⏳ In attesa del click per montare React...');
+  if (root) {
+    root.style.display = 'none';
+    ReactDOM.createRoot(root).render(<App />);
+    root._reactMounted = true;
+    console.log('✅ React montato correttamente');
   }
-});
+} catch (err) {
+  console.error('❌ Errore mount React:', err);
+}
+  
 </script>
 </body>
 </html>
