@@ -391,6 +391,7 @@
     // ============================================================
 
     let containerElement = null;
+    let isInitialized = false;
     let state = {
         importoBase: 10,
         importoInput: 10,
@@ -874,7 +875,13 @@
             return;
         }
 
+        if (isInitialized) {
+            console.log('⚠️ Quota3: già inizializzato');
+            return;
+        }
+
         containerElement = container;
+        isInitialized = true;
         
         // Aggiungi stili
         const styleEl = document.createElement('style');
@@ -984,11 +991,25 @@
         console.log('✅ Quota3 caricato con localStorage');
     }
 
-    function destroy() {
-        if (containerElement) {
-            containerElement.innerHTML = '';
-            containerElement = null;
+    // ============================================================
+    // AUTO-INIZIALIZZAZIONE
+    // ============================================================
+
+    // Cerchiamo il container e inizializziamo automaticamente
+    function autoInit() {
+        const container = document.getElementById('quota3-container');
+        if (container && !isInitialized) {
+            console.log('🚀 Quota3: auto-inizializzazione in corso...');
+            init(container);
         }
+    }
+
+    // Esegui quando il DOM è pronto
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', autoInit);
+    } else {
+        // DOM già pronto
+        setTimeout(autoInit, 100);
     }
 
     // ============================================================
@@ -997,16 +1018,24 @@
 
     window.Quota3 = {
         init: init,
-        destroy: destroy,
+        destroy: function() {
+            if (containerElement) {
+                containerElement.innerHTML = '';
+                containerElement = null;
+                isInitialized = false;
+            }
+        },
         avviaPercorso: avviaPercorso,
         gestisciEsito: gestisciEsito,
         resetPercorso: resetPercorso,
         confermaImporto: confermaImporto,
         renderTutto: renderTutto,
         salvaState: salvaState,
-        caricaState: caricaState
+        caricaState: caricaState,
+        // Per debug
+        getState: function() { return state; }
     };
 
-    console.log('✅ Quota3 caricato come modulo autonomo');
+    console.log('✅ Quota3 caricato come modulo autonomo con auto-inizializzazione');
 
 })();
