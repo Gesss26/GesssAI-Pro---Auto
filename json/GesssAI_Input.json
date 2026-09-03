@@ -346,7 +346,7 @@
     "gol_casa": "2",
     "gol_ospite": "0",
     "citta": "Magdeburg",
-    "stadio": "Avnet Arena",
+    "stadio": "Avnet-Arena",
     "stato": "Giocata"
   },
   {
@@ -7776,12 +7776,12 @@
     "giornata": "4",
     "squadra_casa": "Flamengo",
     "squadra_ospite": "Mirassol",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Rio de Janeiro",
-    "stadio": "",
-    "stato": "Futura"
+    "stadio": "Estádio do Maracanã",
+    "stato": "Giocata"
   },
   {
     "campionato": "Brasileirão Serie A",
@@ -14510,12 +14510,12 @@
     "giornata": "4",
     "squadra_casa": "Millwall",
     "squadra_ospite": "Wrexham",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–3",
+    "gol_casa": "0",
+    "gol_ospite": "3",
     "citta": "London",
     "stadio": "The Den",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -14524,12 +14524,12 @@
     "giornata": "4",
     "squadra_casa": "West Brom",
     "squadra_ospite": "Charlton",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "West Bromwich",
     "stadio": "The Hawthorns",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -14538,12 +14538,12 @@
     "giornata": "4",
     "squadra_casa": "QPR",
     "squadra_ospite": "Cardiff",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "London",
     "stadio": "Loftus Road",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -14552,12 +14552,12 @@
     "giornata": "4",
     "squadra_casa": "Burnley",
     "squadra_ospite": "Middlesbrough",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Burnley",
     "stadio": "Turf Moor",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -34488,12 +34488,12 @@
     "giornata": "3",
     "squadra_casa": "St. Truiden",
     "squadra_ospite": "Union St. Gilloise",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Sint-Truiden",
-    "stadio": "Daio Wasabi Stayen",
-    "stato": "Futura"
+    "risultato": "0–3",
+    "gol_casa": "0",
+    "gol_ospite": "3",
+    "citta": "Sint- Truiden",
+    "stadio": "Stayen",
+    "stato": "Giocata"
   },
   {
     "campionato": "Jupiler Pro League",
@@ -41366,7 +41366,7 @@
     "gol_casa": "3",
     "gol_ospite": "2",
     "citta": "Santander",
-    "stadio": "El Sardinero",
+    "stadio": "Estadio El Sardinero",
     "stato": "Giocata"
   },
   {
@@ -41408,7 +41408,7 @@
     "gol_casa": "2",
     "gol_ospite": "1",
     "citta": "San Sebastian",
-    "stadio": "Reale Arena",
+    "stadio": "Anoeta",
     "stato": "Giocata"
   },
   {
@@ -41421,7 +41421,7 @@
     "risultato": "1–3",
     "gol_casa": "1",
     "gol_ospite": "3",
-    "citta": "Seville",
+    "citta": "Sevilla",
     "stadio": "Ramón Sánchez Pizjuán",
     "stato": "Giocata"
   },
@@ -41450,7 +41450,7 @@
     "gol_casa": "3",
     "gol_ospite": "1",
     "citta": "La Coruna",
-    "stadio": "Estadio Riazor",
+    "stadio": "Estadio Municipal de Riazor",
     "stato": "Giocata"
   },
   {
@@ -52081,21 +52081,35 @@
   },
   {
     "campionato": "Liga Profesional Argentina",
-    "data": "04/10/2026",
-    "ora": "20:00",
+    "data": "03/10/2026",
+    "ora": "00:30",
     "giornata": "11",
-    "squadra_casa": "Argentinos JRS",
-    "squadra_ospite": "Tigre",
+    "squadra_casa": "Independ. Rivadavia",
+    "squadra_ospite": "Gimnasia L.P.",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Buenos Aires",
-    "stadio": "Estadio Diego Armando Maradona",
+    "citta": "Mendoza",
+    "stadio": "Estadio Juan Bautista Gargantini",
     "stato": "Futura"
   },
   {
     "campionato": "Liga Profesional Argentina",
-    "data": "04/10/2026",
+    "data": "03/10/2026",
+    "ora": "17:45",
+    "giornata": "11",
+    "squadra_casa": "Defensa Y Justicia",
+    "squadra_ospite": "San Lorenzo",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Gobernador Julio A. Costa",
+    "stadio": "Estadio Norberto Tito Tomaghello",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Liga Profesional Argentina",
+    "data": "03/10/2026",
     "ora": "20:00",
     "giornata": "11",
     "squadra_casa": "Atletico Tucuman",
@@ -52105,6 +52119,34 @@
     "gol_ospite": "",
     "citta": "Tucuman",
     "stadio": "Estadio Monumental Jose Fierro",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Liga Profesional Argentina",
+    "data": "03/10/2026",
+    "ora": "20:00",
+    "giornata": "11",
+    "squadra_casa": "Newells Old Boys",
+    "squadra_ospite": "Lanus",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Rosario",
+    "stadio": "Estadio Marcelo Bielsa",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Liga Profesional Argentina",
+    "data": "03/10/2026",
+    "ora": "22:15",
+    "giornata": "11",
+    "squadra_casa": "Argentinos JRS",
+    "squadra_ospite": "Tigre",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Buenos Aires",
+    "stadio": "Estadio Diego Armando Maradona",
     "stato": "Futura"
   },
   {
@@ -52133,20 +52175,6 @@
     "gol_ospite": "",
     "citta": "Buenos Aires",
     "stadio": "Estadio Alberto J. Armando",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Liga Profesional Argentina",
-    "data": "04/10/2026",
-    "ora": "20:00",
-    "giornata": "11",
-    "squadra_casa": "Defensa Y Justicia",
-    "squadra_ospite": "San Lorenzo",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Gobernador Julio A. Costa",
-    "stadio": "Estadio Norberto Tito Tomaghello",
     "stato": "Futura"
   },
   {
@@ -52203,34 +52231,6 @@
     "gol_ospite": "",
     "citta": "Buenos Aires",
     "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Liga Profesional Argentina",
-    "data": "04/10/2026",
-    "ora": "20:00",
-    "giornata": "11",
-    "squadra_casa": "Independ. Rivadavia",
-    "squadra_ospite": "Gimnasia L.P.",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Mendoza",
-    "stadio": "Estadio Juan Bautista Gargantini",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Liga Profesional Argentina",
-    "data": "04/10/2026",
-    "ora": "20:00",
-    "giornata": "11",
-    "squadra_casa": "Newells Old Boys",
-    "squadra_ospite": "Lanus",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Rosario",
-    "stadio": "Estadio Marcelo Bielsa",
     "stato": "Futura"
   },
   {
@@ -66482,7 +66482,7 @@
     "gol_casa": "1",
     "gol_ospite": "3",
     "citta": "Columbus",
-    "stadio": "Lower.com Field",
+    "stadio": "ScottsMiracle-Gro Field",
     "stato": "Giocata"
   },
   {
@@ -66496,7 +66496,7 @@
     "gol_casa": "3",
     "gol_ospite": "3",
     "citta": "St. Louis",
-    "stadio": "Energizer Park",
+    "stadio": "CITYPARK",
     "stato": "Giocata"
   },
   {
@@ -78910,12 +78910,12 @@
     "giornata": "5",
     "squadra_casa": "Celtic",
     "squadra_ospite": "Aberdeen",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–0",
+    "gol_casa": "3",
+    "gol_ospite": "0",
     "citta": "Glasgow",
     "stadio": "Celtic Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Scottish Premiership",
@@ -78924,12 +78924,12 @@
     "giornata": "5",
     "squadra_casa": "Kilmarnock",
     "squadra_ospite": "ST Mirren",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–1",
+    "gol_casa": "0",
+    "gol_ospite": "1",
     "citta": "Kilmarnock",
     "stadio": "Rugby Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Scottish Premiership",
@@ -78938,12 +78938,12 @@
     "giornata": "5",
     "squadra_casa": "Dundee",
     "squadra_ospite": "ST Johnstone",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Dundee",
     "stadio": "Dens Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Scottish Premiership",
@@ -78952,12 +78952,12 @@
     "giornata": "5",
     "squadra_casa": "Motherwell",
     "squadra_ospite": "Dundee Utd",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–0",
+    "gol_casa": "3",
+    "gol_ospite": "0",
     "citta": "Motherwell",
     "stadio": "Fir Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Scottish Premiership",
@@ -78966,12 +78966,12 @@
     "giornata": "5",
     "squadra_casa": "Falkirk",
     "squadra_ospite": "Rangers",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Falkirk",
     "stadio": "Falkirk Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Scottish Premiership",
@@ -81784,7 +81784,7 @@
     "gol_casa": "5",
     "gol_ospite": "2",
     "citta": "Girona",
-    "stadio": "Estadi Montilivi",
+    "stadio": "Estadio Municipal de Montilivi",
     "stato": "Giocata"
   },
   {
@@ -81812,7 +81812,7 @@
     "gol_casa": "1",
     "gol_ospite": "1",
     "citta": "Cadiz",
-    "stadio": "Nuevo Mirandilla",
+    "stadio": "JP Financial Estadio",
     "stato": "Giocata"
   },
   {
@@ -88027,7 +88027,7 @@
     "risultato": "2–0",
     "gol_casa": "2",
     "gol_ospite": "0",
-    "citta": "Milano",
+    "citta": "Milan",
     "stadio": "San Siro/Giuseppe Meazza",
     "stato": "Giocata"
   },
@@ -88140,7 +88140,7 @@
     "gol_casa": "0",
     "gol_ospite": "4",
     "citta": "Lecce",
-    "stadio": "Via del Mare",
+    "stadio": "Stadio Via del Mare",
     "stato": "Giocata"
   },
   {
@@ -88330,13 +88330,13 @@
     "data": "12/09/2026",
     "ora": "16:00",
     "giornata": "4",
-    "squadra_casa": "Sassuolo",
-    "squadra_ospite": "Juventus",
+    "squadra_casa": "Lazio",
+    "squadra_ospite": "AC Milan",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Reggio Emilia",
-    "stadio": "",
+    "citta": "Rome",
+    "stadio": "Stadio Olimpico",
     "stato": "Futura"
   },
   {
@@ -88356,20 +88356,6 @@
   {
     "campionato": "Serie A",
     "data": "13/09/2026",
-    "ora": "10:30",
-    "giornata": "4",
-    "squadra_casa": "Torino",
-    "squadra_ospite": "AS Roma",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Turin",
-    "stadio": "Stadio Olimpico di Torino",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie A",
-    "data": "13/09/2026",
     "ora": "13:00",
     "giornata": "4",
     "squadra_casa": "Lecce",
@@ -88379,20 +88365,6 @@
     "gol_ospite": "",
     "citta": "Lecce",
     "stadio": "Stadio Via del Mare",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie A",
-    "data": "13/09/2026",
-    "ora": "13:00",
-    "giornata": "4",
-    "squadra_casa": "como",
-    "squadra_ospite": "Parma",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Como",
-    "stadio": "Stadio Giuseppe Sinigaglia",
     "stato": "Futura"
   },
   {
@@ -88414,13 +88386,41 @@
     "data": "13/09/2026",
     "ora": "18:45",
     "giornata": "4",
-    "squadra_casa": "Lazio",
-    "squadra_ospite": "AC Milan",
+    "squadra_casa": "Sassuolo",
+    "squadra_ospite": "Juventus",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Rome",
-    "stadio": "Stadio Olimpico",
+    "citta": "Reggio Emilia",
+    "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie A",
+    "data": "14/09/2026",
+    "ora": "16:30",
+    "giornata": "4",
+    "squadra_casa": "Torino",
+    "squadra_ospite": "AS Roma",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Turin",
+    "stadio": "Stadio Olimpico di Torino",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie A",
+    "data": "14/09/2026",
+    "ora": "16:30",
+    "giornata": "4",
+    "squadra_casa": "como",
+    "squadra_ospite": "Parma",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Como",
+    "stadio": "Stadio Giuseppe Sinigaglia",
     "stato": "Futura"
   },
   {
@@ -118100,7 +118100,7 @@
     "gol_casa": "1",
     "gol_ospite": "1",
     "citta": "Ankara",
-    "stadio": "Eryaman Stadyumu",
+    "stadio": "Eryaman Stadium",
     "stato": "Giocata"
   },
   {
@@ -118114,7 +118114,7 @@
     "gol_casa": "1",
     "gol_ospite": "2",
     "citta": "Konya",
-    "stadio": "Medas Konya Büyüksehir Belediyesi Stadium",
+    "stadio": "Konya Buyuksehir Belediye Stadium",
     "stato": "Giocata"
   },
   {
@@ -118128,7 +118128,7 @@
     "gol_casa": "3",
     "gol_ospite": "2",
     "citta": "Istanbul",
-    "stadio": "Rams Park Stadyumu",
+    "stadio": "Rams Park",
     "stato": "Giocata"
   },
   {
@@ -118198,7 +118198,7 @@
     "gol_casa": "6",
     "gol_ospite": "2",
     "citta": "Istanbul",
-    "stadio": "Tüpraş Stadyumu",
+    "stadio": "Besiktas Park",
     "stato": "Giocata"
   },
   {
@@ -118212,7 +118212,7 @@
     "gol_casa": "2",
     "gol_ospite": "1",
     "citta": "Diyarbakır",
-    "stadio": "Şilbe Spor Kompleksi",
+    "stadio": "Diyarbakir Stadium",
     "stato": "Giocata"
   },
   {
@@ -118343,8 +118343,8 @@
   },
   {
     "campionato": "Süper Lig",
-    "data": "13/09/2026",
-    "ora": "12:00",
+    "data": "11/09/2026",
+    "ora": "17:00",
     "giornata": "5",
     "squadra_casa": "Beşiktaş",
     "squadra_ospite": "Erzurumspor FK",
@@ -118357,8 +118357,36 @@
   },
   {
     "campionato": "Süper Lig",
-    "data": "13/09/2026",
-    "ora": "12:00",
+    "data": "12/09/2026",
+    "ora": "14:00",
+    "giornata": "5",
+    "squadra_casa": "Eyüpspor",
+    "squadra_ospite": "Rizespor",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Istanbul",
+    "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Süper Lig",
+    "data": "12/09/2026",
+    "ora": "14:00",
+    "giornata": "5",
+    "squadra_casa": "Samsunspor",
+    "squadra_ospite": "Çorum FK",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Samsun",
+    "stadio": "Samsun 19 Mayis Stadyumu",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Süper Lig",
+    "data": "12/09/2026",
+    "ora": "17:00",
     "giornata": "5",
     "squadra_casa": "Konyaspor",
     "squadra_ospite": "Trabzonspor",
@@ -118371,22 +118399,8 @@
   },
   {
     "campionato": "Süper Lig",
-    "data": "13/09/2026",
-    "ora": "12:00",
-    "giornata": "5",
-    "squadra_casa": "Galatasaray",
-    "squadra_ospite": "Kocaelispor",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Istanbul",
-    "stadio": "Rams Park",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Süper Lig",
-    "data": "13/09/2026",
-    "ora": "12:00",
+    "data": "12/09/2026",
+    "ora": "17:00",
     "giornata": "5",
     "squadra_casa": "Alanyaspor",
     "squadra_ospite": "Göztepe",
@@ -118400,7 +118414,7 @@
   {
     "campionato": "Süper Lig",
     "data": "13/09/2026",
-    "ora": "12:00",
+    "ora": "14:00",
     "giornata": "5",
     "squadra_casa": "Gençlerbirliği S.K.",
     "squadra_ospite": "Kasımpaşa",
@@ -118414,21 +118428,21 @@
   {
     "campionato": "Süper Lig",
     "data": "13/09/2026",
-    "ora": "12:00",
+    "ora": "17:00",
     "giornata": "5",
-    "squadra_casa": "Gaziantep FK",
-    "squadra_ospite": "Fenerbahçe",
+    "squadra_casa": "Galatasaray",
+    "squadra_ospite": "Kocaelispor",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Gaziantep",
-    "stadio": "Gaziantep Stadyumu",
+    "citta": "Istanbul",
+    "stadio": "Rams Park",
     "stato": "Futura"
   },
   {
     "campionato": "Süper Lig",
     "data": "13/09/2026",
-    "ora": "12:00",
+    "ora": "17:00",
     "giornata": "5",
     "squadra_casa": "Amed",
     "squadra_ospite": "Başakşehir",
@@ -118441,11 +118455,25 @@
   },
   {
     "campionato": "Süper Lig",
-    "data": "13/09/2026",
-    "ora": "12:00",
+    "data": "14/09/2026",
+    "ora": "17:00",
     "giornata": "5",
-    "squadra_casa": "Eyüpspor",
-    "squadra_ospite": "Rizespor",
+    "squadra_casa": "Gaziantep FK",
+    "squadra_ospite": "Fenerbahçe",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Gaziantep",
+    "stadio": "Gaziantep Stadyumu",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Süper Lig",
+    "data": "18/09/2026",
+    "ora": "17:00",
+    "giornata": "6",
+    "squadra_casa": "Kasımpaşa",
+    "squadra_ospite": "Konyaspor",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
@@ -118455,22 +118483,36 @@
   },
   {
     "campionato": "Süper Lig",
-    "data": "13/09/2026",
-    "ora": "12:00",
-    "giornata": "5",
-    "squadra_casa": "Samsunspor",
-    "squadra_ospite": "Çorum FK",
+    "data": "19/09/2026",
+    "ora": "14:00",
+    "giornata": "6",
+    "squadra_casa": "Çorum FK",
+    "squadra_ospite": "Alanyaspor",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Samsun",
-    "stadio": "Samsun 19 Mayis Stadyumu",
+    "citta": "Corum",
+    "stadio": "Corum Stadyumu",
     "stato": "Futura"
   },
   {
     "campionato": "Süper Lig",
-    "data": "20/09/2026",
-    "ora": "12:00",
+    "data": "19/09/2026",
+    "ora": "14:00",
+    "giornata": "6",
+    "squadra_casa": "Kocaelispor",
+    "squadra_ospite": "Gaziantep FK",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Izmit",
+    "stadio": "Turka Arac Muayene Kocaeli Stadyumu",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Süper Lig",
+    "data": "19/09/2026",
+    "ora": "17:00",
     "giornata": "6",
     "squadra_casa": "Başakşehir",
     "squadra_ospite": "Gençlerbirliği S.K.",
@@ -118483,36 +118525,8 @@
   },
   {
     "campionato": "Süper Lig",
-    "data": "20/09/2026",
-    "ora": "12:00",
-    "giornata": "6",
-    "squadra_casa": "Fenerbahçe",
-    "squadra_ospite": "Eyüpspor",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Istanbul",
-    "stadio": "Chobani Stadium Fenerbahce Sukru Saracoglu",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Süper Lig",
-    "data": "20/09/2026",
-    "ora": "12:00",
-    "giornata": "6",
-    "squadra_casa": "Göztepe",
-    "squadra_ospite": "Rizespor",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Izmir",
-    "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Süper Lig",
-    "data": "20/09/2026",
-    "ora": "12:00",
+    "data": "19/09/2026",
+    "ora": "17:00",
     "giornata": "6",
     "squadra_casa": "Trabzonspor",
     "squadra_ospite": "Galatasaray",
@@ -118526,21 +118540,21 @@
   {
     "campionato": "Süper Lig",
     "data": "20/09/2026",
-    "ora": "12:00",
+    "ora": "14:00",
     "giornata": "6",
-    "squadra_casa": "Kasımpaşa",
-    "squadra_ospite": "Konyaspor",
+    "squadra_casa": "Fenerbahçe",
+    "squadra_ospite": "Eyüpspor",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Istanbul",
-    "stadio": "",
+    "stadio": "Chobani Stadium Fenerbahce Sukru Saracoglu",
     "stato": "Futura"
   },
   {
     "campionato": "Süper Lig",
     "data": "20/09/2026",
-    "ora": "12:00",
+    "ora": "14:00",
     "giornata": "6",
     "squadra_casa": "Erzurumspor FK",
     "squadra_ospite": "Samsunspor",
@@ -118554,7 +118568,21 @@
   {
     "campionato": "Süper Lig",
     "data": "20/09/2026",
-    "ora": "12:00",
+    "ora": "17:00",
+    "giornata": "6",
+    "squadra_casa": "Göztepe",
+    "squadra_ospite": "Rizespor",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Izmir",
+    "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Süper Lig",
+    "data": "20/09/2026",
+    "ora": "17:00",
     "giornata": "6",
     "squadra_casa": "Amed",
     "squadra_ospite": "Beşiktaş",
@@ -118563,34 +118591,6 @@
     "gol_ospite": "",
     "citta": "Diyarbakır",
     "stadio": "Diyarbakir Stadium",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Süper Lig",
-    "data": "20/09/2026",
-    "ora": "12:00",
-    "giornata": "6",
-    "squadra_casa": "Çorum FK",
-    "squadra_ospite": "Alanyaspor",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Corum",
-    "stadio": "Corum Stadyumu",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Süper Lig",
-    "data": "20/09/2026",
-    "ora": "12:00",
-    "giornata": "6",
-    "squadra_casa": "Kocaelispor",
-    "squadra_ospite": "Gaziantep FK",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Izmit",
-    "stadio": "Turka Arac Muayene Kocaeli Stadyumu",
     "stato": "Futura"
   },
   {
