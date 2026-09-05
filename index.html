@@ -5768,38 +5768,35 @@
               /div>
 
               <
-              div style = {{
-                marginTop: '12px',
-                padding: '12px 16px',
-                background: 'var(--card)',
-                borderRadius: '6px',
-                border: '1px solid var(--border)',
-                fontSize: '14px',
-                color: 'var(--text-muted)',
-                display: 'flex',
-                flexWrap: 'wrap',
-                alignItems: 'center',
-                gap: '12px'
-              } }
-              span > 💡 I valori di Attacco e Difesa sono relativi alla < b style = { { color: 'var(--text)' } } > media
-              del campionato < /b> (1.0 = media). <
-              /span>
+              <div style={{
+  marginTop: '12px',
+  padding: '12px 16px',
+  background: 'var(--card)',
+  borderRadius: '6px',
+  border: '1px solid var(--border)',
+  fontSize: '14px',
+  color: 'var(--text-muted)',
+  display: 'flex',
+  flexWrap: 'wrap',
+  alignItems: 'center',
+  gap: '12px'
+}}>
+  <span>💡 I valori di Attacco e Difesa sono relativi alla <b style={{ color: 'var(--text)' }}>media del campionato</b> (1.0 = media).</span>
 
-              {
-                mc.partiteAnalizzate < 5 && ( <
-                  span style = {{
-                    color: 'var(--draw)',
-                    fontWeight: 'bold',
-                    padding: '4px 14px',
-                    background: 'rgba(242, 201, 76, 0.15)',
-                    borderRadius: '4px',
-                    border: '1px solid var(--draw)',
-                    fontSize: '15px'
-                  } } >
-                  ⚠️ Attenzione: solo < b > { mc.partiteAnalizzate } < /b> partite analizzate! I dati potrebbero non essere rappresentativi. <
-                  /span>
-                )
-              }
+  {mc.partiteAnalizzate < 5 && (
+    <span style={{
+      color: 'var(--draw)',
+      fontWeight: 'bold',
+      padding: '4px 14px',
+      background: 'rgba(242, 201, 76, 0.15)',
+      borderRadius: '4px',
+      border: '1px solid var(--draw)',
+      fontSize: '15px'
+    }}>
+      ⚠️ Attenzione: solo <b>{mc.partiteAnalizzate}</b> partite analizzate! I dati potrebbero non essere rappresentativi.
+    </span>
+  )}
+</div>
 
               {
                 mc.partiteAnalizzate >= 5 && mc.partiteAnalizzate < 10 && ( <
