@@ -27296,7 +27296,7 @@
     "gol_casa": "2",
     "gol_ospite": "1",
     "citta": "Rotterdam",
-    "stadio": "Stadion Woudestein",
+    "stadio": "Van Donge & De Roo Stadion",
     "stato": "Giocata"
   },
   {
@@ -27310,7 +27310,7 @@
     "gol_casa": "5",
     "gol_ospite": "2",
     "citta": "Alkmaar",
-    "stadio": "AFAS Stadion",
+    "stadio": "AFAS Stadion（Alkmaar）",
     "stato": "Giocata"
   },
   {
@@ -27324,7 +27324,7 @@
     "gol_casa": "1",
     "gol_ospite": "3",
     "citta": "Zwolle",
-    "stadio": "Mac3Park Stadion",
+    "stadio": "MAC³PARK Stadion",
     "stato": "Giocata"
   },
   {
@@ -27366,7 +27366,7 @@
     "gol_casa": "2",
     "gol_ospite": "2",
     "citta": "Rotterdam",
-    "stadio": "De Kuip",
+    "stadio": "Stadion Feijenoord",
     "stato": "Giocata"
   },
   {
@@ -27379,8 +27379,8 @@
     "risultato": "0–4",
     "gol_casa": "0",
     "gol_ospite": "4",
-    "citta": "Velsen-Zuid",
-    "stadio": "BUKO Stadion",
+    "citta": "Felsen",
+    "stadio": "Sportpark Schoonenberg",
     "stato": "Giocata"
   },
   {
@@ -27478,7 +27478,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Groningen",
-    "stadio": "Euroborg",
+    "stadio": "Hitachi Capital Mobility Stadion",
     "stato": "Futura"
   },
   {
@@ -27505,8 +27505,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Velsen-Zuid",
-    "stadio": "BUKO Stadion",
+    "citta": "Felsen",
+    "stadio": "Sportpark Schoonenberg",
     "stato": "Futura"
   },
   {
@@ -27519,8 +27519,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Den Haag",
-    "stadio": "WerkTalent Stadion",
+    "citta": "The Hague",
+    "stadio": "Bingoal Stadion",
     "stato": "Futura"
   },
   {
@@ -27534,7 +27534,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Nijmegen",
-    "stadio": "Goffertstadion",
+    "stadio": "Stadion de Goffert",
     "stato": "Futura"
   },
   {
@@ -27562,7 +27562,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Alkmaar",
-    "stadio": "AFAS Stadion",
+    "stadio": "AFAS Stadion（Alkmaar）",
     "stato": "Futura"
   },
   {
@@ -27603,7 +27603,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Sittard",
+    "citta": "Sitard",
     "stadio": "Fortuna Sittard Stadion",
     "stato": "Futura"
   },
@@ -27632,7 +27632,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Rotterdam",
-    "stadio": "Stadion Woudestein",
+    "stadio": "Van Donge & De Roo Stadion",
     "stato": "Futura"
   },
   {
@@ -27660,7 +27660,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Zwolle",
-    "stadio": "",
+    "stadio": "MAC³PARK Stadion",
     "stato": "Futura"
   },
   {
@@ -27696,13 +27696,13 @@
     "data": "18/09/2026",
     "ora": "18:00",
     "giornata": "7",
-    "squadra_casa": "Groningen",
-    "squadra_ospite": "PEC Zwolle",
+    "squadra_casa": "Sparta Rotterdam",
+    "squadra_ospite": "Heerenveen",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Groningen",
-    "stadio": "Euroborg",
+    "citta": "Rotterdam",
+    "stadio": "Sparta Stadium Het Kasteel",
     "stato": "Futura"
   },
   {
@@ -27724,13 +27724,13 @@
     "data": "19/09/2026",
     "ora": "16:45",
     "giornata": "7",
-    "squadra_casa": "Sparta Rotterdam",
-    "squadra_ospite": "Heerenveen",
+    "squadra_casa": "Groningen",
+    "squadra_ospite": "PEC Zwolle",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Rotterdam",
-    "stadio": "Sparta Stadion Het Kasteel",
+    "citta": "Groningen",
+    "stadio": "Hitachi Capital Mobility Stadion",
     "stato": "Futura"
   },
   {
@@ -27794,13 +27794,13 @@
     "data": "20/09/2026",
     "ora": "12:30",
     "giornata": "7",
-    "squadra_casa": "Twente",
-    "squadra_ospite": "PSV Eindhoven",
+    "squadra_casa": "NEC Nijmegen",
+    "squadra_ospite": "Go Ahead Eagles",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Enschede",
-    "stadio": "De Grolsch Veste",
+    "citta": "Nijmegen",
+    "stadio": "Stadion de Goffert",
     "stato": "Futura"
   },
   {
@@ -27808,13 +27808,13 @@
     "data": "20/09/2026",
     "ora": "14:45",
     "giornata": "7",
-    "squadra_casa": "NEC Nijmegen",
-    "squadra_ospite": "Go Ahead Eagles",
+    "squadra_casa": "Twente",
+    "squadra_ospite": "PSV Eindhoven",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Nijmegen",
-    "stadio": "Goffertstadion",
+    "citta": "Enschede",
+    "stadio": "De Grolsch Veste",
     "stato": "Futura"
   },
   {
@@ -52196,48 +52196,6 @@
     "data": "04/10/2026",
     "ora": "20:00",
     "giornata": "11",
-    "squadra_casa": "Deportivo Riestra",
-    "squadra_ospite": "Central Cordoba de Santiago",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Buenos Aires",
-    "stadio": "Estadio Guillermo Laza",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Liga Profesional Argentina",
-    "data": "04/10/2026",
-    "ora": "20:00",
-    "giornata": "11",
-    "squadra_casa": "Estudiantes L.P.",
-    "squadra_ospite": "Gimnasia M.",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "La Plata",
-    "stadio": "Estadio Jorge Luis Hirschi",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Liga Profesional Argentina",
-    "data": "04/10/2026",
-    "ora": "20:00",
-    "giornata": "11",
-    "squadra_casa": "Estudiantes de Rio Cuarto",
-    "squadra_ospite": "Racing Club",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Cordoba",
-    "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Liga Profesional Argentina",
-    "data": "04/10/2026",
-    "ora": "20:00",
-    "giornata": "11",
     "squadra_casa": "Talleres Cordoba",
     "squadra_ospite": "Belgrano Cordoba",
     "risultato": "",
@@ -52245,20 +52203,6 @@
     "gol_ospite": "",
     "citta": "Cordoba",
     "stadio": "Estadio Mario Alberto Kempes",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Liga Profesional Argentina",
-    "data": "04/10/2026",
-    "ora": "20:00",
-    "giornata": "11",
-    "squadra_casa": "Velez Sarsfield",
-    "squadra_ospite": "Platense",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Buenos Aires",
-    "stadio": "",
     "stato": "Futura"
   },
   {
@@ -52273,6 +52217,62 @@
     "gol_ospite": "",
     "citta": "Buenos Aires",
     "stadio": "Estadio Alberto J. Armando",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Liga Profesional Argentina",
+    "data": "05/10/2026",
+    "ora": "00:30",
+    "giornata": "11",
+    "squadra_casa": "Estudiantes de Rio Cuarto",
+    "squadra_ospite": "Racing Club",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Cordoba",
+    "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Liga Profesional Argentina",
+    "data": "05/10/2026",
+    "ora": "19:45",
+    "giornata": "11",
+    "squadra_casa": "Deportivo Riestra",
+    "squadra_ospite": "Central Cordoba de Santiago",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Buenos Aires",
+    "stadio": "Estadio Guillermo Laza",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Liga Profesional Argentina",
+    "data": "05/10/2026",
+    "ora": "22:00",
+    "giornata": "11",
+    "squadra_casa": "Estudiantes L.P.",
+    "squadra_ospite": "Gimnasia M.",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "La Plata",
+    "stadio": "Estadio Jorge Luis Hirschi",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Liga Profesional Argentina",
+    "data": "05/10/2026",
+    "ora": "22:00",
+    "giornata": "11",
+    "squadra_casa": "Velez Sarsfield",
+    "squadra_ospite": "Platense",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Buenos Aires",
+    "stadio": "",
     "stato": "Futura"
   },
   {
@@ -104178,20 +104178,6 @@
     "data": "06/09/2026",
     "ora": "13:00",
     "giornata": "3",
-    "squadra_casa": "Perugia",
-    "squadra_ospite": "Pineto",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Perugia",
-    "stadio": "Stadio Renato Curi",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie C - Girone B",
-    "data": "06/09/2026",
-    "ora": "13:00",
-    "giornata": "3",
     "squadra_casa": "Sambenedettese",
     "squadra_ospite": "Spezia",
     "risultato": "",
@@ -104255,6 +104241,20 @@
     "gol_ospite": "",
     "citta": "Reggio Emilia",
     "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie C - Girone B",
+    "data": "06/09/2026",
+    "ora": "19:00",
+    "giornata": "3",
+    "squadra_casa": "Perugia",
+    "squadra_ospite": "Pineto",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Perugia",
+    "stadio": "Stadio Renato Curi",
     "stato": "Futura"
   },
   {
@@ -116398,20 +116398,6 @@
   {
     "campionato": "Super League Grecia",
     "data": "11/07/2026",
-    "ora": "11:00",
-    "giornata": "18",
-    "squadra_casa": "Wuhan Three Towns",
-    "squadra_ospite": "Henan Jianye",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Wuhan",
-    "stadio": "Wuhan Sports Centre",
-    "stato": "Posticipata"
-  },
-  {
-    "campionato": "Super League Grecia",
-    "data": "11/07/2026",
     "ora": "11:35",
     "giornata": "18",
     "squadra_casa": "Sichuan Jiuniu",
@@ -116820,20 +116806,6 @@
     "data": "08/08/2026",
     "ora": "11:35",
     "giornata": "22",
-    "squadra_casa": "Hangzhou Greentown",
-    "squadra_ospite": "Wuhan Three Towns",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Huizhou",
-    "stadio": "Huizhou Olympic Stadium",
-    "stato": "Posticipata"
-  },
-  {
-    "campionato": "Super League Grecia",
-    "data": "08/08/2026",
-    "ora": "11:35",
-    "giornata": "22",
     "squadra_casa": "Dalian Zhixing",
     "squadra_ospite": "Shenyang Urban",
     "risultato": "1–0",
@@ -117218,7 +117190,7 @@
     "gol_casa": "1",
     "gol_ospite": "1",
     "citta": "Tianjin",
-    "stadio": "Olympic Sports Center Stadium",
+    "stadio": "TEDA Football Stadium",
     "stato": "Giocata"
   },
   {
@@ -117231,8 +117203,8 @@
     "risultato": "6–0",
     "gol_casa": "6",
     "gol_ospite": "0",
-    "citta": "Huizhou",
-    "stadio": "Huizhou Olympic Stadium",
+    "citta": "Hangzhou",
+    "stadio": "Hangzhou Dragon Stadium",
     "stato": "Giocata"
   },
   {
@@ -117246,7 +117218,7 @@
     "gol_casa": "2",
     "gol_ospite": "1",
     "citta": "Chengdu",
-    "stadio": "Chengdu Phoenix Hill Sports Park",
+    "stadio": "Chengdu Wuliangye Cultural and Sports Center",
     "stato": "Giocata"
   },
   {
@@ -117330,7 +117302,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Chongqing",
-    "stadio": "Longxing Football Stadium",
+    "stadio": "Chongqing Longxing Football Stadium",
     "stato": "Futura"
   },
   {
@@ -117372,7 +117344,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Tianjin",
-    "stadio": "Olympic Sports Center Stadium",
+    "stadio": "TEDA Football Stadium",
     "stato": "Futura"
   },
   {
@@ -117386,7 +117358,35 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Tianjin",
-    "stadio": "Olympic Sports Center Stadium",
+    "stadio": "TEDA Football Stadium",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Super League Grecia",
+    "data": "12/09/2026",
+    "ora": "11:35",
+    "giornata": "18",
+    "squadra_casa": "Wuhan Three Towns",
+    "squadra_ospite": "Henan Jianye",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Wuhan",
+    "stadio": "Wuhan Sports Center Stadium",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Super League Grecia",
+    "data": "18/09/2026",
+    "ora": "11:35",
+    "giornata": "22",
+    "squadra_casa": "Hangzhou Greentown",
+    "squadra_ospite": "Wuhan Three Towns",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Hangzhou",
+    "stadio": "Hangzhou Dragon Stadium",
     "stato": "Futura"
   },
   {
