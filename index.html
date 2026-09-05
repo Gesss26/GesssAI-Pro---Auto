@@ -12,7 +12,6 @@
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
 </script>
-<!-- CARICAMENTO METEO.JS -->
 <script type="text/javascript" src="meteo.js">
 </script>
 <script type="text/babel" src="schedina.js">
@@ -224,6 +223,70 @@
   }
   #root.visible {
     display: block !important;
+  }
+
+  /* ===== STILE ERRORE ===== */
+  #error-container {
+    display: none;
+    min-height: 100vh;
+    background: #0f1419;
+    color: #e6edf3;
+    padding: 40px 20px;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  #error-container.visible {
+    display: flex !important;
+  }
+  #error-container h2 {
+    color: #f39c12;
+    margin-bottom: 16px;
+  }
+  #error-container .error-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+  }
+  #error-container .error-msg {
+    color: #8b949e;
+    max-width: 600px;
+    margin: 0 auto 20px;
+    line-height: 1.6;
+  }
+  #error-container .error-details {
+    background: #1a2028;
+    padding: 16px 20px;
+    border-radius: 8px;
+    border: 1px solid #30363d;
+    max-width: 700px;
+    margin: 0 auto 20px;
+    text-align: left;
+    font-size: 13px;
+    color: #8b949e;
+    overflow: auto;
+    max-height: 300px;
+  }
+  #error-container .error-details code {
+    color: #e6edf3;
+    font-family: monospace;
+    font-size: 12px;
+    word-break: break-all;
+  }
+  #error-container .btn-retry {
+    padding: 12px 30px;
+    background: #f39c12;
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  #error-container .btn-retry:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 20px rgba(243, 156, 18, 0.4);
   }
 
   .giocata-pct {
@@ -2452,6 +2515,20 @@
     </div>
   </div>
 
+  <!-- ===== CONTENITORE ERRORE ===== -->
+  <div id="error-container">
+    <div class="error-icon">⚠️</div>
+    <h2>Errore di caricamento</h2>
+    <div class="error-msg">
+      Si è verificato un problema durante il caricamento dell'applicazione.<br>
+      <span id="error-message-text">Dettagli dell'errore non disponibili.</span>
+    </div>
+    <div class="error-details" id="error-details-box">
+      <code id="error-stack-text">Nessun dettaglio disponibile.</code>
+    </div>
+    <button class="btn-retry" onclick="window.location.reload()">🔄 Ricarica la pagina</button>
+  </div>
+
   <div id="root"></div>
 
   <script>
@@ -2463,16 +2540,57 @@
 
       if (splash && btn && root) {
         btn.addEventListener('click', function() {
-          // Aggiungi la classe hidden per attivare la dissolvenza
           splash.classList.add('hidden');
-
-          // Mostra il contenuto principale dopo la dissolvenza
           setTimeout(function() {
             splash.style.display = 'none';
             root.style.display = 'block';
             root.classList.add('visible');
           }, 800);
         });
+      }
+    });
+
+    // ===== GESTIONE ERRORI GLOBALI =====
+    window.addEventListener('error', function(e) {
+      console.error('Errore globale:', e);
+      var errorContainer = document.getElementById('error-container');
+      var errorMsg = document.getElementById('error-message-text');
+      var errorStack = document.getElementById('error-stack-text');
+      var root = document.getElementById('root');
+      var splash = document.getElementById('splashscreen');
+
+      if (errorContainer) {
+        errorContainer.classList.add('visible');
+        if (errorMsg) {
+          errorMsg.textContent = e.message || 'Errore sconosciuto durante il caricamento.';
+        }
+        if (errorStack) {
+          errorStack.textContent = e.stack || e.message || 'Nessun dettaglio disponibile.';
+        }
+        if (splash) splash.style.display = 'none';
+        if (root) root.style.display = 'none';
+      }
+    });
+
+    // Gestione errori Promise non catturati
+    window.addEventListener('unhandledrejection', function(e) {
+      console.error('Promise rejection:', e);
+      var errorContainer = document.getElementById('error-container');
+      var errorMsg = document.getElementById('error-message-text');
+      var errorStack = document.getElementById('error-stack-text');
+      var root = document.getElementById('root');
+      var splash = document.getElementById('splashscreen');
+
+      if (errorContainer) {
+        errorContainer.classList.add('visible');
+        if (errorMsg) {
+          errorMsg.textContent = e.reason?.message || 'Errore durante il caricamento dei dati.';
+        }
+        if (errorStack) {
+          errorStack.textContent = e.reason?.stack || e.reason?.message || 'Nessun dettaglio disponibile.';
+        }
+        if (splash) splash.style.display = 'none';
+        if (root) root.style.display = 'none';
       }
     });
   </script>
@@ -7126,8 +7244,7 @@
                   () => setSelectedDay('domani') } > Domani < /button> <
                 button className = { selectedDay === 'weekend' ? 'active' : '' }
                 onClick = {
-                  () => setSelectedDay('weekend') } > Weekend < /button> <
-                /div> <
+                  () => setSelectedDay('weekend') } > Weekend < /button> <                /div> <
                 span style = { { fontSize: '18px' } } > { expanded ? '▼' : '▶' } < /span> <
                 /div> <
                 /div> {
@@ -7670,6 +7787,40 @@
                   // ============================================================
 
                   function App() {
+                    // Se c'è un errore, mostra l'error container
+                    const [hasError, setHasError] = useState(false);
+                    const [errorMessage, setErrorMessage] = useState('');
+
+                    // Gestione errori di React
+                    useEffect(() => {
+                      const errorHandler = (event) => {
+                        console.error('React error:', event);
+                        setHasError(true);
+                        setErrorMessage(event.message || 'Errore sconosciuto nell\'applicazione');
+                        // Nascondi splash e root
+                        const splash = document.getElementById('splashscreen');
+                        const root = document.getElementById('root');
+                        const errorContainer = document.getElementById('error-container');
+                        if (splash) splash.style.display = 'none';
+                        if (root) root.style.display = 'none';
+                        if (errorContainer) {
+                          errorContainer.classList.add('visible');
+                          const msgEl = document.getElementById('error-message-text');
+                          const stackEl = document.getElementById('error-stack-text');
+                          if (msgEl) msgEl.textContent = event.message || 'Errore durante il rendering.';
+                          if (stackEl) stackEl.textContent = event.stack || 'Nessun dettaglio disponibile.';
+                        }
+                      };
+
+                      window.addEventListener('error', errorHandler);
+                      return () => window.removeEventListener('error', errorHandler);
+                    }, []);
+
+                    // Se c'è errore, non renderizzare l'app
+                    if (hasError) {
+                      return null;
+                    }
+
                     const initial = loadState();
                     const [tab, setTab] = useState('Home');
                     const [settingsTab, setSettingsTab] = useState('Temi');
@@ -7694,18 +7845,15 @@
                       'mg_casa_ospite', 'over'
                     ]);
 
-                    // Stato per i filtri campionato (pulsanti)
+                    // Stato per i filtri campionato
                     const [selectedChamps, setSelectedChamps] = useState(() => {
-                      // Inizialmente tutti selezionati
                       const allSelected = {};
                       CHAMPIONSHIP_LIST.forEach(c => { allSelected[c] = true; });
                       return allSelected;
                     });
 
-                    // Stato per i giorni (default 1 giorno)
                     const [selectedGiorni, setSelectedGiorni] = useState(1);
 
-                    // Funzione per gestire il toggle di un campionato
                     const toggleChamp = (champName) => {
                       setSelectedChamps(prev => ({
                         ...prev,
@@ -7713,44 +7861,46 @@
                       }));
                     };
 
-                    // Funzione per selezionare tutti
                     const selectAllChamps = () => {
                       const allSelected = {};
                       CHAMPIONSHIP_LIST.forEach(c => { allSelected[c] = true; });
                       setSelectedChamps(allSelected);
                     };
 
-                    // Funzione per deselezionare tutti
                     const clearAllChamps = () => {
                       const allUnselected = {};
                       CHAMPIONSHIP_LIST.forEach(c => { allUnselected[c] = false; });
                       setSelectedChamps(allUnselected);
                     };
 
-                    // Funzione per ottenere i campionati attivi
                     const getActiveChamps = () => {
                       return Object.keys(selectedChamps).filter(c => selectedChamps[c]);
                     };
 
                     useEffect(() => {
-                      const loadData = async () => {
-                        const data = await loadScrapedData();
-                        if (data && data.matches && data.matches.length > 0) {
-                          setMatches(data.matches);
-                          setChampionships(data.championships || []);
-                          console.log(`✅ Caricate ${data.matches.length} partite!`);
-                        } else {
-                          console.warn('⚠️ Nessun dato trovato');
-                        }
-                      };
-                      loadData();
+                      try {
+                        const loadData = async () => {
+                          const data = await loadScrapedData();
+                          if (data && data.matches && data.matches.length > 0) {
+                            setMatches(data.matches);
+                            setChampionships(data.championships || []);
+                            console.log(`✅ Caricate ${data.matches.length} partite!`);
+                          } else {
+                            console.warn('⚠️ Nessun dato trovato');
+                          }
+                        };
+                        loadData();
+                      } catch (e) {
+                        console.error('Errore caricamento:', e);
+                        setHasError(true);
+                        setErrorMessage(e.message);
+                      }
                     }, []);
 
                     const updateDataFromScraper = (data) => {
                       if (data && data.matches && data.matches.length > 0) {
                         setMatches(data.matches);
                         setChampionships(data.championships || []);
-
                         const state = {
                           championships: data.championships || [],
                           matches: data.matches,
@@ -7759,7 +7909,6 @@
                           selectedFamiglie
                         };
                         saveState(state);
-
                         showAlert('success', `✅ Aggiornato con ${data.matches.length} partite!`);
                       }
                     };
@@ -7770,10 +7919,8 @@
                       if (!selectedMatchId) return;
                       const match = matches.find(m => m.id === selectedMatchId);
                       if (!match) return;
-
                       const weatherKey = `${match.campionato}_${match.data}`;
                       if (weatherCache[weatherKey]) return;
-
                       const loadWeather = async () => {
                         try {
                           const w = await fetchWeatherForMatch(match);
@@ -7787,7 +7934,6 @@
                           setWeatherCache(prev => ({ ...prev, [weatherKey]: null }));
                         }
                       };
-
                       loadWeather();
                     }, [selectedMatchId, matches]);
 
@@ -7852,11 +7998,10 @@
                     };
 
                     // ============================================================
-                    // RENDER DELL'APP
+                    // RENDER DELL'APP - FUNZIONE PRINCIPALE
                     // ============================================================
 
                     const renderAppContent = () => {
-                      // Funzione per disegnare i pulsanti giorni (usata sia in Palinsesto che in Schedina)
                       const renderGiorniButtons = (selected, onChange) => {
                         const giorniOptions = [1, 2, 3, 4, 5];
                         return ( <
@@ -7874,7 +8019,6 @@
                         );
                       };
 
-                      // Funzione per disegnare i pulsanti campionati (usata sia in Palinsesto che in Schedina)
                       const renderChampFilters = (selectedChampsObj, onToggle, onSelectAll, onClearAll) => {
                         const activeCount = Object.values(selectedChampsObj).filter(v => v).length;
                         const total = Object.keys(selectedChampsObj).length;
@@ -7931,8 +8075,7 @@
                         <
                         div className = "header" >
                         <
-                        div className = "header-left" > < div style = { { fontSize: '28px' } } > < /div></div >
-                        <
+                        div className = "header-left" > < /div> <
                         div className = "header-center" >
                         <
                         div className = "app-name" >
@@ -7975,7 +8118,8 @@
                           message && < div className = { `alert alert-${message.type}` } > { message.text } < /div>} {
                           loading && < div className = "alert alert-info" > ⏳ Elaborazione in corso... < /div>}
 
-                          { tab === 'Home' && ( <
+                          { /* TAB HOME */ } {
+                            tab === 'Home' && ( <
                               div >
                               <
                               HomeWidget matches = { matches }
@@ -8093,14 +8237,12 @@
                                 )
                               }
 
-                              { tab === 'Palinsesto' && ( <
+                              { /* TAB PALINSESTO */ } {
+                                tab === 'Palinsesto' && ( <
                                   div >
                                   <
                                   div style = { { marginBottom: '12px' } } >
-                                  { /* PULSANTI GIORNI */ } {
-                                    renderGiorniButtons(selectedGiorni, (val) => setSelectedGiorni(val)) }
-
-                                  { /* PULSANTI CAMPIONATI */ } {
+                                  { renderGiorniButtons(selectedGiorni, (val) => setSelectedGiorni(val)) } {
                                     renderChampFilters(
                                       selectedChamps,
                                       toggleChamp,
@@ -8109,39 +8251,30 @@
                                     )
                                   } <
                                   /div>
-
                                   <
                                   h2 style = { { marginBottom: '14px' } } > 📅 Palinsesto - Prossimi { selectedGiorni }
                                   Giorno { selectedGiorni > 1 ? 'ni' : '' } < /h2> { (() => {
                                     try {
                                       const activeChamps = getActiveChamps();
                                       const todayStr = getTodayStr();
-                                      // 🔥 CORRETTO: per 1 giorno mostra solo oggi, per più giorni da oggi a oggi+giorni-1
                                       const maxDateStr = addDaysToDateStr(todayStr, selectedGiorni);
-
                                       let futureMatches = matches.filter(m => m.stato === 'Futura');
-
-                                      // Filtra per campionati attivi
                                       if (activeChamps.length > 0) {
                                         futureMatches = futureMatches.filter(m => activeChamps.includes(m
                                         .campionato));
                                       }
-
-                                      // 🔥 FILTRO GIORNI CORRETTO
                                       futureMatches = futureMatches.filter(m => {
                                         if (!m.data) return false;
                                         const normalized = normalizeDate(m.data);
                                         if (!normalized) return false;
                                         return normalized >= todayStr && normalized <= maxDateStr;
                                       });
-
                                       futureMatches.sort((a, b) => {
                                         const dateA = normalizeDate(a.data);
                                         const dateB = normalizeDate(b.data);
                                         if (!dateA || !dateB) return 0;
                                         return dateA.localeCompare(dateB);
                                       });
-
                                       if (futureMatches.length === 0) {
                                         let msg =
                                           `Nessuna partita disponibile nelle prossime ${selectedGiorni} giornate`;
@@ -8151,7 +8284,6 @@
                                         }
                                         return < div className = "empty-state" > { msg }. < /div>;
                                       }
-
                                       return < div className = "matches-grid" > { futureMatches.map(m => {
                                         const weatherKey = `${m.campionato}_${m.data}`;
                                         const weather = weatherCache[weatherKey] || null;
@@ -8163,7 +8295,6 @@
                                         weatherData = { weather }
                                         />;
                                       }) } < /div>;
-
                                     } catch (e) {
                                       console.error('Errore rendering Palinsesto:', e);
                                       return < div className = "empty-state" > Errore nel caricamento delle partite: { e
@@ -8174,7 +8305,8 @@
                                 )
                               }
 
-                              { tab === 'Statistiche' && ( <
+                              { /* TAB STATISTICHE */ } {
+                                tab === 'Statistiche' && ( <
                                   div >
                                   <
                                   div className = "sub-tabs" >
@@ -8187,8 +8319,7 @@
                                     () => setStatsSubTab('Scontri') } > ⚔️ Scontri < /button> <
                                   button className = { statsSubTab === 'RiepilogoAI' ? 'active' : '' }
                                   onClick = {
-                                    () => setStatsSubTab('RiepilogoAI') } > 🤖 Riepilogo AI < /button> {
-                                    /* NUOVA TAB ULTIMA GIORNATA */ } <
+                                    () => setStatsSubTab('RiepilogoAI') } > 🤖 Riepilogo AI < /button> <
                                   button className = { statsSubTab === 'UltimaGiornata' ? 'active' : '' }
                                   onClick = {
                                     () => setStatsSubTab('UltimaGiornata') } > 📅 Ultima Giornata < /button> <
@@ -8263,27 +8394,21 @@
                                       div > {
                                         selectedMatch ? ( <
                                           div >
-                                          { /* Meteo Professionale */ } {
-                                            (() => {
-                                              const city = getCityForMatch(selectedMatch.casa, selectedMatch
-                                                .campionato);
-                                              const weatherKey =
-                                                `${selectedMatch.campionato}_${selectedMatch.data}`;
-                                              const weather = weatherCache[weatherKey] || null;
-                                              return < WeatherProfessionale weatherData = { weather }
-                                              city = { city }
-                                              matchDate = { selectedMatch.data }
-                                              />;
-                                            })()
-                                          }
-
-                                          { /* Simulazione Poisson+Monte Carlo */ } <
+                                          { (() => {
+                                            const city = getCityForMatch(selectedMatch.casa, selectedMatch
+                                              .campionato);
+                                            const weatherKey =
+                                              `${selectedMatch.campionato}_${selectedMatch.data}`;
+                                            const weather = weatherCache[weatherKey] || null;
+                                            return < WeatherProfessionale weatherData = { weather }
+                                            city = { city }
+                                            matchDate = { selectedMatch.data }
+                                            />;
+                                          })() } <
                                           AIAnalysis match = { selectedMatch }
                                           allMatches = { matches }
                                           selectedFamiglie = { selectedFamiglie }
-                                          />
-
-                                          { /* Statistiche delle due squadre */ } <
+                                          /> <
                                           div className = "analisi-compact"
                                           style = { { marginTop: '16px' } } >
                                           <
@@ -8311,9 +8436,7 @@
                                           allMatches = { matches }
                                           /> <
                                           /div> <
-                                          /div>
-
-                                          { /* Analisi Meteo */ } <
+                                          /div> <
                                           AnalisiMeteo matches = { matches }
                                           weatherCache = { weatherCache }
                                           /> <
@@ -8329,33 +8452,24 @@
                                     )
                                   }
 
-                                  { /* RENDER ULTIMA GIORNATA */ } {
+                                  { /* ULTIMA GIORNATA */ } {
                                     statsSubTab === 'UltimaGiornata' && ( <
-                                      div >
-                                      {
+                                      div > {
                                         selectedMatch ? ( <
-                                          div >
-                                          { /* Determina la giornata precedente */ } <
-                                          div > {
-                                            (() => {
+                                          div > { (() => {
                                               const currentRound = selectedMatch.round;
-                                              // Se la giornata è un numero, decrementa di 1
                                               const prevRound = parseInt(currentRound) > 0 ? parseInt(
                                                 currentRound) - 1 : null;
-
                                               if (prevRound === null || isNaN(prevRound)) {
                                                 return < p style = { { color: 'var(--text-muted)' } } >
                                                 La giornata corrente non è un numero valido per determinare
                                                 la precedente. < /p>;
                                               }
-
-                                              // Cerca le partite della giornata precedente nello stesso campionato
                                               const prevMatches = matches.filter(m =>
                                                 m.campionato === selectedMatch.campionato &&
                                                 m.round === String(prevRound) &&
                                                 m.stato === 'Giocata'
                                               );
-
                                               if (prevMatches.length === 0) {
                                                 return ( <
                                                   div className = "card" >
@@ -8370,14 +8484,11 @@
                                                   /div>
                                                 );
                                               }
-
-                                              // Ordina per data
                                               const sortedPrev = [...prevMatches].sort((a, b) => {
                                                 const dateA = parseDate(a.data, a.ora);
                                                 const dateB = parseDate(b.data, b.ora);
                                                 return dateA - dateB;
                                               });
-
                                               return ( <
                                                 div >
                                                 <
@@ -8400,9 +8511,7 @@
                                                 /div> <
                                                 /div>
                                               );
-                                            })()
-                                          } <
-                                          /div> <
+                                            })() } <
                                           /div>
                                         ) : ( <
                                           div className = "stats-placeholder" >
@@ -8418,7 +8527,8 @@
                                 )
                               }
 
-                              { tab === 'Storico' && ( <
+                              { /* TAB STORICO */ } {
+                                tab === 'Storico' && ( <
                                   div >
                                   <
                                   h2 style = { { marginBottom: '14px' } } > 📜 Storico Partite Giocate < /h2> <
@@ -8437,27 +8547,22 @@
                                       if (m.stato === 'Futura' && isDatePassed(m.data)) return true;
                                       return false;
                                     });
-
                                     if (selectedChamp !== 'Tutti') {
                                       playedMatches = playedMatches.filter(m => m.campionato ===
                                         selectedChamp);
                                     }
-
                                     playedMatches.sort((a, b) => {
                                       const dateA = normalizeDate(a.data);
                                       const dateB = normalizeDate(b.data);
                                       if (!dateA || !dateB) return 0;
                                       return dateB.localeCompare(dateA);
                                     });
-
                                     if (playedMatches.length === 0) {
                                       return < div className = "empty-state" > Nessuna partita giocata o con data
                                       passata. < /div>;
                                     }
-
                                     const senzaRisultato = playedMatches.filter(m => m.stato === 'Futura' &&
                                       isDatePassed(m.data));
-
                                     return ( <
                                       div >
                                       {
@@ -8483,7 +8588,8 @@
                                 )
                               }
 
-                              { tab === 'Schedina' && ( <
+                              { /* TAB SCHEDINA */ } {
+                                tab === 'Schedina' && ( <
                                   div > {
                                     window.SchedinaComponent ? ( <
                                       window.SchedinaComponent matches = { matches }
@@ -8507,7 +8613,8 @@
                                 )
                               }
 
-                              { tab === 'Impostazioni' && ( <
+                              { /* TAB IMPOSTAZIONI */ } {
+                                tab === 'Impostazioni' && ( <
                                   div >
                                   <
                                   div className = "tabs-sub" > {
@@ -8831,6 +8938,10 @@
                             );
                           };
 
+                          // ============================================================
+                          // RENDER FINALE
+                          // ============================================================
+
                           if (viewMode === 'mobile') {
                             return ( <
                               div style = { { display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
@@ -8901,7 +9012,32 @@
                           }
                         });
 
-                        ReactDOM.createRoot(document.getElementById('root')).render( < App / > );
+                        // Avvia React con try-catch per gestire errori
+                        try {
+                          const rootElement = document.getElementById('root');
+                          if (rootElement) {
+                            ReactDOM.createRoot(rootElement).render( < App / > );
+                          }
+                        } catch (e) {
+                          console.error('Errore durante il rendering React:', e);
+                          const errorContainer = document.getElementById('error-container');
+                          const errorMsg = document.getElementById('error-message-text');
+                          const errorStack = document.getElementById('error-stack-text');
+                          const splash = document.getElementById('splashscreen');
+                          const root = document.getElementById('root');
+
+                          if (errorContainer) {
+                            errorContainer.classList.add('visible');
+                            if (errorMsg) {
+                              errorMsg.textContent = e.message || 'Errore durante il rendering dell\'applicazione.';
+                            }
+                            if (errorStack) {
+                              errorStack.textContent = e.stack || 'Nessun dettaglio disponibile.';
+                            }
+                          }
+                          if (splash) splash.style.display = 'none';
+                          if (root) root.style.display = 'none';
+                        }
   </script>
 </body>
 </html>
