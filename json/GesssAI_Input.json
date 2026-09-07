@@ -499,8 +499,8 @@
     "risultato": "3–1",
     "gol_casa": "3",
     "gol_ospite": "1",
-    "citta": "",
-    "stadio": "",
+    "citta": "Osnabruck",
+    "stadio": "Bremer Brücke",
     "stato": "Giocata"
   },
   {
@@ -14583,8 +14583,8 @@
     "risultato": "4–0",
     "gol_casa": "4",
     "gol_ospite": "0",
-    "citta": "Stoke on Trent",
-    "stadio": "Bet365 Stadium",
+    "citta": "Stoke",
+    "stadio": "bet365 Stadium",
     "stato": "Giocata"
   },
   {
@@ -14598,7 +14598,7 @@
     "gol_casa": "1",
     "gol_ospite": "1",
     "citta": "Lincoln",
-    "stadio": "LNER stadium",
+    "stadio": "Sincil Bank",
     "stato": "Giocata"
   },
   {
@@ -14682,7 +14682,7 @@
     "gol_casa": "0",
     "gol_ospite": "1",
     "citta": "London",
-    "stadio": "Loftus Road",
+    "stadio": "Loftus Road Stadium",
     "stato": "Giocata"
   },
   {
@@ -14724,7 +14724,7 @@
     "gol_casa": "2",
     "gol_ospite": "2",
     "citta": "Birmingham",
-    "stadio": "",
+    "stadio": "St. Andrew's @ Knighthead Park",
     "stato": "Giocata"
   },
   {
@@ -27505,8 +27505,8 @@
     "risultato": "2–2",
     "gol_casa": "2",
     "gol_ospite": "2",
-    "citta": "Felsen",
-    "stadio": "Sportpark Schoonenberg",
+    "citta": "Velsen",
+    "stadio": "BUKO Stadion",
     "stato": "Giocata"
   },
   {
@@ -27519,8 +27519,8 @@
     "risultato": "2–3",
     "gol_casa": "2",
     "gol_ospite": "3",
-    "citta": "The Hague",
-    "stadio": "Bingoal Stadion",
+    "citta": "Den Haag",
+    "stadio": "Bingoal Stadium",
     "stato": "Giocata"
   },
   {
@@ -34562,7 +34562,7 @@
     "gol_casa": "0",
     "gol_ospite": "4",
     "citta": "Mechelen",
-    "stadio": "Achter de Kazerne",
+    "stadio": "Veoliastadion Achter De Kazerne",
     "stato": "Giocata"
   },
   {
@@ -34589,8 +34589,8 @@
     "risultato": "4–0",
     "gol_casa": "4",
     "gol_ospite": "0",
-    "citta": "Sint-Truiden",
-    "stadio": "Daio Wasabi Stayen",
+    "citta": "Sint- Truiden",
+    "stadio": "Stayen",
     "stato": "Giocata"
   },
   {
@@ -34603,8 +34603,8 @@
     "risultato": "0–3",
     "gol_casa": "0",
     "gol_ospite": "3",
-    "citta": "Brugge",
-    "stadio": "Jan Breydel Stadion",
+    "citta": "Bruges",
+    "stadio": "Jan Breydel Stadium",
     "stato": "Giocata"
   },
   {
@@ -34618,7 +34618,7 @@
     "gol_casa": "0",
     "gol_ospite": "2",
     "citta": "Kortrijk",
-    "stadio": "Guldensporen Stadion",
+    "stadio": "Guldensporenstadion",
     "stato": "Giocata"
   },
   {
@@ -34631,7 +34631,7 @@
     "risultato": "0–0",
     "gol_casa": "0",
     "gol_ospite": "0",
-    "citta": "Anderlecht",
+    "citta": "Brussels",
     "stadio": "Lotto Park",
     "stato": "Giocata"
   },
@@ -34646,7 +34646,7 @@
     "gol_casa": "3",
     "gol_ospite": "0",
     "citta": "Beveren",
-    "stadio": "Freethiel Stadion",
+    "stadio": "Freethielstadion",
     "stato": "Giocata"
   },
   {
@@ -66537,7 +66537,7 @@
     "risultato": "2–0",
     "gol_casa": "2",
     "gol_ospite": "0",
-    "citta": "Philadelphia",
+    "citta": "Chester",
     "stadio": "Subaru Park",
     "stato": "Giocata"
   },
@@ -66580,7 +66580,7 @@
     "gol_casa": "3",
     "gol_ospite": "0",
     "citta": "Columbus",
-    "stadio": "ScottsMiracle-Gro Field",
+    "stadio": "Lower.com Field",
     "stato": "Giocata"
   },
   {
@@ -81896,7 +81896,7 @@
     "gol_casa": "1",
     "gol_ospite": "1",
     "citta": "San Sebastian",
-    "stadio": "Estadio Zubieta",
+    "stadio": "Estadio Ciudad Deportiva Zubieta",
     "stato": "Giocata"
   },
   {
@@ -81909,8 +81909,8 @@
     "risultato": "0–2",
     "gol_casa": "0",
     "gol_ospite": "2",
-    "citta": "",
-    "stadio": "",
+    "citta": "Gijon",
+    "stadio": "El Molinón",
     "stato": "Giocata"
   },
   {
@@ -81924,7 +81924,7 @@
     "gol_casa": "1",
     "gol_ospite": "0",
     "citta": "Valladolid",
-    "stadio": "",
+    "stadio": "José Zorrilla",
     "stato": "Giocata"
   },
   {
@@ -81951,8 +81951,8 @@
     "risultato": "0–0",
     "gol_casa": "0",
     "gol_ospite": "0",
-    "citta": "Elda",
-    "stadio": "Estadio Nuevo Pepico Amat",
+    "citta": "Alicante",
+    "stadio": "Estadio Pepico Amat",
     "stato": "Giocata"
   },
   {
@@ -81994,7 +81994,7 @@
     "gol_casa": "2",
     "gol_ospite": "0",
     "citta": "Castellon",
-    "stadio": "Estadio Municipal de Castalia",
+    "stadio": "Estadio Municipal Castalia",
     "stato": "Giocata"
   },
   {
@@ -82007,8 +82007,8 @@
     "risultato": "3–2",
     "gol_casa": "3",
     "gol_ospite": "2",
-    "citta": "",
-    "stadio": "",
+    "citta": "Almeria",
+    "stadio": "UD Almeria Stadium",
     "stato": "Giocata"
   },
   {
