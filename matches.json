@@ -7779,8 +7779,8 @@
     "risultato": "2–3",
     "gol_casa": "2",
     "gol_ospite": "3",
-    "citta": "",
-    "stadio": "",
+    "citta": "Bragança Paulista",
+    "stadio": "Estádio Cícero de Souza Marques",
     "stato": "Giocata"
   },
   {
@@ -7794,7 +7794,7 @@
     "gol_casa": "2",
     "gol_ospite": "0",
     "citta": "Sao Paulo",
-    "stadio": "Estadio Do MorumBIS",
+    "stadio": "MorumBIS",
     "stato": "Giocata"
   },
   {
@@ -7822,7 +7822,7 @@
     "gol_casa": "1",
     "gol_ospite": "2",
     "citta": "Curitiba",
-    "stadio": "",
+    "stadio": "Estádio Major Antônio Couto Pereira",
     "stato": "Giocata"
   },
   {
@@ -7836,7 +7836,7 @@
     "gol_casa": "3",
     "gol_ospite": "1",
     "citta": "Belo Horizonte",
-    "stadio": "",
+    "stadio": "Governador Magalhães Pinto",
     "stato": "Giocata"
   },
   {
@@ -7850,7 +7850,7 @@
     "gol_casa": "2",
     "gol_ospite": "3",
     "citta": "Porto Alegre",
-    "stadio": "",
+    "stadio": "Estádio Beira-Rio",
     "stato": "Giocata"
   },
   {
@@ -7864,7 +7864,7 @@
     "gol_casa": "0",
     "gol_ospite": "1",
     "citta": "Belem",
-    "stadio": "Estadio Evandro Almeida",
+    "stadio": "Mangueirão",
     "stato": "Giocata"
   },
   {
@@ -7878,7 +7878,7 @@
     "gol_casa": "0",
     "gol_ospite": "0",
     "citta": "Rio de Janeiro",
-    "stadio": "Estadio Olimpico Nilton Santos",
+    "stadio": "Estádio Nilton Santos",
     "stato": "Giocata"
   },
   {
@@ -7892,7 +7892,7 @@
     "gol_casa": "1",
     "gol_ospite": "2",
     "citta": "Sao Paulo",
-    "stadio": "Neo Quimica Arena",
+    "stadio": "Neo Química Arena",
     "stato": "Giocata"
   },
   {
@@ -7906,7 +7906,7 @@
     "gol_casa": "1",
     "gol_ospite": "0",
     "citta": "Salvador",
-    "stadio": "Barradao",
+    "stadio": "Estádio Manoel Barradas",
     "stato": "Giocata"
   },
   {
@@ -8206,34 +8206,6 @@
   {
     "campionato": "Brasileirão Serie A",
     "data": "07/10/2026",
-    "ora": "20:00",
-    "giornata": "29",
-    "squadra_casa": "Fluminense",
-    "squadra_ospite": "Coritiba",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Rio de Janeiro",
-    "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Brasileirão Serie A",
-    "data": "07/10/2026",
-    "ora": "20:00",
-    "giornata": "29",
-    "squadra_casa": "Palmeiras",
-    "squadra_ospite": "Bahia",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Sao Paulo",
-    "stadio": "Allianz Parque",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Brasileirão Serie A",
-    "data": "07/10/2026",
     "ora": "22:30",
     "giornata": "29",
     "squadra_casa": "RB Bragantino",
@@ -8341,6 +8313,34 @@
     "gol_ospite": "",
     "citta": "Curitiba",
     "stadio": "Arena da Baixada",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Brasileirão Serie A",
+    "data": "09/10/2026",
+    "ora": "00:30",
+    "giornata": "29",
+    "squadra_casa": "Fluminense",
+    "squadra_ospite": "Coritiba",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Rio de Janeiro",
+    "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Brasileirão Serie A",
+    "data": "09/10/2026",
+    "ora": "00:30",
+    "giornata": "29",
+    "squadra_casa": "Palmeiras",
+    "squadra_ospite": "Bahia",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Sao Paulo",
+    "stadio": "Allianz Parque",
     "stato": "Futura"
   },
   {
@@ -14734,12 +14734,12 @@
     "giornata": "6",
     "squadra_casa": "Watford",
     "squadra_ospite": "Preston",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Watford",
     "stadio": "Vicarage Road",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -14748,12 +14748,12 @@
     "giornata": "6",
     "squadra_casa": "Southampton",
     "squadra_ospite": "Swansea",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–1",
+    "gol_casa": "3",
+    "gol_ospite": "1",
     "citta": "Southampton",
     "stadio": "",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -14762,12 +14762,12 @@
     "giornata": "6",
     "squadra_casa": "Cardiff",
     "squadra_ospite": "Stoke City",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Cardiff",
     "stadio": "Cardiff City Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -14776,12 +14776,12 @@
     "giornata": "6",
     "squadra_casa": "Blackburn",
     "squadra_ospite": "Sheffield Utd",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Blackburn",
     "stadio": "Ewood Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -14790,12 +14790,12 @@
     "giornata": "6",
     "squadra_casa": "Wrexham",
     "squadra_ospite": "Burnley",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Wrexham",
     "stadio": "Racecourse Ground",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -14804,12 +14804,12 @@
     "giornata": "6",
     "squadra_casa": "Bolton",
     "squadra_ospite": "West Ham",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–3",
+    "gol_casa": "2",
+    "gol_ospite": "3",
     "citta": "Bolton",
     "stadio": "Toughsheet Community Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -27516,12 +27516,12 @@
     "giornata": "5",
     "squadra_casa": "FC Utrecht",
     "squadra_ospite": "Go Ahead Eagles",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–3",
+    "gol_casa": "3",
+    "gol_ospite": "3",
     "citta": "Utrecht",
     "stadio": "Stadion Galgenwaard",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eredivisie",
@@ -27530,12 +27530,12 @@
     "giornata": "3",
     "squadra_casa": "NEC Nijmegen",
     "squadra_ospite": "Excelsior",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Nijmegen",
     "stadio": "Stadion de Goffert",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eredivisie",
@@ -34903,6 +34903,20 @@
   },
   {
     "campionato": "Jupiler Pro League",
+    "data": "09/10/2026",
+    "ora": "18:45",
+    "giornata": "8",
+    "squadra_casa": "SK Beveren",
+    "squadra_ospite": "Lommel United",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Beveren",
+    "stadio": "Freethiel Stadion",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Jupiler Pro League",
     "data": "10/10/2026",
     "ora": "15:00",
     "giornata": "8",
@@ -34955,20 +34969,6 @@
     "gol_ospite": "",
     "citta": "Liege",
     "stadio": "Maurice Dufrasnestadion",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Jupiler Pro League",
-    "data": "10/10/2026",
-    "ora": "15:00",
-    "giornata": "8",
-    "squadra_casa": "SK Beveren",
-    "squadra_ospite": "Lommel United",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Beveren",
-    "stadio": "Freethiel Stadion",
     "stato": "Futura"
   },
   {
@@ -40564,12 +40564,12 @@
     "giornata": "28",
     "squadra_casa": "Incheon United",
     "squadra_ospite": "Bucheon FC 1995",
-    "risultato": "0–0",
-    "gol_casa": "0",
-    "gol_ospite": "0",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Incheon",
     "stadio": "Sungui Arena Park",
-    "stato": "In corso"
+    "stato": "Giocata"
   },
   {
     "campionato": "K League 1",
@@ -40578,12 +40578,12 @@
     "giornata": "28",
     "squadra_casa": "Ulsan Hyundai FC",
     "squadra_ospite": "FC Seoul",
-    "risultato": "0–0",
-    "gol_casa": "0",
+    "risultato": "1–0",
+    "gol_casa": "1",
     "gol_ospite": "0",
     "citta": "Ulsan",
     "stadio": "Ulsan Munsu Football Stadium",
-    "stato": "In corso"
+    "stato": "Giocata"
   },
   {
     "campionato": "K League 1",
@@ -40592,12 +40592,12 @@
     "giornata": "28",
     "squadra_casa": "Daejeon Citizen",
     "squadra_ospite": "FC Anyang",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Daejeon",
     "stadio": "Daejeon World Cup Stadium",
-    "stato": "Futura"
+    "stato": "In corso"
   },
   {
     "campionato": "K League 1",
@@ -40606,12 +40606,12 @@
     "giornata": "28",
     "squadra_casa": "Gangwon FC",
     "squadra_ospite": "Jeonbuk Motors",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Chuncheon",
     "stadio": "Chuncheon Songam Stadium",
-    "stato": "Futura"
+    "stato": "In corso"
   },
   {
     "campionato": "K League 1",
@@ -40620,12 +40620,12 @@
     "giornata": "28",
     "squadra_casa": "Gwangju FC",
     "squadra_ospite": "Jeju United",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Gwangju",
     "stadio": "Gwangju Football Stadium",
-    "stato": "Futura"
+    "stato": "In corso"
   },
   {
     "campionato": "K League 1",
@@ -40634,12 +40634,12 @@
     "giornata": "28",
     "squadra_casa": "Pohang Steelers",
     "squadra_ospite": "Gimcheon Sangmu",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Pohang",
     "stadio": "Pohang Steel Yard",
-    "stato": "Futura"
+    "stato": "In corso"
   },
   {
     "campionato": "K League 1",
@@ -41632,7 +41632,7 @@
     "gol_casa": "1",
     "gol_ospite": "1",
     "citta": "Getafe",
-    "stadio": "Coliseum",
+    "stadio": "Coliseum Alfonso Pérez",
     "stato": "Giocata"
   },
   {
@@ -41646,7 +41646,7 @@
     "gol_casa": "2",
     "gol_ospite": "3",
     "citta": "Elche",
-    "stadio": "",
+    "stadio": "Estadio Martínez Valero",
     "stato": "Giocata"
   },
   {
@@ -53957,6 +53957,20 @@
   },
   {
     "campionato": "Ligue 1",
+    "data": "09/10/2026",
+    "ora": "18:45",
+    "giornata": "6",
+    "squadra_casa": "Lens",
+    "squadra_ospite": "Lyon",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Lens",
+    "stadio": "Stade Bollaert-Delelis",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Ligue 1",
     "data": "10/10/2026",
     "ora": "15:00",
     "giornata": "6",
@@ -54065,20 +54079,6 @@
     "gol_ospite": "",
     "citta": "Troyes",
     "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Ligue 1",
-    "data": "10/10/2026",
-    "ora": "15:00",
-    "giornata": "6",
-    "squadra_casa": "Lens",
-    "squadra_ospite": "Lyon",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Lens",
-    "stadio": "Stade Bollaert-Delelis",
     "stato": "Futura"
   },
   {
@@ -75237,6 +75237,34 @@
   },
   {
     "campionato": "Primeira Liga",
+    "data": "09/10/2026",
+    "ora": "17:45",
+    "giornata": "8",
+    "squadra_casa": "Moreirense",
+    "squadra_ospite": "Gil Vicente",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Moreira de Conegos",
+    "stadio": "Parque Joaquim de Almeida Freitas",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Primeira Liga",
+    "data": "09/10/2026",
+    "ora": "19:15",
+    "giornata": "8",
+    "squadra_casa": "Braga",
+    "squadra_ospite": "Sporting CP",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Braga",
+    "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Primeira Liga",
     "data": "11/10/2026",
     "ora": "15:00",
     "giornata": "8",
@@ -75260,34 +75288,6 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Funchal",
-    "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Primeira Liga",
-    "data": "11/10/2026",
-    "ora": "15:00",
-    "giornata": "8",
-    "squadra_casa": "Moreirense",
-    "squadra_ospite": "Gil Vicente",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Moreira de Conegos",
-    "stadio": "Parque Joaquim de Almeida Freitas",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Primeira Liga",
-    "data": "11/10/2026",
-    "ora": "15:00",
-    "giornata": "8",
-    "squadra_casa": "Braga",
-    "squadra_ospite": "Sporting CP",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Braga",
     "stadio": "",
     "stato": "Futura"
   },
@@ -117400,7 +117400,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Shenzhen",
-    "stadio": "",
+    "stadio": "Shenzhen Stadium",
     "stato": "Futura"
   },
   {
@@ -118282,7 +118282,7 @@
     "gol_casa": "3",
     "gol_ospite": "0",
     "citta": "Corum",
-    "stadio": "Çorum Şehir Stadyumu",
+    "stadio": "Corum Stadyumu",
     "stato": "Giocata"
   },
   {
@@ -118324,7 +118324,7 @@
     "gol_casa": "2",
     "gol_ospite": "4",
     "citta": "Izmir",
-    "stadio": "",
+    "stadio": "Gursel Aksel Stadium",
     "stato": "Giocata"
   },
   {
@@ -118338,7 +118338,7 @@
     "gol_casa": "0",
     "gol_ospite": "1",
     "citta": "Rize",
-    "stadio": "",
+    "stadio": "Çaykur Didi Stadyumu",
     "stato": "Giocata"
   },
   {
