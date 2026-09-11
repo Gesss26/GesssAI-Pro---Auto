@@ -14752,7 +14752,7 @@
     "gol_casa": "3",
     "gol_ospite": "1",
     "citta": "Southampton",
-    "stadio": "",
+    "stadio": "St. Mary's Stadium",
     "stato": "Giocata"
   },
   {
@@ -14822,7 +14822,7 @@
     "gol_casa": "0",
     "gol_ospite": "1",
     "citta": "Derby",
-    "stadio": "Pride Park",
+    "stadio": "Pride Park Stadium",
     "stato": "Giocata"
   },
   {
@@ -27534,7 +27534,7 @@
     "gol_casa": "2",
     "gol_ospite": "2",
     "citta": "Nijmegen",
-    "stadio": "Stadion de Goffert",
+    "stadio": "Goffertstadion",
     "stato": "Giocata"
   },
   {
@@ -27562,7 +27562,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Alkmaar",
-    "stadio": "AFAS Stadion（Alkmaar）",
+    "stadio": "AFAS Stadion",
     "stato": "Futura"
   },
   {
@@ -66761,7 +66761,7 @@
     "risultato": "1–2",
     "gol_casa": "1",
     "gol_ospite": "2",
-    "citta": "Montreal",
+    "citta": "Montréal",
     "stadio": "Saputo Stadium",
     "stato": "Giocata"
   },
@@ -66775,7 +66775,7 @@
     "risultato": "5–0",
     "gol_casa": "5",
     "gol_ospite": "0",
-    "citta": "Philadelphia",
+    "citta": "Chester",
     "stadio": "Subaru Park",
     "stato": "Giocata"
   },
@@ -66790,7 +66790,7 @@
     "gol_casa": "1",
     "gol_ospite": "2",
     "citta": "New York",
-    "stadio": "Yankee Stadium",
+    "stadio": "Citi Field",
     "stato": "Giocata"
   },
   {
@@ -74965,8 +74965,8 @@
     "risultato": "0–4",
     "gol_casa": "0",
     "gol_ospite": "4",
-    "citta": "Moreira de Conegos",
-    "stadio": "Parque Joaquim de Almeida Freitas",
+    "citta": "Moreira de Cónegos",
+    "stadio": "Parque de Jogos Comendador Joaquim de Almeida Freitas",
     "stato": "Giocata"
   },
   {
@@ -74976,12 +74976,12 @@
     "giornata": "3",
     "squadra_casa": "Estrela",
     "squadra_ospite": "Braga",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Amadora",
     "stadio": "",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Primeira Liga",
