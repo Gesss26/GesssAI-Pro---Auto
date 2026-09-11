@@ -14,9 +14,19 @@ const SchedinaComponent = ({
   palinsestoGiorniRange = 1,  // Valore dal Palinsesto (default 1)
   renderGiorniButtons,         // Funzione per renderizzare i pulsanti giorni
   renderChampFilters,          // Funzione per renderizzare i pulsanti campionati
-  CHAMPIONSHIP_LIST,           // Lista campionati dal Palinsesto
-  getChampColor                // Funzione per ottenere il colore del campionato
+  CHAMPIONSHIP_LIST            // Lista campionati dal Palinsesto
 }) => {
+  // Accesso sicuro alle funzioni globali (usato in tutto il componente)
+  const getChampColor = window.getChampColor || (() => '#95a5a6');
+  const computeMatchStats = window.computeMatchStats;
+  const getMultigolRange = window.getMultigolRange;
+  const getBestBetForFamily = window.getBestBetForFamily;
+  const getPercentualeClasse = window.getPercentualeClasse;
+  const normalizeDate = window.normalizeDate;
+  const getTodayStr = window.getTodayStr;
+  const addDaysToDateStr = window.addDaysToDateStr;
+  const formatDateEU = window.formatDateEU;
+
   // Stato per i campionati selezionati (array di nomi)
   const [campionatiSelezionati, setCampionatiSelezionati] = useState([]);
   const [partiteSelezionate, setPartiteSelezionate] = useState([]);
