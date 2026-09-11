@@ -8101,32 +8101,33 @@
                         message && < div className = { `alert alert-${message.type}` } > { message.text } < /div>} {
                         loading && < div className = "alert alert-info" > ⏳ Elaborazione in corso... < /div>}
 
-                        { /* TAB HOME - VERSIONE ESTERNA */ } {
-                          tab === 'Home' && ( <
-                            div > {
-                              window.HomeComponent ? ( <
-                                window.HomeComponent matches = { matches }
-                                championships = { championships }
-                                onSelectMatch = { selectMatch }
-                                setTab = { setTab }
-                                selectedFamiglie = { selectedFamiglie }
-                                weatherCache = { weatherCache }
-                                getChampColor = { getChampColor }
-                                formatDateEU = { formatDateEU }
-                                TeamLogo = { TeamLogo }
-                                FAMIGLIE_GIOCATE = { FAMIGLIE_GIOCATE }
-                                getPercentualeClasse = { getPercentualeClasse }
-                                renderGiorniButtons = { renderGiorniButtons }
-                                renderChampFilters = { renderChampFilters }
-                                CHAMPIONSHIP_LIST = { CHAMPIONSHIP_LIST }
-                                />
-                              ) : ( <
-                                div className = "alert alert-info" > ⏳ Caricamento modulo Home... Assicurati che il file < b > home.js < /b> sia presente nella stessa cartella. < /div>
-                              )
-                            } <
-                            /div>
-                          )
-                        }
+                        {/* TAB HOME - VERSIONE ESTERNA */}
+{tab === 'Home' && (
+  <div>
+    {window.HomeComponent ? (
+      <window.HomeComponent
+        matches={matches}
+        championships={championships}
+        onSelectMatch={selectMatch}
+        setTab={setTab}
+        selectedFamiglie={selectedFamiglie}
+        weatherCache={weatherCache}
+        getChampColor={getChampColor}
+        formatDateEU={formatDateEU}
+        TeamLogo={TeamLogo}
+        FAMIGLIE_GIOCATE={FAMIGLIE_GIOCATE}
+        getPercentualeClasse={getPercentualeClasse}
+        renderGiorniButtons={renderGiorniButtons}
+        renderChampFilters={renderChampFilters}
+        CHAMPIONSHIP_LIST={CHAMPIONSHIP_LIST}
+      />
+    ) : (
+      <div className="alert alert-info">
+        ⏳ Caricamento modulo Home... Assicurati che il file <b>home.js</b> sia presente nella stessa cartella.
+      </div>
+    )}
+  </div>
+)}
 
                         { /* TAB PALINSESTO */ } {
                           tab === 'Palinsesto' && ( <
