@@ -1,4 +1,4 @@
-const getChampColor = getChampColorProp || window.getChampColor || (() => '#95a5a6');
+const getChampColor = window.getChampColor || (() => '#95a5a6');
 const computeMatchStats = window.computeMatchStats;
 const getMultigolRange = window.getMultigolRange;
 const getBestBetForFamily = window.getBestBetForFamily;
