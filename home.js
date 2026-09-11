@@ -1,12 +1,6 @@
 // ============================================================
 // home.js - Modulo Home esterno per GesssAI-Pro v3.0
-// ============================================================
-// Richiede che in index.html siano già definite ed esposte
-// globalmente le seguenti funzioni/variabili:
-//   - computeMatchStats, getGiocataPct, getBestBetForFamily
-//   - FAMIGLIE_GIOCATE, getChampColor, formatDateEU
-//   - TeamLogo, getPercentualeClasse
-//   - parseDate, normalizeDate, getTodayStr
+// LEGGE il filtro campionati dal Palinsesto (fonte di verità).
 // ============================================================
 
 (function () {
@@ -16,9 +10,6 @@
 
   // ============================================================
   // FIX: Chinese Super League erroneamente etichettata
-  //      come "Super League Grecia" dallo scraper.
-  //      (Mantenuto per sicurezza: se in futuro si riattiva la Cina,
-  //       le partite saranno già normalizzate.)
   // ============================================================
 
   const CHINESE_TEAMS = new Set([
@@ -73,55 +64,22 @@
         grid-template-columns: repeat(4, 1fr);
         gap: 12px;
       }
-
-      /* Tablet (max 1024px): 3 colonne */
       @media (max-width: 1024px) {
-        .nazioni-grid {
-          grid-template-columns: repeat(3, 1fr);
-          gap: 10px;
-        }
+        .nazioni-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
       }
-
-      /* Tablet piccolo / mobile orizzontale (max 768px): 3 colonne */
       @media (max-width: 768px) {
-        .nazioni-grid {
-          grid-template-columns: repeat(3, 1fr);
-          gap: 8px;
-        }
-        .nazione-btn {
-          min-height: 80px !important;
-          padding: 10px 4px !important;
-        }
+        .nazioni-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .nazione-btn { min-height: 80px !important; padding: 10px 4px !important; }
       }
-
-      /* Mobile (max 480px): 2 colonne */
       @media (max-width: 480px) {
-        .nazioni-grid {
-          grid-template-columns: repeat(2, 1fr);
-          gap: 8px;
-        }
-        .nazione-btn {
-          min-height: 72px !important;
-          padding: 8px 4px !important;
-        }
-        .nazione-btn img {
-          width: 30px !important;
-          height: 30px !important;
-        }
-        .nazione-btn span {
-          font-size: 10px !important;
-        }
+        .nazioni-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .nazione-btn { min-height: 72px !important; padding: 8px 4px !important; }
+        .nazione-btn img { width: 30px !important; height: 30px !important; }
+        .nazione-btn span { font-size: 10px !important; }
       }
-
-      /* Mobile molto piccolo (max 360px): 2 colonne strette */
       @media (max-width: 360px) {
-        .nazioni-grid {
-          grid-template-columns: repeat(2, 1fr);
-          gap: 6px;
-        }
-        .nazione-btn {
-          min-height: 66px !important;
-        }
+        .nazioni-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+        .nazione-btn { min-height: 66px !important; }
       }
     `;
     document.head.appendChild(style);
@@ -607,7 +565,11 @@
 
         {campionatiDaMostrare.length === 0 ? (
           <div className="empty-state">
-            Nessuna partita disponibile per i campionati di {nazione}.
+            Nessuna partita disponibile per i campionati attivi di {nazione}.
+            <br />
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+              Modifica i filtri nel Palinsesto 📅
+            </span>
           </div>
         ) : (
           campionatiDaMostrare.map(camp => (
@@ -674,7 +636,7 @@
                 key={naz}
                 onClick={() => !disabled && onSelectNazione(naz)}
                 disabled={disabled}
-                title={disabled ? `${naz} - nessuna partita` : naz}
+                title={disabled ? `${naz} - nessuna partita (campionati non attivi)` : naz}
                 className="nazione-btn"
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -703,6 +665,13 @@
                 }}>
                   {naz}
                 </span>
+                {!disabled && (
+                  <span style={{
+                    fontSize: '9px', color: 'var(--text-muted)', lineHeight: '1',
+                  }}>
+                    {conteggi[naz]} partite
+                  </span>
+                )}
               </button>
             );
           })}
@@ -715,6 +684,7 @@
         }}>
           <span>💡 Clicca su una nazione per vedere i campionati</span>
           <span>🎯 Clicca su una giocata per aggiungerla alla Schedina</span>
+          <span style={{ color: 'var(--accent)' }}>🔄 Filtro campionati dal Palinsesto</span>
         </div>
       </div>
     );
@@ -727,10 +697,17 @@
   function HomeComponent({ matches, championships, onSelectMatch, setTab, selectedFamiglie, weatherCache }) {
     const [nazioneSelezionata, setNazioneSelezionata] = useState(null);
 
-    // FIX: normalizza i campionati (Chinese Super League non più sotto Grecia)
-    const matchesPuliti = useMemo(() => normalizeMatches(matches), [matches]);
+    // ⭐ FILTRO CAMPIONATI GLOBALE (letto dal Palinsesto)
+    const { filtro: filtroCampionati, campionatiAttivi } =
+      window.FiltriCampionati.useFiltroCampionati();
 
-    if (!matchesPuliti || matchesPuliti.length === 0) {
+    // Normalizza + filtra in base ai campionati attivi
+    const matchesPuliti = useMemo(() => {
+      const normalizzati = normalizeMatches(matches);
+      return window.FiltriCampionati.filtraPartitePerCampionato(normalizzati);
+    }, [matches, filtroCampionati]);
+
+    if (!matches || matches.length === 0) {
       return (
         <div className="empty-state" style={{ padding: '60px 20px' }}>
           <div style={{ fontSize: '64px', marginBottom: '16px' }}>🌍</div>
@@ -744,21 +721,44 @@
       );
     }
 
+    // Banner informativo stato filtro
+    const BannerFiltro = () => (
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
+        padding: '10px 14px', marginBottom: '14px',
+        background: 'var(--surface)', borderRadius: '8px',
+        border: '1px solid var(--border)', fontSize: '12px', color: 'var(--text-muted)'
+      }}>
+        <span>🏆 <b style={{ color: 'var(--accent)' }}>{campionatiAttivi.length}</b> campionati attivi</span>
+        <span>•</span>
+        <span>📊 <b style={{ color: 'var(--accent)' }}>{matchesPuliti.length}</b> partite totali</span>
+        <span style={{ marginLeft: 'auto', fontStyle: 'italic' }}>
+          Modifica i filtri nel <b>Palinsesto</b> 📅
+        </span>
+      </div>
+    );
+
     if (nazioneSelezionata) {
       return (
-        <VistaNazione
-          nazione={nazioneSelezionata}
-          matches={matchesPuliti}
-          onBack={() => setNazioneSelezionata(null)}
-        />
+        <div>
+          <BannerFiltro />
+          <VistaNazione
+            nazione={nazioneSelezionata}
+            matches={matchesPuliti}
+            onBack={() => setNazioneSelezionata(null)}
+          />
+        </div>
       );
     }
 
     return (
-      <GrigliaNazioni
-        matches={matchesPuliti}
-        onSelectNazione={setNazioneSelezionata}
-      />
+      <div>
+        <BannerFiltro />
+        <GrigliaNazioni
+          matches={matchesPuliti}
+          onSelectNazione={setNazioneSelezionata}
+        />
+      </div>
     );
   }
 
@@ -778,16 +778,12 @@
     leggiSelezioniSchedina,
     scriviSelezioniSchedina,
     toggleSelezioneSchedina,
-    // FIX: esposte per debug / riuso altrove
     normalizeMatches,
     normalizeCampionato,
     CHINESE_TEAMS,
   };
 
-  console.log('✅ Modulo Home caricato (home.js)');
+  console.log('✅ Modulo Home caricato (home.js) - legge filtro campionati dal Palinsesto');
   console.log('   - Nazioni disponibili:', Object.keys(NAZIONI).length);
-  console.log('   - Griglia: responsive (4 desktop / 3 tablet / 2 mobile)');
-  console.log('   - Chiave schedina:', SCHEDINA_STORAGE_KEY);
-  console.log('   - Nazioni attive:', Object.keys(NAZIONI).join(', '));
 
 })();

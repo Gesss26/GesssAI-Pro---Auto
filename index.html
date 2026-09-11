@@ -9,6 +9,7 @@
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script type="text/javascript" src="meteo.js"></script>
+<script src="filtri-campionati.js"></script>
 <script type="text/babel" src="schedina.js"></script>
 <script type="text/babel" src="home.js"></script>
 <script type="text/babel" src="impostazioni.js"></script>
@@ -713,7 +714,6 @@
               const data = await response.json();
               console.log('✅ JSON caricato:', data.matches?.length || 0, 'partite');
               if (data.matches) {
-                // Applica filtro anche al JSON
                 const filteredMatches = filtraCampionatiEsclusi(data.matches);
                 const filteredChamps = (data.championships || []).filter(c => !CAMPIONATI_ESCLUSI.has(c.name));
                 localStorage.setItem('ft_matches', JSON.stringify(filteredMatches));
@@ -826,7 +826,6 @@
 
         if (matches.length === 0) return null;
 
-        // === FILTRO GLOBALE: rimuove i campionati esclusi ===
         const matchesFiltrati = filtraCampionatiEsclusi(matches);
         const championshipsFiltrati = Array.from(championshipsSet)
           .filter(name => !CAMPIONATI_ESCLUSI.has(name))
@@ -1335,7 +1334,7 @@
     };
 
     // ============================================================
-    // ESPOSIZIONE GLOBALE (usata dai moduli esterni)
+    // ESPOSIZIONE GLOBALE
     // ============================================================
 
     window.computeMatchStats = computeMatchStats;
@@ -1359,7 +1358,7 @@
     window.THEMES = THEMES;
     window.CHAMPIONSHIP_LIST = CHAMPIONSHIP_LIST;
     window.CHAMPIONSHIP_COLORS = CHAMPIONSHIP_COLORS;
-    window.CAMPIONATI_ESCLUSI = CAMPIONATI_ESCLUSI;   // <-- esposto globalmente
+    window.CAMPIONATI_ESCLUSI = CAMPIONATI_ESCLUSI;
     window.filtraCampionatiEsclusi = filtraCampionatiEsclusi;
 
     console.log('✅ Funzioni globali esposte per i moduli esterni');
@@ -1378,7 +1377,6 @@
           customTheme: JSON.parse(localStorage.getItem('ft_custom_theme') || 'null'),
           selectedFamiglie: JSON.parse(localStorage.getItem('ft_selected_famiglie') || '["dc_under","mg_casa_ospite","over"]'),
         };
-        // Applica filtro di sicurezza ai dati già in localStorage (rimuove eventuali residui)
         localData.matches = filtraCampionatiEsclusi(localData.matches);
         localData.championships = localData.championships.filter(c => !CAMPIONATI_ESCLUSI.has(c.name));
 
@@ -1471,7 +1469,6 @@
 
       const updateDataFromScraper = (data) => {
         if (data && data.matches && data.matches.length > 0) {
-          // Applica filtro di sicurezza anche qui
           const filteredMatches = filtraCampionatiEsclusi(data.matches);
           const filteredChamps = (data.championships || []).filter(c => !CAMPIONATI_ESCLUSI.has(c.name));
           setMatches(filteredMatches);

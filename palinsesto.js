@@ -1,5 +1,6 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto esterno
+// È la FONTE DI VERITÀ per il filtro campionati globale.
 // ============================================================
 
 (function () {
@@ -272,28 +273,16 @@
     const normalizeDate = window.normalizeDate;
     const getTodayStr = window.getTodayStr;
     const addDaysToDateStr = window.addDaysToDateStr;
-    const CHAMPIONSHIP_LIST = window.CHAMPIONSHIP_LIST;
 
     const [selectedGiorni, setSelectedGiorni] = useState(1);
-    const [selectedChamps, setSelectedChamps] = useState(() => {
-      const all = {};
-      CHAMPIONSHIP_LIST.forEach(c => { all[c] = true; });
-      return all;
-    });
 
-    const toggleChamp = (champName) => {
-      setSelectedChamps(prev => ({ ...prev, [champName]: !prev[champName] }));
-    };
-    const selectAllChamps = () => {
-      const all = {};
-      CHAMPIONSHIP_LIST.forEach(c => { all[c] = true; });
-      setSelectedChamps(all);
-    };
-    const clearAllChamps = () => {
-      const none = {};
-      CHAMPIONSHIP_LIST.forEach(c => { none[c] = false; });
-      setSelectedChamps(none);
-    };
+    // ⭐ FILTRO CAMPIONATI GLOBALE (fonte di verità)
+    const {
+      filtro: selectedChamps,
+      toggleCampionato: toggleChamp,
+      selezionaTutti: selectAllChamps,
+      deselezionaTutti: clearAllChamps,
+    } = window.FiltriCampionati.useFiltroCampionati();
 
     const getActiveChamps = () => Object.keys(selectedChamps).filter(c => selectedChamps[c]);
 
@@ -369,6 +358,6 @@
   }
 
   window.PalinsestoComponent = PalinsestoComponent;
-  console.log('✅ Modulo Palinsesto caricato');
+  console.log('✅ Modulo Palinsesto caricato (fonte di verità per filtro campionati)');
 
 })();

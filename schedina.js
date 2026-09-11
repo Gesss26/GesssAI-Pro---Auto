@@ -2,6 +2,7 @@
 // COMPONENTE SCHEDINA - MOSTRA LE STESSE PARTITE DEL PALINSESTO
 // + ESCLUSIONE PARTITE GIÀ INIZIATE
 // + SINCRONIZZATO CON IL RANGE GIORNI DEL PALINSESTO
+// + SINCRONIZZATO CON IL FILTRO CAMPIONATI GLOBALE (Palinsesto)
 // + ORDINAMENTO: DATA -> PERCENTUALE (DECRESCENTE)
 // ============================================================
 
@@ -27,8 +28,19 @@ const SchedinaComponent = ({
   const addDaysToDateStr = window.addDaysToDateStr;
   const formatDateEU = window.formatDateEU;
 
-  // Stato per i campionati selezionati (array di nomi)
-  const [campionatiSelezionati, setCampionatiSelezionati] = useState([]);
+  // ⭐ FILTRO CAMPIONATI GLOBALE (letto dal Palinsesto)
+  const {
+    filtro: campionatiSelezionatiObj,
+    toggleCampionato,
+    selezionaTutti: selezionaTuttiCampionati,
+    deselezionaTutti: deselezionaTuttiCampionati,
+    campionatiAttivi,
+  } = window.FiltriCampionati.useFiltroCampionati();
+
+  // Converte in array di nomi (compatibilità con il codice esistente)
+  const campionatiSelezionati = campionatiAttivi;
+
+  // Stato locale della schedina
   const [partiteSelezionate, setPartiteSelezionate] = useState([]);
   const [schedinaCreata, setSchedinaCreata] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -49,13 +61,6 @@ const SchedinaComponent = ({
   useEffect(() => {
     setGiorniRange(palinsestoGiorniRange);
   }, [palinsestoGiorniRange]);
-
-  // All'avvio: seleziona tutti i campionati di default
-  useEffect(() => {
-    if (campionatiSelezionati.length === 0 && championships.length > 0) {
-      setCampionatiSelezionati(championships.map(c => c.name));
-    }
-  }, [championships]);
 
   // Funzione per mescolare un array
   const shuffleArray = (array) => {
@@ -101,38 +106,6 @@ const SchedinaComponent = ({
   };
 
   // ============================================================
-  // FUNZIONE PER VERIFICARE SE UNA PARTITA È GIÀ INIZIATA
-  // ============================================================
-  const isMatchAlreadyStarted = (match) => {
-    if (!match.data || !match.ora || match.ora === 'TBD' || match.ora === 'N/D') {
-      return false;
-    }
-    
-    const now = new Date();
-    const todayStr = getTodayStr();
-    const matchDate = normalizeDate(match.data);
-    
-    // Se la partita non è oggi, non la escludiamo
-    if (matchDate !== todayStr) {
-      return false;
-    }
-    
-    // Se la partita è oggi, controlliamo l'orario
-    const timeParts = match.ora.split(':');
-    if (timeParts.length < 2) return false;
-    
-    const matchHour = parseInt(timeParts[0], 10);
-    const matchMinutes = parseInt(timeParts[1], 10);
-    if (isNaN(matchHour) || isNaN(matchMinutes)) return false;
-    
-    const matchTotalMinutes = matchHour * 60 + matchMinutes;
-    const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
-    
-    // Se l'orario della partita è già passato, la escludiamo
-    return matchTotalMinutes <= currentTotalMinutes;
-  };
-
-  // ============================================================
   // OTTIENI LE PARTITE - STESSA IDENTICA LOGICA DEL PALINSESTO
   // + ESCLUSIONE PARTITE GIÀ INIZIATE
   // ============================================================
@@ -143,9 +116,12 @@ const SchedinaComponent = ({
     // Prendi le partite Future (come nel Palinsesto)
     let partite = matches.filter(m => m.stato === 'Futura');
     
-    // Filtra per campionati selezionati
+    // Filtra per campionati selezionati (dal filtro globale)
     if (campionatiSelezionati.length > 0) {
       partite = partite.filter(m => campionatiSelezionati.includes(m.campionato));
+    } else {
+      // Se nessun campionato attivo, nessuna partita
+      partite = [];
     }
     
     // FILTRO DATA: da oggi a oggi+giorniRange (IDENTICO AL PALINSESTO)
@@ -158,7 +134,6 @@ const SchedinaComponent = ({
     
     // ⭐ ESCLUSIONE PARTITE GIÀ INIZIATE (ORARIO PASSATO)
     partite = partite.filter(m => {
-      // Se la partita non ha orario, la teniamo (non possiamo verificare)
       if (!m.ora || m.ora === 'TBD' || m.ora === 'N/D') {
         return true;
       }
@@ -168,12 +143,10 @@ const SchedinaComponent = ({
       const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
       const todayStr = getTodayStr();
       
-      // Se la partita non è oggi, la teniamo (è futura)
       if (matchDate !== todayStr) {
         return true;
       }
       
-      // Se la partita è oggi, controlliamo l'orario
       const timeParts = m.ora.split(':');
       if (timeParts.length < 2) return true;
       
@@ -183,7 +156,6 @@ const SchedinaComponent = ({
       
       const matchTotalMinutes = matchHour * 60 + matchMinutes;
       
-      // TENIAMO solo le partite con orario FUTURO (non ancora iniziate)
       return matchTotalMinutes > currentTotalMinutes;
     });
     
@@ -324,22 +296,18 @@ const SchedinaComponent = ({
       const dateA = normalizeDate(a.data);
       const dateB = normalizeDate(b.data);
       
-      // Prima ordina per data (crescente)
       if (dateA && dateB && dateA !== dateB) {
         return dateA.localeCompare(dateB);
       }
       
-      // Se stessa data, ordina per score decrescente (dal più alto al più basso)
       if (a.score !== b.score) {
         return (b.score || 0) - (a.score || 0);
       }
       
-      // Se stesso score, ordina per pct decrescente
       if (a.pct !== b.pct) {
         return (b.pct || 0) - (a.pct || 0);
       }
       
-      // Infine per orario (crescente)
       const oraA = a.ora || '00:00';
       const oraB = b.ora || '00:00';
       return oraA.localeCompare(oraB);
@@ -348,11 +316,7 @@ const SchedinaComponent = ({
 
   // Funzione per determinare il numero di partite da prendere (con casualità estrema)
   const getNumeroPartiteDaPrendere = (limiteMax = 10) => {
-    if (casualitaLevel > 80) {
-      return Math.min(numeroPartiteDaSelezionare, limiteMax, partiteDisponibili.length, 10);
-    } else {
-      return Math.min(numeroPartiteDaSelezionare, limiteMax, partiteDisponibili.length, 10);
-    }
+    return Math.min(numeroPartiteDaSelezionare, limiteMax, partiteDisponibili.length, 10);
   };
 
   // Seleziona un numero personalizzato di partite
@@ -371,7 +335,6 @@ const SchedinaComponent = ({
       migliori = shuffled.slice(0, numeroDaPrendere);
       messaggioExtra = ` 🎲🎲🎲 (scelte casualmente!)`;
     } else {
-      // Prendi le prime N partite (già ordinate per data e percentuale)
       migliori = partiteDisponibili.slice(0, numeroDaPrendere);
     }
     
@@ -565,24 +528,6 @@ const SchedinaComponent = ({
     showAlert('info', '🔄 Schedina resettata');
   };
 
-  const toggleCampionato = (nomeCampionato) => {
-    setCampionatiSelezionati(prev => {
-      if (prev.includes(nomeCampionato)) {
-        return prev.filter(c => c !== nomeCampionato);
-      } else {
-        return [...prev, nomeCampionato];
-      }
-    });
-  };
-
-  const selezionaTuttiCampionati = () => {
-    setCampionatiSelezionati(championships.map(c => c.name));
-  };
-
-  const deselezionaTuttiCampionati = () => {
-    setCampionatiSelezionati([]);
-  };
-
   const toggleGiocata = (giocataId) => {
     setGiocateSelezionate(prev => {
       if (giocataId === 'tutte') {
@@ -639,7 +584,6 @@ const SchedinaComponent = ({
     const pctGG = Math.round((gg / total) * 100);
     const pctNG = Math.round((ng / total) * 100);
     
-    // Scegli la migliore tra GG e NG
     const migliore = pctGG > pctNG ? 'GG' : 'NG';
     const pctMigliore = Math.max(pctGG, pctNG);
     
@@ -820,9 +764,6 @@ const SchedinaComponent = ({
     setSchedinaCreata(schedina);
     const partiteOrdinate = ordinaPartitePerDataOra(schedina.partite);
     setPartiteSelezionate(partiteOrdinate);
-    if (schedina.campionatiSelezionati) {
-      setCampionatiSelezionati(schedina.campionatiSelezionati);
-    }
     if (schedina.giocateSelezionate) {
       setGiocateSelezionate(schedina.giocateSelezionate);
     }
@@ -859,11 +800,11 @@ const SchedinaComponent = ({
         <h3 style={{color: 'var(--accent)', marginBottom: '16px', fontSize: '20px'}}>
           🎯 Crea Schedina {casualitaLevel > 50 ? '🎲' : ''}
           <span style={{fontSize: '12px', color: 'var(--text-muted)', marginLeft: '12px', fontWeight: 'normal'}}>
-            📅 Sincronizzato con Palinsesto ({giorniRange} giorno/i)
+            📅 Sincronizzato con Palinsesto ({giorniRange} giorno/i) • 🏆 {campionatiSelezionati.length} campionati attivi
           </span>
         </h3>
         
-        {/* SEZIONE 1: CAMPIONATI - IN GRIGLIA 5x5 COME PALINSESTO */}
+        {/* SEZIONE 1: CAMPIONATI - SINCRONIZZATI CON PALINSESTO */}
         <div style={{
           marginBottom: '20px', 
           padding: '14px 16px', 
@@ -881,7 +822,10 @@ const SchedinaComponent = ({
             paddingBottom: '8px'
           }}>
             <span style={{fontSize: '15px', fontWeight: 'bold', color: 'var(--text)'}}>
-              🏆 Seleziona Campionati
+              🏆 Campionati Attivi
+              <span style={{fontSize: '11px', color: 'var(--text-muted)', marginLeft: '8px', fontWeight: 'normal'}}>
+                (sincronizzato con Palinsesto)
+              </span>
             </span>
             <div style={{display: 'flex', gap: '6px'}}>
               <button 
@@ -979,7 +923,7 @@ const SchedinaComponent = ({
           </div>
           
           <div style={{fontSize: '10px', color: 'var(--text-muted)', marginTop: '6px', fontStyle: 'italic'}}>
-            Seleziona uno o più campionati da cui prendere le partite
+            🔄 Modifica la selezione nel <b>Palinsesto</b> per sincronizzarla con tutti i tab
           </div>
         </div>
 
@@ -1084,7 +1028,7 @@ const SchedinaComponent = ({
           </div>
         </div>
 
-        {/* SEZIONE 3: FILTRI DATA/ORA (COME NEL PALINSESTO) */}
+        {/* SEZIONE 3: FILTRI DATA/ORA */}
         <div style={{
           marginBottom: '20px', 
           padding: '14px 16px', 
@@ -1267,6 +1211,7 @@ const SchedinaComponent = ({
         }}>
           <div style={{display: 'flex', flexWrap: 'wrap', gap: '16px', fontSize: '13px'}}>
             <span>📊 <b>{partiteDisponibili.length}</b> partite disponibili</span>
+            <span>🏆 <b>{campionatiSelezionati.length}</b> campionati attivi</span>
             <span>📅 Range: <b>{giorniRange} giorno/i</b></span>
             <span>⏰ Solo partite <b>non ancora iniziate</b></span>
             <span>⭐ Media score: <b style={{color: 'var(--accent)'}}>
@@ -1361,17 +1306,6 @@ const SchedinaComponent = ({
               </button>
             </div>
           </div>
-          {casualitaLevel > 80 && (
-            <div style={{
-              marginTop: '6px',
-              fontSize: '10px',
-              color: '#8e44ad',
-              fontStyle: 'italic',
-              textAlign: 'center'
-            }}>
-              🎲 Con casualità estrema, le partite vengono scelte CASUALMENTE dalla lista, ma il numero scelto viene rispettato
-            </div>
-          )}
         </div>
 
         {/* SEZIONE 7: PULSANTI AZIONE */}
@@ -1431,7 +1365,7 @@ const SchedinaComponent = ({
             <span>🔢 Max 10 partite per schedina</span>
             <span style={{color: '#e74c3c'}}>⚽ <b>NOVITÀ:</b> GG - NG (Goal-Goal / No Goal)</span>
             <span style={{color: '#eb5757'}}>⏰ Escluse automaticamente le partite già iniziate</span>
-            <span style={{color: 'var(--accent)'}}>🔄 Sincronizzato con il Palinsesto</span>
+            <span style={{color: 'var(--accent)'}}>🔄 Sincronizzato con il Palinsesto (campionati + range giorni)</span>
             <span style={{color: 'var(--accent)'}}>📊 Ordinate per DATA → PERCENTUALE (decrescente)</span>
             {casualitaLevel > 80 && <span style={{color: '#8e44ad', fontWeight: 'bold'}}>🎲🎲🎲 CASUALITÀ ESTREMA: scelta casuale delle partite!</span>}
           </div>
@@ -1452,7 +1386,7 @@ const SchedinaComponent = ({
           <div className="empty-state" style={{padding: '30px', textAlign: 'center', color: 'var(--text-muted)'}}>
             <div style={{fontSize: '24px', marginBottom: '8px'}}>⏰</div>
             <p>Nessuna partita disponibile per i filtri selezionati.</p>
-            <p style={{fontSize: '12px'}}>Verifica che ci siano partite future nei campionati selezionati e che non siano già iniziate.</p>
+            <p style={{fontSize: '12px'}}>Verifica che ci siano partite future nei campionati attivi (selezionati nel Palinsesto) e che non siano già iniziate.</p>
           </div>
         ) : (
           <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
@@ -1779,4 +1713,4 @@ const SchedinaComponent = ({
 };
 
 window.SchedinaComponent = SchedinaComponent;
-console.log('✅ SchedinaComponent caricato - sincronizzato con il Palinsesto (range giorni) + esclusione partite già iniziate + ordinamento DATA → PERCENTUALE');
+console.log('✅ SchedinaComponent caricato - sincronizzato con Palinsesto (campionati + range giorni)');

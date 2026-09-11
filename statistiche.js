@@ -1,11 +1,12 @@
 // ============================================================
 // statistiche.js - Modulo Statistiche esterno (COMPLETO)
+// LEGGE il filtro campionati dal Palinsesto (fonte di verità).
 // ============================================================
 
 (function () {
   'use strict';
 
-  const { useState, useEffect } = React;
+  const { useState, useEffect, useMemo } = React;
 
   // ============================================================
   // SIMULAZIONE MONTE CARLO + POISSON
@@ -1238,7 +1239,7 @@
   };
 
   // ============================================================
-  // HEATMAP GIOCATE (per Home — se serve altrove)
+  // HEATMAP GIOCATE
   // ============================================================
 
   const HeatmapGiocate = ({ matches, championships, onSelectChampionship }) => {
@@ -1367,10 +1368,35 @@
     const [ultimaGiornataRound, setUltimaGiornataRound] = useState(null);
     const getChampColor = window.getChampColor;
 
-    const selectedMatch = matches.find(m => m.id === selectedMatchId);
+    // ⭐ FILTRO CAMPIONATI GLOBALE (letto dal Palinsesto)
+    const { filtro: filtroCampionati, campionatiAttivi } =
+      window.FiltriCampionati.useFiltroCampionati();
+
+    // Partite filtrate per campionati attivi
+    const matchesFiltrati = useMemo(
+      () => window.FiltriCampionati.filtraPartitePerCampionato(matches),
+      [matches, filtroCampionati]
+    );
+
+    const selectedMatch = matchesFiltrati.find(m => m.id === selectedMatchId);
 
     return (
       <div>
+        {/* Banner filtro campionati */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
+          padding: '10px 14px', marginBottom: '14px',
+          background: 'var(--surface)', borderRadius: '8px',
+          border: '1px solid var(--border)', fontSize: '12px', color: 'var(--text-muted)'
+        }}>
+          <span>🏆 <b style={{ color: 'var(--accent)' }}>{campionatiAttivi.length}</b> campionati attivi</span>
+          <span>•</span>
+          <span>📊 <b style={{ color: 'var(--accent)' }}>{matchesFiltrati.length}</b> partite totali</span>
+          <span style={{ marginLeft: 'auto', fontStyle: 'italic' }}>
+            Modifica i filtri nel <b>Palinsesto</b> 📅
+          </span>
+        </div>
+
         <div className="sub-tabs">
           <button className={statsSubTab === 'Classifica' ? 'active' : ''} onClick={() => setStatsSubTab('Classifica')}>📊 Classifica</button>
           <button className={statsSubTab === 'Scontri' ? 'active' : ''} onClick={() => setStatsSubTab('Scontri')}>⚔️ Scontri</button>
@@ -1382,7 +1408,7 @@
           <div className="stats-two-col">
             <div>
               {selectedMatch ? (
-                <MatchDetail match={selectedMatch} allMatches={matches} />
+                <MatchDetail match={selectedMatch} allMatches={matchesFiltrati} />
               ) : (
                 <div className="stats-placeholder">
                   <p>👈 Seleziona una partita dal <b>Palinsesto</b> per vedere le statistiche.</p>
@@ -1395,7 +1421,7 @@
                   <h3 style={{ marginBottom: '12px', color: getChampColor(selectedMatch.campionato) }}>
                     Classifica - {selectedMatch.campionato}
                   </h3>
-                  <Standings matches={matches} filterChampionship={selectedMatch.campionato}
+                  <Standings matches={matchesFiltrati} filterChampionship={selectedMatch.campionato}
                     highlightTeams={[selectedMatch.casa, selectedMatch.ospiti]} />
                 </>
               ) : (
@@ -1409,8 +1435,8 @@
           <div>
             {selectedMatch ? (
               <div className="stats-two-col" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                <TeamMatchesHistory teamName={selectedMatch.casa} championship={selectedMatch.campionato} allMatches={matches} />
-                <TeamMatchesHistory teamName={selectedMatch.ospiti} championship={selectedMatch.campionato} allMatches={matches} />
+                <TeamMatchesHistory teamName={selectedMatch.casa} championship={selectedMatch.campionato} allMatches={matchesFiltrati} />
+                <TeamMatchesHistory teamName={selectedMatch.ospiti} championship={selectedMatch.campionato} allMatches={matchesFiltrati} />
               </div>
             ) : (
               <div className="stats-placeholder"><p>👈 Seleziona una partita per gli scontri.</p></div>
@@ -1429,20 +1455,20 @@
                   const weather = weatherCache[weatherKey] || null;
                   return <WeatherProfessionale weatherData={weather} city={city} matchDate={selectedMatch.data} />;
                 })()}
-                <AIAnalysis match={selectedMatch} allMatches={matches} selectedFamiglie={selectedFamiglie} />
+                <AIAnalysis match={selectedMatch} allMatches={matchesFiltrati} selectedFamiglie={selectedFamiglie} />
                 <div className="analisi-compact" style={{ marginTop: '16px' }}>
                   <div>
-                    <RisultatiFrequenti teamName={selectedMatch.casa} allMatches={matches} />
-                    <FrequenzaGol teamName={selectedMatch.casa} allMatches={matches} />
-                    <IndiceAffidabilita teamName={selectedMatch.casa} allMatches={matches} />
+                    <RisultatiFrequenti teamName={selectedMatch.casa} allMatches={matchesFiltrati} />
+                    <FrequenzaGol teamName={selectedMatch.casa} allMatches={matchesFiltrati} />
+                    <IndiceAffidabilita teamName={selectedMatch.casa} allMatches={matchesFiltrati} />
                   </div>
                   <div>
-                    <RisultatiFrequenti teamName={selectedMatch.ospiti} allMatches={matches} />
-                    <FrequenzaGol teamName={selectedMatch.ospiti} allMatches={matches} />
-                    <IndiceAffidabilita teamName={selectedMatch.ospiti} allMatches={matches} />
+                    <RisultatiFrequenti teamName={selectedMatch.ospiti} allMatches={matchesFiltrati} />
+                    <FrequenzaGol teamName={selectedMatch.ospiti} allMatches={matchesFiltrati} />
+                    <IndiceAffidabilita teamName={selectedMatch.ospiti} allMatches={matchesFiltrati} />
                   </div>
                 </div>
-                <AnalisiMeteo matches={matches} weatherCache={weatherCache} />
+                <AnalisiMeteo matches={matchesFiltrati} weatherCache={weatherCache} />
               </div>
             ) : (
               <div className="stats-placeholder"><p>👈 Seleziona una partita per il riepilogo AI.</p></div>
@@ -1461,7 +1487,7 @@
                   if (prevRound === null || isNaN(prevRound)) {
                     return <p style={{ color: 'var(--text-muted)' }}>Giornata non numerica.</p>;
                   }
-                  const prevMatches = matches.filter(m =>
+                  const prevMatches = matchesFiltrati.filter(m =>
                     m.campionato === selectedMatch.campionato &&
                     m.round === String(prevRound) &&
                     m.stato === 'Giocata'
@@ -1525,6 +1551,6 @@
   window.Standings = Standings;
   window.TeamMatchesHistory = TeamMatchesHistory;
 
-  console.log('✅ Modulo Statistiche caricato (COMPLETO)');
+  console.log('✅ Modulo Statistiche caricato (COMPLETO) - legge filtro campionati dal Palinsesto');
 
 })();

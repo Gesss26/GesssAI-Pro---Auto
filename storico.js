@@ -1,5 +1,6 @@
 // ============================================================
 // storico.js - Modulo Storico esterno
+// LEGGE il filtro campionati dal Palinsesto (fonte di verità).
 // ============================================================
 
 (function () {
@@ -49,18 +50,31 @@
     const normalizeDate = window.normalizeDate;
     const isDatePassed = window.isDatePassed;
 
-    // Filtro di sicurezza lato UI (i dati arrivano già filtrati da index.html)
+    // Filtro di sicurezza lato UI
     const CAMPIONATI_ESCLUSI = window.CAMPIONATI_ESCLUSI;
 
+    // ⭐ FILTRO CAMPIONATI GLOBALE (letto dal Palinsesto)
+    const { filtro: filtroCampionati, campionatiAttivi } =
+      window.FiltriCampionati.useFiltroCampionati();
+
+    // Partite filtrate per campionati attivi
+    const matchesFiltrati = useMemo(
+      () => window.FiltriCampionati.filtraPartitePerCampionato(matches),
+      [matches, filtroCampionati]
+    );
+
     const campionatiDisponibili = useMemo(() => {
-      const lista = CAMPIONATI_ESCLUSI
-        ? championships.filter(c => !CAMPIONATI_ESCLUSI.has(c.name))
-        : championships;
+      let lista = championships;
+      if (CAMPIONATI_ESCLUSI) {
+        lista = lista.filter(c => !CAMPIONATI_ESCLUSI.has(c.name));
+      }
+      // Mostra solo campionati attivi (dal filtro globale)
+      lista = lista.filter(c => filtroCampionati[c.name] !== false);
       return lista;
-    }, [championships, CAMPIONATI_ESCLUSI]);
+    }, [championships, CAMPIONATI_ESCLUSI, filtroCampionati]);
 
     const playedMatches = useMemo(() => {
-      let list = matches.filter(m => {
+      let list = matchesFiltrati.filter(m => {
         if (CAMPIONATI_ESCLUSI && CAMPIONATI_ESCLUSI.has(m.campionato)) return false;
         if (m.stato === 'Giocata') return true;
         if (m.stato === 'Futura' && isDatePassed(m.data)) return true;
@@ -76,13 +90,27 @@
         return db.localeCompare(da);
       });
       return list;
-    }, [matches, selectedChamp, CAMPIONATI_ESCLUSI]);
+    }, [matchesFiltrati, selectedChamp, CAMPIONATI_ESCLUSI]);
 
     const senzaRisultato = playedMatches.filter(m => m.stato === 'Futura' && isDatePassed(m.data));
 
     return (
       <div>
         <h2 style={{ marginBottom: '14px' }}>📜 Storico Partite Giocate</h2>
+
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
+          padding: '10px 14px', marginBottom: '14px',
+          background: 'var(--surface)', borderRadius: '8px',
+          border: '1px solid var(--border)', fontSize: '12px', color: 'var(--text-muted)'
+        }}>
+          <span>🏆 <b style={{ color: 'var(--accent)' }}>{campionatiAttivi.length}</b> campionati attivi</span>
+          <span>•</span>
+          <span>📜 <b style={{ color: 'var(--accent)' }}>{matchesFiltrati.length}</b> partite totali</span>
+          <span style={{ marginLeft: 'auto', fontStyle: 'italic' }}>
+            Modifica i filtri nel <b>Palinsesto</b> 📅
+          </span>
+        </div>
 
         <div className="form-group">
           <label>Filtra per Campionato</label>
@@ -99,7 +127,11 @@
         )}
 
         {playedMatches.length === 0 ? (
-          <div className="empty-state">Nessuna partita giocata o con data passata.</div>
+          <div className="empty-state">
+            Nessuna partita giocata o con data passata per i campionati attivi.
+            <br />
+            <span style={{ fontSize: '12px' }}>Modifica i filtri nel Palinsesto 📅</span>
+          </div>
         ) : (
           <div className="matches-grid">
             {playedMatches.map(m => (
@@ -112,6 +144,6 @@
   }
 
   window.StoricoComponent = StoricoComponent;
-  console.log('✅ Modulo Storico caricato');
+  console.log('✅ Modulo Storico caricato - legge filtro campionati dal Palinsesto');
 
 })();
