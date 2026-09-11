@@ -1,6 +1,6 @@
 // ============================================================
 // filtri-campionati.js
-// Sistema centralizzato di filtro campionati.
+// Sistema centralizzato di filtro campionati + giorni.
 // Il PALINSESTO è la fonte di verità: scrive la selezione.
 // Tutti gli altri tab la leggono e si sincronizzano.
 // ============================================================
@@ -11,21 +11,21 @@
   const STORAGE_KEY = 'ft_campionati_selezionati';
   const EVENT_NAME = 'campionati-filter-updated';
 
-  // Legge dinamicamente la lista (evita problemi di ordine di caricamento)
+  const GIORNI_STORAGE_KEY = 'ft_giorni_range';
+  const GIORNI_EVENT_NAME = 'giorni-range-updated';
+  const GIORNI_DEFAULT = 1;
+  const GIORNI_MIN = 1;
+  const GIORNI_MAX = 7;
+
   const getChampList = () => {
     const list = window.CHAMPIONSHIP_LIST || [];
     return Array.isArray(list) ? list : [];
   };
 
   // ============================================================
-  // LEGGI / SCRIVI SU LOCALSTORAGE
+  // CAMPIONATI
   // ============================================================
 
-  /**
-   * Ritorna { [nomeCampionato]: boolean }.
-   * Default: tutti true se non esiste nulla in localStorage.
-   * Normalizza: campionati non presenti nell'oggetto salvato → true.
-   */
   const leggiFiltroCampionati = () => {
     const list = getChampList();
     let parsed = null;
@@ -42,9 +42,6 @@
     return result;
   };
 
-  /**
-   * Salva il filtro su localStorage e notifica tutti i tab.
-   */
   const salvaFiltroCampionati = (filtro) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(filtro));
@@ -54,9 +51,6 @@
     }
   };
 
-  /**
-   * Lista dei campionati ATTIVI (true).
-   */
   const getCampionatiAttivi = () => {
     const filtro = leggiFiltroCampionati();
     return Object.keys(filtro).filter(c => filtro[c]);
@@ -67,16 +61,40 @@
     return filtro[nome] !== false;
   };
 
-  /**
-   * Filtra un array di partite in base ai campionati attivi.
-   */
   const filtraPartitePerCampionato = (matches) => {
     const attivi = new Set(getCampionatiAttivi());
     return matches.filter(m => attivi.has(m.campionato));
   };
 
   // ============================================================
-  // HOOK REACT: useFiltroCampionati
+  // GIORNI RANGE
+  // ============================================================
+
+  const leggiGiorniRange = () => {
+    try {
+      const raw = localStorage.getItem(GIORNI_STORAGE_KEY);
+      if (raw !== null) {
+        const num = parseInt(raw, 10);
+        if (!isNaN(num) && num >= GIORNI_MIN && num <= GIORNI_MAX) return num;
+      }
+    } catch (e) {
+      console.warn('Errore lettura giorni range:', e);
+    }
+    return GIORNI_DEFAULT;
+  };
+
+  const salvaGiorniRange = (giorni) => {
+    try {
+      const num = Math.max(GIORNI_MIN, Math.min(GIORNI_MAX, parseInt(giorni, 10) || GIORNI_DEFAULT));
+      localStorage.setItem(GIORNI_STORAGE_KEY, String(num));
+      window.dispatchEvent(new CustomEvent(GIORNI_EVENT_NAME, { detail: num }));
+    } catch (e) {
+      console.warn('Errore salvataggio giorni range:', e);
+    }
+  };
+
+  // ============================================================
+  // HOOK: useFiltroCampionati
   // ============================================================
 
   const useFiltroCampionati = () => {
@@ -84,7 +102,6 @@
 
     const [filtro, setFiltroState] = useState(() => leggiFiltroCampionati());
 
-    // Sync con eventi custom + storage (multi-tab)
     useEffect(() => {
       const handler = (e) => {
         setFiltroState(e.detail ? e.detail : leggiFiltroCampionati());
@@ -140,6 +157,44 @@
   };
 
   // ============================================================
+  // HOOK: useGiorniRange
+  // ============================================================
+
+  const useGiorniRange = () => {
+    const { useState, useEffect, useCallback } = React;
+
+    const [giorni, setGiorniState] = useState(() => leggiGiorniRange());
+
+    useEffect(() => {
+      const handler = (e) => {
+        setGiorniState(typeof e.detail === 'number' ? e.detail : leggiGiorniRange());
+      };
+      const storageHandler = (e) => {
+        if (e.key === GIORNI_STORAGE_KEY) setGiorniState(leggiGiorniRange());
+      };
+      window.addEventListener(GIORNI_EVENT_NAME, handler);
+      window.addEventListener('storage', storageHandler);
+      return () => {
+        window.removeEventListener(GIORNI_EVENT_NAME, handler);
+        window.removeEventListener('storage', storageHandler);
+      };
+    }, []);
+
+    const setGiorni = useCallback((nuovo) => {
+      const num = typeof nuovo === 'function' ? nuovo(leggiGiorniRange()) : nuovo;
+      salvaGiorniRange(num);
+      setGiorniState(Math.max(GIORNI_MIN, Math.min(GIORNI_MAX, parseInt(num, 10) || GIORNI_DEFAULT)));
+    }, []);
+
+    return {
+      giorni,
+      setGiorni,
+      GIORNI_MIN,
+      GIORNI_MAX,
+    };
+  };
+
+  // ============================================================
   // ESPOSIZIONE GLOBALE
   // ============================================================
 
@@ -152,7 +207,15 @@
     isCampionatoAttivo,
     filtraPartitePerCampionato,
     useFiltroCampionati,
+    GIORNI_STORAGE_KEY,
+    GIORNI_EVENT_NAME,
+    GIORNI_DEFAULT,
+    GIORNI_MIN,
+    GIORNI_MAX,
+    leggiGiorniRange,
+    salvaGiorniRange,
+    useGiorniRange,
   };
 
-  console.log('✅ Modulo FiltriCampionati caricato');
+  console.log('✅ Modulo FiltriCampionati caricato (campionati + giorni)');
 })();

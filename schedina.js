@@ -12,12 +12,12 @@ const SchedinaComponent = ({
   selectedFamiglie, 
   onSelectMatch, 
   showAlert,
-  palinsestoGiorniRange = 1,  // Valore dal Palinsesto (default 1)
-  renderGiorniButtons,         // Funzione per renderizzare i pulsanti giorni
-  renderChampFilters,          // Funzione per renderizzare i pulsanti campionati
-  CHAMPIONSHIP_LIST            // Lista campionati dal Palinsesto
+  palinsestoGiorniRange = 1,  // (legacy, ora usiamo il filtro globale)
+  renderGiorniButtons,
+  renderChampFilters,
+  CHAMPIONSHIP_LIST
 }) => {
-  // Accesso sicuro alle funzioni globali (usato in tutto il componente)
+  // Accesso sicuro alle funzioni globali
   const getChampColor = window.getChampColor || (() => '#95a5a6');
   const computeMatchStats = window.computeMatchStats;
   const getMultigolRange = window.getMultigolRange;
@@ -27,6 +27,10 @@ const SchedinaComponent = ({
   const getTodayStr = window.getTodayStr;
   const addDaysToDateStr = window.addDaysToDateStr;
   const formatDateEU = window.formatDateEU;
+
+  // ⭐ GIORNI RANGE GLOBALE (letto dal Palinsesto)
+  const { giorni: giorniRange, setGiorni: setGiorniRange } =
+    window.FiltriCampionati.useGiorniRange();
 
   // ⭐ FILTRO CAMPIONATI GLOBALE (letto dal Palinsesto)
   const {
@@ -53,14 +57,7 @@ const SchedinaComponent = ({
     } catch { return []; }
   });
   const [numeroPartiteDaSelezionare, setNumeroPartiteDaSelezionare] = useState(5);
-  // INIZIALIZZA CON IL VALORE DEL PALINSESTO
-  const [giorniRange, setGiorniRange] = useState(palinsestoGiorniRange);
   const [filtroOrario, setFiltroOrario] = useState('dopo_ora');
-
-  // SINCRONIZZA IL RANGE GIORNI CON IL PALINSESTO
-  useEffect(() => {
-    setGiorniRange(palinsestoGiorniRange);
-  }, [palinsestoGiorniRange]);
 
   // Funzione per mescolare un array
   const shuffleArray = (array) => {
@@ -107,7 +104,6 @@ const SchedinaComponent = ({
 
   // ============================================================
   // OTTIENI LE PARTITE - STESSA IDENTICA LOGICA DEL PALINSESTO
-  // + ESCLUSIONE PARTITE GIÀ INIZIATE
   // ============================================================
   const getPartiteDisponibili = useCallback(() => {
     const todayStr = getTodayStr();
@@ -120,7 +116,6 @@ const SchedinaComponent = ({
     if (campionatiSelezionati.length > 0) {
       partite = partite.filter(m => campionatiSelezionati.includes(m.campionato));
     } else {
-      // Se nessun campionato attivo, nessuna partita
       partite = [];
     }
     
@@ -159,7 +154,7 @@ const SchedinaComponent = ({
       return matchTotalMinutes > currentTotalMinutes;
     });
     
-    // FILTRO ORARIO: "dopo ora" - IDENTICO AL PALINSESTO
+    // FILTRO ORARIO: "dopo ora"
     if (filtroOrario === 'dopo_ora') {
       const now = new Date();
       const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
@@ -313,11 +308,6 @@ const SchedinaComponent = ({
       return oraA.localeCompare(oraB);
     });
   }, [getPartiteDisponibili, giocateSelezionate, selectedFamiglie]);
-
-  // Funzione per determinare il numero di partite da prendere (con casualità estrema)
-  const getNumeroPartiteDaPrendere = (limiteMax = 10) => {
-    return Math.min(numeroPartiteDaSelezionare, limiteMax, partiteDisponibili.length, 10);
-  };
 
   // Seleziona un numero personalizzato di partite
   const selezionaNumeroPartite = (n) => {
@@ -767,9 +757,8 @@ const SchedinaComponent = ({
     if (schedina.giocateSelezionate) {
       setGiocateSelezionate(schedina.giocateSelezionate);
     }
-    if (schedina.giorniRange !== undefined) {
-      setGiorniRange(schedina.giorniRange);
-    }
+    // ⚠️ NON ripristinare giorniRange: è un filtro globale (fonte: Palinsesto)
+    // ⚠️ NON ripristinare campionatiSelezionati: è un filtro globale (fonte: Palinsesto)
     setShowSchedinaModal(true);
     showAlert('success', `📂 Schedina caricata! ${schedina.numPartite} partite, media ${schedina.media}%`);
   };
@@ -1028,7 +1017,7 @@ const SchedinaComponent = ({
           </div>
         </div>
 
-        {/* SEZIONE 3: FILTRI DATA/ORA */}
+        {/* SEZIONE 3: FILTRI DATA/ORA (SINCRONIZZATI CON PALINSESTO) */}
         <div style={{
           marginBottom: '20px', 
           padding: '14px 16px', 
@@ -1067,14 +1056,13 @@ const SchedinaComponent = ({
                   fontSize: '12px'
                 }}
               >
-                <option value="0">Oggi (0)</option>
-                <option value="1">Oggi - Domani (0-1)</option>
-                <option value="2">Oggi - Dopodomani (0-2)</option>
-                <option value="3">Oggi - +3 (0-3)</option>
-                <option value="4">Oggi - +4 (0-4)</option>
-                <option value="5">Oggi - +5 (0-5)</option>
-                <option value="6">Oggi - +6 (0-6)</option>
-                <option value="7">Oggi - +7 (0-7)</option>
+                <option value="1">1 Giorno (Oggi)</option>
+                <option value="2">2 Giorni (Oggi - Domani)</option>
+                <option value="3">3 Giorni (Oggi - +2)</option>
+                <option value="4">4 Giorni (Oggi - +3)</option>
+                <option value="5">5 Giorni (Oggi - +4)</option>
+                <option value="6">6 Giorni (Oggi - +5)</option>
+                <option value="7">7 Giorni (Oggi - +6)</option>
               </select>
               <div style={{fontSize: '9px', color: 'var(--text-muted)', marginTop: '3px'}}>
                 🔄 Sincronizzato con il Palinsesto

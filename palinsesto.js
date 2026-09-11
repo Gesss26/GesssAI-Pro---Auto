@@ -1,6 +1,6 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto esterno
-// È la FONTE DI VERITÀ per il filtro campionati globale.
+// È la FONTE DI VERITÀ per il filtro campionati e giorni.
 // ============================================================
 
 (function () {
@@ -214,7 +214,7 @@
   // ============================================================
 
   const GiorniFilters = ({ selected, onChange }) => {
-    const options = [1, 2, 3, 4, 5];
+    const options = [1, 2, 3, 4, 5, 6, 7];
     return (
       <div className="giorni-filters">
         {options.map(g => (
@@ -274,7 +274,9 @@
     const getTodayStr = window.getTodayStr;
     const addDaysToDateStr = window.addDaysToDateStr;
 
-    const [selectedGiorni, setSelectedGiorni] = useState(1);
+    // ⭐ GIORNI RANGE GLOBALE (fonte di verità)
+    const { giorni: selectedGiorni, setGiorni: setSelectedGiorni } =
+      window.FiltriCampionati.useGiorniRange();
 
     // ⭐ FILTRO CAMPIONATI GLOBALE (fonte di verità)
     const {
@@ -358,6 +360,6 @@
   }
 
   window.PalinsestoComponent = PalinsestoComponent;
-  console.log('✅ Modulo Palinsesto caricato (fonte di verità per filtro campionati)');
+  console.log('✅ Modulo Palinsesto caricato (fonte di verità: campionati + giorni)');
 
 })();
