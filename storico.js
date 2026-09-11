@@ -49,8 +49,19 @@
     const normalizeDate = window.normalizeDate;
     const isDatePassed = window.isDatePassed;
 
+    // Filtro di sicurezza lato UI (i dati arrivano già filtrati da index.html)
+    const CAMPIONATI_ESCLUSI = window.CAMPIONATI_ESCLUSI;
+
+    const campionatiDisponibili = useMemo(() => {
+      const lista = CAMPIONATI_ESCLUSI
+        ? championships.filter(c => !CAMPIONATI_ESCLUSI.has(c.name))
+        : championships;
+      return lista;
+    }, [championships, CAMPIONATI_ESCLUSI]);
+
     const playedMatches = useMemo(() => {
       let list = matches.filter(m => {
+        if (CAMPIONATI_ESCLUSI && CAMPIONATI_ESCLUSI.has(m.campionato)) return false;
         if (m.stato === 'Giocata') return true;
         if (m.stato === 'Futura' && isDatePassed(m.data)) return true;
         return false;
@@ -65,7 +76,7 @@
         return db.localeCompare(da);
       });
       return list;
-    }, [matches, selectedChamp]);
+    }, [matches, selectedChamp, CAMPIONATI_ESCLUSI]);
 
     const senzaRisultato = playedMatches.filter(m => m.stato === 'Futura' && isDatePassed(m.data));
 
@@ -77,7 +88,7 @@
           <label>Filtra per Campionato</label>
           <select value={selectedChamp} onChange={e => setSelectedChamp(e.target.value)}>
             <option value="Tutti">Tutti</option>
-            {championships.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+            {campionatiDisponibili.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
           </select>
         </div>
 

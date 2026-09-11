@@ -645,6 +645,24 @@
     const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
     // ============================================================
+    // CAMPIONATI ESCLUSI (filtro globale — rimuove Argentina, Brasile,
+    // Cina, Grecia e USA da tutta l'app)
+    // ============================================================
+
+    const CAMPIONATI_ESCLUSI = new Set([
+      'Liga Profesional Argentina',
+      'Brasileirão Serie A',
+      'Chinese Super League',
+      'Super League Grecia',
+      'Major League Soccer',
+    ]);
+
+    const filtraCampionatiEsclusi = (arr) => {
+      if (!Array.isArray(arr)) return [];
+      return arr.filter(m => !CAMPIONATI_ESCLUSI.has((m.campionato || '').trim()));
+    };
+
+    // ============================================================
     // CARICAMENTO DATI
     // ============================================================
 
@@ -695,11 +713,14 @@
               const data = await response.json();
               console.log('✅ JSON caricato:', data.matches?.length || 0, 'partite');
               if (data.matches) {
-                localStorage.setItem('ft_matches', JSON.stringify(data.matches));
-                localStorage.setItem('ft_champs', JSON.stringify(data.championships || []));
+                // Applica filtro anche al JSON
+                const filteredMatches = filtraCampionatiEsclusi(data.matches);
+                const filteredChamps = (data.championships || []).filter(c => !CAMPIONATI_ESCLUSI.has(c.name));
+                localStorage.setItem('ft_matches', JSON.stringify(filteredMatches));
+                localStorage.setItem('ft_champs', JSON.stringify(filteredChamps));
+                dataLoaded = true;
+                return { matches: filteredMatches, championships: filteredChamps };
               }
-              dataLoaded = true;
-              return data;
             }
           } catch (e) {
             console.warn('❌ JSON fallback:', e.message);
@@ -805,14 +826,19 @@
 
         if (matches.length === 0) return null;
 
-        const championships = Array.from(championshipsSet).map(name => ({ name, importedAt: new Date().toISOString() }));
-        console.log(`✅ ${matches.length} partite caricate (${championships.length} campionati)`);
+        // === FILTRO GLOBALE: rimuove i campionati esclusi ===
+        const matchesFiltrati = filtraCampionatiEsclusi(matches);
+        const championshipsFiltrati = Array.from(championshipsSet)
+          .filter(name => !CAMPIONATI_ESCLUSI.has(name))
+          .map(name => ({ name, importedAt: new Date().toISOString() }));
 
-        localStorage.setItem('ft_matches', JSON.stringify(matches));
-        localStorage.setItem('ft_champs', JSON.stringify(championships));
+        console.log(`✅ ${matchesFiltrati.length} partite caricate (${championshipsFiltrati.length} campionati)`);
+
+        localStorage.setItem('ft_matches', JSON.stringify(matchesFiltrati));
+        localStorage.setItem('ft_champs', JSON.stringify(championshipsFiltrati));
         dataLoaded = true;
 
-        return { matches, championships };
+        return { matches: matchesFiltrati, championships: championshipsFiltrati };
       } catch (error) {
         console.error('❌ Errore Excel:', error.message);
         return null;
@@ -835,21 +861,21 @@
     const MAIN_TABS = ['Home', 'Palinsesto', 'Statistiche', 'Storico', 'Schedina', 'Impostazioni'];
 
     const CHAMPIONSHIP_COLORS = {
-      'Liga Profesional Argentina': '#3498db', 'Jupiler Pro League': '#e74c3c', 'Brasileirão Serie A': '#2ecc71',
-      'Super League Grecia': '#2980b9', 'Premier League': '#3498db', 'EFL Championship': '#6c3483',
+      'Jupiler Pro League': '#e74c3c',
+      'Premier League': '#3498db', 'EFL Championship': '#6c3483',
       'Ligue 1': '#9b59b6', 'Ligue 2': '#8e44ad', 'Bundesliga': '#f39c12', '2. Bundesliga': '#e67e22',
       'Serie A': '#2ecc71', 'Serie B': '#e67e22', 'Serie C - Girone A': '#2980b9', 'Serie C - Girone B': '#27ae60',
       'Serie C - Girone C': '#c0392b', 'J1 League': '#e74c3c', 'Eerste Divisie': '#e67e22', 'Eredivisie': '#e74c3c',
       'Primeira Liga': '#34495e', 'Scottish Premiership': '#2ecc71', 'K League 1': '#3498db', 'La Liga': '#e74c3c',
-      'Segunda División': '#e67e22', 'Süper Lig': '#e67e22', 'Major League Soccer': '#3498db'
+      'Segunda División': '#e67e22', 'Süper Lig': '#e67e22'
     };
 
     const CHAMPIONSHIP_LIST = [
-      'Liga Profesional Argentina', 'Jupiler Pro League', 'Brasileirão Serie A', 'Super League Grecia',
+      'Jupiler Pro League',
       'Premier League', 'EFL Championship', 'Ligue 1', 'Ligue 2', 'Bundesliga', '2. Bundesliga', 'Serie A',
       'Serie B', 'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C', 'J1 League',
       'Eerste Divisie', 'Eredivisie', 'Primeira Liga', 'Scottish Premiership', 'K League 1', 'La Liga',
-      'Segunda División', 'Süper Lig', 'Major League Soccer'
+      'Segunda División', 'Süper Lig'
     ];
 
     // ============================================================
@@ -973,8 +999,7 @@
       const getLeagueFolder = (champ) => {
         if (!champ) return '';
         const map = {
-          'Liga Profesional Argentina': 'Liga_Profesional_Argentina', 'Jupiler Pro League': 'Jupiler_Pro_League',
-          'Brasileirão Serie A': 'Brasileirao_Serie_A', 'Super League Grecia': 'Super_League_Grecia',
+          'Jupiler Pro League': 'Jupiler_Pro_League',
           'Premier League': 'Premier_League', 'EFL Championship': 'Championship',
           'Ligue 1': 'Ligue_1', 'Ligue 2': 'Ligue_2', 'Bundesliga': 'Bundesliga', '2. Bundesliga': '2. Bundesliga',
           'Serie A': 'Serie_A', 'Serie B': 'Serie_B',
@@ -982,7 +1007,7 @@
           'J1 League': 'J1_League', 'Eredivisie': 'Eredivisie', 'Eerste Divisie': 'Eerste_Divisie',
           'Primeira Liga': 'Primeira_Liga', 'Scottish Premiership': 'Scottish_Premiership',
           'K League 1': 'K_League_1', 'La Liga': 'La_Liga', 'Segunda División': 'Segunda_Division',
-          'Süper Lig': 'Super_Lig', 'Major League Soccer': 'MLS'
+          'Süper Lig': 'Super_Lig'
         };
         return map[champ] || champ.replace(/ /g, '_');
       };
@@ -1334,8 +1359,11 @@
     window.THEMES = THEMES;
     window.CHAMPIONSHIP_LIST = CHAMPIONSHIP_LIST;
     window.CHAMPIONSHIP_COLORS = CHAMPIONSHIP_COLORS;
+    window.CAMPIONATI_ESCLUSI = CAMPIONATI_ESCLUSI;   // <-- esposto globalmente
+    window.filtraCampionatiEsclusi = filtraCampionatiEsclusi;
 
     console.log('✅ Funzioni globali esposte per i moduli esterni');
+    console.log('   - Campionati esclusi:', Array.from(CAMPIONATI_ESCLUSI).join(', '));
 
     // ============================================================
     // LOAD/SAVE STATE
@@ -1350,6 +1378,10 @@
           customTheme: JSON.parse(localStorage.getItem('ft_custom_theme') || 'null'),
           selectedFamiglie: JSON.parse(localStorage.getItem('ft_selected_famiglie') || '["dc_under","mg_casa_ospite","over"]'),
         };
+        // Applica filtro di sicurezza ai dati già in localStorage (rimuove eventuali residui)
+        localData.matches = filtraCampionatiEsclusi(localData.matches);
+        localData.championships = localData.championships.filter(c => !CAMPIONATI_ESCLUSI.has(c.name));
+
         if (localData.matches.length === 0) {
           loadScrapedData().then(data => {
             if (data && data.matches && data.matches.length > 0 && window.updateAppData) {
@@ -1439,10 +1471,13 @@
 
       const updateDataFromScraper = (data) => {
         if (data && data.matches && data.matches.length > 0) {
-          setMatches(data.matches);
-          setChampionships(data.championships || []);
-          saveState({ championships: data.championships || [], matches: data.matches, theme, customTheme, selectedFamiglie });
-          showAlert('success', `✅ Aggiornato con ${data.matches.length} partite!`);
+          // Applica filtro di sicurezza anche qui
+          const filteredMatches = filtraCampionatiEsclusi(data.matches);
+          const filteredChamps = (data.championships || []).filter(c => !CAMPIONATI_ESCLUSI.has(c.name));
+          setMatches(filteredMatches);
+          setChampionships(filteredChamps);
+          saveState({ championships: filteredChamps, matches: filteredMatches, theme, customTheme, selectedFamiglie });
+          showAlert('success', `✅ Aggiornato con ${filteredMatches.length} partite!`);
         }
       };
 
