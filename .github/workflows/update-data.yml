@@ -3,7 +3,7 @@ name: 🔄 Aggiornamento Automatico Dati
 on:
   schedule:
     # Esegue ogni giorno alle 6:00 AM (UTC)
-    - cron: '01 6 * * *'
+    - cron: '01 3 * * *'
   workflow_dispatch:
     # Permette di eseguire manualmente il workflow
 
