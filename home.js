@@ -17,6 +17,8 @@
   // ============================================================
   // FIX: Chinese Super League erroneamente etichettata
   //      come "Super League Grecia" dallo scraper.
+  //      (Mantenuto per sicurezza: se in futuro si riattiva la Cina,
+  //       le partite saranno già normalizzate.)
   // ============================================================
 
   const CHINESE_TEAMS = new Set([
@@ -130,10 +132,7 @@
   // ============================================================
 
   const NAZIONI = {
-    'Argentina':   { file: 'argentina.png',   campionati: ['Liga Profesional Argentina'] },
     'Belgio':      { file: 'belgio.png',      campionati: ['Jupiler Pro League'] },
-    'Brasile':     { file: 'brasile.png',     campionati: ['Brasileirão Serie A'] },
-    'Cina':        { file: 'cina.png',        campionati: ['Chinese Super League'] },
     'Corea':       { file: 'corea.png',       campionati: ['K League 1'] },
     'Francia':     { file: 'francia.png',     campionati: ['Ligue 1', 'Ligue 2'] },
     'Germania':    { file: 'germania.png',    campionati: ['Bundesliga', '2. Bundesliga'] },
@@ -144,7 +143,6 @@
     'Portogallo':  { file: 'portogallo.png',  campionati: ['Primeira Liga'] },
     'Scozia':      { file: 'scozia.png',      campionati: ['Scottish Premiership'] },
     'Spagna':      { file: 'spagna.png',      campionati: ['La Liga', 'Segunda División'] },
-    'Stati Uniti': { file: 'stati_uniti.png', campionati: ['Major League Soccer'] },
     'Turchia':     { file: 'turchia.png',     campionati: ['Süper Lig'] },
   };
 
@@ -626,7 +624,7 @@
   };
 
   // ============================================================
-  // GRIGLIA NAZIONI (4x4 responsive)
+  // GRIGLIA NAZIONI (responsive)
   // ============================================================
 
   const GrigliaNazioni = ({ matches, onSelectNazione }) => {
@@ -788,9 +786,8 @@
 
   console.log('✅ Modulo Home caricato (home.js)');
   console.log('   - Nazioni disponibili:', Object.keys(NAZIONI).length);
-  console.log('   - Griglia: 4x4 responsive (4 desktop / 3 tablet / 2 mobile)');
+  console.log('   - Griglia: responsive (4 desktop / 3 tablet / 2 mobile)');
   console.log('   - Chiave schedina:', SCHEDINA_STORAGE_KEY);
-  console.log('   - FIX attivo: Chinese Super League separata da Super League Grecia');
-  console.log('   - Cina sostituisce Grecia nella griglia nazioni');
+  console.log('   - Nazioni attive:', Object.keys(NAZIONI).join(', '));
 
 })();
