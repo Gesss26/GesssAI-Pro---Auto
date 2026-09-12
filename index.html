@@ -670,7 +670,7 @@
     const BSD_ODDS_STORAGE_KEY = 'ft_quote_cache';
 
     // ============================================================
-    // MATCHING FUZZY tra partite Excel e eventi BSD
+    // MATCHING FUZZY
     // ============================================================
 
     const normalizzaNomeSquadra = (nome) => {
@@ -733,7 +733,7 @@
     };
 
     // ============================================================
-    // CARICAMENTO QUOTE BSD
+    // CARICAMENTO QUOTE BSD (VERSIONE CORRETTA)
     // ============================================================
 
     async function loadQuoteBSD(matches) {
@@ -746,12 +746,15 @@
         console.log('💰 Caricamento quote BSD...');
         const headers = { 'Authorization': `Token ${BSD_API_KEY}` };
 
-        const oggi = new Date().toISOString().slice(0, 10);
-        const maxDate = new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        // Range esteso: da -5 giorni a +30 giorni
+        const oggi = new Date();
+        const minDate = new Date(oggi.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        const maxDate = new Date(oggi.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        console.log(`💰 BSD: range richiesto ${minDate} -> ${maxDate}`);
 
         // 1. Scarica eventi BSD nel range
         let eventsBSD = [];
-        let urlEventi = `https://sports.bzzoiro.com/api/v2/events/?date_from=${oggi}&date_to=${maxDate}&limit=200`;
+        let urlEventi = `https://sports.bzzoiro.com/api/v2/events/?date_from=${minDate}&date_to=${maxDate}&limit=200`;
         for (let page = 0; page < 10 && urlEventi; page++) {
           const r = await fetch(urlEventi, { headers });
           if (!r.ok) { console.warn(`BSD events: ${r.status}`); break; }
@@ -763,7 +766,12 @@
         }
         console.log(`💰 BSD: ${eventsBSD.length} eventi nel range`);
 
-        // 2. Match fuzzy
+        // Debug: mostra le date degli eventi scaricati
+        const dateUniche = [...new Set(eventsBSD.map(ev => normalizzaDataBSD(ev.event_date || ev.date)).filter(Boolean))].sort();
+        console.log(`💰 BSD: date eventi (prime 10):`, dateUniche.slice(0, 10));
+        console.log(`💰 BSD: date eventi (ultime 10):`, dateUniche.slice(-10));
+
+        // 2. Match fuzzy (CON CAMPI CORRETTI: home_team, away_team, event_date)
         const matchMap = {};
         for (const m of matches) {
           if (m.stato !== 'Futura') continue;
@@ -774,15 +782,20 @@
           let bestScore = 0;
 
           for (const ev of eventsBSD) {
-            const dataBSD = normalizzaDataBSD(ev.date || ev.event_date);
+            // ⚠️ BSD usa home_team / away_team / event_date
+            const evHome = ev.home_team || ev.home || '';
+            const evAway = ev.away_team || ev.away || '';
+            const evDate = ev.event_date || ev.date || ev.start_time || '';
+
+            const dataBSD = normalizzaDataBSD(evDate);
             if (dataBSD !== dataExcel) continue;
 
-            const casaMatch = nomiSquadraCorrispondono(m.casa, ev.home);
-            const ospitiMatch = nomiSquadraCorrispondono(m.ospiti, ev.away);
+            const casaMatch = nomiSquadraCorrispondono(m.casa, evHome);
+            const ospitiMatch = nomiSquadraCorrispondono(m.ospiti, evAway);
             if (casaMatch && ospitiMatch) {
               let score = 1;
-              if (normalizzaNomeSquadra(m.casa) === normalizzaNomeSquadra(ev.home)) score += 0.5;
-              if (normalizzaNomeSquadra(m.ospiti) === normalizzaNomeSquadra(ev.away)) score += 0.5;
+              if (normalizzaNomeSquadra(m.casa) === normalizzaNomeSquadra(evHome)) score += 0.5;
+              if (normalizzaNomeSquadra(m.ospiti) === normalizzaNomeSquadra(evAway)) score += 0.5;
               if (score > bestScore) {
                 bestScore = score;
                 trovato = ev;
@@ -793,8 +806,8 @@
           if (trovato) {
             matchMap[m.id] = {
               event_id: trovato.id || trovato.event_id,
-              homeBSD: trovato.home,
-              awayBSD: trovato.away,
+              homeBSD: trovato.home_team || trovato.home,
+              awayBSD: trovato.away_team || trovato.away,
             };
           }
         }
@@ -803,11 +816,12 @@
         console.log(`💰 BSD: ${numMatchati}/${matches.length} partite matchate`);
 
         if (numMatchati === 0) {
+          console.log('💰 BSD: nessun match trovato, skip download quote');
           localStorage.setItem(BSD_ODDS_STORAGE_KEY, JSON.stringify({}));
           return {};
         }
 
-        // 3. Scarica quote (paginazione)
+        // 3. Scarica quote (paginazione estesa)
         const eventIdsSet = new Set(Object.values(matchMap).map(v => v.event_id));
         const allOdds = [];
         let urlOdds = `https://sports.bzzoiro.com/api/v2/odds/?limit=100`;
@@ -821,9 +835,9 @@
           urlOdds = d.next;
           if (results.length < 100) break;
         }
-        console.log(`💰 BSD: ${allOdds.length} quote trovate`);
+        console.log(`💰 BSD: ${allOdds.length} quote trovate per ${eventIdsSet.size} eventi`);
 
-        // 4. Indicizza
+        // 4. Indicizza per event_id + market + outcome
         const cache = {};
         allOdds.forEach(q => {
           const key = `${q.event_id}|${q.market}|${q.outcome}`;
@@ -1956,7 +1970,7 @@
       } catch (e) {
         console.warn('Errore loadQuoteBSD:', e);
       }
-    }, 2000);
+    }, 3000);
 
     try {
       const rootElement = document.getElementById('root');
