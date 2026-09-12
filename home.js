@@ -1,6 +1,7 @@
 // ============================================================
 // home.js - Modulo Home esterno per GesssAI-Pro v3.0
 // LEGGE il filtro campionati dal Palinsesto (fonte di verità).
+// Mostra la quota BSD accanto a ogni giocata (se disponibile).
 // ============================================================
 
 (function () {
@@ -323,7 +324,7 @@
   };
 
   // ============================================================
-  // BOTTONE GIOCATA (selezionabile)
+  // BOTTONE GIOCATA (selezionabile) - CON QUOTA BSD
   // ============================================================
 
   const GiocataBadge = ({ match, giocataObj, onToggle }) => {
@@ -335,6 +336,11 @@
     const cls = window.getPercentualeClasse(pct);
     const isBomb = pct >= 90;
 
+    // ⭐ QUOTA DA BSD
+    const quota = window.getQuotaForGiocata
+      ? window.getQuotaForGiocata(match.id, giocataObj.familyId, giocataObj.giocata)
+      : null;
+
     const handleClick = (e) => {
       e.stopPropagation();
       const nowSelected = toggleSelezioneSchedina(match, giocataObj);
@@ -345,7 +351,7 @@
     return (
       <button
         onClick={handleClick}
-        title={`Clicca per ${selected ? 'rimuovere' : 'aggiungere'} alla schedina`}
+        title={`Clicca per ${selected ? 'rimuovere' : 'aggiungere'} alla schedina${quota ? ` • Quota BSD: ${quota.decimal_odds}` : ''}`}
         style={{
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           gap: '2px', padding: '6px 8px', borderRadius: '6px',
@@ -368,9 +374,30 @@
         }}>
           {giocataObj.label}
         </span>
-        <span className={`giocata-pct ${cls}`} style={{ fontSize: '13px' }}>
-          {pct}% {isBomb && <span className="bomb-icon" style={{ fontSize: '12px' }}>💣</span>}
-        </span>
+
+        {/* PERCENTUALE + QUOTA */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <span className={`giocata-pct ${cls}`} style={{ fontSize: '13px' }}>
+            {pct}% {isBomb && <span className="bomb-icon" style={{ fontSize: '12px' }}>💣</span>}
+          </span>
+          {quota && (
+            <span
+              title={`Quota BSD: ${quota.decimal_odds}${quota.implied_probability ? ` (prob. implicita ${(quota.implied_probability * 100).toFixed(1)}%)` : ''}`}
+              style={{
+                fontSize: '11px',
+                fontWeight: 'bold',
+                color: '#3498db',
+                background: 'rgba(52, 152, 219, 0.15)',
+                padding: '1px 6px',
+                borderRadius: '4px',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              @{quota.decimal_odds}
+            </span>
+          )}
+        </div>
+
         <span style={{
           fontSize: '9px', color: 'var(--text-muted)', lineHeight: '1',
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%',
@@ -684,6 +711,7 @@
         }}>
           <span>💡 Clicca su una nazione per vedere i campionati</span>
           <span>🎯 Clicca su una giocata per aggiungerla alla Schedina</span>
+          <span style={{ color: '#3498db' }}>💰 @quota = quota BSD (se disponibile)</span>
           <span style={{ color: 'var(--accent)' }}>🔄 Filtro campionati dal Palinsesto</span>
         </div>
       </div>
@@ -732,6 +760,8 @@
         <span>🏆 <b style={{ color: 'var(--accent)' }}>{campionatiAttivi.length}</b> campionati attivi</span>
         <span>•</span>
         <span>📊 <b style={{ color: 'var(--accent)' }}>{matchesPuliti.length}</b> partite totali</span>
+        <span>•</span>
+        <span>💰 Quote BSD caricate: <b style={{ color: '#3498db' }}>{Object.keys(JSON.parse(localStorage.getItem('ft_quote_cache') || '{}')).length}</b></span>
         <span style={{ marginLeft: 'auto', fontStyle: 'italic' }}>
           Modifica i filtri nel <b>Palinsesto</b> 📅
         </span>
@@ -783,7 +813,7 @@
     CHINESE_TEAMS,
   };
 
-  console.log('✅ Modulo Home caricato (home.js) - legge filtro campionati dal Palinsesto');
+  console.log('✅ Modulo Home caricato (home.js) - legge filtro campionati dal Palinsesto + quote BSD');
   console.log('   - Nazioni disponibili:', Object.keys(NAZIONI).length);
 
 })();
