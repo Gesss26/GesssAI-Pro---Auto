@@ -5,7 +5,6 @@
 // + SINCRONIZZATO CON IL FILTRO CAMPIONATI GLOBALE (Palinsesto)
 // + ORDINAMENTO: DATA -> PERCENTUALE (DECRESCENTE)
 // + TOP 3 GIOCATE COME IN HOME (filtra in base alle giocate scelte)
-// + QUOTA BSD accanto a ogni giocata + TOTALI QUOTA per medaglia
 // ============================================================
 
 const SchedinaComponent = ({ 
@@ -14,7 +13,7 @@ const SchedinaComponent = ({
   selectedFamiglie, 
   onSelectMatch, 
   showAlert,
-  palinsestoGiorniRange = 1,
+  palinsestoGiorniRange = 1,  // (legacy, ora usiamo il filtro globale)
   renderGiorniButtons,
   renderChampFilters,
   CHAMPIONSHIP_LIST
@@ -43,6 +42,7 @@ const SchedinaComponent = ({
     campionatiAttivi,
   } = window.FiltriCampionati.useFiltroCampionati();
 
+  // Converte in array di nomi (compatibilità con il codice esistente)
   const campionatiSelezionati = campionatiAttivi;
 
   // Stato locale della schedina
@@ -104,20 +104,23 @@ const SchedinaComponent = ({
   };
 
   // ============================================================
-  // OTTIENI LE PARTITE - STESSA LOGICA DEL PALINSESTO
+  // OTTIENI LE PARTITE - STESSA IDENTICA LOGICA DEL PALINSESTO
   // ============================================================
   const getPartiteDisponibili = useCallback(() => {
     const todayStr = getTodayStr();
     const maxDateStr = addDaysToDateStr(todayStr, giorniRange);
     
+    // Prendi le partite Future (come nel Palinsesto)
     let partite = matches.filter(m => m.stato === 'Futura');
     
+    // Filtra per campionati selezionati (dal filtro globale)
     if (campionatiSelezionati.length > 0) {
       partite = partite.filter(m => campionatiSelezionati.includes(m.campionato));
     } else {
       partite = [];
     }
     
+    // FILTRO DATA: da oggi a oggi+giorniRange (IDENTICO AL PALINSESTO)
     partite = partite.filter(m => {
       if (!m.data) return false;
       const normalized = normalizeDate(m.data);
@@ -125,34 +128,49 @@ const SchedinaComponent = ({
       return normalized >= todayStr && normalized <= maxDateStr;
     });
     
-    // Escludi partite già iniziate
+    // ⭐ ESCLUSIONE PARTITE GIÀ INIZIATE (ORARIO PASSATO)
     partite = partite.filter(m => {
-      if (!m.ora || m.ora === 'TBD' || m.ora === 'N/D') return true;
+      if (!m.ora || m.ora === 'TBD' || m.ora === 'N/D') {
+        return true;
+      }
+      
       const matchDate = normalizeDate(m.data);
       const now = new Date();
       const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
-      const todayStr2 = getTodayStr();
-      if (matchDate !== todayStr2) return true;
+      const todayStr = getTodayStr();
+      
+      if (matchDate !== todayStr) {
+        return true;
+      }
+      
       const timeParts = m.ora.split(':');
       if (timeParts.length < 2) return true;
+      
       const matchHour = parseInt(timeParts[0], 10);
       const matchMinutes = parseInt(timeParts[1], 10);
       if (isNaN(matchHour) || isNaN(matchMinutes)) return true;
+      
       const matchTotalMinutes = matchHour * 60 + matchMinutes;
+      
       return matchTotalMinutes > currentTotalMinutes;
     });
     
+    // FILTRO ORARIO: "dopo ora"
     if (filtroOrario === 'dopo_ora') {
       const now = new Date();
       const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
+      
       partite = partite.filter(m => {
-        if (!m.ora || m.ora === 'TBD' || m.ora === 'N/D') return true;
+        if (!m.ora || m.ora === 'TBD' || m.ora === 'N/D') {
+          return true;
+        }
         const timeParts = m.ora.split(':');
         if (timeParts.length < 2) return true;
         const matchHour = parseInt(timeParts[0], 10);
         const matchMinutes = parseInt(timeParts[1], 10);
         if (isNaN(matchHour) || isNaN(matchMinutes)) return true;
         const matchTotalMinutes = matchHour * 60 + matchMinutes;
+        
         const matchDate = normalizeDate(m.data);
         if (matchDate === todayStr) {
           return matchTotalMinutes > currentTotalMinutes;
@@ -208,7 +226,8 @@ const SchedinaComponent = ({
   };
 
   // ============================================================
-  // CALCOLA TOP 3 GIOCATE PER PARTITA
+  // CALCOLA TOP 3 GIOCATE PER PARTITA (come in Home)
+  // Filtra in base alle giocate selezionate (da 1 a 3+)
   // ============================================================
   const calcolaTop3GiocatePerPartita = (match) => {
     const stats = computeMatchStats(match, matches);
@@ -224,6 +243,7 @@ const SchedinaComponent = ({
     const homeRange = getMultigolRange(match.casa, matches);
     const awayRange = getMultigolRange(match.ospiti, matches);
 
+    // Determina quali famiglie analizzare in base alle giocate selezionate
     const famiglieDaAnalizzare = giocateSelezionate.includes('tutte') || giocateSelezionate.length === 0
       ? Object.keys(window.FAMIGLIE_GIOCATE || {})
       : giocateSelezionate;
@@ -263,6 +283,7 @@ const SchedinaComponent = ({
       }
     });
 
+    // Ordina per percentuale decrescente
     tutte.sort((a, b) => b.pct - a.pct);
 
     const top3 = tutte.slice(0, 3);
@@ -278,7 +299,7 @@ const SchedinaComponent = ({
   };
 
   // ============================================================
-  // PARTITE DISPONIBILI CON ORDINAMENTO
+  // PARTITE DISPONIBILI CON ORDINAMENTO: DATA -> SCORE
   // ============================================================
   const partiteDisponibili = useMemo(() => {
     const partite = getPartiteDisponibili();
@@ -292,6 +313,7 @@ const SchedinaComponent = ({
       };
     });
     
+    // ORDINA PER DATA (crescente) e poi per SCORE (decrescente)
     return partiteConDettagli.sort((a, b) => {
       const dateA = normalizeDate(a.data);
       const dateB = normalizeDate(b.data);
@@ -310,52 +332,7 @@ const SchedinaComponent = ({
     });
   }, [getPartiteDisponibili, giocateSelezionate, selectedFamiglie]);
 
-  // ============================================================
-  // CALCOLO TOTALI QUOTA PER MEDAGLIA
-  // ============================================================
-  const calcolaTotaliQuotaPerMedaglia = (schedina) => {
-    if (!schedina || !schedina.partite) return null;
-    
-    const perMedaglia = { '🥇': [], '🥈': [], '🥉': [] };
-    const nomiMedaglie = ['🥇', '🥈', '🥉'];
-    
-    schedina.partite.forEach(m => {
-      const top3 = m.top3 || (m.giocata ? [m.giocata] : []);
-      top3.forEach((g, i) => {
-        if (i > 2) return;
-        const quota = window.getQuotaForGiocata
-          ? window.getQuotaForGiocata(m.id, g.familyId, g.giocata)
-          : null;
-        perMedaglia[nomiMedaglie[i]].push({
-          matchId: m.id,
-          label: g.label,
-          pct: g.pct,
-          quota: quota ? quota.decimal_odds : null,
-        });
-      });
-    });
-    
-    const calcolaTotale = (arr) => {
-      const conQuota = arr.filter(x => x.quota !== null);
-      if (conQuota.length === 0) return { totale: null, count: 0, senza: arr.length };
-      const prodotto = conQuota.reduce((acc, x) => acc * x.quota, 1);
-      return {
-        totale: prodotto,
-        count: conQuota.length,
-        senza: arr.length - conQuota.length,
-      };
-    };
-    
-    return {
-      '🥇': calcolaTotale(perMedaglia['🥇']),
-      '🥈': calcolaTotale(perMedaglia['🥈']),
-      '🥉': calcolaTotale(perMedaglia['🥉']),
-    };
-  };
-
-  // ============================================================
-  // SELEZIONE NUMERO PARTITE
-  // ============================================================
+  // Seleziona un numero personalizzato di partite
   const selezionaNumeroPartite = (n) => {
     if (partiteDisponibili.length === 0) {
       showAlert('info', 'ℹ️ Nessuna partita disponibile.');
@@ -393,7 +370,7 @@ const SchedinaComponent = ({
       const selezionate = shuffled.slice(0, numeroPartiteDesiderato);
       const selezionateOrdinate = ordinaPartitePerDataOra(selezionate);
       setPartiteSelezionate(selezionateOrdinate);
-      showAlert('success', `🎲🎲🎲 CASUALITÀ ESTREMA! ${selezionateOrdinate.length} partite selezionate a caso!`);
+      showAlert('success', `🎲🎲🎲 CASUALITÀ ESTREMA! ${selezionateOrdinate.length} partite selezionate a caso! (rispettato il numero scelto: ${numeroPartiteDesiderato})`);
       return;
     }
 
@@ -518,6 +495,7 @@ const SchedinaComponent = ({
         ...m,
         top3: dettagli.top3,
         score: dettagli.score,
+        // Mantieni anche la migliore per compatibilità con il salvataggio
         giocata: dettagli.top3[0] || null,
         pct: dettagli.top3[0]?.pct || 0
       };
@@ -662,11 +640,7 @@ const SchedinaComponent = ({
           const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉';
           const bombEmoji = g.isBomb ? ' 💣' : '';
           const ggngTag = g.familyId === 'gg_ng' ? ' ⚽GG/NG' : '';
-          const quota = window.getQuotaForGiocata
-            ? window.getQuotaForGiocata(m.id, g.familyId, g.giocata)
-            : null;
-          const quotaStr = quota ? ` @${quota.decimal_odds}` : '';
-          lines.push(`  ${medal} ${g.familyIcon} ${g.label} → ${g.pct}%${quotaStr}${bombEmoji}${ggngTag}`);
+          lines.push(`  ${medal} ${g.familyIcon} ${g.label} → ${g.pct}%${bombEmoji}${ggngTag}`);
         });
       } else {
         lines.push(`  🎯 N/A`);
@@ -674,23 +648,6 @@ const SchedinaComponent = ({
 
       if (idx < schedina.partite.length - 1) lines.push('');
     });
-    
-    // Totali quota per medaglia
-    const totali = calcolaTotaliQuotaPerMedaglia(schedina);
-    if (totali) {
-      lines.push('');
-      lines.push('───────────────────');
-      lines.push('💰 *TOTALI QUOTA PER MEDAGLIA*');
-      ['🥇', '🥈', '🥉'].forEach(med => {
-        const t = totali[med];
-        if (t.totale !== null) {
-          const senzaStr = t.senza > 0 ? ` (${t.senza} senza quota)` : '';
-          lines.push(`  ${med} Totale: ${t.totale.toFixed(2)} • ${t.count} giocate${senzaStr}`);
-        } else {
-          lines.push(`  ${med} Totale: N/D`);
-        }
-      });
-    }
     
     lines.push('');
     lines.push('───────────────────');
@@ -788,6 +745,8 @@ const SchedinaComponent = ({
     if (schedina.giocateSelezionate) {
       setGiocateSelezionate(schedina.giocateSelezionate);
     }
+    // ⚠️ NON ripristinare giorniRange: è un filtro globale (fonte: Palinsesto)
+    // ⚠️ NON ripristinare campionatiSelezionati: è un filtro globale (fonte: Palinsesto)
     setShowSchedinaModal(true);
     showAlert('success', `📂 Schedina caricata! ${schedina.numPartite} partite, media ${schedina.media}%`);
   };
@@ -804,25 +763,40 @@ const SchedinaComponent = ({
       }))
   ];
 
+  function hexToRgb(hex) {
+    if (hex.startsWith('#')) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '243, 156, 18';
+    }
+    return '243, 156, 18';
+  }
+
   return (
     <div className="schedina-container">
       <div className="card" style={{marginBottom: '20px'}}>
         <h3 style={{color: 'var(--accent)', marginBottom: '16px', fontSize: '20px'}}>
           🎯 Crea Schedina {casualitaLevel > 50 ? '🎲' : ''}
           <span style={{fontSize: '12px', color: 'var(--text-muted)', marginLeft: '12px', fontWeight: 'normal'}}>
-            📅 Sincronizzato con Palinsesto ({giorniRange} giorno/i) • 🏆 {campionatiSelezionati.length} campionati attivi • 💰 Quote BSD
+            📅 Sincronizzato con Palinsesto ({giorniRange} giorno/i) • 🏆 {campionatiSelezionati.length} campionati attivi
           </span>
         </h3>
         
-        {/* SEZIONE 1: CAMPIONATI */}
+        {/* SEZIONE 1: CAMPIONATI - SINCRONIZZATI CON PALINSESTO */}
         <div style={{
-          marginBottom: '20px', padding: '14px 16px', background: 'var(--surface)', 
-          borderRadius: '10px', border: '2px solid var(--border)',
+          marginBottom: '20px', 
+          padding: '14px 16px', 
+          background: 'var(--surface)', 
+          borderRadius: '10px', 
+          border: '2px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
         }}>
           <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-            marginBottom: '10px', borderBottom: '1px solid var(--border)', paddingBottom: '8px'
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between', 
+            marginBottom: '10px',
+            borderBottom: '1px solid var(--border)',
+            paddingBottom: '8px'
           }}>
             <span style={{fontSize: '15px', fontWeight: 'bold', color: 'var(--text)'}}>
               🏆 Campionati Attivi
@@ -831,24 +805,48 @@ const SchedinaComponent = ({
               </span>
             </span>
             <div style={{display: 'flex', gap: '6px'}}>
-              <button className="btn" onClick={selezionaTuttiCampionati} style={{
-                fontSize: '10px', padding: '3px 14px',
-                background: campionatiSelezionati.length === championships.length ? 'var(--accent)' : 'var(--surface)',
-                color: campionatiSelezionati.length === championships.length ? '#000' : 'var(--text)',
-                border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer'
-              }}>✅ Tutti</button>
-              <button className="btn" onClick={deselezionaTuttiCampionati} style={{
-                fontSize: '10px', padding: '3px 14px', background: 'var(--surface)',
-                color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer'
-              }}>❌ Deseleziona</button>
+              <button 
+                className="btn" 
+                onClick={selezionaTuttiCampionati}
+                style={{
+                  fontSize: '10px',
+                  padding: '3px 14px',
+                  background: campionatiSelezionati.length === championships.length ? 'var(--accent)' : 'var(--surface)',
+                  color: campionatiSelezionati.length === championships.length ? '#000' : 'var(--text)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                ✅ Tutti
+              </button>
+              <button 
+                className="btn" 
+                onClick={deselezionaTuttiCampionati}
+                style={{
+                  fontSize: '10px',
+                  padding: '3px 14px',
+                  background: 'var(--surface)',
+                  color: 'var(--text)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                ❌ Deseleziona
+              </button>
               <span style={{fontSize: '11px', color: 'var(--text-muted)', padding: '3px 10px', background: 'var(--surface)', borderRadius: '4px'}}>
                 {campionatiSelezionati.length} / {championships.length}
               </span>
             </div>
           </div>
           
+          {/* GRIGLIA 5x5 COME PALINSESTO */}
           <div className="champ-filters-grid" style={{
-            display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', width: '100%'
+            display: 'grid',
+            gridTemplateColumns: 'repeat(5, 1fr)',
+            gap: '6px',
+            width: '100%'
           }}>
             {championships.map(c => {
               const isSelected = campionatiSelezionati.includes(c.name);
@@ -859,25 +857,40 @@ const SchedinaComponent = ({
                   onClick={() => toggleCampionato(c.name)}
                   className={`champ-filter-btn ${isSelected ? 'active' : 'inactive'}`}
                   style={{
-                    padding: '6px 8px', borderRadius: '6px',
+                    padding: '6px 8px',
+                    borderRadius: '6px',
                     border: isSelected ? `2px solid ${color}` : '2px solid var(--border)',
                     background: isSelected ? color : 'var(--surface)',
                     color: isSelected ? '#000' : 'var(--text-muted)',
-                    cursor: 'pointer', fontSize: '11px',
+                    cursor: 'pointer',
+                    fontSize: '11px',
                     fontWeight: isSelected ? 'bold' : '600',
-                    transition: 'all 0.2s', minHeight: '34px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+                    transition: 'all 0.2s',
+                    minHeight: '34px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
                   }}
                   title={c.name}
                 >
                   <span className="champ-color-dot" style={{
-                    display: 'inline-block', width: '10px', height: '10px',
-                    borderRadius: '50%', marginRight: '6px', flexShrink: 0, background: color
+                    display: 'inline-block',
+                    width: '10px',
+                    height: '10px',
+                    borderRadius: '50%',
+                    marginRight: '6px',
+                    flexShrink: 0,
+                    background: color
                   }} />
                   <span className="champ-name" style={{
-                    fontSize: '10px', lineHeight: '1.2',
-                    overflow: 'hidden', textOverflow: 'ellipsis'
+                    fontSize: '10px',
+                    lineHeight: '1.2',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
                   }}>
                     {c.name.length > 20 ? c.name.substring(0, 18) + '…' : c.name}
                   </span>
@@ -893,28 +906,55 @@ const SchedinaComponent = ({
 
         {/* SEZIONE 2: GIOCATE */}
         <div style={{
-          marginBottom: '20px', padding: '14px 16px', background: 'var(--surface)',
-          borderRadius: '10px', border: '2px solid var(--border)',
+          marginBottom: '20px', 
+          padding: '14px 16px', 
+          background: 'var(--surface)', 
+          borderRadius: '10px', 
+          border: '2px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
         }}>
           <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            marginBottom: '10px', borderBottom: '1px solid var(--border)', paddingBottom: '8px'
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between', 
+            marginBottom: '10px',
+            borderBottom: '1px solid var(--border)',
+            paddingBottom: '8px'
           }}>
             <span style={{fontSize: '15px', fontWeight: 'bold', color: 'var(--text)'}}>
               🎯 Seleziona Giocate
             </span>
             <div style={{display: 'flex', gap: '6px'}}>
-              <button className="btn" onClick={selezionaTutteGiocate} style={{
-                fontSize: '10px', padding: '3px 14px',
-                background: giocateSelezionate.includes('tutte') ? 'var(--accent)' : 'var(--surface)',
-                color: giocateSelezionate.includes('tutte') ? '#000' : 'var(--text)',
-                border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer'
-              }}>⭐ Tutte</button>
-              <button className="btn" onClick={deselezionaTutteGiocate} style={{
-                fontSize: '10px', padding: '3px 14px', background: 'var(--surface)',
-                color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer'
-              }}>❌ Deseleziona</button>
+              <button 
+                className="btn" 
+                onClick={selezionaTutteGiocate}
+                style={{
+                  fontSize: '10px',
+                  padding: '3px 14px',
+                  background: giocateSelezionate.includes('tutte') ? 'var(--accent)' : 'var(--surface)',
+                  color: giocateSelezionate.includes('tutte') ? '#000' : 'var(--text)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                ⭐ Tutte
+              </button>
+              <button 
+                className="btn" 
+                onClick={deselezionaTutteGiocate}
+                style={{
+                  fontSize: '10px',
+                  padding: '3px 14px',
+                  background: 'var(--surface)',
+                  color: 'var(--text)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                ❌ Deseleziona
+              </button>
               <span style={{fontSize: '11px', color: 'var(--text-muted)', padding: '3px 10px', background: 'var(--surface)', borderRadius: '4px'}}>
                 {giocateSelezionate.includes('tutte') ? '⭐ Tutte' : `${giocateSelezionate.length} selezionate`}
               </span>
@@ -930,7 +970,8 @@ const SchedinaComponent = ({
                   key={f.id}
                   onClick={() => toggleGiocata(f.id)}
                   style={{
-                    padding: '6px 16px', borderRadius: '8px',
+                    padding: '6px 16px',
+                    borderRadius: '8px',
                     border: isSelected 
                       ? (isGGNG ? '2px solid #e74c3c' : '2px solid var(--accent)') 
                       : '1px solid var(--border)',
@@ -940,9 +981,11 @@ const SchedinaComponent = ({
                     color: isSelected 
                       ? (isGGNG ? '#e74c3c' : 'var(--accent)') 
                       : 'var(--text-muted)',
-                    cursor: 'pointer', fontSize: '12px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
                     fontWeight: isSelected ? 'bold' : 'normal',
-                    transition: 'all 0.2s', opacity: isSelected ? 1 : 0.6,
+                    transition: 'all 0.2s',
+                    opacity: isSelected ? 1 : 0.6,
                     boxShadow: isSelected 
                       ? (isGGNG ? '0 0 20px rgba(231, 76, 60, 0.2)' : '0 0 15px rgba(243, 156, 18, 0.15)') 
                       : 'none'
@@ -962,14 +1005,19 @@ const SchedinaComponent = ({
           </div>
         </div>
 
-        {/* SEZIONE 3: FILTRI DATA/ORA */}
+        {/* SEZIONE 3: FILTRI DATA/ORA (SINCRONIZZATI CON PALINSESTO) */}
         <div style={{
-          marginBottom: '20px', padding: '14px 16px', background: 'var(--surface)',
-          borderRadius: '10px', border: '2px solid var(--border)',
+          marginBottom: '20px', 
+          padding: '14px 16px', 
+          background: 'var(--surface)', 
+          borderRadius: '10px', 
+          border: '2px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
         }}>
           <div style={{
-            borderBottom: '1px solid var(--border)', paddingBottom: '8px', marginBottom: '10px'
+            borderBottom: '1px solid var(--border)',
+            paddingBottom: '8px',
+            marginBottom: '10px'
           }}>
             <span style={{fontSize: '15px', fontWeight: 'bold', color: 'var(--text)'}}>
               📅 Filtri Data e Orario
@@ -987,9 +1035,13 @@ const SchedinaComponent = ({
                 value={giorniRange} 
                 onChange={e => setGiorniRange(parseInt(e.target.value))}
                 style={{
-                  width: '100%', padding: '7px 12px', background: 'var(--surface)',
-                  color: 'var(--text)', border: '1px solid var(--border)',
-                  borderRadius: '6px', fontSize: '12px'
+                  width: '100%',
+                  padding: '7px 12px',
+                  background: 'var(--surface)',
+                  color: 'var(--text)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '6px',
+                  fontSize: '12px'
                 }}
               >
                 <option value="1">1 Giorno (Oggi)</option>
@@ -1010,38 +1062,64 @@ const SchedinaComponent = ({
                 ⏰ Filtro Orario
               </label>
               <div style={{display: 'flex', background: 'var(--surface)', borderRadius: '6px', padding: '3px', border: '1px solid var(--border)'}}>
-                <button onClick={() => setFiltroOrario('dopo_ora')} style={{
-                  flex: 1, padding: '6px 10px', fontSize: '11px', borderRadius: '4px',
-                  border: 'none', cursor: 'pointer',
-                  fontWeight: filtroOrario === 'dopo_ora' ? 'bold' : 'normal',
-                  background: filtroOrario === 'dopo_ora' ? 'var(--accent)' : 'transparent',
-                  color: filtroOrario === 'dopo_ora' ? '#000' : 'var(--text-muted)',
-                  transition: 'all 0.2s'
-                }}>⏰ Dopo ora</button>
-                <button onClick={() => setFiltroOrario('giorno_intero')} style={{
-                  flex: 1, padding: '6px 10px', fontSize: '11px', borderRadius: '4px',
-                  border: 'none', cursor: 'pointer',
-                  fontWeight: filtroOrario === 'giorno_intero' ? 'bold' : 'normal',
-                  background: filtroOrario === 'giorno_intero' ? 'var(--accent)' : 'transparent',
-                  color: filtroOrario === 'giorno_intero' ? '#000' : 'var(--text-muted)',
-                  transition: 'all 0.2s'
-                }}>📅 Giorno intero</button>
+                <button 
+                  onClick={() => setFiltroOrario('dopo_ora')}
+                  style={{
+                    flex: 1,
+                    padding: '6px 10px',
+                    fontSize: '11px',
+                    borderRadius: '4px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontWeight: filtroOrario === 'dopo_ora' ? 'bold' : 'normal',
+                    background: filtroOrario === 'dopo_ora' ? 'var(--accent)' : 'transparent',
+                    color: filtroOrario === 'dopo_ora' ? '#000' : 'var(--text-muted)',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  ⏰ Dopo ora
+                </button>
+                <button 
+                  onClick={() => setFiltroOrario('giorno_intero')}
+                  style={{
+                    flex: 1,
+                    padding: '6px 10px',
+                    fontSize: '11px',
+                    borderRadius: '4px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontWeight: filtroOrario === 'giorno_intero' ? 'bold' : 'normal',
+                    background: filtroOrario === 'giorno_intero' ? 'var(--accent)' : 'transparent',
+                    color: filtroOrario === 'giorno_intero' ? '#000' : 'var(--text-muted)',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  📅 Giorno intero
+                </button>
               </div>
               <div style={{fontSize: '9px', color: 'var(--text-muted)', marginTop: '3px', textAlign: 'center'}}>
                 {filtroOrario === 'dopo_ora' ? 'Solo partite non ancora iniziate' : 'Tutte le partite del giorno'}
               </div>
             </div>
           </div>
+          <div style={{fontSize: '10px', color: 'var(--text-muted)', marginTop: '6px', padding: '4px 8px', background: 'rgba(231, 76, 60, 0.05)', borderRadius: '4px', border: '1px solid rgba(231, 76, 60, 0.1)'}}>
+            ⏰ <b>Escluse automaticamente</b> le partite con orario già passato (solo per partite di oggi)
+          </div>
         </div>
 
         {/* SEZIONE 4: CASUALITÀ */}
         <div style={{
-          marginBottom: '20px', padding: '14px 16px', background: 'var(--surface)',
-          borderRadius: '10px', border: '2px solid var(--border)',
+          marginBottom: '20px', 
+          padding: '14px 16px', 
+          background: 'var(--surface)', 
+          borderRadius: '10px', 
+          border: '2px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
         }}>
           <div style={{
-            borderBottom: '1px solid var(--border)', paddingBottom: '8px', marginBottom: '10px'
+            borderBottom: '1px solid var(--border)',
+            paddingBottom: '8px',
+            marginBottom: '10px'
           }}>
             <span style={{fontSize: '15px', fontWeight: 'bold', color: 'var(--text)'}}>
               🎲 Livello di Casualità
@@ -1053,12 +1131,19 @@ const SchedinaComponent = ({
             </div>
             <div style={{flex: '1', minWidth: '140px'}}>
               <input 
-                type="range" min="0" max="100" step="5"
+                type="range" 
+                min="0" 
+                max="100" 
+                step="5" 
                 value={casualitaLevel} 
                 onChange={e => setCasualitaLevel(parseInt(e.target.value))}
                 style={{
-                  width: '100%', accentColor: '#8e44ad', height: '6px',
-                  borderRadius: '3px', background: 'var(--surface)', cursor: 'pointer'
+                  width: '100%',
+                  accentColor: '#8e44ad',
+                  height: '6px',
+                  borderRadius: '3px',
+                  background: 'var(--surface)',
+                  cursor: 'pointer'
                 }}
               />
             </div>
@@ -1075,33 +1160,67 @@ const SchedinaComponent = ({
                '🎲🎲🎲 MOLTO CASUALE!'}
             </div>
           </div>
+          {casualitaLevel > 80 && (
+            <div style={{
+              marginTop: '8px', 
+              fontSize: '12px', 
+              color: '#e74c3c', 
+              fontWeight: 'bold', 
+              textAlign: 'center',
+              background: 'rgba(231, 76, 60, 0.08)',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              border: '1px solid rgba(231, 76, 60, 0.2)'
+            }}>
+              ⚠️ CASUALITÀ ESTREMA! Le partite vengono scelte CASUALMENTE (ma viene rispettato il numero scelto)
+            </div>
+          )}
         </div>
 
         {/* SEZIONE 5: STATISTICHE */}
         <div style={{
-          marginBottom: '16px', padding: '10px 16px', background: 'var(--surface)',
-          borderRadius: '8px', border: '1px solid var(--border)'
+          marginBottom: '16px', 
+          padding: '10px 16px', 
+          background: 'var(--surface)', 
+          borderRadius: '8px', 
+          border: '1px solid var(--border)'
         }}>
           <div style={{display: 'flex', flexWrap: 'wrap', gap: '16px', fontSize: '13px'}}>
             <span>📊 <b>{partiteDisponibili.length}</b> partite disponibili</span>
             <span>🏆 <b>{campionatiSelezionati.length}</b> campionati attivi</span>
             <span>📅 Range: <b>{giorniRange} giorno/i</b></span>
+            <span>⏰ Solo partite <b>non ancora iniziate</b></span>
             <span>⭐ Media score: <b style={{color: 'var(--accent)'}}>
               {partiteDisponibili.length > 0 ? Math.round(partiteDisponibili.reduce((s, m) => s + m.score, 0) / partiteDisponibili.length) : 0}%
             </b></span>
             <span>🎯 Selezionate: <b style={{color: 'var(--win)'}}>{partiteSelezionate.length}</b> / {numeroPartiteDaSelezionare}</span>
-            <span style={{color: '#3498db'}}>💰 Quote BSD: <b>{Object.keys(JSON.parse(localStorage.getItem('ft_quote_cache') || '{}')).length}</b> partite</span>
+            {partiteSelezionate.length > 0 && (
+              <span style={{fontSize: '11px', color: 'var(--text-muted)'}}>
+                📅 {formatDateEU(partiteSelezionate[0].data)} → {formatDateEU(partiteSelezionate[partiteSelezionate.length-1].data)}
+              </span>
+            )}
+            {giocateSelezionate.includes('gg_ng') && (
+              <span style={{color: '#e74c3c', fontWeight: 'bold', fontSize: '11px'}}>⚽ GG/NG attivo</span>
+            )}
+            <span style={{color: 'var(--accent)', fontSize: '11px'}}>
+              🥇🥈🥉 Top 3 giocate per partita
+            </span>
           </div>
         </div>
 
-        {/* SEZIONE 6: NUMERO PARTITE */}
+        {/* SEZIONE 6: SELEZIONE NUMERO PARTITE */}
         <div style={{
-          marginBottom: '16px', padding: '14px 16px', background: 'var(--surface)',
-          borderRadius: '10px', border: '2px solid var(--border)',
+          marginBottom: '16px', 
+          padding: '14px 16px', 
+          background: 'var(--surface)', 
+          borderRadius: '10px', 
+          border: '2px solid var(--border)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
         }}>
           <div style={{
-            borderBottom: '1px solid var(--border)', paddingBottom: '8px', marginBottom: '10px'
+            borderBottom: '1px solid var(--border)',
+            paddingBottom: '8px',
+            marginBottom: '10px'
           }}>
             <span style={{fontSize: '15px', fontWeight: 'bold', color: 'var(--text)'}}>
               📊 Numero di Partite
@@ -1111,23 +1230,45 @@ const SchedinaComponent = ({
             <div style={{display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--surface)', padding: '5px 14px', borderRadius: '8px', border: '1px solid var(--border)'}}>
               <span style={{fontSize: '13px', fontWeight: 'bold', color: 'var(--text)'}}>📊 Numero partite:</span>
               <input 
-                type="number" min="1" max="10"
+                type="number" 
+                min="1" 
+                max="10" 
                 value={numeroPartiteDaSelezionare} 
                 onChange={e => {
                   const val = parseInt(e.target.value) || 1;
                   setNumeroPartiteDaSelezionare(Math.min(10, Math.max(1, val)));
                 }}
                 style={{
-                  width: '44px', padding: '4px 6px', fontSize: '14px', fontWeight: 'bold',
-                  textAlign: 'center', background: 'var(--background)', color: 'var(--text)',
-                  border: '1px solid var(--border)', borderRadius: '4px', outline: 'none'
+                  width: '44px',
+                  padding: '4px 6px',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  background: 'var(--background)',
+                  color: 'var(--text)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '4px',
+                  outline: 'none'
                 }}
               />
               <span style={{fontSize: '11px', color: 'var(--text-muted)'}}>(1-10)</span>
+              {casualitaLevel > 80 && (
+                <span style={{fontSize: '10px', color: '#e74c3c', fontWeight: 'bold', background: 'rgba(231,76,60,0.1)', padding: '2px 10px', borderRadius: '4px'}}>
+                  🎲 RISPETTATO!
+                </span>
+              )}
             </div>
             
-            <button className="btn" onClick={() => selezionaNumeroPartite(numeroPartiteDaSelezionare)} 
-              style={{background: 'var(--accent2)', color: '#000', padding: '6px 16px', fontWeight: 'bold'}}>
+            <button 
+              className="btn" 
+              onClick={() => selezionaNumeroPartite(numeroPartiteDaSelezionare)} 
+              style={{
+                background: 'var(--accent2)', 
+                color: '#000',
+                padding: '6px 16px',
+                fontWeight: 'bold'
+              }}
+            >
               ⚡ Seleziona
             </button>
             
@@ -1135,8 +1276,11 @@ const SchedinaComponent = ({
               <button className="btn" onClick={() => selezionaNumeroPartite(3)} style={{fontSize: '12px', padding: '5px 12px'}}>Top 3</button>
               <button className="btn" onClick={() => selezionaNumeroPartite(5)} style={{fontSize: '12px', padding: '5px 12px'}}>Top 5</button>
               <button className="btn" onClick={() => selezionaNumeroPartite(10)} style={{fontSize: '12px', padding: '5px 12px'}}>Top 10</button>
-              <button className="btn" onClick={() => selezionaNumeroPartite(partiteDisponibili.length)} 
-                style={{fontSize: '11px', padding: '5px 12px'}}>
+              <button 
+                className="btn" 
+                onClick={() => selezionaNumeroPartite(partiteDisponibili.length)} 
+                style={{fontSize: '11px', padding: '5px 12px'}}
+              >
                 📋 Tutte ({partiteDisponibili.length})
               </button>
             </div>
@@ -1145,42 +1289,64 @@ const SchedinaComponent = ({
 
         {/* SEZIONE 7: PULSANTI AZIONE */}
         <div style={{
-          marginBottom: '12px', padding: '12px 16px', background: 'var(--surface)',
-          borderRadius: '10px', border: '2px solid var(--border)',
-          display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center'
+          marginBottom: '12px',
+          padding: '12px 16px',
+          background: 'var(--surface)',
+          borderRadius: '10px',
+          border: '2px solid var(--border)',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '8px',
+          alignItems: 'center'
         }}>
           <div style={{display: 'flex', gap: '6px', flexWrap: 'wrap'}}>
-            <button className="btn" onClick={selezionaCasuale} style={{background: '#8e44ad', color: '#fff', fontWeight: 'bold'}}>🎲 Casuale</button>
-            <button className="btn" onClick={rigeneraSchedina} style={{background: 'var(--accent2)', color: '#000', fontWeight: 'bold'}}>🔄 Rigenera {casualitaLevel > 50 ? '🎲' : ''}</button>
-            <button className="btn btn-secondary" onClick={resettaSchedina}>🗑️ Resetta</button>
+            <button className="btn" onClick={selezionaCasuale} style={{background: '#8e44ad', color: '#fff', fontWeight: 'bold'}}>
+              🎲 Casuale
+            </button>
+            <button className="btn" onClick={rigeneraSchedina} style={{background: 'var(--accent2)', color: '#000', fontWeight: 'bold'}}>
+              🔄 Rigenera {casualitaLevel > 50 ? '🎲' : ''}
+            </button>
+            <button className="btn btn-secondary" onClick={resettaSchedina}>
+              🗑️ Resetta
+            </button>
           </div>
           
-          <button className="btn" onClick={creaSchedina} 
+          <button 
+            className="btn" 
+            onClick={creaSchedina} 
             disabled={partiteSelezionate.length < 2 || loading} 
             style={{
               marginLeft: 'auto',
               background: partiteSelezionate.length >= 2 ? 'var(--accent)' : 'var(--surface)',
               color: partiteSelezionate.length >= 2 ? '#000' : 'var(--text-muted)',
-              fontWeight: 'bold', padding: '8px 20px', fontSize: '14px'
-            }}>
+              fontWeight: 'bold',
+              padding: '8px 20px',
+              fontSize: '14px'
+            }}
+          >
             {loading ? '⏳ Creazione...' : `🎯 Crea Schedina (${partiteSelezionate.length})`}
           </button>
         </div>
         
         {/* LEGENDA */}
         <div style={{
-          marginTop: '8px', padding: '10px 14px', background: 'var(--surface)',
-          borderRadius: '8px', border: '1px dashed var(--border)', 
-          fontSize: '10px', color: 'var(--text-muted)'
+          marginTop: '8px', 
+          padding: '10px 14px', 
+          background: 'var(--surface)', 
+          borderRadius: '8px', 
+          border: '1px dashed var(--border)', 
+          fontSize: '10px', 
+          color: 'var(--text-muted)'
         }}>
           <div style={{display: 'flex', flexWrap: 'wrap', gap: '14px'}}>
             <span>💡 Clicca su una partita per selezionarla/deselezionarla</span>
+            <span>📅 Ordinate automaticamente per data/ora</span>
             <span>🔢 Max 10 partite per schedina</span>
-            <span style={{color: '#e74c3c'}}>⚽ GG - NG</span>
-            <span style={{color: '#eb5757'}}>⏰ Escluse partite già iniziate</span>
-            <span style={{color: 'var(--accent)'}}>🔄 Sincronizzato con Palinsesto</span>
-            <span style={{color: '#3498db'}}>💰 @quota = quota BSD (se disponibile)</span>
-            <span style={{color: 'var(--accent)'}}>🥇🥈🥉 Top 3 giocate per partita</span>
+            <span style={{color: '#e74c3c'}}>⚽ <b>NOVITÀ:</b> GG - NG (Goal-Goal / No Goal)</span>
+            <span style={{color: '#eb5757'}}>⏰ Escluse automaticamente le partite già iniziate</span>
+            <span style={{color: 'var(--accent)'}}>🔄 Sincronizzato con il Palinsesto (campionati + range giorni)</span>
+            <span style={{color: 'var(--accent)'}}>🥇🥈🥉 Top 3 giocate per partita (come in Home)</span>
+            {casualitaLevel > 80 && <span style={{color: '#8e44ad', fontWeight: 'bold'}}>🎲🎲🎲 CASUALITÀ ESTREMA: scelta casuale delle partite!</span>}
           </div>
         </div>
       </div>
@@ -1211,11 +1377,17 @@ const SchedinaComponent = ({
                   key={m.id}
                   onClick={() => togglePartita(m)}
                   style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '10px 14px', borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '10px 14px',
+                    borderRadius: '8px',
                     border: isSelected ? '2px solid var(--accent)' : '1px solid var(--border)',
                     background: isSelected ? 'rgba(243, 156, 18, 0.08)' : 'var(--surface)',
-                    cursor: 'pointer', transition: 'all 0.2s', gap: '8px', flexWrap: 'wrap'
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    gap: '8px',
+                    flexWrap: 'wrap'
                   }}
                 >
                   <div style={{display: 'flex', alignItems: 'center', gap: '6px', minWidth: '100px'}}>
@@ -1237,55 +1409,55 @@ const SchedinaComponent = ({
                     </span>
                   </div>
 
-                  {/* TOP 3 GIOCATE CON QUOTA */}
+                  {/* TOP 3 GIOCATE */}
                   <div style={{
-                    display: 'flex', gap: '6px', alignItems: 'center',
-                    justifyContent: 'center', flexWrap: 'wrap', minWidth: '280px'
+                    display: 'flex',
+                    gap: '6px',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexWrap: 'wrap',
+                    minWidth: '280px'
                   }}>
                     {m.top3 && m.top3.length > 0 ? (
                       m.top3.map((g, idx) => {
                         const isGGNG = g.familyId === 'gg_ng';
-                        const quota = window.getQuotaForGiocata
-                          ? window.getQuotaForGiocata(m.id, g.familyId, g.giocata)
-                          : null;
                         return (
                           <div
                             key={idx}
                             style={{
-                              display: 'flex', flexDirection: 'column', alignItems: 'center',
-                              gap: '2px', padding: '4px 8px', borderRadius: '6px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              gap: '2px',
+                              padding: '4px 8px',
+                              borderRadius: '6px',
                               border: g.isBomb ? '2px solid var(--accent)' : (isGGNG ? '1px solid #e74c3c' : '1px solid var(--border)'),
                               background: g.isBomb ? 'rgba(243, 156, 18, 0.10)' : (isGGNG ? 'rgba(231, 76, 60, 0.06)' : 'var(--surface)'),
                               minWidth: '85px'
                             }}
-                            title={`${g.familyIcon} ${g.familyLabel}${quota ? ` • Quota: ${quota.decimal_odds}` : ''}`}
+                            title={`${g.familyIcon} ${g.familyLabel}`}
                           >
                             <span style={{
-                              fontSize: '10px', fontWeight: 'bold',
+                              fontSize: '10px',
+                              fontWeight: 'bold',
                               color: isGGNG ? '#e74c3c' : 'var(--accent)',
-                              whiteSpace: 'nowrap', overflow: 'hidden',
-                              textOverflow: 'ellipsis', maxWidth: '80px'
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              maxWidth: '80px'
                             }}>
                               {g.label}
                             </span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                              <span className={`giocata-pct ${getPercentualeClasse(g.pct)}`} style={{fontSize: '11px', padding: '1px 5px'}}>
-                                {g.pct}% {g.isBomb && '💣'}
-                              </span>
-                              {quota && (
-                                <span style={{
-                                  fontSize: '10px', fontWeight: 'bold', color: '#3498db',
-                                  background: 'rgba(52, 152, 219, 0.15)',
-                                  padding: '1px 5px', borderRadius: '4px',
-                                }}>
-                                  @{quota.decimal_odds}
-                                </span>
-                              )}
-                            </div>
+                            <span className={`giocata-pct ${getPercentualeClasse(g.pct)}`} style={{fontSize: '11px', padding: '1px 6px'}}>
+                              {g.pct}% {g.isBomb && '💣'}
+                            </span>
                             <span style={{
-                              fontSize: '8px', color: 'var(--text-muted)',
-                              whiteSpace: 'nowrap', overflow: 'hidden',
-                              textOverflow: 'ellipsis', maxWidth: '80px'
+                              fontSize: '8px',
+                              color: 'var(--text-muted)',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              maxWidth: '80px'
                             }}>
                               {g.familyIcon} {g.familyLabel}
                             </span>
@@ -1315,7 +1487,8 @@ const SchedinaComponent = ({
         <div className="card" style={{marginTop: '16px', border: '2px solid var(--accent)'}}>
           <h4 style={{color: 'var(--accent)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px'}}>
             💾 Schedine Salvate ({schedineSalvate.length})
-            <button className="btn btn-secondary" 
+            <button 
+              className="btn btn-secondary" 
               onClick={() => {
                 if (confirm('⚠️ Eliminare TUTTE le schedine salvate?')) {
                   localStorage.setItem('ft_schedine_salvate', '[]');
@@ -1323,19 +1496,28 @@ const SchedinaComponent = ({
                   showAlert('success', '🗑️ Tutte le schedine eliminate!');
                 }
               }}
-              style={{fontSize: '10px', padding: '2px 12px', marginLeft: 'auto'}}>
+              style={{fontSize: '10px', padding: '2px 12px', marginLeft: 'auto'}}
+            >
               🗑️ Elimina Tutte
             </button>
           </h4>
           
           <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
             {schedineSalvate.map((s, idx) => (
-              <div key={s.id} style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '8px 12px', borderRadius: '6px',
-                border: '1px solid var(--border)', background: 'var(--surface)',
-                gap: '8px', flexWrap: 'wrap'
-              }}>
+              <div 
+                key={s.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid var(--border)',
+                  background: 'var(--surface)',
+                  gap: '8px',
+                  flexWrap: 'wrap'
+                }}
+              >
                 <div style={{display: 'flex', alignItems: 'center', gap: '8px', flex: '1', minWidth: '150px'}}>
                   <span style={{fontWeight: 'bold', color: 'var(--accent)', fontSize: '12px'}}>#{idx + 1}</span>
                   <span style={{fontSize: '12px', color: 'var(--text)'}}>
@@ -1347,22 +1529,35 @@ const SchedinaComponent = ({
                   {s.giocateSelezionate?.includes('gg_ng') && (
                     <span style={{fontSize: '10px', color: '#e74c3c'}}>⚽ GG/NG</span>
                   )}
+                  {s.casualitaLevel > 80 && (
+                    <span style={{fontSize: '10px', color: '#8e44ad'}}>🎲 ESTREMA</span>
+                  )}
                 </div>
                 
                 <div style={{display: 'flex', gap: '6px', flexWrap: 'wrap'}}>
-                  <button className="btn" onClick={() => caricaSchedinaSalvata(s)} style={{fontSize: '10px', padding: '4px 12px'}}>
+                  <button 
+                    className="btn" 
+                    onClick={() => caricaSchedinaSalvata(s)}
+                    style={{fontSize: '10px', padding: '4px 12px'}}
+                  >
                     📂 Carica
                   </button>
-                  <button className="btn btn-secondary" 
+                  <button 
+                    className="btn btn-secondary" 
                     onClick={() => {
                       const text = formatSchedinaText(s);
                       navigator.clipboard?.writeText?.(text);
                       showAlert('success', '📋 Schedina copiata!');
                     }}
-                    style={{fontSize: '10px', padding: '4px 12px'}}>
+                    style={{fontSize: '10px', padding: '4px 12px'}}
+                  >
                     📋 Copia
                   </button>
-                  <button className="btn btn-danger" onClick={() => eliminaSchedinaSalvata(s.id)} style={{fontSize: '10px', padding: '4px 12px'}}>
+                  <button 
+                    className="btn btn-danger" 
+                    onClick={() => eliminaSchedinaSalvata(s.id)}
+                    style={{fontSize: '10px', padding: '4px 12px'}}
+                  >
                     🗑️
                   </button>
                 </div>
@@ -1386,14 +1581,43 @@ const SchedinaComponent = ({
                 {schedinaCreata.casualitaLevel > 80 && <span style={{marginLeft: '8px', color: '#8e44ad'}}>🎲 ESTREMA</span>}
               </p>
               
+              <div style={{textAlign: 'center', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '12px', display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center'}}>
+                {schedinaCreata.dataInizio && schedinaCreata.dataFine && (
+                  <span>
+                    📆 {schedinaCreata.dataInizio === schedinaCreata.dataFine 
+                      ? `Partite del ${formatDateEU(schedinaCreata.dataInizio)}` 
+                      : `Dal ${formatDateEU(schedinaCreata.dataInizio)} al ${formatDateEU(schedinaCreata.dataFine)}`
+                    }
+                  </span>
+                )}
+                {schedinaCreata.campionatiSelezionati && (
+                  <span>
+                    🏆 {schedinaCreata.campionatiSelezionati.length === championships.length ? 'Tutti i campionati' : schedinaCreata.campionatiSelezionati.join(', ')}
+                  </span>
+                )}
+                {schedinaCreata.giocateSelezionate && (
+                  <span>
+                    🎯 {schedinaCreata.giocateSelezionate.includes('tutte') ? 'Tutte le giocate' : schedinaCreata.giocateSelezionate.map(id => window.FAMIGLIE_GIOCATE[id]?.label || id).join(', ')}
+                  </span>
+                )}
+                {schedinaCreata.giorniRange !== undefined && (
+                  <span>
+                    📅 Range: {schedinaCreata.giorniRange} giorno/i
+                  </span>
+                )}
+              </div>
+              
               <div style={{borderTop: '2px solid var(--accent)', paddingTop: '12px'}}>
                 {schedinaCreata.partite.map((m, idx) => {
                   const top3 = m.top3 || (m.giocata ? [m.giocata] : []);
                   
                   return (
                     <div key={idx} style={{
-                      padding: '8px 12px', marginBottom: '6px', borderRadius: '6px',
-                      border: '1px solid var(--border)', background: 'var(--surface)'
+                      padding: '8px 12px',
+                      marginBottom: '6px',
+                      borderRadius: '6px',
+                      border: '1px solid var(--border)',
+                      background: 'var(--surface)'
                     }}>
                       <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '4px'}}>
                         <span style={{fontSize: '12px', color: 'var(--text-muted)'}}>
@@ -1403,24 +1627,25 @@ const SchedinaComponent = ({
                           🏆 {m.campionato}
                         </span>
                       </div>
-                      <div style={{marginTop: '2px'}}>
+                      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '4px', marginTop: '2px'}}>
                         <span style={{fontSize: '14px', fontWeight: 'bold'}}>
                           ⚽ {m.casa} vs {m.ospiti}
                         </span>
                       </div>
 
+                      {/* TOP 3 GIOCATE NEL MODAL */}
                       <div style={{display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px', alignItems: 'center'}}>
                         {top3.length > 0 ? top3.map((g, i) => {
                           const isGGNG = g.familyId === 'gg_ng';
                           const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉';
-                          const quota = window.getQuotaForGiocata
-                            ? window.getQuotaForGiocata(m.id, g.familyId, g.giocata)
-                            : null;
-
                           return (
                             <div key={i} style={{
-                              display: 'flex', flexDirection: 'column', alignItems: 'center',
-                              gap: '1px', padding: '3px 8px', borderRadius: '6px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              gap: '1px',
+                              padding: '3px 8px',
+                              borderRadius: '6px',
                               border: g.isBomb ? '2px solid var(--accent)' : (isGGNG ? '1px solid #e74c3c' : '1px solid var(--border)'),
                               background: g.isBomb ? 'rgba(243, 156, 18, 0.10)' : 'var(--surface)'
                             }}>
@@ -1428,20 +1653,9 @@ const SchedinaComponent = ({
                               <span style={{fontSize: '11px', fontWeight: 'bold', color: isGGNG ? '#e74c3c' : 'var(--accent)'}}>
                                 {g.label}
                               </span>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                <span className={`giocata-pct ${getPercentualeClasse(g.pct)}`} style={{fontSize: '12px', padding: '1px 6px'}}>
-                                  {g.pct}% {g.isBomb && '💣'}
-                                </span>
-                                {quota && (
-                                  <span style={{
-                                    fontSize: '11px', fontWeight: 'bold', color: '#3498db',
-                                    background: 'rgba(52, 152, 219, 0.15)',
-                                    padding: '1px 6px', borderRadius: '4px',
-                                  }}>
-                                    @{quota.decimal_odds}
-                                  </span>
-                                )}
-                              </div>
+                              <span className={`giocata-pct ${getPercentualeClasse(g.pct)}`} style={{fontSize: '12px', padding: '1px 6px'}}>
+                                {g.pct}% {g.isBomb && '💣'}
+                              </span>
                               <span style={{fontSize: '8px', color: 'var(--text-muted)'}}>
                                 {g.familyIcon} {g.familyLabel}
                               </span>
@@ -1461,67 +1675,7 @@ const SchedinaComponent = ({
                   );
                 })}
               </div>
-
-              {/* ============================================================ */}
-              {/* 💰 TOTALI QUOTA PER MEDAGLIA                                   */}
-              {/* ============================================================ */}
-              {(() => {
-                const totali = calcolaTotaliQuotaPerMedaglia(schedinaCreata);
-                if (!totali) return null;
-                
-                return (
-                  <div style={{
-                    marginTop: '16px', padding: '14px 16px',
-                    background: 'rgba(243, 156, 18, 0.08)',
-                    borderRadius: '10px', border: '2px solid var(--accent)'
-                  }}>
-                    <div style={{textAlign: 'center', fontSize: '15px', fontWeight: 'bold', color: 'var(--accent)', marginBottom: '10px'}}>
-                      💰 Totali Quota per Medaglia
-                    </div>
-                    
-                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px'}}>
-                      {[
-                        { medaglia: '🥇', label: 'Top 1', t: totali['🥇'] },
-                        { medaglia: '🥈', label: 'Top 2', t: totali['🥈'] },
-                        { medaglia: '🥉', label: 'Top 3', t: totali['🥉'] },
-                      ].map(({ medaglia, label, t }) => (
-                        <div key={medaglia} style={{
-                          padding: '10px 8px', background: 'var(--card)',
-                          borderRadius: '8px', textAlign: 'center',
-                          border: '1px solid var(--border)'
-                        }}>
-                          <div style={{fontSize: '20px', marginBottom: '4px'}}>{medaglia}</div>
-                          <div style={{fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px'}}>
-                            {label}
-                          </div>
-                          {t.totale !== null ? (
-                            <>
-                              <div style={{
-                                fontSize: '20px', fontWeight: 'bold',
-                                color: '#3498db', wordBreak: 'break-all'
-                              }}>
-                                {t.totale.toFixed(2)}
-                              </div>
-                              <div style={{fontSize: '9px', color: 'var(--text-muted)', marginTop: '4px'}}>
-                                {t.count} giocate{t.senza > 0 ? ` • ${t.senza} senza quota` : ''}
-                              </div>
-                            </>
-                          ) : (
-                            <div style={{fontSize: '12px', color: 'var(--text-muted)'}}>
-                              N/D
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                    
-                    <div style={{textAlign: 'center', fontSize: '10px', color: 'var(--text-muted)', marginTop: '10px', fontStyle: 'italic'}}>
-                      💡 La quota totale è il prodotto delle singole quote. Le partite senza quota BSD sono escluse.
-                    </div>
-                  </div>
-                );
-              })()}
-
+              
               <div style={{borderTop: '2px solid var(--accent)', marginTop: '12px', paddingTop: '12px', textAlign: 'center'}}>
                 <div style={{fontSize: '16px', fontWeight: 'bold', color: 'var(--accent)'}}>
                   ⭐ Media Score: {schedinaCreata.media}%
@@ -1551,16 +1705,36 @@ const SchedinaComponent = ({
                 💾 Salva
               </button>
               
-              <button className="btn" onClick={shareOnWhatsApp}
-                style={{background: '#25D366', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', gap: '6px'}}>
+              <button 
+                className="btn" 
+                onClick={shareOnWhatsApp}
+                style={{
+                  background: '#25D366',
+                  color: '#fff',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="white">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                 </svg>
                 WhatsApp
               </button>
               
-              <button className="btn" onClick={shareOnTelegram}
-                style={{background: '#0088cc', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', gap: '6px'}}>
+              <button 
+                className="btn" 
+                onClick={shareOnTelegram}
+                style={{
+                  background: '#0088cc',
+                  color: '#fff',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="white">
                   <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
                 </svg>
@@ -1579,4 +1753,4 @@ const SchedinaComponent = ({
 };
 
 window.SchedinaComponent = SchedinaComponent;
-console.log('✅ SchedinaComponent caricato - Top 3 giocate + Quote BSD + Totali quota per medaglia');
+console.log('✅ SchedinaComponent caricato - sincronizzato con Palinsesto (campionati + range giorni) + Top 3 giocate');

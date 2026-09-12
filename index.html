@@ -646,7 +646,8 @@
     const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
     // ============================================================
-    // CAMPIONATI ESCLUSI
+    // CAMPIONATI ESCLUSI (filtro globale — rimuove Argentina, Brasile,
+    // Cina, Grecia e USA da tutta l'app)
     // ============================================================
 
     const CAMPIONATI_ESCLUSI = new Set([
@@ -660,248 +661,6 @@
     const filtraCampionatiEsclusi = (arr) => {
       if (!Array.isArray(arr)) return [];
       return arr.filter(m => !CAMPIONATI_ESCLUSI.has((m.campionato || '').trim()));
-    };
-
-    // ============================================================
-    // API KEY BSD
-    // ============================================================
-
-    const BSD_API_KEY = 'c958a1a97001b982d3a910f974adb315f1f15059';
-    const BSD_ODDS_STORAGE_KEY = 'ft_quote_cache';
-
-    // ============================================================
-    // MATCHING FUZZY
-    // ============================================================
-
-    const normalizzaNomeSquadra = (nome) => {
-      if (!nome) return '';
-      return nome
-        .toString()
-        .toLowerCase()
-        .replace(/[.\-–_'’]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-    };
-
-    const nomiSquadraCorrispondono = (nomeExcel, nomeBSD) => {
-      const a = normalizzaNomeSquadra(nomeExcel);
-      const b = normalizzaNomeSquadra(nomeBSD);
-      if (!a || !b) return false;
-      if (a === b) return true;
-      if (a.includes(b) || b.includes(a)) return true;
-      const paroleA = a.split(' ').filter(p => p.length > 2);
-      const paroleB = b.split(' ').filter(p => p.length > 2);
-      const comuni = paroleA.filter(p => paroleB.includes(p));
-      if (comuni.length >= 2) return true;
-      if (comuni.length === 1 && comuni[0].length >= 5) return true;
-      return false;
-    };
-
-    const normalizzaDataBSD = (dateStr) => {
-      if (!dateStr) return '';
-      try {
-        const d = new Date(dateStr);
-        if (isNaN(d.getTime())) return '';
-        return d.toISOString().slice(0, 10);
-      } catch (e) { return ''; }
-    };
-
-    // ============================================================
-    // MAPPA MERCATI BSD
-    // ============================================================
-
-    const mappaGiocataToBSDMercato = (familyId, giocata) => {
-      const map = {
-        'fisse:1': { market: '1x2', outcome: 'HOME' },
-        'fisse:X': { market: '1x2', outcome: 'DRAW' },
-        'fisse:2': { market: '1x2', outcome: 'AWAY' },
-        'dc:1X': { market: 'double_chance', outcome: '1X' },
-        'dc:12': { market: 'double_chance', outcome: '12' },
-        'dc:X2': { market: 'double_chance', outcome: 'X2' },
-        'over:Over 1.5': { market: 'over_under_15', outcome: 'over' },
-        'over:Over 2.5': { market: 'over_under_25', outcome: 'over' },
-        'over:Over 3.5': { market: 'over_under_35', outcome: 'over' },
-        'over:Over 4.5': { market: 'over_under_45', outcome: 'over' },
-        'under:Under 1.5': { market: 'over_under_15', outcome: 'under' },
-        'under:Under 2.5': { market: 'over_under_25', outcome: 'under' },
-        'under:Under 3.5': { market: 'over_under_35', outcome: 'under' },
-        'under:Under 4.5': { market: 'over_under_45', outcome: 'under' },
-        'gg_ng:GG': { market: 'btts', outcome: 'yes' },
-        'gg_ng:NG': { market: 'btts', outcome: 'no' },
-      };
-      return map[`${familyId}:${giocata}`] || null;
-    };
-
-    // ============================================================
-    // CARICAMENTO QUOTE BSD (VERSIONE CORRETTA)
-    // ============================================================
-
-    async function loadQuoteBSD(matches) {
-      try {
-        if (!matches || matches.length === 0) {
-          console.log('💰 BSD: nessuna partita da matchare');
-          return null;
-        }
-
-        console.log('💰 Caricamento quote BSD...');
-        const headers = { 'Authorization': `Token ${BSD_API_KEY}` };
-
-        // Range esteso: da -5 giorni a +30 giorni
-        const oggi = new Date();
-        const minDate = new Date(oggi.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-        const maxDate = new Date(oggi.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-        console.log(`💰 BSD: range richiesto ${minDate} -> ${maxDate}`);
-
-        // 1. Scarica eventi BSD nel range
-        let eventsBSD = [];
-        let urlEventi = `https://sports.bzzoiro.com/api/v2/events/?date_from=${minDate}&date_to=${maxDate}&limit=200`;
-        for (let page = 0; page < 10 && urlEventi; page++) {
-          const r = await fetch(urlEventi, { headers });
-          if (!r.ok) { console.warn(`BSD events: ${r.status}`); break; }
-          const d = await r.json();
-          const results = d.results || [];
-          eventsBSD.push(...results);
-          urlEventi = d.next;
-          if (results.length < 200) break;
-        }
-        console.log(`💰 BSD: ${eventsBSD.length} eventi nel range`);
-
-        // Debug: mostra le date degli eventi scaricati
-        const dateUniche = [...new Set(eventsBSD.map(ev => normalizzaDataBSD(ev.event_date || ev.date)).filter(Boolean))].sort();
-        console.log(`💰 BSD: date eventi (prime 10):`, dateUniche.slice(0, 10));
-        console.log(`💰 BSD: date eventi (ultime 10):`, dateUniche.slice(-10));
-
-        // 2. Match fuzzy (CON CAMPI CORRETTI: home_team, away_team, event_date)
-        const matchMap = {};
-        for (const m of matches) {
-          if (m.stato !== 'Futura') continue;
-          if (!m.casa || !m.ospiti || !m.data) continue;
-
-          const dataExcel = normalizzaDataBSD(m.data);
-          let trovato = null;
-          let bestScore = 0;
-
-          for (const ev of eventsBSD) {
-            // ⚠️ BSD usa home_team / away_team / event_date
-            const evHome = ev.home_team || ev.home || '';
-            const evAway = ev.away_team || ev.away || '';
-            const evDate = ev.event_date || ev.date || ev.start_time || '';
-
-            const dataBSD = normalizzaDataBSD(evDate);
-            if (dataBSD !== dataExcel) continue;
-
-            const casaMatch = nomiSquadraCorrispondono(m.casa, evHome);
-            const ospitiMatch = nomiSquadraCorrispondono(m.ospiti, evAway);
-            if (casaMatch && ospitiMatch) {
-              let score = 1;
-              if (normalizzaNomeSquadra(m.casa) === normalizzaNomeSquadra(evHome)) score += 0.5;
-              if (normalizzaNomeSquadra(m.ospiti) === normalizzaNomeSquadra(evAway)) score += 0.5;
-              if (score > bestScore) {
-                bestScore = score;
-                trovato = ev;
-              }
-            }
-          }
-
-          if (trovato) {
-            matchMap[m.id] = {
-              event_id: trovato.id || trovato.event_id,
-              homeBSD: trovato.home_team || trovato.home,
-              awayBSD: trovato.away_team || trovato.away,
-            };
-          }
-        }
-
-        const numMatchati = Object.keys(matchMap).length;
-        console.log(`💰 BSD: ${numMatchati}/${matches.length} partite matchate`);
-
-        if (numMatchati === 0) {
-          console.log('💰 BSD: nessun match trovato, skip download quote');
-          localStorage.setItem(BSD_ODDS_STORAGE_KEY, JSON.stringify({}));
-          return {};
-        }
-
-        // 3. Scarica quote (paginazione estesa)
-        const eventIdsSet = new Set(Object.values(matchMap).map(v => v.event_id));
-        const allOdds = [];
-        let urlOdds = `https://sports.bzzoiro.com/api/v2/odds/?limit=100`;
-        for (let page = 0; page < 200 && urlOdds; page++) {
-          const r = await fetch(urlOdds, { headers });
-          if (!r.ok) { console.warn(`BSD odds: ${r.status}`); break; }
-          const d = await r.json();
-          const results = d.results || [];
-          const filtrate = results.filter(q => eventIdsSet.has(q.event_id));
-          allOdds.push(...filtrate);
-          urlOdds = d.next;
-          if (results.length < 100) break;
-        }
-        console.log(`💰 BSD: ${allOdds.length} quote trovate per ${eventIdsSet.size} eventi`);
-
-        // 4. Indicizza per event_id + market + outcome
-        const cache = {};
-        allOdds.forEach(q => {
-          const key = `${q.event_id}|${q.market}|${q.outcome}`;
-          cache[key] = {
-            decimal_odds: q.decimal_odds,
-            implied_probability: q.implied_probability,
-            bookmaker_count: q.bookmaker_count,
-          };
-        });
-
-        // 5. Cache per matchId
-        const cachePerMatch = {};
-        for (const [matchId, info] of Object.entries(matchMap)) {
-          cachePerMatch[matchId] = {};
-          const possibiliGiocate = [
-            ['fisse', ['1', 'X', '2']],
-            ['dc', ['1X', '12', 'X2']],
-            ['over', ['Over 1.5', 'Over 2.5', 'Over 3.5', 'Over 4.5']],
-            ['under', ['Under 1.5', 'Under 2.5', 'Under 3.5', 'Under 4.5']],
-            ['gg_ng', ['GG', 'NG']],
-          ];
-          for (const [familyId, giocate] of possibiliGiocate) {
-            for (const g of giocate) {
-              const mappa = mappaGiocataToBSDMercato(familyId, g);
-              if (!mappa) continue;
-              const key = `${info.event_id}|${mappa.market}|${mappa.outcome}`;
-              const entry = cache[key];
-              if (entry) {
-                cachePerMatch[matchId][`${familyId}:${g}`] = {
-                  decimal_odds: entry.decimal_odds,
-                  implied_probability: entry.implied_probability,
-                };
-              }
-            }
-          }
-        }
-
-        localStorage.setItem(BSD_ODDS_STORAGE_KEY, JSON.stringify(cachePerMatch));
-        console.log(`✅ Cache quote BSD salvata: ${Object.keys(cachePerMatch).length} partite con quote`);
-        return cachePerMatch;
-      } catch (e) {
-        console.error('❌ Errore caricamento quote BSD:', e);
-        return null;
-      }
-    }
-
-    window.getQuotaForGiocata = function(matchId, familyId, giocata) {
-      try {
-        const cache = JSON.parse(localStorage.getItem(BSD_ODDS_STORAGE_KEY) || '{}');
-        const perMatch = cache[matchId];
-        if (!perMatch) return null;
-        return perMatch[`${familyId}:${giocata}`] || null;
-      } catch (e) {
-        return null;
-      }
-    };
-
-    window.getBSDInfoForMatch = function(matchId) {
-      try {
-        const cache = JSON.parse(localStorage.getItem(BSD_ODDS_STORAGE_KEY) || '{}');
-        return cache[matchId] || null;
-      } catch (e) {
-        return null;
-      }
     };
 
     // ============================================================
@@ -1601,7 +1360,6 @@
     window.CHAMPIONSHIP_COLORS = CHAMPIONSHIP_COLORS;
     window.CAMPIONATI_ESCLUSI = CAMPIONATI_ESCLUSI;
     window.filtraCampionatiEsclusi = filtraCampionatiEsclusi;
-    window.loadQuoteBSD = loadQuoteBSD;
 
     console.log('✅ Funzioni globali esposte per i moduli esterni');
     console.log('   - Campionati esclusi:', Array.from(CAMPIONATI_ESCLUSI).join(', '));
@@ -1947,7 +1705,6 @@
 
     localStorage.removeItem('ft_matches');
     localStorage.removeItem('ft_champs');
-    localStorage.removeItem('ft_quote_cache');
 
     loadScrapedData(true).then(data => {
       if (data && data.matches && data.matches.length > 0) {
@@ -1955,22 +1712,6 @@
         if (window.updateAppData) window.updateAppData(data);
       }
     });
-
-    // ⭐ Carica le quote BSD dopo che le partite sono state caricate
-    setTimeout(() => {
-      try {
-        const matchesSalvati = JSON.parse(localStorage.getItem('ft_matches') || '[]');
-        if (matchesSalvati.length > 0) {
-          loadQuoteBSD(matchesSalvati).then(cache => {
-            if (cache) console.log(`💰 Quote BSD pronte per ${Object.keys(cache).length} partite`);
-          });
-        } else {
-          console.log('💰 BSD: nessuna partita in localStorage, skip');
-        }
-      } catch (e) {
-        console.warn('Errore loadQuoteBSD:', e);
-      }
-    }, 3000);
 
     try {
       const rootElement = document.getElementById('root');
