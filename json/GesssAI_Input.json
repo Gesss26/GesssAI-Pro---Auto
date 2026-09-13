@@ -538,12 +538,12 @@
     "giornata": "5",
     "squadra_casa": "VfL Bochum",
     "squadra_ospite": "Greuther Fürth",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Bochum",
     "stadio": "Vonovia Ruhrstadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "2. Bundesliga",
@@ -552,12 +552,12 @@
     "giornata": "5",
     "squadra_casa": "Magdeburg",
     "squadra_ospite": "Kaiserslautern",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–0",
+    "gol_casa": "3",
+    "gol_ospite": "0",
     "citta": "Magdeburg",
     "stadio": "Avnet-Arena",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "2. Bundesliga",
@@ -566,12 +566,12 @@
     "giornata": "5",
     "squadra_casa": "Eintracht Braunschweig",
     "squadra_ospite": "Dynamo Dresden",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Braunschweig",
     "stadio": "Eintracht-Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "2. Bundesliga",
@@ -580,12 +580,12 @@
     "giornata": "5",
     "squadra_casa": "FC St. Pauli",
     "squadra_ospite": "VfL Wolfsburg",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Hamburg",
     "stadio": "Millerntor-Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "2. Bundesliga",
@@ -7930,12 +7930,12 @@
     "giornata": "27",
     "squadra_casa": "Atletico-MG",
     "squadra_ospite": "Fluminense",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–1",
+    "gol_casa": "3",
+    "gol_ospite": "1",
     "citta": "Belo Horizonte",
     "stadio": "MRV Arena",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Brasileirão Serie A",
@@ -7944,12 +7944,12 @@
     "giornata": "27",
     "squadra_casa": "Gremio",
     "squadra_ospite": "Vasco DA Gama",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Porto Alegre",
     "stadio": "",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Brasileirão Serie A",
@@ -7958,12 +7958,12 @@
     "giornata": "27",
     "squadra_casa": "Chapecoense-sc",
     "squadra_ospite": "Internacional",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "",
     "stadio": "",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Brasileirão Serie A",
@@ -7972,12 +7972,12 @@
     "giornata": "27",
     "squadra_casa": "Palmeiras",
     "squadra_ospite": "Sao Paulo",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Sao Paulo",
     "stadio": "Allianz Parque",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Brasileirão Serie A",
@@ -7986,12 +7986,12 @@
     "giornata": "27",
     "squadra_casa": "Botafogo",
     "squadra_ospite": "RB Bragantino",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Rio de Janeiro",
     "stadio": "Estadio Olimpico Nilton Santos",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Brasileirão Serie A",
@@ -8000,12 +8000,12 @@
     "giornata": "27",
     "squadra_casa": "Santos",
     "squadra_ospite": "Cruzeiro",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Santos",
     "stadio": "Estadio Urbano Caldeira",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Brasileirão Serie A",
@@ -8388,20 +8388,6 @@
   {
     "campionato": "Brasileirão Serie A",
     "data": "11/10/2026",
-    "ora": "20:00",
-    "giornata": "30",
-    "squadra_casa": "RB Bragantino",
-    "squadra_ospite": "Cruzeiro",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "",
-    "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Brasileirão Serie A",
-    "data": "11/10/2026",
     "ora": "20:30",
     "giornata": "30",
     "squadra_casa": "Flamengo",
@@ -8476,6 +8462,20 @@
     "giornata": "30",
     "squadra_casa": "Chapecoense-sc",
     "squadra_ospite": "Atletico Paranaense",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "",
+    "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Brasileirão Serie A",
+    "data": "13/10/2026",
+    "ora": "00:00",
+    "giornata": "30",
+    "squadra_casa": "RB Bragantino",
+    "squadra_ospite": "Cruzeiro",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
@@ -9876,12 +9876,12 @@
     "giornata": "3",
     "squadra_casa": "SC Freiburg",
     "squadra_ospite": "Borussia Mönchengladbach",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "5–0",
+    "gol_casa": "5",
+    "gol_ospite": "0",
     "citta": "Freiburg",
     "stadio": "Europa-Park Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Bundesliga",
@@ -9890,12 +9890,12 @@
     "giornata": "3",
     "squadra_casa": "FSV Mainz 05",
     "squadra_ospite": "Eintracht Frankfurt",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–3",
+    "gol_casa": "1",
+    "gol_ospite": "3",
     "citta": "Mainz",
     "stadio": "Mewa Arena",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Bundesliga",
@@ -9904,12 +9904,12 @@
     "giornata": "3",
     "squadra_casa": "Borussia Dortmund",
     "squadra_ospite": "SC Paderborn 07",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–0",
+    "gol_casa": "3",
+    "gol_ospite": "0",
     "citta": "Dortmund",
     "stadio": "Signal Iduna Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Bundesliga",
@@ -9918,12 +9918,12 @@
     "giornata": "3",
     "squadra_casa": "Hoffenheim",
     "squadra_ospite": "VfB Stuttgart",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Sinsheim",
     "stadio": "SNP Arena",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Bundesliga",
@@ -9932,12 +9932,12 @@
     "giornata": "3",
     "squadra_casa": "FC Augsburg",
     "squadra_ospite": "Bayer Leverkusen",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Augsburg",
     "stadio": "WWK Arena",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Bundesliga",
@@ -9946,12 +9946,12 @@
     "giornata": "3",
     "squadra_casa": "1. FC Köln",
     "squadra_ospite": "Werder Bremen",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Cologne",
     "stadio": "RheinEnergieStadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Bundesliga",
@@ -14874,12 +14874,12 @@
     "giornata": "7",
     "squadra_casa": "West Brom",
     "squadra_ospite": "QPR",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "West Bromwich",
     "stadio": "The Hawthorns",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -14888,12 +14888,12 @@
     "giornata": "7",
     "squadra_casa": "Bolton",
     "squadra_ospite": "Cardiff",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Bolton",
     "stadio": "Toughsheet Community Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -14902,12 +14902,12 @@
     "giornata": "7",
     "squadra_casa": "Derby",
     "squadra_ospite": "Birmingham",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Derby",
     "stadio": "Pride Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -14916,12 +14916,12 @@
     "giornata": "7",
     "squadra_casa": "Watford",
     "squadra_ospite": "Stoke City",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Watford",
     "stadio": "Vicarage Road",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -14930,12 +14930,12 @@
     "giornata": "7",
     "squadra_casa": "Southampton",
     "squadra_ospite": "Bristol City",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "4–1",
+    "gol_casa": "4",
+    "gol_ospite": "1",
     "citta": "Southampton",
     "stadio": "",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -14944,12 +14944,12 @@
     "giornata": "7",
     "squadra_casa": "Preston",
     "squadra_ospite": "Lincoln",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–1",
+    "gol_casa": "0",
+    "gol_ospite": "1",
     "citta": "Preston",
     "stadio": "Deepdale",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -14958,12 +14958,12 @@
     "giornata": "7",
     "squadra_casa": "Blackburn",
     "squadra_ospite": "Millwall",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–1",
+    "gol_casa": "3",
+    "gol_ospite": "1",
     "citta": "Blackburn",
     "stadio": "Ewood Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -14972,12 +14972,12 @@
     "giornata": "7",
     "squadra_casa": "Middlesbrough",
     "squadra_ospite": "Norwich",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "4–3",
+    "gol_casa": "4",
+    "gol_ospite": "3",
     "citta": "Middlesbrough",
     "stadio": "Riverside Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -14986,12 +14986,12 @@
     "giornata": "7",
     "squadra_casa": "Swansea",
     "squadra_ospite": "Burnley",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–1",
+    "gol_casa": "3",
+    "gol_ospite": "1",
     "citta": "Swansea",
     "stadio": "Swansea.com Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -15000,12 +15000,12 @@
     "giornata": "7",
     "squadra_casa": "Charlton",
     "squadra_ospite": "Portsmouth",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "London",
     "stadio": "The Valley",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -22462,12 +22462,12 @@
     "giornata": "6",
     "squadra_casa": "Roda",
     "squadra_ospite": "Vitesse",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Kerkrade",
     "stadio": "Parkstad Limburg Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -27572,12 +27572,12 @@
     "giornata": "6",
     "squadra_casa": "Twente",
     "squadra_ospite": "ADO Den Haag",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Enschede",
     "stadio": "De Grolsch Veste",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eredivisie",
@@ -27586,12 +27586,12 @@
     "giornata": "6",
     "squadra_casa": "Go Ahead Eagles",
     "squadra_ospite": "Groningen",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Deventer",
     "stadio": "De Adelaarshorst",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eredivisie",
@@ -27600,12 +27600,12 @@
     "giornata": "6",
     "squadra_casa": "Fortuna Sittard",
     "squadra_ospite": "Ajax",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–5",
+    "gol_casa": "1",
+    "gol_ospite": "5",
     "citta": "Sittard",
     "stadio": "Fortuna Sittard Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eredivisie",
@@ -27614,12 +27614,12 @@
     "giornata": "6",
     "squadra_casa": "Cambuur",
     "squadra_ospite": "NEC Nijmegen",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–0",
+    "gol_casa": "3",
+    "gol_ospite": "0",
     "citta": "Leeuwarden",
     "stadio": "Kooi Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eredivisie",
@@ -34670,12 +34670,12 @@
     "giornata": "6",
     "squadra_casa": "SK Beveren",
     "squadra_ospite": "St. Truiden",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Beveren",
     "stadio": "Freethiel Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Jupiler Pro League",
@@ -34684,12 +34684,12 @@
     "giornata": "6",
     "squadra_casa": "Westerlo",
     "squadra_ospite": "Standard Liege",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "4–2",
+    "gol_casa": "4",
+    "gol_ospite": "2",
     "citta": "Westerlo",
     "stadio": "Het Kuipje",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Jupiler Pro League",
@@ -34698,12 +34698,12 @@
     "giornata": "6",
     "squadra_casa": "OH Leuven",
     "squadra_ospite": "Cercle Brugge",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Heverlee",
     "stadio": "Den Dreef",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Jupiler Pro League",
@@ -34712,12 +34712,12 @@
     "giornata": "6",
     "squadra_casa": "Union St. Gilloise",
     "squadra_ospite": "Lommel United",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "5–0",
+    "gol_casa": "5",
+    "gol_ospite": "0",
     "citta": "Brussels",
     "stadio": "Stade Joseph Marien",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Jupiler Pro League",
@@ -40648,12 +40648,12 @@
     "giornata": "29",
     "squadra_casa": "Bucheon FC 1995",
     "squadra_ospite": "Jeju United",
-    "risultato": "0–0",
-    "gol_casa": "0",
-    "gol_ospite": "0",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Bucheon",
     "stadio": "Bucheon Stadium",
-    "stato": "In corso"
+    "stato": "Giocata"
   },
   {
     "campionato": "K League 1",
@@ -40662,12 +40662,12 @@
     "giornata": "29",
     "squadra_casa": "Jeonbuk Motors",
     "squadra_ospite": "FC Seoul",
-    "risultato": "0–0",
-    "gol_casa": "0",
-    "gol_ospite": "0",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Jeonju",
     "stadio": "Jeonju World Cup Stadium",
-    "stato": "In corso"
+    "stato": "Giocata"
   },
   {
     "campionato": "K League 1",
@@ -40676,12 +40676,12 @@
     "giornata": "29",
     "squadra_casa": "Ulsan Hyundai FC",
     "squadra_ospite": "Incheon United",
-    "risultato": "0–0",
-    "gol_casa": "0",
-    "gol_ospite": "0",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Ulsan",
     "stadio": "Ulsan Munsu Football Stadium",
-    "stato": "In corso"
+    "stato": "Giocata"
   },
   {
     "campionato": "K League 1",
@@ -40690,12 +40690,12 @@
     "giornata": "29",
     "squadra_casa": "Daejeon Citizen",
     "squadra_ospite": "Pohang Steelers",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Daejeon",
     "stadio": "Daejeon World Cup Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "K League 1",
@@ -40704,12 +40704,12 @@
     "giornata": "29",
     "squadra_casa": "Gimcheon Sangmu",
     "squadra_ospite": "Gangwon FC",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Gimcheon",
     "stadio": "Gimcheon Stadium",
-    "stato": "Futura"
+    "stato": "In corso"
   },
   {
     "campionato": "K League 1",
@@ -41670,12 +41670,12 @@
     "giornata": "5",
     "squadra_casa": "Racing Santander",
     "squadra_ospite": "Alaves",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Santander",
     "stadio": "Estadio El Sardinero",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "La Liga",
@@ -41684,12 +41684,12 @@
     "giornata": "5",
     "squadra_casa": "Osasuna",
     "squadra_ospite": "Espanyol",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–2",
+    "gol_casa": "0",
+    "gol_ospite": "2",
     "citta": "Pamplona",
     "stadio": "Estadio El Sadar",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "La Liga",
@@ -41698,12 +41698,12 @@
     "giornata": "5",
     "squadra_casa": "Athletic Club",
     "squadra_ospite": "Elche",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Bilbao",
     "stadio": "",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "La Liga",
@@ -41712,12 +41712,12 @@
     "giornata": "5",
     "squadra_casa": "Real Madrid",
     "squadra_ospite": "Rayo Vallecano",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "4–1",
+    "gol_casa": "4",
+    "gol_ospite": "1",
     "citta": "Madrid",
     "stadio": "",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "La Liga",
@@ -51694,12 +51694,12 @@
     "giornata": "9",
     "squadra_casa": "Estudiantes L.P.",
     "squadra_ospite": "Platense",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "La Plata",
     "stadio": "Estadio Jorge Luis Hirschi",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Liga Profesional Argentina",
@@ -51708,12 +51708,12 @@
     "giornata": "9",
     "squadra_casa": "Independ. Rivadavia",
     "squadra_ospite": "Aldosivi",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "4–3",
+    "gol_casa": "4",
+    "gol_ospite": "3",
     "citta": "Mendoza",
     "stadio": "Estadio Juan Bautista Gargantini",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Liga Profesional Argentina",
@@ -51722,12 +51722,12 @@
     "giornata": "9",
     "squadra_casa": "Atletico Tucuman",
     "squadra_ospite": "River Plate",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Tucuman",
     "stadio": "Estadio Monumental Jose Fierro",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Liga Profesional Argentina",
@@ -51736,12 +51736,12 @@
     "giornata": "9",
     "squadra_casa": "Talleres Cordoba",
     "squadra_ospite": "Union Santa Fe",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Cordoba",
     "stadio": "Estadio Mario Alberto Kempes",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Liga Profesional Argentina",
@@ -53724,12 +53724,12 @@
     "giornata": "4",
     "squadra_casa": "Strasbourg",
     "squadra_ospite": "Monaco",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Strasbourg",
     "stadio": "Stade de la Meinau",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Ligue 1",
@@ -53738,12 +53738,12 @@
     "giornata": "4",
     "squadra_casa": "Lorient",
     "squadra_ospite": "Toulouse",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Lorient",
     "stadio": "Stade du Moustoir",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Ligue 1",
@@ -53752,12 +53752,12 @@
     "giornata": "4",
     "squadra_casa": "Auxerre",
     "squadra_ospite": "Nice",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Auxerre",
     "stadio": "Stade de l'Abbé-Deschamps",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Ligue 1",
@@ -53766,12 +53766,12 @@
     "giornata": "4",
     "squadra_casa": "Le Havre",
     "squadra_ospite": "Angers",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Le Havre",
     "stadio": "Stade Océane",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Ligue 1",
@@ -53780,12 +53780,12 @@
     "giornata": "4",
     "squadra_casa": "Paris FC",
     "squadra_ospite": "Lyon",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Isilemulino",
     "stadio": "Stade Jean Bouin",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Ligue 1",
@@ -58316,12 +58316,12 @@
     "giornata": "6",
     "squadra_casa": "Guingamp",
     "squadra_ospite": "Annecy",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Guingamp",
     "stadio": "Stade de Roudourou",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Ligue 2",
@@ -58330,12 +58330,12 @@
     "giornata": "6",
     "squadra_casa": "Sochaux",
     "squadra_ospite": "Nantes",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Montbéliard",
     "stadio": "Stade Auguste Bonal",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Ligue 2",
@@ -58344,12 +58344,12 @@
     "giornata": "6",
     "squadra_casa": "Dunkerque",
     "squadra_ospite": "Saint Etienne",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Dunkerque",
     "stadio": "Stade Marcel Tribut",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Ligue 2",
@@ -66912,12 +66912,12 @@
     "giornata": "25",
     "squadra_casa": "Inter Miami CF",
     "squadra_ospite": "Nashville SC",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Fort Lauderdale",
     "stadio": "Nu Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -66926,12 +66926,12 @@
     "giornata": "25",
     "squadra_casa": "Columbus Crew",
     "squadra_ospite": "New York Red Bulls",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–1",
+    "gol_casa": "0",
+    "gol_ospite": "1",
     "citta": "Columbus",
     "stadio": "ScottsMiracle-Gro Field",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -66940,12 +66940,12 @@
     "giornata": "25",
     "squadra_casa": "FC Cincinnati",
     "squadra_ospite": "Charlotte FC",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–3",
+    "gol_casa": "3",
+    "gol_ospite": "3",
     "citta": "Cincinnati",
     "stadio": "TQL Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -66954,12 +66954,12 @@
     "giornata": "25",
     "squadra_casa": "Orlando City",
     "squadra_ospite": "Toronto FC",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–0",
+    "gol_casa": "3",
+    "gol_ospite": "0",
     "citta": "Orlando",
     "stadio": "Exploria Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -66968,12 +66968,12 @@
     "giornata": "25",
     "squadra_casa": "DC United",
     "squadra_ospite": "Atlanta United",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Washington",
     "stadio": "Audi Field",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -66982,12 +66982,12 @@
     "giornata": "25",
     "squadra_casa": "Sporting Kansas City",
     "squadra_ospite": "Los Angeles FC",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–1",
+    "gol_casa": "3",
+    "gol_ospite": "1",
     "citta": "Kansas City",
     "stadio": "Children's Mercy Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -66996,12 +66996,12 @@
     "giornata": "25",
     "squadra_casa": "FC Dallas",
     "squadra_ospite": "Portland Timbers",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Frisco",
     "stadio": "Toyota Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -67010,12 +67010,12 @@
     "giornata": "25",
     "squadra_casa": "St. Louis City SC",
     "squadra_ospite": "Minnesota United",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "4–2",
+    "gol_casa": "4",
+    "gol_ospite": "2",
     "citta": "St. Louis",
     "stadio": "CITYPARK",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -67024,12 +67024,12 @@
     "giornata": "25",
     "squadra_casa": "Real Salt Lake",
     "squadra_ospite": "New York City FC",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–2",
+    "gol_casa": "0",
+    "gol_ospite": "2",
     "citta": "Sandy",
     "stadio": "America First Field",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -67038,12 +67038,12 @@
     "giornata": "25",
     "squadra_casa": "Colorado Rapids",
     "squadra_ospite": "CF Montreal",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Trade City",
     "stadio": "Dick's Sporting Goods Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -67052,12 +67052,12 @@
     "giornata": "25",
     "squadra_casa": "Los Angeles Galaxy",
     "squadra_ospite": "Seattle Sounders",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Los Angeles",
     "stadio": "Dignity Health Sports Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -67066,12 +67066,12 @@
     "giornata": "25",
     "squadra_casa": "San Jose Earthquakes",
     "squadra_ospite": "Houston Dynamo",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "San Jose",
     "stadio": "PayPal Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -69460,12 +69460,12 @@
     "giornata": "4",
     "squadra_casa": "Bournemouth",
     "squadra_ospite": "Brentford",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Bournemouth",
     "stadio": "Vitality Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Premier League",
@@ -69474,12 +69474,12 @@
     "giornata": "4",
     "squadra_casa": "Liverpool",
     "squadra_ospite": "Fulham",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Liverpool",
     "stadio": "Anfield",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Premier League",
@@ -69488,12 +69488,12 @@
     "giornata": "4",
     "squadra_casa": "Chelsea",
     "squadra_ospite": "Hull City",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "London",
     "stadio": "Stamford Bridge",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Premier League",
@@ -69502,12 +69502,12 @@
     "giornata": "4",
     "squadra_casa": "Crystal Palace",
     "squadra_ospite": "Ipswich",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–3",
+    "gol_casa": "2",
+    "gol_ospite": "3",
     "citta": "London",
     "stadio": "Selhurst Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Premier League",
@@ -69516,12 +69516,12 @@
     "giornata": "4",
     "squadra_casa": "Aston Villa",
     "squadra_ospite": "Nottingham Forest",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Birmingham",
     "stadio": "Villa Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Premier League",
@@ -69530,12 +69530,12 @@
     "giornata": "4",
     "squadra_casa": "Tottenham",
     "squadra_ospite": "Everton",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "London",
     "stadio": "Tottenham Hotspur Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Premier League",
@@ -69544,12 +69544,12 @@
     "giornata": "4",
     "squadra_casa": "Sunderland",
     "squadra_ospite": "Arsenal",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–2",
+    "gol_casa": "0",
+    "gol_ospite": "2",
     "citta": "Sunderland",
     "stadio": "Stadium of Light",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Premier League",
@@ -74990,12 +74990,12 @@
     "giornata": "6",
     "squadra_casa": "Nacional",
     "squadra_ospite": "Alverca",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–3",
+    "gol_casa": "1",
+    "gol_ospite": "3",
     "citta": "Funchal",
     "stadio": "",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Primeira Liga",
@@ -75004,12 +75004,12 @@
     "giornata": "6",
     "squadra_casa": "Casa Pia",
     "squadra_ospite": "Porto",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–4",
+    "gol_casa": "1",
+    "gol_ospite": "4",
     "citta": "Rio Maior",
     "stadio": "",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Primeira Liga",
@@ -75018,12 +75018,12 @@
     "giornata": "6",
     "squadra_casa": "Academico Viseu",
     "squadra_ospite": "Vitória SC",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Viseu",
     "stadio": "",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Primeira Liga",
@@ -82046,12 +82046,12 @@
     "giornata": "5",
     "squadra_casa": "FC Andorra",
     "squadra_ospite": "Real Sociedad II",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–3",
+    "gol_casa": "1",
+    "gol_ospite": "3",
     "citta": "Encamp",
     "stadio": "Estadi de la FAF",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -82060,12 +82060,12 @@
     "giornata": "5",
     "squadra_casa": "Cadiz",
     "squadra_ospite": "Las Palmas",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–1",
+    "gol_casa": "0",
+    "gol_ospite": "1",
     "citta": "Cadiz",
     "stadio": "JP Financial Estadio",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -82074,12 +82074,12 @@
     "giornata": "5",
     "squadra_casa": "Girona",
     "squadra_ospite": "Castellón",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Girona",
     "stadio": "Estadio Municipal de Montilivi",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -82088,12 +82088,12 @@
     "giornata": "5",
     "squadra_casa": "Granada",
     "squadra_ospite": "Albacete",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Granada",
     "stadio": "",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -82102,12 +82102,12 @@
     "giornata": "5",
     "squadra_casa": "Cordoba",
     "squadra_ospite": "Almeria",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–2",
+    "gol_casa": "0",
+    "gol_ospite": "2",
     "citta": "Cordoba",
     "stadio": "",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -88318,12 +88318,12 @@
     "giornata": "4",
     "squadra_casa": "Genoa",
     "squadra_ospite": "Frosinone",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Genoa",
-    "stadio": "Stadio Luigi Ferraris",
-    "stato": "Futura"
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
+    "citta": "Genova",
+    "stadio": "Luigi Ferraris",
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie A",
@@ -88332,12 +88332,12 @@
     "giornata": "4",
     "squadra_casa": "Lazio",
     "squadra_ospite": "AC Milan",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Rome",
     "stadio": "Stadio Olimpico",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie A",
@@ -88346,12 +88346,12 @@
     "giornata": "4",
     "squadra_casa": "Atalanta",
     "squadra_ospite": "Cagliari",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Bergamo",
     "stadio": "New Balance Arena",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie A",
@@ -93666,12 +93666,12 @@
     "giornata": "4",
     "squadra_casa": "Padova",
     "squadra_ospite": "Ascoli",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Padova",
     "stadio": "Stadio Euganeo",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie B",
@@ -93680,12 +93680,12 @@
     "giornata": "4",
     "squadra_casa": "Sudtirol",
     "squadra_ospite": "Modena",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Bolzano",
     "stadio": "Stadio Marco Druso",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie B",
@@ -93694,12 +93694,12 @@
     "giornata": "4",
     "squadra_casa": "Vicenza",
     "squadra_ospite": "Juve Stabia",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Vicenza",
     "stadio": "Stadio Romeo Menti",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie B",
@@ -93708,12 +93708,12 @@
     "giornata": "4",
     "squadra_casa": "Catanzaro",
     "squadra_ospite": "Carrarese",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Catanzaro",
     "stadio": "Stadio Nicola Ceravolo",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie B",
@@ -93722,12 +93722,12 @@
     "giornata": "4",
     "squadra_casa": "Cesena",
     "squadra_ospite": "Cremonese",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Cesena",
     "stadio": "Stadio Dino Manuzzi",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie B",
@@ -99017,8 +99017,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "",
-    "stadio": "",
+    "citta": "Zanica",
+    "stadio": "AlbinoLeffe",
     "stato": "Futura"
   },
   {
@@ -104264,12 +104264,12 @@
     "giornata": "4",
     "squadra_casa": "Vado",
     "squadra_ospite": "Campobasso FC",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–1",
+    "gol_casa": "0",
+    "gol_ospite": "1",
     "citta": "Sestri Levante",
     "stadio": "Giuseppe Sivori",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -104278,12 +104278,12 @@
     "giornata": "4",
     "squadra_casa": "Atalanta II",
     "squadra_ospite": "Pescara",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Piancastagnaio",
     "stadio": "Stadio Comunale",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -104292,12 +104292,12 @@
     "giornata": "4",
     "squadra_casa": "Spezia",
     "squadra_ospite": "Livorno",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "La Spezia",
     "stadio": "Stadio Alberto Picco",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -104306,12 +104306,12 @@
     "giornata": "4",
     "squadra_casa": "Guidonia Montecelio 1937",
     "squadra_ospite": "Reggiana",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Guidonia Montecelio",
     "stadio": "Stadio Citta dell Aria",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -104320,12 +104320,12 @@
     "giornata": "4",
     "squadra_casa": "Pineto",
     "squadra_ospite": "Sambenedettese",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Pineto",
     "stadio": "Mimmo Pavone-Alessandro Mariani",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -104334,12 +104334,12 @@
     "giornata": "4",
     "squadra_casa": "Gubbio",
     "squadra_ospite": "Latina",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–1",
+    "gol_casa": "3",
+    "gol_ospite": "1",
     "citta": "Gubbio",
     "stadio": "Stadio Pietro Barbetti",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -104348,12 +104348,12 @@
     "giornata": "4",
     "squadra_casa": "Forli",
     "squadra_ospite": "Vis Pesaro",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Forli",
     "stadio": "Stadio Tullo Morgagni",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -104362,12 +104362,12 @@
     "giornata": "4",
     "squadra_casa": "Pianese",
     "squadra_ospite": "Grosseto",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Piancastagnaio",
     "stadio": "Stadio Comunale",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -109640,12 +109640,12 @@
     "giornata": "4",
     "squadra_casa": "Savoia",
     "squadra_ospite": "Crotone",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Giugliano",
     "stadio": "Stadio Alberto De Cristofaro",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -109654,12 +109654,12 @@
     "giornata": "4",
     "squadra_casa": "Cosenza",
     "squadra_ospite": "Cavese",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Cosenza",
     "stadio": "Stadio San Vito-Luigi Marulla",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -109668,12 +109668,12 @@
     "giornata": "4",
     "squadra_casa": "Inter U23",
     "squadra_ospite": "Casertana",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–3",
+    "gol_casa": "2",
+    "gol_ospite": "3",
     "citta": "Monza",
     "stadio": "",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -109682,12 +109682,12 @@
     "giornata": "4",
     "squadra_casa": "Catania",
     "squadra_ospite": "Scafatese",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Catania",
     "stadio": "Stadio Angelo Massimino",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -109696,12 +109696,12 @@
     "giornata": "4",
     "squadra_casa": "Sorrento",
     "squadra_ospite": "AZ Picerno",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Potenza",
     "stadio": "Stadio Comunale Alfredo Viviani",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -109710,12 +109710,12 @@
     "giornata": "4",
     "squadra_casa": "SS Monopoli",
     "squadra_ospite": "Foggia",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Monopoli",
     "stadio": "Stadio Vito Simone Veneziani",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -117344,7 +117344,7 @@
     "gol_casa": "2",
     "gol_ospite": "1",
     "citta": "Tianjin",
-    "stadio": "Olympic Sports Center Stadium",
+    "stadio": "TEDA Football Stadium",
     "stato": "Giocata"
   },
   {
@@ -117354,12 +117354,12 @@
     "giornata": "18",
     "squadra_casa": "Tianjin Teda",
     "squadra_ospite": "Shenyang Urban",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Tianjin",
-    "stadio": "Olympic Sports Center Stadium",
-    "stato": "Futura"
+    "stadio": "TEDA Football Stadium",
+    "stato": "Giocata"
   },
   {
     "campionato": "Super League Grecia",
@@ -117368,12 +117368,12 @@
     "giornata": "18",
     "squadra_casa": "Wuhan Three Towns",
     "squadra_ospite": "Henan Jianye",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Wuhan",
     "stadio": "Wuhan Sports Centre",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Super League Grecia",
@@ -118362,12 +118362,12 @@
     "giornata": "5",
     "squadra_casa": "Eyüpspor",
     "squadra_ospite": "Rizespor",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Istanbul",
-    "stadio": "",
-    "stato": "Futura"
+    "risultato": "0–2",
+    "gol_casa": "0",
+    "gol_ospite": "2",
+    "citta": "Esenyurt",
+    "stadio": "Esenyurt Necmi Kadioglu Stadi",
+    "stato": "Giocata"
   },
   {
     "campionato": "Süper Lig",
@@ -118376,12 +118376,12 @@
     "giornata": "5",
     "squadra_casa": "Samsunspor",
     "squadra_ospite": "Çorum FK",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–5",
+    "gol_casa": "1",
+    "gol_ospite": "5",
     "citta": "Samsun",
-    "stadio": "Samsun 19 Mayis Stadyumu",
-    "stato": "Futura"
+    "stadio": "Samsun Yeni 19 Mayıs Stadyumu",
+    "stato": "Giocata"
   },
   {
     "campionato": "Süper Lig",
@@ -118390,12 +118390,12 @@
     "giornata": "5",
     "squadra_casa": "Konyaspor",
     "squadra_ospite": "Trabzonspor",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Konya",
-    "stadio": "Konya Buyuksehir Belediye Stadium",
-    "stato": "Futura"
+    "stadio": "Medas Konya Büyüksehir Belediyesi Stadium",
+    "stato": "Giocata"
   },
   {
     "campionato": "Süper Lig",
@@ -118404,12 +118404,12 @@
     "giornata": "5",
     "squadra_casa": "Alanyaspor",
     "squadra_ospite": "Göztepe",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Alanya",
-    "stadio": "Alanya Oba Stadium",
-    "stato": "Futura"
+    "stadio": "Bahcesehir Okullari Stadium",
+    "stato": "Giocata"
   },
   {
     "campionato": "Süper Lig",
