@@ -1,9 +1,7 @@
 // ============================================================
 // performance.js - Modulo Storico Performance
 // Traccia l'esito reale delle giocate suggerite (snapshot).
-// Salva uno snapshot per ogni partita futura analizzata, poi
-// quando la partita diventa "Giocata" calcola se ogni giocata
-// ha vinto o perso.
+// Limite: 20000 snapshot massimi in localStorage (~10 MB).
 // ============================================================
 
 (function () {
@@ -12,6 +10,7 @@
   const { useState, useEffect, useMemo } = React;
 
   const STORAGE_KEY = 'ft_performance_snapshots';
+  const MAX_SNAPSHOTS = 20000; // ⭐ Aumentato da 5000 a 20000
 
   // ============================================================
   // UTILITY STORAGE
@@ -31,12 +30,23 @@
 
   const scriviSnapshots = (arr) => {
     try {
-      // Limita a 5000 snapshot per non saturare localStorage
-      const limited = arr.slice(-5000);
+      const limited = arr.slice(-MAX_SNAPSHOTS); // ⭐ Mantieni solo gli ultimi 20000
       localStorage.setItem(STORAGE_KEY, JSON.stringify(limited));
       window.dispatchEvent(new CustomEvent('performance-updated', { detail: limited }));
     } catch (e) {
-      console.warn('Errore salvataggio performance:', e);
+      // ⚠️ Se superiamo la quota di localStorage, tenta di liberare spazio
+      if (e.name === 'QuotaExceededError' || e.code === 22) {
+        console.warn('⚠️ Quota localStorage superata, taglio a metà e riprovo...');
+        try {
+          const half = arr.slice(-Math.floor(MAX_SNAPSHOTS / 2));
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(half));
+          window.dispatchEvent(new CustomEvent('performance-updated', { detail: half }));
+        } catch (e2) {
+          console.error('❌ Impossibile salvare neanche metà degli snapshot:', e2);
+        }
+      } else {
+        console.warn('Errore salvataggio performance:', e);
+      }
     }
   };
 
@@ -45,7 +55,6 @@
   // ============================================================
 
   const calcolaEsitoGiocata = (match, familyId, giocataLabel) => {
-    // Restituisce 'V' (vinta) o 'P' (persa). null se non calcolabile.
     const gC = match.golCasa || 0;
     const gO = match.golOspite || 0;
     const tot = gC + gO;
@@ -82,7 +91,7 @@
       if (giocataLabel === 'No Goal' || giocataLabel === 'NG') return (gC === 0 || gO === 0) ? 'V' : 'P';
     }
 
-    // MULTIGOL (misto: 0-2/1-3 su casa, 1-4/2-5 su totale)
+    // MULTIGOL (0-2/1-3 su casa, 1-4/2-5 su totale)
     if (familyId === 'multigol') {
       if (giocataLabel === '0-2') return gC <= 2 ? 'V' : 'P';
       if (giocataLabel === '1-3') return (gC >= 1 && gC <= 3) ? 'V' : 'P';
@@ -90,50 +99,47 @@
       if (giocataLabel === '2-5') return (tot >= 2 && tot <= 5) ? 'V' : 'P';
     }
 
-    // MG CASA + OSPITE (formato: "0-2+1-3")
+    // MG CASA + OSPITE ("0-2+1-3")
     if (familyId === 'mg_casa_ospite') {
       const parts = giocataLabel.split('+');
       if (parts.length === 2) {
-        const [casaRange, ospiteRange] = parts;
-        const casaOk = matchRange(gC, casaRange);
-        const ospiteOk = matchRange(gO, ospiteRange);
+        const casaOk = matchRange(gC, parts[0]);
+        const ospiteOk = matchRange(gO, parts[1]);
         return (casaOk && ospiteOk) ? 'V' : 'P';
       }
     }
 
-    // DC + OVER (formato: "1X+O2.5")
+    // DC + OVER ("1X+O2.5")
     if (familyId === 'dc_over') {
       const parts = giocataLabel.split('+');
       if (parts.length === 2) {
         const dcOk = calcolaEsitoGiocata(match, 'dc', parts[0]) === 'V';
-        const overLabel = 'Over ' + parts[1].replace('O', '');
-        const overOk = calcolaEsitoGiocata(match, 'over', overLabel) === 'V';
+        const overOk = calcolaEsitoGiocata(match, 'over', 'Over ' + parts[1].replace('O', '')) === 'V';
         return (dcOk && overOk) ? 'V' : 'P';
       }
     }
 
-    // DC + UNDER (formato: "1X+U2.5")
+    // DC + UNDER ("1X+U2.5")
     if (familyId === 'dc_under') {
       const parts = giocataLabel.split('+');
       if (parts.length === 2) {
         const dcOk = calcolaEsitoGiocata(match, 'dc', parts[0]) === 'V';
-        const underLabel = 'Under ' + parts[1].replace('U', '');
-        const underOk = calcolaEsitoGiocata(match, 'under', underLabel) === 'V';
+        const underOk = calcolaEsitoGiocata(match, 'under', 'Under ' + parts[1].replace('U', '')) === 'V';
         return (dcOk && underOk) ? 'V' : 'P';
       }
     }
 
-    // DC + MULTIGOL (formato: "1X+0-2")
+    // DC + MULTIGOL ("1X+0-2")
     if (familyId === 'dc_multigol') {
       const parts = giocataLabel.split('+');
       if (parts.length === 2) {
         const dcOk = calcolaEsitoGiocata(match, 'dc', parts[0]) === 'V';
-        const mgLabel = parts[1];
+        const mg = parts[1];
         let mgOk = false;
-        if (mgLabel === '0-2') mgOk = tot <= 2;
-        else if (mgLabel === '1-3') mgOk = tot >= 1 && tot <= 3;
-        else if (mgLabel === '1-4') mgOk = tot >= 1 && tot <= 4;
-        else if (mgLabel === '2-5') mgOk = tot >= 2 && tot <= 5;
+        if (mg === '0-2') mgOk = tot <= 2;
+        else if (mg === '1-3') mgOk = tot >= 1 && tot <= 3;
+        else if (mg === '1-4') mgOk = tot >= 1 && tot <= 4;
+        else if (mg === '2-5') mgOk = tot >= 2 && tot <= 5;
         return (dcOk && mgOk) ? 'V' : 'P';
       }
     }
@@ -152,9 +158,7 @@
   // ============================================================
 
   const salvaSnapshot = (match, giocate) => {
-    // giocate: array di { familyId, familyLabel, giocata, label, pct, displayLabel }
     const arr = leggiSnapshots();
-    // Evita duplicati per matchId
     const idx = arr.findIndex(s => s.matchId === match.id);
     const snapshot = {
       matchId: match.id,
@@ -185,7 +189,7 @@
   };
 
   // ============================================================
-  // AGGIORNA ESITI (per partite diventate "Giocata")
+  // AGGIORNA ESITI
   // ============================================================
 
   const aggiornaEsiti = (matches) => {
@@ -193,20 +197,15 @@
     let modificato = false;
 
     arr.forEach(snap => {
-      if (snap.risultatoFinale) return; // già risolto
+      if (snap.risultatoFinale) return;
       const match = matches.find(m => m.id === snap.matchId);
       if (!match) return;
       if (match.stato !== 'Giocata') return;
 
-      // Aggiorna risultato finale
       snap.risultatoFinale = `${match.golCasa}-${match.golOspite}`;
-
-      // Calcola esito di ogni giocata
       snap.giocate.forEach(g => {
-        const esito = calcolaEsitoGiocata(match, g.familyId, g.giocata);
-        g.esito = esito;
+        g.esito = calcolaEsitoGiocata(match, g.familyId, g.giocata);
       });
-
       modificato = true;
     });
 
@@ -215,7 +214,7 @@
   };
 
   // ============================================================
-  // HOOK: usePerformanceSnapshots
+  // HOOK
   // ============================================================
 
   const usePerformanceSnapshots = () => {
@@ -246,7 +245,7 @@
     let totaleGiocate = 0, totaleVinte = 0, totalePerse = 0;
 
     snapshots.forEach(snap => {
-      if (!snap.risultatoFinale) return; // partita non ancora giocata
+      if (!snap.risultatoFinale) return;
       snap.giocate.forEach(g => {
         if (g.esito !== 'V' && g.esito !== 'P') return;
 
@@ -276,13 +275,11 @@
         if (g.esito === 'V') st.vinte++;
         else st.perse++;
 
-        // Bombe
         if (g.pct >= 90) {
           st.bombe++;
           if (g.esito === 'V') st.bombeVinte++;
         }
 
-        // Fasce
         let fascia = '0-50';
         if (g.pct >= 95) fascia = '95-100';
         else if (g.pct >= 85) fascia = '85-95';
@@ -297,7 +294,6 @@
       });
     });
 
-    // Calcola percentuali
     Object.values(stats).forEach(st => {
       st.pctReale = st.tot > 0 ? Math.round((st.vinte / st.tot) * 100) : 0;
       st.pctMediaPrevista = st.tot > 0 ? Math.round(st.sommaPct / st.tot) : 0;
@@ -315,7 +311,7 @@
   };
 
   // ============================================================
-  // COMPONENTE: TABELLA RIEPILOGO
+  // TABELLA RIEPILOGO
   // ============================================================
 
   const TabellaRiepilogo = ({ stats }) => {
@@ -345,71 +341,39 @@
     };
 
     const getDiffColor = (diff) => {
-      if (diff > 5) return 'var(--win)';   // Sottostima (meglio del previsto)
-      if (diff < -5) return 'var(--lose)'; // Sovrastima (peggio del previsto)
-      return 'var(--text-muted)';           // Ben calibrato
+      if (diff > 5) return 'var(--win)';
+      if (diff < -5) return 'var(--lose)';
+      return 'var(--text-muted)';
     };
 
     return (
       <div>
-        {/* Riepilogo globale */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
           gap: '12px',
           marginBottom: '20px',
         }}>
-          <div style={{
-            background: 'var(--card)', border: '2px solid var(--accent)',
-            borderRadius: '10px', padding: '14px 16px', textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>
-              Giocate totali
-            </div>
-            <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--accent)' }}>
-              {stats.totaleGiocate}
-            </div>
+          <div style={{ background: 'var(--card)', border: '2px solid var(--accent)', borderRadius: '10px', padding: '14px 16px', textAlign: 'center' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>Giocate totali</div>
+            <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--accent)' }}>{stats.totaleGiocate}</div>
           </div>
-          <div style={{
-            background: 'var(--card)', border: '1px solid var(--win)',
-            borderRadius: '10px', padding: '14px 16px', textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>
-              ✅ Vinte
-            </div>
-            <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--win)' }}>
-              {stats.totaleVinte}
-            </div>
+          <div style={{ background: 'var(--card)', border: '1px solid var(--win)', borderRadius: '10px', padding: '14px 16px', textAlign: 'center' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>✅ Vinte</div>
+            <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--win)' }}>{stats.totaleVinte}</div>
           </div>
-          <div style={{
-            background: 'var(--card)', border: '1px solid var(--lose)',
-            borderRadius: '10px', padding: '14px 16px', textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>
-              ❌ Perse
-            </div>
-            <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--lose)' }}>
-              {stats.totalePerse}
-            </div>
+          <div style={{ background: 'var(--card)', border: '1px solid var(--lose)', borderRadius: '10px', padding: '14px 16px', textAlign: 'center' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>❌ Perse</div>
+            <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--lose)' }}>{stats.totalePerse}</div>
           </div>
-          <div style={{
-            background: 'var(--card)', border: '2px solid var(--accent)',
-            borderRadius: '10px', padding: '14px 16px', textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>
-              % Successo totale
-            </div>
-            <div style={{ fontSize: '28px', fontWeight: 'bold', color: getPctColor(stats.pctSuccessoTotale) }}>
-              {stats.pctSuccessoTotale}%
-            </div>
+          <div style={{ background: 'var(--card)', border: '2px solid var(--accent)', borderRadius: '10px', padding: '14px 16px', textAlign: 'center' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>% Successo totale</div>
+            <div style={{ fontSize: '28px', fontWeight: 'bold', color: getPctColor(stats.pctSuccessoTotale) }}>{stats.pctSuccessoTotale}%</div>
           </div>
         </div>
 
-        {/* Tabella per famiglia */}
         <div className="card" style={{ padding: '14px 16px', overflowX: 'auto' }}>
-          <h4 style={{ marginBottom: '12px', fontSize: '16px' }}>
-            📊 Performance per Famiglia
-          </h4>
+          <h4 style={{ marginBottom: '12px', fontSize: '16px' }}>📊 Performance per Famiglia</h4>
           <table className="standings-table" style={{ width: '100%', minWidth: '850px', fontSize: '13px' }}>
             <thead>
               <tr>
@@ -431,25 +395,15 @@
                 const diffSign = st.diff > 0 ? '+' : '';
                 return (
                   <tr key={st.familyId}>
-                    <td style={{ fontWeight: 'bold' }}>
-                      {st.familyLabel || st.familyId}
-                    </td>
+                    <td style={{ fontWeight: 'bold' }}>{st.familyLabel || st.familyId}</td>
                     <td className="num">{st.tot}</td>
                     <td className="num" style={{ color: 'var(--win)', fontWeight: 'bold' }}>{st.vinte}</td>
                     <td className="num" style={{ color: 'var(--lose)', fontWeight: 'bold' }}>{st.perse}</td>
-                    <td className="num" style={{ color: pctColor, fontWeight: 'bold', fontSize: '15px' }}>
-                      {st.pctReale}%
-                    </td>
-                    <td className="num" style={{ color: 'var(--text-muted)' }}>
-                      {st.pctMediaPrevista}%
-                    </td>
-                    <td className="num" style={{ color: diffColor, fontWeight: 'bold' }}>
-                      {diffSign}{st.diff}
-                    </td>
+                    <td className="num" style={{ color: pctColor, fontWeight: 'bold', fontSize: '15px' }}>{st.pctReale}%</td>
+                    <td className="num" style={{ color: 'var(--text-muted)' }}>{st.pctMediaPrevista}%</td>
+                    <td className="num" style={{ color: diffColor, fontWeight: 'bold' }}>{diffSign}{st.diff}</td>
                     <td className="num">{st.bombe}</td>
-                    <td className="num" style={{ fontWeight: 'bold', color: st.pctBombeVinte >= 80 ? 'var(--win)' : 'var(--draw)' }}>
-                      {st.pctBombeVinte}%
-                    </td>
+                    <td className="num" style={{ fontWeight: 'bold', color: st.pctBombeVinte >= 80 ? 'var(--win)' : 'var(--draw)' }}>{st.pctBombeVinte}%</td>
                   </tr>
                 );
               })}
@@ -457,8 +411,8 @@
           </table>
           <div style={{ marginTop: '10px', fontSize: '11px', color: 'var(--text-muted)', fontStyle: 'italic' }}>
             💡 <b>Δ Diff</b>: differenza tra % reale e % media prevista.
-            <b style={{ color: 'var(--win)' }}> +5 o più</b> = modello sottostima (meglio del previsto).
-            <b style={{ color: 'var(--lose)' }}> −5 o meno</b> = modello sovrastima (peggio del previsto).
+            <b style={{ color: 'var(--win)' }}> +5 o più</b> = modello sottostima.
+            <b style={{ color: 'var(--lose)' }}> −5 o meno</b> = modello sovrastima.
           </div>
         </div>
       </div>
@@ -466,7 +420,7 @@
   };
 
   // ============================================================
-  // COMPONENTE: CALIBRAZIONE (previsto vs reale per fascia)
+  // CALIBRAZIONE
   // ============================================================
 
   const Calibrazione = ({ stats }) => {
@@ -484,11 +438,9 @@
 
     return (
       <div className="card" style={{ padding: '14px 16px' }}>
-        <h4 style={{ marginBottom: '12px', fontSize: '16px' }}>
-          🎯 Calibrazione: Previsto vs Reale
-        </h4>
+        <h4 style={{ marginBottom: '12px', fontSize: '16px' }}>🎯 Calibrazione: Previsto vs Reale</h4>
         <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-          Se il modello è ben calibrato, ogni fascia dovrebbe avere una % reale vicina al valore centrale della fascia.
+          Se il modello è ben calibrato, ogni fascia dovrebbe avere una % reale vicina al valore centrale.
         </div>
 
         {entries.map(st => (
@@ -499,19 +451,12 @@
                 ({st.tot} giocate)
               </span>
             </div>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(5, 1fr)',
-              gap: '8px',
-            }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
               {fasceOrdine.map(fascia => {
                 const data = st.fasce[fascia];
                 if (!data || data.tot === 0) {
                   return (
-                    <div key={fascia} style={{
-                      background: 'var(--surface)', padding: '8px', borderRadius: '6px',
-                      textAlign: 'center', opacity: 0.4, fontSize: '11px'
-                    }}>
+                    <div key={fascia} style={{ background: 'var(--surface)', padding: '8px', borderRadius: '6px', textAlign: 'center', opacity: 0.4, fontSize: '11px' }}>
                       <div style={{ color: 'var(--text-muted)' }}>{fascia}%</div>
                       <div style={{ fontSize: '16px', color: 'var(--text-muted)' }}>—</div>
                       <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>0 giocate</div>
@@ -519,30 +464,16 @@
                   );
                 }
                 const pctReale = Math.round((data.vinte / data.tot) * 100);
-                // Valore centrale della fascia
-                const center = {
-                  '0-50': 40, '50-70': 60, '70-85': 78, '85-95': 90, '95-100': 97
-                }[fascia];
+                const center = { '0-50': 40, '50-70': 60, '70-85': 78, '85-95': 90, '95-100': 97 }[fascia];
                 const diff = pctReale - center;
                 const diffColor = Math.abs(diff) <= 8 ? 'var(--win)' : Math.abs(diff) <= 15 ? 'var(--draw)' : 'var(--lose)';
                 return (
-                  <div key={fascia} style={{
-                    background: 'var(--surface)', padding: '8px', borderRadius: '6px',
-                    textAlign: 'center', border: `1px solid ${diffColor}`
-                  }}>
+                  <div key={fascia} style={{ background: 'var(--surface)', padding: '8px', borderRadius: '6px', textAlign: 'center', border: `1px solid ${diffColor}` }}>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{fascia}%</div>
-                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: diffColor }}>
-                      {pctReale}%
-                    </div>
-                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-                      previsto ~{center}%
-                    </div>
-                    <div style={{ fontSize: '10px', color: diffColor, fontWeight: 'bold' }}>
-                      {diff >= 0 ? '+' : ''}{diff}
-                    </div>
-                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-                      {data.tot} giocate
-                    </div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: diffColor }}>{pctReale}%</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>previsto ~{center}%</div>
+                    <div style={{ fontSize: '10px', color: diffColor, fontWeight: 'bold' }}>{diff >= 0 ? '+' : ''}{diff}</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{data.tot} giocate</div>
                   </div>
                 );
               })}
@@ -554,7 +485,7 @@
   };
 
   // ============================================================
-  // COMPONENTE: ULTIMI RISULTATI (lista)
+  // ULTIMI RISULTATI
   // ============================================================
 
   const UltimiRisultati = ({ snapshots }) => {
@@ -641,11 +572,9 @@
     const [subTab, setSubTab] = useState('Riepilogo');
     const [autoAggiorna, setAutoAggiorna] = useState(true);
 
-    // Auto-aggiorna gli esiti quando arrivano nuovi match o cambiano
     useEffect(() => {
       if (!autoAggiorna) return;
       if (!matches || matches.length === 0) return;
-      // Ritardo per non bloccare il rendering iniziale
       const timer = setTimeout(() => {
         aggiornaEsiti(matches);
       }, 500);
@@ -659,6 +588,10 @@
       localStorage.removeItem(STORAGE_KEY);
       window.dispatchEvent(new CustomEvent('performance-updated', { detail: [] }));
     };
+
+    const totaleSnapshot = snapshots.length;
+    const risoltiCount = snapshots.filter(s => s.risultatoFinale).length;
+    const inAttesaCount = totaleSnapshot - risoltiCount;
 
     return (
       <div>
@@ -679,7 +612,7 @@
               📈 Storico Performance
             </h2>
             <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              {snapshots.length} snapshot salvati • {stats.totaleGiocate} giocate risolte
+              {totaleSnapshot} snapshot ({risoltiCount} risolti • {inAttesaCount} in attesa) • {stats.totaleGiocate} giocate risolte
             </span>
           </div>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -734,6 +667,7 @@
   window.PerformanceComponent = PerformanceComponent;
   window.PerformanceUtils = {
     STORAGE_KEY,
+    MAX_SNAPSHOTS,
     leggiSnapshots,
     scriviSnapshots,
     salvaSnapshot,
@@ -743,6 +677,6 @@
     usePerformanceSnapshots,
   };
 
-  console.log('✅ Modulo Performance caricato');
+  console.log('✅ Modulo Performance caricato - MAX_SNAPSHOTS:', MAX_SNAPSHOTS);
 
 })();
