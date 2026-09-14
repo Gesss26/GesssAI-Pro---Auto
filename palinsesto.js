@@ -1,12 +1,63 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto esterno
 // È la FONTE DI VERITÀ per il filtro campionati, giorni e modalità giocate.
+// Etichette MG: mostrano "Casa", "Ospite" o "Tot".
 // ============================================================
 
 (function () {
   'use strict';
 
   const { useState, useMemo } = React;
+
+  // ============================================================
+  // FORMATTAZIONE ETICHETTE GIOCATE
+  // ============================================================
+  const formatGiocataLabel = (familyId, label) => {
+    if (!label) return '—';
+
+    if (label.startsWith('Over '))  return label;
+    if (label.startsWith('Under ')) return label.replace('.', ',');
+
+    if (familyId === 'multigol') {
+      if (label === '1-4') return 'MG Tot 1-4';
+      return 'MG Tot ' + label;
+    }
+
+    if (familyId === 'mg_casa_ospite') {
+      const parts = label.split('+');
+      if (parts.length === 2) {
+        return `MG ${parts[0]} Casa + MG ${parts[1]} Ospite`;
+      }
+    }
+
+    if (familyId === 'dc_multigol') {
+      const parts = label.split('+');
+      if (parts.length === 2) return `${parts[0]} + MG Tot ${parts[1]}`;
+    }
+
+    if (familyId === 'dc_under') {
+      const parts = label.split('+');
+      if (parts.length === 2) {
+        const uLabel = parts[1].replace('U', 'Under ').replace('.', ',');
+        return `${parts[0]} + ${uLabel}`;
+      }
+    }
+
+    if (familyId === 'dc_over') {
+      const parts = label.split('+');
+      if (parts.length === 2) {
+        const oLabel = parts[1].replace('O', 'Over ').replace('.', ',');
+        return `${parts[0]} + ${oLabel}`;
+      }
+    }
+
+    if (familyId === 'gg_ng') {
+      if (label === 'Goal-Goal') return 'GG';
+      if (label === 'No Goal') return 'NG';
+    }
+
+    return label;
+  };
 
   // ============================================================
   // MATCH TAB (card partita con giocate)
@@ -124,6 +175,7 @@
             familyLabel: family.label,
             familyIcon: family.icon,
             label: best.label,
+            displayLabel: formatGiocataLabel(familyId, best.label),  // ⭐ Etichetta formattata
             familyName: family.label,
             pct: best.pct,
             isBomb: best.pct >= 90,
@@ -219,7 +271,7 @@
                   <span className="bet-label" style={{ color: isBomb ? '#000' : pctColor }}>
                     {isBomb && '💣 '}
                     <span style={{ fontWeight: 'bold', fontSize: '13px', color: isBomb ? '#000' : pctColor }}>
-                      {g.label}
+                      {g.displayLabel || g.label}
                     </span>
                   </span>
                   <span className="bet-value">
@@ -477,6 +529,6 @@
   }
 
   window.PalinsestoComponent = PalinsestoComponent;
-  console.log('✅ Modulo Palinsesto caricato (fonte di verità: campionati + giorni + modalità giocate)');
+  console.log('✅ Modulo Palinsesto caricato - etichette MG Casa/Ospite');
 
 })();

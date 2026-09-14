@@ -1,13 +1,65 @@
 // ============================================================
 // statistiche.js - Modulo Statistiche esterno (COMPLETO)
 // LEGGE il filtro campionati dal Palinsesto (fonte di verità).
-// Supporta GG-NG come famiglia di giocata (come le altre).
+// Supporta GG-NG come famiglia di giocata.
+// GG-NG appare SEMPRE accanto alle famiglie selezionate.
+// Etichette MG: mostrano "Casa", "Ospite" o "Tot".
 // ============================================================
 
 (function () {
   'use strict';
 
   const { useState, useEffect, useMemo } = React;
+
+  // ============================================================
+  // FORMATTAZIONE ETICHETTE GIOCATE
+  // ============================================================
+  const formatGiocataLabel = (familyId, label) => {
+    if (!label) return '—';
+
+    if (label.startsWith('Over '))  return label;
+    if (label.startsWith('Under ')) return label.replace('.', ',');
+
+    if (familyId === 'multigol') {
+      if (label === '1-4') return 'MG Tot 1-4';
+      return 'MG Tot ' + label;
+    }
+
+    if (familyId === 'mg_casa_ospite') {
+      const parts = label.split('+');
+      if (parts.length === 2) {
+        return `MG ${parts[0]} Casa + MG ${parts[1]} Ospite`;
+      }
+    }
+
+    if (familyId === 'dc_multigol') {
+      const parts = label.split('+');
+      if (parts.length === 2) return `${parts[0]} + MG Tot ${parts[1]}`;
+    }
+
+    if (familyId === 'dc_under') {
+      const parts = label.split('+');
+      if (parts.length === 2) {
+        const uLabel = parts[1].replace('U', 'Under ').replace('.', ',');
+        return `${parts[0]} + ${uLabel}`;
+      }
+    }
+
+    if (familyId === 'dc_over') {
+      const parts = label.split('+');
+      if (parts.length === 2) {
+        const oLabel = parts[1].replace('O', 'Over ').replace('.', ',');
+        return `${parts[0]} + ${oLabel}`;
+      }
+    }
+
+    if (familyId === 'gg_ng') {
+      if (label === 'Goal-Goal' || label === 'GG') return 'GG';
+      if (label === 'No Goal' || label === 'NG') return 'NG';
+    }
+
+    return label;
+  };
 
   // ============================================================
   // SIMULAZIONE MONTE CARLO + POISSON
@@ -345,6 +397,17 @@
       );
     };
 
+    // Prepara lista famiglie da mostrare: selezionate (max 3) + GG-NG sempre in coda
+    const famiglieDaMostrare = (() => {
+      const list = [];
+      const selezionate = (selectedFamiglie || []).slice(0, 3);
+      selezionate.forEach(fid => list.push(fid));
+      if (!list.includes('gg_ng')) {
+        list.push('gg_ng');
+      }
+      return list;
+    })();
+
     return (
       <div className="ai-analysis-box">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
@@ -382,38 +445,39 @@
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginTop: '12px' }}>
-          {selectedFamiglie && selectedFamiglie.length > 0 ? (
-            selectedFamiglie.slice(0, 3).map((familyId, idx) => {
-              const best = getBestFamily(familyId);
-              if (!best || best.pct < 0) return <div key={idx} style={{ background: 'var(--card)', padding: '12px', borderRadius: '8px', textAlign: 'center' }}>N/D</div>;
-              const isBomb = best.isBomb;
-              const isGGNG = familyId === 'gg_ng';
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px', marginTop: '12px' }}>
+          {famiglieDaMostrare.map((familyId, idx) => {
+            const best = getBestFamily(familyId);
+            if (!best || best.pct < 0) {
               return (
-                <div key={idx} style={{
-                  background: 'var(--card)', padding: '12px 16px', borderRadius: '8px',
-                  textAlign: 'center',
-                  border: isBomb ? '2px solid var(--accent)' : (isGGNG ? '2px solid #e74c3c' : '1px solid var(--border)')
-                }}>
-                  <div style={{ fontSize: '11px', color: isGGNG ? '#e74c3c' : 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>
-                    {best.familyIcon} {best.familyLabel}
-                  </div>
-                  <div style={{ fontSize: '12px', color: 'var(--text)', marginTop: '2px' }}>{best.label}</div>
-                  <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '4px' }}>
-                    <span className={`giocata-pct ${getPercentualeClasse(best.pct)}`}>
-                      {best.pct}% {isBomb && <span className="bomb-icon">💣</span>}
-                    </span>
-                  </div>
+                <div key={idx} style={{ background: 'var(--card)', padding: '12px', borderRadius: '8px', textAlign: 'center' }}>
+                  N/D
                 </div>
               );
-            })
-          ) : (
-            <>
-              {renderPctBox(mc.pct12Under45, '12+Under 4.5', '🎯')}
-              {renderPctBox(mc.combinataPct, mc.combinataLabel, '🔗')}
-              {renderPctBox(mc.over15, 'Over 1.5', '⚽')}
-            </>
-          )}
+            }
+            const isBomb = best.isBomb;
+            const isGGNG = familyId === 'gg_ng';
+            const displayLabel = formatGiocataLabel(familyId, best.label);
+            return (
+              <div key={idx} style={{
+                background: 'var(--card)', padding: '12px 16px', borderRadius: '8px',
+                textAlign: 'center',
+                border: isBomb ? '2px solid var(--accent)' : (isGGNG ? '2px solid #e74c3c' : '1px solid var(--border)')
+              }}>
+                <div style={{ fontSize: '11px', color: isGGNG ? '#e74c3c' : 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>
+                  {best.familyIcon} {best.familyLabel}
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--text)', marginTop: '2px', fontWeight: 'bold' }}>
+                  {displayLabel}
+                </div>
+                <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '4px' }}>
+                  <span className={`giocata-pct ${getPercentualeClasse(best.pct)}`}>
+                    {best.pct}% {isBomb && <span className="bomb-icon">💣</span>}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <div style={{ marginTop: '16px', background: 'var(--surface)', borderRadius: '8px', border: '1px solid var(--border)', overflow: 'hidden' }}>
@@ -1375,7 +1439,6 @@
 
   function StatisticheComponent({ matches, selectedMatchId, selectedFamiglie, weatherCache }) {
     const [statsSubTab, setStatsSubTab] = useState('Classifica');
-    const [ultimaGiornataRound, setUltimaGiornataRound] = useState(null);
     const getChampColor = window.getChampColor;
 
     // ⭐ FILTRO CAMPIONATI GLOBALE (letto dal Palinsesto)
@@ -1561,6 +1624,6 @@
   window.Standings = Standings;
   window.TeamMatchesHistory = TeamMatchesHistory;
 
-  console.log('✅ Modulo Statistiche caricato (COMPLETO) - legge filtro campionati dal Palinsesto + GG/NG');
+  console.log('✅ Modulo Statistiche caricato - GG/NG sempre visibile + etichette MG Casa/Ospite');
 
 })();

@@ -6,7 +6,58 @@
 // + ORDINAMENTO: DATA -> PERCENTUALE (DECRESCENTE)
 // + TOP 3 GIOCATE COME IN HOME (filtra in base alle giocate scelte)
 // + GG-NG come famiglia di giocata (usa window.calcolaGG_NG)
+// + Etichette MG: mostrano "Casa", "Ospite" o "Tot".
 // ============================================================
+
+// ============================================================
+// FORMATTAZIONE ETICHETTE GIOCATE
+// ============================================================
+const formatGiocataLabel = (familyId, label) => {
+  if (!label) return '—';
+
+  if (label.startsWith('Over '))  return label;
+  if (label.startsWith('Under ')) return label.replace('.', ',');
+
+  if (familyId === 'multigol') {
+    if (label === '1-4') return 'MG Tot 1-4';
+    return 'MG Tot ' + label;
+  }
+
+  if (familyId === 'mg_casa_ospite') {
+    const parts = label.split('+');
+    if (parts.length === 2) {
+      return `MG ${parts[0]} Casa + MG ${parts[1]} Ospite`;
+    }
+  }
+
+  if (familyId === 'dc_multigol') {
+    const parts = label.split('+');
+    if (parts.length === 2) return `${parts[0]} + MG Tot ${parts[1]}`;
+  }
+
+  if (familyId === 'dc_under') {
+    const parts = label.split('+');
+    if (parts.length === 2) {
+      const uLabel = parts[1].replace('U', 'Under ').replace('.', ',');
+      return `${parts[0]} + ${uLabel}`;
+    }
+  }
+
+  if (familyId === 'dc_over') {
+    const parts = label.split('+');
+    if (parts.length === 2) {
+      const oLabel = parts[1].replace('O', 'Over ').replace('.', ',');
+      return `${parts[0]} + ${oLabel}`;
+    }
+  }
+
+  if (familyId === 'gg_ng') {
+    if (label === 'Goal-Goal') return 'GG';
+    if (label === 'No Goal') return 'NG';
+  }
+
+  return label;
+};
 
 const SchedinaComponent = ({ 
   matches, 
@@ -14,12 +65,11 @@ const SchedinaComponent = ({
   selectedFamiglie, 
   onSelectMatch, 
   showAlert,
-  palinsestoGiorniRange = 1,  // (legacy, ora usiamo il filtro globale)
+  palinsestoGiorniRange = 1,
   renderGiorniButtons,
   renderChampFilters,
   CHAMPIONSHIP_LIST
 }) => {
-  // Accesso sicuro alle funzioni globali
   const getChampColor = window.getChampColor || (() => '#95a5a6');
   const computeMatchStats = window.computeMatchStats;
   const getMultigolRange = window.getMultigolRange;
@@ -30,11 +80,9 @@ const SchedinaComponent = ({
   const addDaysToDateStr = window.addDaysToDateStr;
   const formatDateEU = window.formatDateEU;
 
-  // ⭐ GIORNI RANGE GLOBALE (letto dal Palinsesto)
   const { giorni: giorniRange, setGiorni: setGiorniRange } =
     window.FiltriCampionati.useGiorniRange();
 
-  // ⭐ FILTRO CAMPIONATI GLOBALE (letto dal Palinsesto)
   const {
     filtro: campionatiSelezionatiObj,
     toggleCampionato,
@@ -43,10 +91,8 @@ const SchedinaComponent = ({
     campionatiAttivi,
   } = window.FiltriCampionati.useFiltroCampionati();
 
-  // Converte in array di nomi (compatibilità con il codice esistente)
   const campionatiSelezionati = campionatiAttivi;
 
-  // Stato locale della schedina
   const [partiteSelezionate, setPartiteSelezionate] = useState([]);
   const [schedinaCreata, setSchedinaCreata] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -61,7 +107,6 @@ const SchedinaComponent = ({
   const [numeroPartiteDaSelezionare, setNumeroPartiteDaSelezionare] = useState(5);
   const [filtroOrario, setFiltroOrario] = useState('dopo_ora');
 
-  // Funzione per mescolare un array
   const shuffleArray = (array) => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -71,7 +116,6 @@ const SchedinaComponent = ({
     return shuffled;
   };
 
-  // Funzione per ordinare le partite per data e ora crescente
   const ordinaPartitePerDataOra = (partite) => {
     return [...partite].sort((a, b) => {
       const dateA = normalizeDate(a.data);
@@ -104,24 +148,18 @@ const SchedinaComponent = ({
     });
   };
 
-  // ============================================================
-  // OTTIENI LE PARTITE - STESSA IDENTICA LOGICA DEL PALINSESTO
-  // ============================================================
   const getPartiteDisponibili = useCallback(() => {
     const todayStr = getTodayStr();
     const maxDateStr = addDaysToDateStr(todayStr, giorniRange);
     
-    // Prendi le partite Future (come nel Palinsesto)
     let partite = matches.filter(m => m.stato === 'Futura');
     
-    // Filtra per campionati selezionati (dal filtro globale)
     if (campionatiSelezionati.length > 0) {
       partite = partite.filter(m => campionatiSelezionati.includes(m.campionato));
     } else {
       partite = [];
     }
     
-    // FILTRO DATA: da oggi a oggi+giorniRange (IDENTICO AL PALINSESTO)
     partite = partite.filter(m => {
       if (!m.data) return false;
       const normalized = normalizeDate(m.data);
@@ -129,7 +167,6 @@ const SchedinaComponent = ({
       return normalized >= todayStr && normalized <= maxDateStr;
     });
     
-    // ⭐ ESCLUSIONE PARTITE GIÀ INIZIATE (ORARIO PASSATO)
     partite = partite.filter(m => {
       if (!m.ora || m.ora === 'TBD' || m.ora === 'N/D') {
         return true;
@@ -156,7 +193,6 @@ const SchedinaComponent = ({
       return matchTotalMinutes > currentTotalMinutes;
     });
     
-    // FILTRO ORARIO: "dopo ora"
     if (filtroOrario === 'dopo_ora') {
       const now = new Date();
       const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
@@ -183,11 +219,6 @@ const SchedinaComponent = ({
     return partite;
   }, [matches, campionatiSelezionati, giorniRange, filtroOrario]);
 
-  // ============================================================
-  // CALCOLA TOP 3 GIOCATE PER PARTITA (come in Home)
-  // Filtra in base alle giocate selezionate (da 1 a 3+)
-  // Usa window.calcolaGG_NG per la famiglia gg_ng
-  // ============================================================
   const calcolaTop3GiocatePerPartita = (match) => {
     const stats = computeMatchStats(match, matches);
     if (stats.error) return { top3: [], score: 0, tutteGiocate: [] };
@@ -202,7 +233,6 @@ const SchedinaComponent = ({
     const homeRange = getMultigolRange(match.casa, matches);
     const awayRange = getMultigolRange(match.ospiti, matches);
 
-    // Determina quali famiglie analizzare in base alle giocate selezionate
     const famiglieDaAnalizzare = giocateSelezionate.includes('tutte') || giocateSelezionate.length === 0
       ? Object.keys(window.FAMIGLIE_GIOCATE || {})
       : giocateSelezionate;
@@ -215,7 +245,6 @@ const SchedinaComponent = ({
 
       let best = null;
 
-      // GG-NG usa la funzione globale
       if (familyId === 'gg_ng') {
         const ggNgResult = window.calcolaGG_NG ? window.calcolaGG_NG(stats) : null;
         if (ggNgResult) {
@@ -239,11 +268,12 @@ const SchedinaComponent = ({
       }
 
       if (best && best.pct > 0) {
+        // ⭐ Aggiungi displayLabel formattata
+        best.displayLabel = formatGiocataLabel(familyId, best.label);
         tutte.push(best);
       }
     });
 
-    // Ordina per percentuale decrescente
     tutte.sort((a, b) => b.pct - a.pct);
 
     const top3 = tutte.slice(0, 3);
@@ -258,9 +288,6 @@ const SchedinaComponent = ({
     };
   };
 
-  // ============================================================
-  // PARTITE DISPONIBILI CON ORDINAMENTO: DATA -> SCORE
-  // ============================================================
   const partiteDisponibili = useMemo(() => {
     const partite = getPartiteDisponibili();
     const partiteConDettagli = partite.map(m => {
@@ -273,7 +300,6 @@ const SchedinaComponent = ({
       };
     });
     
-    // ORDINA PER DATA (crescente) e poi per SCORE (decrescente)
     return partiteConDettagli.sort((a, b) => {
       const dateA = normalizeDate(a.data);
       const dateB = normalizeDate(b.data);
@@ -292,7 +318,6 @@ const SchedinaComponent = ({
     });
   }, [getPartiteDisponibili, giocateSelezionate, selectedFamiglie]);
 
-  // Seleziona un numero personalizzato di partite
   const selezionaNumeroPartite = (n) => {
     if (partiteDisponibili.length === 0) {
       showAlert('info', 'ℹ️ Nessuna partita disponibile.');
@@ -316,7 +341,6 @@ const SchedinaComponent = ({
     showAlert('success', `✅ Selezionate ${miglioriOrdinate.length} partite!${messaggioExtra}`);
   };
 
-  // RIGENERA
   const rigeneraSchedina = () => {
     if (partiteDisponibili.length === 0) {
       showAlert('info', 'ℹ️ Nessuna partita disponibile per rigenerare la schedina.');
@@ -402,7 +426,6 @@ const SchedinaComponent = ({
     showAlert('success', `🔄 Schedina rigenerata! ${messaggioCasualita} ${emojiCasualita} Livello: ${casualitaLevel}%`);
   };
 
-  // SELEZIONE CASUALE
   const selezionaCasuale = () => {
     if (partiteDisponibili.length === 0) {
       showAlert('info', 'ℹ️ Nessuna partita disponibile.');
@@ -439,7 +462,6 @@ const SchedinaComponent = ({
     });
   };
 
-  // CREA SCHEDINA
   const creaSchedina = () => {
     if (partiteSelezionate.length < 2) {
       showAlert('error', '⚠️ Seleziona almeno 2 partite per creare la schedina!');
@@ -455,7 +477,6 @@ const SchedinaComponent = ({
         ...m,
         top3: dettagli.top3,
         score: dettagli.score,
-        // Mantieni anche la migliore per compatibilità con il salvataggio
         giocata: dettagli.top3[0] || null,
         pct: dettagli.top3[0]?.pct || 0
       };
@@ -532,9 +553,6 @@ const SchedinaComponent = ({
     }, 0);
   };
 
-  // ============================================================
-  // FORMATTAZIONE SCHEDINA PER CONDIVISIONE
-  // ============================================================
   const formatSchedinaText = (schedina) => {
     if (!schedina || !schedina.partite) {
       console.error('❌ Schedina non valida per la formattazione');
@@ -600,7 +618,8 @@ const SchedinaComponent = ({
           const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉';
           const bombEmoji = g.isBomb ? ' 💣' : '';
           const ggngTag = g.familyId === 'gg_ng' ? ' ⚽GG/NG' : '';
-          lines.push(`  ${medal} ${g.familyIcon} ${g.label} → ${g.pct}%${bombEmoji}${ggngTag}`);
+          const displayLabel = g.displayLabel || formatGiocataLabel(g.familyId, g.label);
+          lines.push(`  ${medal} ${g.familyIcon} ${displayLabel} → ${g.pct}%${bombEmoji}${ggngTag}`);
         });
       } else {
         lines.push(`  🎯 N/A`);
@@ -619,10 +638,6 @@ const SchedinaComponent = ({
     return lines.join('\n');
   };
 
-  // ============================================================
-  // FUNZIONI DI CONDIVISIONE
-  // ============================================================
-  
   const copySchedinaToClipboard = () => {
     if (!schedinaCreata) {
       showAlert('error', '❌ Nessuna schedina da copiare!');
@@ -705,13 +720,10 @@ const SchedinaComponent = ({
     if (schedina.giocateSelezionate) {
       setGiocateSelezionate(schedina.giocateSelezionate);
     }
-    // ⚠️ NON ripristinare giorniRange: è un filtro globale (fonte: Palinsesto)
-    // ⚠️ NON ripristinare campionatiSelezionati: è un filtro globale (fonte: Palinsesto)
     setShowSchedinaModal(true);
     showAlert('success', `📂 Schedina caricata! ${schedina.numPartite} partite, media ${schedina.media}%`);
   };
 
-  // Famiglie disponibili per il selettore (gg_ng è dentro FAMIGLIE_GIOCATE)
   const famiglieDisponibili = [
     { id: 'tutte', label: '⭐ Tutte', icon: '⭐' },
     ...Object.entries(window.FAMIGLIE_GIOCATE || {}).map(([id, family]) => ({
@@ -739,7 +751,7 @@ const SchedinaComponent = ({
           </span>
         </h3>
         
-        {/* SEZIONE 1: CAMPIONATI - SINCRONIZZATI CON PALINSESTO */}
+        {/* SEZIONE 1: CAMPIONATI */}
         <div style={{
           marginBottom: '20px', 
           padding: '14px 16px', 
@@ -799,7 +811,6 @@ const SchedinaComponent = ({
             </div>
           </div>
           
-          {/* GRIGLIA 5x5 COME PALINSESTO */}
           <div className="champ-filters-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(5, 1fr)',
@@ -963,7 +974,7 @@ const SchedinaComponent = ({
           </div>
         </div>
 
-        {/* SEZIONE 3: FILTRI DATA/ORA (SINCRONIZZATI CON PALINSESTO) */}
+        {/* SEZIONE 3: FILTRI DATA/ORA */}
         <div style={{
           marginBottom: '20px', 
           padding: '14px 16px', 
@@ -1404,7 +1415,7 @@ const SchedinaComponent = ({
                               textOverflow: 'ellipsis',
                               maxWidth: '80px'
                             }}>
-                              {g.label}
+                              {g.displayLabel || g.label}
                             </span>
                             <span className={`giocata-pct ${getPercentualeClasse(g.pct)}`} style={{fontSize: '11px', padding: '1px 6px'}}>
                               {g.pct}% {g.isBomb && '💣'}
@@ -1591,11 +1602,11 @@ const SchedinaComponent = ({
                         </span>
                       </div>
 
-                      {/* TOP 3 GIOCATE NEL MODAL */}
                       <div style={{display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px', alignItems: 'center'}}>
                         {top3.length > 0 ? top3.map((g, i) => {
                           const isGGNG = g.familyId === 'gg_ng';
                           const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉';
+                          const displayLabel = g.displayLabel || formatGiocataLabel(g.familyId, g.label);
                           return (
                             <div key={i} style={{
                               display: 'flex',
@@ -1609,7 +1620,7 @@ const SchedinaComponent = ({
                             }}>
                               <span style={{fontSize: '9px', color: 'var(--text-muted)'}}>{medal}</span>
                               <span style={{fontSize: '11px', fontWeight: 'bold', color: isGGNG ? '#e74c3c' : 'var(--accent)'}}>
-                                {g.label}
+                                {displayLabel}
                               </span>
                               <span className={`giocata-pct ${getPercentualeClasse(g.pct)}`} style={{fontSize: '12px', padding: '1px 6px'}}>
                                 {g.pct}% {g.isBomb && '💣'}
@@ -1653,7 +1664,6 @@ const SchedinaComponent = ({
               </div>
             </div>
             
-            {/* BOTTONI AZIONE MODAL */}
             <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border)', justifyContent: 'center'}}>
               <button className="btn" onClick={copySchedinaToClipboard} style={{background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)'}}>
                 📋 Copia
@@ -1711,4 +1721,4 @@ const SchedinaComponent = ({
 };
 
 window.SchedinaComponent = SchedinaComponent;
-console.log('✅ SchedinaComponent caricato - sincronizzato con Palinsesto (campionati + range giorni) + Top 3 giocate + GG/NG come famiglia');
+console.log('✅ SchedinaComponent caricato - etichette MG Casa/Ospite/Tot + GG/NG come famiglia');
