@@ -1,8 +1,8 @@
 // ============================================================
 // statistiche.js - Modulo Statistiche esterno (COMPLETO)
 // LEGGE il filtro campionati dal Palinsesto (fonte di verità).
-// Supporta GG-NG come famiglia di giocata.
-// GG-NG appare SEMPRE accanto alle famiglie selezionate.
+// Include sezione GG / NG in MatchDetail (tra Under/Over e Multigol).
+// GG-NG sempre visibile in Riepilogo AI (dopo Under/Over).
 // Etichette MG: mostrano "Casa", "Ospite" o "Tot".
 // ============================================================
 
@@ -397,15 +397,37 @@
       );
     };
 
-    // Prepara lista famiglie da mostrare: selezionate (max 3) + GG-NG sempre in coda
+    // Prepara lista famiglie da mostrare:
+    // - Le famiglie selezionate (max 3)
+    // - GG-NG sempre presente (inserito dopo "under" o "over" se non già selezionato)
     const famiglieDaMostrare = (() => {
-      const list = [];
+      const ORDINE_PREFERITO = ['gg_ng', 'fisse', 'dc', 'over', 'under', 'multigol', 'dc_over', 'dc_under', 'mg_casa_ospite', 'dc_multigol'];
+
       const selezionate = (selectedFamiglie || []).slice(0, 3);
-      selezionate.forEach(fid => list.push(fid));
-      if (!list.includes('gg_ng')) {
-        list.push('gg_ng');
+      const selezionateOrdinate = [...selezionate].sort((a, b) => {
+        const ia = ORDINE_PREFERITO.indexOf(a);
+        const ib = ORDINE_PREFERITO.indexOf(b);
+        return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+      });
+
+      const lista = [];
+      selezionateOrdinate.forEach(fid => {
+        if (fid && !lista.includes(fid)) lista.push(fid);
+      });
+
+      if (!lista.includes('gg_ng')) {
+        const posUnder = lista.indexOf('under');
+        const posOver = lista.indexOf('over');
+        if (posUnder !== -1) {
+          lista.splice(posUnder + 1, 0, 'gg_ng');
+        } else if (posOver !== -1) {
+          lista.splice(posOver + 1, 0, 'gg_ng');
+        } else {
+          lista.push('gg_ng');
+        }
       }
-      return list;
+
+      return lista;
     })();
 
     return (
@@ -731,7 +753,7 @@
   };
 
   // ============================================================
-  // MATCH DETAIL (completo)
+  // MATCH DETAIL (completo, con sezione GG/NG)
   // ============================================================
 
   const MatchDetail = ({ match, allMatches }) => {
@@ -819,6 +841,29 @@
       const cls = getXgClasse(num);
       return <span className={`xg-value ${cls}`}>{num.toFixed(1)}</span>;
     };
+
+    // ⭐ Calcolo GG/NG dai dati storici
+    const calcolaGGNGLocale = () => {
+      const homeGames = stats.homeGames || [];
+      const awayGames = stats.awayGames || [];
+      const allGames = [...homeGames, ...awayGames];
+      const uniqueGames = Array.from(new Map(allGames.map(g => [g.id, g])).values());
+      if (uniqueGames.length === 0) return null;
+
+      let gg = 0, ng = 0;
+      uniqueGames.forEach(g => {
+        if (g.golCasa > 0 && g.golOspite > 0) gg++;
+        else ng++;
+      });
+      const total = uniqueGames.length;
+      return {
+        gg: Math.round((gg / total) * 100),
+        ng: Math.round((ng / total) * 100),
+        totalePartite: total
+      };
+    };
+
+    const ggngData = calcolaGGNGLocale();
 
     return (
       <div>
@@ -936,6 +981,26 @@
             </div>
           ))}
         </div>
+
+        {/* ⭐ SEZIONE GG / NG (tra Under/Over e Multigol) */}
+        {ggngData && (
+          <div className="card detail-section">
+            <h4>⚽ GG / NG</h4>
+            <div className="detail-row">
+              {renderStatBox('GG (Goal-Goal)', ggngData.gg)}
+              {renderStatBox('NG (No Goal)', ggngData.ng)}
+            </div>
+            <div style={{
+              marginTop: '8px',
+              fontSize: '11px',
+              color: 'var(--text-muted)',
+              textAlign: 'center',
+              fontStyle: 'italic'
+            }}>
+              📊 Basato su {ggngData.totalePartite} partite (casa + ospite unite, senza duplicati)
+            </div>
+          </div>
+        )}
 
         <div className="card detail-section">
           <h4>📊 MULTIGOL</h4>
@@ -1441,11 +1506,9 @@
     const [statsSubTab, setStatsSubTab] = useState('Classifica');
     const getChampColor = window.getChampColor;
 
-    // ⭐ FILTRO CAMPIONATI GLOBALE (letto dal Palinsesto)
     const { filtro: filtroCampionati, campionatiAttivi } =
       window.FiltriCampionati.useFiltroCampionati();
 
-    // Partite filtrate per campionati attivi
     const matchesFiltrati = useMemo(
       () => window.FiltriCampionati.filtraPartitePerCampionato(matches),
       [matches, filtroCampionati]
@@ -1455,7 +1518,6 @@
 
     return (
       <div>
-        {/* Banner filtro campionati */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
           padding: '10px 14px', marginBottom: '14px',
@@ -1624,6 +1686,6 @@
   window.Standings = Standings;
   window.TeamMatchesHistory = TeamMatchesHistory;
 
-  console.log('✅ Modulo Statistiche caricato - GG/NG sempre visibile + etichette MG Casa/Ospite');
+  console.log('✅ Modulo Statistiche caricato - sezione GG/NG in MatchDetail + GG-NG in Riepilogo AI');
 
 })();
