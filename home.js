@@ -1,6 +1,7 @@
 // ============================================================
 // home.js - Modulo Home esterno per GesssAI-Pro v3.0
 // LEGGE il filtro campionati dal Palinsesto (fonte di verità).
+// Include 2 tab: "🌍 Seleziona una Nazione" e "📈 Performance".
 // Etichette MG: 0-2/1-3 = "MG Casa", 1-4/2-5 = "MG Tot".
 // ============================================================
 
@@ -725,10 +726,11 @@
   };
 
   // ============================================================
-  // COMPONENTE PRINCIPALE: HOME
+  // COMPONENTE PRINCIPALE: HOME (con 2 tab)
   // ============================================================
 
   function HomeComponent({ matches, championships, onSelectMatch, setTab, selectedFamiglie, weatherCache }) {
+    const [homeTab, setHomeTab] = useState('Nazioni'); // 'Nazioni' | 'Performance'
     const [nazioneSelezionata, setNazioneSelezionata] = useState(null);
 
     const { filtro: filtroCampionati, campionatiAttivi } =
@@ -753,6 +755,7 @@
       );
     }
 
+    // Banner informativo stato filtro
     const BannerFiltro = () => (
       <div style={{
         display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
@@ -769,29 +772,66 @@
       </div>
     );
 
-    if (nazioneSelezionata) {
-      return (
-        <div>
-          <BannerFiltro />
+    // Contenuto della tab selezionata
+    const renderTabContent = () => {
+      if (homeTab === 'Performance') {
+        return window.PerformanceComponent ? (
+          <window.PerformanceComponent
+            matches={matches}
+            championships={championships}
+            onSelectMatch={onSelectMatch}
+          />
+        ) : (
+          <div className="alert alert-info">⏳ Caricamento Performance... (performance.js)</div>
+        );
+      }
+
+      // Tab "Nazioni"
+      if (nazioneSelezionata) {
+        return (
           <VistaNazione
             nazione={nazioneSelezionata}
             matches={matchesPuliti}
             onBack={() => setNazioneSelezionata(null)}
           />
-        </div>
-      );
-    }
-
-    return (
-      <div>
-        <BannerFiltro />
+        );
+      }
+      return (
         <GrigliaNazioni
           matches={matchesPuliti}
           onSelectNazione={setNazioneSelezionata}
         />
+      );
+    };
+
+    return (
+      <div>
+        <BannerFiltro />
+
+        {/* Sub-tabs Home */}
+        <div className="sub-tabs" style={{ marginBottom: '16px' }}>
+          <button
+            className={homeTab === 'Nazioni' ? 'active' : ''}
+            onClick={() => { setHomeTab('Nazioni'); setNazioneSelezionata(null); }}
+          >
+            🌍 Seleziona una Nazione
+          </button>
+          <button
+            className={homeTab === 'Performance' ? 'active' : ''}
+            onClick={() => setHomeTab('Performance')}
+          >
+            📈 Performance
+          </button>
+        </div>
+
+        {renderTabContent()}
       </div>
     );
   }
+
+  // ============================================================
+  // ESPOSIZIONE GLOBALE
+  // ============================================================
 
   window.HomeComponent = HomeComponent;
 
@@ -810,6 +850,6 @@
     CHINESE_TEAMS,
   };
 
-  console.log('✅ Modulo Home caricato - MG Casa/Tot etichettati');
+  console.log('✅ Modulo Home caricato - 2 tab: Nazioni + Performance');
 
 })();

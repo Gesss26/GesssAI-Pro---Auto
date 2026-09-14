@@ -2,12 +2,13 @@
 // palinsesto.js - Modulo Palinsesto esterno
 // È la FONTE DI VERITÀ per il filtro campionati, giorni e modalità giocate.
 // Etichette MG: 0-2/1-3 = "MG Casa", 1-4/2-5 = "MG Tot".
+// Salva automaticamente gli snapshot per lo Storico Performance.
 // ============================================================
 
 (function () {
   'use strict';
 
-  const { useState, useMemo } = React;
+  const { useState, useMemo, useEffect } = React;
 
   // ============================================================
   // FORMATTAZIONE ETICHETTE GIOCATE
@@ -35,10 +36,7 @@
 
     if (familyId === 'dc_multigol') {
       const parts = label.split('+');
-      if (parts.length === 2) {
-        // Nel dc_multigol, il multigol è sempre sul totale
-        return `${parts[0]} + MG Tot ${parts[1]}`;
-      }
+      if (parts.length === 2) return `${parts[0]} + MG Tot ${parts[1]}`;
     }
 
     if (familyId === 'dc_under') {
@@ -63,6 +61,18 @@
     }
 
     return label;
+  };
+
+  // ============================================================
+  // SALVATAGGIO SNAPSHOT PERFORMANCE
+  // ============================================================
+  const salvaSnapshotPerformance = (match, giocate) => {
+    if (!window.PerformanceUtils || !window.PerformanceUtils.salvaSnapshot) return;
+    try {
+      window.PerformanceUtils.salvaSnapshot(match, giocate);
+    } catch (e) {
+      console.warn('Errore salvataggio snapshot performance:', e);
+    }
   };
 
   // ============================================================
@@ -195,6 +205,14 @@
       ? Math.round(giocateDaMostrare.reduce((s, g) => s + g.pct, 0) / giocateDaMostrare.length)
       : 0;
     const hasBomb = giocateDaMostrare.some(g => g.isBomb);
+
+    // ⭐ Salva snapshot performance quando la partita è "Futura" e ha giocate
+    useEffect(() => {
+      if (!match || match.stato !== 'Futura') return;
+      if (!giocateDaMostrare || giocateDaMostrare.length === 0) return;
+      const top3 = giocateDaMostrare.slice(0, 3);
+      salvaSnapshotPerformance(match, top3);
+    }, [match.id, match.stato]);
 
     const handleClick = (e) => {
       e.stopPropagation();
@@ -523,6 +541,6 @@
   }
 
   window.PalinsestoComponent = PalinsestoComponent;
-  console.log('✅ Modulo Palinsesto caricato - MG Casa/Tot etichettati');
+  console.log('✅ Modulo Palinsesto caricato - MG Casa/Tot + snapshot performance');
 
 })();
