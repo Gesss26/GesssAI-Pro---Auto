@@ -1,8 +1,7 @@
 // ============================================================
 // home.js - Modulo Home esterno per GesssAI-Pro v3.0
 // LEGGE il filtro campionati dal Palinsesto (fonte di verità).
-// Le etichette delle giocate specificano "Casa" o "Ospite" per
-// le famiglie MULTIGOL (mg_casa_ospite).
+// Etichette MG: 0-2/1-3 = "MG Casa", 1-4/2-5 = "MG Tot".
 // ============================================================
 
 (function () {
@@ -153,11 +152,13 @@
     if (label.startsWith('Under ')) return label.replace('Under ', 'Under ').replace('.', ',');
 
     if (familyId === 'multigol') {
-      if (label === '1-4') return 'MG Tot 1-4';
-      return 'MG Tot ' + label;
+      // 0-2 e 1-3 sono calcolati sulla squadra di CASA
+      // 1-4 e 2-5 sono calcolati sul TOTALE partita
+      if (label === '0-2' || label === '1-3') return `MG Casa ${label}`;
+      if (label === '1-4' || label === '2-5') return `MG Tot ${label}`;
+      return `MG ${label}`;
     }
 
-    // ⭐ MG CASA + OSPITE: specifica esplicitamente Casa o Ospite
     if (familyId === 'mg_casa_ospite') {
       const parts = label.split('+');
       if (parts.length === 2) {
@@ -186,7 +187,6 @@
       }
     }
 
-    // GG / NG: formatta bene
     if (familyId === 'gg_ng') {
       if (label === 'Goal-Goal') return 'GG';
       if (label === 'No Goal') return 'NG';
@@ -260,7 +260,6 @@
 
       let best = null;
 
-      // GG-NG usa la funzione globale
       if (familyId === 'gg_ng') {
         const ggNgResult = window.calcolaGG_NG ? window.calcolaGG_NG(stats) : null;
         if (ggNgResult) {
@@ -732,11 +731,9 @@
   function HomeComponent({ matches, championships, onSelectMatch, setTab, selectedFamiglie, weatherCache }) {
     const [nazioneSelezionata, setNazioneSelezionata] = useState(null);
 
-    // ⭐ FILTRO CAMPIONATI GLOBALE (letto dal Palinsesto)
     const { filtro: filtroCampionati, campionatiAttivi } =
       window.FiltriCampionati.useFiltroCampionati();
 
-    // Normalizza + filtra in base ai campionati attivi
     const matchesPuliti = useMemo(() => {
       const normalizzati = normalizeMatches(matches);
       return window.FiltriCampionati.filtraPartitePerCampionato(normalizzati);
@@ -756,7 +753,6 @@
       );
     }
 
-    // Banner informativo stato filtro
     const BannerFiltro = () => (
       <div style={{
         display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
@@ -797,10 +793,6 @@
     );
   }
 
-  // ============================================================
-  // ESPOSIZIONE GLOBALE
-  // ============================================================
-
   window.HomeComponent = HomeComponent;
 
   window.HomeUtils = {
@@ -818,8 +810,6 @@
     CHINESE_TEAMS,
   };
 
-  console.log('✅ Modulo Home caricato (home.js) - legge filtro campionati dal Palinsesto');
-  console.log('   - Nazioni disponibili:', Object.keys(NAZIONI).length);
-  console.log('   - Etichette MG: mostrano "Casa" o "Ospite" esplicitamente');
+  console.log('✅ Modulo Home caricato - MG Casa/Tot etichettati');
 
 })();

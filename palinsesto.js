@@ -1,7 +1,7 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto esterno
 // È la FONTE DI VERITÀ per il filtro campionati, giorni e modalità giocate.
-// Etichette MG: mostrano "Casa", "Ospite" o "Tot".
+// Etichette MG: 0-2/1-3 = "MG Casa", 1-4/2-5 = "MG Tot".
 // ============================================================
 
 (function () {
@@ -19,8 +19,11 @@
     if (label.startsWith('Under ')) return label.replace('.', ',');
 
     if (familyId === 'multigol') {
-      if (label === '1-4') return 'MG Tot 1-4';
-      return 'MG Tot ' + label;
+      // 0-2 e 1-3 sono calcolati sulla squadra di CASA
+      // 1-4 e 2-5 sono calcolati sul TOTALE partita
+      if (label === '0-2' || label === '1-3') return `MG Casa ${label}`;
+      if (label === '1-4' || label === '2-5') return `MG Tot ${label}`;
+      return `MG ${label}`;
     }
 
     if (familyId === 'mg_casa_ospite') {
@@ -32,7 +35,10 @@
 
     if (familyId === 'dc_multigol') {
       const parts = label.split('+');
-      if (parts.length === 2) return `${parts[0]} + MG Tot ${parts[1]}`;
+      if (parts.length === 2) {
+        // Nel dc_multigol, il multigol è sempre sul totale
+        return `${parts[0]} + MG Tot ${parts[1]}`;
+      }
     }
 
     if (familyId === 'dc_under') {
@@ -75,7 +81,6 @@
     const getPercentualeClasse = window.getPercentualeClasse;
     const calcolaGG_NG = window.calcolaGG_NG;
 
-    // ⭐ Modalità visualizzazione giocate
     const { mode: visualizzaMode } = window.FiltriCampionati.useVisualizzaGiocateMode();
 
     if (!match) return null;
@@ -136,7 +141,6 @@
       const awayRange = getMultigolRange(match.ospiti, allMatches);
       const giocateDaMostrare = [];
 
-      // Determina quali famiglie analizzare
       let famiglieDaAnalizzare;
       if (visualizzaMode === 'tutte') {
         famiglieDaAnalizzare = Object.keys(FAMIGLIE_GIOCATE);
@@ -154,7 +158,6 @@
 
         let best = null;
 
-        // Gestione speciale GG-NG (usa funzione globale)
         if (familyId === 'gg_ng') {
           const ggNgResult = calcolaGG_NG ? calcolaGG_NG(stats) : null;
           if (ggNgResult) {
@@ -175,7 +178,7 @@
             familyLabel: family.label,
             familyIcon: family.icon,
             label: best.label,
-            displayLabel: formatGiocataLabel(familyId, best.label),  // ⭐ Etichetta formattata
+            displayLabel: formatGiocataLabel(familyId, best.label),
             familyName: family.label,
             pct: best.pct,
             isBomb: best.pct >= 90,
@@ -184,7 +187,6 @@
         }
       });
 
-      // Ordina per percentuale decrescente e prendi le top 3
       return giocateDaMostrare.sort((a, b) => b.pct - a.pct).slice(0, 3);
     };
 
@@ -351,10 +353,6 @@
     );
   };
 
-  // ============================================================
-  // SWITCH VISUALIZZAZIONE GIOCATE
-  // ============================================================
-
   const VisualizzaGiocateSwitch = ({ mode, setMode, selectedFamiglie }) => {
     const countScelte = (selectedFamiglie || []).length;
     const totalFamiglie = Object.keys(window.FAMIGLIE_GIOCATE || {}).length;
@@ -432,11 +430,9 @@
     const getTodayStr = window.getTodayStr;
     const addDaysToDateStr = window.addDaysToDateStr;
 
-    // ⭐ GIORNI RANGE GLOBALE
     const { giorni: selectedGiorni, setGiorni: setSelectedGiorni } =
       window.FiltriCampionati.useGiorniRange();
 
-    // ⭐ FILTRO CAMPIONATI GLOBALE
     const {
       filtro: selectedChamps,
       toggleCampionato: toggleChamp,
@@ -444,7 +440,6 @@
       deselezionaTutti: clearAllChamps,
     } = window.FiltriCampionati.useFiltroCampionati();
 
-    // ⭐ MODALITÀ VISUALIZZAZIONE GIOCATE
     const { mode: visualizzaMode, setMode: setVisualizzaMode } =
       window.FiltriCampionati.useVisualizzaGiocateMode();
 
@@ -490,7 +485,6 @@
             onClearAll={clearAllChamps}
           />
 
-          {/* ⭐ SWITCH VISUALIZZAZIONE GIOCATE */}
           <VisualizzaGiocateSwitch
             mode={visualizzaMode}
             setMode={setVisualizzaMode}
@@ -529,6 +523,6 @@
   }
 
   window.PalinsestoComponent = PalinsestoComponent;
-  console.log('✅ Modulo Palinsesto caricato - etichette MG Casa/Ospite');
+  console.log('✅ Modulo Palinsesto caricato - MG Casa/Tot etichettati');
 
 })();

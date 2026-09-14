@@ -3,7 +3,7 @@
 // LEGGE il filtro campionati dal Palinsesto (fonte di verità).
 // Include sezione GG / NG in MatchDetail (tra Under/Over e Multigol).
 // GG-NG sempre visibile in Riepilogo AI (dopo Under/Over).
-// Etichette MG: mostrano "Casa", "Ospite" o "Tot".
+// Etichette MG: 0-2/1-3 = "MG Casa", 1-4/2-5 = "MG Tot".
 // ============================================================
 
 (function () {
@@ -21,8 +21,11 @@
     if (label.startsWith('Under ')) return label.replace('.', ',');
 
     if (familyId === 'multigol') {
-      if (label === '1-4') return 'MG Tot 1-4';
-      return 'MG Tot ' + label;
+      // 0-2 e 1-3 sono calcolati sulla squadra di CASA
+      // 1-4 e 2-5 sono calcolati sul TOTALE partita
+      if (label === '0-2' || label === '1-3') return `MG Casa ${label}`;
+      if (label === '1-4' || label === '2-5') return `MG Tot ${label}`;
+      return `MG ${label}`;
     }
 
     if (familyId === 'mg_casa_ospite') {
@@ -236,7 +239,6 @@
     const calcPctFromSim = (familyId, giocata) => {
       const totalSim = mc?.numSimulations || 10000;
 
-      // ⭐ GG - NG
       if (familyId === 'gg_ng') {
         if (giocata === 'GG') return mc?.gg || 0;
         if (giocata === 'NG') return mc?.ng || 0;
@@ -842,7 +844,6 @@
       return <span className={`xg-value ${cls}`}>{num.toFixed(1)}</span>;
     };
 
-    // ⭐ Calcolo GG/NG dai dati storici
     const calcolaGGNGLocale = () => {
       const homeGames = stats.homeGames || [];
       const awayGames = stats.awayGames || [];
@@ -982,7 +983,7 @@
           ))}
         </div>
 
-        {/* ⭐ SEZIONE GG / NG (tra Under/Over e Multigol) */}
+        {/* ⭐ SEZIONE GG / NG */}
         {ggngData && (
           <div className="card detail-section">
             <h4>⚽ GG / NG</h4>
@@ -1686,6 +1687,6 @@
   window.Standings = Standings;
   window.TeamMatchesHistory = TeamMatchesHistory;
 
-  console.log('✅ Modulo Statistiche caricato - sezione GG/NG in MatchDetail + GG-NG in Riepilogo AI');
+  console.log('✅ Modulo Statistiche caricato - MG Casa/Tot + sezione GG/NG in MatchDetail');
 
 })();

@@ -6,7 +6,7 @@
 // + ORDINAMENTO: DATA -> PERCENTUALE (DECRESCENTE)
 // + TOP 3 GIOCATE COME IN HOME (filtra in base alle giocate scelte)
 // + GG-NG come famiglia di giocata (usa window.calcolaGG_NG)
-// + Etichette MG: mostrano "Casa", "Ospite" o "Tot".
+// + Etichette MG: 0-2/1-3 = "MG Casa", 1-4/2-5 = "MG Tot".
 // ============================================================
 
 // ============================================================
@@ -19,8 +19,11 @@ const formatGiocataLabel = (familyId, label) => {
   if (label.startsWith('Under ')) return label.replace('.', ',');
 
   if (familyId === 'multigol') {
-    if (label === '1-4') return 'MG Tot 1-4';
-    return 'MG Tot ' + label;
+    // 0-2 e 1-3 sono calcolati sulla squadra di CASA
+    // 1-4 e 2-5 sono calcolati sul TOTALE partita
+    if (label === '0-2' || label === '1-3') return `MG Casa ${label}`;
+    if (label === '1-4' || label === '2-5') return `MG Tot ${label}`;
+    return `MG ${label}`;
   }
 
   if (familyId === 'mg_casa_ospite') {
@@ -268,7 +271,6 @@ const SchedinaComponent = ({
       }
 
       if (best && best.pct > 0) {
-        // ⭐ Aggiungi displayLabel formattata
         best.displayLabel = formatGiocataLabel(familyId, best.label);
         tutte.push(best);
       }
@@ -1378,7 +1380,6 @@ const SchedinaComponent = ({
                     </span>
                   </div>
 
-                  {/* TOP 3 GIOCATE */}
                   <div style={{
                     display: 'flex',
                     gap: '6px',
@@ -1721,4 +1722,4 @@ const SchedinaComponent = ({
 };
 
 window.SchedinaComponent = SchedinaComponent;
-console.log('✅ SchedinaComponent caricato - etichette MG Casa/Ospite/Tot + GG/NG come famiglia');
+console.log('✅ SchedinaComponent caricato - MG Casa/Tot etichettati');
