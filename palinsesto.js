@@ -1,6 +1,6 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto esterno
-// È la FONTE DI VERITÀ per il filtro campionati e giorni.
+// È la FONTE DI VERITÀ per il filtro campionati, giorni e modalità giocate.
 // ============================================================
 
 (function () {
@@ -22,6 +22,10 @@
     const getBestBetForFamily = window.getBestBetForFamily;
     const getMultigolRange = window.getMultigolRange;
     const getPercentualeClasse = window.getPercentualeClasse;
+    const calcolaGG_NG = window.calcolaGG_NG;
+
+    // ⭐ Modalità visualizzazione giocate
+    const { mode: visualizzaMode } = window.FiltriCampionati.useVisualizzaGiocateMode();
 
     if (!match) return null;
 
@@ -81,10 +85,39 @@
       const awayRange = getMultigolRange(match.ospiti, allMatches);
       const giocateDaMostrare = [];
 
-      selectedFamiglie.forEach(familyId => {
+      // Determina quali famiglie analizzare
+      let famiglieDaAnalizzare;
+      if (visualizzaMode === 'tutte') {
+        famiglieDaAnalizzare = Object.keys(FAMIGLIE_GIOCATE);
+      } else {
+        famiglieDaAnalizzare = selectedFamiglie || [];
+      }
+
+      famiglieDaAnalizzare = [...new Set(famiglieDaAnalizzare)].filter(
+        id => FAMIGLIE_GIOCATE[id]
+      );
+
+      famiglieDaAnalizzare.forEach(familyId => {
         const family = FAMIGLIE_GIOCATE[familyId];
         if (!family) return;
-        const best = getBestBetForFamily(familyId, stats, homeRange, awayRange, homeMG, awayMG, mgTot);
+
+        let best = null;
+
+        // Gestione speciale GG-NG (usa funzione globale)
+        if (familyId === 'gg_ng') {
+          const ggNgResult = calcolaGG_NG ? calcolaGG_NG(stats) : null;
+          if (ggNgResult) {
+            best = {
+              ...ggNgResult,
+              familyId: 'gg_ng',
+              familyLabel: family.label,
+              familyIcon: family.icon,
+            };
+          }
+        } else {
+          best = getBestBetForFamily(familyId, stats, homeRange, awayRange, homeMG, awayMG, mgTot);
+        }
+
         if (best && best.pct > 0) {
           giocateDaMostrare.push({
             familyId,
@@ -94,12 +127,13 @@
             familyName: family.label,
             pct: best.pct,
             isBomb: best.pct >= 90,
-            giocata: best.giocata
+            giocata: best.giocata,
           });
         }
       });
 
-      return giocateDaMostrare.sort((a, b) => b.pct - a.pct);
+      // Ordina per percentuale decrescente e prendi le top 3
+      return giocateDaMostrare.sort((a, b) => b.pct - a.pct).slice(0, 3);
     };
 
     const giocateDaMostrare = getGiocateDaMostrare();
@@ -266,6 +300,78 @@
   };
 
   // ============================================================
+  // SWITCH VISUALIZZAZIONE GIOCATE
+  // ============================================================
+
+  const VisualizzaGiocateSwitch = ({ mode, setMode, selectedFamiglie }) => {
+    const countScelte = (selectedFamiglie || []).length;
+    const totalFamiglie = Object.keys(window.FAMIGLIE_GIOCATE || {}).length;
+
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        flexWrap: 'wrap',
+        marginTop: '12px',
+        padding: '10px 14px',
+        background: 'var(--surface)',
+        borderRadius: '8px',
+        border: '2px solid var(--border)',
+      }}>
+        <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text)' }}>
+          🎯 Giocate da mostrare:
+        </span>
+        <div style={{
+          display: 'flex',
+          background: 'var(--card)',
+          borderRadius: '8px',
+          padding: '3px',
+          border: '1px solid var(--border)',
+        }}>
+          <button
+            onClick={() => setMode('scelte')}
+            style={{
+              padding: '6px 16px',
+              fontSize: '12px',
+              fontWeight: mode === 'scelte' ? 'bold' : 'normal',
+              borderRadius: '6px',
+              border: 'none',
+              cursor: 'pointer',
+              background: mode === 'scelte' ? 'var(--accent)' : 'transparent',
+              color: mode === 'scelte' ? '#000' : 'var(--text-muted)',
+              transition: 'all 0.2s',
+            }}
+          >
+            ⭐ Scelte ({countScelte})
+          </button>
+          <button
+            onClick={() => setMode('tutte')}
+            style={{
+              padding: '6px 16px',
+              fontSize: '12px',
+              fontWeight: mode === 'tutte' ? 'bold' : 'normal',
+              borderRadius: '6px',
+              border: 'none',
+              cursor: 'pointer',
+              background: mode === 'tutte' ? 'var(--accent)' : 'transparent',
+              color: mode === 'tutte' ? '#000' : 'var(--text-muted)',
+              transition: 'all 0.2s',
+            }}
+          >
+            🌐 Tutte ({totalFamiglie})
+          </button>
+        </div>
+        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+          {mode === 'scelte'
+            ? 'Mostra le 3 migliori giocate tra le famiglie scelte in Impostazioni'
+            : 'Mostra le 3 migliori giocate tra tutte le famiglie disponibili (incluso GG/NG)'}
+        </span>
+      </div>
+    );
+  };
+
+  // ============================================================
   // COMPONENTE PRINCIPALE
   // ============================================================
 
@@ -274,17 +380,21 @@
     const getTodayStr = window.getTodayStr;
     const addDaysToDateStr = window.addDaysToDateStr;
 
-    // ⭐ GIORNI RANGE GLOBALE (fonte di verità)
+    // ⭐ GIORNI RANGE GLOBALE
     const { giorni: selectedGiorni, setGiorni: setSelectedGiorni } =
       window.FiltriCampionati.useGiorniRange();
 
-    // ⭐ FILTRO CAMPIONATI GLOBALE (fonte di verità)
+    // ⭐ FILTRO CAMPIONATI GLOBALE
     const {
       filtro: selectedChamps,
       toggleCampionato: toggleChamp,
       selezionaTutti: selectAllChamps,
       deselezionaTutti: clearAllChamps,
     } = window.FiltriCampionati.useFiltroCampionati();
+
+    // ⭐ MODALITÀ VISUALIZZAZIONE GIOCATE
+    const { mode: visualizzaMode, setMode: setVisualizzaMode } =
+      window.FiltriCampionati.useVisualizzaGiocateMode();
 
     const getActiveChamps = () => Object.keys(selectedChamps).filter(c => selectedChamps[c]);
 
@@ -327,6 +437,13 @@
             onSelectAll={selectAllChamps}
             onClearAll={clearAllChamps}
           />
+
+          {/* ⭐ SWITCH VISUALIZZAZIONE GIOCATE */}
+          <VisualizzaGiocateSwitch
+            mode={visualizzaMode}
+            setMode={setVisualizzaMode}
+            selectedFamiglie={selectedFamiglie}
+          />
         </div>
 
         <h2 style={{ marginBottom: '14px' }}>
@@ -360,6 +477,6 @@
   }
 
   window.PalinsestoComponent = PalinsestoComponent;
-  console.log('✅ Modulo Palinsesto caricato (fonte di verità: campionati + giorni)');
+  console.log('✅ Modulo Palinsesto caricato (fonte di verità: campionati + giorni + modalità giocate)');
 
 })();

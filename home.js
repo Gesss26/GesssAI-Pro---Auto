@@ -1,6 +1,8 @@
 // ============================================================
 // home.js - Modulo Home esterno per GesssAI-Pro v3.0
 // LEGGE il filtro campionati dal Palinsesto (fonte di verità).
+// Le etichette delle giocate specificano "Casa" o "Ospite" per
+// le famiglie MULTIGOL (mg_casa_ospite).
 // ============================================================
 
 (function () {
@@ -155,9 +157,12 @@
       return 'MG Tot ' + label;
     }
 
+    // ⭐ MG CASA + OSPITE: specifica esplicitamente Casa o Ospite
     if (familyId === 'mg_casa_ospite') {
       const parts = label.split('+');
-      if (parts.length === 2) return `MG Casa ${parts[0]} + MG Ospite ${parts[1]}`;
+      if (parts.length === 2) {
+        return `MG ${parts[0]} Casa + MG ${parts[1]} Ospite`;
+      }
     }
 
     if (familyId === 'dc_multigol') {
@@ -179,6 +184,12 @@
         const oLabel = parts[1].replace('O', 'Over ').replace('.', ',');
         return `${parts[0]} + ${oLabel}`;
       }
+    }
+
+    // GG / NG: formatta bene
+    if (familyId === 'gg_ng') {
+      if (label === 'Goal-Goal') return 'GG';
+      if (label === 'No Goal') return 'NG';
     }
 
     return label;
@@ -247,9 +258,24 @@
       const family = window.FAMIGLIE_GIOCATE[familyId];
       if (!family) return;
 
-      const best = window.getBestBetForFamily(
-        familyId, stats, homeRange, awayRange, homeMG, awayMG, mgTot
-      );
+      let best = null;
+
+      // GG-NG usa la funzione globale
+      if (familyId === 'gg_ng') {
+        const ggNgResult = window.calcolaGG_NG ? window.calcolaGG_NG(stats) : null;
+        if (ggNgResult) {
+          best = {
+            ...ggNgResult,
+            familyId: 'gg_ng',
+            familyLabel: family.label,
+            familyIcon: family.icon,
+          };
+        }
+      } else {
+        best = window.getBestBetForFamily(
+          familyId, stats, homeRange, awayRange, homeMG, awayMG, mgTot
+        );
+      }
 
       if (best && best.pct > 0) {
         tutte.push({
@@ -334,6 +360,7 @@
     const pct = giocataObj.pct;
     const cls = window.getPercentualeClasse(pct);
     const isBomb = pct >= 90;
+    const isGGNG = giocataObj.familyId === 'gg_ng';
 
     const handleClick = (e) => {
       e.stopPropagation();
@@ -349,8 +376,16 @@
         style={{
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           gap: '2px', padding: '6px 8px', borderRadius: '6px',
-          border: selected ? '2px solid var(--win)' : isBomb ? '2px solid var(--accent)' : '1px solid var(--border)',
-          background: selected ? 'rgba(111, 207, 151, 0.15)' : isBomb ? 'rgba(243, 156, 18, 0.10)' : 'var(--surface)',
+          border: selected
+            ? '2px solid var(--win)'
+            : isBomb
+              ? '2px solid var(--accent)'
+              : (isGGNG ? '2px solid #e74c3c' : '1px solid var(--border)'),
+          background: selected
+            ? 'rgba(111, 207, 151, 0.15)'
+            : isBomb
+              ? 'rgba(243, 156, 18, 0.10)'
+              : (isGGNG ? 'rgba(231, 76, 60, 0.06)' : 'var(--surface)'),
           cursor: 'pointer', transition: 'all 0.15s', width: '100%', textAlign: 'center',
           minHeight: '48px', position: 'relative',
         }}
@@ -363,7 +398,7 @@
           }}>✓</span>
         )}
         <span style={{
-          fontSize: '11px', fontWeight: 'bold', color: 'var(--text)', lineHeight: '1.2',
+          fontSize: '11px', fontWeight: 'bold', color: isGGNG ? '#e74c3c' : 'var(--text)', lineHeight: '1.2',
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%',
         }}>
           {giocataObj.label}
@@ -785,5 +820,6 @@
 
   console.log('✅ Modulo Home caricato (home.js) - legge filtro campionati dal Palinsesto');
   console.log('   - Nazioni disponibili:', Object.keys(NAZIONI).length);
+  console.log('   - Etichette MG: mostrano "Casa" o "Ospite" esplicitamente');
 
 })();

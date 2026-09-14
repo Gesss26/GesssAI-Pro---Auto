@@ -1,6 +1,7 @@
 // ============================================================
 // statistiche.js - Modulo Statistiche esterno (COMPLETO)
 // LEGGE il filtro campionati dal Palinsesto (fonte di verità).
+// Supporta GG-NG come famiglia di giocata (come le altre).
 // ============================================================
 
 (function () {
@@ -182,6 +183,13 @@
 
     const calcPctFromSim = (familyId, giocata) => {
       const totalSim = mc?.numSimulations || 10000;
+
+      // ⭐ GG - NG
+      if (familyId === 'gg_ng') {
+        if (giocata === 'GG') return mc?.gg || 0;
+        if (giocata === 'NG') return mc?.ng || 0;
+      }
+
       if (familyId === 'fisse') {
         if (giocata === '1') return mc?.homeWins || 0;
         if (giocata === 'X') return mc?.draws || 0;
@@ -380,12 +388,14 @@
               const best = getBestFamily(familyId);
               if (!best || best.pct < 0) return <div key={idx} style={{ background: 'var(--card)', padding: '12px', borderRadius: '8px', textAlign: 'center' }}>N/D</div>;
               const isBomb = best.isBomb;
+              const isGGNG = familyId === 'gg_ng';
               return (
                 <div key={idx} style={{
                   background: 'var(--card)', padding: '12px 16px', borderRadius: '8px',
-                  textAlign: 'center', border: isBomb ? '2px solid var(--accent)' : '1px solid var(--border)'
+                  textAlign: 'center',
+                  border: isBomb ? '2px solid var(--accent)' : (isGGNG ? '2px solid #e74c3c' : '1px solid var(--border)')
                 }}>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>
+                  <div style={{ fontSize: '11px', color: isGGNG ? '#e74c3c' : 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>
                     {best.familyIcon} {best.familyLabel}
                   </div>
                   <div style={{ fontSize: '12px', color: 'var(--text)', marginTop: '2px' }}>{best.label}</div>
@@ -1551,6 +1561,6 @@
   window.Standings = Standings;
   window.TeamMatchesHistory = TeamMatchesHistory;
 
-  console.log('✅ Modulo Statistiche caricato (COMPLETO) - legge filtro campionati dal Palinsesto');
+  console.log('✅ Modulo Statistiche caricato (COMPLETO) - legge filtro campionati dal Palinsesto + GG/NG');
 
 })();

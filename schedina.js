@@ -5,6 +5,7 @@
 // + SINCRONIZZATO CON IL FILTRO CAMPIONATI GLOBALE (Palinsesto)
 // + ORDINAMENTO: DATA -> PERCENTUALE (DECRESCENTE)
 // + TOP 3 GIOCATE COME IN HOME (filtra in base alle giocate scelte)
+// + GG-NG come famiglia di giocata (usa window.calcolaGG_NG)
 // ============================================================
 
 const SchedinaComponent = ({ 
@@ -183,51 +184,9 @@ const SchedinaComponent = ({
   }, [matches, campionatiSelezionati, giorniRange, filtroOrario]);
 
   // ============================================================
-  // FUNZIONE CALCOLA GG - NG
-  // ============================================================
-  const calcolaGG_NG = (stats) => {
-    if (stats.error) return null;
-    
-    const { homeGames, awayGames } = stats;
-    const allGames = [...homeGames, ...awayGames];
-    const uniqueGames = Array.from(new Map(allGames.map(g => [g.id, g])).values());
-    
-    if (uniqueGames.length === 0) return null;
-    
-    let gg = 0;
-    let ng = 0;
-    
-    uniqueGames.forEach(g => {
-      if (g.golCasa > 0 && g.golOspite > 0) {
-        gg++;
-      } else {
-        ng++;
-      }
-    });
-    
-    const total = uniqueGames.length;
-    const pctGG = Math.round((gg / total) * 100);
-    const pctNG = Math.round((ng / total) * 100);
-    
-    const migliore = pctGG > pctNG ? 'GG' : 'NG';
-    const pctMigliore = Math.max(pctGG, pctNG);
-    
-    return {
-      giocata: migliore,
-      label: migliore === 'GG' ? 'Goal-Goal' : 'No Goal',
-      pct: pctMigliore,
-      isBomb: pctMigliore >= 90,
-      familyId: 'gg_ng',
-      familyLabel: 'GG - NG',
-      familyIcon: '⚽',
-      gg: pctGG,
-      ng: pctNG
-    };
-  };
-
-  // ============================================================
   // CALCOLA TOP 3 GIOCATE PER PARTITA (come in Home)
   // Filtra in base alle giocate selezionate (da 1 a 3+)
+  // Usa window.calcolaGG_NG per la famiglia gg_ng
   // ============================================================
   const calcolaTop3GiocatePerPartita = (match) => {
     const stats = computeMatchStats(match, matches);
@@ -256,14 +215,15 @@ const SchedinaComponent = ({
 
       let best = null;
 
+      // GG-NG usa la funzione globale
       if (familyId === 'gg_ng') {
-        const ggNgResult = calcolaGG_NG(stats);
+        const ggNgResult = window.calcolaGG_NG ? window.calcolaGG_NG(stats) : null;
         if (ggNgResult) {
           best = {
             ...ggNgResult,
             familyId: 'gg_ng',
-            familyLabel: window.FAMIGLIE_GIOCATE['gg_ng']?.label || 'GG - NG',
-            familyIcon: window.FAMIGLIE_GIOCATE['gg_ng']?.icon || '⚽'
+            familyLabel: family.label,
+            familyIcon: family.icon,
           };
         }
       } else {
@@ -272,8 +232,8 @@ const SchedinaComponent = ({
           best = {
             ...bestBet,
             familyId: familyId,
-            familyLabel: window.FAMIGLIE_GIOCATE[familyId]?.label || familyId,
-            familyIcon: window.FAMIGLIE_GIOCATE[familyId]?.icon || '🎯'
+            familyLabel: family.label,
+            familyIcon: family.icon,
           };
         }
       }
@@ -751,16 +711,14 @@ const SchedinaComponent = ({
     showAlert('success', `📂 Schedina caricata! ${schedina.numPartite} partite, media ${schedina.media}%`);
   };
 
+  // Famiglie disponibili per il selettore (gg_ng è dentro FAMIGLIE_GIOCATE)
   const famiglieDisponibili = [
     { id: 'tutte', label: '⭐ Tutte', icon: '⭐' },
-    { id: 'gg_ng', label: 'GG - NG', icon: '⚽' },
-    ...Object.entries(window.FAMIGLIE_GIOCATE || {})
-      .filter(([id]) => id !== 'gg_ng')
-      .map(([id, family]) => ({
-        id: id,
-        label: family.label,
-        icon: family.icon
-      }))
+    ...Object.entries(window.FAMIGLIE_GIOCATE || {}).map(([id, family]) => ({
+      id: id,
+      label: family.label,
+      icon: family.icon
+    }))
   ];
 
   function hexToRgb(hex) {
@@ -1342,7 +1300,7 @@ const SchedinaComponent = ({
             <span>💡 Clicca su una partita per selezionarla/deselezionarla</span>
             <span>📅 Ordinate automaticamente per data/ora</span>
             <span>🔢 Max 10 partite per schedina</span>
-            <span style={{color: '#e74c3c'}}>⚽ <b>NOVITÀ:</b> GG - NG (Goal-Goal / No Goal)</span>
+            <span style={{color: '#e74c3c'}}>⚽ <b>GG - NG</b> (Goal-Goal / No Goal)</span>
             <span style={{color: '#eb5757'}}>⏰ Escluse automaticamente le partite già iniziate</span>
             <span style={{color: 'var(--accent)'}}>🔄 Sincronizzato con il Palinsesto (campionati + range giorni)</span>
             <span style={{color: 'var(--accent)'}}>🥇🥈🥉 Top 3 giocate per partita (come in Home)</span>
@@ -1753,4 +1711,4 @@ const SchedinaComponent = ({
 };
 
 window.SchedinaComponent = SchedinaComponent;
-console.log('✅ SchedinaComponent caricato - sincronizzato con Palinsesto (campionati + range giorni) + Top 3 giocate');
+console.log('✅ SchedinaComponent caricato - sincronizzato con Palinsesto (campionati + range giorni) + Top 3 giocate + GG/NG come famiglia');

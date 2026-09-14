@@ -1,6 +1,6 @@
 // ============================================================
 // filtri-campionati.js
-// Sistema centralizzato di filtro campionati + giorni.
+// Sistema centralizzato di filtro campionati + giorni + modalità giocate.
 // Il PALINSESTO è la fonte di verità: scrive la selezione.
 // Tutti gli altri tab la leggono e si sincronizzano.
 // ============================================================
@@ -16,6 +16,11 @@
   const GIORNI_DEFAULT = 1;
   const GIORNI_MIN = 1;
   const GIORNI_MAX = 7;
+
+  // ⭐ NUOVO: modalità visualizzazione giocate nel Palinsesto
+  const GIOCATE_MODE_STORAGE_KEY = 'ft_visualizza_giocate_mode';
+  const GIOCATE_MODE_EVENT_NAME = 'visualizza-giocate-mode-updated';
+  const GIOCATE_MODE_DEFAULT = 'scelte'; // 'scelte' | 'tutte'
 
   const getChampList = () => {
     const list = window.CHAMPIONSHIP_LIST || [];
@@ -90,6 +95,30 @@
       window.dispatchEvent(new CustomEvent(GIORNI_EVENT_NAME, { detail: num }));
     } catch (e) {
       console.warn('Errore salvataggio giorni range:', e);
+    }
+  };
+
+  // ============================================================
+  // MODALITÀ VISUALIZZAZIONE GIOCATE
+  // ============================================================
+
+  const leggiVisualizzaGiocateMode = () => {
+    try {
+      const raw = localStorage.getItem(GIOCATE_MODE_STORAGE_KEY);
+      if (raw === 'scelte' || raw === 'tutte') return raw;
+    } catch (e) {
+      console.warn('Errore lettura visualizza giocate mode:', e);
+    }
+    return GIOCATE_MODE_DEFAULT;
+  };
+
+  const salvaVisualizzaGiocateMode = (mode) => {
+    try {
+      const val = (mode === 'tutte') ? 'tutte' : 'scelte';
+      localStorage.setItem(GIOCATE_MODE_STORAGE_KEY, val);
+      window.dispatchEvent(new CustomEvent(GIOCATE_MODE_EVENT_NAME, { detail: val }));
+    } catch (e) {
+      console.warn('Errore salvataggio visualizza giocate mode:', e);
     }
   };
 
@@ -195,6 +224,39 @@
   };
 
   // ============================================================
+  // HOOK: useVisualizzaGiocateMode
+  // ============================================================
+
+  const useVisualizzaGiocateMode = () => {
+    const { useState, useEffect, useCallback } = React;
+
+    const [mode, setModeState] = useState(() => leggiVisualizzaGiocateMode());
+
+    useEffect(() => {
+      const handler = (e) => {
+        setModeState(typeof e.detail === 'string' ? e.detail : leggiVisualizzaGiocateMode());
+      };
+      const storageHandler = (e) => {
+        if (e.key === GIOCATE_MODE_STORAGE_KEY) setModeState(leggiVisualizzaGiocateMode());
+      };
+      window.addEventListener(GIOCATE_MODE_EVENT_NAME, handler);
+      window.addEventListener('storage', storageHandler);
+      return () => {
+        window.removeEventListener(GIOCATE_MODE_EVENT_NAME, handler);
+        window.removeEventListener('storage', storageHandler);
+      };
+    }, []);
+
+    const setMode = useCallback((nuovo) => {
+      const val = (nuovo === 'tutte') ? 'tutte' : 'scelte';
+      salvaVisualizzaGiocateMode(val);
+      setModeState(val);
+    }, []);
+
+    return { mode, setMode };
+  };
+
+  // ============================================================
   // ESPOSIZIONE GLOBALE
   // ============================================================
 
@@ -215,7 +277,14 @@
     leggiGiorniRange,
     salvaGiorniRange,
     useGiorniRange,
+    // ⭐ NUOVO
+    GIOCATE_MODE_STORAGE_KEY,
+    GIOCATE_MODE_EVENT_NAME,
+    GIOCATE_MODE_DEFAULT,
+    leggiVisualizzaGiocateMode,
+    salvaVisualizzaGiocateMode,
+    useVisualizzaGiocateMode,
   };
 
-  console.log('✅ Modulo FiltriCampionati caricato (campionati + giorni)');
+  console.log('✅ Modulo FiltriCampionati caricato (campionati + giorni + modalità giocate)');
 })();

@@ -1057,10 +1057,17 @@
     };
 
     // ============================================================
-    // FAMIGLIE GIOCATE
+    // FAMIGLIE GIOCATE (con gg_ng come prima famiglia)
     // ============================================================
 
     const FAMIGLIE_GIOCATE = {
+      gg_ng: { 
+        id: 'gg_ng', 
+        label: 'GG - NG', 
+        icon: '⚽', 
+        desc: 'Goal-Goal / No Goal: entrambe segnano oppure no', 
+        options: ['GG', 'NG'] 
+      },
       fisse: { id: 'fisse', label: 'FISSE', icon: '🎯', desc: 'Sceglie la migliore tra 1, X, 2', options: ['1', 'X', '2'] },
       dc: { id: 'dc', label: 'DOPPIA CHANCE', icon: '🛡️', desc: 'Sceglie la migliore tra 1X, 12, X2', options: ['1X', '12', 'X2'] },
       over: { id: 'over', label: 'OVER', icon: '⬆️', desc: 'Sceglie la migliore tra Over 1.5, 2.5, 3.5, 4.5', options: ['Over 1.5', 'Over 2.5', 'Over 3.5', 'Over 4.5'] },
@@ -1220,7 +1227,22 @@
 
     const getGiocataPct = (giocata, stats, homeMG, awayMG, mgTot) => {
       if (stats.error) return 0;
-      const { p1, pX, p2, p1X, p12, pX2, underOver } = stats;
+      const { p1, pX, p2, p1X, p12, pX2, underOver, homeGames, awayGames } = stats;
+
+      // ⭐ GG / NG
+      if (giocata === 'GG' || giocata === 'NG') {
+        const allGames = [...(homeGames || []), ...(awayGames || [])];
+        const uniqueGames = Array.from(new Map(allGames.map(g => [g.id, g])).values());
+        if (uniqueGames.length === 0) return 0;
+        let ggCount = 0, ngCount = 0;
+        uniqueGames.forEach(g => {
+          if (g.golCasa > 0 && g.golOspite > 0) ggCount++;
+          else ngCount++;
+        });
+        const total = uniqueGames.length;
+        if (giocata === 'GG') return Math.round((ggCount / total) * 100);
+        return Math.round((ngCount / total) * 100);
+      }
 
       if (giocata === '1') return Math.round(p1);
       if (giocata === 'X') return Math.round(pX);
@@ -1334,6 +1356,41 @@
     };
 
     // ============================================================
+    // CALCOLA GG - NG (funzione globale riutilizzabile)
+    // ============================================================
+
+    const calcolaGG_NG = (stats) => {
+      if (stats.error) return null;
+      const { homeGames, awayGames } = stats;
+      const allGames = [...(homeGames || []), ...(awayGames || [])];
+      const uniqueGames = Array.from(new Map(allGames.map(g => [g.id, g])).values());
+      if (uniqueGames.length === 0) return null;
+
+      let gg = 0, ng = 0;
+      uniqueGames.forEach(g => {
+        if (g.golCasa > 0 && g.golOspite > 0) gg++;
+        else ng++;
+      });
+      const total = uniqueGames.length;
+      const pctGG = Math.round((gg / total) * 100);
+      const pctNG = Math.round((ng / total) * 100);
+      const migliore = pctGG > pctNG ? 'GG' : 'NG';
+      const pctMigliore = Math.max(pctGG, pctNG);
+
+      return {
+        giocata: migliore,
+        label: migliore === 'GG' ? 'Goal-Goal' : 'No Goal',
+        pct: pctMigliore,
+        isBomb: pctMigliore >= 90,
+        familyId: 'gg_ng',
+        familyLabel: 'GG - NG',
+        familyIcon: '⚽',
+        gg: pctGG,
+        ng: pctNG,
+      };
+    };
+
+    // ============================================================
     // ESPOSIZIONE GLOBALE
     // ============================================================
 
@@ -1360,9 +1417,11 @@
     window.CHAMPIONSHIP_COLORS = CHAMPIONSHIP_COLORS;
     window.CAMPIONATI_ESCLUSI = CAMPIONATI_ESCLUSI;
     window.filtraCampionatiEsclusi = filtraCampionatiEsclusi;
+    window.calcolaGG_NG = calcolaGG_NG;
 
     console.log('✅ Funzioni globali esposte per i moduli esterni');
     console.log('   - Campionati esclusi:', Array.from(CAMPIONATI_ESCLUSI).join(', '));
+    console.log('   - GG/NG incluso in FAMIGLIE_GIOCATE');
 
     // ============================================================
     // LOAD/SAVE STATE
