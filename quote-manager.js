@@ -1,63 +1,48 @@
 // ============================================================
 // quote-manager.js
-// Gestore quote via The Odds API (sostituisce il sistema PDF)
-// - Download automatico da The Odds API
-// - Salvataggio in localStorage (stesso formato di prima)
-// - Alert se quote non aggiornate
-// - Hook React useQuote() per accedere alle quote
+// Gestore quote via Bzzoiro Sports Data (sostituisce The Odds API)
 // ============================================================
 
 (function () {
   'use strict';
 
-  const { useState, useEffect, useCallback } = React;
+  const { useState, useEffect } = React;
 
   // ============================================================
   // CONFIGURAZIONE
   // ============================================================
 
-  const API_KEY = '801b8133c6b51c33d6c69757b2446cbc';
-  const API_BASE = 'https://api.the-odds-api.com/v4';
+  const API_TOKEN = 'c958a1a97001b982d3a910f974adb315f1f15059';
+  const API_BASE = 'https://sports.bzzoiro.com/api/v2';
 
-  // Regione bookmaker: 'eu' include Marathonbet e altri europei
-  const REGIONS = 'eu';
-  const ODDS_FORMAT = 'decimal';
-
-  // Mercati richiesti
-  // h2h = 1X2, totals = Over/Under, btts = GG/NG
-  const MARKETS = 'h2h,totals,btts';
-
-  // Soglie Over/Under che ci interessano (l'API restituisce vari points)
-  const TOTALS_POINTS = [1.5, 2.5, 3.5, 4.5];
-
-  // Bookmaker preferito (se presente nei dati, altrimenti media)
-  const BOOKMAKER_PREFERITO = 'marathonbet';
-
-  // Campionati da scaricare (sport_key di The Odds API)
-  const SPORTS_KEYS = [
-    'soccer_italy_serie_a',
-    'soccer_italy_serie_b',
-    'soccer_spain_la_liga',
-    'soccer_spain_segunda_division',
-    'soccer_epl',
-    'soccer_efl_champ',
-    'soccer_germany_bundesliga',
-    'soccer_germany_bundesliga2',
-    'soccer_france_ligue_one',
-    'soccer_france_ligue_two',
-    'soccer_netherlands_eredivisie',
-    'soccer_portugal_primeira_liga',
-    'soccer_belgium_first_div',
-    'soccer_turkey_super_league',
-    'soccer_spl', // Scottish Premiership
-    'soccer_japan_j_league',
-    'soccer_korea_kleague1',
+  // Mercati da richiedere
+  const MARKETS = [
+    '1x2',
+    'over_under_15',
+    'over_under_25',
+    'over_under_35',
+    'over_under_45',
+    'btts',
+    'double_chance'
   ];
 
-  const CACHE_DURATION_MS = 30 * 60 * 1000; // 30 minuti
+  // Campionati (ID o nomi) - da verificare con /leagues/
+  const LEAGUES = [
+    'Serie A', 'Serie B',
+    'La Liga', 'Segunda División',
+    'Premier League', 'EFL Championship',
+    'Bundesliga', '2. Bundesliga',
+    'Ligue 1', 'Ligue 2',
+    'Eredivisie', 'Eerste Divisie',
+    'Primeira Liga', 'Jupiler Pro League',
+    'Süper Lig', 'Scottish Premiership',
+    'J1 League', 'K League 1'
+  ];
+
+  const CACHE_DURATION_MS = 30 * 60 * 1000;
   const CACHE_KEY = 'ft_quote_last_download';
 
-  const STORAGE_KEY = 'ft_quote_pdf'; // manteniamo la stessa chiave per non rompere il resto
+  const STORAGE_KEY = 'ft_quote_pdf';
   const STORAGE_META_KEY = 'ft_quote_pdf_meta';
 
   const DEBUG = true;
@@ -72,7 +57,6 @@
     errore: null,
     ultimaDataMax: null,
     numPartite: 0,
-    richiesteRimanenti: null,
   };
 
   const listeners = new Set();
@@ -84,7 +68,7 @@
   };
 
   // ============================================================
-  // NORMALIZZAZIONE NOMI (per matchare con Excel)
+  // NORMALIZZAZIONE NOMI
   // ============================================================
 
   const normalizzaNome = (nome) => {
@@ -99,26 +83,7 @@
   };
 
   // ============================================================
-  // UTILITY: DATA ISO DA EVENTO API
-  // ============================================================
-
-  const isoToDateStr = (isoString) => {
-    if (!isoString) return null;
-    try {
-      return isoString.slice(0, 10); // YYYY-MM-DD
-    } catch (e) { return null; }
-  };
-
-  const isoToOraStr = (isoString) => {
-    if (!isoString) return null;
-    try {
-      const d = new Date(isoString);
-      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-    } catch (e) { return null; }
-  };
-
-  // ============================================================
-  // ESTRAZIONE QUOTE DA UN EVENTO API
+  // ESTRAZIONE QUOTE DA EVENTO BZZOIRO
   // ============================================================
 
   const estraiQuoteEvento = (evento) => {
@@ -130,81 +95,52 @@
       'U2.5': null, 'O2.5': null,
       'U3.5': null, 'O3.5': null,
       'U4.5': null, 'O4.5': null,
-      'MG14_SI': null, 'MG14_NO': null,
-      'MG25_SI': null, 'MG25_NO': null,
     };
 
-    if (!evento.bookmakers || evento.bookmakers.length === 0) return quote;
+    // Bzzoiro restituisce le quote in modo diverso - adatta in base alla risposta reale
+    // Struttura tipica: evento.odds con chiavi tipo odds_home, odds_draw, odds_away
+    // e mercati extra in un array
 
-    // Preferisci Marathonbet se presente, altrimenti il primo bookmaker
-    let bookmaker = evento.bookmakers.find(b =>
-      b.key && b.key.toLowerCase().includes(BOOKMAKER_PREFERITO)
-    ) || evento.bookmakers[0];
+    if (evento.odds_home) quote['1'] = evento.odds_home;
+    if (evento.odds_draw) quote['X'] = evento.odds_draw;
+    if (evento.odds_away) quote['2'] = evento.odds_away;
 
-    if (!bookmaker || !bookmaker.markets) return quote;
+    // Doppia chance diretta (se disponibile)
+    if (evento.odds_1x) quote['1X'] = evento.odds_1x;
+    if (evento.odds_12) quote['12'] = evento.odds_12;
+    if (evento.odds_x2) quote['X2'] = evento.odds_x2;
 
-    // Mappa mercato → outcomes
-    bookmaker.markets.forEach(mkt => {
-      if (!mkt.outcomes) return;
+    // GG/NG diretta
+    if (evento.odds_btts_yes) quote['GG'] = evento.odds_btts_yes;
+    if (evento.odds_btts_no) quote['NG'] = evento.odds_btts_no;
 
-      // ─── h2h (1X2) ───
-      if (mkt.key === 'h2h') {
-        mkt.outcomes.forEach(o => {
-          if (o.name === evento.home_team) quote['1'] = o.price;
-          else if (o.name === evento.away_team) quote['2'] = o.price;
-          else if (o.name === 'Draw') quote['X'] = o.price;
-        });
-      }
+    // Over/Under (se disponibili come campi separati)
+    if (evento.odds_over_15) quote['O1.5'] = evento.odds_over_15;
+    if (evento.odds_under_15) quote['U1.5'] = evento.odds_under_15;
+    if (evento.odds_over_25) quote['O2.5'] = evento.odds_over_25;
+    if (evento.odds_under_25) quote['U2.5'] = evento.odds_under_25;
+    if (evento.odds_over_35) quote['O3.5'] = evento.odds_over_35;
+    if (evento.odds_under_35) quote['U3.5'] = evento.odds_under_35;
+    if (evento.odds_over_45) quote['O4.5'] = evento.odds_over_45;
+    if (evento.odds_under_45) quote['U4.5'] = evento.odds_under_45;
 
-      // ─── totals (Over/Under) ───
-      if (mkt.key === 'totals') {
-        mkt.outcomes.forEach(o => {
-          const point = o.point;
-          if (!TOTALS_POINTS.includes(point)) return;
-
-          if (o.name === 'Over') {
-            if (point === 1.5) quote['O1.5'] = o.price;
-            if (point === 2.5) quote['O2.5'] = o.price;
-            if (point === 3.5) quote['O3.5'] = o.price;
-            if (point === 4.5) quote['O4.5'] = o.price;
-          } else if (o.name === 'Under') {
-            if (point === 1.5) quote['U1.5'] = o.price;
-            if (point === 2.5) quote['U2.5'] = o.price;
-            if (point === 3.5) quote['U3.5'] = o.price;
-            if (point === 4.5) quote['U4.5'] = o.price;
-          }
-        });
-      }
-
-      // ─── btts (GG/NG) ───
-      if (mkt.key === 'btts') {
-        mkt.outcomes.forEach(o => {
-          if (o.name === 'Yes') quote['GG'] = o.price;
-          else if (o.name === 'No') quote['NG'] = o.price;
-        });
-      }
-    });
-
-    // ─── CALCOLO DOPPIA CHANCE (1X, 12, X2) ───
-    // Formula: quotaDC = 1 / (1/quotaA + 1/quotaB)
+    // Calcola doppia chance se non fornita direttamente
     const calcolaDC = (qa, qb) => {
       if (!qa || !qb || qa <= 1 || qb <= 1) return null;
-      const pA = 1 / qa;
-      const pB = 1 / qb;
-      const somma = pA + pB;
-      if (somma >= 1) return null; // margine nullo o negativo, non calcolabile
+      const somma = (1 / qa) + (1 / qb);
+      if (somma >= 1) return null;
       return parseFloat((1 / somma).toFixed(2));
     };
 
-    quote['1X'] = calcolaDC(quote['1'], quote['X']);
-    quote['12'] = calcolaDC(quote['1'], quote['2']);
-    quote['X2'] = calcolaDC(quote['X'], quote['2']);
+    if (!quote['1X']) quote['1X'] = calcolaDC(quote['1'], quote['X']);
+    if (!quote['12']) quote['12'] = calcolaDC(quote['1'], quote['2']);
+    if (!quote['X2']) quote['X2'] = calcolaDC(quote['X'], quote['2']);
 
     return quote;
   };
 
   // ============================================================
-  // DOWNLOAD DA THE ODDS API
+  // DOWNLOAD DA BZZOIRO
   // ============================================================
 
   const scaricaDaAPI = async (forza = false) => {
@@ -213,7 +149,6 @@
       return { ok: false, motivo: 'in-corso' };
     }
 
-    // Check cache
     if (!forza) {
       try {
         const last = localStorage.getItem(CACHE_KEY);
@@ -238,75 +173,77 @@
     notifyListeners({ inCorso: true });
 
     try {
-      if (DEBUG) console.log('🌐 Download quote da The Odds API...');
+      if (DEBUG) console.log('🌐 Download quote da Bzzoiro Sports Data...');
+
+      const headers = {
+        'Authorization': `Token ${API_TOKEN}`,
+        'Accept': 'application/json',
+      };
 
       const mappa = {};
       let totaleEventi = 0;
-      let richiesteRimanenti = null;
       let dataMax = null;
 
-      for (const sportKey of SPORTS_KEYS) {
-        try {
-          const url = `${API_BASE}/sports/${sportKey}/odds/?apiKey=${API_KEY}&regions=${REGIONS}&markets=${MARKETS}&oddsFormat=${ODDS_FORMAT}`;
+      // Richiedi eventi con quote per i prossimi 14 giorni
+      const oggi = new Date().toISOString().slice(0, 10);
+      const tra14 = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-          if (DEBUG) console.log(`📡 Chiamata: ${sportKey}`);
+      const url = `${API_BASE}/events/?date_from=${oggi}&date_to=${tra14}&full=true`;
 
-          const response = await fetch(url);
+      if (DEBUG) console.log(`📡 Chiamata: ${url}`);
 
-          // Leggi credito residuo dagli header
-          const remaining = response.headers.get('x-requests-remaining');
-          if (remaining) richiesteRimanenti = parseInt(remaining, 10);
+      const response = await fetch(url, { headers });
 
-          if (!response.ok) {
-            console.warn(`⚠️ ${sportKey}: HTTP ${response.status}`);
-            continue;
-          }
-
-          const eventi = await response.json();
-
-          if (!Array.isArray(eventi) || eventi.length === 0) {
-            if (DEBUG) console.log(`   → nessun evento`);
-            continue;
-          }
-
-          if (DEBUG) console.log(`   → ${eventi.length} eventi`);
-
-          eventi.forEach(ev => {
-            const quote = estraiQuoteEvento(ev);
-            const casa = ev.home_team;
-            const ospiti = ev.away_team;
-            const dataISO = isoToDateStr(ev.commence_time);
-            const ora = isoToOraStr(ev.commence_time);
-
-            if (!casa || !ospiti || !dataISO) return;
-
-            const key = `${normalizzaNome(casa)}|${normalizzaNome(ospiti)}|${dataISO}`;
-            mappa[key] = {
-              casa,
-              ospiti,
-              campionato: ev.sport_title || sportKey,
-              data: dataISO,
-              dataISO,
-              ora,
-              quote,
-            };
-
-            totaleEventi++;
-            if (!dataMax || dataISO > dataMax) dataMax = dataISO;
-          });
-
-        } catch (err) {
-          console.warn(`❌ Errore ${sportKey}:`, err.message);
-        }
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errText}`);
       }
 
-      // Salva in localStorage
+      const data = await response.json();
+      const eventi = data.results || data;
+
+      if (!Array.isArray(eventi)) {
+        throw new Error('Formato risposta inatteso');
+      }
+
+      if (DEBUG) console.log(`   → ${eventi.length} eventi`);
+
+      eventi.forEach(ev => {
+        const quote = estraiQuoteEvento(ev);
+        const casa = ev.home_team || ev.home_team_name;
+        const ospiti = ev.away_team || ev.away_team_name;
+        const dataEvento = ev.date || ev.scheduled_start_time?.slice(0, 10);
+        const ora = ev.time || ev.scheduled_start_time?.slice(11, 16);
+
+        if (!casa || !ospiti || !dataEvento) return;
+
+        // Filtra solo i campionati che ci interessano
+        const leagueName = ev.league || ev.league_name || '';
+        if (LEAGUES.length > 0 && !LEAGUES.some(l => leagueName.toLowerCase().includes(l.toLowerCase()))) {
+          return;
+        }
+
+        const key = `${normalizzaNome(casa)}|${normalizzaNome(ospiti)}|${dataEvento}`;
+        mappa[key] = {
+          casa,
+          ospiti,
+          campionato: leagueName,
+          data: dataEvento,
+          dataISO: dataEvento,
+          ora,
+          quote,
+        };
+
+        totaleEventi++;
+        if (!dataMax || dataEvento > dataMax) dataMax = dataEvento;
+      });
+
       localStorage.setItem(STORAGE_KEY, JSON.stringify(mappa));
       localStorage.setItem(STORAGE_META_KEY, JSON.stringify({
         salvatoIl: new Date().toISOString(),
         dataMaxPDF: dataMax,
         numPartite: totaleEventi,
-        fonte: 'The Odds API',
+        fonte: 'Bzzoiro Sports Data',
       }));
 
       try { localStorage.setItem(CACHE_KEY, String(Date.now())); } catch (e) {}
@@ -316,25 +253,23 @@
       state.numPartite = totaleEventi;
       state.errore = null;
       state.inCorso = false;
-      state.richiesteRimanenti = richiesteRimanenti;
 
       const payload = {
         inCorso: false,
         ok: true,
         numPartite: totaleEventi,
         dataMaxPDF: dataMax,
-        oggi: new Date().toISOString().slice(0, 10),
-        aggiornato: dataMax ? dataMax >= new Date().toISOString().slice(0, 10) : false,
-        richiesteRimanenti,
+        oggi,
+        aggiornato: dataMax ? dataMax >= oggi : false,
       };
 
       notifyListeners(payload);
-      if (DEBUG) console.log(`✅ Quote aggiornate: ${totaleEventi} partite, data max: ${dataMax}, richieste rimanenti: ${richiesteRimanenti}`);
+      if (DEBUG) console.log(`✅ Quote aggiornate: ${totaleEventi} partite, data max: ${dataMax}`);
 
       return payload;
 
     } catch (err) {
-      console.error('❌ Errore download quote:', err);
+      console.error('❌ Errore download quote Bzzoiro:', err);
 
       state.inCorso = false;
       state.errore = err.message;
@@ -346,27 +281,21 @@
   };
 
   // ============================================================
-  // LETTURA / SCRITTURA STORAGE
+  // STORAGE
   // ============================================================
 
   const leggiQuote = () => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return {};
-      return JSON.parse(raw);
-    } catch (e) {
-      return {};
-    }
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
   };
 
   const leggiMeta = () => {
     try {
       const raw = localStorage.getItem(STORAGE_META_KEY);
-      if (!raw) return null;
-      return JSON.parse(raw);
-    } catch (e) {
-      return null;
-    }
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
   };
 
   const getMaxDataPDF = () => {
@@ -405,32 +334,24 @@
   const mappaGiocataAQuota = (quote, familyId, giocata) => {
     if (!quote) return null;
 
-    // FISSE
     if (familyId === 'fisse') {
       if (giocata === '1') return quote['1'] || null;
       if (giocata === 'X') return quote['X'] || null;
       if (giocata === '2') return quote['2'] || null;
     }
 
-    // DOPPIA CHANCE
     if (familyId === 'dc') {
       if (giocata === '1X') return quote['1X'] || null;
       if (giocata === '12') return quote['12'] || null;
       if (giocata === 'X2') return quote['X2'] || null;
     }
 
-    // GG/NG
     if (familyId === 'gg_ng') {
       const g = String(giocata || '').trim().toLowerCase();
-      if (g === 'gg' || g === 'goal-goal' || g === 'goal goal' || g === 'g' || g === 'goal') {
-        return quote['GG'] || null;
-      }
-      if (g === 'ng' || g === 'no goal' || g === 'no-goal' || g === 'n' || g === 'nogoal') {
-        return quote['NG'] || null;
-      }
+      if (g === 'gg' || g === 'goal-goal' || g === 'g') return quote['GG'] || null;
+      if (g === 'ng' || g === 'no goal' || g === 'n') return quote['NG'] || null;
     }
 
-    // OVER
     if (familyId === 'over') {
       if (giocata === 'Over 1.5') return quote['O1.5'] || null;
       if (giocata === 'Over 2.5') return quote['O2.5'] || null;
@@ -438,7 +359,6 @@
       if (giocata === 'Over 4.5') return quote['O4.5'] || null;
     }
 
-    // UNDER
     if (familyId === 'under') {
       if (giocata === 'Under 1.5') return quote['U1.5'] || null;
       if (giocata === 'Under 2.5') return quote['U2.5'] || null;
@@ -446,34 +366,11 @@
       if (giocata === 'Under 4.5') return quote['U4.5'] || null;
     }
 
-    // MULTIGOL (l'API non li fornisce, li calcoliamo da 1X2 + totals? No, servirebbero
-    // i goal esatti. Per ora restituiamo null, puoi implementarli in futuro.)
-    if (familyId === 'multigol') return null;
-
-    // DC + OVER / DC + UNDER (combinazioni)
-    if (familyId === 'dc_over') {
-      const parts = giocata.split('+');
-      if (parts.length === 2) {
-        const dcQ = quote[parts[0]] || null;
-        const overQ = quote[parts[1]] || null;
-        if (dcQ && overQ) return parseFloat((dcQ * overQ).toFixed(2));
-      }
-    }
-
-    if (familyId === 'dc_under') {
-      const parts = giocata.split('+');
-      if (parts.length === 2) {
-        const dcQ = quote[parts[0]] || null;
-        const underQ = quote[parts[1]] || null;
-        if (dcQ && underQ) return parseFloat((dcQ * underQ).toFixed(2));
-      }
-    }
-
     return null;
   };
 
   // ============================================================
-  // TROVA QUOTA PER PARTITA + GIOCATA
+  // TROVA QUOTA
   // ============================================================
 
   const trovaQuotaPerGiocata = (match, familyId, giocata) => {
@@ -486,44 +383,34 @@
 
     let entry = null;
 
-    // 1. Match esatto
     const keyEsatta = `${casaNorm}|${ospitiNorm}|${dataMatch}`;
-    if (quote[keyEsatta]) {
-      entry = quote[keyEsatta];
-    }
+    if (quote[keyEsatta]) entry = quote[keyEsatta];
 
-    // 2. Match casa|ospiti (senza data)
     if (!entry) {
       const keys = Object.keys(quote).filter(k => k.startsWith(`${casaNorm}|${ospitiNorm}|`));
       if (keys.length > 0) entry = quote[keys[0]];
     }
 
-    // 3. Fuzzy matching
     if (!entry) {
-      let bestMatch = null;
-      let bestScore = 0;
-
-      for (const [key, val] of Object.entries(quote)) {
+      let bestMatch = null, bestScore = 0;
+      for (const [, val] of Object.entries(quote)) {
         const scoreCasa = similarita(casaNorm, normalizzaNome(val.casa));
         const scoreOspiti = similarita(ospitiNorm, normalizzaNome(val.ospiti));
         const score = (scoreCasa + scoreOspiti) / 2;
-
         if (score > bestScore && score > SOGLIA_MATCH) {
           bestScore = score;
           bestMatch = val;
         }
       }
-
       if (bestMatch) entry = bestMatch;
     }
 
     if (!entry || !entry.quote) return null;
-
     return mappaGiocataAQuota(entry.quote, familyId, giocata);
   };
 
   // ============================================================
-  // ANALISI GIOCATA CON EDGE
+  // ANALISI CON EDGE
   // ============================================================
 
   const analizzaGiocataConQuota = (match, familyId, giocata, pctTua) => {
@@ -554,18 +441,122 @@
   const checkAggiornamentoPDF = () => {
     const dataMax = getMaxDataPDF();
     const oggi = new Date().toISOString().slice(0, 10);
+    if (!dataMax) return { aggiornato: false, dataMax: null, oggi, motivo: 'no-data' };
+    return { aggiornato: dataMax >= oggi, dataMax, oggi, motivo: dataMax >= oggi ? 'ok' : 'vecchio' };
+  };
 
-    if (!dataMax) {
-      return { aggiornato: false, dataMax: null, oggi, motivo: 'no-data' };
+  // ============================================================
+  // HOOK REACT
+  // ============================================================
+
+  const useQuote = () => {
+    const [stato, setStato] = useState(() => ({
+      scaricato: state.scaricato,
+      inCorso: state.inCorso,
+      errore: state.errore,
+      numPartite: state.numPartite,
+      dataMaxPDF: state.ultimaDataMax,
+      aggiornato: null,
+      meta: leggiMeta(),
+    }));
+
+    useEffect(() => {
+      const update = (payload) => {
+        setStato(prev => ({ ...prev, ...payload, meta: leggiMeta() }));
+      };
+      const updateFromGlobalEvent = () => {
+        setStato(prev => ({ ...prev, meta: leggiMeta() }));
+      };
+
+      listeners.add(update);
+      window.addEventListener('quote-updated', updateFromGlobalEvent);
+
+      const meta = leggiMeta();
+      if (meta) {
+        const check = checkAggiornamentoPDF();
+        setStato(prev => ({
+          ...prev,
+          numPartite: meta.numPartite,
+          dataMaxPDF: meta.dataMaxPDF,
+          aggiornato: check.aggiornato,
+          meta,
+        }));
+      }
+
+      return () => {
+        listeners.delete(update);
+        window.removeEventListener('quote-updated', updateFromGlobalEvent);
+      };
+    }, []);
+
+    return stato;
+  };
+
+  // ============================================================
+  // AUTO-DOWNLOAD
+  // ============================================================
+
+  const initAutoDownload = () => {
+    if (DEBUG) console.log('🚀 QuoteManager: avvio auto-download da Bzzoiro');
+    scaricaDaAPI(false).then(result => {
+      if (result.ok) {
+        if (DEBUG) console.log('✅ Auto-download completato');
+      } else if (result.motivo === 'cache') {
+        if (DEBUG) console.log('⏩ Auto-download saltato (cache)');
+      } else {
+        console.warn('⚠️ Auto-download fallito:', result.errore);
+      }
+    });
+  };
+
+  // ============================================================
+  // BANNER (semplificato)
+  // ============================================================
+
+  function BannerAlertPDF() {
+    const { aggiornato, dataMaxPDF, errore } = useQuote();
+    const [dismissed, setDismissed] = useState(false);
+    if (dismissed) return null;
+
+    if (errore) {
+      return (
+        <div style={{
+          background: 'rgba(235, 87, 87, 0.15)', border: '2px solid var(--lose)',
+          borderRadius: '8px', padding: '10px 16px', marginBottom: '12px',
+          display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', color: 'var(--text)',
+        }}>
+          <span style={{ fontSize: '20px' }}>❌</span>
+          <span style={{ flex: 1 }}><b style={{ color: 'var(--lose)' }}>Errore quote:</b> {errore}</span>
+          <button onClick={() => scaricaDaAPI(true)} className="btn" style={{ fontSize: '11px', padding: '4px 12px' }}>🔄 Riprova</button>
+          <button onClick={() => setDismissed(true)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '18px' }}>✖</button>
+        </div>
+      );
     }
 
-    return {
-      aggiornato: dataMax >= oggi,
-      dataMax,
-      oggi,
-      motivo: dataMax >= oggi ? 'ok' : 'vecchio',
-    };
-  };
+    if (aggiornato === false && dataMaxPDF) {
+      const dataMaxEU = dataMaxPDF.split('-').reverse().join('/');
+      const oggiEU = new Date().toISOString().slice(0, 10).split('-').reverse().join('/');
+      return (
+        <div style={{
+          background: 'rgba(243, 156, 18, 0.15)', border: '2px solid var(--accent)',
+          borderRadius: '8px', padding: '10px 16px', marginBottom: '12px',
+          display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px', color: 'var(--text)',
+        }}>
+          <span style={{ fontSize: '20px' }}>⚠️</span>
+          <span style={{ flex: 1 }}>
+            <b style={{ color: 'var(--accent)' }}>Quote non aggiornate</b>
+            <span style={{ color: 'var(--text-muted)', marginLeft: '8px', fontSize: '11px' }}>
+              (ultima data: {dataMaxEU} • oggi: {oggiEU})
+            </span>
+          </span>
+          <button onClick={() => scaricaDaAPI(true)} className="btn" style={{ fontSize: '11px', padding: '4px 12px', background: 'var(--accent)', color: '#000' }}>🔄 Ricarica</button>
+          <button onClick={() => setDismissed(true)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '18px' }}>✖</button>
+        </div>
+      );
+    }
+
+    return null;
+  }
 
   // ============================================================
   // DEBUG
@@ -603,215 +594,12 @@
   };
 
   // ============================================================
-  // HOOK REACT: useQuote
-  // ============================================================
-
-  const useQuote = () => {
-    const [stato, setStato] = useState(() => ({
-      scaricato: state.scaricato,
-      inCorso: state.inCorso,
-      errore: state.errore,
-      numPartite: state.numPartite,
-      dataMaxPDF: state.ultimaDataMax,
-      aggiornato: null,
-      meta: leggiMeta(),
-      richiesteRimanenti: state.richiesteRimanenti,
-    }));
-
-    useEffect(() => {
-      const update = (payload) => {
-        setStato(prev => ({
-          ...prev,
-          ...payload,
-          meta: leggiMeta(),
-        }));
-      };
-
-      const updateFromGlobalEvent = () => {
-        setStato(prev => ({
-          ...prev,
-          meta: leggiMeta(),
-        }));
-      };
-
-      listeners.add(update);
-      window.addEventListener('quote-updated', updateFromGlobalEvent);
-
-      const meta = leggiMeta();
-      if (meta) {
-        const check = checkAggiornamentoPDF();
-        setStato(prev => ({
-          ...prev,
-          numPartite: meta.numPartite,
-          dataMaxPDF: meta.dataMaxPDF,
-          aggiornato: check.aggiornato,
-          meta,
-        }));
-      }
-
-      return () => {
-        listeners.delete(update);
-        window.removeEventListener('quote-updated', updateFromGlobalEvent);
-      };
-    }, []);
-
-    return stato;
-  };
-
-  // ============================================================
-  // ALERT
-  // ============================================================
-
-  const getAlertPDF = () => {
-    const check = checkAggiornamentoPDF();
-    if (!check.dataMax) {
-      return {
-        tipo: 'warning',
-        messaggio: '📄 Quote non caricate. Verifica la connessione o la chiave API.',
-      };
-    }
-    if (!check.aggiornato) {
-      const dataMaxEU = check.dataMax ? check.dataMax.split('-').reverse().join('/') : 'N/D';
-      const oggiEU = check.oggi ? check.oggi.split('-').reverse().join('/') : 'N/D';
-      return {
-        tipo: 'warning',
-        messaggio: `⚠️ Quote non aggiornate (ultima data: ${dataMaxEU}, oggi: ${oggiEU})`,
-      };
-    }
-    return null;
-  };
-
-  // ============================================================
-  // AUTO-DOWNLOAD
-  // ============================================================
-
-  const initAutoDownload = () => {
-    if (DEBUG) console.log('🚀 QuoteManager: avvio auto-download da The Odds API');
-    scaricaDaAPI(false).then(result => {
-      if (result.ok) {
-        if (DEBUG) console.log('✅ Auto-download completato');
-      } else if (result.motivo === 'cache') {
-        if (DEBUG) console.log('⏩ Auto-download saltato (cache)');
-      } else {
-        console.warn('⚠️ Auto-download fallito:', result.errore);
-      }
-    });
-  };
-
-  // ============================================================
-  // COMPONENTE: BannerAlertPDF
-  // ============================================================
-
-  function BannerAlertPDF() {
-    const { aggiornato, dataMaxPDF, errore, richiesteRimanenti } = useQuote();
-    const [dismissed, setDismissed] = useState(false);
-
-    if (dismissed) return null;
-
-    if (errore) {
-      return (
-        <div style={{
-          background: 'rgba(235, 87, 87, 0.15)',
-          border: '2px solid var(--lose)',
-          borderRadius: '8px',
-          padding: '10px 16px',
-          marginBottom: '12px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          fontSize: '13px',
-          color: 'var(--text)',
-        }}>
-          <span style={{ fontSize: '20px' }}>❌</span>
-          <span style={{ flex: 1 }}>
-            <b style={{ color: 'var(--lose)' }}>Errore download quote:</b> {errore}
-          </span>
-          <button
-            onClick={() => scaricaDaAPI(true)}
-            className="btn"
-            style={{ fontSize: '11px', padding: '4px 12px' }}
-          >
-            🔄 Riprova
-          </button>
-          <button
-            onClick={() => setDismissed(true)}
-            style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '18px' }}
-          >
-            ✖
-          </button>
-        </div>
-      );
-    }
-
-    if (aggiornato === false && dataMaxPDF) {
-      const dataMaxEU = dataMaxPDF.split('-').reverse().join('/');
-      const oggiEU = new Date().toISOString().slice(0, 10).split('-').reverse().join('/');
-
-      return (
-        <div style={{
-          background: 'rgba(243, 156, 18, 0.15)',
-          border: '2px solid var(--accent)',
-          borderRadius: '8px',
-          padding: '10px 16px',
-          marginBottom: '12px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          fontSize: '13px',
-          color: 'var(--text)',
-        }}>
-          <span style={{ fontSize: '20px' }}>⚠️</span>
-          <span style={{ flex: 1 }}>
-            <b style={{ color: 'var(--accent)' }}>Quote non aggiornate</b>
-            <span style={{ color: 'var(--text-muted)', marginLeft: '8px', fontSize: '11px' }}>
-              (ultima data: {dataMaxEU} • oggi: {oggiEU})
-              {richiesteRimanenti !== null && ` • richieste rimanenti: ${richiesteRimanenti}`}
-            </span>
-          </span>
-          <button
-            onClick={() => scaricaDaAPI(true)}
-            className="btn"
-            style={{ fontSize: '11px', padding: '4px 12px', background: 'var(--accent)', color: '#000' }}
-          >
-            🔄 Ricarica
-          </button>
-          <button
-            onClick={() => setDismissed(true)}
-            style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '18px' }}
-          >
-            ✖
-          </button>
-        </div>
-      );
-    }
-
-    // Mostra solo info richieste rimanenti (non bloccante)
-    if (richiesteRimanenti !== null && richiesteRimanenti < 50) {
-      return (
-        <div style={{
-          background: 'rgba(243, 156, 18, 0.10)',
-          border: '1px solid var(--accent)',
-          borderRadius: '8px',
-          padding: '8px 16px',
-          marginBottom: '12px',
-          fontSize: '12px',
-          color: 'var(--text-muted)',
-        }}>
-          📡 Richieste API rimanenti questo mese: <b style={{ color: 'var(--accent)' }}>{richiesteRimanenti}</b>
-        </div>
-      );
-    }
-
-    return null;
-  }
-
-  // ============================================================
   // ESPOSIZIONE GLOBALE
   // ============================================================
 
   window.QuoteManager = {
     scaricaDaAPI,
-    scaricaEAggiorna: scaricaDaAPI, // alias retrocompatibile
+    scaricaEAggiorna: scaricaDaAPI,
     checkAggiornamento: checkAggiornamentoPDF,
     hasQuote: () => {
       const meta = leggiMeta();
@@ -819,7 +607,6 @@
     },
     trovaQuota: trovaQuotaPerGiocata,
     analizzaGiocata: analizzaGiocataConQuota,
-    getAlertPDF,
     useQuote,
     BannerAlertPDF,
     initAutoDownload,
@@ -831,11 +618,10 @@
     normalizzaNome,
     similarita,
     mappaGiocataAQuota,
-    API_KEY,
-    SPORTS_KEYS,
+    API_TOKEN,
     DEBUG,
   };
 
-  console.log('✅ QuoteManager caricato - The Odds API (no PDF)');
+  console.log('✅ QuoteManager caricato - Bzzoiro Sports Data');
 
 })();
