@@ -218,10 +218,10 @@
         if (!casa || !ospiti || !dataEvento) return;
 
         // Filtra solo i campionati che ci interessano
-        const leagueName = ev.league || ev.league_name || '';
-        if (LEAGUES.length > 0 && !LEAGUES.some(l => leagueName.toLowerCase().includes(l.toLowerCase()))) {
-          return;
-        }
+// const leagueName = ev.league || ev.league_name || '';
+// if (LEAGUES.length > 0 && !LEAGUES.some(l => leagueName.toLowerCase().includes(l.toLowerCase()))) {
+//   return;
+// }
 
         const key = `${normalizzaNome(casa)}|${normalizzaNome(ospiti)}|${dataEvento}`;
         mappa[key] = {
