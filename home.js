@@ -1,8 +1,8 @@
 // ============================================================
-// home.js - Modulo Home esterno per GesssAI-Pro v3.0
+// home.js - Modulo Home con quote PDF visibili
 // LEGGE il filtro campionati dal Palinsesto (fonte di verità).
 // Include 2 tab: "🌍 Seleziona una Nazione" e "📈 Performance".
-// Etichette MG: 0-2/1-3 = "MG Casa", 1-4/2-5 = "MG Tot".
+// Quote mostrate accanto alle giocate (con value bet evidenziato)
 // ============================================================
 
 (function () {
@@ -110,6 +110,56 @@
   const SCHEDINA_STORAGE_KEY = 'ft_schedina_selezioni';
 
   // ============================================================
+  // COMPONENTE QUOTA INLINE (per tabella giornata)
+  // ============================================================
+  const QuotaInline = ({ match, familyId, giocata, pctTua, size = 'sm' }) => {
+    const [quotaInfo, setQuotaInfo] = useState(null);
+
+    const quoteHook = window.QuoteManager ? window.QuoteManager.useQuote() : { numPartite: 0 };
+    const numPartite = quoteHook.numPartite;
+
+    useEffect(() => {
+      if (!window.QuoteManager || typeof window.QuoteManager.analizzaGiocata !== 'function') return;
+      try {
+        const info = window.QuoteManager.analizzaGiocata(match, familyId, giocata, pctTua);
+        setQuotaInfo(info);
+      } catch (e) {
+        setQuotaInfo(null);
+      }
+    }, [match.id, familyId, giocata, pctTua, numPartite]);
+
+    if (!quotaInfo || !quotaInfo.quotaBook) return null;
+
+    const { quotaBook, edge, isValue } = quotaInfo;
+
+    const padding = size === 'lg' ? '3px 8px' : '1px 6px';
+    const fontSize = size === 'lg' ? '12px' : '10px';
+
+    return (
+      <span
+        title={isValue ? `VALUE BET! Edge: +${edge}%` : `Quota Marathonbet`}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '3px',
+          padding,
+          marginTop: '2px',
+          borderRadius: '4px',
+          background: isValue ? 'rgba(111, 207, 151, 0.2)' : 'rgba(255, 255, 255, 0.08)',
+          border: `1px solid ${isValue ? 'var(--win)' : 'var(--border)'}`,
+          fontSize,
+          fontWeight: 'bold',
+          color: isValue ? 'var(--win)' : 'var(--text)',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        💰{quotaBook.toFixed(2)}
+        {isValue && <span>+{edge}%</span>}
+      </span>
+    );
+  };
+
+  // ============================================================
   // BANDIERA NAZIONE CON FALLBACK
   // ============================================================
 
@@ -149,12 +199,10 @@
   const formatGiocataLabel = (familyId, label, giocata) => {
     if (!label) return '—';
 
-    if (label.startsWith('Over '))  return label.replace('Over ', 'Over ').replace('.', ',');
-    if (label.startsWith('Under ')) return label.replace('Under ', 'Under ').replace('.', ',');
+    if (label.startsWith('Over '))  return label;
+    if (label.startsWith('Under ')) return label.replace('.', ',');
 
     if (familyId === 'multigol') {
-      // 0-2 e 1-3 sono calcolati sulla squadra di CASA
-      // 1-4 e 2-5 sono calcolati sul TOTALE partita
       if (label === '0-2' || label === '1-3') return `MG Casa ${label}`;
       if (label === '1-4' || label === '2-5') return `MG Tot ${label}`;
       return `MG ${label}`;
@@ -349,7 +397,7 @@
   };
 
   // ============================================================
-  // BOTTONE GIOCATA (selezionabile)
+  // BOTTONE GIOCATA (selezionabile con quota)
   // ============================================================
 
   const GiocataBadge = ({ match, giocataObj, onToggle }) => {
@@ -387,7 +435,7 @@
               ? 'rgba(243, 156, 18, 0.10)'
               : (isGGNG ? 'rgba(231, 76, 60, 0.06)' : 'var(--surface)'),
           cursor: 'pointer', transition: 'all 0.15s', width: '100%', textAlign: 'center',
-          minHeight: '48px', position: 'relative',
+          minHeight: '58px', position: 'relative',
         }}
       >
         {selected && (
@@ -406,6 +454,14 @@
         <span className={`giocata-pct ${cls}`} style={{ fontSize: '13px' }}>
           {pct}% {isBomb && <span className="bomb-icon" style={{ fontSize: '12px' }}>💣</span>}
         </span>
+        {/* ⭐ QUOTA PDF */}
+        <QuotaInline
+          match={match}
+          familyId={giocataObj.familyId}
+          giocata={giocataObj.giocata}
+          pctTua={pct}
+          size="sm"
+        />
         <span style={{
           fontSize: '9px', color: 'var(--text-muted)', lineHeight: '1',
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%',
@@ -463,13 +519,13 @@
             <window.TeamLogo teamName={match.ospiti} championship={match.campionato} size={20} />
           </div>
         </td>
-        <td style={{ ...cellStyle, width: '150px' }}>
+        <td style={{ ...cellStyle, width: '160px' }}>
           {top3[0] ? <GiocataBadge match={match} giocataObj={top3[0]} /> : <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>—</span>}
         </td>
-        <td style={{ ...cellStyle, width: '150px' }}>
+        <td style={{ ...cellStyle, width: '160px' }}>
           {top3[1] ? <GiocataBadge match={match} giocataObj={top3[1]} /> : <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>—</span>}
         </td>
-        <td style={{ ...cellStyle, width: '150px' }}>
+        <td style={{ ...cellStyle, width: '160px' }}>
           {top3[2] ? <GiocataBadge match={match} giocataObj={top3[2]} /> : <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>—</span>}
         </td>
       </tr>
@@ -524,7 +580,7 @@
           border: '1px solid var(--border)', borderTop: 'none',
           borderRadius: '0 0 8px 8px',
         }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '950px' }}>
             <thead>
               <tr style={{ background: 'var(--surface)' }}>
                 <th style={{ padding: '10px', textAlign: 'left', fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-muted)', borderBottom: '2px solid var(--border)' }}>Data</th>
@@ -719,7 +775,7 @@
         }}>
           <span>💡 Clicca su una nazione per vedere i campionati</span>
           <span>🎯 Clicca su una giocata per aggiungerla alla Schedina</span>
-          <span style={{ color: 'var(--accent)' }}>🔄 Filtro campionati dal Palinsesto</span>
+          <span style={{ color: 'var(--accent)' }}>💰 Quote Marathonbet visibili accanto a ogni giocata</span>
         </div>
       </div>
     );
@@ -730,7 +786,7 @@
   // ============================================================
 
   function HomeComponent({ matches, championships, onSelectMatch, setTab, selectedFamiglie, weatherCache }) {
-    const [homeTab, setHomeTab] = useState('Nazioni'); // 'Nazioni' | 'Performance'
+    const [homeTab, setHomeTab] = useState('Nazioni');
     const [nazioneSelezionata, setNazioneSelezionata] = useState(null);
 
     const { filtro: filtroCampionati, campionatiAttivi } =
@@ -755,7 +811,6 @@
       );
     }
 
-    // Banner informativo stato filtro
     const BannerFiltro = () => (
       <div style={{
         display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
@@ -772,7 +827,6 @@
       </div>
     );
 
-    // Contenuto della tab selezionata
     const renderTabContent = () => {
       if (homeTab === 'Performance') {
         return window.PerformanceComponent ? (
@@ -786,7 +840,6 @@
         );
       }
 
-      // Tab "Nazioni"
       if (nazioneSelezionata) {
         return (
           <VistaNazione
@@ -808,7 +861,6 @@
       <div>
         <BannerFiltro />
 
-        {/* Sub-tabs Home */}
         <div className="sub-tabs" style={{ marginBottom: '16px' }}>
           <button
             className={homeTab === 'Nazioni' ? 'active' : ''}
@@ -850,6 +902,6 @@
     CHINESE_TEAMS,
   };
 
-  console.log('✅ Modulo Home caricato - 2 tab: Nazioni + Performance');
+  console.log('✅ Modulo Home caricato - con quote PDF visibili');
 
 })();

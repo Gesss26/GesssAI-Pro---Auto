@@ -10,7 +10,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-  // Worker PDF.js (necessario per il parsing in background)
+  // Worker PDF.js per parsing quote
   if (typeof pdfjsLib !== 'undefined') {
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   }
@@ -19,7 +19,7 @@
 <script src="filtri-campionati.js"></script>
 <script type="text/babel" src="performance.js"></script>
 <script type="text/babel" src="pdf-quote-parser.js"></script>
-<script type="text/babel" src="quote-importer.jsx"></script>
+<script type="text/babel" src="quote-manager.js"></script>
 <script type="text/babel" src="schedina.js"></script>
 <script type="text/babel" src="home.js"></script>
 <script type="text/babel" src="impostazioni.js"></script>
@@ -656,8 +656,7 @@
     const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
     // ============================================================
-    // CAMPIONATI ESCLUSI (filtro globale — rimuove Argentina, Brasile,
-    // Cina, Grecia e USA da tutta l'app)
+    // CAMPIONATI ESCLUSI (filtro globale)
     // ============================================================
 
     const CAMPIONATI_ESCLUSI = new Set([
@@ -1067,7 +1066,7 @@
     };
 
     // ============================================================
-    // FAMIGLIE GIOCATE (con gg_ng come prima famiglia)
+    // FAMIGLIE GIOCATE
     // ============================================================
 
     const FAMIGLIE_GIOCATE = {
@@ -1239,7 +1238,6 @@
       if (stats.error) return 0;
       const { p1, pX, p2, p1X, p12, pX2, underOver, homeGames, awayGames } = stats;
 
-      // ⭐ GG / NG
       if (giocata === 'GG' || giocata === 'NG') {
         const allGames = [...(homeGames || []), ...(awayGames || [])];
         const uniqueGames = Array.from(new Map(allGames.map(g => [g.id, g])).values());
@@ -1365,10 +1363,6 @@
       return null;
     };
 
-    // ============================================================
-    // CALCOLA GG - NG (funzione globale riutilizzabile)
-    // ============================================================
-
     const calcolaGG_NG = (stats) => {
       if (stats.error) return null;
       const { homeGames, awayGames } = stats;
@@ -1430,8 +1424,6 @@
     window.calcolaGG_NG = calcolaGG_NG;
 
     console.log('✅ Funzioni globali esposte per i moduli esterni');
-    console.log('   - Campionati esclusi:', Array.from(CAMPIONATI_ESCLUSI).join(', '));
-    console.log('   - GG/NG incluso in FAMIGLIE_GIOCATE');
 
     // ============================================================
     // LOAD/SAVE STATE
@@ -1517,6 +1509,13 @@
         const saved = localStorage.getItem('ft_font_size');
         return saved ? parseInt(saved) : 100;
       });
+
+      // ⭐ AUTO-DOWNLOAD QUOTE ALL'AVVIO
+      useEffect(() => {
+        if (window.QuoteManager && typeof window.QuoteManager.initAutoDownload === 'function') {
+          window.QuoteManager.initAutoDownload();
+        }
+      }, []);
 
       useEffect(() => {
         try {
@@ -1613,6 +1612,11 @@
           </div>
 
           <div className="container">
+            {/* ⭐ BANNER ALERT PDF NON AGGIORNATO */}
+            {window.QuoteManager && window.QuoteManager.BannerAlertPDF && (
+              <window.QuoteManager.BannerAlertPDF />
+            )}
+
             {message && <div className={`alert alert-${message.type}`}>{message.text}</div>}
             {loading && <div className="alert alert-info">⏳ Elaborazione in corso...</div>}
 

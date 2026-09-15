@@ -1,5 +1,6 @@
 // ============================================================
-// palinsesto.js - Modulo Palinsesto esterno
+// palinsesto.js - Modulo Palinsesto con quote visibili
+// Mostra quote PDF accanto a ogni giocata (con value bet)
 // È la FONTE DI VERITÀ per il filtro campionati, giorni e modalità giocate.
 // Etichette MG: 0-2/1-3 = "MG Casa", 1-4/2-5 = "MG Tot".
 // Salva automaticamente gli snapshot per lo Storico Performance.
@@ -20,8 +21,6 @@
     if (label.startsWith('Under ')) return label.replace('.', ',');
 
     if (familyId === 'multigol') {
-      // 0-2 e 1-3 sono calcolati sulla squadra di CASA
-      // 1-4 e 2-5 sono calcolati sul TOTALE partita
       if (label === '0-2' || label === '1-3') return `MG Casa ${label}`;
       if (label === '1-4' || label === '2-5') return `MG Tot ${label}`;
       return `MG ${label}`;
@@ -73,6 +72,72 @@
     } catch (e) {
       console.warn('Errore salvataggio snapshot performance:', e);
     }
+  };
+
+  // ============================================================
+  // UTILITY: CERCA QUOTA PDF PER GIOCATA
+  // ============================================================
+  const getQuotaInfo = (match, familyId, giocata, pctTua) => {
+    if (!window.QuoteManager || typeof window.QuoteManager.analizzaGiocata !== 'function') {
+      return null;
+    }
+    try {
+      return window.QuoteManager.analizzaGiocata(match, familyId, giocata, pctTua);
+    } catch (e) {
+      return null;
+    }
+  };
+
+  // ============================================================
+  // COMPONENTE: BOX QUOTA (con value bet evidenziato)
+  // ============================================================
+  const QuotaBox = ({ match, familyId, giocata, pctTua }) => {
+    const [quotaInfo, setQuotaInfo] = useState(null);
+
+    // Dipendenza dal "trigger" quote per aggiornare quando caricano
+    const { numPartite, dataMaxPDF } = window.QuoteManager ? window.QuoteManager.useQuote() : { numPartite: 0, dataMaxPDF: null };
+
+    useEffect(() => {
+      const info = getQuotaInfo(match, familyId, giocata, pctTua);
+      setQuotaInfo(info);
+    }, [match.id, familyId, giocata, pctTua, numPartite, dataMaxPDF]);
+
+    if (!quotaInfo || !quotaInfo.quotaBook) {
+      return null;
+    }
+
+    const { quotaBook, edge, isValue } = quotaInfo;
+
+    const bgColor = isValue
+      ? 'rgba(111, 207, 151, 0.15)'
+      : 'rgba(255, 255, 255, 0.05)';
+    const borderColor = isValue ? 'var(--win)' : 'var(--border)';
+    const textColor = isValue ? 'var(--win)' : 'var(--text)';
+
+    return (
+      <div style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px',
+        padding: '2px 6px',
+        marginLeft: '6px',
+        borderRadius: '4px',
+        background: bgColor,
+        border: `1px solid ${borderColor}`,
+        fontSize: '11px',
+        fontWeight: 'bold',
+        color: textColor,
+        whiteSpace: 'nowrap',
+      }}
+        title={isValue ? `VALUE BET! Edge: +${edge}%` : `Quota Marathonbet`}
+      >
+        <span>💰</span>
+        <span>{quotaBook.toFixed(2)}</span>
+        {isValue && (
+          <span style={{ color: 'var(--win)' }}>+{edge}%</span>
+        )}
+      </div>
+    );
   };
 
   // ============================================================
@@ -206,7 +271,7 @@
       : 0;
     const hasBomb = giocateDaMostrare.some(g => g.isBomb);
 
-    // ⭐ Salva snapshot performance quando la partita è "Futura" e ha giocate
+    // Salva snapshot performance quando la partita è "Futura" e ha giocate
     useEffect(() => {
       if (!match || match.stato !== 'Futura') return;
       if (!giocateDaMostrare || giocateDaMostrare.length === 0) return;
@@ -298,6 +363,13 @@
                     <span className={`giocata-pct ${getPercentualeClasse(g.pct)}`}>
                       {g.pct}% {isBomb && <span className="bomb-icon">💣</span>}
                     </span>
+                    {/* ⭐ QUOTA PDF ACCANTO */}
+                    <QuotaBox
+                      match={match}
+                      familyId={g.familyId}
+                      giocata={g.giocata}
+                      pctTua={g.pct}
+                    />
                     <div className="combinata-detail" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
                       {g.familyIcon} {g.familyName}
                     </div>
@@ -541,6 +613,6 @@
   }
 
   window.PalinsestoComponent = PalinsestoComponent;
-  console.log('✅ Modulo Palinsesto caricato - MG Casa/Tot + snapshot performance');
+  console.log('✅ Modulo Palinsesto caricato - con quote PDF visibili');
 
 })();
