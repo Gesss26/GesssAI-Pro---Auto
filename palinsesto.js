@@ -329,7 +329,12 @@
           </div>
         </div>
 
-        <div className="form-diff">📊 Differenza forma: <span>{isNaN(diff) ? 0 : diff}%</span></div>
+        <div className="form-diff">
+  📊 Differenza forma:{' '}
+  <span className={diff >= 20 ? 'diff-alta' : 'diff-bassa'}>
+    {isNaN(diff) ? 0 : diff}%
+  </span>
+</div>
 
         <div className="form-xg">
           <span className="xg-home">⚽ xG {match.casa}: {renderXgValue(homeForm.mediaGolFatti || 0)}</span>
