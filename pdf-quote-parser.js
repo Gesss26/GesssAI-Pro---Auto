@@ -2,8 +2,7 @@
 // pdf-quote-parser.js
 // Parser PDF Marathonbet → quote strutturate
 // + salvataggio in localStorage
-// + estrazione data massima per check aggiornamento
-// + FIX: normalizzazione accenti, soglia matching, GG/NG
+// + dizionario traduzioni squadre (Siviglia → Sevilla, ecc.)
 // ============================================================
 
 (function () {
@@ -20,37 +19,316 @@
 
   const STORAGE_KEY = 'ft_quote_pdf';
   const STORAGE_META_KEY = 'ft_quote_pdf_meta';
-
-  const SOGLIA_MATCH = 0.62; // ⭐ Abbassata da 0.75 per match più permissivo
-
-  const CAMPIONATI_RICONOSCIBILI = [
-    'Italia - Serie A', 'Italia - Serie B', 'Italia - Serie C',
-    'Inghilterra - Premier League', 'Inghilterra - Championship', 'Inghilterra - EFL Cup',
-    'Spagna - La Liga', 'Spagna - LaLiga2', 'Spagna - LaLiga 2',
-    'Germania - Bundesliga', 'Germania - 2. Bundesliga',
-    'Francia - Ligue 1', 'Francia - Ligue 2',
-    'Olanda - Eredivisie', 'Olanda - Eerste Divisie',
-    'Portogallo - Liga Portugal', 'Belgio - Pro League',
-    'Turchia - Süper Lig', 'Scozia - Premiership',
-    'Repubblica di Corea - K-Legue 1', 'Corea - K League 1',
-    'Jupiler Pro League', 'Premier League', 'Ligue 1', 'Ligue 2',
-    'Bundesliga', '2. Bundesliga', 'Serie A', 'Serie B',
-    'Eredivisie', 'Eerste Divisie', 'Primeira Liga', 'La Liga',
-  ];
+  const SOGLIA_MATCH = 0.62;
 
   // ============================================================
-  // NORMALIZZAZIONE NOMI (con accenti)
+  // DIZIONARIO TRADUZIONI SQUADRE
+  // Il PDF Marathonbet usa nomi italiani, l'Excel può usare nomi originali
+  // ⚠️ Aggiungi qui tutte le squadre che non vengono matchate
+  // ============================================================
+  const TRADUZIONI_SQUADRE = {
+    // ─── SPAGNA ───
+    'siviglia': 'sevilla',
+    'barcellona': 'barcelona',
+    'real madrid': 'realmadrid',
+    'atletico madrid': 'atleticomadrid',
+    'athletic bilbao': 'athleticbilbao',
+    'real betis': 'realbetis',
+    'real sociedad': 'realsociedad',
+    'valencia': 'valencia',
+    'villarreal': 'villarreal',
+    'getafe': 'getafe',
+    'osasuna': 'osasuna',
+    'elche': 'elche',
+    'levante': 'levante',
+    'espanyol': 'espanyol',
+    'rayo vallecano': 'rayovallecano',
+    'alaves': 'alaves',
+    'malaga': 'malaga',
+    'cf malaga': 'malaga',
+    'racing santander': 'racingsantander',
+    'deportivo la coruna': 'deportivolacoruna',
+
+    // ─── ITALIA ───
+    'inter': 'inter',
+    'inter milano': 'intermilano',
+    'milan': 'milan',
+    'ac milan': 'milan',
+    'juventus': 'juventus',
+    'napoli': 'napoli',
+    'roma': 'roma',
+    'lazio': 'lazio',
+    'atalanta': 'atalanta',
+    'fiorentina': 'fiorentina',
+    'torino': 'torino',
+    'bologna': 'bologna',
+    'genoa': 'genoa',
+    'cagliari': 'cagliari',
+    'cagliari calcio': 'cagliari',
+    'udinese': 'udinese',
+    'venezia': 'venezia',
+    'como': 'como',
+    'verona': 'verona',
+    'hellas verona': 'verona',
+    'parma': 'parma',
+    'parma calcio': 'parma',
+    'lecce': 'lecce',
+    'monza': 'monza',
+    'ac monza': 'monza',
+    'sassuolo': 'sassuolo',
+    'sassuolo calcio': 'sassuolo',
+    'frosinone': 'frosinone',
+    'frosinone calcio': 'frosinone',
+    'empoli': 'empoli',
+    'salernitana': 'salernitana',
+    'us salernitana': 'salernitana',
+    'sampdoria': 'sampdoria',
+    'spezia': 'spezia',
+    'spezia calcio': 'spezia',
+    'cremonese': 'cremonese',
+    'palermo': 'palermo',
+    'palermo fc': 'palermo',
+    'bari': 'bari',
+    'ssc bari': 'bari',
+    'catania': 'catania',
+    'catania fc': 'catania',
+
+    // ─── INGHILTERRA ───
+    'manchester city': 'manchestercity',
+    'manchester united': 'manchesterunited',
+    'newcastle': 'newcastle',
+    'newcastle united': 'newcastle',
+    'tottenham': 'tottenham',
+    'chelsea': 'chelsea',
+    'arsenal': 'arsenal',
+    'liverpool': 'liverpool',
+    'everton': 'everton',
+    'brighton': 'brighton',
+    'aston villa': 'astonvilla',
+    'west ham': 'westham',
+    'crystal palace': 'crystalpalace',
+    'wolverhampton': 'wolverhampton',
+    'nottingham forest': 'nottinghamforest',
+    'bournemouth': 'bournemouth',
+    'brentford': 'brentford',
+    'fulham': 'fulham',
+    'fulham fc': 'fulham',
+    'leeds united': 'leedsunited',
+    'sunderland': 'sunderland',
+    'hull city': 'hullcity',
+    'ipswich town': 'ipswichtown',
+    'coventry city': 'coventrycity',
+
+    // ─── GERMANIA ───
+    'bayern monaco': 'bayernmonaco',
+    'bayern munich': 'bayernmonaco',
+    'borussia dortmund': 'borussiadortmund',
+    'borussia monchengladbach': 'borussiamonchengladbach',
+    'eintracht francoforte': 'eintrachtfrancoforte',
+    'bayer leverkusen': 'bayerleverkusen',
+    'werder brema': 'werderbrema',
+    'werder bremen': 'werderbrema',
+    'augsburg': 'augsburg',
+    'mainz': 'mainz',
+    'amburgo': 'amburgo',
+    'hamburger sv': 'amburgo',
+    'colonia': 'colonia',
+    'fc koln': 'colonia',
+    'friburgo': 'friburgo',
+    'stoccarda': 'stoccarda',
+    'union berlino': 'unionberlino',
+    'schalke 04': 'schalke04',
+    'hoffenheim': 'hoffenheim',
+    'lipsia': 'lipsia',
+    'rb lipsia': 'lipsia',
+
+    // ─── FRANCIA ───
+    'paris saint-germain': 'psg',
+    'paris saint germain': 'psg',
+    'psg': 'psg',
+    'olympique marsiglia': 'marsiglia',
+    'olympique marseille': 'marsiglia',
+    'marsiglia': 'marsiglia',
+    'monaco': 'monaco',
+    'lione': 'lione',
+    'lyon': 'lione',
+    'lilla': 'lilla',
+    'lille': 'lilla',
+    'nizza': 'nizza',
+    'nice': 'nizza',
+    'lens': 'lens',
+    'rennes': 'rennes',
+    'stade rennes fc': 'rennes',
+    'strasburgo': 'strasburgo',
+    'strasbourg': 'strasburgo',
+    'troyes': 'troyes',
+    'angers': 'angers',
+    'brest': 'brest',
+    'auxerre': 'auxerre',
+    'toulouse': 'toulouse',
+    'tolosa fc': 'toulouse',
+    'le havre ac': 'lehavre',
+    'le havre': 'lehavre',
+    'lorient': 'lorient',
+    'le mans fc': 'lemans',
+    'le mans': 'lemans',
+    'paris fc': 'parisfc',
+
+    // ─── OLANDA ───
+    'ajax': 'ajax',
+    'psv eindhoven': 'psveindhoven',
+    'psv': 'psveindhoven',
+    'feyenoord': 'feyenoord',
+    'az alkmaar': 'azalkmaar',
+    'az': 'azalkmaar',
+    'twente': 'twente',
+    'utrecht': 'utrecht',
+    'nec nimega': 'nec',
+    'nec': 'nec',
+    'go ahead eagles': 'goaheadeagles',
+    'willem ii': 'willemii',
+    'fortuna sittard': 'fortunasittard',
+    'sparta rotterdam': 'spartarotterdam',
+    'heerenveen': 'heerenveen',
+    'groningen': 'groningen',
+    'zwolle': 'zwolle',
+    'ado den haag': 'adodenhaag',
+    'cambuur': 'cambuur',
+    'excelsior rotterdam': 'excelsior',
+    'telstar': 'telstar',
+    'den bosch': 'denbosch',
+
+    // ─── PORTOGALLO ───
+    'benfica': 'benfica',
+    'fc porto': 'porto',
+    'porto': 'porto',
+    'sporting lisbona': 'sporting',
+    'sporting': 'sporting',
+    'sporting braga': 'braga',
+    'braga': 'braga',
+    'vitoria guimaraes': 'vitoriaguimaraes',
+    'moreirense': 'moreirense',
+    'moreirense fc': 'moreirense',
+    'santa clara': 'santaclara',
+    'estoril praia': 'estoril',
+    'casa pia lisbona': 'casapia',
+    'casa pia': 'casapia',
+    'rio ave': 'rioave',
+    'famalicao': 'famalicao',
+    'nacional da madeira': 'nacional',
+    'maritimo madeira': 'maritimo',
+    'gil vicente': 'gilvicente',
+    'fc alverca sad': 'alverca',
+    'alverca': 'alverca',
+    'arouca': 'arouca',
+    'estrela amadora': 'estrelaamadora',
+    'academico de viseu fc': 'academicoviseu',
+
+    // ─── BELGIO ───
+    'club bruges': 'clubbruges',
+    'anderlecht': 'anderlecht',
+    'gent': 'gent',
+    'genk': 'genk',
+    'standard liegi': 'standardliegi',
+    'standard': 'standardliegi',
+    'anversa': 'anversa',
+    'antwerp': 'anversa',
+    'union saint gilloise': 'unionsaintgilloise',
+    'cercle brugge': 'cerclebrugge',
+    'royal charleroi': 'charleroi',
+    'charleroi': 'charleroi',
+    'zulte waregem': 'zultewaregem',
+    'kortrijk': 'kortrijk',
+    'sk beveren': 'beveren',
+    'oud-heverlee leuven': 'leuven',
+    'raal la louviere': 'lalouviere',
+    'st. truidense vv': 'sinttruiden',
+    'kvc westerlo': 'westerlo',
+    'lommel sk': 'lommel',
+    'mechelen': 'mechelen',
+
+    // ─── TURCHIA ───
+    'galatasaray': 'galatasaray',
+    'fenerbahce': 'fenerbahce',
+    'besiktas': 'besiktas',
+    'trabzonspor': 'trabzonspor',
+    'basaksehir': 'basaksehir',
+    'istanbul basaksehir fk': 'basaksehir',
+    'samsunspor': 'samsunspor',
+    'eyupspor': 'eyupspor',
+    'konyaspor': 'konyaspor',
+    'konyaspor club': 'konyaspor',
+    'antalyaspor': 'antalyaspor',
+    'alanyaspor': 'alanyaspor',
+    'gaziantep fk': 'gaziantep',
+    'rizespor': 'rizespor',
+    'kasimpasa': 'kasimpasa',
+    'goster': 'goster',
+
+    // ─── SCOZIA ───
+    'celtic': 'celtic',
+    'glasgow rangers': 'rangers',
+    'rangers': 'rangers',
+    'aberdeen': 'aberdeen',
+    'hearts': 'hearts',
+    'heart of midlothian': 'hearts',
+    'heart of midlothian fc': 'hearts',
+    'hibernian': 'hibernian',
+    'hibernian fc': 'hibernian',
+    'dundee united': 'dundeeunited',
+    'dundee fc': 'dundee',
+    'motherwell': 'motherwell',
+    'kilmarnock': 'kilmarnock',
+    'st. johnstone fc': 'stjohnstone',
+    'st johnstone': 'stjohnstone',
+    'st. mirren': 'stmirren',
+    'st mirren': 'stmirren',
+    'falkirk': 'falkirk',
+
+    // ─── GRECIA ───
+    'olympiacos': 'olympiacos',
+    'panathinaikos': 'panathinaikos',
+    'aek atene': 'aek',
+    'aek': 'aek',
+    'paok': 'paok',
+
+    // ─── COREA ───
+    'daеjeon citizen': 'daejeon',
+    'daejeon citizen': 'daejeon',
+    'daejeon': 'daejeon',
+    'fc pohang steelers': 'pohang',
+    'pohang': 'pohang',
+    'gimcheon sangmu': 'gimcheon',
+    'gangwon': 'gangwon',
+    'gwangju': 'gwangju',
+    'anyang': 'anyang',
+
+    // ─── GIAPPONE ───
+    'kashima antlers': 'kashima',
+    'yokohama f marinos': 'yokohama',
+    'kawasaki frontale': 'kawasaki',
+  };
+
+  // ============================================================
+  // NORMALIZZAZIONE NOMI (con accenti + traduzioni)
   // ============================================================
 
   const normalizzaNome = (nome) => {
     if (!nome) return '';
-    return nome
+    let n = nome
       .toLowerCase()
-      .normalize('NFD')                     // ⭐ Decompone accenti (ñ → n + combining)
-      .replace(/[\u0300-\u036f]/g, '')      // ⭐ Rimuove i combining marks
-      .replace(/\b(fc|ac|ssc|as|us|ss|asd|ssd|calcio|sportiva|società|societa|1919|1929|1937|1908|1911|u23|u21|u19)\b/g, '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')      // rimuove accenti (ñ → n)
+      .replace(/\b(fc|ac|ssc|as|us|ss|asd|ssd|calcio|sportiva|società|societa|1919|1929|1937|1908|1911|u23|u21|u19|cf|sk|sv|sc|vv|kvc|fk|bk|if|ff|cd|sd|ud|rc|rcd|afc|cfc)\b/g, '')
       .replace(/[^a-z0-9]/g, '')
       .trim();
+
+    // ⭐ Applica traduzione se esiste
+    if (TRADUZIONI_SQUADRE[n]) {
+      n = TRADUZIONI_SQUADRE[n];
+    }
+
+    return n;
   };
 
   // ============================================================
@@ -100,6 +378,21 @@
   // ============================================================
   // RICONOSCIMENTO RIGHE
   // ============================================================
+
+  const CAMPIONATI_RICONOSCIBILI = [
+    'Italia - Serie A', 'Italia - Serie B', 'Italia - Serie C',
+    'Inghilterra - Premier League', 'Inghilterra - Championship', 'Inghilterra - EFL Cup',
+    'Spagna - La Liga', 'Spagna - LaLiga2', 'Spagna - LaLiga 2',
+    'Germania - Bundesliga', 'Germania - 2. Bundesliga',
+    'Francia - Ligue 1', 'Francia - Ligue 2',
+    'Olanda - Eredivisie', 'Olanda - Eerste Divisie',
+    'Portogallo - Liga Portugal', 'Belgio - Pro League',
+    'Turchia - Süper Lig', 'Scozia - Premiership',
+    'Repubblica di Corea - K-Legue 1', 'Corea - K League 1',
+    'Jupiler Pro League', 'Premier League', 'Ligue 1', 'Ligue 2',
+    'Bundesliga', '2. Bundesliga', 'Serie A', 'Serie B',
+    'Eredivisie', 'Eerste Divisie', 'Primeira Liga', 'La Liga',
+  ];
 
   const isIntestazioneCampionato = (testo) => {
     const pattern = /^([A-Z][a-zà-ù]+(?:\s+di\s+[A-Z][a-zà-ù]+)?)\s+-\s+(.+)$/;
@@ -177,8 +470,8 @@
       '1X': quote[3] ?? null,
       '12': quote[4] ?? null,
       'X2': quote[5] ?? null,
-      'GG': quote[6] ?? null,           // ⭐ Colonna 'g' → GG
-      'NG': quote[7] ?? null,           // ⭐ Colonna 'n' → NG
+      'GG': quote[6] ?? null,
+      'NG': quote[7] ?? null,
       'U1.5': quote[8] ?? null,
       'O1.5': quote[9] ?? null,
       'U2.5': quote[10] ?? null,
@@ -254,7 +547,7 @@
   };
 
   // ============================================================
-  // SIMILARITÀ (Dice coefficient)
+  // SIMILARITÀ
   // ============================================================
 
   const similarita = (a, b) => {
@@ -280,7 +573,7 @@
   };
 
   // ============================================================
-  // FUZZY MATCHING PARTITA
+  // FUZZY MATCHING
   // ============================================================
 
   const trovaMatchApp = (partitaPDF, matchesApp) => {
@@ -456,36 +749,36 @@
   };
 
   // ============================================================
-  // MAPPA GIOCATA → CHIAVE QUOTA PDF
+  // MAPPA GIOCATA → QUOTA
   // ============================================================
 
   const mappaGiocataAQuota = (quotePDF, familyId, giocata) => {
-    // ⭐ FISSE
+    // FISSE
     if (familyId === 'fisse') {
       if (giocata === '1') return quotePDF['1'] || null;
       if (giocata === 'X') return quotePDF['X'] || null;
       if (giocata === '2') return quotePDF['2'] || null;
     }
 
-    // ⭐ DOPPIA CHANCE
+    // DOPPIA CHANCE
     if (familyId === 'dc') {
       if (giocata === '1X') return quotePDF['1X'] || null;
       if (giocata === '12') return quotePDF['12'] || null;
       if (giocata === 'X2') return quotePDF['X2'] || null;
     }
 
-    // ⭐ GG/NG — supporta TUTTE le varianti
+    // GG/NG — supporta tutte le varianti
     if (familyId === 'gg_ng') {
-      const g = String(giocata || '').trim();
-      if (g === 'GG' || g === 'Goal-Goal' || g === 'Goal Goal' || g === 'g' || g === 'GOAL' || g === 'goal' || g === 'goal-goal') {
+      const g = String(giocata || '').trim().toLowerCase();
+      if (g === 'gg' || g === 'goal-goal' || g === 'goal goal' || g === 'g' || g === 'goal') {
         return quotePDF['GG'] || null;
       }
-      if (g === 'NG' || g === 'No Goal' || g === 'No-Goal' || g === 'n' || g === 'NOGOAL' || g === 'nogoal' || g === 'no-goal') {
+      if (g === 'ng' || g === 'no goal' || g === 'no-goal' || g === 'n' || g === 'nogoal') {
         return quotePDF['NG'] || null;
       }
     }
 
-    // ⭐ OVER
+    // OVER
     if (familyId === 'over') {
       if (giocata === 'Over 1.5') return quotePDF['O1.5'] || null;
       if (giocata === 'Over 2.5') return quotePDF['O2.5'] || null;
@@ -493,7 +786,7 @@
       if (giocata === 'Over 4.5') return quotePDF['O4.5'] || null;
     }
 
-    // ⭐ UNDER
+    // UNDER
     if (familyId === 'under') {
       if (giocata === 'Under 1.5') return quotePDF['U1.5'] || null;
       if (giocata === 'Under 2.5') return quotePDF['U2.5'] || null;
@@ -501,13 +794,13 @@
       if (giocata === 'Under 4.5') return quotePDF['U4.5'] || null;
     }
 
-    // ⭐ MULTIGOL
+    // MULTIGOL
     if (familyId === 'multigol') {
       if (giocata === '1-4') return quotePDF['MG14_SI'] || null;
       if (giocata === '2-5') return quotePDF['MG25_SI'] || null;
     }
 
-    // ⭐ DC + OVER (es. "1X+O2.5")
+    // DC + OVER
     if (familyId === 'dc_over') {
       const parts = giocata.split('+');
       if (parts.length === 2) {
@@ -517,7 +810,7 @@
       }
     }
 
-    // ⭐ DC + UNDER (es. "1X+U2.5")
+    // DC + UNDER
     if (familyId === 'dc_under') {
       const parts = giocata.split('+');
       if (parts.length === 2) {
@@ -531,7 +824,7 @@
   };
 
   // ============================================================
-  // TROVA QUOTA PER UNA PARTITA + GIOCATA
+  // TROVA QUOTA PER PARTITA + GIOCATA
   // ============================================================
 
   const trovaQuotaPerGiocata = (match, familyId, giocata) => {
@@ -544,13 +837,13 @@
 
     let entry = null;
 
-    // 1. Match esatto (casa|ospiti|data)
+    // 1. Match esatto
     const keyEsatta = `${casaNorm}|${ospitiNorm}|${dataMatch}`;
     if (quote[keyEsatta]) {
       entry = quote[keyEsatta];
     }
 
-    // 2. Match per casa|ospiti (senza data)
+    // 2. Match casa|ospiti (senza data)
     if (!entry) {
       const keys = Object.keys(quote).filter(k => k.startsWith(`${casaNorm}|${ospitiNorm}|`));
       if (keys.length > 0) {
@@ -558,7 +851,7 @@
       }
     }
 
-    // 3. Fuzzy matching (con soglia bassa)
+    // 3. Fuzzy matching
     if (!entry) {
       let bestMatch = null;
       let bestScore = 0;
@@ -576,7 +869,6 @@
 
       if (bestMatch) {
         entry = bestMatch;
-        console.log(`🔍 Fuzzy match trovato per ${match.casa} vs ${match.ospiti}: ${bestMatch.casa} vs ${bestMatch.ospiti} (score ${bestScore.toFixed(2)})`);
       }
     }
 
@@ -586,7 +878,7 @@
   };
 
   // ============================================================
-  // ANALISI GIOCATA (con edge + value)
+  // ANALISI GIOCATA CON EDGE
   // ============================================================
 
   const analizzaGiocataConQuota = (match, familyId, giocata, pctTua) => {
@@ -611,7 +903,7 @@
   };
 
   // ============================================================
-  // CHECK AGGIORNAMENTO PDF
+  // CHECK AGGIORNAMENTO
   // ============================================================
 
   const checkAggiornamentoPDF = () => {
@@ -631,7 +923,7 @@
   };
 
   // ============================================================
-  // DEBUG: stampa tutte le quote di una partita
+  // DEBUG
   // ============================================================
 
   const debugPartita = (nomeCasa) => {
@@ -656,38 +948,31 @@
   // ============================================================
 
   window.PDFQuoteParser = {
-    // Parsing
     estraiRigheDaPDF,
     parseMarathonbetPDF,
     parseRigaPartita,
     isIntestazioneCampionato,
     isRigaData,
-    // Matching
     normalizzaNome,
     similarita,
     trovaMatchApp,
-    // Analisi
     analizzaValueBet,
-    // Storage
     salvaQuote,
     leggiQuote,
     leggiMeta,
     getMaxDataPDF,
-    // Query
     trovaQuotaPerGiocata,
     analizzaGiocataConQuota,
     mappaGiocataAQuota,
-    // Check
     checkAggiornamentoPDF,
-    // Debug
     debugPartita,
-    // Costanti
     CAMPIONATI_RICONOSCIBILI,
+    TRADUZIONI_SQUADRE,
     SOGLIA_MATCH,
     STORAGE_KEY,
     STORAGE_META_KEY,
   };
 
-  console.log('✅ PDFQuoteParser caricato - con fix accenti + soglia ' + SOGLIA_MATCH);
+  console.log('✅ PDFQuoteParser caricato - con dizionario traduzioni squadre');
 
 })();
