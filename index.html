@@ -8,9 +8,18 @@
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  // Worker PDF.js per parsing in background
+  if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+</script>
 <script type="text/javascript" src="meteo.js"></script>
 <script src="filtri-campionati.js"></script>
 <script type="text/babel" src="performance.js"></script>
+<script type="text/babel" src="pdf-quote-parser.js"></script>
+<script type="text/babel" src="quote-importer.jsx"></script>
 <script type="text/babel" src="schedina.js"></script>
 <script type="text/babel" src="home.js"></script>
 <script type="text/babel" src="impostazioni.js"></script>
@@ -647,8 +656,7 @@
     const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
     // ============================================================
-    // CAMPIONATI ESCLUSI (filtro globale — rimuove Argentina, Brasile,
-    // Cina, Grecia e USA da tutta l'app)
+    // CAMPIONATI ESCLUSI
     // ============================================================
 
     const CAMPIONATI_ESCLUSI = new Set([
@@ -1058,16 +1066,16 @@
     };
 
     // ============================================================
-    // FAMIGLIE GIOCATE (con gg_ng come prima famiglia)
+    // FAMIGLIE GIOCATE
     // ============================================================
 
     const FAMIGLIE_GIOCATE = {
-      gg_ng: { 
-        id: 'gg_ng', 
-        label: 'GG - NG', 
-        icon: '⚽', 
-        desc: 'Goal-Goal / No Goal: entrambe segnano oppure no', 
-        options: ['GG', 'NG'] 
+      gg_ng: {
+        id: 'gg_ng',
+        label: 'GG - NG',
+        icon: '⚽',
+        desc: 'Goal-Goal / No Goal: entrambe segnano oppure no',
+        options: ['GG', 'NG']
       },
       fisse: { id: 'fisse', label: 'FISSE', icon: '🎯', desc: 'Sceglie la migliore tra 1, X, 2', options: ['1', 'X', '2'] },
       dc: { id: 'dc', label: 'DOPPIA CHANCE', icon: '🛡️', desc: 'Sceglie la migliore tra 1X, 12, X2', options: ['1X', '12', 'X2'] },
@@ -1230,7 +1238,6 @@
       if (stats.error) return 0;
       const { p1, pX, p2, p1X, p12, pX2, underOver, homeGames, awayGames } = stats;
 
-      // ⭐ GG / NG
       if (giocata === 'GG' || giocata === 'NG') {
         const allGames = [...(homeGames || []), ...(awayGames || [])];
         const uniqueGames = Array.from(new Map(allGames.map(g => [g.id, g])).values());
@@ -1355,10 +1362,6 @@
       if (best && bestPct > 0) return { giocata: best, label: bestLabel, pct: bestPct, isBomb: bestPct >= 90 };
       return null;
     };
-
-    // ============================================================
-    // CALCOLA GG - NG (funzione globale riutilizzabile)
-    // ============================================================
 
     const calcolaGG_NG = (stats) => {
       if (stats.error) return null;
