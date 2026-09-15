@@ -13,7 +13,7 @@
   // CONFIGURAZIONE GITHUB
   // ============================================================
 
-  // ⚠️ MODIFICA QUESTO URL CON IL TUO REPO
+  // ⚠️ MODIFICA QUESTO URL CON IL TUO REPO (se diverso)
   const REPO_BASE_URL = 'https://gesss26.github.io/GesssAI-Pro---Auto';
   const PDF_REMOTE_PATH = 'quote/marathonbet.pdf';
   const PDF_FULL_URL = `${REPO_BASE_URL}/${PDF_REMOTE_PATH}`;
@@ -49,6 +49,11 @@
       setProgress('📄 Lettura PDF...');
 
       try {
+        // ⚠️ Verifica che il parser sia disponibile
+        if (!window.PDFQuoteParser || typeof window.PDFQuoteParser.estraiRigheDaPDF !== 'function') {
+          throw new Error('Parser PDF non caricato. Verifica che pdf-quote-parser.js sia incluso nell\'HTML.');
+        }
+
         // 1. Estrai righe
         const righe = await window.PDFQuoteParser.estraiRigheDaPDF(pdfBlobOrFile);
         setProgress(`🔍 Analisi ${righe.length} righe...`);
@@ -153,7 +158,7 @@
         setProgress(`📥 Download ${PDF_REMOTE_PATH}...`);
         console.log('🌐 Download PDF da:', PDF_FULL_URL);
 
-        // Aggiungi cache-buster per forzare download fresco
+        // Cache-buster per forzare download fresco
         const url = `${PDF_FULL_URL}?t=${Date.now()}`;
         const response = await fetch(url, {
           cache: 'no-store',
