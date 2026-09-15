@@ -10,7 +10,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-  // Worker PDF.js per parsing in background
+  // Worker PDF.js (necessario per il parsing in background)
   if (typeof pdfjsLib !== 'undefined') {
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   }
@@ -656,7 +656,8 @@
     const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
     // ============================================================
-    // CAMPIONATI ESCLUSI
+    // CAMPIONATI ESCLUSI (filtro globale — rimuove Argentina, Brasile,
+    // Cina, Grecia e USA da tutta l'app)
     // ============================================================
 
     const CAMPIONATI_ESCLUSI = new Set([
@@ -1066,7 +1067,7 @@
     };
 
     // ============================================================
-    // FAMIGLIE GIOCATE
+    // FAMIGLIE GIOCATE (con gg_ng come prima famiglia)
     // ============================================================
 
     const FAMIGLIE_GIOCATE = {
@@ -1238,6 +1239,7 @@
       if (stats.error) return 0;
       const { p1, pX, p2, p1X, p12, pX2, underOver, homeGames, awayGames } = stats;
 
+      // ⭐ GG / NG
       if (giocata === 'GG' || giocata === 'NG') {
         const allGames = [...(homeGames || []), ...(awayGames || [])];
         const uniqueGames = Array.from(new Map(allGames.map(g => [g.id, g])).values());
@@ -1362,6 +1364,10 @@
       if (best && bestPct > 0) return { giocata: best, label: bestLabel, pct: bestPct, isBomb: bestPct >= 90 };
       return null;
     };
+
+    // ============================================================
+    // CALCOLA GG - NG (funzione globale riutilizzabile)
+    // ============================================================
 
     const calcolaGG_NG = (stats) => {
       if (stats.error) return null;
