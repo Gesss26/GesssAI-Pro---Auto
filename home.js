@@ -857,8 +857,13 @@
       );
     };
 
-    return (
+        return (
       <div>
+        {/* 🚨 BANNER SCADENZA QUOTE */}
+        {window.QuoteManager?.BannerScadenzaQuote && (
+          <window.QuoteManager.BannerScadenzaQuote />
+        )}
+
         <BannerFiltro />
 
         <div className="sub-tabs" style={{ marginBottom: '16px' }}>

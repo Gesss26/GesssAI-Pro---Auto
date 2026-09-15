@@ -746,8 +746,13 @@ const SchedinaComponent = ({
   // RENDER
   // ============================================================
 
-  return (
+    return (
     <div className="schedina-container">
+
+      {/* 🚨 BANNER SCADENZA QUOTE */}
+      {window.QuoteManager?.BannerScadenzaQuote && (
+        <window.QuoteManager.BannerScadenzaQuote />
+      )}
 
       <div className="card" style={{marginBottom: '20px'}}>
         <h3 style={{color: 'var(--accent)', marginBottom: '16px', fontSize: '20px'}}>
