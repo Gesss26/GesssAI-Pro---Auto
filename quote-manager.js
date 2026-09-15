@@ -5,6 +5,7 @@
 // - Salvataggio in localStorage
 // - Alert se PDF non aggiornato
 // - Hook React useQuote() per accedere alle quote
+// - FIX: debug logging
 // ============================================================
 
 (function () {
@@ -20,12 +21,13 @@
   const PDF_REMOTE_PATH = 'quote/marathonbet.pdf';
   const PDF_FULL_URL = `${REPO_BASE_URL}/${PDF_REMOTE_PATH}`;
 
-  // Anti-doppio download: max 1 download ogni 30 minuti
   const CACHE_DURATION_MS = 30 * 60 * 1000;
   const CACHE_KEY = 'ft_quote_last_download';
 
+  const DEBUG = true; // ⭐ Metti false quando tutto funziona
+
   // ============================================================
-  // STATO GLOBALE (non React)
+  // STATO GLOBALE
   // ============================================================
 
   const state = {
@@ -48,25 +50,19 @@
   // CORE: DOWNLOAD + PARSING + SALVATAGGIO
   // ============================================================
 
-  /**
-   * Scarica il PDF da GitHub, lo parsa e salva le quote.
-   * @param {boolean} forza - se true ignora la cache
-   * @returns {Promise<Object>} { ok, numPartite, dataMaxPDF, errore }
-   */
   const scaricaEAggiorna = async (forza = false) => {
     if (state.inCorso) {
-      console.log('⏳ Download già in corso, skip');
+      if (DEBUG) console.log('⏳ Download già in corso, skip');
       return { ok: false, motivo: 'in-corso' };
     }
 
-    // Check cache
     if (!forza) {
       try {
         const last = localStorage.getItem(CACHE_KEY);
         if (last) {
           const elapsed = Date.now() - parseInt(last, 10);
           if (elapsed < CACHE_DURATION_MS) {
-            console.log('⏩ Cache recente, skip download');
+            if (DEBUG) console.log('⏩ Cache recente, skip download');
             const meta = window.PDFQuoteParser?.leggiMeta?.();
             return {
               ok: true,
@@ -92,9 +88,8 @@
     notifyListeners({ inCorso: true });
 
     try {
-      console.log('🌐 Download PDF da:', PDF_FULL_URL);
+      if (DEBUG) console.log('🌐 Download PDF da:', PDF_FULL_URL);
 
-      // Cache-buster
       const url = `${PDF_FULL_URL}?t=${Date.now()}`;
       const response = await fetch(url, {
         cache: 'no-store',
@@ -109,7 +104,7 @@
       }
 
       const blob = await response.blob();
-      console.log(`✅ PDF scaricato: ${(blob.size / 1024).toFixed(0)} KB`);
+      if (DEBUG) console.log(`✅ PDF scaricato: ${(blob.size / 1024).toFixed(0)} KB`);
 
       if (blob.size < 1000) {
         throw new Error('File scaricato troppo piccolo (probabile HTML di errore)');
@@ -119,15 +114,13 @@
       const fakeFile = new File([blob], 'marathonbet.pdf', { type: 'application/pdf' });
       const righe = await window.PDFQuoteParser.estraiRigheDaPDF(fakeFile);
       const partite = window.PDFQuoteParser.parseMarathonbetPDF(righe);
-      console.log(`📊 Estratte ${partite.length} partite dal PDF`);
+      if (DEBUG) console.log(`📊 Estratte ${partite.length} partite dal PDF`);
 
       // Salvataggio
       const result = window.PDFQuoteParser.salvaQuote(partite);
 
-      // Timestamp
       try { localStorage.setItem(CACHE_KEY, String(Date.now())); } catch (e) {}
 
-      // Check aggiornamento
       const check = window.PDFQuoteParser.checkAggiornamentoPDF();
 
       state.scaricato = true;
@@ -146,7 +139,7 @@
       };
 
       notifyListeners(payload);
-      console.log(`✅ Quote aggiornate: ${partite.length} partite, data max: ${check.dataMax}, aggiornato: ${check.aggiornato}`);
+      if (DEBUG) console.log(`✅ Quote aggiornate: ${partite.length} partite, data max: ${check.dataMax}`);
 
       return payload;
 
@@ -163,13 +156,9 @@
   };
 
   // ============================================================
-  // CHECK AGGIORNAMENTO (senza download)
+  // CHECK AGGIORNAMENTO
   // ============================================================
 
-  /**
-   * Verifica se le quote salvate sono aggiornate (data max >= oggi)
-   * @returns {Object} { aggiornato, dataMax, oggi, motivo }
-   */
   const checkAggiornamento = () => {
     if (!window.PDFQuoteParser?.checkAggiornamentoPDF) {
       return { aggiornato: false, dataMax: null, oggi: null, motivo: 'no-parser' };
@@ -181,25 +170,25 @@
   // QUERY QUOTE
   // ============================================================
 
-  /**
-   * Trova quota per partita + famiglia + giocata
-   */
   const trovaQuota = (match, familyId, giocata) => {
     if (!window.PDFQuoteParser?.trovaQuotaPerGiocata) return null;
     return window.PDFQuoteParser.trovaQuotaPerGiocata(match, familyId, giocata);
   };
 
-  /**
-   * Restituisce analisi completa (quota + edge + value)
-   */
   const analizzaGiocata = (match, familyId, giocata, pctTua) => {
     if (!window.PDFQuoteParser?.analizzaGiocataConQuota) return null;
-    return window.PDFQuoteParser.analizzaGiocataConQuota(match, familyId, giocata, pctTua);
+    try {
+      const result = window.PDFQuoteParser.analizzaGiocataConQuota(match, familyId, giocata, pctTua);
+      if (DEBUG && result) {
+        console.log(`💰 Quota trovata: ${match.casa} vs ${match.ospiti} | ${familyId}/${giocata} → ${result.quotaBook} (edge ${result.edge}%)`);
+      }
+      return result;
+    } catch (e) {
+      console.warn('Errore analizzaGiocata:', e);
+      return null;
+    }
   };
 
-  /**
-   * Verifica se esistono quote salvate
-   */
   const hasQuote = () => {
     const meta = window.PDFQuoteParser?.leggiMeta?.();
     return !!(meta && meta.numPartite > 0);
@@ -209,10 +198,6 @@
   // HOOK REACT: useQuote
   // ============================================================
 
-  /**
-   * Hook React per accedere allo stato delle quote e ri-renderizzare
-   * quando cambiano.
-   */
   const useQuote = () => {
     const [stato, setStato] = useState(() => ({
       scaricato: state.scaricato,
@@ -243,7 +228,6 @@
       listeners.add(update);
       window.addEventListener('quote-updated', updateFromGlobalEvent);
 
-      // Stato iniziale
       const meta = window.PDFQuoteParser?.leggiMeta?.() || null;
       if (meta) {
         const check = window.PDFQuoteParser?.checkAggiornamentoPDF?.() || {};
@@ -266,13 +250,9 @@
   };
 
   // ============================================================
-  // ALERT PDF NON AGGIORNATO
+  // ALERT PDF
   // ============================================================
 
-  /**
-   * Restituisce il messaggio di alert se il PDF non è aggiornato,
-   * altrimenti null.
-   */
   const getAlertPDF = () => {
     const check = checkAggiornamento();
     if (!check.dataMax) {
@@ -293,52 +273,42 @@
   };
 
   // ============================================================
-  // AUTO-DOWNLOAD ALL'AVVIO
+  // AUTO-DOWNLOAD
   // ============================================================
 
-  /**
-   * Da chiamare all'avvio dell'app (una sola volta)
-   */
   const initAutoDownload = () => {
-    // Aspetta che il DOM sia pronto e PDFQuoteParser caricato
     const tryInit = () => {
       if (!window.PDFQuoteParser) {
-        console.warn('⏳ PDFQuoteParser non ancora caricato, riprovo...');
+        if (DEBUG) console.warn('⏳ PDFQuoteParser non ancora caricato, riprovo...');
         setTimeout(tryInit, 500);
         return;
       }
 
-      console.log('🚀 QuoteManager: avvio auto-download');
+      if (DEBUG) console.log('🚀 QuoteManager: avvio auto-download');
       scaricaEAggiorna(false).then(result => {
         if (result.ok) {
-          console.log('✅ Auto-download completato');
+          if (DEBUG) console.log('✅ Auto-download completato');
         } else if (result.motivo === 'cache') {
-          console.log('⏩ Auto-download saltato (cache)');
+          if (DEBUG) console.log('⏩ Auto-download saltato (cache)');
         } else {
           console.warn('⚠️ Auto-download fallito:', result.errore);
         }
       });
     };
 
-    // Aspetta 1s per non bloccare il rendering
     setTimeout(tryInit, 1000);
   };
 
   // ============================================================
-  // COMPONENTE REACT: BannerAlertPDF
+  // COMPONENTE: BannerAlertPDF
   // ============================================================
 
-  /**
-   * Banner che mostra l'alert se il PDF non è aggiornato
-   * Da inserire in cima all'app (in index.html)
-   */
   function BannerAlertPDF() {
     const { aggiornato, dataMaxPDF, errore } = useQuote();
     const [dismissed, setDismissed] = useState(false);
 
     if (dismissed) return null;
 
-    // Errore download
     if (errore) {
       return (
         <div style={{
@@ -374,7 +344,6 @@
       );
     }
 
-    // PDF non aggiornato
     if (aggiornato === false && dataMaxPDF) {
       const dataMaxEU = dataMaxPDF.split('-').reverse().join('/');
       const oggiEU = new Date().toISOString().slice(0, 10).split('-').reverse().join('/');
@@ -420,28 +389,41 @@
   }
 
   // ============================================================
+  // DEBUG: mostra tutte le quote in console
+  // ============================================================
+
+  const stampaTutteQuote = () => {
+    const quote = window.PDFQuoteParser?.leggiQuote?.() || {};
+    const numKeys = Object.keys(quote).length;
+    console.log(`📊 Quote salvate: ${numKeys} partite`);
+    console.log(`📅 Data max: ${window.PDFQuoteParser?.getMaxDataPDF?.() || 'N/D'}`);
+    console.log('─'.repeat(50));
+    Object.entries(quote).forEach(([k, v]) => {
+      console.log(`⚽ ${v.casa} vs ${v.ospiti} (${v.data || 'N/D'})`);
+      console.log(`   GG: ${v.quote.GG || 'N/D'} | NG: ${v.quote.NG || 'N/D'}`);
+      console.log(`   1: ${v.quote['1']} | X: ${v.quote['X']} | 2: ${v.quote['2']}`);
+    });
+  };
+
+  // ============================================================
   // ESPOSIZIONE GLOBALE
   // ============================================================
 
   window.QuoteManager = {
-    // Core
     scaricaEAggiorna,
     checkAggiornamento,
     hasQuote,
-    // Query
     trovaQuota,
     analizzaGiocata,
-    // Alert
     getAlertPDF,
-    // Hook + componenti
     useQuote,
     BannerAlertPDF,
-    // Init
     initAutoDownload,
-    // Config
+    stampaTutteQuote,
     PDF_FULL_URL,
+    DEBUG,
   };
 
-  console.log('✅ QuoteManager caricato - auto-download all\'avvio + hook useQuote + BannerAlertPDF');
+  console.log('✅ QuoteManager caricato - con debug attivo');
 
 })();

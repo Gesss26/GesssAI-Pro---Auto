@@ -3,6 +3,7 @@
 // Parser PDF Marathonbet → quote strutturate
 // + salvataggio in localStorage
 // + estrazione data massima per check aggiornamento
+// + FIX: normalizzazione accenti, soglia matching, GG/NG
 // ============================================================
 
 (function () {
@@ -20,6 +21,8 @@
   const STORAGE_KEY = 'ft_quote_pdf';
   const STORAGE_META_KEY = 'ft_quote_pdf_meta';
 
+  const SOGLIA_MATCH = 0.62; // ⭐ Abbassata da 0.75 per match più permissivo
+
   const CAMPIONATI_RICONOSCIBILI = [
     'Italia - Serie A', 'Italia - Serie B', 'Italia - Serie C',
     'Inghilterra - Premier League', 'Inghilterra - Championship', 'Inghilterra - EFL Cup',
@@ -34,6 +37,21 @@
     'Bundesliga', '2. Bundesliga', 'Serie A', 'Serie B',
     'Eredivisie', 'Eerste Divisie', 'Primeira Liga', 'La Liga',
   ];
+
+  // ============================================================
+  // NORMALIZZAZIONE NOMI (con accenti)
+  // ============================================================
+
+  const normalizzaNome = (nome) => {
+    if (!nome) return '';
+    return nome
+      .toLowerCase()
+      .normalize('NFD')                     // ⭐ Decompone accenti (ñ → n + combining)
+      .replace(/[\u0300-\u036f]/g, '')      // ⭐ Rimuove i combining marks
+      .replace(/\b(fc|ac|ssc|as|us|ss|asd|ssd|calcio|sportiva|società|societa|1919|1929|1937|1908|1911|u23|u21|u19)\b/g, '')
+      .replace(/[^a-z0-9]/g, '')
+      .trim();
+  };
 
   // ============================================================
   // ESTRAZIONE TESTO DA PDF (con posizionamento Y)
@@ -159,8 +177,8 @@
       '1X': quote[3] ?? null,
       '12': quote[4] ?? null,
       'X2': quote[5] ?? null,
-      'GG': quote[6] ?? null,
-      'NG': quote[7] ?? null,
+      'GG': quote[6] ?? null,           // ⭐ Colonna 'g' → GG
+      'NG': quote[7] ?? null,           // ⭐ Colonna 'n' → NG
       'U1.5': quote[8] ?? null,
       'O1.5': quote[9] ?? null,
       'U2.5': quote[10] ?? null,
@@ -236,17 +254,8 @@
   };
 
   // ============================================================
-  // NORMALIZZAZIONE NOMI + FUZZY MATCHING
+  // SIMILARITÀ (Dice coefficient)
   // ============================================================
-
-  const normalizzaNome = (nome) => {
-    if (!nome) return '';
-    return nome
-      .toLowerCase()
-      .replace(/\b(fc|ac|ssc|as|us|ss|asd|ssd|calcio|sportiva|società|1919|1929|1937|1908|1911|u23|u21|u19)\b/g, '')
-      .replace(/[^a-z0-9]/g, '')
-      .trim();
-  };
 
   const similarita = (a, b) => {
     if (a === b) return 1;
@@ -270,6 +279,10 @@
     return (2 * intersection) / (aBigrams.size + bBigrams.size);
   };
 
+  // ============================================================
+  // FUZZY MATCHING PARTITA
+  // ============================================================
+
   const trovaMatchApp = (partitaPDF, matchesApp) => {
     const casaNorm = normalizzaNome(partitaPDF.casa);
     const ospitiNorm = normalizzaNome(partitaPDF.ospiti);
@@ -285,7 +298,7 @@
       const scoreOspiti = similarita(ospitiNorm, appOspitiNorm);
       const score = (scoreCasa + scoreOspiti) / 2;
 
-      if (score > bestScore && score > 0.65) {
+      if (score > bestScore && score > SOGLIA_MATCH) {
         bestScore = score;
         bestMatch = m;
       }
@@ -375,10 +388,6 @@
 
   const salvaQuote = (partite) => {
     try {
-      // Struttura salvata:
-      // {
-      //   "casa|ospiti|YYYY-MM-DD": { quote: {...}, meta: {...} }
-      // }
       const mappa = {};
 
       partite.forEach(p => {
@@ -394,7 +403,6 @@
         };
       });
 
-      // Calcola data massima
       const dateValide = partite
         .map(p => p.dataISO)
         .filter(d => d && d.match(/^\d{4}-\d{2}-\d{2}$/))
@@ -409,9 +417,8 @@
         numPartite: partite.length,
       }));
 
-      console.log(`✅ Quote salvate in localStorage: ${partite.length} partite, data max: ${dataMax}`);
+      console.log(`✅ Quote salvate: ${partite.length} partite, data max: ${dataMax}`);
 
-      // Evento globale per notificare i moduli
       window.dispatchEvent(new CustomEvent('quote-updated', {
         detail: { numPartite: partite.length, dataMaxPDF: dataMax }
       }));
@@ -449,83 +456,36 @@
   };
 
   // ============================================================
-  // CERCA QUOTA PER UNA PARTITA + GIOCATA
+  // MAPPA GIOCATA → CHIAVE QUOTA PDF
   // ============================================================
 
-  /**
-   * Trova la quota di una giocata per una specifica partita
-   * @param {Object} match - partita dell'app {casa, ospiti, data}
-   * @param {string} familyId - es. 'dc', 'over', 'gg_ng'
-   * @param {string} giocata - es. '1X', 'Over 2.5', 'GG'
-   * @returns {number|null} quota o null
-   */
-  const trovaQuotaPerGiocata = (match, familyId, giocata) => {
-    const quote = leggiQuote();
-    if (!quote || Object.keys(quote).length === 0) return null;
-
-    const casaNorm = normalizzaNome(match.casa);
-    const ospitiNorm = normalizzaNome(match.ospiti);
-    const dataMatch = match.data || '';
-
-    // 1. Prova match esatto (casa|ospiti|data)
-    const keyEsatta = `${casaNorm}|${ospitiNorm}|${dataMatch}`;
-    let entry = quote[keyEsatta];
-
-    // 2. Se non trovato, prova per casa|ospiti (senza data)
-    if (!entry) {
-      const keys = Object.keys(quote).filter(k => k.startsWith(`${casaNorm}|${ospitiNorm}|`));
-      if (keys.length > 0) {
-        entry = quote[keys[0]];
-      }
-    }
-
-    // 3. Fuzzy matching: cerca per somiglianza nomi
-    if (!entry) {
-      let bestMatch = null;
-      let bestScore = 0;
-
-      for (const [key, val] of Object.entries(quote)) {
-        const scoreCasa = similarita(casaNorm, normalizzaNome(val.casa));
-        const scoreOspiti = similarita(ospitiNorm, normalizzaNome(val.ospiti));
-        const score = (scoreCasa + scoreOspiti) / 2;
-
-        if (score > bestScore && score > 0.75) {
-          bestScore = score;
-          bestMatch = val;
-        }
-      }
-
-      if (bestMatch) entry = bestMatch;
-    }
-
-    if (!entry || !entry.quote) return null;
-
-    // Mappa famiglia → chiave quota
-    return mappaGiocataAQuota(entry.quote, familyId, giocata);
-  };
-
   const mappaGiocataAQuota = (quotePDF, familyId, giocata) => {
-    // FISSE
+    // ⭐ FISSE
     if (familyId === 'fisse') {
       if (giocata === '1') return quotePDF['1'] || null;
       if (giocata === 'X') return quotePDF['X'] || null;
       if (giocata === '2') return quotePDF['2'] || null;
     }
 
-    // DOPPIA CHANCE
+    // ⭐ DOPPIA CHANCE
     if (familyId === 'dc') {
       if (giocata === '1X') return quotePDF['1X'] || null;
       if (giocata === '12') return quotePDF['12'] || null;
       if (giocata === 'X2') return quotePDF['X2'] || null;
     }
 
-    // GG/NG
+    // ⭐ GG/NG — supporta TUTTE le varianti
     if (familyId === 'gg_ng') {
-      if (giocata === 'GG' || giocata === 'Goal-Goal') return quotePDF['GG'] || null;
-      if (giocata === 'NG' || giocata === 'No Goal') return quotePDF['NG'] || null;
+      const g = String(giocata || '').trim();
+      if (g === 'GG' || g === 'Goal-Goal' || g === 'Goal Goal' || g === 'g' || g === 'GOAL' || g === 'goal' || g === 'goal-goal') {
+        return quotePDF['GG'] || null;
+      }
+      if (g === 'NG' || g === 'No Goal' || g === 'No-Goal' || g === 'n' || g === 'NOGOAL' || g === 'nogoal' || g === 'no-goal') {
+        return quotePDF['NG'] || null;
+      }
     }
 
-    // OVER
+    // ⭐ OVER
     if (familyId === 'over') {
       if (giocata === 'Over 1.5') return quotePDF['O1.5'] || null;
       if (giocata === 'Over 2.5') return quotePDF['O2.5'] || null;
@@ -533,7 +493,7 @@
       if (giocata === 'Over 4.5') return quotePDF['O4.5'] || null;
     }
 
-    // UNDER
+    // ⭐ UNDER
     if (familyId === 'under') {
       if (giocata === 'Under 1.5') return quotePDF['U1.5'] || null;
       if (giocata === 'Under 2.5') return quotePDF['U2.5'] || null;
@@ -541,14 +501,13 @@
       if (giocata === 'Under 4.5') return quotePDF['U4.5'] || null;
     }
 
-    // MULTIGOL
+    // ⭐ MULTIGOL
     if (familyId === 'multigol') {
       if (giocata === '1-4') return quotePDF['MG14_SI'] || null;
       if (giocata === '2-5') return quotePDF['MG25_SI'] || null;
-      // 0-2 e 1-3 non sono nel PDF Marathonbet (sono MG Casa)
     }
 
-    // DC + OVER (es. "1X+O2.5")
+    // ⭐ DC + OVER (es. "1X+O2.5")
     if (familyId === 'dc_over') {
       const parts = giocata.split('+');
       if (parts.length === 2) {
@@ -558,7 +517,7 @@
       }
     }
 
-    // DC + UNDER (es. "1X+U2.5")
+    // ⭐ DC + UNDER (es. "1X+U2.5")
     if (familyId === 'dc_under') {
       const parts = giocata.split('+');
       if (parts.length === 2) {
@@ -571,10 +530,65 @@
     return null;
   };
 
-  /**
-   * Restituisce l'analisi completa (con edge, value bet) per una giocata
-   * @returns {Object|null} { quota, quotaFair, edge, isValue, classificazione }
-   */
+  // ============================================================
+  // TROVA QUOTA PER UNA PARTITA + GIOCATA
+  // ============================================================
+
+  const trovaQuotaPerGiocata = (match, familyId, giocata) => {
+    const quote = leggiQuote();
+    if (!quote || Object.keys(quote).length === 0) return null;
+
+    const casaNorm = normalizzaNome(match.casa);
+    const ospitiNorm = normalizzaNome(match.ospiti);
+    const dataMatch = match.data || '';
+
+    let entry = null;
+
+    // 1. Match esatto (casa|ospiti|data)
+    const keyEsatta = `${casaNorm}|${ospitiNorm}|${dataMatch}`;
+    if (quote[keyEsatta]) {
+      entry = quote[keyEsatta];
+    }
+
+    // 2. Match per casa|ospiti (senza data)
+    if (!entry) {
+      const keys = Object.keys(quote).filter(k => k.startsWith(`${casaNorm}|${ospitiNorm}|`));
+      if (keys.length > 0) {
+        entry = quote[keys[0]];
+      }
+    }
+
+    // 3. Fuzzy matching (con soglia bassa)
+    if (!entry) {
+      let bestMatch = null;
+      let bestScore = 0;
+
+      for (const [key, val] of Object.entries(quote)) {
+        const scoreCasa = similarita(casaNorm, normalizzaNome(val.casa));
+        const scoreOspiti = similarita(ospitiNorm, normalizzaNome(val.ospiti));
+        const score = (scoreCasa + scoreOspiti) / 2;
+
+        if (score > bestScore && score > SOGLIA_MATCH) {
+          bestScore = score;
+          bestMatch = val;
+        }
+      }
+
+      if (bestMatch) {
+        entry = bestMatch;
+        console.log(`🔍 Fuzzy match trovato per ${match.casa} vs ${match.ospiti}: ${bestMatch.casa} vs ${bestMatch.ospiti} (score ${bestScore.toFixed(2)})`);
+      }
+    }
+
+    if (!entry || !entry.quote) return null;
+
+    return mappaGiocataAQuota(entry.quote, familyId, giocata);
+  };
+
+  // ============================================================
+  // ANALISI GIOCATA (con edge + value)
+  // ============================================================
+
   const analizzaGiocataConQuota = (match, familyId, giocata, pctTua) => {
     const quotaBook = trovaQuotaPerGiocata(match, familyId, giocata);
     if (!quotaBook || !pctTua || pctTua <= 0) return null;
@@ -600,10 +614,6 @@
   // CHECK AGGIORNAMENTO PDF
   // ============================================================
 
-  /**
-   * Verifica se il PDF è aggiornato (data max >= oggi)
-   * @returns {Object} { aggiornato: bool, dataMax: string, oggi: string }
-   */
   const checkAggiornamentoPDF = () => {
     const dataMax = getMaxDataPDF();
     const oggi = new Date().toISOString().slice(0, 10);
@@ -618,6 +628,27 @@
       oggi,
       motivo: dataMax >= oggi ? 'ok' : 'vecchio',
     };
+  };
+
+  // ============================================================
+  // DEBUG: stampa tutte le quote di una partita
+  // ============================================================
+
+  const debugPartita = (nomeCasa) => {
+    const quote = leggiQuote();
+    const keys = Object.keys(quote).filter(k =>
+      k.includes(normalizzaNome(nomeCasa))
+    );
+    if (keys.length === 0) {
+      console.log(`❌ Nessuna partita trovata contenente "${nomeCasa}"`);
+      return;
+    }
+    keys.forEach(k => {
+      const val = quote[k];
+      console.log(`📌 KEY: ${k}`);
+      console.log(`   ${val.casa} vs ${val.ospiti} (${val.data})`);
+      console.log(`   Quote:`, val.quote);
+    });
   };
 
   // ============================================================
@@ -645,14 +676,18 @@
     // Query
     trovaQuotaPerGiocata,
     analizzaGiocataConQuota,
+    mappaGiocataAQuota,
     // Check
     checkAggiornamentoPDF,
+    // Debug
+    debugPartita,
     // Costanti
     CAMPIONATI_RICONOSCIBILI,
+    SOGLIA_MATCH,
     STORAGE_KEY,
     STORAGE_META_KEY,
   };
 
-  console.log('✅ PDFQuoteParser caricato - Marathonbet (con storage + check data)');
+  console.log('✅ PDFQuoteParser caricato - con fix accenti + soglia ' + SOGLIA_MATCH);
 
 })();
