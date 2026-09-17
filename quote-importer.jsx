@@ -17,15 +17,11 @@
 
   const REPO_BASE_URL = 'https://gesss26.github.io/GesssAI-Pro---Auto';
 
-  // ⭐ LISTA DEI PDF DA SCARICARE E UNIRE
-  // Aggiungi/rimuovi file qui. Se un file non esiste su GitHub, viene saltato.
   const PDF_FILES = [
     'quote/marathonbet.pdf',
     'quote/marathonbet-2.pdf',
-    // 'quote/marathonbet-3.pdf',
   ];
 
-  // Anti-doppio download: max 1 download ogni 5 minuti
   const CACHE_DURATION_MS = 5 * 60 * 1000;
   const CACHE_KEY = 'ft_pdf_quote_last_download';
 
@@ -44,13 +40,12 @@
     const [fonteLabel, setFonteLabel] = useState('');
     const [autoTentato, setAutoTentato] = useState(false);
     const [erroreAuto, setErroreAuto] = useState(null);
-    const [avvisiFile, setAvvisiFile] = useState([]); // ⭐ file falliti ma non bloccanti
+    const [avvisiFile, setAvvisiFile] = useState([]);
 
     const downloadInCorso = useRef(false);
 
     // ============================================================
-    // CORE: ELABORA UN SINGOLO PDF (blob o file)
-    // Aggiunge le quote al localStorage tramite aggiungiQuote (MERGE)
+    // ELABORA UN SINGOLO PDF
     // ============================================================
 
     const elaboraPDFSingolo = async (pdfBlobOrFile) => {
@@ -66,7 +61,7 @@
     };
 
     // ============================================================
-    // CALCOLA VALUE BET (dopo aver caricato tutti i file)
+    // CALCOLA VALUE BET
     // ============================================================
 
     const calcolaValueBets = async (soglia) => {
@@ -114,16 +109,17 @@
     };
 
     // ============================================================
-    // DOWNLOAD AUTOMATICO MULTI-FILE DA GITHUB
+    // DOWNLOAD AUTOMATICO MULTI-FILE
     // ============================================================
 
-    const caricaDaGitHub = async (forza = false) => {
+    const caricaDaGitHub = async (forza) => {
+      if (typeof forza !== 'boolean') forza = false;
+
       if (downloadInCorso.current) {
         console.log('⏳ Download già in corso, skip');
         return;
       }
 
-      // Check cache (evita download ripetuti)
       if (!forza) {
         try {
           const last = localStorage.getItem(CACHE_KEY);
@@ -145,7 +141,6 @@
       setAvvisiFile([]);
 
       try {
-        // ⭐ RESETTA le quote vecchie prima di riscaricare tutti i file
         window.PDFQuoteParser.resetQuote();
 
         let totalePartite = 0;
@@ -207,7 +202,6 @@
         setFile({ name: `${PDF_FILES.length} file GitHub` });
         setAvvisiFile(errori);
 
-        // Salva timestamp
         try { localStorage.setItem(CACHE_KEY, String(Date.now())); } catch (e) {}
 
         setProgress(`🎯 ${partiteMatchate}/${totalePartite} matchate • ${vb.length} con value bet`);
@@ -236,7 +230,6 @@
       if (autoTentato) return;
       setAutoTentato(true);
 
-      // Aspetta 800ms per lasciare renderizzare la UI
       const timer = setTimeout(() => {
         console.log('🚀 Auto-download PDF da GitHub (multi-file)...');
         caricaDaGitHub(false).catch(() => {});
@@ -247,7 +240,7 @@
     }, []);
 
     // ============================================================
-    // HANDLE FILE MANUALE (multi-file)
+    // HANDLE FILE MANUALE
     // ============================================================
 
     const handleFiles = async (files) => {
@@ -265,7 +258,6 @@
       setProgress('📄 Lettura PDF...');
 
       try {
-        // ⭐ Reset per evitare accumulo di quote vecchie
         window.PDFQuoteParser.resetQuote();
 
         let totale = 0;
@@ -321,13 +313,11 @@
       setFonteLabel('');
       setErroreAuto(null);
       setAvvisiFile([]);
-
-      // Riprova auto-download
       setTimeout(() => caricaDaGitHub(true), 300);
     };
 
     // ============================================================
-    // FILTRI + ORDINAMENTO
+    // FILTRI
     // ============================================================
 
     const campionatiDisponibili = useMemo(() => {
@@ -361,17 +351,13 @@
     }, [valueBets]);
 
     // ============================================================
-    // RENDER — STATO LOADING
+    // RENDER — LOADING
     // ============================================================
 
     if (loading) {
       return (
         <div className="card" style={{ textAlign: 'center', padding: '50px 20px' }}>
-          <div style={{
-            fontSize: '64px',
-            marginBottom: '16px',
-            animation: 'pulse 1.4s ease-in-out infinite'
-          }}>⏳</div>
+          <div style={{ fontSize: '64px', marginBottom: '16px', animation: 'pulse 1.4s ease-in-out infinite' }}>⏳</div>
           <h3 style={{ color: 'var(--accent)', marginBottom: '8px' }}>
             {fonteLabel === 'GitHub' ? `🌐 Download da GitHub (${PDF_FILES.length} file)` : 'Analisi in corso'}
           </h3>
@@ -388,20 +374,13 @@
     }
 
     // ============================================================
-    // RENDER — STATO INIZIALE (con errore auto o pronto)
+    // RENDER — STATO INIZIALE
     // ============================================================
 
     if (!file && valueBets.length === 0) {
       return (
         <div>
-          {/* HEADER */}
-          <div className="card" style={{
-            padding: '14px 16px',
-            background: 'var(--surface)',
-            border: '2px solid var(--border)',
-            borderRadius: '10px',
-            marginBottom: '16px'
-          }}>
+          <div className="card" style={{ padding: '14px 16px', background: 'var(--surface)', border: '2px solid var(--border)', borderRadius: '10px', marginBottom: '16px' }}>
             <h3 style={{ color: 'var(--accent)', marginBottom: '8px', fontSize: '18px' }}>
               📄 Quote Book — Marathonbet
             </h3>
@@ -411,34 +390,16 @@
             </p>
           </div>
 
-          {/* ERRORE AUTO-DOWNLOAD */}
           {erroreAuto && (
-            <div className="card" style={{
-              padding: '14px 16px',
-              background: 'rgba(235, 87, 87, 0.1)',
-              border: '2px solid var(--lose)',
-              borderRadius: '10px',
-              marginBottom: '16px'
-            }}>
+            <div className="card" style={{ padding: '14px 16px', background: 'rgba(235, 87, 87, 0.1)', border: '2px solid var(--lose)', borderRadius: '10px', marginBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                 <span style={{ fontSize: '24px' }}>⚠️</span>
                 <b style={{ color: 'var(--lose)' }}>Download automatico fallito</b>
               </div>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', whiteSpace: 'pre-wrap' }}>
-                {erroreAuto}
-              </p>
-              <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px', fontStyle: 'italic' }}>
-                File tentati:
-              </p>
-              <ul style={{ fontSize: '10px', color: 'var(--text-muted)', paddingLeft: '20px', marginTop: '4px' }}>
-                {PDF_FILES.map((f, i) => (
-                  <li key={i}><code>{REPO_BASE_URL}/{f}</code></li>
-                ))}
-              </ul>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', whiteSpace: 'pre-wrap' }}>{erroreAuto}</p>
             </div>
           )}
 
-          {/* PULSANTE DOWNLOAD MANUALE / RIPROVA */}
           <button
             className="btn"
             onClick={() => caricaDaGitHub(true)}
@@ -464,14 +425,12 @@
             🌐 {erroreAuto ? 'Riprova Download da GitHub' : `Scarica ${PDF_FILES.length} PDF da GitHub`}
           </button>
 
-          {/* SEPARATORE */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
             <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>oppure carica manualmente (anche più file)</span>
             <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
           </div>
 
-          {/* DROP ZONE MANUALE MULTI-FILE */}
           <div
             className="file-drop-area"
             onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('dragging'); }}
@@ -501,17 +460,7 @@
             />
           </div>
 
-          {/* INFO */}
-          <div style={{
-            marginTop: '16px',
-            padding: '12px 16px',
-            background: 'var(--surface)',
-            borderRadius: '8px',
-            border: '1px dashed var(--border)',
-            fontSize: '11px',
-            color: 'var(--text-muted)',
-            lineHeight: '1.6'
-          }}>
+          <div style={{ marginTop: '16px', padding: '12px 16px', background: 'var(--surface)', borderRadius: '8px', border: '1px dashed var(--border)', fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.6' }}>
             <b style={{ color: 'var(--accent)' }}>💡 Come funziona:</b>
             <ul style={{ marginTop: '6px', paddingLeft: '20px' }}>
               <li>🌐 <b>Auto-download</b> di {PDF_FILES.length} file da GitHub all'apertura del tab</li>
@@ -531,13 +480,7 @@
 
     return (
       <div>
-        {/* HEADER RISULTATI */}
-        <div className="card" style={{
-          padding: '14px 16px',
-          background: 'linear-gradient(135deg, rgba(243, 156, 18, 0.15), rgba(243, 156, 18, 0.05))',
-          border: '2px solid var(--accent)',
-          marginBottom: '16px'
-        }}>
+        <div className="card" style={{ padding: '14px 16px', background: 'linear-gradient(135deg, rgba(243, 156, 18, 0.15), rgba(243, 156, 18, 0.05))', border: '2px solid var(--accent)', marginBottom: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
             <div>
               <h3 style={{ color: 'var(--accent)', margin: 0, fontSize: '18px' }}>
@@ -565,17 +508,8 @@
           </div>
         </div>
 
-        {/* ⭐ AVVISI FILE FALLITI (non bloccanti) */}
         {avvisiFile.length > 0 && (
-          <div className="card" style={{
-            padding: '10px 14px',
-            background: 'rgba(243, 156, 18, 0.10)',
-            border: '2px solid var(--accent)',
-            borderRadius: '8px',
-            marginBottom: '16px',
-            fontSize: '12px',
-            color: 'var(--text)',
-          }}>
+          <div className="card" style={{ padding: '10px 14px', background: 'rgba(243, 156, 18, 0.10)', border: '2px solid var(--accent)', borderRadius: '8px', marginBottom: '16px', fontSize: '12px', color: 'var(--text)' }}>
             <b style={{ color: 'var(--accent)' }}>⚠️ Alcuni file non sono stati caricati:</b>
             <ul style={{ marginTop: '4px', paddingLeft: '20px', fontSize: '11px', color: 'var(--text-muted)' }}>
               {avvisiFile.map((msg, i) => <li key={i}>{msg}</li>)}
@@ -583,7 +517,6 @@
           </div>
         )}
 
-        {/* FILTRI */}
         <div className="card" style={{ padding: '12px 14px', marginBottom: '16px' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -628,7 +561,6 @@
           </div>
         </div>
 
-        {/* LISTA VALUE BET */}
         {valueBetsFiltrate.length === 0 && (
           <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
             <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔍</div>
@@ -645,17 +577,7 @@
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {valueBetsFiltrate.map((vb, idx) => (
               <div key={idx} className="card" style={{ padding: '14px 16px' }}>
-                {/* HEADER PARTITA */}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '10px',
-                  flexWrap: 'wrap',
-                  gap: '8px',
-                  paddingBottom: '8px',
-                  borderBottom: '1px solid var(--border)'
-                }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px', paddingBottom: '8px', borderBottom: '1px solid var(--border)' }}>
                   <div>
                     <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
                       ⚽ {vb.matchApp.casa} vs {vb.matchApp.ospiti}
@@ -674,12 +596,7 @@
                   </div>
                 </div>
 
-                {/* VALUE BETS */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))',
-                  gap: '8px'
-                }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: '8px' }}>
                   {vb.valueBets.map((v, i) => {
                     const isExcellent = v.edge > 20;
                     const isGood = v.edge > 10;
@@ -691,18 +608,8 @@
                         : 'rgba(243, 156, 18, 0.08)';
 
                     return (
-                      <div key={i} style={{
-                        padding: '10px 12px',
-                        borderRadius: '8px',
-                        background: bgColor,
-                        border: `${isExcellent ? '2px' : '1px'} solid ${borderColor}`,
-                      }}>
-                        <div style={{
-                          fontSize: '10px',
-                          color: 'var(--text-muted)',
-                          textTransform: 'uppercase',
-                          fontWeight: 'bold'
-                        }}>
+                      <div key={i} style={{ padding: '10px 12px', borderRadius: '8px', background: bgColor, border: `${isExcellent ? '2px' : '1px'} solid ${borderColor}` }}>
+                        <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>
                           {v.classificazione}
                         </div>
                         <div style={{ fontSize: '15px', fontWeight: 'bold', marginTop: '3px', color: 'var(--text)' }}>
@@ -712,28 +619,14 @@
                           <span>📊 Tua: <b style={{ color: 'var(--accent)' }}>{v.pctTua}%</b></span>
                           <span>💰 Book: <b style={{ color: 'var(--win)' }}>{v.quotaBook.toFixed(2)}</b></span>
                         </div>
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          marginTop: '4px',
-                          fontSize: '11px',
-                          color: 'var(--text-muted)'
-                        }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '11px', color: 'var(--text-muted)' }}>
                           <span>Fair: {v.quotaFair.toFixed(2)}</span>
                           <span style={{ color: 'var(--win)', fontWeight: 'bold' }}>
                             +{v.edge}%
                           </span>
                         </div>
                         {v.kellyStake > 0 && (
-                          <div style={{
-                            marginTop: '5px',
-                            fontSize: '10px',
-                            textAlign: 'center',
-                            color: 'var(--accent)',
-                            padding: '2px 4px',
-                            background: 'rgba(243, 156, 18, 0.1)',
-                            borderRadius: '4px'
-                          }}>
+                          <div style={{ marginTop: '5px', fontSize: '10px', textAlign: 'center', color: 'var(--accent)', padding: '2px 4px', background: 'rgba(243, 156, 18, 0.1)', borderRadius: '4px' }}>
                             💡 Kelly: {v.kellyStake}% bankroll
                           </div>
                         )}
@@ -742,26 +635,14 @@
                   })}
                 </div>
 
-                {/* MOSTRA TUTTE LE ANALISI */}
                 {!soloValueBets && vb.analisiCompleta.length > vb.valueBets.length && (
                   <details style={{ marginTop: '10px', fontSize: '11px' }}>
                     <summary style={{ cursor: 'pointer', color: 'var(--text-muted)' }}>
                       Mostra tutte le {vb.analisiCompleta.length} analisi (incluse non-value)
                     </summary>
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-                      gap: '6px',
-                      marginTop: '8px'
-                    }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '6px', marginTop: '8px' }}>
                       {vb.analisiCompleta.map((v, i) => (
-                        <div key={i} style={{
-                          padding: '6px 8px',
-                          borderRadius: '6px',
-                          background: 'var(--surface)',
-                          border: '1px solid var(--border)',
-                          fontSize: '11px'
-                        }}>
+                        <div key={i} style={{ padding: '6px 8px', borderRadius: '6px', background: 'var(--surface)', border: '1px solid var(--border)', fontSize: '11px' }}>
                           <div style={{ fontWeight: 'bold' }}>{v.giocata}</div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2px' }}>
                             <span>{v.pctTua}%</span>
@@ -769,11 +650,7 @@
                               {v.quotaBook.toFixed(2)}
                             </span>
                           </div>
-                          <div style={{
-                            fontSize: '10px',
-                            color: v.edge > 0 ? 'var(--win)' : 'var(--lose)',
-                            textAlign: 'right'
-                          }}>
+                          <div style={{ fontSize: '10px', color: v.edge > 0 ? 'var(--win)' : 'var(--lose)', textAlign: 'right' }}>
                             {v.edge > 0 ? '+' : ''}{v.edge}%
                           </div>
                         </div>
