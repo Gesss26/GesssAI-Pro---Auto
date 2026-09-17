@@ -6,6 +6,7 @@
 // + FIX: gestione anno Dicembre/Gennaio
 // + FIX: checkAggiornamentoPDF con stati ok/scaduto/assente
 // + FIX: controllo età salvataggio (>7 giorni = scaduto)
+// + NEW: supporto MULTI-FILE (aggiungiQuote + resetQuote)
 // ============================================================
 
 (function () {
@@ -680,7 +681,7 @@
   };
 
   // ============================================================
-  // SALVATAGGIO IN LOCALSTORAGE
+  // SALVATAGGIO IN LOCALSTORAGE (singolo file - SOVRASCRIVE)
   // ============================================================
 
   const salvaQuote = (partite) => {
@@ -726,6 +727,79 @@
       return null;
     }
   };
+
+  // ============================================================
+  // ⭐ NUOVO: AGGIUNGI QUOTE (MERGE con quelle esistenti)
+  // ============================================================
+
+  const aggiungiQuote = (partite) => {
+    try {
+      const esistenti = leggiQuote();
+      const mappa = { ...esistenti };
+
+      partite.forEach(p => {
+        const key = `${normalizzaNome(p.casa)}|${normalizzaNome(p.ospiti)}|${p.dataISO || ''}`;
+        mappa[key] = {
+          casa: p.casa,
+          ospiti: p.ospiti,
+          campionato: p.campionato,
+          data: p.data,
+          dataISO: p.dataISO,
+          ora: p.ora,
+          quote: p.quote,
+        };
+      });
+
+      const tutte = Object.values(mappa);
+      const dateValide = tutte
+        .map(p => p.dataISO)
+        .filter(d => d && d.match(/^\d{4}-\d{2}-\d{2}$/))
+        .sort();
+
+      const dataMax = dateValide[dateValide.length - 1] || null;
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(mappa));
+      localStorage.setItem(STORAGE_META_KEY, JSON.stringify({
+        salvatoIl: new Date().toISOString(),
+        dataMaxPDF: dataMax,
+        numPartite: tutte.length,
+      }));
+
+      console.log(`✅ Quote aggiunte: +${partite.length} (totale: ${tutte.length}), data max: ${dataMax}`);
+
+      window.dispatchEvent(new CustomEvent('quote-updated', {
+        detail: { numPartite: tutte.length, dataMaxPDF: dataMax }
+      }));
+
+      return { numPartite: tutte.length, dataMaxPDF: dataMax };
+    } catch (e) {
+      console.warn('Errore aggiunta quote:', e);
+      return null;
+    }
+  };
+
+  // ============================================================
+  // ⭐ NUOVO: RESET QUOTE
+  // ============================================================
+
+  const resetQuote = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_META_KEY);
+      console.log('🗑️ Quote resettate');
+      window.dispatchEvent(new CustomEvent('quote-updated', {
+        detail: { numPartite: 0, dataMaxPDF: null }
+      }));
+      return true;
+    } catch (e) {
+      console.warn('Errore reset quote:', e);
+      return false;
+    }
+  };
+
+  // ============================================================
+  // LETTURA
+  // ============================================================
 
   const leggiQuote = () => {
     try {
@@ -988,6 +1062,8 @@
     trovaMatchApp,
     analizzaValueBet,
     salvaQuote,
+    aggiungiQuote,   // ⭐ NUOVO
+    resetQuote,      // ⭐ NUOVO
     leggiQuote,
     leggiMeta,
     getMaxDataPDF,
@@ -1004,6 +1080,6 @@
     GIORNI_SCADENZA,
   };
 
-  console.log('✅ PDFQuoteParser caricato - con check scadenza quote');
+  console.log('✅ PDFQuoteParser caricato - con supporto MULTI-FILE (aggiungiQuote + resetQuote)');
 
 })();

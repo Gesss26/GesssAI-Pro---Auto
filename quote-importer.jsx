@@ -1,7 +1,8 @@
 // ============================================================
 // quote-importer.jsx
 // Componente React per importare PDF quote Marathonbet
-// CON AUTO-DOWNLOAD DA GITHUB all'apertura del tab
+// CON AUTO-DOWNLOAD MULTI-FILE DA GITHUB all'apertura del tab
+// E supporto import manuale di PIÙ file PDF contemporaneamente
 // ============================================================
 
 (function () {
@@ -11,12 +12,18 @@
 
   // ============================================================
   // CONFIGURAZIONE GITHUB
+  // Deve rispecchiare la stessa lista di quote-manager.js
   // ============================================================
 
-  // ⚠️ MODIFICA QUESTO URL CON IL TUO REPO (se diverso)
   const REPO_BASE_URL = 'https://gesss26.github.io/GesssAI-Pro---Auto';
-  const PDF_REMOTE_PATH = 'quote/marathonbet.pdf';
-  const PDF_FULL_URL = `${REPO_BASE_URL}/${PDF_REMOTE_PATH}`;
+
+  // ⭐ LISTA DEI PDF DA SCARICARE E UNIRE
+  // Aggiungi/rimuovi file qui. Se un file non esiste su GitHub, viene saltato.
+  const PDF_FILES = [
+    'quote/marathonbet.pdf',
+    'quote/marathonbet-2.pdf',
+    // 'quote/marathonbet-3.pdf',
+  ];
 
   // Anti-doppio download: max 1 download ogni 5 minuti
   const CACHE_DURATION_MS = 5 * 60 * 1000;
@@ -37,95 +44,77 @@
     const [fonteLabel, setFonteLabel] = useState('');
     const [autoTentato, setAutoTentato] = useState(false);
     const [erroreAuto, setErroreAuto] = useState(null);
+    const [avvisiFile, setAvvisiFile] = useState([]); // ⭐ file falliti ma non bloccanti
 
     const downloadInCorso = useRef(false);
 
     // ============================================================
-    // CORE: ELABORA PDF (blob o file)
+    // CORE: ELABORA UN SINGOLO PDF (blob o file)
+    // Aggiunge le quote al localStorage tramite aggiungiQuote (MERGE)
     // ============================================================
 
-    const elaboraPDF = async (pdfBlobOrFile, nomeFile = 'PDF') => {
-      setLoading(true);
-      setProgress('📄 Lettura PDF...');
-
-      try {
-        // ⚠️ Verifica che il parser sia disponibile
-        if (!window.PDFQuoteParser || typeof window.PDFQuoteParser.estraiRigheDaPDF !== 'function') {
-          throw new Error('Parser PDF non caricato. Verifica che pdf-quote-parser.js sia incluso nell\'HTML.');
-        }
-
-        // 1. Estrai righe
-        const righe = await window.PDFQuoteParser.estraiRigheDaPDF(pdfBlobOrFile);
-        setProgress(`🔍 Analisi ${righe.length} righe...`);
-
-        await new Promise(r => setTimeout(r, 30));
-
-        // 2. Parse partite
-        const partite = window.PDFQuoteParser.parseMarathonbetPDF(righe);
-        setProgress(`✅ ${partite.length} partite estratte`);
-
-        await new Promise(r => setTimeout(r, 30));
-
-        // 3. Analisi value bet
-        setProgress('🎯 Calcolo value bet...');
-
-        const vb = [];
-        let partiteMatchate = 0;
-
-        for (const p of partite) {
-          const matchResult = window.PDFQuoteParser.trovaMatchApp(p, matches);
-          if (!matchResult) continue;
-
-          partiteMatchate++;
-          const matchApp = matchResult.match;
-
-          const stats = window.computeMatchStats(matchApp, matches);
-          if (stats.error) continue;
-
-          stats._allMatches = matches;
-          stats._homeTeam = matchApp.casa;
-          stats._awayTeam = matchApp.ospiti;
-
-          const analisi = window.PDFQuoteParser.analizzaValueBet(p, matchApp, stats);
-          const valueOnly = analisi.filter(a => a.edge > sogliaEdge);
-
-          if (valueOnly.length > 0) {
-            vb.push({
-              partitaPDF: p,
-              matchApp,
-              matchScore: matchResult.score,
-              valueBets: valueOnly,
-              analisiCompleta: analisi,
-            });
-          }
-        }
-
-        vb.sort((a, b) => {
-          const maxA = Math.max(...a.valueBets.map(v => v.edge));
-          const maxB = Math.max(...b.valueBets.map(v => v.edge));
-          return maxB - maxA;
-        });
-
-        setValueBets(vb);
-        setFile({ name: nomeFile });
-        setProgress(`🎯 ${partiteMatchate}/${partite.length} matchate • ${vb.length} con value bet`);
-
-        showAlert('success',
-          `✅ ${partite.length} partite, ${partiteMatchate} matchate, ${vb.length} con value bet!`
-        );
-
-        return { partite, partiteMatchate, valueBetsCount: vb.length };
-      } catch (err) {
-        console.error('Errore elaborazione PDF:', err);
-        showAlert('error', '❌ Errore: ' + err.message);
-        throw err;
-      } finally {
-        setLoading(false);
+    const elaboraPDFSingolo = async (pdfBlobOrFile) => {
+      if (!window.PDFQuoteParser || typeof window.PDFQuoteParser.estraiRigheDaPDF !== 'function') {
+        throw new Error('Parser PDF non caricato. Verifica che pdf-quote-parser.js sia incluso nell\'HTML.');
       }
+      const righe = await window.PDFQuoteParser.estraiRigheDaPDF(pdfBlobOrFile);
+      const partite = window.PDFQuoteParser.parseMarathonbetPDF(righe);
+      if (partite.length > 0) {
+        window.PDFQuoteParser.aggiungiQuote(partite);
+      }
+      return partite;
     };
 
     // ============================================================
-    // DOWNLOAD AUTOMATICO DA GITHUB
+    // CALCOLA VALUE BET (dopo aver caricato tutti i file)
+    // ============================================================
+
+    const calcolaValueBets = async (soglia) => {
+      const quote = window.PDFQuoteParser.leggiQuote();
+      const partitePDF = Object.values(quote);
+
+      const vb = [];
+      let partiteMatchate = 0;
+
+      for (const p of partitePDF) {
+        const matchResult = window.PDFQuoteParser.trovaMatchApp(p, matches);
+        if (!matchResult) continue;
+
+        partiteMatchate++;
+        const matchApp = matchResult.match;
+
+        const stats = window.computeMatchStats(matchApp, matches);
+        if (stats.error) continue;
+
+        stats._allMatches = matches;
+        stats._homeTeam = matchApp.casa;
+        stats._awayTeam = matchApp.ospiti;
+
+        const analisi = window.PDFQuoteParser.analizzaValueBet(p, matchApp, stats);
+        const valueOnly = analisi.filter(a => a.edge > soglia);
+
+        if (valueOnly.length > 0) {
+          vb.push({
+            partitaPDF: p,
+            matchApp,
+            matchScore: matchResult.score,
+            valueBets: valueOnly,
+            analisiCompleta: analisi,
+          });
+        }
+      }
+
+      vb.sort((a, b) => {
+        const maxA = Math.max(...a.valueBets.map(v => v.edge));
+        const maxB = Math.max(...b.valueBets.map(v => v.edge));
+        return maxB - maxA;
+      });
+
+      return { vb, partiteMatchate, totalePartite: partitePDF.length };
+    };
+
+    // ============================================================
+    // DOWNLOAD AUTOMATICO MULTI-FILE DA GITHUB
     // ============================================================
 
     const caricaDaGitHub = async (forza = false) => {
@@ -153,51 +142,86 @@
       setProgress('🌐 Connessione a GitHub...');
       setFonteLabel('GitHub');
       setErroreAuto(null);
+      setAvvisiFile([]);
 
       try {
-        setProgress(`📥 Download ${PDF_REMOTE_PATH}...`);
-        console.log('🌐 Download PDF da:', PDF_FULL_URL);
+        // ⭐ RESETTA le quote vecchie prima di riscaricare tutti i file
+        window.PDFQuoteParser.resetQuote();
 
-        // Cache-buster per forzare download fresco
-        const url = `${PDF_FULL_URL}?t=${Date.now()}`;
-        const response = await fetch(url, {
-          cache: 'no-store',
-          headers: {
-            'Accept': 'application/pdf',
-          },
-        });
+        let totalePartite = 0;
+        const errori = [];
 
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error(`PDF non trovato su GitHub (404).\nCarica il file in: quote/marathonbet.pdf`);
+        for (const percorso of PDF_FILES) {
+          const url = `${REPO_BASE_URL}/${percorso}?t=${Date.now()}`;
+          setProgress(`📥 Download ${percorso}...`);
+          console.log('🌐 Download PDF da:', url);
+
+          try {
+            const response = await fetch(url, {
+              cache: 'no-store',
+              headers: { 'Accept': 'application/pdf' },
+            });
+
+            if (!response.ok) {
+              if (response.status === 404) {
+                errori.push(`${percorso}: non trovato (404)`);
+              } else {
+                errori.push(`${percorso}: HTTP ${response.status}`);
+              }
+              continue;
+            }
+
+            const blob = await response.blob();
+            console.log(`✅ PDF scaricato: ${percorso} (${(blob.size / 1024).toFixed(0)} KB)`);
+
+            if (blob.size < 1000) {
+              errori.push(`${percorso}: file troppo piccolo`);
+              continue;
+            }
+
+            const fakeFile = new File([blob], percorso.split('/').pop(), { type: 'application/pdf' });
+            const partite = await elaboraPDFSingolo(fakeFile);
+
+            if (partite.length === 0) {
+              errori.push(`${percorso}: 0 partite estratte`);
+              continue;
+            }
+
+            totalePartite += partite.length;
+            console.log(`✅ ${percorso}: ${partite.length} partite`);
+
+          } catch (errFile) {
+            console.error(`❌ ${percorso}:`, errFile.message);
+            errori.push(`${percorso}: ${errFile.message}`);
           }
-          throw new Error(`HTTP ${response.status} - ${response.statusText}`);
         }
 
-        const blob = await response.blob();
-        console.log(`✅ PDF scaricato: ${(blob.size / 1024).toFixed(0)} KB`);
-
-        if (blob.size < 1000) {
-          throw new Error('Il file scaricato è troppo piccolo (probabile HTML di errore)');
+        if (totalePartite === 0) {
+          throw new Error(`Nessun PDF caricato correttamente.\n${errori.join('\n')}`);
         }
 
-        setProgress(`✅ PDF scaricato (${(blob.size / 1024).toFixed(0)} KB)`);
+        setProgress(`🎯 ${totalePartite} partite caricate, calcolo value bet...`);
 
-        // Converti in File per compatibilità
-        const fakeFile = new File([blob], 'marathonbet.pdf', { type: 'application/pdf' });
-
-        // Elabora
-        await elaboraPDF(fakeFile, 'marathonbet.pdf (GitHub)');
+        const { vb, partiteMatchate } = await calcolaValueBets(sogliaEdge);
+        setValueBets(vb);
+        setFile({ name: `${PDF_FILES.length} file GitHub` });
+        setAvvisiFile(errori);
 
         // Salva timestamp
-        try {
-          localStorage.setItem(CACHE_KEY, String(Date.now()));
-        } catch (e) {}
+        try { localStorage.setItem(CACHE_KEY, String(Date.now())); } catch (e) {}
+
+        setProgress(`🎯 ${partiteMatchate}/${totalePartite} matchate • ${vb.length} con value bet`);
+
+        if (errori.length > 0) {
+          showAlert('warning', `⚠️ ${totalePartite} partite caricate. File con problemi: ${errori.length}`);
+        } else {
+          showAlert('success', `✅ ${totalePartite} partite, ${partiteMatchate} matchate, ${vb.length} con value bet!`);
+        }
 
       } catch (err) {
         console.error('❌ Errore download GitHub:', err);
         setErroreAuto(err.message);
-        showAlert('error', `❌ ${err.message}`);
+        showAlert('error', `❌ ${err.message.split('\n')[0]}`);
       } finally {
         setLoading(false);
         downloadInCorso.current = false;
@@ -214,7 +238,7 @@
 
       // Aspetta 800ms per lasciare renderizzare la UI
       const timer = setTimeout(() => {
-        console.log('🚀 Auto-download PDF da GitHub...');
+        console.log('🚀 Auto-download PDF da GitHub (multi-file)...');
         caricaDaGitHub(false).catch(() => {});
       }, 800);
 
@@ -223,22 +247,66 @@
     }, []);
 
     // ============================================================
-    // HANDLE FILE MANUALE
+    // HANDLE FILE MANUALE (multi-file)
     // ============================================================
 
-    const handleFile = async (f) => {
-      if (!f || !f.name.toLowerCase().endsWith('.pdf')) {
+    const handleFiles = async (files) => {
+      const pdfFiles = files.filter(f => f && f.name && f.name.toLowerCase().endsWith('.pdf'));
+
+      if (pdfFiles.length === 0) {
         showAlert('error', '❌ Solo file PDF supportati');
         return;
       }
 
       setFonteLabel('Manuale');
       setErroreAuto(null);
+      setAvvisiFile([]);
+      setLoading(true);
+      setProgress('📄 Lettura PDF...');
 
       try {
-        await elaboraPDF(f, f.name);
+        // ⭐ Reset per evitare accumulo di quote vecchie
+        window.PDFQuoteParser.resetQuote();
+
+        let totale = 0;
+        const errori = [];
+
+        for (const f of pdfFiles) {
+          setProgress(`📄 Lettura ${f.name}...`);
+          try {
+            const partite = await elaboraPDFSingolo(f);
+            totale += partite.length;
+            console.log(`✅ ${f.name}: ${partite.length} partite`);
+          } catch (errFile) {
+            console.error(`❌ ${f.name}:`, errFile.message);
+            errori.push(`${f.name}: ${errFile.message}`);
+          }
+        }
+
+        if (totale === 0) {
+          throw new Error(`Nessun file elaborato correttamente.\n${errori.join('\n')}`);
+        }
+
+        setProgress(`🎯 ${totale} partite, calcolo value bet...`);
+        const { vb, partiteMatchate } = await calcolaValueBets(sogliaEdge);
+
+        setValueBets(vb);
+        setFile({ name: `${pdfFiles.length} file manuali` });
+        setAvvisiFile(errori);
+        setProgress(`🎯 ${partiteMatchate}/${totale} matchate • ${vb.length} con value bet`);
+
+        if (errori.length > 0) {
+          showAlert('warning', `⚠️ ${totale} partite caricate. File con problemi: ${errori.length}`);
+        } else {
+          showAlert('success', `✅ ${totale} partite da ${pdfFiles.length} file!`);
+        }
+
       } catch (err) {
-        // già gestito in elaboraPDF
+        console.error('Errore elaborazione PDF:', err);
+        showAlert('error', '❌ Errore: ' + err.message.split('\n')[0]);
+        setErroreAuto(err.message);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -252,6 +320,7 @@
       setProgress('');
       setFonteLabel('');
       setErroreAuto(null);
+      setAvvisiFile([]);
 
       // Riprova auto-download
       setTimeout(() => caricaDaGitHub(true), 300);
@@ -304,13 +373,15 @@
             animation: 'pulse 1.4s ease-in-out infinite'
           }}>⏳</div>
           <h3 style={{ color: 'var(--accent)', marginBottom: '8px' }}>
-            {fonteLabel === 'GitHub' ? '🌐 Download da GitHub' : 'Analisi in corso'}
+            {fonteLabel === 'GitHub' ? `🌐 Download da GitHub (${PDF_FILES.length} file)` : 'Analisi in corso'}
           </h3>
           <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>{progress}</p>
           {fonteLabel === 'GitHub' && (
-            <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '12px' }}>
-              {PDF_FULL_URL}
-            </p>
+            <div style={{ marginTop: '12px', fontSize: '11px', color: 'var(--text-muted)' }}>
+              {PDF_FILES.map((f, i) => (
+                <div key={i}>{REPO_BASE_URL}/{f}</div>
+              ))}
+            </div>
           )}
         </div>
       );
@@ -335,8 +406,8 @@
               📄 Quote Book — Marathonbet
             </h3>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.5' }}>
-              Le quote vengono <b>scaricate automaticamente da GitHub</b> e confrontate con
-              le tue percentuali per trovare le <b style={{ color: 'var(--win)' }}>VALUE BET</b>.
+              Le quote vengono <b>scaricate automaticamente da GitHub</b> ({PDF_FILES.length} file uniti)
+              e confrontate con le tue percentuali per trovare le <b style={{ color: 'var(--win)' }}>VALUE BET</b>.
             </p>
           </div>
 
@@ -357,8 +428,13 @@
                 {erroreAuto}
               </p>
               <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px', fontStyle: 'italic' }}>
-                URL tentato: <code style={{ fontSize: '10px' }}>{PDF_FULL_URL}</code>
+                File tentati:
               </p>
+              <ul style={{ fontSize: '10px', color: 'var(--text-muted)', paddingLeft: '20px', marginTop: '4px' }}>
+                {PDF_FILES.map((f, i) => (
+                  <li key={i}><code>{REPO_BASE_URL}/{f}</code></li>
+                ))}
+              </ul>
             </div>
           )}
 
@@ -385,17 +461,17 @@
               gap: '12px'
             }}
           >
-            🌐 {erroreAuto ? 'Riprova Download da GitHub' : 'Scarica PDF da GitHub'}
+            🌐 {erroreAuto ? 'Riprova Download da GitHub' : `Scarica ${PDF_FILES.length} PDF da GitHub`}
           </button>
 
           {/* SEPARATORE */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>oppure carica manualmente</span>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>oppure carica manualmente (anche più file)</span>
             <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
           </div>
 
-          {/* DROP ZONE MANUALE */}
+          {/* DROP ZONE MANUALE MULTI-FILE */}
           <div
             className="file-drop-area"
             onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('dragging'); }}
@@ -403,24 +479,25 @@
             onDrop={(e) => {
               e.preventDefault();
               e.currentTarget.classList.remove('dragging');
-              if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+              if (e.dataTransfer.files.length > 0) handleFiles(Array.from(e.dataTransfer.files));
             }}
             onClick={() => document.getElementById('pdf-quote-input').click()}
             style={{ padding: '30px 20px' }}
           >
             <div style={{ fontSize: '48px', marginBottom: '8px' }}>📂</div>
             <p style={{ fontWeight: 'bold', fontSize: '14px', margin: '8px 0 4px' }}>
-              Trascina PDF Marathonbet
+              Trascina uno o più PDF Marathonbet
             </p>
             <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-              oppure clicca per selezionare
+              oppure clicca per selezionare (multi-selezione supportata)
             </p>
             <input
               id="pdf-quote-input"
               type="file"
               accept=".pdf"
+              multiple
               style={{ display: 'none' }}
-              onChange={(e) => e.target.files.length > 0 && handleFile(e.target.files[0])}
+              onChange={(e) => e.target.files.length > 0 && handleFiles(Array.from(e.target.files))}
             />
           </div>
 
@@ -437,8 +514,8 @@
           }}>
             <b style={{ color: 'var(--accent)' }}>💡 Come funziona:</b>
             <ul style={{ marginTop: '6px', paddingLeft: '20px' }}>
-              <li>🌐 <b>Auto-download</b> all'apertura del tab (da GitHub)</li>
-              <li>📂 <b>Manuale</b>: trascina un PDF locale se preferisci</li>
+              <li>🌐 <b>Auto-download</b> di {PDF_FILES.length} file da GitHub all'apertura del tab</li>
+              <li>📂 <b>Manuale multi-file</b>: trascina più PDF insieme, vengono uniti automaticamente</li>
               <li>Estrae <b>20 mercati</b>: 1X2, DC, GG/NG, U/O 1.5-4.5, MG 1-4, MG 2-5</li>
               <li>Calcola <b>quota fair</b>, <b>edge %</b> e <b>Kelly stake</b></li>
               <li>Evidenzia <b style={{ color: 'var(--win)' }}>VALUE BET</b> con edge &gt; 5%</li>
@@ -468,7 +545,8 @@
               </h3>
               <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0' }}>
                 📄 {file?.name} • 🎯 {valueBets.length} partite con value bet • 📊 {tutteLeAnalisi.length} analisi totali
-                {fonteLabel === 'GitHub' && <span style={{ color: 'var(--win)', marginLeft: '8px' }}>🌐 da GitHub</span>}
+                {fonteLabel === 'GitHub' && <span style={{ color: 'var(--win)', marginLeft: '8px' }}>🌐 da GitHub ({PDF_FILES.length} file)</span>}
+                {fonteLabel === 'Manuale' && <span style={{ color: 'var(--accent)', marginLeft: '8px' }}>📂 manuale</span>}
               </p>
             </div>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -476,7 +554,7 @@
                 className="btn"
                 onClick={() => caricaDaGitHub(true)}
                 style={{ fontSize: '12px', padding: '6px 14px', background: 'var(--accent)', color: '#000' }}
-                title="Riscarica il PDF da GitHub"
+                title="Riscarica tutti i PDF da GitHub"
               >
                 🔄 Ricarica
               </button>
@@ -486,6 +564,24 @@
             </div>
           </div>
         </div>
+
+        {/* ⭐ AVVISI FILE FALLITI (non bloccanti) */}
+        {avvisiFile.length > 0 && (
+          <div className="card" style={{
+            padding: '10px 14px',
+            background: 'rgba(243, 156, 18, 0.10)',
+            border: '2px solid var(--accent)',
+            borderRadius: '8px',
+            marginBottom: '16px',
+            fontSize: '12px',
+            color: 'var(--text)',
+          }}>
+            <b style={{ color: 'var(--accent)' }}>⚠️ Alcuni file non sono stati caricati:</b>
+            <ul style={{ marginTop: '4px', paddingLeft: '20px', fontSize: '11px', color: 'var(--text-muted)' }}>
+              {avvisiFile.map((msg, i) => <li key={i}>{msg}</li>)}
+            </ul>
+          </div>
+        )}
 
         {/* FILTRI */}
         <div className="card" style={{ padding: '12px 14px', marginBottom: '16px' }}>
@@ -694,6 +790,6 @@
   }
 
   window.QuoteImporter = QuoteImporter;
-  console.log('✅ QuoteImporter caricato (con auto-download GitHub)');
+  console.log('✅ QuoteImporter caricato (con multi-file auto-download + manuale)');
 
 })();
