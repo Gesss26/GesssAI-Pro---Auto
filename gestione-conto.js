@@ -2,6 +2,7 @@
 // gestione-conto.js - Gestione conto con persistenza Excel
 // Salva/carica da: excel/gestione.xlsx (GitHub)
 // Settimana: Giovedì → Mercoledì successivo
+// Data input in formato italiano (GG/MM/AAAA)
 // ============================================================
 
 (function () {
@@ -35,17 +36,7 @@
     const d = new Date(dateInput);
     d.setHours(0, 0, 0, 0);
     const day = d.getDay(); // 0=Dom, 1=Lun, ..., 4=Gio, 5=Ven, 6=Sab
-    
-    // Se siamo Giovedì(4), Venerdì(5), Sabato(6), Domenica(0), Lunedì(1), Martedì(2), Mercoledì(3)
-    // il giovedì di riferimento è:
-    // - Gio(4): oggi
-    // - Ven(5): ieri (giovedì)
-    // - Sab(6): 2 giorni fa
-    // - Dom(0): 3 giorni fa
-    // - Lun(1): 4 giorni fa
-    // - Mar(2): 5 giorni fa
-    // - Mer(3): 6 giorni fa
-    
+
     let offset;
     if (day === 4) offset = 0;        // Giovedì
     else if (day === 5) offset = -1;  // Venerdì
@@ -54,7 +45,7 @@
     else if (day === 1) offset = -4;  // Lunedì
     else if (day === 2) offset = -5;  // Martedì
     else offset = -6;                  // Mercoledì
-    
+
     const giovedi = new Date(d);
     giovedi.setDate(d.getDate() + offset);
     return giovedi;
@@ -305,6 +296,299 @@
   };
 
   // ============================================================
+  // INPUT DATA ITALIANO (GG / MM / AAAA)
+  // ============================================================
+
+  const DataInputItaliano = ({ value, onChange }) => {
+    // value è in formato ISO "YYYY-MM-DD"
+    const parseISO = (iso) => {
+      if (!iso) return { g: '', m: '', a: '' };
+      const parts = iso.split('-');
+      if (parts.length !== 3) return { g: '', m: '', a: '' };
+      return { g: parts[2], m: parts[1], a: parts[0] };
+    };
+
+    const [giorno, setGiorno] = useState(() => parseISO(value).g);
+    const [mese, setMese] = useState(() => parseISO(value).m);
+    const [anno, setAnno] = useState(() => parseISO(value).a);
+
+    const meseRef = useRef(null);
+    const annoRef = useRef(null);
+
+    // Sync esterno (es. se il parent cambia value)
+    useEffect(() => {
+      const p = parseISO(value);
+      setGiorno(p.g); setMese(p.m); setAnno(p.a);
+    }, [value]);
+
+    const emitChange = (g, m, a) => {
+      if (g && m && a && g.length === 2 && m.length === 2 && a.length === 4) {
+        onChange(`${a}-${m}-${g}`);
+      }
+    };
+
+    const handleGiorno = (e) => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 2);
+      setGiorno(v);
+      if (v.length === 2) meseRef.current?.focus();
+      emitChange(v, mese, anno);
+    };
+
+    const handleMese = (e) => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 2);
+      // Validazione mese
+      if (v.length === 2) {
+        const n = parseInt(v, 10);
+        if (n > 12) v = '12';
+        if (n < 1) v = '01';
+      }
+      setMese(v);
+      if (v.length === 2) annoRef.current?.focus();
+      emitChange(giorno, v, anno);
+    };
+
+    const handleAnno = (e) => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 4);
+      setAnno(v);
+      emitChange(giorno, mese, v);
+    };
+
+    const handleBlur = (campo) => {
+      // Auto-padding
+      if (campo === 'g' && giorno.length === 1) {
+        const newV = '0' + giorno;
+        setGiorno(newV);
+        emitChange(newV, mese, anno);
+      }
+      if (campo === 'm' && mese.length === 1) {
+        const n = parseInt(mese, 10);
+        const newV = n < 10 ? '0' + n : String(n);
+        setMese(newV);
+        emitChange(giorno, newV, anno);
+      }
+    };
+
+    const inputStyle = {
+      width: '100%',
+      padding: '8px 6px',
+      background: 'var(--surface)',
+      border: '1px solid var(--border)',
+      color: 'var(--text)',
+      borderRadius: '6px',
+      fontSize: '14px',
+      textAlign: 'center',
+      fontFamily: 'monospace',
+      fontWeight: 'bold',
+      letterSpacing: '1px',
+    };
+
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <input
+          type="text"
+          inputMode="numeric"
+          placeholder="GG"
+          value={giorno}
+          onChange={handleGiorno}
+          onBlur={() => handleBlur('g')}
+          maxLength={2}
+          style={{ ...inputStyle, width: '48px', flex: '0 0 auto' }}
+        />
+        <span style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '16px' }}>/</span>
+        <input
+          ref={meseRef}
+          type="text"
+          inputMode="numeric"
+          placeholder="MM"
+          value={mese}
+          onChange={handleMese}
+          onBlur={() => handleBlur('m')}
+          maxLength={2}
+          style={{ ...inputStyle, width: '48px', flex: '0 0 auto' }}
+        />
+        <span style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '16px' }}>/</span>
+        <input
+          ref={annoRef}
+          type="text"
+          inputMode="numeric"
+          placeholder="AAAA"
+          value={anno}
+          onChange={handleAnno}
+          maxLength={4}
+          style={{ ...inputStyle, flex: 1, minWidth: '60px' }}
+        />
+      </div>
+    );
+  };
+
+  // ============================================================
+  // FORM INSERIMENTO (con data italiana)
+  // ============================================================
+
+  const FormInserimento = ({ onAdd, onUpdate, movimenti, saldoIniziale }) => {
+    const [data, setData] = useState(() => toDateStr(new Date()));
+    const [importoGiocato, setImportoGiocato] = useState('');
+    const [importoVinto, setImportoVinto] = useState('');
+    const [note, setNote] = useState('');
+    const [msg, setMsg] = useState(null);
+
+    const saldoCorrente = useMemo(
+      () => calcolaSaldoCorrente(movimenti, saldoIniziale),
+      [movimenti, saldoIniziale]
+    );
+
+    // ⭐ Anteprima data italiana
+    const dataItaliana = useMemo(() => {
+      if (!data) return '';
+      const p = data.split('-');
+      if (p.length !== 3) return '';
+      return `${p[2]}/${p[1]}/${p[0]}`;
+    }, [data]);
+
+    const handleAdd = (esito) => {
+      const ig = parseFloat(importoGiocato);
+      if (!data || isNaN(ig) || ig <= 0) {
+        setMsg({ type: 'error', text: '⚠️ Inserisci data e importo giocato validi' });
+        setTimeout(() => setMsg(null), 3000);
+        return;
+      }
+
+      const iv = parseFloat(importoVinto);
+      if (esito === 'win' && (isNaN(iv) || iv <= 0)) {
+        setMsg({ type: 'error', text: '⚠️ Inserisci l\'importo vinto per la giocata vincente' });
+        setTimeout(() => setMsg(null), 3000);
+        return;
+      }
+
+      onAdd({
+        id: 'g_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        data,
+        importoGiocato: ig,
+        esito,
+        importoVinto: esito === 'win' ? iv : 0,
+        note: note.trim(),
+      });
+
+      setImportoGiocato('');
+      setImportoVinto('');
+      setNote('');
+      setMsg({ type: 'success', text: esito === 'win' ? '✅ Giocata VINTA registrata!' : '❌ Giocata PERSA registrata!' });
+      setTimeout(() => setMsg(null), 2500);
+    };
+
+    return (
+      <div style={{
+        background: 'var(--card)', borderRadius: '12px', border: '1px solid var(--border)',
+        padding: '18px', marginBottom: '20px',
+      }}>
+        <h4 style={{ margin: '0 0 14px 0', color: 'var(--accent)', fontSize: '15px' }}>
+          ➕ Nuova Giocata
+        </h4>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '12px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
+              📅 Data {dataItaliana && <span style={{ color: 'var(--accent)', fontWeight: 'normal' }}>({dataItaliana})</span>}
+            </label>
+            <DataInputItaliano value={data} onChange={setData} />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
+              💵 Importo Giocato (€)
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={importoGiocato}
+              onChange={(e) => setImportoGiocato(e.target.value)}
+              placeholder="0.00"
+              style={{ width: '100%', padding: '8px 10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px', fontSize: '13px' }}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
+              🏆 Importo Vinto (€)
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={importoVinto}
+              onChange={(e) => setImportoVinto(e.target.value)}
+              placeholder="0.00"
+              style={{ width: '100%', padding: '8px 10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px', fontSize: '13px' }}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
+              📝 Note (opz.)
+            </label>
+            <input
+              type="text"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Es. Milan-Roma Over 2.5"
+              style={{ width: '100%', padding: '8px 10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px', fontSize: '13px' }}
+            />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <button
+            onClick={() => handleAdd('win')}
+            style={{
+              flex: 1, minWidth: '140px', padding: '12px 20px',
+              background: 'var(--win)', color: '#000', border: 'none', borderRadius: '8px',
+              fontWeight: 'bold', fontSize: '14px', cursor: 'pointer',
+              transition: 'all 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(111, 207, 151, 0.4)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+          >
+            ✅ VINTA
+          </button>
+
+          <button
+            onClick={() => handleAdd('loss')}
+            style={{
+              flex: 1, minWidth: '140px', padding: '12px 20px',
+              background: 'var(--lose)', color: '#fff', border: 'none', borderRadius: '8px',
+              fontWeight: 'bold', fontSize: '14px', cursor: 'pointer',
+              transition: 'all 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(235, 87, 87, 0.4)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+          >
+            ❌ PERSA
+          </button>
+
+          <div style={{
+            padding: '10px 16px', background: 'var(--surface)', borderRadius: '8px',
+            border: '1px solid var(--border)', fontSize: '13px', fontWeight: 'bold',
+          }}>
+            💰 Saldo: <span style={{ color: saldoCorrente >= saldoIniziale ? 'var(--win)' : 'var(--lose)' }}>
+              €{saldoCorrente.toFixed(2)}
+            </span>
+          </div>
+        </div>
+
+        {msg && (
+          <div style={{
+            marginTop: '12px', padding: '10px 14px', borderRadius: '6px',
+            background: msg.type === 'success' ? 'rgba(111, 207, 151, 0.15)' : 'rgba(235, 87, 87, 0.15)',
+            border: `1px solid ${msg.type === 'success' ? 'var(--win)' : 'var(--lose)'}`,
+            color: msg.type === 'success' ? 'var(--win)' : 'var(--lose)',
+            fontSize: '13px', fontWeight: 'bold',
+          }}>
+            {msg.text}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ============================================================
   // COMPONENTE GRAFICO SVG
   // ============================================================
 
@@ -486,7 +770,6 @@
       );
     }
 
-    // Raggruppa per anno/mese per separatori visivi (solo settimanale/giornaliero)
     return (
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', minWidth: '500px' }}>
@@ -503,7 +786,7 @@
             </tr>
           </thead>
           <tbody>
-            {dati.map((d, i) => {
+            {dati.map((d) => {
               const roi = d.giocato > 0 ? (d.profitto / d.giocato) * 100 : 0;
               const cls = d.profitto > 0 ? 'var(--win)' : d.profitto < 0 ? 'var(--lose)' : 'var(--text-muted)';
               return (
@@ -545,170 +828,6 @@
             </tr>
           </tfoot>
         </table>
-      </div>
-    );
-  };
-
-  // ============================================================
-  // FORM INSERIMENTO
-  // ============================================================
-
-  const FormInserimento = ({ onAdd, onUpdate, movimenti, saldoIniziale }) => {
-    const [data, setData] = useState(() => toDateStr(new Date()));
-    const [importoGiocato, setImportoGiocato] = useState('');
-    const [importoVinto, setImportoVinto] = useState('');
-    const [note, setNote] = useState('');
-    const [msg, setMsg] = useState(null);
-
-    const saldoCorrente = useMemo(
-      () => calcolaSaldoCorrente(movimenti, saldoIniziale),
-      [movimenti, saldoIniziale]
-    );
-
-    const handleAdd = (esito) => {
-      const ig = parseFloat(importoGiocato);
-      if (!data || isNaN(ig) || ig <= 0) {
-        setMsg({ type: 'error', text: '⚠️ Inserisci data e importo giocato validi' });
-        setTimeout(() => setMsg(null), 3000);
-        return;
-      }
-
-      const iv = parseFloat(importoVinto);
-      if (esito === 'win' && (isNaN(iv) || iv <= 0)) {
-        setMsg({ type: 'error', text: '⚠️ Inserisci l\'importo vinto per la giocata vincente' });
-        setTimeout(() => setMsg(null), 3000);
-        return;
-      }
-
-      onAdd({
-        id: 'g_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-        data,
-        importoGiocato: ig,
-        esito,
-        importoVinto: esito === 'win' ? iv : 0,
-        note: note.trim(),
-      });
-
-      setImportoGiocato('');
-      setImportoVinto('');
-      setNote('');
-      setMsg({ type: 'success', text: esito === 'win' ? '✅ Giocata VINTA registrata!' : '❌ Giocata PERSA registrata!' });
-      setTimeout(() => setMsg(null), 2500);
-    };
-
-    return (
-      <div style={{
-        background: 'var(--card)', borderRadius: '12px', border: '1px solid var(--border)',
-        padding: '18px', marginBottom: '20px',
-      }}>
-        <h4 style={{ margin: '0 0 14px 0', color: 'var(--accent)', fontSize: '15px' }}>
-          ➕ Nuova Giocata
-        </h4>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '12px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
-              📅 Data
-            </label>
-            <input
-              type="date"
-              value={data}
-              onChange={(e) => setData(e.target.value)}
-              style={{ width: '100%', padding: '8px 10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px', fontSize: '13px' }}
-            />
-          </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
-              💵 Importo Giocato (€)
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={importoGiocato}
-              onChange={(e) => setImportoGiocato(e.target.value)}
-              placeholder="0.00"
-              style={{ width: '100%', padding: '8px 10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px', fontSize: '13px' }}
-            />
-          </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
-              🏆 Importo Vinto (€)
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={importoVinto}
-              onChange={(e) => setImportoVinto(e.target.value)}
-              placeholder="0.00"
-              style={{ width: '100%', padding: '8px 10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px', fontSize: '13px' }}
-            />
-          </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
-              📝 Note (opz.)
-            </label>
-            <input
-              type="text"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Es. Milan-Roma Over 2.5"
-              style={{ width: '100%', padding: '8px 10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px', fontSize: '13px' }}
-            />
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <button
-            onClick={() => handleAdd('win')}
-            style={{
-              flex: 1, minWidth: '140px', padding: '12px 20px',
-              background: 'var(--win)', color: '#000', border: 'none', borderRadius: '8px',
-              fontWeight: 'bold', fontSize: '14px', cursor: 'pointer',
-              transition: 'all 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(111, 207, 151, 0.4)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
-          >
-            ✅ VINTA
-          </button>
-
-          <button
-            onClick={() => handleAdd('loss')}
-            style={{
-              flex: 1, minWidth: '140px', padding: '12px 20px',
-              background: 'var(--lose)', color: '#fff', border: 'none', borderRadius: '8px',
-              fontWeight: 'bold', fontSize: '14px', cursor: 'pointer',
-              transition: 'all 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(235, 87, 87, 0.4)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
-          >
-            ❌ PERSA
-          </button>
-
-          <div style={{
-            padding: '10px 16px', background: 'var(--surface)', borderRadius: '8px',
-            border: '1px solid var(--border)', fontSize: '13px', fontWeight: 'bold',
-          }}>
-            💰 Saldo: <span style={{ color: saldoCorrente >= saldoIniziale ? 'var(--win)' : 'var(--lose)' }}>
-              €{saldoCorrente.toFixed(2)}
-            </span>
-          </div>
-        </div>
-
-        {msg && (
-          <div style={{
-            marginTop: '12px', padding: '10px 14px', borderRadius: '6px',
-            background: msg.type === 'success' ? 'rgba(111, 207, 151, 0.15)' : 'rgba(235, 87, 87, 0.15)',
-            border: `1px solid ${msg.type === 'success' ? 'var(--win)' : 'var(--lose)'}`,
-            color: msg.type === 'success' ? 'var(--win)' : 'var(--lose)',
-            fontSize: '13px', fontWeight: 'bold',
-          }}>
-            {msg.text}
-          </div>
-        )}
       </div>
     );
   };
@@ -834,6 +953,26 @@
       </div>
     );
   };
+
+  // ============================================================
+  // STAT CARD
+  // ============================================================
+
+  const StatCard = ({ icon, label, value, sub, color }) => (
+    <div style={{
+      background: 'var(--card)', borderRadius: '10px', border: '1px solid var(--border)',
+      padding: '12px 14px', textAlign: 'center',
+    }}>
+      <div style={{ fontSize: '20px', marginBottom: '2px' }}>{icon}</div>
+      <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '4px' }}>
+        {label}
+      </div>
+      <div style={{ fontSize: '18px', fontWeight: 'bold', color: color || 'var(--text)' }}>
+        {value}
+      </div>
+      {sub && <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>{sub}</div>}
+    </div>
+  );
 
   // ============================================================
   // COMPONENTE PRINCIPALE: GESTIONE CONTO
@@ -1101,26 +1240,6 @@
   }
 
   // ============================================================
-  // STAT CARD
-  // ============================================================
-
-  const StatCard = ({ icon, label, value, sub, color }) => (
-    <div style={{
-      background: 'var(--card)', borderRadius: '10px', border: '1px solid var(--border)',
-      padding: '12px 14px', textAlign: 'center',
-    }}>
-      <div style={{ fontSize: '20px', marginBottom: '2px' }}>{icon}</div>
-      <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '4px' }}>
-        {label}
-      </div>
-      <div style={{ fontSize: '18px', fontWeight: 'bold', color: color || 'var(--text)' }}>
-        {value}
-      </div>
-      {sub && <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>{sub}</div>}
-    </div>
-  );
-
-  // ============================================================
   // ESPOSIZIONE GLOBALE
   // ============================================================
 
@@ -1134,8 +1253,10 @@
     calcolaStatistiche,
     raggruppaPerPeriodo,
     esportaExcel,
+    formatDateIT,
     EXCEL_FILENAME,
   };
 
-  console.log('✅ Modulo Gestione Conto caricato');
+  console.log('✅ Modulo Gestione Conto caricato - con input data italiano (GG/MM/AAAA)');
+
 })();
