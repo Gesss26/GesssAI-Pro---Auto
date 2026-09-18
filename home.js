@@ -1,7 +1,7 @@
 // ============================================================
 // home.js - Modulo Home con quote PDF visibili
 // LEGGE il filtro campionati dal Palinsesto (fonte di verità).
-// Include 3 tab: "💰 Gestione Conto", "🌍 Seleziona una Nazione", "📈 Performance".
+// Include 3 tab: "🌍 Seleziona una Nazione", "💰 Gestione Conto" (default), "📈 Performance".
 // Quote mostrate accanto alle giocate (con value bet evidenziato)
 // ============================================================
 
@@ -783,6 +783,7 @@
 
   // ============================================================
   // COMPONENTE PRINCIPALE: HOME (con 3 tab)
+  // Ordine tab: 🌍 Nazioni | 💰 Gestione Conto (default) | 📈 Performance
   // ============================================================
 
   function HomeComponent({ matches, championships, onSelectMatch, setTab, selectedFamiglie, weatherCache }) {
@@ -877,19 +878,19 @@
         {/* Banner filtro visibile solo nelle tab Nazioni/Performance */}
         {homeTab !== 'GestioneConto' && <BannerFiltro />}
 
-        {/* ⭐ SWITCH CON 3 TAB */}
+        {/* ⭐ SWITCH CON 3 TAB - Ordine: Nazioni | Gestione Conto (default) | Performance */}
         <div className="sub-tabs" style={{ marginBottom: '16px', flexWrap: 'wrap' }}>
-          <button
-            className={homeTab === 'GestioneConto' ? 'active' : ''}
-            onClick={() => { setHomeTab('GestioneConto'); setNazioneSelezionata(null); }}
-          >
-            💰 Gestione Conto
-          </button>
           <button
             className={homeTab === 'Nazioni' ? 'active' : ''}
             onClick={() => { setHomeTab('Nazioni'); setNazioneSelezionata(null); }}
           >
             🌍 Seleziona una Nazione
+          </button>
+          <button
+            className={homeTab === 'GestioneConto' ? 'active' : ''}
+            onClick={() => { setHomeTab('GestioneConto'); setNazioneSelezionata(null); }}
+          >
+            💰 Gestione Conto
           </button>
           <button
             className={homeTab === 'Performance' ? 'active' : ''}
@@ -925,6 +926,6 @@
     CHINESE_TEAMS,
   };
 
-  console.log('✅ Modulo Home caricato - con Gestione Conto + quote PDF visibili');
+  console.log('✅ Modulo Home caricato - con Gestione Conto (default) + quote PDF visibili');
 
 })();
