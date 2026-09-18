@@ -788,7 +788,7 @@
 
   function HomeComponent({ matches, championships, onSelectMatch, setTab, selectedFamiglie, weatherCache }) {
     // ⭐ SWITCH: GestioneConto (default) / Nazioni / Performance
-    const [homeTab, setHomeTab] = useState('GestioneConto');
+    const [homeTab, setHomeTab] = useState('Nazioni');
     const [nazioneSelezionata, setNazioneSelezionata] = useState(null);
 
     const { filtro: filtroCampionati, campionatiAttivi } =
