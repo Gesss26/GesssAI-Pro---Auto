@@ -41814,7 +41814,7 @@
     "gol_casa": "0",
     "gol_ospite": "1",
     "citta": "Vitoria-Gasteiz",
-    "stadio": "Estadio Mendizorrotza",
+    "stadio": "Estadio de Mendizorroza",
     "stato": "Giocata"
   },
   {
@@ -41842,7 +41842,7 @@
     "gol_casa": "4",
     "gol_ospite": "0",
     "citta": "Madrid",
-    "stadio": "Metropolitano Stadium",
+    "stadio": "Riyadh Air Metropolitano",
     "stato": "Giocata"
   },
   {
@@ -41856,7 +41856,7 @@
     "gol_casa": "0",
     "gol_ospite": "1",
     "citta": "La Coruna",
-    "stadio": "Estadio Municipal de Riazor",
+    "stadio": "Estadio Riazor",
     "stato": "Giocata"
   },
   {
@@ -41894,12 +41894,12 @@
     "giornata": "6",
     "squadra_casa": "Real Betis",
     "squadra_ospite": "Getafe",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Sevilla",
     "stadio": "Estadio de La Cartuja",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "La Liga",
@@ -41908,12 +41908,12 @@
     "giornata": "6",
     "squadra_casa": "Malaga",
     "squadra_ospite": "Villarreal",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–3",
+    "gol_casa": "1",
+    "gol_ospite": "3",
     "citta": "Malaga",
     "stadio": "Estadio La Rosaleda",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "La Liga",
@@ -41925,7 +41925,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Cornella",
+    "citta": "Cornella de Llobregat",
     "stadio": "RCDE Stadium",
     "stato": "Futura"
   },
@@ -99084,12 +99084,12 @@
     "giornata": "5",
     "squadra_casa": "Cittadella",
     "squadra_ospite": "Juventus U23",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Cittadella",
     "stadio": "Stadio Pier Cesare Tombolato",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99098,12 +99098,12 @@
     "giornata": "5",
     "squadra_casa": "PRO Vercelli",
     "squadra_ospite": "Alcione",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Vercelli",
     "stadio": "Stadio Silvio Piola",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99112,12 +99112,12 @@
     "giornata": "5",
     "squadra_casa": "Albinoleffe",
     "squadra_ospite": "Arzignano Valchiampo",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Zanica",
     "stadio": "AlbinoLeffe",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99126,12 +99126,12 @@
     "giornata": "5",
     "squadra_casa": "Lumezzane",
     "squadra_ospite": "Novara",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Lumezzane",
     "stadio": "Tullio Saleri",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99140,12 +99140,12 @@
     "giornata": "5",
     "squadra_casa": "Pergolettese",
     "squadra_ospite": "Folgore Caratese",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Crema",
     "stadio": "Giuseppe Voltini",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99154,12 +99154,12 @@
     "giornata": "5",
     "squadra_casa": "Desenzano Calvina",
     "squadra_ospite": "Lecco",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–3",
+    "gol_casa": "1",
+    "gol_ospite": "3",
     "citta": "Ospitaletto",
     "stadio": "Stadio Comunale Gino Corioni",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99168,12 +99168,12 @@
     "giornata": "5",
     "squadra_casa": "Giana Erminio",
     "squadra_ospite": "Trento",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Gorgonzola",
     "stadio": "Stadio Citta di Gorgonzola",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99182,12 +99182,12 @@
     "giornata": "5",
     "squadra_casa": "Renate",
     "squadra_ospite": "Dolomiti Bellunesi",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Meda",
     "stadio": "Mino Favini",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99196,12 +99196,12 @@
     "giornata": "5",
     "squadra_casa": "Athletic Carpi",
     "squadra_ospite": "Ospitaletto",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Carpi",
     "stadio": "Stadio Sandro Cabassi",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99210,12 +99210,12 @@
     "giornata": "5",
     "squadra_casa": "Union Brescia",
     "squadra_ospite": "Treviso",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Brescia",
     "stadio": "Stadio Mario Rigamonti",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
