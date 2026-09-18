@@ -1546,6 +1546,74 @@
         }
       }, []);
 
+      // ⭐ NUOVO: POPOLA LA WEATHER CACHE PER LE PARTITE FUTURE
+      useEffect(() => {
+        if (!matches || matches.length === 0) return;
+        if (typeof window.fetchWeatherForMatch !== 'function') {
+          console.warn('⚠️ fetchWeatherForMatch non disponibile (meteo.js non caricato)');
+          return;
+        }
+
+        // Prendi solo le partite future (max 50 per non fare troppe chiamate API)
+        const todayStr = getTodayStr();
+        const partiteFuture = matches
+          .filter(m => {
+            if (m.stato !== 'Futura') return false;
+            if (!m.data) return false;
+            const d = normalizeDate(m.data);
+            return d && d >= todayStr;
+          })
+          .slice(0, 50);
+
+        if (partiteFuture.length === 0) {
+          console.log('🌤️ Nessuna partita futura per cui caricare il meteo');
+          return;
+        }
+
+        let cancelled = false;
+
+        const caricaMeteo = async () => {
+          const nuoveWeather = {};
+          let caricate = 0;
+
+          for (const m of partiteFuture) {
+            if (cancelled) return;
+
+            const key = `${m.campionato}_${m.data}`;
+            // Salta se già in cache (evita chiamate duplicate)
+            if (weatherCache[key]) continue;
+
+            try {
+              const w = await window.fetchWeatherForMatch(m);
+              if (w) {
+                nuoveWeather[key] = w;
+                caricate++;
+              }
+            } catch (e) {
+              // Silenzioso: la partita potrebbe essere fuori range date per l'API
+            }
+
+            // Pausa di 200ms tra le chiamate per rispettare i limiti di Open-Meteo
+            await new Promise(r => setTimeout(r, 200));
+          }
+
+          if (!cancelled && Object.keys(nuoveWeather).length > 0) {
+            setWeatherCache(prev => ({ ...prev, ...nuoveWeather }));
+            console.log(`🌤️ Meteo caricato per ${caricate} partite (${Object.keys(nuoveWeather).length} chiavi uniche)`);
+          } else if (!cancelled) {
+            console.log('🌤️ Nessun dato meteo disponibile per le partite future (probabilmente fuori range date)');
+          }
+        };
+
+        // Piccolo delay per non bloccare il primo render
+        const timer = setTimeout(caricaMeteo, 1500);
+
+        return () => {
+          cancelled = true;
+          clearTimeout(timer);
+        };
+      }, [matches]);
+
       const updateDataFromScraper = (data) => {
         if (data && data.matches && data.matches.length > 0) {
           const filteredMatches = filtraCampionatiEsclusi(data.matches);
