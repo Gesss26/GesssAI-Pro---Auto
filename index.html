@@ -1546,7 +1546,7 @@
         }
       }, []);
 
-      // ⭐ NUOVO: POPOLA LA WEATHER CACHE PER LE PARTITE FUTURE
+      // ⭐ MODIFICATO: POPOLA LA WEATHER CACHE BILANCIANDO TRA CAMPIONATI
       useEffect(() => {
         if (!matches || matches.length === 0) return;
         if (typeof window.fetchWeatherForMatch !== 'function') {
@@ -1554,33 +1554,55 @@
           return;
         }
 
-        // Prendi solo le partite future (max 50 per non fare troppe chiamate API)
         const todayStr = getTodayStr();
-        const partiteFuture = matches
-          .filter(m => {
-            if (m.stato !== 'Futura') return false;
-            if (!m.data) return false;
-            const d = normalizeDate(m.data);
-            return d && d >= todayStr;
-          })
-          .slice(0, 50);
+
+        // Prendi TUTTE le partite future con data valida
+        const partiteFuture = matches.filter(m => {
+          if (m.stato !== 'Futura') return false;
+          if (!m.data) return false;
+          const d = normalizeDate(m.data);
+          return d && d >= todayStr;
+        });
 
         if (partiteFuture.length === 0) {
           console.log('🌤️ Nessuna partita futura per cui caricare il meteo');
           return;
         }
 
+        // ⭐ Raggruppa per campionato per bilanciare
+        const perCampionato = {};
+        partiteFuture.forEach(m => {
+          const camp = m.campionato || 'Sconosciuto';
+          if (!perCampionato[camp]) perCampionato[camp] = [];
+          perCampionato[camp].push(m);
+        });
+
+        // ⭐ Prendi max 5 partite per campionato (così copri tutti i campionati)
+        const MAX_PER_CAMPIONATO = 5;
+        const partiteBilanciate = [];
+        Object.entries(perCampionato).forEach(([camp, lista]) => {
+          // Ordina per data (le più vicine prima)
+          const ordinate = lista.slice().sort((a, b) => {
+            const da = normalizeDate(a.data);
+            const db = normalizeDate(b.data);
+            return da.localeCompare(db);
+          });
+          partiteBilanciate.push(...ordinate.slice(0, MAX_PER_CAMPIONATO));
+        });
+
+        console.log(`🌤️ Meteo: ${partiteBilanciate.length} partite da ${Object.keys(perCampionato).length} campionati`);
+
         let cancelled = false;
 
         const caricaMeteo = async () => {
           const nuoveWeather = {};
           let caricate = 0;
+          let errori = 0;
 
-          for (const m of partiteFuture) {
+          for (const m of partiteBilanciate) {
             if (cancelled) return;
 
             const key = `${m.campionato}_${m.data}`;
-            // Salta se già in cache (evita chiamate duplicate)
             if (weatherCache[key]) continue;
 
             try {
@@ -1588,30 +1610,26 @@
               if (w) {
                 nuoveWeather[key] = w;
                 caricate++;
+              } else {
+                errori++;
               }
             } catch (e) {
-              // Silenzioso: la partita potrebbe essere fuori range date per l'API
+              errori++;
             }
 
-            // Pausa di 200ms tra le chiamate per rispettare i limiti di Open-Meteo
-            await new Promise(r => setTimeout(r, 200));
+            await new Promise(r => setTimeout(r, 150));
           }
 
           if (!cancelled && Object.keys(nuoveWeather).length > 0) {
             setWeatherCache(prev => ({ ...prev, ...nuoveWeather }));
-            console.log(`🌤️ Meteo caricato per ${caricate} partite (${Object.keys(nuoveWeather).length} chiavi uniche)`);
+            console.log(`✅ Meteo caricato: ${caricate} OK, ${errori} falliti, ${Object.keys(nuoveWeather).length} chiavi uniche`);
           } else if (!cancelled) {
-            console.log('🌤️ Nessun dato meteo disponibile per le partite future (probabilmente fuori range date)');
+            console.log('⚠️ Nessun meteo caricato');
           }
         };
 
-        // Piccolo delay per non bloccare il primo render
         const timer = setTimeout(caricaMeteo, 1500);
-
-        return () => {
-          cancelled = true;
-          clearTimeout(timer);
-        };
+        return () => { cancelled = true; clearTimeout(timer); };
       }, [matches]);
 
       const updateDataFromScraper = (data) => {
