@@ -43,7 +43,7 @@
   // ============================================================
 
   // ⭐ SOSTITUISCI QUESTO CON IL TUO PAT REALE
-  const DEFAULT_PAT = 'ghp_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+  const DEFAULT_PAT = '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';
 
   const storageKeyConto = (user) => `ft_gestione_conto_${user}`;
   const storageKeySaldo = (user) => `ft_gestione_saldo_${user}`;
