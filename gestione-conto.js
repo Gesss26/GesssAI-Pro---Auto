@@ -1,8 +1,10 @@
 // ============================================================
-// gestione-conto.js - Gestione conto con persistenza Excel
-// Salva/carica da: excel/gestione.xlsx (GitHub)
-// Settimana: Giovedì → Mercoledì successivo
-// Data input in formato italiano (GG/MM/AAAA)
+// gestione-conto.js - Gestione conto MULTI-UTENTE con password
+// - Ogni utente ha il suo conto protetto da password (SHA-256)
+// - File Excel separati: excel/gestione_<username>.xlsx (branch master)
+// - Upload automatico su GitHub via PAT (Personal Access Token)
+// - Settimana: Giovedì → Mercoledì successivo
+// - Input data italiano GG/MM/AAAA
 // ============================================================
 
 (function () {
@@ -11,41 +13,215 @@
   const { useState, useEffect, useMemo, useCallback, useRef } = React;
 
   // ============================================================
-  // CONFIGURAZIONE
+  // CONFIGURAZIONE GITHUB
   // ============================================================
 
-  const EXCEL_PATHS = [
-    '/GesssAI-Pro---Auto/excel/gestione.xlsx',
-    '/excel/gestione.xlsx',
-    'https://gesss26.github.io/GesssAI-Pro---Auto/excel/gestione.xlsx',
-  ];
-  const EXCEL_FILENAME = 'gestione.xlsx';
-  const STORAGE_KEY = 'ft_gestione_conto';
-  const SALDO_INIZIALE_KEY = 'ft_gestione_saldo_iniziale';
+  const GITHUB_USER = 'Gesss26';
+  const GITHUB_REPO = 'GesssAI-Pro---Auto';
+  const GITHUB_BRANCH = 'master';
+  const EXCEL_DIR = 'excel';
+
+  const STORAGE_USERS = 'ft_gestione_utenti';
+  const STORAGE_SESSION = 'ft_gestione_sessione';
+  const STORAGE_PAT = 'ft_github_pat';
   const DEFAULT_SALDO_INIZIALE = 1000;
 
+  const storageKeyConto = (user) => `ft_gestione_conto_${user}`;
+  const storageKeySaldo = (user) => `ft_gestione_saldo_${user}`;
+  const excelFilename = (user) => `gestione_${user}.xlsx`;
+
   // ============================================================
-  // UTILITÀ DATE - Settimana Giovedì → Mercoledì
+  // CRIPTO: SHA-256 (Web Crypto API)
   // ============================================================
 
-  /**
-   * Restituisce il giovedì della settimana di una data (o il giovedì precedente)
-   * La settimana va da Giovedì a Mercoledì successivo
-   */
+  const sha256 = async (text) => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(text);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  };
+
+  const hashPassword = async (username, password) => {
+    return await sha256(`gesssai::${username.toLowerCase()}::${password}`);
+  };
+
+  // ============================================================
+  // GESTIONE UTENTI
+  // ============================================================
+
+  const loadUtenti = () => {
+    try {
+      const arr = JSON.parse(localStorage.getItem(STORAGE_USERS) || '[]');
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) { return []; }
+  };
+
+  const saveUtenti = (utenti) => {
+    localStorage.setItem(STORAGE_USERS, JSON.stringify(utenti));
+  };
+
+  const getUtente = (username) => {
+    return loadUtenti().find(u => u.username.toLowerCase() === username.toLowerCase()) || null;
+  };
+
+  const creaUtente = async (username, password) => {
+    const uname = username.trim();
+    if (!uname || uname.length < 2) throw new Error('Username troppo corto (min 2 caratteri)');
+    if (!/^[a-zA-Z0-9_-]+$/.test(uname)) throw new Error('Solo lettere, numeri, _ e - consentiti');
+    if (!password || password.length < 3) throw new Error('Password troppo corta (min 3 caratteri)');
+    if (getUtente(uname)) throw new Error('Username già esistente');
+
+    const hash = await hashPassword(uname, password);
+    const utenti = loadUtenti();
+    utenti.push({
+      username: uname,
+      hash,
+      creatoIl: new Date().toISOString(),
+    });
+    saveUtenti(utenti);
+    return uname;
+  };
+
+  const eliminaUtente = (username) => {
+    const utenti = loadUtenti().filter(u => u.username !== username);
+    saveUtenti(utenti);
+    localStorage.removeItem(storageKeyConto(username));
+    localStorage.removeItem(storageKeySaldo(username));
+    const sessione = loadSessione();
+    if (sessione && sessione.toLowerCase() === username.toLowerCase()) {
+      localStorage.removeItem(STORAGE_SESSION);
+    }
+  };
+
+  const verificaPassword = async (username, password) => {
+    const u = getUtente(username);
+    if (!u) return false;
+    const hash = await hashPassword(u.username, password);
+    return hash === u.hash;
+  };
+
+  const loadSessione = () => localStorage.getItem(STORAGE_SESSION) || null;
+  const saveSessione = (username) => {
+    if (username) localStorage.setItem(STORAGE_SESSION, username);
+    else localStorage.removeItem(STORAGE_SESSION);
+  };
+
+  // ============================================================
+  // PAT GITHUB
+  // ============================================================
+
+  const getPAT = () => localStorage.getItem(STORAGE_PAT) || '';
+  const setPAT = (pat) => {
+    if (pat) localStorage.setItem(STORAGE_PAT, pat.trim());
+    else localStorage.removeItem(STORAGE_PAT);
+  };
+
+  // ============================================================
+  // UPLOAD SU GITHUB (Contents API)
+  // ============================================================
+
+  function arrayBufferToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    const chunkSize = 0x8000;
+    for (let i = 0; i < len; i += chunkSize) {
+      const chunk = bytes.subarray(i, i + chunkSize);
+      binary += String.fromCharCode.apply(null, chunk);
+    }
+    return btoa(binary);
+  }
+
+  async function caricaFileSuGitHub(filepath, content, commitMessage = 'Update da GesssAI-Pro') {
+    const pat = getPAT();
+    if (!pat) {
+      console.warn('PAT GitHub non configurato');
+      return { ok: false, error: 'PAT non configurato' };
+    }
+
+    const apiUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${filepath}`;
+
+    // 1. Recupera SHA se il file esiste
+    let sha = null;
+    try {
+      const checkResp = await fetch(apiUrl + `?ref=${GITHUB_BRANCH}`, {
+        headers: {
+          'Authorization': `token ${pat}`,
+          'Accept': 'application/vnd.github+json',
+        },
+      });
+      if (checkResp.ok) {
+        const existing = await checkResp.json();
+        sha = existing.sha;
+      }
+    } catch (e) {
+      // File non esiste
+    }
+
+    // 2. Base64
+    const base64 = arrayBufferToBase64(content);
+
+    // 3. PUT
+    const body = {
+      message: commitMessage,
+      content: base64,
+      branch: GITHUB_BRANCH,
+    };
+    if (sha) body.sha = sha;
+
+    try {
+      const resp = await fetch(apiUrl, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${pat}`,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (resp.ok) {
+        return { ok: true };
+      } else {
+        const err = await resp.json().catch(() => ({}));
+        let msg = err.message || `HTTP ${resp.status}`;
+        if (resp.status === 401) msg = 'PAT non valido o scaduto';
+        if (resp.status === 403) msg = 'Permessi insufficienti (serve scope "repo")';
+        if (resp.status === 404) msg = 'Repo non trovato o PAT senza accesso';
+        return { ok: false, error: msg };
+      }
+    } catch (e) {
+      return { ok: false, error: 'Errore rete: ' + e.message };
+    }
+  }
+
+  // ============================================================
+  // DOWNLOAD DA GITHUB (CDN jsDelivr + raw GitHub)
+  // ============================================================
+
+  const getDownloadUrls = (user) => [
+    `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}@${GITHUB_BRANCH}/${EXCEL_DIR}/${excelFilename(user)}`,
+    `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${EXCEL_DIR}/${excelFilename(user)}`,
+    `/${GITHUB_REPO}/${EXCEL_DIR}/${excelFilename(user)}`,
+  ];
+
+  // ============================================================
+  // UTILITÀ DATE
+  // ============================================================
+
   const getGiovediSettimana = (dateInput) => {
     const d = new Date(dateInput);
     d.setHours(0, 0, 0, 0);
-    const day = d.getDay(); // 0=Dom, 1=Lun, ..., 4=Gio, 5=Ven, 6=Sab
-
+    const day = d.getDay();
     let offset;
-    if (day === 4) offset = 0;        // Giovedì
-    else if (day === 5) offset = -1;  // Venerdì
-    else if (day === 6) offset = -2;  // Sabato
-    else if (day === 0) offset = -3;  // Domenica
-    else if (day === 1) offset = -4;  // Lunedì
-    else if (day === 2) offset = -5;  // Martedì
-    else offset = -6;                  // Mercoledì
-
+    if (day === 4) offset = 0;
+    else if (day === 5) offset = -1;
+    else if (day === 6) offset = -2;
+    else if (day === 0) offset = -3;
+    else if (day === 1) offset = -4;
+    else if (day === 2) offset = -5;
+    else offset = -6;
     const giovedi = new Date(d);
     giovedi.setDate(d.getDate() + offset);
     return giovedi;
@@ -81,7 +257,7 @@
   };
 
   // ============================================================
-  // PARSING / SERIALIZZAZIONE EXCEL
+  // PARSING EXCEL
   // ============================================================
 
   const parseExcelGestione = (arrayBuffer) => {
@@ -159,36 +335,31 @@
     }
   };
 
-  const loadGestioneFromLocal = () => {
+  const loadGestioneFromLocal = (username) => {
     try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-      const saldoIniziale = parseFloat(localStorage.getItem(SALDO_INIZIALE_KEY)) || DEFAULT_SALDO_INIZIALE;
+      const saved = JSON.parse(localStorage.getItem(storageKeyConto(username)) || 'null');
+      const saldo = parseFloat(localStorage.getItem(storageKeySaldo(username))) || DEFAULT_SALDO_INIZIALE;
       if (saved && Array.isArray(saved.movimenti)) {
-        return { movimenti: saved.movimenti, saldoIniziale: saved.saldoIniziale || saldoIniziale };
+        return { movimenti: saved.movimenti, saldoIniziale: saved.saldoIniziale || saldo };
       }
     } catch (e) {}
     return { movimenti: [], saldoIniziale: DEFAULT_SALDO_INIZIALE };
   };
 
-  const saveGestioneToLocal = (movimenti, saldoIniziale) => {
+  const saveGestioneToLocal = (username, movimenti, saldoIniziale) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ movimenti, saldoIniziale, updatedAt: new Date().toISOString() }));
-      localStorage.setItem(SALDO_INIZIALE_KEY, String(saldoIniziale));
+      localStorage.setItem(storageKeyConto(username), JSON.stringify({ movimenti, saldoIniziale, updatedAt: new Date().toISOString() }));
+      localStorage.setItem(storageKeySaldo(username), String(saldoIniziale));
     } catch (e) {
       console.warn('Errore salvataggio gestione:', e);
     }
   };
 
   // ============================================================
-  // ESPORTAZIONE EXCEL
+  // GENERAZIONE WORKBOOK (per export/upload)
   // ============================================================
 
-  const esportaExcel = (movimenti, saldoIniziale) => {
-    if (typeof XLSX === 'undefined') {
-      alert('Libreria XLSX non disponibile');
-      return;
-    }
-
+  const buildWorkbook = (username, movimenti, saldoIniziale) => {
     const righe = movimenti
       .slice()
       .sort((a, b) => new Date(a.data) - new Date(b.data))
@@ -201,21 +372,28 @@
         'Note': m.note || '',
       }));
 
-    // Riga iniziale con saldo iniziale
     righe.unshift({
       'Data': '',
       'Importo Giocato': '',
       'Esito': 'SALDO INIZIALE',
       'Importo Vinto': saldoIniziale,
       'Profitto': '',
-      'Note': '',
+      'Note': `Utente: ${username} - Generato il ${formatDateIT(toDateStr(new Date()))}`,
     });
 
     const ws = XLSX.utils.json_to_sheet(righe);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Gestione');
+    return wb;
+  };
 
-    XLSX.writeFile(wb, EXCEL_FILENAME);
+  const esportaExcel = (username, movimenti, saldoIniziale) => {
+    if (typeof XLSX === 'undefined') {
+      alert('Libreria XLSX non disponibile');
+      return;
+    }
+    const wb = buildWorkbook(username, movimenti, saldoIniziale);
+    XLSX.writeFile(wb, excelFilename(username));
   };
 
   // ============================================================
@@ -263,28 +441,21 @@
       .sort((a, b) => new Date(a.data) - new Date(b.data));
 
     if (completati.length === 0) return [];
-
     const groups = new Map();
 
     completati.forEach(m => {
       const d = new Date(m.data + 'T00:00:00');
       let key, label;
-
       if (tipo === 'giornaliero') {
-        key = m.data;
-        label = formatDateIT(m.data);
+        key = m.data; label = formatDateIT(m.data);
       } else if (tipo === 'settimanale') {
         const gio = getGiovediSettimana(d);
-        key = toDateStr(gio);
-        label = getWeekLabel(gio);
+        key = toDateStr(gio); label = getWeekLabel(gio);
       } else {
         key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         label = getMonthLabel(d);
       }
-
-      if (!groups.has(key)) {
-        groups.set(key, { key, label, giocato: 0, vinto: 0, profitto: 0, count: 0, dataOrdine: key });
-      }
+      if (!groups.has(key)) groups.set(key, { key, label, giocato: 0, vinto: 0, profitto: 0, count: 0, dataOrdine: key });
       const g = groups.get(key);
       g.giocato += m.importoGiocato;
       if (m.esito === 'win') g.vinto += m.importoVinto;
@@ -300,7 +471,6 @@
   // ============================================================
 
   const DataInputItaliano = ({ value, onChange }) => {
-    // value è in formato ISO "YYYY-MM-DD"
     const parseISO = (iso) => {
       if (!iso) return { g: '', m: '', a: '' };
       const parts = iso.split('-');
@@ -315,7 +485,6 @@
     const meseRef = useRef(null);
     const annoRef = useRef(null);
 
-    // Sync esterno (es. se il parent cambia value)
     useEffect(() => {
       const p = parseISO(value);
       setGiorno(p.g); setMese(p.m); setAnno(p.a);
@@ -336,7 +505,6 @@
 
     const handleMese = (e) => {
       let v = e.target.value.replace(/\D/g, '').slice(0, 2);
-      // Validazione mese
       if (v.length === 2) {
         const n = parseInt(v, 10);
         if (n > 12) v = '12';
@@ -354,22 +522,18 @@
     };
 
     const handleBlur = (campo) => {
-      // Auto-padding
       if (campo === 'g' && giorno.length === 1) {
-        const newV = '0' + giorno;
-        setGiorno(newV);
-        emitChange(newV, mese, anno);
+        const nv = '0' + giorno;
+        setGiorno(nv); emitChange(nv, mese, anno);
       }
       if (campo === 'm' && mese.length === 1) {
         const n = parseInt(mese, 10);
-        const newV = n < 10 ? '0' + n : String(n);
-        setMese(newV);
-        emitChange(giorno, newV, anno);
+        const nv = n < 10 ? '0' + n : String(n);
+        setMese(nv); emitChange(giorno, nv, anno);
       }
     };
 
     const inputStyle = {
-      width: '100%',
       padding: '8px 6px',
       background: 'var(--surface)',
       border: '1px solid var(--border)',
@@ -384,48 +548,401 @@
 
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-        <input
-          type="text"
-          inputMode="numeric"
-          placeholder="GG"
-          value={giorno}
-          onChange={handleGiorno}
-          onBlur={() => handleBlur('g')}
-          maxLength={2}
-          style={{ ...inputStyle, width: '48px', flex: '0 0 auto' }}
-        />
+        <input type="text" inputMode="numeric" placeholder="GG"
+          value={giorno} onChange={handleGiorno} onBlur={() => handleBlur('g')} maxLength={2}
+          style={{ ...inputStyle, width: '48px', flex: '0 0 auto' }} />
         <span style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '16px' }}>/</span>
-        <input
-          ref={meseRef}
-          type="text"
-          inputMode="numeric"
-          placeholder="MM"
-          value={mese}
-          onChange={handleMese}
-          onBlur={() => handleBlur('m')}
-          maxLength={2}
-          style={{ ...inputStyle, width: '48px', flex: '0 0 auto' }}
-        />
+        <input ref={meseRef} type="text" inputMode="numeric" placeholder="MM"
+          value={mese} onChange={handleMese} onBlur={() => handleBlur('m')} maxLength={2}
+          style={{ ...inputStyle, width: '48px', flex: '0 0 auto' }} />
         <span style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '16px' }}>/</span>
-        <input
-          ref={annoRef}
-          type="text"
-          inputMode="numeric"
-          placeholder="AAAA"
-          value={anno}
-          onChange={handleAnno}
-          maxLength={4}
-          style={{ ...inputStyle, flex: 1, minWidth: '60px' }}
-        />
+        <input ref={annoRef} type="text" inputMode="numeric" placeholder="AAAA"
+          value={anno} onChange={handleAnno} maxLength={4}
+          style={{ ...inputStyle, flex: 1, minWidth: '60px' }} />
       </div>
     );
   };
 
   // ============================================================
-  // FORM INSERIMENTO (con data italiana)
+  // SCHERMATA REGISTRAZIONE (primo utente)
   // ============================================================
 
-  const FormInserimento = ({ onAdd, onUpdate, movimenti, saldoIniziale }) => {
+  const SchermataRegistrazione = ({ onRegistrato }) => {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [password2, setPassword2] = useState('');
+    const [msg, setMsg] = useState(null);
+    const [busy, setBusy] = useState(false);
+
+    const handleSubmit = async () => {
+      setMsg(null);
+      if (password !== password2) {
+        setMsg({ type: 'error', text: '⚠️ Le password non coincidono' });
+        return;
+      }
+      setBusy(true);
+      try {
+        const uname = await creaUtente(username, password);
+        setMsg({ type: 'success', text: '✅ Utente creato! Accesso in corso...' });
+        setTimeout(() => onRegistrato(uname), 800);
+      } catch (e) {
+        setMsg({ type: 'error', text: '⚠️ ' + e.message });
+      } finally {
+        setBusy(false);
+      }
+    };
+
+    return (
+      <div style={{
+        maxWidth: '420px', margin: '60px auto', padding: '32px',
+        background: 'var(--card)', borderRadius: '16px',
+        border: '2px solid var(--accent)', boxShadow: '0 8px 40px rgba(243, 156, 18, 0.2)',
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <div style={{ fontSize: '56px', marginBottom: '8px' }}>👤</div>
+          <h2 style={{ color: 'var(--accent)', margin: '0 0 6px 0' }}>Benvenuto in GesssAI-Pro</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: 0 }}>
+            Crea il tuo account per gestire il conto
+          </p>
+        </div>
+
+        <div style={{ marginBottom: '14px' }}>
+          <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 'bold' }}>
+            👤 Username
+          </label>
+          <input type="text" value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Es. Mario"
+            style={{ width: '100%', padding: '10px 12px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '8px', fontSize: '14px' }} />
+        </div>
+
+        <div style={{ marginBottom: '14px' }}>
+          <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 'bold' }}>
+            🔒 Password
+          </label>
+          <input type="password" value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Min 3 caratteri"
+            style={{ width: '100%', padding: '10px 12px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '8px', fontSize: '14px' }} />
+        </div>
+
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-muted)', marginBottom: '6px', fontWeight: 'bold' }}>
+            🔒 Conferma Password
+          </label>
+          <input type="password" value={password2}
+            onChange={(e) => setPassword2(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+            placeholder="Ripeti password"
+            style={{ width: '100%', padding: '10px 12px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '8px', fontSize: '14px' }} />
+        </div>
+
+        <button onClick={handleSubmit} disabled={busy}
+          style={{
+            width: '100%', padding: '14px', background: 'var(--accent)', color: '#000',
+            border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '15px',
+            cursor: busy ? 'wait' : 'pointer', transition: 'all 0.15s',
+            opacity: busy ? 0.6 : 1,
+          }}>
+          {busy ? '⏳ Creazione...' : '✨ Registrati'}
+        </button>
+
+        {msg && (
+          <div style={{
+            marginTop: '14px', padding: '10px 14px', borderRadius: '6px',
+            background: msg.type === 'success' ? 'rgba(111, 207, 151, 0.15)' : 'rgba(235, 87, 87, 0.15)',
+            border: `1px solid ${msg.type === 'success' ? 'var(--win)' : 'var(--lose)'}`,
+            color: msg.type === 'success' ? 'var(--win)' : 'var(--lose)',
+            fontSize: '13px', fontWeight: 'bold', textAlign: 'center',
+          }}>
+            {msg.text}
+          </div>
+        )}
+
+        <div style={{ marginTop: '18px', fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center', lineHeight: '1.5' }}>
+          🔐 Le password sono hashate con SHA-256 e non vengono mai salvate in chiaro.
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================================
+  // SCHERMATA SELEZIONE UTENTE (login)
+  // ============================================================
+
+  const SchermataSelezioneUtente = ({ utenti, onLogin, onUtentiCambiati }) => {
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [password, setPassword] = useState('');
+    const [msg, setMsg] = useState(null);
+    const [busy, setBusy] = useState(false);
+    const [showAdd, setShowAdd] = useState(false);
+    const [nuovoUser, setNuovoUser] = useState('');
+    const [nuovaPass, setNuovaPass] = useState('');
+    const [nuovaPass2, setNuovaPass2] = useState('');
+
+    const handleLogin = async () => {
+      if (!selectedUser) return;
+      setBusy(true); setMsg(null);
+      const ok = await verificaPassword(selectedUser.username, password);
+      if (ok) {
+        setMsg({ type: 'success', text: '✅ Accesso consentito' });
+        setTimeout(() => onLogin(selectedUser.username), 400);
+      } else {
+        setMsg({ type: 'error', text: '❌ Password errata' });
+        setPassword('');
+      }
+      setBusy(false);
+    };
+
+    const handleAdd = async () => {
+      setMsg(null);
+      if (nuovaPass !== nuovaPass2) {
+        setMsg({ type: 'error', text: '⚠️ Le password non coincidono' });
+        return;
+      }
+      setBusy(true);
+      try {
+        await creaUtente(nuovoUser, nuovaPass);
+        setMsg({ type: 'success', text: '✅ Utente creato!' });
+        setNuovoUser(''); setNuovaPass(''); setNuovaPass2('');
+        setTimeout(() => { setShowAdd(false); onUtentiCambiati(); }, 800);
+      } catch (e) {
+        setMsg({ type: 'error', text: '⚠️ ' + e.message });
+      } finally {
+        setBusy(false);
+      }
+    };
+
+    const handleDelete = (user) => {
+      if (!window.confirm(`Eliminare l'utente "${user.username}" e TUTTI i suoi dati?`)) return;
+      eliminaUtente(user.username);
+      onUtentiCambiati();
+    };
+
+    return (
+      <div style={{
+        maxWidth: '680px', margin: '40px auto', padding: '32px',
+        background: 'var(--card)', borderRadius: '16px',
+        border: '2px solid var(--border)', boxShadow: '0 8px 40px rgba(0, 0, 0, 0.4)',
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <div style={{ fontSize: '56px', marginBottom: '8px' }}>👥</div>
+          <h2 style={{ color: 'var(--accent)', margin: '0 0 6px 0' }}>Chi sta usando il conto?</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: 0 }}>
+            Seleziona il tuo profilo e inserisci la password
+          </p>
+        </div>
+
+        {/* Lista utenti */}
+        {!selectedUser && !showAdd && (
+          <>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+              gap: '12px', marginBottom: '16px',
+            }}>
+              {utenti.map(u => (
+                <div key={u.username} style={{ position: 'relative' }}>
+                  <button
+                    onClick={() => { setSelectedUser(u); setPassword(''); setMsg(null); }}
+                    style={{
+                      width: '100%', padding: '16px 12px', background: 'var(--surface)',
+                      border: '2px solid var(--border)', borderRadius: '12px',
+                      cursor: 'pointer', transition: 'all 0.15s',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                  >
+                    <div style={{
+                      width: '48px', height: '48px', borderRadius: '50%',
+                      background: 'var(--accent)', color: '#000', display: 'flex',
+                      alignItems: 'center', justifyContent: 'center',
+                      fontSize: '20px', fontWeight: 'bold',
+                    }}>
+                      {u.username.charAt(0).toUpperCase()}
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text)' }}>
+                      {u.username}
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => handleDelete(u)}
+                    title="Elimina utente"
+                    style={{
+                      position: 'absolute', top: '-6px', right: '-6px',
+                      background: 'var(--lose)', color: '#fff', border: 'none',
+                      borderRadius: '50%', width: '24px', height: '24px',
+                      cursor: 'pointer', fontWeight: 'bold', fontSize: '12px',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+                    }}
+                  >✕</button>
+                </div>
+              ))}
+
+              <button
+                onClick={() => { setShowAdd(true); setMsg(null); }}
+                style={{
+                  padding: '16px 12px', background: 'transparent',
+                  border: '2px dashed var(--border)', borderRadius: '12px',
+                  cursor: 'pointer', transition: 'all 0.15s',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                  color: 'var(--text-muted)',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+              >
+                <div style={{ fontSize: '32px' }}>➕</div>
+                <div style={{ fontSize: '12px', fontWeight: 'bold' }}>Nuovo utente</div>
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Login */}
+        {selectedUser && !showAdd && (
+          <div style={{
+            padding: '20px', background: 'var(--surface)', borderRadius: '12px',
+            border: '1px solid var(--border)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+              <div style={{
+                width: '44px', height: '44px', borderRadius: '50%',
+                background: 'var(--accent)', color: '#000', display: 'flex',
+                alignItems: 'center', justifyContent: 'center',
+                fontSize: '18px', fontWeight: 'bold',
+              }}>
+                {selectedUser.username.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <div style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--text)' }}>
+                  {selectedUser.username}
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                  Inserisci la password per accedere
+                </div>
+              </div>
+            </div>
+
+            <input
+              type="password" value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+              placeholder="🔒 Password"
+              autoFocus
+              style={{
+                width: '100%', padding: '12px 14px', background: 'var(--card)',
+                border: '1px solid var(--border)', color: 'var(--text)',
+                borderRadius: '8px', fontSize: '15px', marginBottom: '12px',
+              }}
+            />
+
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => { setSelectedUser(null); setPassword(''); setMsg(null); }}
+                style={{
+                  padding: '10px 18px', background: 'var(--surface)', color: 'var(--text)',
+                  border: '1px solid var(--border)', borderRadius: '8px',
+                  cursor: 'pointer', fontWeight: 'bold', fontSize: '13px',
+                }}
+              >← Cambia utente</button>
+              <button
+                onClick={handleLogin} disabled={busy || !password}
+                style={{
+                  flex: 1, padding: '10px 18px', background: 'var(--accent)', color: '#000',
+                  border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '14px',
+                  cursor: busy || !password ? 'not-allowed' : 'pointer',
+                  opacity: busy || !password ? 0.5 : 1,
+                }}
+              >
+                {busy ? '⏳ Verifica...' : '🔓 Accedi'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Aggiungi utente */}
+        {showAdd && (
+          <div style={{
+            padding: '20px', background: 'var(--surface)', borderRadius: '12px',
+            border: '2px solid var(--accent)',
+          }}>
+            <h3 style={{ margin: '0 0 14px 0', color: 'var(--accent)', fontSize: '15px' }}>
+              ➕ Nuovo Utente
+            </h3>
+
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
+                👤 Username
+              </label>
+              <input type="text" value={nuovoUser}
+                onChange={(e) => setNuovoUser(e.target.value)}
+                placeholder="Es. Luca"
+                style={{ width: '100%', padding: '10px 12px', background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '8px', fontSize: '14px' }} />
+            </div>
+
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
+                🔒 Password
+              </label>
+              <input type="password" value={nuovaPass}
+                onChange={(e) => setNuovaPass(e.target.value)}
+                placeholder="Min 3 caratteri"
+                style={{ width: '100%', padding: '10px 12px', background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '8px', fontSize: '14px' }} />
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
+                🔒 Conferma Password
+              </label>
+              <input type="password" value={nuovaPass2}
+                onChange={(e) => setNuovaPass2(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+                placeholder="Ripeti password"
+                style={{ width: '100%', padding: '10px 12px', background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '8px', fontSize: '14px' }} />
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => { setShowAdd(false); setMsg(null); }}
+                style={{
+                  padding: '10px 18px', background: 'var(--surface)', color: 'var(--text)',
+                  border: '1px solid var(--border)', borderRadius: '8px',
+                  cursor: 'pointer', fontWeight: 'bold', fontSize: '13px',
+                }}
+              >← Annulla</button>
+              <button
+                onClick={handleAdd} disabled={busy}
+                style={{
+                  flex: 1, padding: '10px 18px', background: 'var(--accent)', color: '#000',
+                  border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '14px',
+                  cursor: busy ? 'wait' : 'pointer', opacity: busy ? 0.6 : 1,
+                }}
+              >{busy ? '⏳...' : '✨ Crea Utente'}</button>
+            </div>
+          </div>
+        )}
+
+        {msg && (
+          <div style={{
+            marginTop: '14px', padding: '10px 14px', borderRadius: '6px',
+            background: msg.type === 'success' ? 'rgba(111, 207, 151, 0.15)' : 'rgba(235, 87, 87, 0.15)',
+            border: `1px solid ${msg.type === 'success' ? 'var(--win)' : 'var(--lose)'}`,
+            color: msg.type === 'success' ? 'var(--win)' : 'var(--lose)',
+            fontSize: '13px', fontWeight: 'bold', textAlign: 'center',
+          }}>
+            {msg.text}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ============================================================
+  // FORM INSERIMENTO
+  // ============================================================
+
+  const FormInserimento = ({ onAdd, movimenti, saldoIniziale }) => {
     const [data, setData] = useState(() => toDateStr(new Date()));
     const [importoGiocato, setImportoGiocato] = useState('');
     const [importoVinto, setImportoVinto] = useState('');
@@ -437,7 +954,6 @@
       [movimenti, saldoIniziale]
     );
 
-    // ⭐ Anteprima data italiana
     const dataItaliana = useMemo(() => {
       if (!data) return '';
       const p = data.split('-');
@@ -452,14 +968,12 @@
         setTimeout(() => setMsg(null), 3000);
         return;
       }
-
       const iv = parseFloat(importoVinto);
       if (esito === 'win' && (isNaN(iv) || iv <= 0)) {
         setMsg({ type: 'error', text: '⚠️ Inserisci l\'importo vinto per la giocata vincente' });
         setTimeout(() => setMsg(null), 3000);
         return;
       }
-
       onAdd({
         id: 'g_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
         data,
@@ -468,7 +982,6 @@
         importoVinto: esito === 'win' ? iv : 0,
         note: note.trim(),
       });
-
       setImportoGiocato('');
       setImportoVinto('');
       setNote('');
@@ -496,73 +1009,52 @@
             <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
               💵 Importo Giocato (€)
             </label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={importoGiocato}
+            <input type="number" step="0.01" min="0" value={importoGiocato}
               onChange={(e) => setImportoGiocato(e.target.value)}
               placeholder="0.00"
-              style={{ width: '100%', padding: '8px 10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px', fontSize: '13px' }}
-            />
+              style={{ width: '100%', padding: '8px 10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px', fontSize: '13px' }} />
           </div>
           <div>
             <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
               🏆 Importo Vinto (€)
             </label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={importoVinto}
+            <input type="number" step="0.01" min="0" value={importoVinto}
               onChange={(e) => setImportoVinto(e.target.value)}
               placeholder="0.00"
-              style={{ width: '100%', padding: '8px 10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px', fontSize: '13px' }}
-            />
+              style={{ width: '100%', padding: '8px 10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px', fontSize: '13px' }} />
           </div>
           <div>
             <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
               📝 Note (opz.)
             </label>
-            <input
-              type="text"
-              value={note}
+            <input type="text" value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Es. Milan-Roma Over 2.5"
-              style={{ width: '100%', padding: '8px 10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px', fontSize: '13px' }}
-            />
+              style={{ width: '100%', padding: '8px 10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px', fontSize: '13px' }} />
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <button
-            onClick={() => handleAdd('win')}
+          <button onClick={() => handleAdd('win')}
             style={{
               flex: 1, minWidth: '140px', padding: '12px 20px',
               background: 'var(--win)', color: '#000', border: 'none', borderRadius: '8px',
               fontWeight: 'bold', fontSize: '14px', cursor: 'pointer',
-              transition: 'all 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+              transition: 'all 0.15s',
             }}
             onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(111, 207, 151, 0.4)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
-          >
-            ✅ VINTA
-          </button>
-
-          <button
-            onClick={() => handleAdd('loss')}
+          >✅ VINTA</button>
+          <button onClick={() => handleAdd('loss')}
             style={{
               flex: 1, minWidth: '140px', padding: '12px 20px',
               background: 'var(--lose)', color: '#fff', border: 'none', borderRadius: '8px',
               fontWeight: 'bold', fontSize: '14px', cursor: 'pointer',
-              transition: 'all 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+              transition: 'all 0.15s',
             }}
             onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(235, 87, 87, 0.4)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
-          >
-            ❌ PERSA
-          </button>
-
+          >❌ PERSA</button>
           <div style={{
             padding: '10px 16px', background: 'var(--surface)', borderRadius: '8px',
             border: '1px solid var(--border)', fontSize: '13px', fontWeight: 'bold',
@@ -589,24 +1081,22 @@
   };
 
   // ============================================================
-  // COMPONENTE GRAFICO SVG
+  // GRAFICO SVG
   // ============================================================
 
   const GraficoAndamento = ({ movimenti, saldoIniziale }) => {
     const [hoverIdx, setHoverIdx] = useState(null);
-    const svgRef = useRef(null);
 
     const punti = useMemo(() => {
       const completati = movimenti
         .filter(m => m.esito === 'win' || m.esito === 'loss')
         .sort((a, b) => new Date(a.data) - new Date(b.data));
-
       let saldo = saldoIniziale;
       const arr = [{ idx: 0, data: 'Inizio', saldo }];
-      completati.forEach((m, i) => {
+      completati.forEach((m) => {
         if (m.esito === 'win') saldo += (m.importoVinto - m.importoGiocato);
         else saldo -= m.importoGiocato;
-        arr.push({ idx: i + 1, data: formatDateIT(m.data), saldo });
+        arr.push({ data: formatDateIT(m.data), saldo });
       });
       return arr;
     }, [movimenti, saldoIniziale]);
@@ -641,11 +1131,8 @@
 
     const pathD = punti.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScale(p.saldo)}`).join(' ');
     const areaD = `${pathD} L ${xScale(punti.length - 1)} ${yScale(padded_min)} L ${xScale(0)} ${yScale(padded_min)} Z`;
-
-    // Linea saldo iniziale
     const yIniziale = yScale(saldoIniziale);
 
-    // Griglia Y
     const numGrid = 5;
     const gridLines = [];
     for (let i = 0; i <= numGrid; i++) {
@@ -662,93 +1149,60 @@
         padding: '16px', overflow: 'hidden',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-          <h4 style={{ margin: 0, color: 'var(--accent)', fontSize: '15px' }}>
-            📈 Andamento Stagione
-          </h4>
+          <h4 style={{ margin: 0, color: 'var(--accent)', fontSize: '15px' }}>📈 Andamento Stagione</h4>
           <div style={{ display: 'flex', gap: '14px', fontSize: '12px', color: 'var(--text-muted)' }}>
             <span>Iniziale: <b style={{ color: 'var(--text)' }}>€{saldoIniziale.toFixed(2)}</b></span>
-            <span>Attuale: <b style={{ color: isProfitto ? 'var(--win)' : 'var(--lose)' }}>
-              €{punti[punti.length - 1].saldo.toFixed(2)}
-            </b></span>
+            <span>Attuale: <b style={{ color: isProfitto ? 'var(--win)' : 'var(--lose)' }}>€{punti[punti.length - 1].saldo.toFixed(2)}</b></span>
           </div>
         </div>
 
         <div style={{ width: '100%', overflowX: 'auto' }}>
-          <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', minWidth: '600px', height: 'auto', display: 'block' }}>
+          <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', minWidth: '600px', height: 'auto', display: 'block' }}>
             <defs>
               <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor={lineColor} stopOpacity="0.35" />
                 <stop offset="100%" stopColor={lineColor} stopOpacity="0.02" />
               </linearGradient>
             </defs>
-
-            {/* Griglia */}
             {gridLines.map((g, i) => (
               <g key={i}>
                 <line x1={PAD_L} y1={g.y} x2={W - PAD_R} y2={g.y} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3 3" />
-                <text x={PAD_L - 8} y={g.y + 4} textAnchor="end" fontSize="11" fill="var(--text-muted)">
-                  €{g.v.toFixed(0)}
-                </text>
+                <text x={PAD_L - 8} y={g.y + 4} textAnchor="end" fontSize="11" fill="var(--text-muted)">€{g.v.toFixed(0)}</text>
               </g>
             ))}
-
-            {/* Linea saldo iniziale */}
             <line x1={PAD_L} y1={yIniziale} x2={W - PAD_R} y2={yIniziale} stroke="var(--accent)" strokeWidth="1" strokeDasharray="5 5" opacity="0.6" />
-
-            {/* Area */}
             <path d={areaD} fill="url(#areaGrad)" />
-
-            {/* Linea */}
             <path d={pathD} fill="none" stroke={lineColor} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
-
-            {/* Punti (solo hover) */}
             {punti.map((p, i) => (
               <g key={i}>
-                {hoverIdx === i && (
-                  <circle cx={xScale(i)} cy={yScale(p.saldo)} r="6" fill={lineColor} stroke="#fff" strokeWidth="2" />
-                )}
-                <circle
-                  cx={xScale(i)} cy={yScale(p.saldo)} r="10" fill="transparent"
+                {hoverIdx === i && <circle cx={xScale(i)} cy={yScale(p.saldo)} r="6" fill={lineColor} stroke="#fff" strokeWidth="2" />}
+                <circle cx={xScale(i)} cy={yScale(p.saldo)} r="10" fill="transparent"
                   style={{ cursor: 'pointer' }}
                   onMouseEnter={() => setHoverIdx(i)}
-                  onMouseLeave={() => setHoverIdx(null)}
-                />
+                  onMouseLeave={() => setHoverIdx(null)} />
               </g>
             ))}
-
-            {/* Tooltip */}
             {hoverIdx !== null && (
               <g>
                 <rect
                   x={Math.min(Math.max(xScale(hoverIdx) - 70, PAD_L), W - PAD_R - 140)}
                   y={Math.max(yScale(punti[hoverIdx].saldo) - 55, 5)}
                   width="140" height="46" rx="6"
-                  fill="var(--surface)" stroke="var(--border)" strokeWidth="1"
-                />
-                <text
-                  x={Math.min(Math.max(xScale(hoverIdx) - 70, PAD_L), W - PAD_R - 140) + 70}
+                  fill="var(--surface)" stroke="var(--border)" strokeWidth="1" />
+                <text x={Math.min(Math.max(xScale(hoverIdx) - 70, PAD_L), W - PAD_R - 140) + 70}
                   y={Math.max(yScale(punti[hoverIdx].saldo) - 55, 5) + 18}
-                  textAnchor="middle" fontSize="11" fill="var(--text-muted)"
-                >
+                  textAnchor="middle" fontSize="11" fill="var(--text-muted)">
                   {punti[hoverIdx].data}
                 </text>
-                <text
-                  x={Math.min(Math.max(xScale(hoverIdx) - 70, PAD_L), W - PAD_R - 140) + 70}
+                <text x={Math.min(Math.max(xScale(hoverIdx) - 70, PAD_L), W - PAD_R - 140) + 70}
                   y={Math.max(yScale(punti[hoverIdx].saldo) - 55, 5) + 36}
-                  textAnchor="middle" fontSize="14" fontWeight="bold" fill={lineColor}
-                >
+                  textAnchor="middle" fontSize="14" fontWeight="bold" fill={lineColor}>
                   €{punti[hoverIdx].saldo.toFixed(2)}
                 </text>
               </g>
             )}
-
-            {/* Asse X label inizio/fine */}
-            <text x={PAD_L} y={H - 20} fontSize="11" fill="var(--text-muted)" textAnchor="start">
-              {punti[0].data}
-            </text>
-            <text x={W - PAD_R} y={H - 20} fontSize="11" fill="var(--text-muted)" textAnchor="end">
-              {punti[punti.length - 1].data}
-            </text>
+            <text x={PAD_L} y={H - 20} fontSize="11" fill="var(--text-muted)" textAnchor="start">{punti[0].data}</text>
+            <text x={W - PAD_R} y={H - 20} fontSize="11" fill="var(--text-muted)" textAnchor="end">{punti[punti.length - 1].data}</text>
           </svg>
         </div>
       </div>
@@ -756,7 +1210,7 @@
   };
 
   // ============================================================
-  // TABELLA RIEPILOGO PERIODI
+  // TABELLA PERIODI
   // ============================================================
 
   const TabellaPeriodi = ({ movimenti, saldoIniziale, tipo }) => {
@@ -811,10 +1265,7 @@
               <td style={{ padding: '10px', textAlign: 'right' }}>{dati.reduce((s, d) => s + d.count, 0)}</td>
               <td style={{ padding: '10px', textAlign: 'right' }}>€{dati.reduce((s, d) => s + d.giocato, 0).toFixed(2)}</td>
               <td style={{ padding: '10px', textAlign: 'right' }}>€{dati.reduce((s, d) => s + d.vinto, 0).toFixed(2)}</td>
-              <td style={{
-                padding: '10px', textAlign: 'right',
-                color: dati.reduce((s, d) => s + d.profitto, 0) >= 0 ? 'var(--win)' : 'var(--lose)',
-              }}>
+              <td style={{ padding: '10px', textAlign: 'right', color: dati.reduce((s, d) => s + d.profitto, 0) >= 0 ? 'var(--win)' : 'var(--lose)' }}>
                 {dati.reduce((s, d) => s + d.profitto, 0) >= 0 ? '+' : ''}€{dati.reduce((s, d) => s + d.profitto, 0).toFixed(2)}
               </td>
               <td style={{ padding: '10px', textAlign: 'right' }}>
@@ -833,7 +1284,7 @@
   };
 
   // ============================================================
-  // LISTA MOVIMENTI (con modifica esito)
+  // LISTA MOVIMENTI
   // ============================================================
 
   const ListaMovimenti = ({ movimenti, onUpdate, onDelete }) => {
@@ -864,19 +1315,14 @@
             { k: 'loss', label: `❌ Perse (${movimenti.filter(m => m.esito === 'loss').length})` },
             { k: 'pending', label: `⏳ In attesa (${movimenti.filter(m => m.esito === 'pending').length})` },
           ].map(f => (
-            <button
-              key={f.k}
-              onClick={() => setFiltro(f.k)}
+            <button key={f.k} onClick={() => setFiltro(f.k)}
               style={{
                 padding: '5px 12px', fontSize: '11px', borderRadius: '6px', cursor: 'pointer',
                 border: '1px solid var(--border)',
                 background: filtro === f.k ? 'var(--accent)' : 'var(--surface)',
                 color: filtro === f.k ? '#000' : 'var(--text-muted)',
                 fontWeight: 'bold',
-              }}
-            >
-              {f.label}
-            </button>
+              }}>{f.label}</button>
           ))}
         </div>
 
@@ -924,24 +1370,18 @@
                     <td style={{ padding: '8px', textAlign: 'center' }}>
                       <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
                         {m.esito !== 'win' && (
-                          <button
-                            onClick={() => onUpdate(m.id, { esito: 'win' })}
+                          <button onClick={() => onUpdate(m.id, { esito: 'win' })}
                             title="Segna come VINTA"
-                            style={{ padding: '3px 8px', fontSize: '10px', background: 'var(--win)', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-                          >V</button>
+                            style={{ padding: '3px 8px', fontSize: '10px', background: 'var(--win)', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>V</button>
                         )}
                         {m.esito !== 'loss' && (
-                          <button
-                            onClick={() => onUpdate(m.id, { esito: 'loss' })}
+                          <button onClick={() => onUpdate(m.id, { esito: 'loss' })}
                             title="Segna come PERSA"
-                            style={{ padding: '3px 8px', fontSize: '10px', background: 'var(--lose)', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-                          >P</button>
+                            style={{ padding: '3px 8px', fontSize: '10px', background: 'var(--lose)', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>P</button>
                         )}
-                        <button
-                          onClick={() => { if (window.confirm('Eliminare questa giocata?')) onDelete(m.id); }}
+                        <button onClick={() => { if (window.confirm('Eliminare questa giocata?')) onDelete(m.id); }}
                           title="Elimina"
-                          style={{ padding: '3px 8px', fontSize: '10px', background: 'transparent', color: 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer' }}
-                        >✕</button>
+                          style={{ padding: '3px 8px', fontSize: '10px', background: 'transparent', color: 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
                       </div>
                     </td>
                   </tr>
@@ -975,10 +1415,10 @@
   );
 
   // ============================================================
-  // COMPONENTE PRINCIPALE: GESTIONE CONTO
+  // SCHERMATA PRINCIPALE GESTIONE CONTO (dopo login)
   // ============================================================
 
-  function GestioneContoComponent() {
+  function GestioneContoLoggato({ username, onCambiaUtente }) {
     const [movimenti, setMovimenti] = useState([]);
     const [saldoIniziale, setSaldoIniziale] = useState(DEFAULT_SALDO_INIZIALE);
     const [loading, setLoading] = useState(true);
@@ -987,25 +1427,24 @@
     const [editSaldo, setEditSaldo] = useState(false);
     const [saldoInput, setSaldoInput] = useState('');
     const [autoSynced, setAutoSynced] = useState(false);
+    const [uploadBusy, setUploadBusy] = useState(false);
 
-    // Carica da localStorage + Excel all'avvio
     useEffect(() => {
-      const local = loadGestioneFromLocal();
+      const local = loadGestioneFromLocal(username);
       setMovimenti(local.movimenti);
       setSaldoIniziale(local.saldoIniziale);
       setSaldoInput(String(local.saldoIniziale));
 
-      // Prova a caricare da Excel remoto
       (async () => {
         try {
-          for (const path of EXCEL_PATHS) {
+          const urls = getDownloadUrls(username);
+          for (const url of urls) {
             try {
-              const resp = await fetch(path + '?t=' + Date.now());
+              const resp = await fetch(url + '?t=' + Date.now());
               if (resp.ok) {
                 const buf = await resp.arrayBuffer();
                 const parsed = parseExcelGestione(buf);
                 if (parsed && parsed.movimenti) {
-                  // Merge: mantieni locali + aggiungi Excel non duplicati
                   const localIds = new Set(local.movimenti.map(m => `${m.data}|${m.importoGiocato}|${m.esito}`));
                   const merge = [...local.movimenti];
                   parsed.movimenti.forEach(em => {
@@ -1017,39 +1456,35 @@
                   });
                   setMovimenti(merge);
                   setSaldoIniziale(parsed.saldoIniziale || local.saldoIniziale);
-                  saveGestioneToLocal(merge, parsed.saldoIniziale || local.saldoIniziale);
+                  saveGestioneToLocal(username, merge, parsed.saldoIniziale || local.saldoIniziale);
                   setAutoSynced(true);
-                  console.log('✅ Gestione caricata da Excel:', parsed.movimenti.length, 'movimenti');
+                  console.log('✅ Gestione caricata da:', url.split('/').slice(0, 6).join('/'));
                 }
                 break;
               }
             } catch (e) {
-              console.warn('Excel gestione non disponibile:', path);
+              console.warn('URL non disponibile:', url.split('/').slice(0, 6).join('/'));
             }
           }
         } catch (e) {}
         setLoading(false);
       })();
-    }, []);
+    }, [username]);
 
-    // Salva su localStorage ad ogni modifica
     useEffect(() => {
       if (!loading) {
-        saveGestioneToLocal(movimenti, saldoIniziale);
+        saveGestioneToLocal(username, movimenti, saldoIniziale);
       }
-    }, [movimenti, saldoIniziale, loading]);
+    }, [movimenti, saldoIniziale, loading, username]);
 
     const stats = useMemo(() => calcolaStatistiche(movimenti, saldoIniziale), [movimenti, saldoIniziale]);
 
-    const handleAdd = useCallback((mov) => {
-      setMovimenti(prev => [...prev, mov]);
-    }, []);
+    const handleAdd = useCallback((mov) => setMovimenti(prev => [...prev, mov]), []);
 
     const handleUpdate = useCallback((id, patch) => {
       setMovimenti(prev => prev.map(m => {
         if (m.id !== id) return m;
         const updated = { ...m, ...patch };
-        // Se diventa "win" e non c'è importoVinto, chiedi o imposta 0
         if (patch.esito === 'win' && !updated.importoVinto) {
           const v = window.prompt('Importo vinto (€):', String(updated.importoGiocato * 2));
           const n = parseFloat(v);
@@ -1060,14 +1495,44 @@
       }));
     }, []);
 
-    const handleDelete = useCallback((id) => {
-      setMovimenti(prev => prev.filter(m => m.id !== id));
-    }, []);
+    const handleDelete = useCallback((id) => setMovimenti(prev => prev.filter(m => m.id !== id)), []);
 
-    const handleExport = () => {
-      esportaExcel(movimenti, saldoIniziale);
-      setMsg({ type: 'success', text: '📥 File ' + EXCEL_FILENAME + ' scaricato!' });
+    const handleExportDownload = () => {
+      esportaExcel(username, movimenti, saldoIniziale);
+      setMsg({ type: 'success', text: '📥 File ' + excelFilename(username) + ' scaricato!' });
       setTimeout(() => setMsg(null), 3000);
+    };
+
+    const handleUploadGitHub = async () => {
+      if (!getPAT()) {
+        setMsg({ type: 'error', text: '⚠️ Configura il PAT in Impostazioni → Gestione Utenti' });
+        setTimeout(() => setMsg(null), 4000);
+        return;
+      }
+
+      setUploadBusy(true);
+      try {
+        const wb = buildWorkbook(username, movimenti, saldoIniziale);
+        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+
+        const filepath = `${EXCEL_DIR}/${excelFilename(username)}`;
+        const result = await caricaFileSuGitHub(
+          filepath,
+          wbout,
+          `Update ${username} - ${new Date().toISOString().slice(0, 19)}`
+        );
+
+        if (result.ok) {
+          setMsg({ type: 'success', text: '✅ File caricato su GitHub (branch master)!' });
+        } else {
+          setMsg({ type: 'error', text: '❌ ' + result.error });
+        }
+      } catch (e) {
+        setMsg({ type: 'error', text: '❌ Errore: ' + e.message });
+      } finally {
+        setUploadBusy(false);
+        setTimeout(() => setMsg(null), 5000);
+      }
     };
 
     const handleSaveSaldo = () => {
@@ -1080,53 +1545,66 @@
 
     return (
       <div>
-        {/* HEADER con stats */}
+        {/* Header utente */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px',
+          padding: '12px 16px', background: 'var(--card)', borderRadius: '10px',
+          border: '1px solid var(--border)', flexWrap: 'wrap',
+        }}>
+          <div style={{
+            width: '40px', height: '40px', borderRadius: '50%',
+            background: 'var(--accent)', color: '#000',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '18px', fontWeight: 'bold',
+          }}>
+            {username.charAt(0).toUpperCase()}
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>
+              Utente attivo
+            </div>
+            <div style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--accent)' }}>
+              {username}
+            </div>
+          </div>
+          <button
+            onClick={onCambiaUtente}
+            style={{
+              padding: '8px 16px', background: 'var(--surface)', color: 'var(--text)',
+              border: '1px solid var(--border)', borderRadius: '8px',
+              cursor: 'pointer', fontWeight: 'bold', fontSize: '12px',
+            }}
+          >🔄 Cambia utente</button>
+        </div>
+
+        {/* Stats */}
         <div style={{
           display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px',
           marginBottom: '20px',
         }}>
-          <StatCard
-            icon="💰"
-            label="Saldo Corrente"
+          <StatCard icon="💰" label="Saldo Corrente"
             value={`€${stats.saldoCorrente.toFixed(2)}`}
-            color={stats.saldoCorrente >= saldoIniziale ? 'var(--win)' : 'var(--lose)'}
-          />
-          <StatCard
-            icon="📊"
-            label="Profitto"
+            color={stats.saldoCorrente >= saldoIniziale ? 'var(--win)' : 'var(--lose)'} />
+          <StatCard icon="📊" label="Profitto"
             value={`${stats.profitto >= 0 ? '+' : ''}€${stats.profitto.toFixed(2)}`}
-            color={stats.profitto >= 0 ? 'var(--win)' : 'var(--lose)'}
-          />
-          <StatCard
-            icon="📈"
-            label="ROI"
+            color={stats.profitto >= 0 ? 'var(--win)' : 'var(--lose)'} />
+          <StatCard icon="📈" label="ROI"
             value={`${stats.roi >= 0 ? '+' : ''}${stats.roi.toFixed(1)}%`}
-            color={stats.roi >= 0 ? 'var(--win)' : 'var(--lose)'}
-          />
-          <StatCard
-            icon="🎯"
-            label="Win Rate"
+            color={stats.roi >= 0 ? 'var(--win)' : 'var(--lose)'} />
+          <StatCard icon="🎯" label="Win Rate"
             value={`${stats.winRate.toFixed(1)}%`}
             sub={`${stats.numVinte}V / ${stats.numPerse}P`}
-            color="var(--accent)"
-          />
-          <StatCard
-            icon="🎲"
-            label="Giocate"
+            color="var(--accent)" />
+          <StatCard icon="🎲" label="Giocate"
             value={stats.numTotale}
             sub={stats.numPending > 0 ? `${stats.numPending} in attesa` : ''}
-            color="var(--accent)"
-          />
+            color="var(--accent)" />
         </div>
 
-        {/* Form inserimento */}
-        <FormInserimento
-          onAdd={handleAdd}
-          movimenti={movimenti}
-          saldoIniziale={saldoIniziale}
-        />
+        {/* Form */}
+        <FormInserimento onAdd={handleAdd} movimenti={movimenti} saldoIniziale={saldoIniziale} />
 
-        {/* Saldo iniziale + Export */}
+        {/* Saldo + Export/Upload */}
         <div style={{
           display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center',
           marginBottom: '20px', padding: '12px 16px', background: 'var(--card)',
@@ -1136,11 +1614,9 @@
             <span style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 'bold' }}>💵 Saldo iniziale:</span>
             {editSaldo ? (
               <>
-                <input
-                  type="number" step="0.01" value={saldoInput}
+                <input type="number" step="0.01" value={saldoInput}
                   onChange={(e) => setSaldoInput(e.target.value)}
-                  style={{ width: '110px', padding: '4px 8px', fontSize: '13px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px' }}
-                />
+                  style={{ width: '110px', padding: '4px 8px', fontSize: '13px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px' }} />
                 <button onClick={handleSaveSaldo} style={{ padding: '4px 10px', fontSize: '11px', background: 'var(--win)', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>✓</button>
                 <button onClick={() => setEditSaldo(false)} style={{ padding: '4px 10px', fontSize: '11px', background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
               </>
@@ -1152,15 +1628,26 @@
             )}
           </div>
 
-          <button
-            onClick={handleExport}
+          <button onClick={handleExportDownload}
             style={{
-              padding: '10px 20px', background: 'var(--accent)', color: '#000', border: 'none',
-              borderRadius: '8px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer',
+              padding: '10px 16px', background: 'var(--surface)', color: 'var(--text)',
+              border: '1px solid var(--border)', borderRadius: '8px',
+              fontWeight: 'bold', fontSize: '12px', cursor: 'pointer',
               display: 'flex', alignItems: 'center', gap: '6px',
-            }}
-          >
-            💾 Salva su Excel (gestione.xlsx)
+            }}>
+            📥 Download Excel
+          </button>
+
+          <button onClick={handleUploadGitHub} disabled={uploadBusy}
+            style={{
+              padding: '10px 16px', background: 'var(--accent)', color: '#000',
+              border: 'none', borderRadius: '8px',
+              fontWeight: 'bold', fontSize: '12px',
+              cursor: uploadBusy ? 'wait' : 'pointer',
+              display: 'flex', alignItems: 'center', gap: '6px',
+              opacity: uploadBusy ? 0.6 : 1,
+            }}>
+            {uploadBusy ? '⏳ Upload...' : '🚀 Salva su GitHub'}
           </button>
 
           {autoSynced && (
@@ -1173,17 +1660,17 @@
         {msg && (
           <div style={{
             marginBottom: '16px', padding: '10px 14px', borderRadius: '6px',
-            background: 'rgba(111, 207, 151, 0.15)', border: '1px solid var(--win)',
-            color: 'var(--win)', fontSize: '13px', fontWeight: 'bold',
+            background: msg.type === 'success' ? 'rgba(111, 207, 151, 0.15)' : 'rgba(235, 87, 87, 0.15)',
+            border: `1px solid ${msg.type === 'success' ? 'var(--win)' : 'var(--lose)'}`,
+            color: msg.type === 'success' ? 'var(--win)' : 'var(--lose)',
+            fontSize: '13px', fontWeight: 'bold',
           }}>
             {msg.text}
           </div>
         )}
 
-        {/* Grafico */}
         <GraficoAndamento movimenti={movimenti} saldoIniziale={saldoIniziale} />
 
-        {/* Periodo selettore */}
         <div style={{ marginTop: '20px' }}>
           <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
             <h4 style={{ margin: 0, flex: 1, color: 'var(--accent)', fontSize: '15px' }}>
@@ -1194,19 +1681,14 @@
               { k: 'settimanale', label: '🗓️ Settimanale (Gio→Mer)' },
               { k: 'mensile', label: '📆 Mensile' },
             ].map(p => (
-              <button
-                key={p.k}
-                onClick={() => setPeriodoTipo(p.k)}
+              <button key={p.k} onClick={() => setPeriodoTipo(p.k)}
                 style={{
                   padding: '7px 14px', fontSize: '12px', borderRadius: '6px', cursor: 'pointer',
                   border: '1px solid var(--border)',
                   background: periodoTipo === p.k ? 'var(--accent)' : 'var(--surface)',
                   color: periodoTipo === p.k ? '#000' : 'var(--text)',
                   fontWeight: 'bold',
-                }}
-              >
-                {p.label}
-              </button>
+                }}>{p.label}</button>
             ))}
           </div>
 
@@ -1215,7 +1697,6 @@
           </div>
         </div>
 
-        {/* Lista movimenti */}
         <div style={{ marginTop: '20px' }}>
           <h4 style={{ margin: '0 0 12px 0', color: 'var(--accent)', fontSize: '15px' }}>
             📋 Storico Giocate
@@ -1225,16 +1706,332 @@
           </div>
         </div>
 
-        {/* Info */}
         <div style={{
           marginTop: '16px', padding: '12px 16px', background: 'var(--surface)',
           borderRadius: '8px', border: '1px solid var(--border)', fontSize: '11px',
           color: 'var(--text-muted)', lineHeight: '1.6',
         }}>
           <b style={{ color: 'var(--accent)' }}>💡 Info:</b> La settimana va da <b>Giovedì</b> a <b>Mercoledì</b> successivo.
-          I dati sono salvati localmente e sincronizzati da <code>excel/gestione.xlsx</code> su GitHub.
-          Usa <b>Salva su Excel</b> per esportare e ricaricare il file su GitHub.
+          File sincronizzato da <code>excel/{excelFilename(username)}</code> (branch <code>master</code>).
+          Usa <b>🚀 Salva su GitHub</b> per caricare automaticamente tramite PAT.
         </div>
+      </div>
+    );
+  }
+
+  // ============================================================
+  // COMPONENTE PRINCIPALE
+  // ============================================================
+
+  function GestioneContoComponent() {
+    const [utenti, setUtenti] = useState(() => loadUtenti());
+    const [utenteLoggato, setUtenteLoggato] = useState(() => loadSessione());
+
+    // Se nessun utente registrato → registrazione
+    if (utenti.length === 0) {
+      return (
+        <SchermataRegistrazione
+          onRegistrato={(uname) => {
+            saveSessione(uname);
+            setUtenti(loadUtenti());
+            setUtenteLoggato(uname);
+          }}
+        />
+      );
+    }
+
+    // Se utenti esistono ma nessuno loggato → selezione
+    if (!utenteLoggato || !getUtente(utenteLoggato)) {
+      return (
+        <SchermataSelezioneUtente
+          utenti={utenti}
+          onLogin={(uname) => {
+            saveSessione(uname);
+            setUtenteLoggato(uname);
+          }}
+          onUtentiCambiati={() => setUtenti(loadUtenti())}
+        />
+      );
+    }
+
+    // Utente loggato → gestione conto
+    return (
+      <GestioneContoLoggato
+        username={utenteLoggato}
+        onCambiaUtente={() => {
+          saveSessione(null);
+          setUtenteLoggato(null);
+        }}
+      />
+    );
+  }
+
+  // ============================================================
+  // PANNELLO GESTIONE UTENTI (per Impostazioni)
+  // ============================================================
+
+  function GestioneUtentiPanel() {
+    const [utenti, setUtenti] = useState(() => loadUtenti());
+    const [pat, setPatState] = useState(() => getPAT());
+    const [msg, setMsg] = useState(null);
+    const [showAdd, setShowAdd] = useState(false);
+    const [nuovoUser, setNuovoUser] = useState('');
+    const [nuovaPass, setNuovaPass] = useState('');
+    const [nuovaPass2, setNuovaPass2] = useState('');
+    const [busy, setBusy] = useState(false);
+    const [patVisible, setPatVisible] = useState(false);
+
+    const handleAdd = async () => {
+      setMsg(null);
+      if (nuovaPass !== nuovaPass2) {
+        setMsg({ type: 'error', text: '⚠️ Le password non coincidono' });
+        return;
+      }
+      setBusy(true);
+      try {
+        await creaUtente(nuovoUser, nuovaPass);
+        setMsg({ type: 'success', text: '✅ Utente creato!' });
+        setNuovoUser(''); setNuovaPass(''); setNuovaPass2('');
+        setShowAdd(false);
+        setUtenti(loadUtenti());
+      } catch (e) {
+        setMsg({ type: 'error', text: '⚠️ ' + e.message });
+      } finally {
+        setBusy(false);
+      }
+    };
+
+    const handleDelete = (user) => {
+      if (!window.confirm(`Eliminare l'utente "${user.username}" e TUTTI i suoi dati (conti, movimenti) su questo dispositivo?\n\nIl file Excel su GitHub NON verrà eliminato.`)) return;
+      eliminaUtente(user.username);
+      setUtenti(loadUtenti());
+      setMsg({ type: 'success', text: `🗑️ Utente ${user.username} eliminato` });
+    };
+
+    const handleSavePAT = () => {
+      setPAT(pat);
+      setMsg({ type: 'success', text: pat ? '✅ PAT salvato' : '🗑️ PAT rimosso' });
+      setTimeout(() => setMsg(null), 2500);
+    };
+
+    const handleTestPAT = async () => {
+      if (!pat) {
+        setMsg({ type: 'error', text: '⚠️ Inserisci un PAT' });
+        return;
+      }
+      setMsg({ type: 'info', text: '⏳ Verifica PAT...' });
+      try {
+        const resp = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`, {
+          headers: { 'Authorization': `token ${pat}` },
+        });
+        if (resp.ok) {
+          setMsg({ type: 'success', text: '✅ PAT valido! Accesso al repo confermato.' });
+        } else if (resp.status === 401) {
+          setMsg({ type: 'error', text: '❌ PAT non valido o scaduto' });
+        } else if (resp.status === 404) {
+          setMsg({ type: 'error', text: '❌ Repo non trovato o PAT senza permessi' });
+        } else {
+          setMsg({ type: 'error', text: `❌ Errore HTTP ${resp.status}` });
+        }
+      } catch (e) {
+        setMsg({ type: 'error', text: '❌ Errore rete: ' + e.message });
+      }
+    };
+
+    return (
+      <div>
+        <div className="card" style={{ padding: '18px', marginBottom: '16px' }}>
+          <h3 style={{ margin: '0 0 12px 0', color: 'var(--accent)', fontSize: '16px' }}>
+            👥 Utenti Registrati ({utenti.length})
+          </h3>
+
+          {utenti.length === 0 ? (
+            <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
+              Nessun utente registrato. Vai in <b>Home → 💰 Gestione Conto</b> per creare il primo.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {utenti.map(u => (
+                <div key={u.username} style={{
+                  display: 'flex', alignItems: 'center', gap: '12px',
+                  padding: '10px 14px', background: 'var(--surface)',
+                  border: '1px solid var(--border)', borderRadius: '10px',
+                }}>
+                  <div style={{
+                    width: '38px', height: '38px', borderRadius: '50%',
+                    background: 'var(--accent)', color: '#000',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '16px', fontWeight: 'bold',
+                  }}>
+                    {u.username.charAt(0).toUpperCase()}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text)' }}>
+                      {u.username}
+                    </div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                      Creato il {formatDateIT(u.creatoIl.slice(0, 10))}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleDelete(u)}
+                    style={{
+                      padding: '6px 12px', background: 'var(--lose)', color: '#fff',
+                      border: 'none', borderRadius: '6px', cursor: 'pointer',
+                      fontWeight: 'bold', fontSize: '11px',
+                    }}>
+                    🗑️ Elimina
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!showAdd ? (
+            <button
+              onClick={() => setShowAdd(true)}
+              style={{
+                marginTop: '14px', padding: '10px 18px', background: 'var(--accent)', color: '#000',
+                border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '13px',
+                cursor: 'pointer',
+              }}>
+              ➕ Aggiungi Utente
+            </button>
+          ) : (
+            <div style={{
+              marginTop: '14px', padding: '16px', background: 'var(--surface)',
+              border: '2px solid var(--accent)', borderRadius: '10px',
+            }}>
+              <h4 style={{ margin: '0 0 12px 0', color: 'var(--accent)', fontSize: '14px' }}>
+                ➕ Nuovo Utente
+              </h4>
+
+              <div style={{ marginBottom: '10px' }}>
+                <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
+                  👤 Username
+                </label>
+                <input type="text" value={nuovoUser}
+                  onChange={(e) => setNuovoUser(e.target.value)}
+                  placeholder="Es. Giulia"
+                  style={{ width: '100%', padding: '8px 10px', background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px', fontSize: '13px' }} />
+              </div>
+
+              <div style={{ marginBottom: '10px' }}>
+                <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
+                  🔒 Password
+                </label>
+                <input type="password" value={nuovaPass}
+                  onChange={(e) => setNuovaPass(e.target.value)}
+                  placeholder="Min 3 caratteri"
+                  style={{ width: '100%', padding: '8px 10px', background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px', fontSize: '13px' }} />
+              </div>
+
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
+                  🔒 Conferma Password
+                </label>
+                <input type="password" value={nuovaPass2}
+                  onChange={(e) => setNuovaPass2(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+                  placeholder="Ripeti password"
+                  style={{ width: '100%', padding: '8px 10px', background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px', fontSize: '13px' }} />
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button onClick={() => { setShowAdd(false); setMsg(null); }}
+                  style={{
+                    padding: '8px 16px', background: 'var(--surface)', color: 'var(--text)',
+                    border: '1px solid var(--border)', borderRadius: '6px',
+                    cursor: 'pointer', fontWeight: 'bold', fontSize: '12px',
+                  }}>Annulla</button>
+                <button onClick={handleAdd} disabled={busy}
+                  style={{
+                    flex: 1, padding: '8px 16px', background: 'var(--accent)', color: '#000',
+                    border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '13px',
+                    cursor: busy ? 'wait' : 'pointer', opacity: busy ? 0.6 : 1,
+                  }}>{busy ? '⏳...' : '✨ Crea'}</button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* PAT GitHub */}
+        <div className="card" style={{ padding: '18px' }}>
+          <h3 style={{ margin: '0 0 8px 0', color: 'var(--accent)', fontSize: '16px' }}>
+            🔑 GitHub Personal Access Token (PAT)
+          </h3>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 14px 0', lineHeight: '1.5' }}>
+            Per caricare automaticamente i file Excel su GitHub, serve un <b>PAT</b> con permesso <code>repo</code>.
+            Crealo su <a href="https://github.com/settings/tokens/new?scopes=repo&description=GesssAI-Pro" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', fontWeight: 'bold' }}>github.com/settings/tokens</a>.
+            <br />
+            ⚠️ Il token è salvato solo nel browser (localStorage) e non viene mai inviato altrove se non a GitHub.
+          </p>
+
+          <div style={{ position: 'relative', marginBottom: '12px' }}>
+            <input
+              type={patVisible ? 'text' : 'password'}
+              value={pat}
+              onChange={(e) => setPatState(e.target.value)}
+              placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              style={{
+                width: '100%', padding: '10px 44px 10px 12px',
+                background: 'var(--surface)', border: '1px solid var(--border)',
+                color: 'var(--text)', borderRadius: '8px',
+                fontSize: '13px', fontFamily: 'monospace',
+              }}
+            />
+            <button
+              onClick={() => setPatVisible(v => !v)}
+              style={{
+                position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
+                background: 'transparent', border: 'none', cursor: 'pointer',
+                fontSize: '16px', color: 'var(--text-muted)',
+              }}
+              title={patVisible ? 'Nascondi' : 'Mostra'}
+            >{patVisible ? '🙈' : '👁️'}</button>
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <button onClick={handleSavePAT}
+              style={{
+                padding: '8px 18px', background: 'var(--accent)', color: '#000',
+                border: 'none', borderRadius: '6px', fontWeight: 'bold',
+                fontSize: '13px', cursor: 'pointer',
+              }}>💾 Salva PAT</button>
+            <button onClick={handleTestPAT}
+              style={{
+                padding: '8px 18px', background: 'var(--surface)', color: 'var(--text)',
+                border: '1px solid var(--border)', borderRadius: '6px',
+                fontWeight: 'bold', fontSize: '13px', cursor: 'pointer',
+              }}>🧪 Testa PAT</button>
+            {pat && (
+              <button onClick={() => { setPatState(''); setPAT(''); setMsg({ type: 'info', text: '🗑️ PAT rimosso' }); setTimeout(() => setMsg(null), 2000); }}
+                style={{
+                  padding: '8px 18px', background: 'transparent', color: 'var(--lose)',
+                  border: '1px solid var(--lose)', borderRadius: '6px',
+                  fontWeight: 'bold', fontSize: '13px', cursor: 'pointer',
+                }}>🗑️ Rimuovi</button>
+            )}
+          </div>
+
+          <div style={{ marginTop: '12px', fontSize: '11px', color: 'var(--text-muted)' }}>
+            <b>Scope necessari:</b> <code>repo</code> (per repo privati) o <code>public_repo</code> (per repo pubblici).
+          </div>
+        </div>
+
+        {msg && (
+          <div style={{
+            marginTop: '14px', padding: '10px 14px', borderRadius: '6px',
+            background: msg.type === 'success' ? 'rgba(111, 207, 151, 0.15)'
+              : msg.type === 'error' ? 'rgba(235, 87, 87, 0.15)'
+              : 'rgba(52, 152, 219, 0.15)',
+            border: `1px solid ${msg.type === 'success' ? 'var(--win)' : msg.type === 'error' ? 'var(--lose)' : '#3498db'}`,
+            color: msg.type === 'success' ? 'var(--win)' : msg.type === 'error' ? 'var(--lose)' : '#3498db',
+            fontSize: '13px', fontWeight: 'bold',
+          }}>
+            {msg.text}
+          </div>
+        )}
       </div>
     );
   }
@@ -1244,6 +2041,7 @@
   // ============================================================
 
   window.GestioneContoComponent = GestioneContoComponent;
+  window.GestioneUtentiPanel = GestioneUtentiPanel;
 
   window.GestioneContoUtils = {
     getGiovediSettimana,
@@ -1253,10 +2051,17 @@
     calcolaStatistiche,
     raggruppaPerPeriodo,
     esportaExcel,
+    caricaFileSuGitHub,
+    getPAT,
+    setPAT,
+    loadUtenti,
     formatDateIT,
-    EXCEL_FILENAME,
+    excelFilename,
+    GITHUB_USER,
+    GITHUB_REPO,
+    GITHUB_BRANCH,
   };
 
-  console.log('✅ Modulo Gestione Conto caricato - con input data italiano (GG/MM/AAAA)');
+  console.log('✅ Modulo Gestione Conto MULTI-UTENTE caricato - con PAT GitHub + branch master');
 
 })();
