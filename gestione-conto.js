@@ -2,6 +2,8 @@
 // gestione-conto.js - Gestione conto MULTI-UTENTE con password
 // - Ogni utente ha il suo conto protetto da password (SHA-256)
 // - File Excel separati: excel/gestione_<username>.xlsx (branch master)
+// - ⭐ NUOVO: Sincronizzazione utenti su GitHub (excel/utenti.json)
+// - ⭐ NUOVO: Export/Import manuale utenti (backup JSON)
 // - Upload automatico su GitHub via PAT (Personal Access Token)
 // - Settimana: Giovedì → Mercoledì successivo
 // - Input data italiano GG/MM/AAAA
@@ -26,6 +28,8 @@
   const STORAGE_PAT = 'ft_github_pat';
   const DEFAULT_SALDO_INIZIALE = 1000;
 
+  const USERS_FILE = 'excel/utenti.json';
+
   const storageKeyConto = (user) => `ft_gestione_conto_${user}`;
   const storageKeySaldo = (user) => `ft_gestione_saldo_${user}`;
   const excelFilename = (user) => `gestione_${user}.xlsx`;
@@ -47,7 +51,7 @@
   };
 
   // ============================================================
-  // GESTIONE UTENTI
+  // GESTIONE UTENTI (locale)
   // ============================================================
 
   const loadUtenti = () => {
@@ -65,6 +69,113 @@
     return loadUtenti().find(u => u.username.toLowerCase() === username.toLowerCase()) || null;
   };
 
+  // ============================================================
+  // ⭐ MERGE UTENTI (locali + remoti)
+  // ============================================================
+
+  const mergeUtenti = (locali, remoti) => {
+    const map = new Map();
+    // Prima i remoti
+    (remoti || []).forEach(u => {
+      if (u && u.username) map.set(u.username.toLowerCase(), u);
+    });
+    // Poi i locali (priorità se più recenti o con hash)
+    (locali || []).forEach(u => {
+      if (!u || !u.username) return;
+      const key = u.username.toLowerCase();
+      const existing = map.get(key);
+      if (!existing) {
+        map.set(key, u);
+      } else {
+        const dataLocal = new Date(u.creatoIl || 0);
+        const dataRemote = new Date(existing.creatoIl || 0);
+        if (dataLocal > dataRemote || (!existing.hash && u.hash)) {
+          map.set(key, u);
+        }
+      }
+    });
+    return Array.from(map.values());
+  };
+
+  // ============================================================
+  // ⭐ SINCRONIZZAZIONE UTENTI SU GITHUB
+  // ============================================================
+
+  const scaricaUtentiDaGitHub = async () => {
+    const urls = [
+      `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}@${GITHUB_BRANCH}/${USERS_FILE}?t=${Date.now()}`,
+      `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${USERS_FILE}?t=${Date.now()}`,
+    ];
+
+    for (const url of urls) {
+      try {
+        const resp = await fetch(url, { cache: 'no-store' });
+        if (resp.ok) {
+          const data = await resp.json();
+          if (Array.isArray(data)) {
+            console.log(`✅ Utenti scaricati da GitHub: ${data.length}`);
+            return data;
+          }
+        }
+      } catch (e) {
+        console.warn('Tentativo fallito:', url.split('/')[2]);
+      }
+    }
+    return null;
+  };
+
+  const caricaUtentiSuGitHub = async () => {
+    const pat = getPAT();
+    if (!pat) {
+      console.warn('⚠️ PAT non configurato, skip upload utenti');
+      return { ok: false, error: 'PAT non configurato' };
+    }
+
+    const utenti = loadUtenti();
+    const json = JSON.stringify(utenti, null, 2);
+    const encoder = new TextEncoder();
+    const content = encoder.encode(json);
+
+    return await caricaFileSuGitHub(
+      USERS_FILE,
+      content,
+      `Update utenti.json - ${new Date().toISOString().slice(0, 19)}`
+    );
+  };
+
+  const sincronizzaUtenti = async (silent = false) => {
+    try {
+      const locali = loadUtenti();
+      const remoti = await scaricaUtentiDaGitHub();
+
+      if (remoti === null) {
+        if (!silent) console.log('ℹ️ Nessun utenti.json remoto trovato');
+        return { ok: false, motivo: 'no-remote', utenti: locali };
+      }
+
+      const merged = mergeUtenti(locali, remoti);
+
+      if (merged.length !== locali.length || JSON.stringify(merged) !== JSON.stringify(locali)) {
+        saveUtenti(merged);
+        console.log(`🔄 Utenti sincronizzati: ${locali.length} locali + ${remoti.length} remoti = ${merged.length}`);
+
+        // Se ci sono differenze, ricarica su GitHub
+        if (getPAT()) {
+          await caricaUtentiSuGitHub();
+        }
+      }
+
+      return { ok: true, utenti: merged };
+    } catch (e) {
+      console.warn('Errore sincronizzazione utenti:', e);
+      return { ok: false, error: e.message, utenti: loadUtenti() };
+    }
+  };
+
+  // ============================================================
+  // CRUD UTENTI
+  // ============================================================
+
   const creaUtente = async (username, password) => {
     const uname = username.trim();
     if (!uname || uname.length < 2) throw new Error('Username troppo corto (min 2 caratteri)');
@@ -80,6 +191,15 @@
       creatoIl: new Date().toISOString(),
     });
     saveUtenti(utenti);
+
+    // ⭐ Upload su GitHub (non blocca)
+    if (getPAT()) {
+      caricaUtentiSuGitHub().then(r => {
+        if (r.ok) console.log('✅ utenti.json aggiornato su GitHub');
+        else console.warn('⚠️ Upload utenti fallito:', r.error);
+      });
+    }
+
     return uname;
   };
 
@@ -91,6 +211,14 @@
     const sessione = loadSessione();
     if (sessione && sessione.toLowerCase() === username.toLowerCase()) {
       localStorage.removeItem(STORAGE_SESSION);
+    }
+
+    // ⭐ Upload su GitHub
+    if (getPAT()) {
+      caricaUtentiSuGitHub().then(r => {
+        if (r.ok) console.log('✅ utenti.json aggiornato su GitHub (delete)');
+        else console.warn('⚠️ Upload utenti fallito:', r.error);
+      });
     }
   };
 
@@ -679,6 +807,21 @@
     const [nuovoUser, setNuovoUser] = useState('');
     const [nuovaPass, setNuovaPass] = useState('');
     const [nuovaPass2, setNuovaPass2] = useState('');
+    const [syncing, setSyncing] = useState(false);
+
+    const handleSync = async () => {
+      setSyncing(true);
+      setMsg({ type: 'info', text: '🔄 Sincronizzazione...' });
+      const result = await sincronizzaUtenti(false);
+      setSyncing(false);
+      if (result.ok) {
+        setMsg({ type: 'success', text: `✅ ${result.utenti.length} utenti sincronizzati` });
+        onUtentiCambiati();
+      } else {
+        setMsg({ type: 'error', text: '❌ Impossibile sincronizzare con GitHub' });
+      }
+      setTimeout(() => setMsg(null), 3000);
+    };
 
     const handleLogin = async () => {
       if (!selectedUser) return;
@@ -731,6 +874,19 @@
           <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: 0 }}>
             Seleziona il tuo profilo e inserisci la password
           </p>
+        </div>
+
+        {/* Pulsante sync */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+          <button onClick={handleSync} disabled={syncing}
+            style={{
+              padding: '6px 16px', background: 'var(--surface)', color: 'var(--text)',
+              border: '1px solid var(--border)', borderRadius: '6px',
+              fontSize: '11px', fontWeight: 'bold', cursor: syncing ? 'wait' : 'pointer',
+              display: 'flex', alignItems: 'center', gap: '6px',
+            }}>
+            🔄 {syncing ? 'Sincronizzazione...' : 'Sincronizza da GitHub'}
+          </button>
         </div>
 
         {/* Lista utenti */}
@@ -926,9 +1082,11 @@
         {msg && (
           <div style={{
             marginTop: '14px', padding: '10px 14px', borderRadius: '6px',
-            background: msg.type === 'success' ? 'rgba(111, 207, 151, 0.15)' : 'rgba(235, 87, 87, 0.15)',
-            border: `1px solid ${msg.type === 'success' ? 'var(--win)' : 'var(--lose)'}`,
-            color: msg.type === 'success' ? 'var(--win)' : 'var(--lose)',
+            background: msg.type === 'success' ? 'rgba(111, 207, 151, 0.15)'
+              : msg.type === 'error' ? 'rgba(235, 87, 87, 0.15)'
+              : 'rgba(52, 152, 219, 0.15)',
+            border: `1px solid ${msg.type === 'success' ? 'var(--win)' : msg.type === 'error' ? 'var(--lose)' : '#3498db'}`,
+            color: msg.type === 'success' ? 'var(--win)' : msg.type === 'error' ? 'var(--lose)' : '#3498db',
             fontSize: '13px', fontWeight: 'bold', textAlign: 'center',
           }}>
             {msg.text}
@@ -1726,6 +1884,33 @@
   function GestioneContoComponent() {
     const [utenti, setUtenti] = useState(() => loadUtenti());
     const [utenteLoggato, setUtenteLoggato] = useState(() => loadSessione());
+    const [syncing, setSyncing] = useState(false);
+
+    // ⭐ SINCRONIZZA ALL'AVVIO
+    useEffect(() => {
+      let cancelled = false;
+      (async () => {
+        setSyncing(true);
+        const result = await sincronizzaUtenti(true);
+        if (!cancelled) {
+          setUtenti(loadUtenti());
+          setSyncing(false);
+          if (result.ok && result.utenti) {
+            console.log(`✅ Sync completata: ${result.utenti.length} utenti`);
+          }
+        }
+      })();
+      return () => { cancelled = true; };
+    }, []);
+
+    if (syncing && utenti.length === 0) {
+      return (
+        <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔄</div>
+          <p>Caricamento utenti da GitHub...</p>
+        </div>
+      );
+    }
 
     // Se nessun utente registrato → registrazione
     if (utenti.length === 0) {
@@ -1780,6 +1965,77 @@
     const [nuovaPass2, setNuovaPass2] = useState('');
     const [busy, setBusy] = useState(false);
     const [patVisible, setPatVisible] = useState(false);
+    const [syncing, setSyncing] = useState(false);
+
+    // ⭐ SINCRONIZZA all'apertura del pannello
+    useEffect(() => {
+      let cancelled = false;
+      (async () => {
+        setSyncing(true);
+        await sincronizzaUtenti(true);
+        if (!cancelled) {
+          setUtenti(loadUtenti());
+          setSyncing(false);
+        }
+      })();
+      return () => { cancelled = true; };
+    }, []);
+
+    const handleSyncManuale = async () => {
+      setSyncing(true);
+      setMsg({ type: 'info', text: '⏳ Sincronizzazione in corso...' });
+      try {
+        const result = await sincronizzaUtenti(false);
+        setUtenti(loadUtenti());
+        if (result.ok) {
+          setMsg({ type: 'success', text: `✅ Sincronizzati ${result.utenti.length} utenti` });
+        } else {
+          setMsg({ type: 'error', text: '❌ utenti.json non trovato su GitHub (crea prima un utente con PAT configurato)' });
+        }
+      } catch (e) {
+        setMsg({ type: 'error', text: '❌ ' + e.message });
+      } finally {
+        setSyncing(false);
+        setTimeout(() => setMsg(null), 4000);
+      }
+    };
+
+    const handleEsportaUtenti = () => {
+      const json = JSON.stringify(utenti, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `utenti_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setMsg({ type: 'success', text: '📥 Backup utenti scaricato' });
+      setTimeout(() => setMsg(null), 2500);
+    };
+
+    const handleImportaUtenti = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        try {
+          const importati = JSON.parse(ev.target.result);
+          if (!Array.isArray(importati)) throw new Error('Formato non valido');
+          const merged = mergeUtenti(loadUtenti(), importati);
+          saveUtenti(merged);
+          setUtenti(merged);
+          setMsg({ type: 'success', text: `✅ Importati ${importati.length} utenti (totale: ${merged.length})` });
+          if (getPAT()) await caricaUtentiSuGitHub();
+        } catch (err) {
+          setMsg({ type: 'error', text: '❌ ' + err.message });
+        }
+        setTimeout(() => setMsg(null), 3000);
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    };
 
     const handleAdd = async () => {
       setMsg(null);
@@ -1843,11 +2099,40 @@
         <div className="card" style={{ padding: '18px', marginBottom: '16px' }}>
           <h3 style={{ margin: '0 0 12px 0', color: 'var(--accent)', fontSize: '16px' }}>
             👥 Utenti Registrati ({utenti.length})
+            {syncing && <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginLeft: '10px', fontWeight: 'normal' }}>🔄 sync...</span>}
           </h3>
+
+          {/* ⭐ Pulsanti Sync/Export/Import */}
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '14px' }}>
+            <button onClick={handleSyncManuale} disabled={syncing}
+              style={{
+                padding: '6px 14px', background: 'var(--accent)', color: '#000',
+                border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '11px',
+                cursor: syncing ? 'wait' : 'pointer', opacity: syncing ? 0.6 : 1,
+              }}>
+              🔄 {syncing ? 'Sync...' : 'Sincronizza GitHub'}
+            </button>
+            <button onClick={handleEsportaUtenti}
+              style={{
+                padding: '6px 14px', background: 'var(--surface)', color: 'var(--text)',
+                border: '1px solid var(--border)', borderRadius: '6px',
+                fontWeight: 'bold', fontSize: '11px', cursor: 'pointer',
+              }}>
+              📥 Esporta
+            </button>
+            <label style={{
+              padding: '6px 14px', background: 'var(--surface)', color: 'var(--text)',
+              border: '1px solid var(--border)', borderRadius: '6px',
+              fontWeight: 'bold', fontSize: '11px', cursor: 'pointer',
+            }}>
+              📤 Importa
+              <input type="file" accept=".json" onChange={handleImportaUtenti} style={{ display: 'none' }} />
+            </label>
+          </div>
 
           {utenti.length === 0 ? (
             <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
-              Nessun utente registrato. Vai in <b>Home → 💰 Gestione Conto</b> per creare il primo.
+              {syncing ? '⏳ Caricamento da GitHub...' : 'Nessun utente registrato. Vai in Home → 💰 Gestione Conto per crearne uno.'}
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -1961,7 +2246,7 @@
             🔑 GitHub Personal Access Token (PAT)
           </h3>
           <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 14px 0', lineHeight: '1.5' }}>
-            Per caricare automaticamente i file Excel su GitHub, serve un <b>PAT</b> con permesso <code>repo</code>.
+            Per caricare automaticamente i file Excel e <b>sincronizzare gli utenti</b> su GitHub, serve un <b>PAT</b> con permesso <code>repo</code>.
             Crealo su <a href="https://github.com/settings/tokens/new?scopes=repo&description=GesssAI-Pro" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', fontWeight: 'bold' }}>github.com/settings/tokens</a>.
             <br />
             ⚠️ Il token è salvato solo nel browser (localStorage) e non viene mai inviato altrove se non a GitHub.
@@ -2055,13 +2340,18 @@
     getPAT,
     setPAT,
     loadUtenti,
+    mergeUtenti,
+    sincronizzaUtenti,
+    scaricaUtentiDaGitHub,
+    caricaUtentiSuGitHub,
     formatDateIT,
     excelFilename,
     GITHUB_USER,
     GITHUB_REPO,
     GITHUB_BRANCH,
+    USERS_FILE,
   };
 
-  console.log('✅ Modulo Gestione Conto MULTI-UTENTE caricato - con PAT GitHub + branch master');
+  console.log('✅ Modulo Gestione Conto MULTI-UTENTE caricato - con sync utenti su GitHub + Export/Import');
 
 })();
