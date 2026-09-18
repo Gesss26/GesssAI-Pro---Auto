@@ -5,7 +5,9 @@
 // - ⭐ Sync utenti su GitHub (excel/utenti.json)
 // - ⭐ Export/Import manuale utenti (backup JSON)
 // - ⭐ Pulsante "Carica su GitHub" per primo upload manuale
+// - ⭐ FIX: parsing SALDO INIZIALE dal file Excel (legge riga "Esito = SALDO INIZIALE")
 // - ⭐ FIX: saldo 0€ gestito correttamente (?? invece di ||)
+// - ⭐ FIX: priorità a raw.githubusercontent (evita cache CDN)
 // - Upload automatico su GitHub via PAT (Personal Access Token)
 // - Settimana: Giovedì → Mercoledì successivo
 // - Input data italiano GG/MM/AAAA
@@ -53,10 +55,9 @@
   };
 
   // ============================================================
-  // UTILITÀ SALDO (⭐ FIX: gestisce correttamente 0)
+  // UTILITÀ SALDO (gestisce correttamente 0)
   // ============================================================
 
-  // Restituisce un saldo valido (>= 0) o il default
   const parseSaldoSafe = (value, fallback = DEFAULT_SALDO_INIZIALE) => {
     if (value === null || value === undefined || value === '') return fallback;
     const parsed = parseFloat(value);
@@ -64,7 +65,6 @@
     return parsed;
   };
 
-  // Prende il saldo non-nullish (preserva 0)
   const coalesceSaldo = (primary, secondary = DEFAULT_SALDO_INIZIALE) => {
     if (primary !== null && primary !== undefined && primary !== '') {
       const parsed = typeof primary === 'number' ? primary : parseFloat(primary);
@@ -128,8 +128,8 @@
 
   const scaricaUtentiDaGitHub = async () => {
     const urls = [
-      `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}@${GITHUB_BRANCH}/${USERS_FILE}?t=${Date.now()}`,
       `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${USERS_FILE}?t=${Date.now()}`,
+      `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}@${GITHUB_BRANCH}/${USERS_FILE}?t=${Date.now()}`,
     ];
 
     for (const url of urls) {
@@ -342,13 +342,16 @@
   }
 
   // ============================================================
-  // DOWNLOAD DA GITHUB
+  // DOWNLOAD DA GITHUB (⭐ raw PRIMA per evitare cache CDN)
   // ============================================================
 
   const getDownloadUrls = (user) => [
-    `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}@${GITHUB_BRANCH}/${EXCEL_DIR}/${excelFilename(user)}`,
-    `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${EXCEL_DIR}/${excelFilename(user)}`,
-    `/${GITHUB_REPO}/${EXCEL_DIR}/${excelFilename(user)}`,
+    // ⭐ raw.githubusercontent PRIMA (cache breve, ~5 min)
+    `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${EXCEL_DIR}/${excelFilename(user)}?t=${Date.now()}`,
+    // jsDelivr come fallback (cache lunga)
+    `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}@${GITHUB_BRANCH}/${EXCEL_DIR}/${excelFilename(user)}?t=${Date.now()}`,
+    // Locale (dev)
+    `/${GITHUB_REPO}/${EXCEL_DIR}/${excelFilename(user)}?t=${Date.now()}`,
   ];
 
   // ============================================================
@@ -402,7 +405,7 @@
   };
 
   // ============================================================
-  // PARSING EXCEL (⭐ FIX: saldo 0 accettato)
+  // PARSING EXCEL (⭐ FIX: cerca riga "Esito = SALDO INIZIALE")
   // ============================================================
 
   const parseExcelGestione = (arrayBuffer) => {
@@ -426,19 +429,24 @@
       const colImporto = findCol(['importo giocato', 'importo', 'puntata', 'stake']);
       const colEsito = findCol(['esito', 'vinta', 'risultato', 'stato']);
       const colVincita = findCol(['importo vinto', 'vincita', 'vinto', 'ritorno']);
-      const colSaldo = findCol(['saldo iniziale', 'saldo']);
 
       const movimenti = [];
       let saldoIniziale = DEFAULT_SALDO_INIZIALE;
       let saldoTrovato = false;
 
       rows.forEach((row, i) => {
-        // ⭐ FIX: accetta anche saldo = 0
-        if (colSaldo && !saldoTrovato && row[colSaldo] !== undefined && row[colSaldo] !== '') {
-          const sv = parseFloat(row[colSaldo]);
-          if (!isNaN(sv) && sv >= 0) {
-            saldoIniziale = sv;
-            saldoTrovato = true;
+        // ⭐ FIX: cerca la riga "SALDO INIZIALE" tramite la colonna Esito
+        // Il saldo è nella colonna "Importo Vinto" di quella riga
+        if (!saldoTrovato && colEsito && colVincita) {
+          const esito = String(row[colEsito] || '').toUpperCase().trim();
+          if (esito.includes('SALDO INIZIALE') || esito === 'SALDO') {
+            const sv = parseFloat(row[colVincita]);
+            if (!isNaN(sv) && sv >= 0) {
+              saldoIniziale = sv;
+              saldoTrovato = true;
+              console.log('💰 SALDO INIZIALE trovato nel file:', sv);
+            }
+            return; // Salta questa riga (non è un movimento)
           }
         }
 
@@ -478,6 +486,8 @@
         });
       });
 
+      console.log('📊 Parsing completato:', { movimenti: movimenti.length, saldoIniziale });
+
       return { movimenti, saldoIniziale };
     } catch (e) {
       console.error('Errore parsing gestione.xlsx:', e);
@@ -486,7 +496,7 @@
   };
 
   // ============================================================
-  // LOAD/SAVE GESTIONE LOCALE (⭐ FIX: saldo 0)
+  // LOAD/SAVE GESTIONE LOCALE
   // ============================================================
 
   const loadGestioneFromLocal = (username) => {
@@ -494,11 +504,9 @@
       const saved = JSON.parse(localStorage.getItem(storageKeyConto(username)) || 'null');
       const saldoRaw = localStorage.getItem(storageKeySaldo(username));
 
-      // ⭐ FIX: usa parseSaldoSafe che gestisce 0 correttamente
       const saldoLocale = parseSaldoSafe(saldoRaw, null);
 
       if (saved && Array.isArray(saved.movimenti)) {
-        // ⭐ FIX: coalesceSaldo preserva 0
         const savedSaldo = coalesceSaldo(
           saved.saldoIniziale,
           saldoLocale !== null ? saldoLocale : DEFAULT_SALDO_INIZIALE
@@ -517,7 +525,6 @@
 
   const saveGestioneToLocal = (username, movimenti, saldoIniziale) => {
     try {
-      // ⭐ FIX: salva sempre il valore, anche 0
       const saldoDaSalvare = (saldoIniziale !== null && saldoIniziale !== undefined && !isNaN(saldoIniziale))
         ? saldoIniziale
         : DEFAULT_SALDO_INIZIALE;
@@ -530,7 +537,6 @@
           updatedAt: new Date().toISOString(),
         })
       );
-      // ⭐ FIX: salva anche "0" come stringa valida
       localStorage.setItem(storageKeySaldo(username), String(saldoDaSalvare));
     } catch (e) {
       console.warn('Errore salvataggio gestione:', e);
@@ -1624,7 +1630,6 @@
 
   // ============================================================
   // SCHERMATA PRINCIPALE GESTIONE CONTO (dopo login)
-  // ⭐ FIX: saldo 0 gestito correttamente in tutti i punti
   // ============================================================
 
   function GestioneContoLoggato({ username, onCambiaUtente }) {
@@ -1638,19 +1643,26 @@
     const [autoSynced, setAutoSynced] = useState(false);
     const [uploadBusy, setUploadBusy] = useState(false);
 
+    // ⭐ FLAG: disabilita auto-save nei primi 3 secondi post-load
+    const autoSaveEnabled = useRef(false);
+
     useEffect(() => {
       const local = loadGestioneFromLocal(username);
       setMovimenti(local.movimenti);
-      // ⭐ FIX: usa il valore anche se 0
       setSaldoIniziale(local.saldoIniziale);
       setSaldoInput(String(local.saldoIniziale));
+
+      console.log('🔵 Load da localStorage:', {
+        saldo: local.saldoIniziale,
+        movimenti: local.movimenti.length
+      });
 
       (async () => {
         try {
           const urls = getDownloadUrls(username);
           for (const url of urls) {
             try {
-              const resp = await fetch(url + '?t=' + Date.now());
+              const resp = await fetch(url, { cache: 'no-store' });
               if (resp.ok) {
                 const buf = await resp.arrayBuffer();
                 const parsed = parseExcelGestione(buf);
@@ -1665,18 +1677,30 @@
                     }
                   });
 
-                  // ⭐ FIX: preserva 0 dal PDF e dal locale
-                  const saldoFinale = coalesceSaldo(
-                    parsed.saldoIniziale,
-                    local.saldoIniziale
-                  );
+                  // ⭐ Priorità: se il locale è stato modificato di recente (10 min), usa il locale
+                  const localUpdatedAt = (() => {
+                    try {
+                      const saved = JSON.parse(localStorage.getItem(storageKeyConto(username)) || 'null');
+                      return saved?.updatedAt ? new Date(saved.updatedAt).getTime() : 0;
+                    } catch (e) { return 0; }
+                  })();
+                  const localModificatoDiRecente = (Date.now() - localUpdatedAt) < 10 * 60 * 1000;
+
+                  let saldoFinale;
+                  if (localModificatoDiRecente && local.saldoIniziale !== undefined && local.saldoIniziale !== null) {
+                    saldoFinale = local.saldoIniziale;
+                    console.log('💰 Saldo LOCALE ha priorità (modificato di recente):', saldoFinale);
+                  } else {
+                    saldoFinale = coalesceSaldo(parsed.saldoIniziale, local.saldoIniziale);
+                    console.log('💰 Saldo REMOTO ha priorità:', saldoFinale, '(parsed:', parsed.saldoIniziale, ', local:', local.saldoIniziale, ')');
+                  }
 
                   setMovimenti(merge);
                   setSaldoIniziale(saldoFinale);
                   setSaldoInput(String(saldoFinale));
                   saveGestioneToLocal(username, merge, saldoFinale);
                   setAutoSynced(true);
-                  console.log('✅ Gestione caricata da:', url.split('/').slice(0, 6).join('/'), '- saldo:', saldoFinale);
+                  console.log('✅ Gestione caricata da:', url.split('/').slice(0, 5).join('/'), '- saldo finale:', saldoFinale);
                 }
                 break;
               }
@@ -1686,14 +1710,22 @@
           }
         } catch (e) {}
         setLoading(false);
+        // ⭐ Abilita auto-save dopo 3 secondi
+        setTimeout(() => {
+          autoSaveEnabled.current = true;
+          console.log('🔓 Auto-save ABILITATO');
+        }, 3000);
       })();
     }, [username]);
 
-    // ⭐ FIX: salva anche quando saldo = 0
+    // ⭐ Auto-save SOLO dopo che autoSaveEnabled è true
     useEffect(() => {
-      if (!loading) {
-        saveGestioneToLocal(username, movimenti, saldoIniziale);
+      if (loading) return;
+      if (!autoSaveEnabled.current) {
+        console.log('🔒 Auto-save bloccato (in attesa di init)');
+        return;
       }
+      saveGestioneToLocal(username, movimenti, saldoIniziale);
     }, [movimenti, saldoIniziale, loading, username]);
 
     const stats = useMemo(() => calcolaStatistiche(movimenti, saldoIniziale), [movimenti, saldoIniziale]);
@@ -1743,6 +1775,8 @@
 
         if (result.ok) {
           setMsg({ type: 'success', text: '✅ File caricato su GitHub (branch master)!' });
+          // Invalida la cache jsDelivr
+          fetch(`https://purge.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}@${GITHUB_BRANCH}/${filepath}`).catch(() => {});
         } else {
           setMsg({ type: 'error', text: '❌ ' + result.error });
         }
@@ -1754,13 +1788,12 @@
       }
     };
 
-    // ⭐ FIX: salva anche se 0
     const handleSaveSaldo = () => {
       const v = parseFloat(saldoInput);
       if (!isNaN(v) && v >= 0) {
         setSaldoIniziale(v);
         setEditSaldo(false);
-        // Salva subito in localStorage per evitare race con useEffect
+        // ⭐ Salva subito in localStorage
         saveGestioneToLocal(username, movimenti, v);
         setMsg({ type: 'success', text: `✅ Saldo iniziale aggiornato a €${v.toFixed(2)}` });
         setTimeout(() => setMsg(null), 2500);
@@ -2019,7 +2052,6 @@
 
   // ============================================================
   // PANNELLO GESTIONE UTENTI (per Impostazioni)
-  // ⭐ NUOVO: pulsante "Carica su GitHub" per primo upload
   // ============================================================
 
   function GestioneUtentiPanel() {
@@ -2066,7 +2098,6 @@
       }
     };
 
-    // ⭐ NUOVO: forza caricamento utenti su GitHub
     const handleForzaUpload = async () => {
       if (!getPAT()) {
         setMsg({ type: 'error', text: '⚠️ Configura prima il PAT' });
@@ -2197,7 +2228,6 @@
             {syncing && <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginLeft: '10px', fontWeight: 'normal' }}>🔄 sync...</span>}
           </h3>
 
-          {/* Pulsanti Sync/Upload/Export/Import */}
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '14px' }}>
             <button onClick={handleSyncManuale} disabled={syncing}
               style={{
@@ -2215,7 +2245,7 @@
                 cursor: (syncing || utenti.length === 0) ? 'not-allowed' : 'pointer',
                 opacity: (syncing || utenti.length === 0) ? 0.5 : 1,
               }}
-              title="Forza il caricamento degli utenti locali su GitHub (crea utenti.json se non esiste)">
+              title="Forza il caricamento degli utenti locali su GitHub">
               📤 Carica su GitHub ({utenti.length})
             </button>
 
@@ -2347,7 +2377,6 @@
           )}
         </div>
 
-        {/* PAT GitHub */}
         <div className="card" style={{ padding: '18px' }}>
           <h3 style={{ margin: '0 0 8px 0', color: 'var(--accent)', fontSize: '16px' }}>
             🔑 GitHub Personal Access Token (PAT)
@@ -2453,6 +2482,9 @@
     caricaUtentiSuGitHub,
     parseSaldoSafe,
     coalesceSaldo,
+    parseExcelGestione,
+    loadGestioneFromLocal,
+    saveGestioneToLocal,
     formatDateIT,
     excelFilename,
     GITHUB_USER,
@@ -2461,6 +2493,6 @@
     USERS_FILE,
   };
 
-  console.log('✅ Modulo Gestione Conto MULTI-UTENTE caricato - con FIX saldo 0€ + upload GitHub manuale');
+  console.log('✅ Modulo Gestione Conto MULTI-UTENTE caricato - con FIX parsing Excel + saldo 0€');
 
 })();
