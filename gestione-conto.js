@@ -3,13 +3,13 @@
 // - Ogni utente ha il suo conto protetto da password (SHA-256)
 // - File Excel separati: excel/gestione_<username>.xlsx (branch master)
 // - ⭐ Sync utenti su GitHub (excel/utenti.json) con MERGE intelligente
-// - ⭐ Quando un utente si registra → merge + upload automatico
-// - ⭐ Quando un utente refresha → merge + aggiornamento automatico
+// - ⭐ PAT hardcodato per uso interno (tutti i dispositivi lo usano)
+// - ⭐ PAT mascherato nel pannello (mostra solo ultimi 3 caratteri)
+// - ⭐ FIX: eliminaUtente ora rimuove DAVVERO l'utente da GitHub
+// - ⭐ FIX: creaUtente crea anche il file Excel iniziale su GitHub
 // - ⭐ Export/Import manuale utenti (backup JSON)
 // - ⭐ FIX: parsing SALDO INIZIALE dal file Excel
 // - ⭐ FIX: saldo 0€ gestito correttamente
-// - ⭐ FIX: priorità a raw.githubusercontent (evita cache CDN)
-// - Upload automatico su GitHub via PAT (Personal Access Token)
 // - Settimana: Giovedì → Mercoledì successivo
 // - Input data italiano GG/MM/AAAA
 // ============================================================
@@ -35,12 +35,22 @@
 
   const USERS_FILE = 'excel/utenti.json';
 
+  // ============================================================
+  // ⭐ PAT HARDCODATO (default per tutti i dispositivi)
+  // ⚠️ ATTENZIONE: se il repo è pubblico, GitHub potrebbe invalidare
+  //    automaticamente il token. Usa un repo PRIVATO o un token
+  //    con permessi limitati al solo repo.
+  // ============================================================
+
+  // ⭐ SOSTITUISCI QUESTO CON IL TUO PAT REALE
+  const DEFAULT_PAT = 'ghp_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+
   const storageKeyConto = (user) => `ft_gestione_conto_${user}`;
   const storageKeySaldo = (user) => `ft_gestione_saldo_${user}`;
   const excelFilename = (user) => `gestione_${user}.xlsx`;
 
   // ============================================================
-  // CRIPTO: SHA-256 (Web Crypto API)
+  // CRIPTO: SHA-256
   // ============================================================
 
   const sha256 = async (text) => {
@@ -56,7 +66,34 @@
   };
 
   // ============================================================
-  // UTILITÀ SALDO (gestisce correttamente 0)
+  // PAT: getter/setter con fallback a DEFAULT_PAT
+  // ============================================================
+
+  const getPAT = () => {
+    const savedPAT = localStorage.getItem(STORAGE_PAT);
+    if (savedPAT && savedPAT.trim()) return savedPAT.trim();
+    return DEFAULT_PAT;
+  };
+
+  const setPAT = (pat) => {
+    if (pat && pat.trim()) localStorage.setItem(STORAGE_PAT, pat.trim());
+    else localStorage.removeItem(STORAGE_PAT);
+  };
+
+  const isUsingDefaultPAT = () => {
+    const savedPAT = localStorage.getItem(STORAGE_PAT);
+    return !savedPAT || !savedPAT.trim();
+  };
+
+  // ⭐ Maschera un PAT mostrando solo gli ultimi 3 caratteri
+  const mascheraPAT = (pat) => {
+    if (!pat || pat.length < 4) return 'xxx...xxx';
+    const ultimi3 = pat.slice(-3);
+    return `xxx...xxx${ultimi3}`;
+  };
+
+  // ============================================================
+  // UTILITÀ SALDO
   // ============================================================
 
   const parseSaldoSafe = (value, fallback = DEFAULT_SALDO_INIZIALE) => {
@@ -98,16 +135,14 @@
   };
 
   // ============================================================
-  // MERGE UTENTI (locali + remoti) - unisce senza perdere dati
+  // MERGE UTENTI (locali + remoti) - solo per aggiungere
   // ============================================================
 
   const mergeUtenti = (locali, remoti) => {
     const map = new Map();
-    // Prima i remoti
     (remoti || []).forEach(u => {
       if (u && u.username) map.set(u.username.toLowerCase(), u);
     });
-    // Poi i locali (priorità se più recenti o con hash)
     (locali || []).forEach(u => {
       if (!u || !u.username) return;
       const key = u.username.toLowerCase();
@@ -152,7 +187,7 @@
     return null;
   };
 
-  // ⭐ FIX: scarica i remoti PRIMA di uploadare, poi merge
+  // ⭐ Upload con MERGE (per AGGIUNGERE utenti senza perdere quelli di altri dispositivi)
   const caricaUtentiSuGitHub = async () => {
     const pat = getPAT();
     if (!pat) {
@@ -160,7 +195,6 @@
       return { ok: false, error: 'PAT non configurato' };
     }
 
-    // ⭐ Scarica i remoti PRIMA, poi merge (evita di sovrascrivere utenti di altri dispositivi)
     const locali = loadUtenti();
     let remoti = [];
     try {
@@ -173,16 +207,13 @@
       console.warn('⚠️ Impossibile scaricare remoti per merge:', e);
     }
 
-    // Merge locali + remoti
     const merged = mergeUtenti(locali, remoti);
     console.log(`🔄 Merge per upload: ${locali.length} locali + ${remoti.length} remoti = ${merged.length} totali`);
 
-    // Aggiorna anche il localStorage locale con il merged
     if (merged.length !== locali.length || JSON.stringify(merged) !== JSON.stringify(locali)) {
       saveUtenti(merged);
     }
 
-    // Ora carica il merged
     const json = JSON.stringify(merged, null, 2);
     const encoder = new TextEncoder();
     const content = encoder.encode(json);
@@ -194,7 +225,29 @@
     );
   };
 
-  // Sincronizza: scarica + merge (usato al refresh e manualmente)
+  // ⭐ NUOVO: Upload FORZATO senza merge (per ELIMINARE utenti)
+  const caricaUtentiSuGitHubForzato = async () => {
+    const pat = getPAT();
+    if (!pat) {
+      console.warn('⚠️ PAT non configurato');
+      return { ok: false, error: 'PAT non configurato' };
+    }
+
+    // NON fare merge: usa SOLO la lista locale
+    const utenti = loadUtenti();
+    console.log(`📤 Upload FORZATO (no merge): ${utenti.length} utenti →`, utenti.map(u => u.username));
+
+    const json = JSON.stringify(utenti, null, 2);
+    const encoder = new TextEncoder();
+    const content = encoder.encode(json);
+
+    return await caricaFileSuGitHub(
+      USERS_FILE,
+      content,
+      `Update utenti.json (forzato) - ${new Date().toISOString().slice(0, 19)}`
+    );
+  };
+
   const sincronizzaUtenti = async (silent = false) => {
     try {
       const locali = loadUtenti();
@@ -211,7 +264,6 @@
         saveUtenti(merged);
         console.log(`🔄 Utenti sincronizzati: ${locali.length} locali + ${remoti.length} remoti = ${merged.length}`);
 
-        // Se ci sono nuovi utenti remoti, ricarica anche su GitHub (mantiene allineati)
         if (getPAT() && merged.length > remoti.length) {
           await caricaUtentiSuGitHub();
         }
@@ -244,19 +296,38 @@
     });
     saveUtenti(utenti);
 
-    // ⭐ Upload su GitHub (con merge automatico interno)
+    // ⭐ 1. Upload utenti.json con merge (non perdere utenti di altri)
     if (getPAT()) {
       caricaUtentiSuGitHub().then(r => {
         if (r.ok) console.log('✅ utenti.json aggiornato su GitHub dopo registrazione');
         else console.warn('⚠️ Upload utenti fallito:', r.error);
       });
-    } else {
-      console.warn('⚠️ PAT non configurato - utente salvato solo in locale');
+    }
+
+    // ⭐ 2. Crea anche file Excel vuoto su GitHub (per far esistere il file)
+    if (getPAT()) {
+      (async () => {
+        try {
+          const wb = buildWorkbook(uname, [], DEFAULT_SALDO_INIZIALE);
+          const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+          const filepath = `${EXCEL_DIR}/${excelFilename(uname)}`;
+          const result = await caricaFileSuGitHub(
+            filepath,
+            wbout,
+            `Crea file gestione iniziale per ${uname} - ${new Date().toISOString().slice(0, 19)}`
+          );
+          if (result.ok) console.log(`✅ File Excel iniziale creato per ${uname}`);
+          else console.warn(`⚠️ File Excel per ${uname} non creato:`, result.error);
+        } catch (e) {
+          console.warn('⚠️ Errore creazione file Excel iniziale:', e);
+        }
+      })();
     }
 
     return uname;
   };
 
+  // ⭐ FIX: eliminaUtente ora usa upload FORZATO (no merge)
   const eliminaUtente = (username) => {
     const utenti = loadUtenti().filter(u => u.username !== username);
     saveUtenti(utenti);
@@ -267,9 +338,10 @@
       localStorage.removeItem(STORAGE_SESSION);
     }
 
+    // ⭐ FIX: upload FORZATO senza merge (per rimuovere davvero da GitHub)
     if (getPAT()) {
-      caricaUtentiSuGitHub().then(r => {
-        if (r.ok) console.log('✅ utenti.json aggiornato su GitHub (delete)');
+      caricaUtentiSuGitHubForzato().then(r => {
+        if (r.ok) console.log('✅ utenti.json aggiornato su GitHub (delete forzato)');
         else console.warn('⚠️ Upload utenti fallito:', r.error);
       });
     }
@@ -286,16 +358,6 @@
   const saveSessione = (username) => {
     if (username) localStorage.setItem(STORAGE_SESSION, username);
     else localStorage.removeItem(STORAGE_SESSION);
-  };
-
-  // ============================================================
-  // PAT GITHUB
-  // ============================================================
-
-  const getPAT = () => localStorage.getItem(STORAGE_PAT) || '';
-  const setPAT = (pat) => {
-    if (pat) localStorage.setItem(STORAGE_PAT, pat.trim());
-    else localStorage.removeItem(STORAGE_PAT);
   };
 
   // ============================================================
@@ -373,7 +435,7 @@
   }
 
   // ============================================================
-  // DOWNLOAD DA GITHUB (raw PRIMA per evitare cache CDN)
+  // DOWNLOAD DA GITHUB
   // ============================================================
 
   const getDownloadUrls = (user) => [
@@ -433,7 +495,7 @@
   };
 
   // ============================================================
-  // PARSING EXCEL (cerca riga "Esito = SALDO INIZIALE")
+  // PARSING EXCEL
   // ============================================================
 
   const parseExcelGestione = (arrayBuffer) => {
@@ -463,7 +525,6 @@
       let saldoTrovato = false;
 
       rows.forEach((row, i) => {
-        // Cerca la riga "SALDO INIZIALE" tramite la colonna Esito
         if (!saldoTrovato && colEsito && colVincita) {
           const esito = String(row[colEsito] || '').toUpperCase().trim();
           if (esito.includes('SALDO INIZIALE') || esito === 'SALDO') {
@@ -681,7 +742,7 @@
   };
 
   // ============================================================
-  // INPUT DATA ITALIANO (GG / MM / AAAA)
+  // INPUT DATA ITALIANO
   // ============================================================
 
   const DataInputItaliano = ({ value, onChange }) => {
@@ -1655,7 +1716,7 @@
   );
 
   // ============================================================
-  // SCHERMATA PRINCIPALE GESTIONE CONTO (dopo login)
+  // SCHERMATA PRINCIPALE GESTIONE CONTO
   // ============================================================
 
   function GestioneContoLoggato({ username, onCambiaUtente }) {
@@ -1702,7 +1763,6 @@
                     }
                   });
 
-                  // Priorità al locale se modificato di recente (10 min)
                   const localUpdatedAt = (() => {
                     try {
                       const saved = JSON.parse(localStorage.getItem(storageKeyConto(username)) || 'null');
@@ -1779,7 +1839,7 @@
 
     const handleUploadGitHub = async () => {
       if (!getPAT()) {
-        setMsg({ type: 'error', text: '⚠️ Configura il PAT in Impostazioni → Gestione Utenti' });
+        setMsg({ type: 'error', text: '⚠️ PAT non configurato' });
         setTimeout(() => setMsg(null), 4000);
         return;
       }
@@ -1797,7 +1857,7 @@
         );
 
         if (result.ok) {
-          setMsg({ type: 'success', text: '✅ File caricato su GitHub (branch master)!' });
+          setMsg({ type: 'success', text: '✅ File caricato su GitHub!' });
           fetch(`https://purge.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}@${GITHUB_BRANCH}/${filepath}`).catch(() => {});
         } else {
           setMsg({ type: 'error', text: '❌ ' + result.error });
@@ -1826,7 +1886,6 @@
 
     return (
       <div>
-        {/* Header utente */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px',
           padding: '12px 16px', background: 'var(--card)', borderRadius: '10px',
@@ -1858,7 +1917,6 @@
           >🔄 Cambia utente</button>
         </div>
 
-        {/* Stats */}
         <div style={{
           display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px',
           marginBottom: '20px',
@@ -1882,10 +1940,8 @@
             color="var(--accent)" />
         </div>
 
-        {/* Form */}
         <FormInserimento onAdd={handleAdd} movimenti={movimenti} saldoIniziale={saldoIniziale} />
 
-        {/* Saldo + Export/Upload */}
         <div style={{
           display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center',
           marginBottom: '20px', padding: '12px 16px', background: 'var(--card)',
@@ -2077,7 +2133,11 @@
 
   function GestioneUtentiPanel() {
     const [utenti, setUtenti] = useState(() => loadUtenti());
-    const [pat, setPatState] = useState(() => getPAT());
+    const [pat, setPatState] = useState(() => {
+      const savedPAT = localStorage.getItem(STORAGE_PAT);
+      if (savedPAT && savedPAT.trim()) return savedPAT.trim();
+      return '';
+    });
     const [msg, setMsg] = useState(null);
     const [showAdd, setShowAdd] = useState(false);
     const [nuovoUser, setNuovoUser] = useState('');
@@ -2109,7 +2169,7 @@
         if (result.ok) {
           setMsg({ type: 'success', text: `✅ Sincronizzati ${result.utenti.length} utenti` });
         } else {
-          setMsg({ type: 'error', text: '❌ utenti.json non trovato su GitHub (usa 📤 Carica su GitHub per crearlo)' });
+          setMsg({ type: 'error', text: '❌ utenti.json non trovato su GitHub' });
         }
       } catch (e) {
         setMsg({ type: 'error', text: '❌ ' + e.message });
@@ -2120,11 +2180,6 @@
     };
 
     const handleForzaUpload = async () => {
-      if (!getPAT()) {
-        setMsg({ type: 'error', text: '⚠️ Configura prima il PAT' });
-        setTimeout(() => setMsg(null), 3000);
-        return;
-      }
       if (utenti.length === 0) {
         setMsg({ type: 'error', text: '⚠️ Nessun utente locale da caricare' });
         setTimeout(() => setMsg(null), 3000);
@@ -2136,7 +2191,34 @@
         const result = await caricaUtentiSuGitHub();
         setUtenti(loadUtenti());
         if (result.ok) {
-          setMsg({ type: 'success', text: `✅ Utenti caricati su GitHub! Ora sincronizza gli altri dispositivi.` });
+          setMsg({ type: 'success', text: `✅ Utenti caricati su GitHub!` });
+        } else {
+          setMsg({ type: 'error', text: '❌ ' + result.error });
+        }
+      } catch (e) {
+        setMsg({ type: 'error', text: '❌ ' + e.message });
+      } finally {
+        setSyncing(false);
+        setTimeout(() => setMsg(null), 6000);
+      }
+    };
+
+    // ⭐ NUOVO: upload forzato (no merge) - per rimuovere utenti
+    const handleForzaUploadSenzaMerge = async () => {
+      if (utenti.length === 0) {
+        setMsg({ type: 'error', text: '⚠️ Nessun utente locale' });
+        setTimeout(() => setMsg(null), 3000);
+        return;
+      }
+      if (!window.confirm('⚠️ Attenzione: questo upload SOVRASCRIVE la lista su GitHub con SOLO i tuoi utenti locali.\n\nUsa SOLO se vuoi rimuovere utenti.\n\nContinuare?')) return;
+      
+      setSyncing(true);
+      setMsg({ type: 'info', text: `⏳ Upload forzato (no merge)...` });
+      try {
+        const result = await caricaUtentiSuGitHubForzato();
+        setUtenti(loadUtenti());
+        if (result.ok) {
+          setMsg({ type: 'success', text: `✅ Utenti caricati (forzato)! Ora su GitHub ci sono solo i tuoi.` });
         } else {
           setMsg({ type: 'error', text: '❌ ' + result.error });
         }
@@ -2206,7 +2288,7 @@
     };
 
     const handleDelete = (user) => {
-      if (!window.confirm(`Eliminare l'utente "${user.username}" e TUTTI i suoi dati (conti, movimenti) su questo dispositivo?\n\nIl file Excel su GitHub NON verrà eliminato.`)) return;
+      if (!window.confirm(`Eliminare l'utente "${user.username}"?`)) return;
       eliminaUtente(user.username);
       setUtenti(loadUtenti());
       setMsg({ type: 'success', text: `🗑️ Utente ${user.username} eliminato` });
@@ -2214,22 +2296,23 @@
 
     const handleSavePAT = () => {
       setPAT(pat);
-      setMsg({ type: 'success', text: pat ? '✅ PAT salvato' : '🗑️ PAT rimosso' });
+      setMsg({ type: 'success', text: pat ? '✅ PAT personale salvato' : '✅ PAT di sistema ripristinato' });
       setTimeout(() => setMsg(null), 2500);
     };
 
     const handleTestPAT = async () => {
-      if (!pat) {
-        setMsg({ type: 'error', text: '⚠️ Inserisci un PAT' });
+      const patToTest = pat && pat.trim() ? pat.trim() : getPAT();
+      if (!patToTest) {
+        setMsg({ type: 'error', text: '⚠️ Nessun PAT disponibile' });
         return;
       }
       setMsg({ type: 'info', text: '⏳ Verifica PAT...' });
       try {
         const resp = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`, {
-          headers: { 'Authorization': `token ${pat}` },
+          headers: { 'Authorization': `token ${patToTest}` },
         });
         if (resp.ok) {
-          setMsg({ type: 'success', text: '✅ PAT valido! Accesso al repo confermato.' });
+          setMsg({ type: 'success', text: `✅ PAT valido! (${isUsingDefaultPAT() ? 'sistema' : 'personale'})` });
         } else if (resp.status === 401) {
           setMsg({ type: 'error', text: '❌ PAT non valido o scaduto' });
         } else if (resp.status === 404) {
@@ -2241,6 +2324,9 @@
         setMsg({ type: 'error', text: '❌ Errore rete: ' + e.message });
       }
     };
+
+    const patEffettivo = getPAT();
+    const patMascherato = mascheraPAT(patEffettivo);
 
     return (
       <div>
@@ -2267,8 +2353,20 @@
                 cursor: (syncing || utenti.length === 0) ? 'not-allowed' : 'pointer',
                 opacity: (syncing || utenti.length === 0) ? 0.5 : 1,
               }}
-              title="Forza il caricamento degli utenti locali su GitHub">
-              📤 Carica su GitHub ({utenti.length})
+              title="Carica gli utenti locali su GitHub (con merge - mantiene utenti di altri dispositivi)">
+              📤 Carica (merge) ({utenti.length})
+            </button>
+
+            {/* ⭐ NUOVO: upload forzato senza merge */}
+            <button onClick={handleForzaUploadSenzaMerge} disabled={syncing || utenti.length === 0}
+              style={{
+                padding: '6px 14px', background: '#e67e22', color: '#fff',
+                border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '11px',
+                cursor: (syncing || utenti.length === 0) ? 'not-allowed' : 'pointer',
+                opacity: (syncing || utenti.length === 0) ? 0.5 : 1,
+              }}
+              title="SOVRASCRIVE la lista su GitHub con SOLO i tuoi utenti locali (per rimuovere utenti)">
+              ⚠️ Upload forzato
             </button>
 
             <button onClick={handleEsportaUtenti}
@@ -2291,7 +2389,7 @@
 
           {utenti.length === 0 ? (
             <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
-              {syncing ? '⏳ Caricamento da GitHub...' : 'Nessun utente registrato. Vai in Home → 💰 Gestione Conto per crearne uno.'}
+              {syncing ? '⏳ Caricamento da GitHub...' : 'Nessun utente registrato.'}
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -2403,11 +2501,48 @@
           <h3 style={{ margin: '0 0 8px 0', color: 'var(--accent)', fontSize: '16px' }}>
             🔑 GitHub Personal Access Token (PAT)
           </h3>
+
+          <div style={{
+            padding: '10px 14px',
+            marginBottom: '14px',
+            borderRadius: '8px',
+            background: isUsingDefaultPAT()
+              ? 'rgba(111, 207, 151, 0.15)'
+              : 'rgba(52, 152, 219, 0.15)',
+            border: `1px solid ${isUsingDefaultPAT() ? 'var(--win)' : '#3498db'}`,
+            fontSize: '12px',
+            fontWeight: 'bold',
+            color: isUsingDefaultPAT() ? 'var(--win)' : '#3498db',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            flexWrap: 'wrap',
+          }}>
+            <span style={{ fontSize: '18px' }}>
+              {isUsingDefaultPAT() ? '✅' : '🔵'}
+            </span>
+            <span style={{ flex: 1 }}>
+              {isUsingDefaultPAT()
+                ? 'PAT di sistema attivo (hardcodato)'
+                : 'PAT personale attivo (sovrascrive quello di sistema)'}
+            </span>
+            <span style={{
+              fontFamily: 'monospace',
+              fontSize: '13px',
+              background: 'rgba(0,0,0,0.3)',
+              padding: '3px 10px',
+              borderRadius: '5px',
+              letterSpacing: '1px',
+            }}>
+              {patMascherato}
+            </span>
+          </div>
+
           <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 14px 0', lineHeight: '1.5' }}>
-            Per caricare automaticamente i file Excel e <b>sincronizzare gli utenti</b> su GitHub, serve un <b>PAT</b> con permesso <code>repo</code>.
-            Crealo su <a href="https://github.com/settings/tokens/new?scopes=repo&description=GesssAI-Pro" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', fontWeight: 'bold' }}>github.com/settings/tokens</a>.
+            Il PAT è già <b>configurato di default</b> nel sistema. Puoi inserire il tuo PAT personale
+            qui sotto solo se vuoi sovrascriverlo.
             <br />
-            ⚠️ Il token è salvato solo nel browser (localStorage) e non viene mai inviato altrove se non a GitHub.
+            ⚠️ Lascia vuoto per usare il PAT di sistema.
           </p>
 
           <div style={{ position: 'relative', marginBottom: '12px' }}>
@@ -2415,7 +2550,7 @@
               type={patVisible ? 'text' : 'password'}
               value={pat}
               onChange={(e) => setPatState(e.target.value)}
-              placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              placeholder="(opzionale) incolla qui il tuo PAT personale"
               style={{
                 width: '100%', padding: '10px 44px 10px 12px',
                 background: 'var(--surface)', border: '1px solid var(--border)',
@@ -2440,25 +2575,21 @@
                 padding: '8px 18px', background: 'var(--accent)', color: '#000',
                 border: 'none', borderRadius: '6px', fontWeight: 'bold',
                 fontSize: '13px', cursor: 'pointer',
-              }}>💾 Salva PAT</button>
+              }}>
+              💾 {pat && pat.trim() ? 'Salva PAT personale' : 'Rimuovi PAT personale'}
+            </button>
             <button onClick={handleTestPAT}
               style={{
                 padding: '8px 18px', background: 'var(--surface)', color: 'var(--text)',
                 border: '1px solid var(--border)', borderRadius: '6px',
                 fontWeight: 'bold', fontSize: '13px', cursor: 'pointer',
               }}>🧪 Testa PAT</button>
-            {pat && (
-              <button onClick={() => { setPatState(''); setPAT(''); setMsg({ type: 'info', text: '🗑️ PAT rimosso' }); setTimeout(() => setMsg(null), 2000); }}
-                style={{
-                  padding: '8px 18px', background: 'transparent', color: 'var(--lose)',
-                  border: '1px solid var(--lose)', borderRadius: '6px',
-                  fontWeight: 'bold', fontSize: '13px', cursor: 'pointer',
-                }}>🗑️ Rimuovi</button>
-            )}
           </div>
 
-          <div style={{ marginTop: '12px', fontSize: '11px', color: 'var(--text-muted)' }}>
+          <div style={{ marginTop: '12px', fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.5' }}>
             <b>Scope necessari:</b> <code>repo</code> (per repo privati) o <code>public_repo</code> (per repo pubblici).
+            <br />
+            <b>Nota:</b> il PAT mostrato sopra è solo una <b>versione mascherata</b> (ultimi 3 caratteri visibili) per sicurezza.
           </div>
         </div>
 
@@ -2497,11 +2628,14 @@
     caricaFileSuGitHub,
     getPAT,
     setPAT,
+    isUsingDefaultPAT,
+    mascheraPAT,
     loadUtenti,
     mergeUtenti,
     sincronizzaUtenti,
     scaricaUtentiDaGitHub,
     caricaUtentiSuGitHub,
+    caricaUtentiSuGitHubForzato,  // ⭐ NUOVO
     parseSaldoSafe,
     coalesceSaldo,
     parseExcelGestione,
@@ -2513,8 +2647,9 @@
     GITHUB_REPO,
     GITHUB_BRANCH,
     USERS_FILE,
+    DEFAULT_PAT,
   };
 
-  console.log('✅ Modulo Gestione Conto MULTI-UTENTE caricato - con MERGE intelligente utenti + fix saldo 0€');
+  console.log('✅ Modulo Gestione Conto caricato - con FIX eliminazione utenti + creazione file Excel iniziale');
 
 })();
