@@ -2,11 +2,12 @@
 // gestione-conto.js - Gestione conto MULTI-UTENTE con password
 // - Ogni utente ha il suo conto protetto da password (SHA-256)
 // - File Excel separati: excel/gestione_<username>.xlsx (branch master)
-// - ⭐ Sync utenti su GitHub (excel/utenti.json)
+// - ⭐ Sync utenti su GitHub (excel/utenti.json) con MERGE intelligente
+// - ⭐ Quando un utente si registra → merge + upload automatico
+// - ⭐ Quando un utente refresha → merge + aggiornamento automatico
 // - ⭐ Export/Import manuale utenti (backup JSON)
-// - ⭐ Pulsante "Carica su GitHub" per primo upload manuale
-// - ⭐ FIX: parsing SALDO INIZIALE dal file Excel (legge riga "Esito = SALDO INIZIALE")
-// - ⭐ FIX: saldo 0€ gestito correttamente (?? invece di ||)
+// - ⭐ FIX: parsing SALDO INIZIALE dal file Excel
+// - ⭐ FIX: saldo 0€ gestito correttamente
 // - ⭐ FIX: priorità a raw.githubusercontent (evita cache CDN)
 // - Upload automatico su GitHub via PAT (Personal Access Token)
 // - Settimana: Giovedì → Mercoledì successivo
@@ -97,14 +98,16 @@
   };
 
   // ============================================================
-  // MERGE UTENTI (locali + remoti)
+  // MERGE UTENTI (locali + remoti) - unisce senza perdere dati
   // ============================================================
 
   const mergeUtenti = (locali, remoti) => {
     const map = new Map();
+    // Prima i remoti
     (remoti || []).forEach(u => {
       if (u && u.username) map.set(u.username.toLowerCase(), u);
     });
+    // Poi i locali (priorità se più recenti o con hash)
     (locali || []).forEach(u => {
       if (!u || !u.username) return;
       const key = u.username.toLowerCase();
@@ -149,6 +152,7 @@
     return null;
   };
 
+  // ⭐ FIX: scarica i remoti PRIMA di uploadare, poi merge
   const caricaUtentiSuGitHub = async () => {
     const pat = getPAT();
     if (!pat) {
@@ -156,8 +160,30 @@
       return { ok: false, error: 'PAT non configurato' };
     }
 
-    const utenti = loadUtenti();
-    const json = JSON.stringify(utenti, null, 2);
+    // ⭐ Scarica i remoti PRIMA, poi merge (evita di sovrascrivere utenti di altri dispositivi)
+    const locali = loadUtenti();
+    let remoti = [];
+    try {
+      const downloaded = await scaricaUtentiDaGitHub();
+      if (Array.isArray(downloaded)) {
+        remoti = downloaded;
+        console.log(`📥 Remoti scaricati per merge: ${remoti.length} utenti`);
+      }
+    } catch (e) {
+      console.warn('⚠️ Impossibile scaricare remoti per merge:', e);
+    }
+
+    // Merge locali + remoti
+    const merged = mergeUtenti(locali, remoti);
+    console.log(`🔄 Merge per upload: ${locali.length} locali + ${remoti.length} remoti = ${merged.length} totali`);
+
+    // Aggiorna anche il localStorage locale con il merged
+    if (merged.length !== locali.length || JSON.stringify(merged) !== JSON.stringify(locali)) {
+      saveUtenti(merged);
+    }
+
+    // Ora carica il merged
+    const json = JSON.stringify(merged, null, 2);
     const encoder = new TextEncoder();
     const content = encoder.encode(json);
 
@@ -168,6 +194,7 @@
     );
   };
 
+  // Sincronizza: scarica + merge (usato al refresh e manualmente)
   const sincronizzaUtenti = async (silent = false) => {
     try {
       const locali = loadUtenti();
@@ -184,7 +211,8 @@
         saveUtenti(merged);
         console.log(`🔄 Utenti sincronizzati: ${locali.length} locali + ${remoti.length} remoti = ${merged.length}`);
 
-        if (getPAT()) {
+        // Se ci sono nuovi utenti remoti, ricarica anche su GitHub (mantiene allineati)
+        if (getPAT() && merged.length > remoti.length) {
           await caricaUtentiSuGitHub();
         }
       }
@@ -216,11 +244,14 @@
     });
     saveUtenti(utenti);
 
+    // ⭐ Upload su GitHub (con merge automatico interno)
     if (getPAT()) {
       caricaUtentiSuGitHub().then(r => {
-        if (r.ok) console.log('✅ utenti.json aggiornato su GitHub');
+        if (r.ok) console.log('✅ utenti.json aggiornato su GitHub dopo registrazione');
         else console.warn('⚠️ Upload utenti fallito:', r.error);
       });
+    } else {
+      console.warn('⚠️ PAT non configurato - utente salvato solo in locale');
     }
 
     return uname;
@@ -342,15 +373,12 @@
   }
 
   // ============================================================
-  // DOWNLOAD DA GITHUB (⭐ raw PRIMA per evitare cache CDN)
+  // DOWNLOAD DA GITHUB (raw PRIMA per evitare cache CDN)
   // ============================================================
 
   const getDownloadUrls = (user) => [
-    // ⭐ raw.githubusercontent PRIMA (cache breve, ~5 min)
     `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${EXCEL_DIR}/${excelFilename(user)}?t=${Date.now()}`,
-    // jsDelivr come fallback (cache lunga)
     `https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}@${GITHUB_BRANCH}/${EXCEL_DIR}/${excelFilename(user)}?t=${Date.now()}`,
-    // Locale (dev)
     `/${GITHUB_REPO}/${EXCEL_DIR}/${excelFilename(user)}?t=${Date.now()}`,
   ];
 
@@ -405,7 +433,7 @@
   };
 
   // ============================================================
-  // PARSING EXCEL (⭐ FIX: cerca riga "Esito = SALDO INIZIALE")
+  // PARSING EXCEL (cerca riga "Esito = SALDO INIZIALE")
   // ============================================================
 
   const parseExcelGestione = (arrayBuffer) => {
@@ -435,8 +463,7 @@
       let saldoTrovato = false;
 
       rows.forEach((row, i) => {
-        // ⭐ FIX: cerca la riga "SALDO INIZIALE" tramite la colonna Esito
-        // Il saldo è nella colonna "Importo Vinto" di quella riga
+        // Cerca la riga "SALDO INIZIALE" tramite la colonna Esito
         if (!saldoTrovato && colEsito && colVincita) {
           const esito = String(row[colEsito] || '').toUpperCase().trim();
           if (esito.includes('SALDO INIZIALE') || esito === 'SALDO') {
@@ -446,7 +473,7 @@
               saldoTrovato = true;
               console.log('💰 SALDO INIZIALE trovato nel file:', sv);
             }
-            return; // Salta questa riga (non è un movimento)
+            return;
           }
         }
 
@@ -487,7 +514,6 @@
       });
 
       console.log('📊 Parsing completato:', { movimenti: movimenti.length, saldoIniziale });
-
       return { movimenti, saldoIniziale };
     } catch (e) {
       console.error('Errore parsing gestione.xlsx:', e);
@@ -1643,7 +1669,6 @@
     const [autoSynced, setAutoSynced] = useState(false);
     const [uploadBusy, setUploadBusy] = useState(false);
 
-    // ⭐ FLAG: disabilita auto-save nei primi 3 secondi post-load
     const autoSaveEnabled = useRef(false);
 
     useEffect(() => {
@@ -1677,7 +1702,7 @@
                     }
                   });
 
-                  // ⭐ Priorità: se il locale è stato modificato di recente (10 min), usa il locale
+                  // Priorità al locale se modificato di recente (10 min)
                   const localUpdatedAt = (() => {
                     try {
                       const saved = JSON.parse(localStorage.getItem(storageKeyConto(username)) || 'null');
@@ -1692,7 +1717,7 @@
                     console.log('💰 Saldo LOCALE ha priorità (modificato di recente):', saldoFinale);
                   } else {
                     saldoFinale = coalesceSaldo(parsed.saldoIniziale, local.saldoIniziale);
-                    console.log('💰 Saldo REMOTO ha priorità:', saldoFinale, '(parsed:', parsed.saldoIniziale, ', local:', local.saldoIniziale, ')');
+                    console.log('💰 Saldo REMOTO ha priorità:', saldoFinale);
                   }
 
                   setMovimenti(merge);
@@ -1710,7 +1735,6 @@
           }
         } catch (e) {}
         setLoading(false);
-        // ⭐ Abilita auto-save dopo 3 secondi
         setTimeout(() => {
           autoSaveEnabled.current = true;
           console.log('🔓 Auto-save ABILITATO');
@@ -1718,7 +1742,6 @@
       })();
     }, [username]);
 
-    // ⭐ Auto-save SOLO dopo che autoSaveEnabled è true
     useEffect(() => {
       if (loading) return;
       if (!autoSaveEnabled.current) {
@@ -1775,7 +1798,6 @@
 
         if (result.ok) {
           setMsg({ type: 'success', text: '✅ File caricato su GitHub (branch master)!' });
-          // Invalida la cache jsDelivr
           fetch(`https://purge.jsdelivr.net/gh/${GITHUB_USER}/${GITHUB_REPO}@${GITHUB_BRANCH}/${filepath}`).catch(() => {});
         } else {
           setMsg({ type: 'error', text: '❌ ' + result.error });
@@ -1793,7 +1815,6 @@
       if (!isNaN(v) && v >= 0) {
         setSaldoIniziale(v);
         setEditSaldo(false);
-        // ⭐ Salva subito in localStorage
         saveGestioneToLocal(username, movimenti, v);
         setMsg({ type: 'success', text: `✅ Saldo iniziale aggiornato a €${v.toFixed(2)}` });
         setTimeout(() => setMsg(null), 2500);
@@ -2110,11 +2131,12 @@
         return;
       }
       setSyncing(true);
-      setMsg({ type: 'info', text: `⏳ Caricamento ${utenti.length} utenti su GitHub...` });
+      setMsg({ type: 'info', text: `⏳ Caricamento utenti su GitHub (con merge)...` });
       try {
         const result = await caricaUtentiSuGitHub();
+        setUtenti(loadUtenti());
         if (result.ok) {
-          setMsg({ type: 'success', text: `✅ ${utenti.length} utenti caricati su GitHub! Ora sincronizza gli altri dispositivi.` });
+          setMsg({ type: 'success', text: `✅ Utenti caricati su GitHub! Ora sincronizza gli altri dispositivi.` });
         } else {
           setMsg({ type: 'error', text: '❌ ' + result.error });
         }
@@ -2493,6 +2515,6 @@
     USERS_FILE,
   };
 
-  console.log('✅ Modulo Gestione Conto MULTI-UTENTE caricato - con FIX parsing Excel + saldo 0€');
+  console.log('✅ Modulo Gestione Conto MULTI-UTENTE caricato - con MERGE intelligente utenti + fix saldo 0€');
 
 })();
