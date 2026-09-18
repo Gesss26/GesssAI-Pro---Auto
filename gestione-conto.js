@@ -2,8 +2,10 @@
 // gestione-conto.js - Gestione conto MULTI-UTENTE con password
 // - Ogni utente ha il suo conto protetto da password (SHA-256)
 // - File Excel separati: excel/gestione_<username>.xlsx (branch master)
-// - ⭐ NUOVO: Sincronizzazione utenti su GitHub (excel/utenti.json)
-// - ⭐ NUOVO: Export/Import manuale utenti (backup JSON)
+// - ⭐ Sync utenti su GitHub (excel/utenti.json)
+// - ⭐ Export/Import manuale utenti (backup JSON)
+// - ⭐ Pulsante "Carica su GitHub" per primo upload manuale
+// - ⭐ FIX: saldo 0€ gestito correttamente (?? invece di ||)
 // - Upload automatico su GitHub via PAT (Personal Access Token)
 // - Settimana: Giovedì → Mercoledì successivo
 // - Input data italiano GG/MM/AAAA
@@ -51,6 +53,31 @@
   };
 
   // ============================================================
+  // UTILITÀ SALDO (⭐ FIX: gestisce correttamente 0)
+  // ============================================================
+
+  // Restituisce un saldo valido (>= 0) o il default
+  const parseSaldoSafe = (value, fallback = DEFAULT_SALDO_INIZIALE) => {
+    if (value === null || value === undefined || value === '') return fallback;
+    const parsed = parseFloat(value);
+    if (isNaN(parsed) || parsed < 0) return fallback;
+    return parsed;
+  };
+
+  // Prende il saldo non-nullish (preserva 0)
+  const coalesceSaldo = (primary, secondary = DEFAULT_SALDO_INIZIALE) => {
+    if (primary !== null && primary !== undefined && primary !== '') {
+      const parsed = typeof primary === 'number' ? primary : parseFloat(primary);
+      if (!isNaN(parsed) && parsed >= 0) return parsed;
+    }
+    if (secondary !== null && secondary !== undefined && secondary !== '') {
+      const parsed = typeof secondary === 'number' ? secondary : parseFloat(secondary);
+      if (!isNaN(parsed) && parsed >= 0) return parsed;
+    }
+    return DEFAULT_SALDO_INIZIALE;
+  };
+
+  // ============================================================
   // GESTIONE UTENTI (locale)
   // ============================================================
 
@@ -70,16 +97,14 @@
   };
 
   // ============================================================
-  // ⭐ MERGE UTENTI (locali + remoti)
+  // MERGE UTENTI (locali + remoti)
   // ============================================================
 
   const mergeUtenti = (locali, remoti) => {
     const map = new Map();
-    // Prima i remoti
     (remoti || []).forEach(u => {
       if (u && u.username) map.set(u.username.toLowerCase(), u);
     });
-    // Poi i locali (priorità se più recenti o con hash)
     (locali || []).forEach(u => {
       if (!u || !u.username) return;
       const key = u.username.toLowerCase();
@@ -98,7 +123,7 @@
   };
 
   // ============================================================
-  // ⭐ SINCRONIZZAZIONE UTENTI SU GITHUB
+  // SINCRONIZZAZIONE UTENTI SU GITHUB
   // ============================================================
 
   const scaricaUtentiDaGitHub = async () => {
@@ -159,7 +184,6 @@
         saveUtenti(merged);
         console.log(`🔄 Utenti sincronizzati: ${locali.length} locali + ${remoti.length} remoti = ${merged.length}`);
 
-        // Se ci sono differenze, ricarica su GitHub
         if (getPAT()) {
           await caricaUtentiSuGitHub();
         }
@@ -192,7 +216,6 @@
     });
     saveUtenti(utenti);
 
-    // ⭐ Upload su GitHub (non blocca)
     if (getPAT()) {
       caricaUtentiSuGitHub().then(r => {
         if (r.ok) console.log('✅ utenti.json aggiornato su GitHub');
@@ -213,7 +236,6 @@
       localStorage.removeItem(STORAGE_SESSION);
     }
 
-    // ⭐ Upload su GitHub
     if (getPAT()) {
       caricaUtentiSuGitHub().then(r => {
         if (r.ok) console.log('✅ utenti.json aggiornato su GitHub (delete)');
@@ -270,7 +292,6 @@
 
     const apiUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${filepath}`;
 
-    // 1. Recupera SHA se il file esiste
     let sha = null;
     try {
       const checkResp = await fetch(apiUrl + `?ref=${GITHUB_BRANCH}`, {
@@ -283,14 +304,10 @@
         const existing = await checkResp.json();
         sha = existing.sha;
       }
-    } catch (e) {
-      // File non esiste
-    }
+    } catch (e) {}
 
-    // 2. Base64
     const base64 = arrayBufferToBase64(content);
 
-    // 3. PUT
     const body = {
       message: commitMessage,
       content: base64,
@@ -325,7 +342,7 @@
   }
 
   // ============================================================
-  // DOWNLOAD DA GITHUB (CDN jsDelivr + raw GitHub)
+  // DOWNLOAD DA GITHUB
   // ============================================================
 
   const getDownloadUrls = (user) => [
@@ -385,7 +402,7 @@
   };
 
   // ============================================================
-  // PARSING EXCEL
+  // PARSING EXCEL (⭐ FIX: saldo 0 accettato)
   // ============================================================
 
   const parseExcelGestione = (arrayBuffer) => {
@@ -413,11 +430,16 @@
 
       const movimenti = [];
       let saldoIniziale = DEFAULT_SALDO_INIZIALE;
+      let saldoTrovato = false;
 
       rows.forEach((row, i) => {
-        if (colSaldo && row[colSaldo] && saldoIniziale === DEFAULT_SALDO_INIZIALE) {
+        // ⭐ FIX: accetta anche saldo = 0
+        if (colSaldo && !saldoTrovato && row[colSaldo] !== undefined && row[colSaldo] !== '') {
           const sv = parseFloat(row[colSaldo]);
-          if (!isNaN(sv) && sv > 0) saldoIniziale = sv;
+          if (!isNaN(sv) && sv >= 0) {
+            saldoIniziale = sv;
+            saldoTrovato = true;
+          }
         }
 
         const dataRaw = row[colData];
@@ -463,28 +485,60 @@
     }
   };
 
+  // ============================================================
+  // LOAD/SAVE GESTIONE LOCALE (⭐ FIX: saldo 0)
+  // ============================================================
+
   const loadGestioneFromLocal = (username) => {
     try {
       const saved = JSON.parse(localStorage.getItem(storageKeyConto(username)) || 'null');
-      const saldo = parseFloat(localStorage.getItem(storageKeySaldo(username))) || DEFAULT_SALDO_INIZIALE;
+      const saldoRaw = localStorage.getItem(storageKeySaldo(username));
+
+      // ⭐ FIX: usa parseSaldoSafe che gestisce 0 correttamente
+      const saldoLocale = parseSaldoSafe(saldoRaw, null);
+
       if (saved && Array.isArray(saved.movimenti)) {
-        return { movimenti: saved.movimenti, saldoIniziale: saved.saldoIniziale || saldo };
+        // ⭐ FIX: coalesceSaldo preserva 0
+        const savedSaldo = coalesceSaldo(
+          saved.saldoIniziale,
+          saldoLocale !== null ? saldoLocale : DEFAULT_SALDO_INIZIALE
+        );
+        return { movimenti: saved.movimenti, saldoIniziale: savedSaldo };
       }
-    } catch (e) {}
+
+      if (saldoLocale !== null) {
+        return { movimenti: [], saldoIniziale: saldoLocale };
+      }
+    } catch (e) {
+      console.warn('Errore loadGestioneFromLocal:', e);
+    }
     return { movimenti: [], saldoIniziale: DEFAULT_SALDO_INIZIALE };
   };
 
   const saveGestioneToLocal = (username, movimenti, saldoIniziale) => {
     try {
-      localStorage.setItem(storageKeyConto(username), JSON.stringify({ movimenti, saldoIniziale, updatedAt: new Date().toISOString() }));
-      localStorage.setItem(storageKeySaldo(username), String(saldoIniziale));
+      // ⭐ FIX: salva sempre il valore, anche 0
+      const saldoDaSalvare = (saldoIniziale !== null && saldoIniziale !== undefined && !isNaN(saldoIniziale))
+        ? saldoIniziale
+        : DEFAULT_SALDO_INIZIALE;
+
+      localStorage.setItem(
+        storageKeyConto(username),
+        JSON.stringify({
+          movimenti,
+          saldoIniziale: saldoDaSalvare,
+          updatedAt: new Date().toISOString(),
+        })
+      );
+      // ⭐ FIX: salva anche "0" come stringa valida
+      localStorage.setItem(storageKeySaldo(username), String(saldoDaSalvare));
     } catch (e) {
       console.warn('Errore salvataggio gestione:', e);
     }
   };
 
   // ============================================================
-  // GENERAZIONE WORKBOOK (per export/upload)
+  // GENERAZIONE WORKBOOK
   // ============================================================
 
   const buildWorkbook = (username, movimenti, saldoIniziale) => {
@@ -692,7 +746,7 @@
   };
 
   // ============================================================
-  // SCHERMATA REGISTRAZIONE (primo utente)
+  // SCHERMATA REGISTRAZIONE
   // ============================================================
 
   const SchermataRegistrazione = ({ onRegistrato }) => {
@@ -795,7 +849,7 @@
   };
 
   // ============================================================
-  // SCHERMATA SELEZIONE UTENTE (login)
+  // SCHERMATA SELEZIONE UTENTE
   // ============================================================
 
   const SchermataSelezioneUtente = ({ utenti, onLogin, onUtentiCambiati }) => {
@@ -876,7 +930,6 @@
           </p>
         </div>
 
-        {/* Pulsante sync */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
           <button onClick={handleSync} disabled={syncing}
             style={{
@@ -889,7 +942,6 @@
           </button>
         </div>
 
-        {/* Lista utenti */}
         {!selectedUser && !showAdd && (
           <>
             <div style={{
@@ -955,7 +1007,6 @@
           </>
         )}
 
-        {/* Login */}
         {selectedUser && !showAdd && (
           <div style={{
             padding: '20px', background: 'var(--surface)', borderRadius: '12px',
@@ -1017,7 +1068,6 @@
           </div>
         )}
 
-        {/* Aggiungi utente */}
         {showAdd && (
           <div style={{
             padding: '20px', background: 'var(--surface)', borderRadius: '12px',
@@ -1574,6 +1624,7 @@
 
   // ============================================================
   // SCHERMATA PRINCIPALE GESTIONE CONTO (dopo login)
+  // ⭐ FIX: saldo 0 gestito correttamente in tutti i punti
   // ============================================================
 
   function GestioneContoLoggato({ username, onCambiaUtente }) {
@@ -1590,6 +1641,7 @@
     useEffect(() => {
       const local = loadGestioneFromLocal(username);
       setMovimenti(local.movimenti);
+      // ⭐ FIX: usa il valore anche se 0
       setSaldoIniziale(local.saldoIniziale);
       setSaldoInput(String(local.saldoIniziale));
 
@@ -1612,11 +1664,19 @@
                       localIds.add(key);
                     }
                   });
+
+                  // ⭐ FIX: preserva 0 dal PDF e dal locale
+                  const saldoFinale = coalesceSaldo(
+                    parsed.saldoIniziale,
+                    local.saldoIniziale
+                  );
+
                   setMovimenti(merge);
-                  setSaldoIniziale(parsed.saldoIniziale || local.saldoIniziale);
-                  saveGestioneToLocal(username, merge, parsed.saldoIniziale || local.saldoIniziale);
+                  setSaldoIniziale(saldoFinale);
+                  setSaldoInput(String(saldoFinale));
+                  saveGestioneToLocal(username, merge, saldoFinale);
                   setAutoSynced(true);
-                  console.log('✅ Gestione caricata da:', url.split('/').slice(0, 6).join('/'));
+                  console.log('✅ Gestione caricata da:', url.split('/').slice(0, 6).join('/'), '- saldo:', saldoFinale);
                 }
                 break;
               }
@@ -1629,6 +1689,7 @@
       })();
     }, [username]);
 
+    // ⭐ FIX: salva anche quando saldo = 0
     useEffect(() => {
       if (!loading) {
         saveGestioneToLocal(username, movimenti, saldoIniziale);
@@ -1693,11 +1754,19 @@
       }
     };
 
+    // ⭐ FIX: salva anche se 0
     const handleSaveSaldo = () => {
       const v = parseFloat(saldoInput);
       if (!isNaN(v) && v >= 0) {
         setSaldoIniziale(v);
         setEditSaldo(false);
+        // Salva subito in localStorage per evitare race con useEffect
+        saveGestioneToLocal(username, movimenti, v);
+        setMsg({ type: 'success', text: `✅ Saldo iniziale aggiornato a €${v.toFixed(2)}` });
+        setTimeout(() => setMsg(null), 2500);
+      } else {
+        setMsg({ type: 'error', text: '⚠️ Inserisci un valore valido (≥ 0)' });
+        setTimeout(() => setMsg(null), 3000);
       }
     };
 
@@ -1772,16 +1841,17 @@
             <span style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 'bold' }}>💵 Saldo iniziale:</span>
             {editSaldo ? (
               <>
-                <input type="number" step="0.01" value={saldoInput}
+                <input type="number" step="0.01" min="0" value={saldoInput}
                   onChange={(e) => setSaldoInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSaveSaldo()}
                   style={{ width: '110px', padding: '4px 8px', fontSize: '13px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '6px' }} />
                 <button onClick={handleSaveSaldo} style={{ padding: '4px 10px', fontSize: '11px', background: 'var(--win)', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>✓</button>
-                <button onClick={() => setEditSaldo(false)} style={{ padding: '4px 10px', fontSize: '11px', background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
+                <button onClick={() => { setEditSaldo(false); setSaldoInput(String(saldoIniziale)); }} style={{ padding: '4px 10px', fontSize: '11px', background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
               </>
             ) : (
               <>
                 <span style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--accent)' }}>€{saldoIniziale.toFixed(2)}</span>
-                <button onClick={() => setEditSaldo(true)} style={{ padding: '3px 10px', fontSize: '11px', background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer' }}>✏️ Modifica</button>
+                <button onClick={() => { setSaldoInput(String(saldoIniziale)); setEditSaldo(true); }} style={{ padding: '3px 10px', fontSize: '11px', background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer' }}>✏️ Modifica</button>
               </>
             )}
           </div>
@@ -1886,7 +1956,6 @@
     const [utenteLoggato, setUtenteLoggato] = useState(() => loadSessione());
     const [syncing, setSyncing] = useState(false);
 
-    // ⭐ SINCRONIZZA ALL'AVVIO
     useEffect(() => {
       let cancelled = false;
       (async () => {
@@ -1912,7 +1981,6 @@
       );
     }
 
-    // Se nessun utente registrato → registrazione
     if (utenti.length === 0) {
       return (
         <SchermataRegistrazione
@@ -1925,7 +1993,6 @@
       );
     }
 
-    // Se utenti esistono ma nessuno loggato → selezione
     if (!utenteLoggato || !getUtente(utenteLoggato)) {
       return (
         <SchermataSelezioneUtente
@@ -1939,7 +2006,6 @@
       );
     }
 
-    // Utente loggato → gestione conto
     return (
       <GestioneContoLoggato
         username={utenteLoggato}
@@ -1953,6 +2019,7 @@
 
   // ============================================================
   // PANNELLO GESTIONE UTENTI (per Impostazioni)
+  // ⭐ NUOVO: pulsante "Carica su GitHub" per primo upload
   // ============================================================
 
   function GestioneUtentiPanel() {
@@ -1967,7 +2034,6 @@
     const [patVisible, setPatVisible] = useState(false);
     const [syncing, setSyncing] = useState(false);
 
-    // ⭐ SINCRONIZZA all'apertura del pannello
     useEffect(() => {
       let cancelled = false;
       (async () => {
@@ -1990,13 +2056,42 @@
         if (result.ok) {
           setMsg({ type: 'success', text: `✅ Sincronizzati ${result.utenti.length} utenti` });
         } else {
-          setMsg({ type: 'error', text: '❌ utenti.json non trovato su GitHub (crea prima un utente con PAT configurato)' });
+          setMsg({ type: 'error', text: '❌ utenti.json non trovato su GitHub (usa 📤 Carica su GitHub per crearlo)' });
         }
       } catch (e) {
         setMsg({ type: 'error', text: '❌ ' + e.message });
       } finally {
         setSyncing(false);
-        setTimeout(() => setMsg(null), 4000);
+        setTimeout(() => setMsg(null), 5000);
+      }
+    };
+
+    // ⭐ NUOVO: forza caricamento utenti su GitHub
+    const handleForzaUpload = async () => {
+      if (!getPAT()) {
+        setMsg({ type: 'error', text: '⚠️ Configura prima il PAT' });
+        setTimeout(() => setMsg(null), 3000);
+        return;
+      }
+      if (utenti.length === 0) {
+        setMsg({ type: 'error', text: '⚠️ Nessun utente locale da caricare' });
+        setTimeout(() => setMsg(null), 3000);
+        return;
+      }
+      setSyncing(true);
+      setMsg({ type: 'info', text: `⏳ Caricamento ${utenti.length} utenti su GitHub...` });
+      try {
+        const result = await caricaUtentiSuGitHub();
+        if (result.ok) {
+          setMsg({ type: 'success', text: `✅ ${utenti.length} utenti caricati su GitHub! Ora sincronizza gli altri dispositivi.` });
+        } else {
+          setMsg({ type: 'error', text: '❌ ' + result.error });
+        }
+      } catch (e) {
+        setMsg({ type: 'error', text: '❌ ' + e.message });
+      } finally {
+        setSyncing(false);
+        setTimeout(() => setMsg(null), 6000);
       }
     };
 
@@ -2102,7 +2197,7 @@
             {syncing && <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginLeft: '10px', fontWeight: 'normal' }}>🔄 sync...</span>}
           </h3>
 
-          {/* ⭐ Pulsanti Sync/Export/Import */}
+          {/* Pulsanti Sync/Upload/Export/Import */}
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '14px' }}>
             <button onClick={handleSyncManuale} disabled={syncing}
               style={{
@@ -2112,6 +2207,18 @@
               }}>
               🔄 {syncing ? 'Sync...' : 'Sincronizza GitHub'}
             </button>
+
+            <button onClick={handleForzaUpload} disabled={syncing || utenti.length === 0}
+              style={{
+                padding: '6px 14px', background: '#3498db', color: '#fff',
+                border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '11px',
+                cursor: (syncing || utenti.length === 0) ? 'not-allowed' : 'pointer',
+                opacity: (syncing || utenti.length === 0) ? 0.5 : 1,
+              }}
+              title="Forza il caricamento degli utenti locali su GitHub (crea utenti.json se non esiste)">
+              📤 Carica su GitHub ({utenti.length})
+            </button>
+
             <button onClick={handleEsportaUtenti}
               style={{
                 padding: '6px 14px', background: 'var(--surface)', color: 'var(--text)',
@@ -2344,6 +2451,8 @@
     sincronizzaUtenti,
     scaricaUtentiDaGitHub,
     caricaUtentiSuGitHub,
+    parseSaldoSafe,
+    coalesceSaldo,
     formatDateIT,
     excelFilename,
     GITHUB_USER,
@@ -2352,6 +2461,6 @@
     USERS_FILE,
   };
 
-  console.log('✅ Modulo Gestione Conto MULTI-UTENTE caricato - con sync utenti su GitHub + Export/Import');
+  console.log('✅ Modulo Gestione Conto MULTI-UTENTE caricato - con FIX saldo 0€ + upload GitHub manuale');
 
 })();
