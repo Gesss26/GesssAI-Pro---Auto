@@ -1,9 +1,10 @@
 // ============================================================
-// performance.js - Modulo Storico Performance (v2 - DB GitHub)
+// performance.js - Modulo Storico Performance (v3 - DB GitHub)
 // - Salva TUTTE le giocate di TUTTE le famiglie
 // - Scrive su GitHub (solo admin) + localStorage locale
 // - Upload debounced + manuale + on beforeunload
 // - Tabella matrice Campionato × Giocata con filtri ed export CSV
+// - ⭐ NUOVO: pulsante "Importa partite giocate" per recuperare storico
 // - Ordinamento campionati: Italiane → Top 5 → Serie B estere
 // ============================================================
 
@@ -12,8 +13,8 @@
 
   const { useState, useEffect, useMemo, useCallback, useRef } = React;
 
-  const STORAGE_KEY = 'ft_performance_pending'; // buffer locale prima dell'upload
-  const DEBOUNCE_MS = 5 * 60 * 1000; // 5 minuti
+  const STORAGE_KEY = 'ft_performance_pending';
+  const DEBOUNCE_MS = 5 * 60 * 1000;
   const MAX_LOCAL = 50000;
 
   // ============================================================
@@ -21,20 +22,16 @@
   // ============================================================
 
   const CHAMP_ORDER = [
-    // Italiane
     'Serie A', 'Serie B', 'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C',
-    // Top 5 europee
     'Premier League', 'EFL Championship',
     'Bundesliga', '2. Bundesliga',
     'La Liga', 'Segunda División',
     'Ligue 1', 'Ligue 2',
-    // Altre europee
     'Eredivisie', 'Eerste Divisie',
     'Primeira Liga',
     'Süper Lig',
     'Jupiler Pro League',
     'Scottish Premiership',
-    // Extra-europee
     'J1 League', 'K League 1',
   ];
 
@@ -165,6 +162,64 @@
   };
 
   // ============================================================
+  // ⭐ CALCOLA TUTTE LE GIOCATE DI TUTTE LE FAMIGLIE PER UNA PARTITA
+  // (usato dall'importazione retroattiva delle partite già giocate)
+  // ============================================================
+
+  const calcolaTutteGiocatePerPartita = (match, allMatches) => {
+    if (typeof window.computeMatchStats !== 'function') return [];
+    if (typeof window.FAMIGLIE_GIOCATE !== 'object') return [];
+
+    const stats = window.computeMatchStats(match, allMatches);
+    if (!stats || stats.error) return [];
+
+    stats._allMatches = allMatches;
+    stats._homeTeam = match.casa;
+    stats._awayTeam = match.ospiti;
+
+    const homeMG = stats.homeMG || {};
+    const awayMG = stats.awayMG || {};
+    const mgTot = stats.mgTot || {};
+    const FAMIGLIE = window.FAMIGLIE_GIOCATE;
+    const out = [];
+
+    Object.keys(FAMIGLIE).forEach(familyId => {
+      const family = FAMIGLIE[familyId];
+      if (!family) return;
+
+      family.options.forEach(opt => {
+        let pct = 0;
+
+        if (familyId === 'gg_ng') {
+          const ggNgResult = window.calcolaGG_NG ? window.calcolaGG_NG(stats) : null;
+          if (ggNgResult) {
+            if (opt === 'GG') pct = ggNgResult.gg || 0;
+            else if (opt === 'NG') pct = ggNgResult.ng || 0;
+          }
+        } else {
+          if (window.getGiocataPct) {
+            pct = window.getGiocataPct(opt, stats, homeMG, awayMG, mgTot);
+          }
+        }
+
+        if (pct > 0) {
+          out.push({
+            familyId,
+            familyLabel: family.label,
+            familyIcon: family.icon,
+            giocata: opt,
+            label: opt,
+            displayLabel: opt,
+            pct,
+          });
+        }
+      });
+    });
+
+    return out;
+  };
+
+  // ============================================================
   // SALVA SNAPSHOT (locale + pianifica upload)
   // ============================================================
 
@@ -203,10 +258,8 @@
     }
 
     if (idx >= 0) {
-      // Unisci: prendi giocate nuove (con esito aggiornato), preserva risultato finale se già risolto
       const prev = arr[idx];
       const merged = Object.assign({}, prev, snapshot);
-      // Se la partita era già risolta, mantieni il risultato finale e gli esiti
       if (prev.risultatoFinale) {
         merged.risultatoFinale = prev.risultatoFinale;
       }
@@ -217,7 +270,6 @@
 
     scriviPending(arr);
 
-    // Pianifica upload debounced (solo se writer)
     if (window.PerformanceDB && window.PerformanceDB.isWriter()) {
       if (uploadTimer) clearTimeout(uploadTimer);
       uploadTimer = setTimeout(() => {
@@ -232,7 +284,8 @@
 
   const uploadInCorso = { value: false };
 
-  const flushUpload = async () => {
+  const flushUpload = async (opts) => {
+    const silent = opts && opts.silent;
     if (uploadInCorso.value) return { ok: false, motivo: 'in-corso' };
     if (!window.PerformanceDB || !window.PerformanceDB.isWriter()) {
       return { ok: false, motivo: 'readonly' };
@@ -245,7 +298,6 @@
       return { ok: true, motivo: 'vuoto' };
     }
 
-    // Raggruppa per data
     const perGiorno = {};
     arr.forEach(s => {
       const d = s.data ? s.data.slice(0, 10) : null;
@@ -273,7 +325,7 @@
     uploadInCorso.value = false;
 
     if (errori.length === 0) {
-      console.log(`✅ Performance: upload completato (${totaleUploadati} snapshot su ${Object.keys(perGiorno).length} giorni)`);
+      if (!silent) console.log(`✅ Performance: upload completato (${totaleUploadati} snapshot su ${Object.keys(perGiorno).length} giorni)`);
       return { ok: true, uploadati: totaleUploadati };
     } else {
       console.warn('⚠️ Performance: upload parziale:', errori);
@@ -282,7 +334,7 @@
   };
 
   // ============================================================
-  // AGGIORNA ESITI SUI PENDING E SUL DB
+  // AGGIORNA ESITI SUI PENDING
   // ============================================================
 
   const aggiornaEsiti = (matches) => {
@@ -339,7 +391,6 @@
       };
     }, []);
 
-    // Carica dal DB remoto (una volta)
     useEffect(() => {
       if (!window.PerformanceDB) return;
       let cancelled = false;
@@ -360,7 +411,6 @@
       return () => { cancelled = true; };
     }, []);
 
-    // Unisci pending + remote (pending vince in caso di conflitto — è più aggiornato)
     const tutti = useMemo(() => {
       const map = new Map();
       remote.forEach(s => map.set(s.matchKey, s));
@@ -376,7 +426,6 @@
   // ============================================================
 
   const costruisciMatrice = (snapshots) => {
-    // Struttura: { campionato: { "Over 1.5": {V, P, tot}, ... } }
     const matrix = {};
     const tutteGiocateSet = new Set();
 
@@ -397,7 +446,6 @@
       });
     });
 
-    // Ordina campionati
     const campionati = Object.keys(matrix).sort((a, b) => {
       const ka = champSortKey(a);
       const kb = champSortKey(b);
@@ -405,7 +453,6 @@
       return a.localeCompare(b);
     });
 
-    // Ordina giocate: prima tutte le Over, poi Under, poi GG/NG, poi 1X2, DC, poi combinazioni
     const tutteGiocate = Array.from(tutteGiocateSet).sort((a, b) => {
       const order = (s) => {
         if (s.startsWith('Over ')) return 1;
@@ -455,8 +502,6 @@
       [snapshots]
     );
 
-    // Filtro famiglie
-    const FAMIGLIE_ORDER = ['Over ', 'Under ', 'GG', 'NG', 'MG ', '1', 'X', '2', '1X', '12', 'X2'];
     const inFamiglia = (label, fam) => {
       if (fam === 'Tutte') return true;
       if (fam === 'Over') return label.startsWith('Over ');
@@ -475,7 +520,6 @@
       ? campionati
       : campionati.filter(c => c === filtroCampionato);
 
-    // Applica sort
     let campionatiOrdinati = [...campionatiFiltrati];
     if (sortCol) {
       campionatiOrdinati.sort((a, b) => {
@@ -496,7 +540,6 @@
       }
     };
 
-    // Export CSV
     const exportCSV = () => {
       const sep = ';';
       const lines = [];
@@ -529,7 +572,7 @@
           <div style={{ fontSize: '48px', marginBottom: '12px' }}>📊</div>
           <h3 style={{ color: 'var(--accent)', marginBottom: '8px' }}>Nessun dato di performance</h3>
           <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
-            Apri il <b>Palinsesto</b> per generare snapshot. Compariranno qui.
+            Apri il <b>Palinsesto</b> per generare snapshot, oppure clicca <b>📥 Importa partite giocate</b> qui sopra.
           </p>
         </div>
       );
@@ -537,7 +580,6 @@
 
     return (
       <div>
-        {/* FILTRI */}
         <div className="card" style={{ padding: '12px 14px', marginBottom: '12px' }}>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -575,7 +617,6 @@
           </div>
         </div>
 
-        {/* MATRICE */}
         <div className="card" style={{ padding: '12px', overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', minWidth: '1200px' }}>
             <thead>
@@ -593,7 +634,8 @@
                     style={{
                       padding: '6px 8px', textAlign: 'center', cursor: 'pointer',
                       borderBottom: '2px solid var(--border)', whiteSpace: 'nowrap',
-                      fontSize: '10px', textTransform: 'uppercase', color: sortCol === g ? 'var(--accent)' : 'var(--text-muted)',
+                      fontSize: '10px', textTransform: 'uppercase',
+                      color: sortCol === g ? 'var(--accent)' : 'var(--text-muted)',
                       background: sortCol === g ? 'rgba(243, 156, 18, 0.1)' : 'var(--surface)',
                     }}>
                     {g} {sortCol === g && (sortDir === 'desc' ? '▼' : '▲')}
@@ -641,7 +683,6 @@
           </table>
         </div>
 
-        {/* MODAL DETTAGLIO */}
         {dettaglio && (
           <div className="heatmap-detail-overlay" onClick={() => setDettaglio(null)}>
             <div className="heatmap-detail-modal" onClick={e => e.stopPropagation()}
@@ -698,10 +739,10 @@
   function PerformanceComponent({ matches, championships, onSelectMatch }) {
     const { snapshots, loading, pending, remote } = usePerformanceSnapshots();
     const [uploading, setUploading] = useState(false);
+    const [importandoGiocate, setImportandoGiocate] = useState(false);
     const [msg, setMsg] = useState(null);
     const isWriter = window.PerformanceDB ? window.PerformanceDB.isWriter() : false;
 
-    // Auto-aggiorna esiti + auto-upload
     useEffect(() => {
       if (!matches || matches.length === 0) return;
       const t = setTimeout(() => {
@@ -710,12 +751,10 @@
       return () => clearTimeout(t);
     }, [matches]);
 
-    // beforeunload: flush best-effort
     useEffect(() => {
       const handler = () => {
         if (isWriter && leggiPending().length > 0) {
-          // Usa sendBeacon se possibile, altrimenti ignora
-          try { flushUpload(); } catch (e) {}
+          try { flushUpload({ silent: true }); } catch (e) {}
         }
       };
       window.addEventListener('beforeunload', handler);
@@ -725,7 +764,7 @@
     const handleUploadManuale = async () => {
       setUploading(true);
       setMsg({ type: 'info', text: '⏳ Upload in corso...' });
-      const r = await flushUpload();
+      const r = await flushUpload({ silent: false });
       setUploading(false);
       if (r.ok) {
         setMsg({ type: 'success', text: `✅ Caricati ${r.uploadati || 0} snapshot su GitHub` });
@@ -735,9 +774,93 @@
       setTimeout(() => setMsg(null), 4000);
     };
 
+    // ⭐ IMPORTA PARTITE GIÀ GIOCATE
+    const handleImportaPartiteGiocate = async () => {
+      if (!matches || matches.length === 0) {
+        setMsg({ type: 'error', text: '⚠️ Nessuna partita disponibile' });
+        setTimeout(() => setMsg(null), 3000);
+        return;
+      }
+
+      const partiteGiocate = matches.filter(m =>
+        m.stato === 'Giocata' &&
+        (m.golCasa > 0 || m.golOspite > 0 || m.risultato)
+      );
+
+      if (partiteGiocate.length === 0) {
+        setMsg({ type: 'warning', text: '⚠️ Nessuna partita giocata con risultato' });
+        setTimeout(() => setMsg(null), 3000);
+        return;
+      }
+
+      setImportandoGiocate(true);
+      setMsg({ type: 'info', text: `⏳ Importazione di ${partiteGiocate.length} partite...` });
+
+      // Aspetta un tick per far vedere il messaggio
+      await new Promise(r => setTimeout(r, 100));
+
+      let importate = 0;
+      let errori = 0;
+
+      try {
+        for (let i = 0; i < partiteGiocate.length; i++) {
+          const match = partiteGiocate[i];
+          try {
+            const tutteGiocate = calcolaTutteGiocatePerPartita(match, matches);
+            if (!tutteGiocate || tutteGiocate.length === 0) continue;
+
+            salvaSnapshot(match, tutteGiocate);
+            importate++;
+
+            // Aggiorna il messaggio ogni 100 partite
+            if (i % 100 === 0 && i > 0) {
+              setMsg({ type: 'info', text: `⏳ Importazione... ${i}/${partiteGiocate.length}` });
+              await new Promise(r => setTimeout(r, 0));
+            }
+          } catch (e) {
+            errori++;
+          }
+        }
+
+        setMsg({
+          type: 'success',
+          text: `✅ Importate ${importate} partite (${errori} errori). Upload su GitHub in corso...`
+        });
+
+        // Upload immediato (senza debounce)
+        if (window.PerformanceDB && window.PerformanceDB.isWriter()) {
+          const r = await flushUpload({ silent: true });
+          if (r.ok) {
+            setMsg({
+              type: 'success',
+              text: `✅ Importate ${importate} partite e caricate su GitHub!`
+            });
+          } else {
+            setMsg({
+              type: 'warning',
+              text: `✅ ${importate} snapshot in coda locale (upload: ${r.motivo || r.errori?.join(', ') || 'attesa'})`
+            });
+          }
+        } else {
+          setMsg({
+            type: 'success',
+            text: `✅ Importate ${importate} partite (solo locali, non sei admin)`
+          });
+        }
+      } catch (e) {
+        setMsg({ type: 'error', text: '❌ ' + e.message });
+      } finally {
+        setImportandoGiocate(false);
+        setTimeout(() => setMsg(null), 8000);
+      }
+    };
+
     const risolti = snapshots.filter(s => s.risultatoFinale).length;
     const inAttesa = snapshots.length - risolti;
     const pendingCount = pending.length;
+    const partiteGiocateDisponibili = matches
+      ? matches.filter(m => m.stato === 'Giocata' && (m.golCasa > 0 || m.golOspite > 0 || m.risultato)).length
+      : 0;
 
     return (
       <div>
@@ -785,13 +908,49 @@
           </div>
         </div>
 
+        {/* ⭐ IMPORTA PARTITE GIÀ GIOCATE */}
+        {isWriter && partiteGiocateDisponibili > 0 && (
+          <div className="card" style={{
+            padding: '10px 14px', marginBottom: '12px',
+            background: 'rgba(52, 152, 219, 0.08)',
+            border: '1px solid #3498db', borderRadius: '8px',
+            display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
+          }}>
+            <span style={{ fontSize: '13px', color: 'var(--text)', flex: 1 }}>
+              📚 <b>Recupera storico</b>: importa snapshot per tutte le partite già giocate
+              ({partiteGiocateDisponibili} disponibili)
+            </span>
+            <button
+              className="btn"
+              onClick={handleImportaPartiteGiocate}
+              disabled={importandoGiocate}
+              style={{
+                fontSize: '12px', padding: '6px 14px',
+                background: importandoGiocate ? 'var(--surface)' : '#3498db',
+                color: importandoGiocate ? 'var(--text-muted)' : '#fff',
+                border: 'none', borderRadius: '6px', fontWeight: 'bold',
+                cursor: importandoGiocate ? 'wait' : 'pointer',
+              }}>
+              {importandoGiocate ? '⏳ Importazione...' : '📥 Importa partite giocate'}
+            </button>
+          </div>
+        )}
+
         {msg && (
           <div style={{
             marginBottom: '12px', padding: '10px 14px', borderRadius: '6px',
             background: msg.type === 'success' ? 'rgba(111, 207, 151, 0.15)'
-              : msg.type === 'error' ? 'rgba(235, 87, 87, 0.15)' : 'rgba(52, 152, 219, 0.15)',
-            border: `1px solid ${msg.type === 'success' ? 'var(--win)' : msg.type === 'error' ? 'var(--lose)' : '#3498db'}`,
-            color: msg.type === 'success' ? 'var(--win)' : msg.type === 'error' ? 'var(--lose)' : '#3498db',
+              : msg.type === 'error' ? 'rgba(235, 87, 87, 0.15)'
+              : msg.type === 'warning' ? 'rgba(243, 156, 18, 0.15)'
+              : 'rgba(52, 152, 219, 0.15)',
+            border: `1px solid ${msg.type === 'success' ? 'var(--win)'
+              : msg.type === 'error' ? 'var(--lose)'
+              : msg.type === 'warning' ? 'var(--accent)'
+              : '#3498db'}`,
+            color: msg.type === 'success' ? 'var(--win)'
+              : msg.type === 'error' ? 'var(--lose)'
+              : msg.type === 'warning' ? 'var(--accent)'
+              : '#3498db',
             fontSize: '13px', fontWeight: 'bold',
           }}>
             {msg.text}
@@ -816,12 +975,13 @@
     aggiornaEsiti,
     flushUpload,
     calcolaEsitoGiocata,
+    calcolaTutteGiocatePerPartita,
     usePerformanceSnapshots,
     costruisciMatrice,
     makeMatchKey,
     CHAMP_ORDER,
   };
 
-  console.log('✅ Modulo Performance v2 caricato - DB GitHub + matrice Campionato × Giocata');
+  console.log('✅ Modulo Performance v3 caricato - DB GitHub + matrice Campionato × Giocata + import partite giocate');
 
 })();
