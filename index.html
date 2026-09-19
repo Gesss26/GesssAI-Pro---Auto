@@ -880,7 +880,8 @@
       'Calcio': { bg: '#1b5e20', surface: '#2e7d32', card: '#388e3c', banner: '#2e7d32', text: '#fff', textMuted: '#ffff00', accent: '#ffc107', accent2: '#ff9800', border: '#1b5e20', tabActive: '#ffc107' },
     };
 
-    const MAIN_TABS = ['Home', 'Palinsesto', 'Statistiche', 'Storico', 'Schedina', 'Impostazioni'];
+    // ⭐ AGGIUNTO 'Performance'
+    const MAIN_TABS = ['Home', 'Palinsesto', 'Statistiche', 'Storico', 'Performance', 'Schedina', 'Impostazioni'];
 
     const CHAMPIONSHIP_COLORS = {
       'Jupiler Pro League': '#e74c3c',
@@ -1698,6 +1699,7 @@
                 {t === 'Palinsesto' && '📅 '}
                 {t === 'Statistiche' && '📊 '}
                 {t === 'Storico' && '📜 '}
+                {t === 'Performance' && '📈 '}
                 {t === 'Schedina' && '🎯 '}
                 {t === 'Impostazioni' && '⚙️ '}
                 {t}
@@ -1770,6 +1772,21 @@
                   />
                 ) : (
                   <div className="alert alert-info">⏳ Caricamento Storico... (storico.js)</div>
+                )}
+              </div>
+            )}
+
+            {/* ⭐ NUOVO TAB PERFORMANCE */}
+            {tab === 'Performance' && (
+              <div>
+                {window.PerformanceComponent ? (
+                  <window.PerformanceComponent
+                    matches={matches}
+                    championships={championships}
+                    onSelectMatch={selectMatch}
+                  />
+                ) : (
+                  <div className="alert alert-info">⏳ Caricamento Performance... (performance.js)</div>
                 )}
               </div>
             )}
@@ -1869,8 +1886,10 @@
 
     console.log('🚀 Avvio GesssAI-Pro');
 
-    localStorage.removeItem('ft_matches');
-    localStorage.removeItem('ft_champs');
+    // ⭐ RIMOSSE le 2 righe che svuotavano lo storage ad ogni avvio:
+    //   localStorage.removeItem('ft_matches');
+    //   localStorage.removeItem('ft_champs');
+    // Ora lo storico persiste tra sessioni e il tab Performance funziona subito.
 
     loadScrapedData(true).then(data => {
       if (data && data.matches && data.matches.length > 0) {

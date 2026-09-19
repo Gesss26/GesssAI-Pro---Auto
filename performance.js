@@ -1,12 +1,11 @@
 // ============================================================
-// performance.js - Modulo Storico Performance (v4 - DB GitHub)
+// performance.js - Modulo Storico Performance (v5 - Calcolo da Excel)
+// - ⭐ NOVITÀ v5: calcola TUTTI gli snapshot direttamente da matches (Excel)
+// - ⭐ NOVITÀ v5: la matrice Campionato × Giocata si popola automaticamente
+// - ⭐ NOVITÀ v5: il DB GitHub è solo cache opzionale per condivisione
 // - Salva TUTTE le giocate di TUTTE le famiglie
-// - Scrive su GitHub (solo admin) + localStorage locale
-// - Upload debounced + manuale + on beforeunload
 // - Tabella matrice Campionato × Giocata con filtri ed export CSV
-// - ⭐ Pulsante "Importa partite giocate" per recuperare storico
-// - ⭐ FIX v4: gestione localStorage pieno (riduzione progressiva)
-// - ⭐ FIX v4: MAX_LOCAL = 5000 (evita quota exceeded)
+// - Upload GitHub (debounced + manuale + beforeunload) per admin
 // - Ordinamento campionati: Italiane → Top 5 → Serie B estere
 // ============================================================
 
@@ -17,7 +16,7 @@
 
   const STORAGE_KEY = 'ft_performance_pending';
   const DEBOUNCE_MS = 5 * 60 * 1000;
-  const MAX_LOCAL = 5000; // ⭐ Ridotto da 50000 a 5000 per evitare quota exceeded
+  const MAX_LOCAL = 5000;
 
   // ============================================================
   // ORDINE CAMPIONATI (per tabella)
@@ -58,7 +57,6 @@
   };
 
   const scriviPending = (arr) => {
-    // Helper: prova a salvare una lista
     const trySave = (list) => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
       return true;
@@ -70,7 +68,6 @@
       window.dispatchEvent(new CustomEvent('performance-updated', { detail: limited }));
       return;
     } catch (e) {
-      // QuotaExceededError? Riduci progressivamente
       if (e.name === 'QuotaExceededError' || e.code === 22 || /quota/i.test(e.message)) {
         console.warn('⚠️ localStorage pieno. Riduco la dimensione del buffer...');
         const sizes = [3000, 2000, 1000, 500, 200, 100, 50];
@@ -81,11 +78,8 @@
             console.log(`✅ Buffer ridotto a ${limited.length} snapshot`);
             window.dispatchEvent(new CustomEvent('performance-updated', { detail: limited }));
             return;
-          } catch (e2) {
-            // Prova la prossima dimensione
-          }
+          } catch (e2) {}
         }
-        // Fallback estremo: svuota e salva solo gli ultimi 20
         try {
           const minimal = arr.slice(-20);
           localStorage.setItem(STORAGE_KEY, JSON.stringify(minimal));
@@ -116,6 +110,12 @@
   // ============================================================
   // CALCOLO ESITO
   // ============================================================
+
+  const matchRange = (val, range) => {
+    const [min, max] = String(range).split('-').map(Number);
+    if (isNaN(min) || isNaN(max)) return false;
+    return val >= min && val <= max;
+  };
 
   const calcolaEsitoGiocata = (match, familyId, giocataLabel) => {
     const gC = match.golCasa || 0;
@@ -190,12 +190,6 @@
     return null;
   };
 
-  const matchRange = (val, range) => {
-    const [min, max] = String(range).split('-').map(Number);
-    if (isNaN(min) || isNaN(max)) return false;
-    return val >= min && val <= max;
-  };
-
   // ============================================================
   // CALCOLA TUTTE LE GIOCATE DI TUTTE LE FAMIGLIE PER UNA PARTITA
   // ============================================================
@@ -254,7 +248,7 @@
   };
 
   // ============================================================
-  // SALVA SNAPSHOT (locale + pianifica upload)
+  // SALVA SNAPSHOT (locale + pianifica upload) — solo per upload opzionale
   // ============================================================
 
   let uploadTimer = null;
@@ -368,7 +362,7 @@
   };
 
   // ============================================================
-  // AGGIORNA ESITI SUI PENDING
+  // AGGIORNA ESITI SUI PENDING (per upload GitHub opzionale)
   // ============================================================
 
   const aggiornaEsiti = (matches) => {
@@ -404,14 +398,15 @@
   };
 
   // ============================================================
-  // HOOK: legge pending + DB remoto
+  // ⭐ HOOK PRINCIPALE: calcola snapshot da matches (Excel) + merge con remoto/pending
   // ============================================================
 
-  const usePerformanceSnapshots = () => {
+  const usePerformanceSnapshots = (matches) => {
     const [pending, setPending] = useState(() => leggiPending());
     const [remote, setRemote] = useState([]);
     const [loading, setLoading] = useState(false);
 
+    // Ascolta aggiornamenti pending (per upload GitHub)
     useEffect(() => {
       const handler = (e) => setPending(e.detail || leggiPending());
       const storageHandler = (e) => {
@@ -425,6 +420,7 @@
       };
     }, []);
 
+    // Carica DB remoto (opzionale, per dati condivisi da altri utenti)
     useEffect(() => {
       if (!window.PerformanceDB) return;
       let cancelled = false;
@@ -445,14 +441,73 @@
       return () => { cancelled = true; };
     }, []);
 
+    // ⭐ CALCOLA SNAPSHOT DAI MATCHES (Excel = fonte primaria)
+    const daExcel = useMemo(() => {
+      if (!matches || matches.length === 0) return [];
+      if (typeof window.computeMatchStats !== 'function') return [];
+      if (typeof window.FAMIGLIE_GIOCATE !== 'object') return [];
+
+      const partiteGiocate = matches.filter(m => m.stato === 'Giocata');
+      if (partiteGiocate.length === 0) return [];
+
+      console.log(`📊 Performance: calcolo snapshot per ${partiteGiocate.length} partite giocate...`);
+      const t0 = performance.now();
+      const out = [];
+
+      partiteGiocate.forEach((match, idx) => {
+        try {
+          const giocate = calcolaTutteGiocatePerPartita(match, matches);
+          if (!giocate || giocate.length === 0) return;
+
+          const giocateConEsito = giocate.map(g => ({
+            ...g,
+            esito: calcolaEsitoGiocata(match, g.familyId, g.giocata),
+          }));
+
+          out.push({
+            matchKey: makeMatchKey(match.data, match.casa, match.ospiti),
+            data: match.data,
+            ora: match.ora || '',
+            campionato: match.campionato || '',
+            casa: match.casa || '',
+            ospiti: match.ospiti || '',
+            risultatoFinale: `${match.golCasa || 0}-${match.golOspite || 0}`,
+            salvatoIl: new Date().toISOString(),
+            giocate: giocateConEsito,
+          });
+
+          if (idx > 0 && idx % 100 === 0) {
+            console.log(`   ... ${idx}/${partiteGiocate.length}`);
+          }
+        } catch (e) {
+          console.warn(`⚠️ Errore calcolo snapshot per ${match.casa}-${match.ospiti}:`, e.message);
+        }
+      });
+
+      const t1 = performance.now();
+      console.log(`✅ Performance: ${out.length} snapshot calcolati in ${Math.round(t1 - t0)}ms`);
+      return out;
+    }, [matches]);
+
+    // Merge: Excel (primario) + remoto (arricchimento) + pending (upload in coda)
     const tutti = useMemo(() => {
       const map = new Map();
+      // 1. Remoto (base)
       remote.forEach(s => map.set(s.matchKey, s));
+      // 2. Excel (sovrascrive, è la fonte primaria)
+      daExcel.forEach(s => map.set(s.matchKey, s));
+      // 3. Pending locale (più recente)
       pending.forEach(s => map.set(s.matchKey, s));
       return Array.from(map.values());
-    }, [pending, remote]);
+    }, [pending, remote, daExcel]);
 
-    return { snapshots: tutti, loading, pending, remote };
+    return {
+      snapshots: tutti,
+      loading,
+      pending,
+      remote,
+      daExcel,
+    };
   };
 
   // ============================================================
@@ -606,7 +661,9 @@
           <div style={{ fontSize: '48px', marginBottom: '12px' }}>📊</div>
           <h3 style={{ color: 'var(--accent)', marginBottom: '8px' }}>Nessun dato di performance</h3>
           <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
-            Apri il <b>Palinsesto</b> per generare snapshot, oppure clicca <b>📥 Importa partite giocate</b> qui sopra.
+            Assicurati che il file Excel contenga partite con <b>stato = "Giocata"</b> e i relativi gol.
+            <br />
+            Il calcolo è automatico: ogni volta che ricarichi l'Excel, la matrice si aggiorna.
           </p>
         </div>
       );
@@ -771,12 +828,12 @@
   // ============================================================
 
   function PerformanceComponent({ matches, championships, onSelectMatch }) {
-    const { snapshots, loading, pending, remote } = usePerformanceSnapshots();
+    const { snapshots, loading, pending, remote, daExcel } = usePerformanceSnapshots(matches);
     const [uploading, setUploading] = useState(false);
-    const [importandoGiocate, setImportandoGiocate] = useState(false);
     const [msg, setMsg] = useState(null);
     const isWriter = window.PerformanceDB ? window.PerformanceDB.isWriter() : false;
 
+    // Aggiorna esiti sui pending (per upload opzionale su GitHub)
     useEffect(() => {
       if (!matches || matches.length === 0) return;
       const t = setTimeout(() => {
@@ -785,6 +842,7 @@
       return () => clearTimeout(t);
     }, [matches]);
 
+    // Upload automatico su beforeunload (solo admin)
     useEffect(() => {
       const handler = () => {
         if (isWriter && leggiPending().length > 0) {
@@ -796,102 +854,80 @@
     }, [isWriter]);
 
     const handleUploadManuale = async () => {
+      if (!window.PerformanceDB) return;
+      if (!isWriter) {
+        setMsg({ type: 'warning', text: '⚠️ Solo l\'admin può fare upload su GitHub' });
+        setTimeout(() => setMsg(null), 3000);
+        return;
+      }
+
       setUploading(true);
-      setMsg({ type: 'info', text: '⏳ Upload in corso...' });
-      const r = await flushUpload({ silent: false });
-      setUploading(false);
-      if (r.ok) {
-        setMsg({ type: 'success', text: `✅ Caricati ${r.uploadati || 0} snapshot su GitHub` });
-      } else {
-        setMsg({ type: 'error', text: `❌ ${r.errori ? r.errori.join(', ') : r.motivo || 'Errore'}` });
-      }
-      setTimeout(() => setMsg(null), 4000);
-    };
+      setMsg({ type: 'info', text: '⏳ Preparazione upload...' });
 
-    // ⭐ IMPORTA PARTITE GIÀ GIOCATE
-    const handleImportaPartiteGiocate = async () => {
-      if (!matches || matches.length === 0) {
-        setMsg({ type: 'error', text: '⚠️ Nessuna partita disponibile' });
-        setTimeout(() => setMsg(null), 3000);
-        return;
-      }
-
-      const partiteGiocate = matches.filter(m =>
-        m.stato === 'Giocata' &&
-        (m.golCasa > 0 || m.golOspite > 0 || m.risultato)
-      );
-
-      if (partiteGiocate.length === 0) {
-        setMsg({ type: 'warning', text: '⚠️ Nessuna partita giocata con risultato' });
-        setTimeout(() => setMsg(null), 3000);
-        return;
-      }
-
-      setImportandoGiocate(true);
-      setMsg({ type: 'info', text: `⏳ Importazione di ${partiteGiocate.length} partite...` });
-
-      await new Promise(r => setTimeout(r, 100));
-
-      let importate = 0;
-      let errori = 0;
-
+      // Salva TUTTI gli snapshot calcolati da Excel nel pending
+      // così vengono caricati su GitHub
       try {
-        for (let i = 0; i < partiteGiocate.length; i++) {
-          const match = partiteGiocate[i];
-          try {
-            const tutteGiocate = calcolaTutteGiocatePerPartita(match, matches);
-            if (!tutteGiocate || tutteGiocate.length === 0) continue;
-
-            salvaSnapshot(match, tutteGiocate);
-            importate++;
-
-            if (i % 100 === 0 && i > 0) {
-              setMsg({ type: 'info', text: `⏳ Importazione... ${i}/${partiteGiocate.length}` });
-              await new Promise(r => setTimeout(r, 0));
-            }
-          } catch (e) {
-            errori++;
-          }
+        const tuttiDaSalvare = daExcel || [];
+        if (tuttiDaSalvare.length === 0) {
+          setMsg({ type: 'warning', text: '⚠️ Nessuno snapshot da caricare' });
+          setUploading(false);
+          setTimeout(() => setMsg(null), 3000);
+          return;
         }
 
-        setMsg({
-          type: 'success',
-          text: `✅ Importate ${importate} partite (${errori} errori). Upload su GitHub in corso...`
+        // Raggruppa per data e salva
+        const perGiorno = {};
+        tuttiDaSalvare.forEach(s => {
+          const d = s.data ? s.data.slice(0, 10) : null;
+          if (!d) return;
+          if (!perGiorno[d]) perGiorno[d] = [];
+          perGiorno[d].push(s);
         });
 
-        if (window.PerformanceDB && window.PerformanceDB.isWriter()) {
-          const r = await flushUpload({ silent: true });
-          if (r.ok) {
-            setMsg({
-              type: 'success',
-              text: `✅ Importate ${importate} partite e caricate su GitHub!`
-            });
-          } else {
-            setMsg({
-              type: 'warning',
-              text: `✅ ${importate} snapshot in coda locale (upload: ${r.motivo || r.errori?.join(', ') || 'attesa'})`
-            });
+        setMsg({ type: 'info', text: `⏳ Upload di ${Object.keys(perGiorno).length} giorni...` });
+
+        let totaleOk = 0;
+        let errori = [];
+        let giorniOk = 0;
+
+        for (const [data, snaps] of Object.entries(perGiorno)) {
+          try {
+            const r = await window.PerformanceDB.salvaGiorno(data, snaps);
+            if (r.ok) {
+              totaleOk += snaps.length;
+              giorniOk++;
+            } else {
+              errori.push(`${data}: ${r.error}`);
+            }
+          } catch (e) {
+            errori.push(`${data}: ${e.message}`);
           }
+          // Aggiorna messaggio ogni 10 giorni
+          if (giorniOk % 10 === 0) {
+            setMsg({ type: 'info', text: `⏳ Upload... ${giorniOk}/${Object.keys(perGiorno).length} giorni` });
+          }
+        }
+
+        setUploading(false);
+
+        if (errori.length === 0) {
+          setMsg({ type: 'success', text: `✅ Caricati ${totaleOk} snapshot (${giorniOk} giorni) su GitHub` });
         } else {
-          setMsg({
-            type: 'success',
-            text: `✅ Importate ${importate} partite (solo locali, non sei admin)`
-          });
+          setMsg({ type: 'warning', text: `⚠️ Caricati ${totaleOk} snapshot, ${errori.length} errori: ${errori.slice(0, 3).join(', ')}` });
         }
       } catch (e) {
-        setMsg({ type: 'error', text: '❌ ' + e.message });
-      } finally {
-        setImportandoGiocate(false);
-        setTimeout(() => setMsg(null), 8000);
+        setUploading(false);
+        setMsg({ type: 'error', text: `❌ ${e.message}` });
       }
+
+      setTimeout(() => setMsg(null), 8000);
     };
 
     const risolti = snapshots.filter(s => s.risultatoFinale).length;
     const inAttesa = snapshots.length - risolti;
     const pendingCount = pending.length;
-    const partiteGiocateDisponibili = matches
-      ? matches.filter(m => m.stato === 'Giocata' && (m.golCasa > 0 || m.golOspite > 0 || m.risultato)).length
-      : 0;
+    const daExcelCount = daExcel ? daExcel.length : 0;
+    const remoteCount = remote ? remote.length : 0;
 
     return (
       <div>
@@ -913,17 +949,19 @@
             </span>
             <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
               {snapshots.length} snapshot ({risolti} risolti • {inAttesa} in attesa)
-              {pendingCount > 0 && ` • ${pendingCount} pending`}
+              {daExcelCount > 0 && ` • 📊 ${daExcelCount} da Excel`}
+              {remoteCount > 0 && ` • ☁️ ${remoteCount} da GitHub`}
+              {pendingCount > 0 && ` • 💾 ${pendingCount} in coda`}
               {loading && ' • 🔄 caricamento...'}
             </span>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             {isWriter && (
               <button className="btn" onClick={handleUploadManuale}
-                disabled={uploading || pendingCount === 0}
+                disabled={uploading || daExcelCount === 0}
                 style={{ fontSize: '12px', padding: '6px 14px',
-                  opacity: (uploading || pendingCount === 0) ? 0.5 : 1 }}>
-                {uploading ? '⏳ Upload...' : '💾 Salva adesso'}
+                  opacity: (uploading || daExcelCount === 0) ? 0.5 : 1 }}>
+                {uploading ? '⏳ Upload...' : '☁️ Pubblica su GitHub'}
               </button>
             )}
             {!isWriter && (
@@ -939,33 +977,19 @@
           </div>
         </div>
 
-        {/* IMPORTA PARTITE GIÀ GIOCATE */}
-        {isWriter && partiteGiocateDisponibili > 0 && (
-          <div className="card" style={{
-            padding: '10px 14px', marginBottom: '12px',
-            background: 'rgba(52, 152, 219, 0.08)',
-            border: '1px solid #3498db', borderRadius: '8px',
-            display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
-          }}>
-            <span style={{ fontSize: '13px', color: 'var(--text)', flex: 1 }}>
-              📚 <b>Recupera storico</b>: importa snapshot per tutte le partite già giocate
-              ({partiteGiocateDisponibili} disponibili)
-            </span>
-            <button
-              className="btn"
-              onClick={handleImportaPartiteGiocate}
-              disabled={importandoGiocate}
-              style={{
-                fontSize: '12px', padding: '6px 14px',
-                background: importandoGiocate ? 'var(--surface)' : '#3498db',
-                color: importandoGiocate ? 'var(--text-muted)' : '#fff',
-                border: 'none', borderRadius: '6px', fontWeight: 'bold',
-                cursor: importandoGiocate ? 'wait' : 'pointer',
-              }}>
-              {importandoGiocate ? '⏳ Importazione...' : '📥 Importa partite giocate'}
-            </button>
-          </div>
-        )}
+        {/* INFO BOX */}
+        <div className="card" style={{
+          padding: '10px 14px', marginBottom: '12px',
+          background: 'rgba(52, 152, 219, 0.08)',
+          border: '1px solid #3498db', borderRadius: '8px',
+          fontSize: '12px', color: 'var(--text)',
+        }}>
+          ℹ️ <b>Fonte dati automatica:</b> gli snapshot vengono calcolati direttamente dal file Excel caricato
+          ({daExcelCount} partite giocate con risultato). Ogni volta che ricarichi l'Excel, la matrice si aggiorna.
+          {isWriter && (
+            <span> Gli admin possono pubblicare i risultati su GitHub con il pulsante <b>☁️ Pubblica su GitHub</b>.</span>
+          )}
+        </div>
 
         {msg && (
           <div style={{
@@ -1013,6 +1037,6 @@
     CHAMP_ORDER,
   };
 
-  console.log('✅ Modulo Performance v4 caricato - DB GitHub + matrice Campionato × Giocata + import partite giocate + buffer ridotto');
+  console.log('✅ Modulo Performance v5 caricato - calcolo automatico da Excel + upload GitHub opzionale');
 
 })();
