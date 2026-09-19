@@ -2,6 +2,11 @@
 // performance.js - Modulo Storico Performance
 // Traccia l'esito reale delle giocate suggerite (snapshot).
 // Limite: 20000 snapshot massimi in localStorage (~10 MB).
+//
+// ⭐ FIX 2026-09: aggiornaEsiti fa matching per CONTENUTO
+//    (data + squadre normalizzate) perché gli ID delle partite
+//    in index.html usano Math.random() e cambiano ad ogni reload.
+//    Gli snapshot esistenti (con ID vecchi) vengono risolti comunque.
 // ============================================================
 
 (function () {
@@ -75,13 +80,13 @@
 
     // OVER
     if (familyId === 'over') {
-      const soglia = parseFloat(giocataLabel.replace('Over ', ''));
+      const soglia = parseFloat(String(giocataLabel).replace('Over ', ''));
       if (!isNaN(soglia)) return tot > soglia ? 'V' : 'P';
     }
 
     // UNDER
     if (familyId === 'under') {
-      const soglia = parseFloat(giocataLabel.replace('Under ', ''));
+      const soglia = parseFloat(String(giocataLabel).replace('Under ', ''));
       if (!isNaN(soglia)) return tot < soglia ? 'V' : 'P';
     }
 
@@ -101,7 +106,7 @@
 
     // MG CASA + OSPITE ("0-2+1-3")
     if (familyId === 'mg_casa_ospite') {
-      const parts = giocataLabel.split('+');
+      const parts = String(giocataLabel).split('+');
       if (parts.length === 2) {
         const casaOk = matchRange(gC, parts[0]);
         const ospiteOk = matchRange(gO, parts[1]);
@@ -111,7 +116,7 @@
 
     // DC + OVER ("1X+O2.5")
     if (familyId === 'dc_over') {
-      const parts = giocataLabel.split('+');
+      const parts = String(giocataLabel).split('+');
       if (parts.length === 2) {
         const dcOk = calcolaEsitoGiocata(match, 'dc', parts[0]) === 'V';
         const overOk = calcolaEsitoGiocata(match, 'over', 'Over ' + parts[1].replace('O', '')) === 'V';
@@ -121,7 +126,7 @@
 
     // DC + UNDER ("1X+U2.5")
     if (familyId === 'dc_under') {
-      const parts = giocataLabel.split('+');
+      const parts = String(giocataLabel).split('+');
       if (parts.length === 2) {
         const dcOk = calcolaEsitoGiocata(match, 'dc', parts[0]) === 'V';
         const underOk = calcolaEsitoGiocata(match, 'under', 'Under ' + parts[1].replace('U', '')) === 'V';
@@ -131,7 +136,7 @@
 
     // DC + MULTIGOL ("1X+0-2")
     if (familyId === 'dc_multigol') {
-      const parts = giocataLabel.split('+');
+      const parts = String(giocataLabel).split('+');
       if (parts.length === 2) {
         const dcOk = calcolaEsitoGiocata(match, 'dc', parts[0]) === 'V';
         const mg = parts[1];
@@ -148,7 +153,7 @@
   };
 
   const matchRange = (val, range) => {
-    const [min, max] = range.split('-').map(Number);
+    const [min, max] = String(range).split('-').map(Number);
     if (isNaN(min) || isNaN(max)) return false;
     return val >= min && val <= max;
   };
@@ -180,6 +185,14 @@
       risultatoFinale: null,
     };
 
+    // ⭐ Se la partita è già giocata, risolvi subito gli esiti
+    if (match.stato === 'Giocata') {
+      snapshot.risultatoFinale = `${match.golCasa || 0}-${match.golOspite || 0}`;
+      snapshot.giocate.forEach(g => {
+        g.esito = calcolaEsitoGiocata(match, g.familyId, g.giocata);
+      });
+    }
+
     if (idx >= 0) {
       arr[idx] = { ...arr[idx], ...snapshot };
     } else {
@@ -190,19 +203,67 @@
 
   // ============================================================
   // AGGIORNA ESITI
+  // ⭐ FIX: matching per CONTENUTO (data + squadre), non solo per ID
+  //    perché gli ID delle partite (index.html) usano Math.random()
+  //    e cambiano ad ogni reload → gli snapshot con ID vecchi
+  //    non troverebbero mai il match corrispondente.
   // ============================================================
 
   const aggiornaEsiti = (matches) => {
     const arr = leggiSnapshots();
     let modificato = false;
 
+    // Normalizza stringhe (lowercase, no accenti, trim)
+    const norm = (s) => String(s || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+
+    // Chiave stabile: data (YYYY-MM-DD) + casa + ospiti
+    const keyOf = (data, casa, ospiti) => {
+      const d = String(data || '').slice(0, 10);
+      return `${d}|${norm(casa)}|${norm(ospiti)}`;
+    };
+
+    // Indice: chiave stabile → match
+    // (registro sia orientamento normale sia invertito, per sicurezza)
+    const matchIndex = new Map();
+    matches.forEach(m => {
+      matchIndex.set(keyOf(m.data, m.casa, m.ospiti), m);
+      matchIndex.set(keyOf(m.data, m.ospiti, m.casa), m);
+    });
+
+    // Indice di fallback senza data (solo squadre) — usato se la data è ambigua
+    const matchIndexNoData = new Map();
+    matches.forEach(m => {
+      const k1 = `${norm(m.casa)}|${norm(m.ospiti)}`;
+      const k2 = `${norm(m.ospiti)}|${norm(m.casa)}`;
+      if (!matchIndexNoData.has(k1)) matchIndexNoData.set(k1, m);
+      if (!matchIndexNoData.has(k2)) matchIndexNoData.set(k2, m);
+    });
+
     arr.forEach(snap => {
       if (snap.risultatoFinale) return;
-      const match = matches.find(m => m.id === snap.matchId);
+
+      // 1° tentativo: match per ID (veloce, funziona nello stesso reload)
+      let match = matches.find(m => m.id === snap.matchId);
+
+      // 2° tentativo: match per chiave stabile (data + squadre)
+      if (!match) {
+        match = matchIndex.get(keyOf(snap.data, snap.casa, snap.ospiti));
+      }
+
+      // 3° tentativo: match per sole squadre (se la data non combacia)
+      if (!match) {
+        const k = `${norm(snap.casa)}|${norm(snap.ospiti)}`;
+        match = matchIndexNoData.get(k);
+      }
+
       if (!match) return;
       if (match.stato !== 'Giocata') return;
 
-      snap.risultatoFinale = `${match.golCasa}-${match.golOspite}`;
+      snap.risultatoFinale = `${match.golCasa || 0}-${match.golOspite || 0}`;
       snap.giocate.forEach(g => {
         g.esito = calcolaEsitoGiocata(match, g.familyId, g.giocata);
       });
@@ -677,6 +738,6 @@
     usePerformanceSnapshots,
   };
 
-  console.log('✅ Modulo Performance caricato - MAX_SNAPSHOTS:', MAX_SNAPSHOTS);
+  console.log('✅ Modulo Performance caricato - MAX_SNAPSHOTS:', MAX_SNAPSHOTS, '- matching per contenuto attivo');
 
 })();
