@@ -1,824 +1,495 @@
 // ============================================================
-// performance.js - Modulo Storico Performance (v5 - Calcolo da Excel)
-// - ⭐ NOVITÀ v5: calcola TUTTI gli snapshot direttamente da matches (Excel)
-// - ⭐ NOVITÀ v5: la matrice Campionato × Giocata si popola automaticamente
-// - ⭐ NOVITÀ v5: il DB GitHub è solo cache opzionale per condivisione
-// - Salva TUTTE le giocate di TUTTE le famiglie
-// - Tabella matrice Campionato × Giocata con filtri ed export CSV
-// - Upload GitHub (debounced + manuale + beforeunload) per admin
-// - Ordinamento campionati: Italiane → Top 5 → Serie B estere
+// palinsesto.js - Modulo Palinsesto con quote visibili
+// Mostra quote PDF accanto a ogni giocata (con value bet)
+// È la FONTE DI VERITÀ per il filtro campionati, giorni e modalità giocate.
+// Etichette MG: 0-2/1-3 = "MG Casa", 1-4/2-5 = "MG Tot".
+// ⭐ v5: NON salva più snapshot (li calcola performance.js da Excel)
 // ============================================================
 
 (function () {
   'use strict';
 
-  const { useState, useEffect, useMemo, useCallback, useRef } = React;
-
-  const STORAGE_KEY = 'ft_performance_pending';
-  const DEBOUNCE_MS = 5 * 60 * 1000;
-  const MAX_LOCAL = 5000;
+  const { useState, useMemo, useEffect } = React;
 
   // ============================================================
-  // ORDINE CAMPIONATI (per tabella)
+  // FORMATTAZIONE ETICHETTE GIOCATE
   // ============================================================
+  const formatGiocataLabel = (familyId, label) => {
+    if (!label) return '—';
 
-  const CHAMP_ORDER = [
-    'Serie A', 'Serie B', 'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C',
-    'Premier League', 'EFL Championship',
-    'Bundesliga', '2. Bundesliga',
-    'La Liga', 'Segunda División',
-    'Ligue 1', 'Ligue 2',
-    'Eredivisie', 'Eerste Divisie',
-    'Primeira Liga',
-    'Süper Lig',
-    'Jupiler Pro League',
-    'Scottish Premiership',
-    'J1 League', 'K League 1',
-  ];
+    if (label.startsWith('Over '))  return label;
+    if (label.startsWith('Under ')) return label.replace('.', ',');
 
-  const champSortKey = (champ) => {
-    const i = CHAMP_ORDER.indexOf(champ);
-    return i === -1 ? 9999 : i;
-  };
-
-  // ============================================================
-  // STORAGE LOCALE (buffer + UI) — con riduzione progressiva
-  // ============================================================
-
-  const leggiPending = () => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return [];
-      const arr = JSON.parse(raw);
-      return Array.isArray(arr) ? arr : [];
-    } catch (e) {
-      return [];
-    }
-  };
-
-  const scriviPending = (arr) => {
-    const trySave = (list) => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-      return true;
-    };
-
-    try {
-      const limited = arr.slice(-MAX_LOCAL);
-      trySave(limited);
-      window.dispatchEvent(new CustomEvent('performance-updated', { detail: limited }));
-      return;
-    } catch (e) {
-      if (e.name === 'QuotaExceededError' || e.code === 22 || /quota/i.test(e.message)) {
-        console.warn('⚠️ localStorage pieno. Riduco la dimensione del buffer...');
-        const sizes = [3000, 2000, 1000, 500, 200, 100, 50];
-        for (const size of sizes) {
-          try {
-            const limited = arr.slice(-size);
-            trySave(limited);
-            console.log(`✅ Buffer ridotto a ${limited.length} snapshot`);
-            window.dispatchEvent(new CustomEvent('performance-updated', { detail: limited }));
-            return;
-          } catch (e2) {}
-        }
-        try {
-          const minimal = arr.slice(-20);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(minimal));
-          console.warn('⚠️ Buffer di emergenza: solo 20 snapshot in locale');
-          window.dispatchEvent(new CustomEvent('performance-updated', { detail: minimal }));
-        } catch (e3) {
-          console.error('❌ Impossibile salvare anche il buffer minimo:', e3);
-        }
-      } else {
-        console.warn('Errore salvataggio pending performance:', e);
-      }
-    }
-  };
-
-  // ============================================================
-  // CHIAVE STABILE
-  // ============================================================
-
-  const norm = (s) => String(s || '')
-    .trim().toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-
-  const makeMatchKey = (data, casa, ospiti) => {
-    const d = String(data || '').slice(0, 10);
-    return `${d}|${norm(casa)}|${norm(ospiti)}`;
-  };
-
-  // ============================================================
-  // CALCOLO ESITO
-  // ============================================================
-
-  const matchRange = (val, range) => {
-    const [min, max] = String(range).split('-').map(Number);
-    if (isNaN(min) || isNaN(max)) return false;
-    return val >= min && val <= max;
-  };
-
-  const calcolaEsitoGiocata = (match, familyId, giocataLabel) => {
-    const gC = match.golCasa || 0;
-    const gO = match.golOspite || 0;
-    const tot = gC + gO;
-
-    if (familyId === 'fisse') {
-      if (giocataLabel === '1') return gC > gO ? 'V' : 'P';
-      if (giocataLabel === 'X') return gC === gO ? 'V' : 'P';
-      if (giocataLabel === '2') return gC < gO ? 'V' : 'P';
-    }
-    if (familyId === 'dc') {
-      if (giocataLabel === '1X') return gC >= gO ? 'V' : 'P';
-      if (giocataLabel === '12') return gC !== gO ? 'V' : 'P';
-      if (giocataLabel === 'X2') return gC <= gO ? 'V' : 'P';
-    }
-    if (familyId === 'over') {
-      const s = parseFloat(String(giocataLabel).replace('Over ', ''));
-      if (!isNaN(s)) return tot > s ? 'V' : 'P';
-    }
-    if (familyId === 'under') {
-      const s = parseFloat(String(giocataLabel).replace('Under ', ''));
-      if (!isNaN(s)) return tot < s ? 'V' : 'P';
-    }
-    if (familyId === 'gg_ng') {
-      if (giocataLabel === 'Goal-Goal' || giocataLabel === 'GG') return (gC > 0 && gO > 0) ? 'V' : 'P';
-      if (giocataLabel === 'No Goal' || giocataLabel === 'NG') return (gC === 0 || gO === 0) ? 'V' : 'P';
-    }
     if (familyId === 'multigol') {
-      if (giocataLabel === '0-2') return gC <= 2 ? 'V' : 'P';
-      if (giocataLabel === '1-3') return (gC >= 1 && gC <= 3) ? 'V' : 'P';
-      if (giocataLabel === '1-4') return (tot >= 1 && tot <= 4) ? 'V' : 'P';
-      if (giocataLabel === '2-5') return (tot >= 2 && tot <= 5) ? 'V' : 'P';
+      if (label === '0-2' || label === '1-3') return `MG Casa ${label}`;
+      if (label === '1-4' || label === '2-5') return `MG Tot ${label}`;
+      return `MG ${label}`;
     }
+
     if (familyId === 'mg_casa_ospite') {
-      const parts = String(giocataLabel).split('+');
+      const parts = label.split('+');
       if (parts.length === 2) {
-        const c1 = matchRange(gC, parts[0]);
-        const c2 = matchRange(gO, parts[1]);
-        return (c1 && c2) ? 'V' : 'P';
+        return `MG ${parts[0]} Casa + MG ${parts[1]} Ospite`;
       }
     }
-    if (familyId === 'dc_over') {
-      const parts = String(giocataLabel).split('+');
-      if (parts.length === 2) {
-        const dcOk = calcolaEsitoGiocata(match, 'dc', parts[0]) === 'V';
-        const oOk = calcolaEsitoGiocata(match, 'over', 'Over ' + parts[1].replace('O', '')) === 'V';
-        return (dcOk && oOk) ? 'V' : 'P';
-      }
-    }
-    if (familyId === 'dc_under') {
-      const parts = String(giocataLabel).split('+');
-      if (parts.length === 2) {
-        const dcOk = calcolaEsitoGiocata(match, 'dc', parts[0]) === 'V';
-        const uOk = calcolaEsitoGiocata(match, 'under', 'Under ' + parts[1].replace('U', '')) === 'V';
-        return (dcOk && uOk) ? 'V' : 'P';
-      }
-    }
+
     if (familyId === 'dc_multigol') {
-      const parts = String(giocataLabel).split('+');
+      const parts = label.split('+');
+      if (parts.length === 2) return `${parts[0]} + MG Tot ${parts[1]}`;
+    }
+
+    if (familyId === 'dc_under') {
+      const parts = label.split('+');
       if (parts.length === 2) {
-        const dcOk = calcolaEsitoGiocata(match, 'dc', parts[0]) === 'V';
-        const mg = parts[1];
-        let mgOk = false;
-        if (mg === '0-2') mgOk = tot <= 2;
-        else if (mg === '1-3') mgOk = tot >= 1 && tot <= 3;
-        else if (mg === '1-4') mgOk = tot >= 1 && tot <= 4;
-        else if (mg === '2-5') mgOk = tot >= 2 && tot <= 5;
-        return (dcOk && mgOk) ? 'V' : 'P';
+        const uLabel = parts[1].replace('U', 'Under ').replace('.', ',');
+        return `${parts[0]} + ${uLabel}`;
       }
     }
-    return null;
+
+    if (familyId === 'dc_over') {
+      const parts = label.split('+');
+      if (parts.length === 2) {
+        const oLabel = parts[1].replace('O', 'Over ').replace('.', ',');
+        return `${parts[0]} + ${oLabel}`;
+      }
+    }
+
+    if (familyId === 'gg_ng') {
+      if (label === 'Goal-Goal') return 'GG';
+      if (label === 'No Goal') return 'NG';
+    }
+
+    return label;
   };
 
   // ============================================================
-  // CALCOLA TUTTE LE GIOCATE DI TUTTE LE FAMIGLIE PER UNA PARTITA
+  // UTILITY: CERCA QUOTA PDF PER GIOCATA
+  // ============================================================
+  const getQuotaInfo = (match, familyId, giocata, pctTua) => {
+    if (!window.QuoteManager || typeof window.QuoteManager.analizzaGiocata !== 'function') {
+      return null;
+    }
+    try {
+      return window.QuoteManager.analizzaGiocata(match, familyId, giocata, pctTua);
+    } catch (e) {
+      return null;
+    }
+  };
+
+  // ============================================================
+  // COMPONENTE: BOX QUOTA (con value bet evidenziato)
+  // ============================================================
+  const QuotaBox = ({ match, familyId, giocata, pctTua }) => {
+    const [quotaInfo, setQuotaInfo] = useState(null);
+
+    const { numPartite, dataMaxPDF } = window.QuoteManager ? window.QuoteManager.useQuote() : { numPartite: 0, dataMaxPDF: null };
+
+    useEffect(() => {
+      const info = getQuotaInfo(match, familyId, giocata, pctTua);
+      setQuotaInfo(info);
+    }, [match.id, familyId, giocata, pctTua, numPartite, dataMaxPDF]);
+
+    if (!quotaInfo || !quotaInfo.quotaBook) {
+      return null;
+    }
+
+    const { quotaBook, edge, isValue } = quotaInfo;
+
+    const bgColor = isValue
+      ? 'rgba(111, 207, 151, 0.15)'
+      : 'rgba(255, 255, 255, 0.05)';
+    const borderColor = isValue ? 'var(--win)' : 'var(--border)';
+    const textColor = isValue ? 'var(--win)' : 'var(--text)';
+
+    return (
+      <div style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px',
+        padding: '2px 6px',
+        marginLeft: '6px',
+        borderRadius: '4px',
+        background: bgColor,
+        border: `1px solid ${borderColor}`,
+        fontSize: '11px',
+        fontWeight: 'bold',
+        color: textColor,
+        whiteSpace: 'nowrap',
+      }}
+        title={isValue ? `VALUE BET! Edge: +${edge}%` : `Quota Marathonbet`}
+      >
+        <span>💰</span>
+        <span>{quotaBook.toFixed(2)}</span>
+        {isValue && (
+          <span style={{ color: 'var(--win)' }}>+{edge}%</span>
+        )}
+      </div>
+    );
+  };
+
+  // ============================================================
+  // MATCH TAB (card partita con giocate)
   // ============================================================
 
-  const calcolaTutteGiocatePerPartita = (match, allMatches) => {
-    if (typeof window.computeMatchStats !== 'function') return [];
-    if (typeof window.FAMIGLIE_GIOCATE !== 'object') return [];
+  const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie, weatherCache }) => {
+    const computeMatchStats = window.computeMatchStats;
+    const calcFormAndStats = window.calcFormAndStats;
+    const getChampColor = window.getChampColor;
+    const formatDateEU = window.formatDateEU;
+    const TeamLogo = window.TeamLogo;
+    const FAMIGLIE_GIOCATE = window.FAMIGLIE_GIOCATE;
+    const getBestBetForFamily = window.getBestBetForFamily;
+    const getMultigolRange = window.getMultigolRange;
+    const getPercentualeClasse = window.getPercentualeClasse;
+    const calcolaGG_NG = window.calcolaGG_NG;
 
-    const stats = window.computeMatchStats(match, allMatches);
-    if (!stats || stats.error) return [];
+    const { mode: visualizzaMode } = window.FiltriCampionati.useVisualizzaGiocateMode();
+
+    if (!match) return null;
+
+    const homeForm = calcFormAndStats(allMatches, match.casa);
+    const awayForm = calcFormAndStats(allMatches, match.ospiti);
+    const champColor = getChampColor(match.campionato);
+    const diff = Math.abs(homeForm.pct - awayForm.pct);
+    const stats = computeMatchStats(match, allMatches);
 
     stats._allMatches = allMatches;
     stats._homeTeam = match.casa;
     stats._awayTeam = match.ospiti;
 
-    const homeMG = stats.homeMG || {};
-    const awayMG = stats.awayMG || {};
-    const mgTot = stats.mgTot || {};
-    const FAMIGLIE = window.FAMIGLIE_GIOCATE;
-    const out = [];
+    const renderFormSquares = (formStr) => {
+      if (!formStr) return <span>N/D</span>;
+      return [...formStr].map((letter, idx) => (
+        <div key={idx} className={`form-square form-square-${letter}`}>{letter}</div>
+      ));
+    };
 
-    Object.keys(FAMIGLIE).forEach(familyId => {
-      const family = FAMIGLIE[familyId];
-      if (!family) return;
+    const renderXgValue = (value) => {
+      const num = parseFloat(value);
+      if (isNaN(num)) return <span className="xg-value xg-white">N/A</span>;
+      let cls = 'xg-white';
+      if (num >= 2) cls = 'xg-blue';
+      else if (num < 1) cls = 'xg-red';
+      return <span className={`xg-value ${cls}`}>{num.toFixed(1)}</span>;
+    };
 
-      family.options.forEach(opt => {
-        let pct = 0;
+    const getColorForPct = (valore) => {
+      if (valore >= 90) return '#f39c12';
+      if (valore >= 66.67) return '#6fcf97';
+      if (valore >= 33.34) return '#8b949e';
+      return '#eb5757';
+    };
+
+    const getBadgeBackground = (valore) => {
+      if (valore >= 90) return 'rgba(243, 156, 18, 0.2)';
+      if (valore >= 66.67) return 'rgba(111, 207, 151, 0.2)';
+      if (valore >= 33.34) return 'rgba(139, 148, 158, 0.2)';
+      return 'rgba(235, 87, 87, 0.2)';
+    };
+
+    const getBadgeBorder = (valore) => {
+      if (valore >= 90) return '2px solid #f39c12';
+      if (valore >= 66.67) return '1px solid #6fcf97';
+      if (valore >= 33.34) return '1px solid #8b949e';
+      return '1px solid #eb5757';
+    };
+
+    const getGiocateDaMostrare = () => {
+      if (stats.error) return [];
+      const homeMG = stats.homeMG || {};
+      const awayMG = stats.awayMG || {};
+      const mgTot = stats.mgTot || {};
+      const homeRange = getMultigolRange(match.casa, allMatches);
+      const awayRange = getMultigolRange(match.ospiti, allMatches);
+      const giocateDaMostrare = [];
+
+      let famiglieDaAnalizzare;
+      if (visualizzaMode === 'tutte') {
+        famiglieDaAnalizzare = Object.keys(FAMIGLIE_GIOCATE);
+      } else {
+        famiglieDaAnalizzare = selectedFamiglie || [];
+      }
+
+      famiglieDaAnalizzare = [...new Set(famiglieDaAnalizzare)].filter(
+        id => FAMIGLIE_GIOCATE[id]
+      );
+
+      famiglieDaAnalizzare.forEach(familyId => {
+        const family = FAMIGLIE_GIOCATE[familyId];
+        if (!family) return;
+
+        let best = null;
 
         if (familyId === 'gg_ng') {
-          const ggNgResult = window.calcolaGG_NG ? window.calcolaGG_NG(stats) : null;
+          const ggNgResult = calcolaGG_NG ? calcolaGG_NG(stats) : null;
           if (ggNgResult) {
-            if (opt === 'GG') pct = ggNgResult.gg || 0;
-            else if (opt === 'NG') pct = ggNgResult.ng || 0;
+            best = {
+              ...ggNgResult,
+              familyId: 'gg_ng',
+              familyLabel: family.label,
+              familyIcon: family.icon,
+            };
           }
         } else {
-          if (window.getGiocataPct) {
-            pct = window.getGiocataPct(opt, stats, homeMG, awayMG, mgTot);
-          }
+          best = getBestBetForFamily(familyId, stats, homeRange, awayRange, homeMG, awayMG, mgTot);
         }
 
-        if (pct > 0) {
-          out.push({
+        if (best && best.pct > 0) {
+          giocateDaMostrare.push({
             familyId,
             familyLabel: family.label,
             familyIcon: family.icon,
-            giocata: opt,
-            label: opt,
-            displayLabel: opt,
-            pct,
+            label: best.label,
+            displayLabel: formatGiocataLabel(familyId, best.label),
+            familyName: family.label,
+            pct: best.pct,
+            isBomb: best.pct >= 90,
+            giocata: best.giocata,
           });
         }
       });
-    });
 
-    return out;
-  };
-
-  // ============================================================
-  // SALVA SNAPSHOT (locale + pianifica upload) — solo per upload opzionale
-  // ============================================================
-
-  let uploadTimer = null;
-
-  const salvaSnapshot = (match, giocate) => {
-    const arr = leggiPending();
-    const key = makeMatchKey(match.data, match.casa, match.ospiti);
-    const idx = arr.findIndex(s => s.matchKey === key);
-
-    const snapshot = {
-      matchKey: key,
-      data: match.data,
-      ora: match.ora || '',
-      campionato: match.campionato || '',
-      casa: match.casa || '',
-      ospiti: match.ospiti || '',
-      risultatoFinale: null,
-      salvatoIl: new Date().toISOString(),
-      giocate: giocate.map(g => ({
-        familyId: g.familyId,
-        familyLabel: g.familyLabel,
-        giocata: g.giocata,
-        label: g.label,
-        displayLabel: g.displayLabel || g.label,
-        pct: g.pct,
-        esito: null,
-      })),
+      return giocateDaMostrare.sort((a, b) => b.pct - a.pct).slice(0, 3);
     };
 
-    if (match.stato === 'Giocata') {
-      snapshot.risultatoFinale = `${match.golCasa || 0}-${match.golOspite || 0}`;
-      snapshot.giocate.forEach(g => {
-        g.esito = calcolaEsitoGiocata(match, g.familyId, g.giocata);
-      });
-    }
+    const giocateDaMostrare = getGiocateDaMostrare();
+    const score = giocateDaMostrare.length > 0
+      ? Math.round(giocateDaMostrare.reduce((s, g) => s + g.pct, 0) / giocateDaMostrare.length)
+      : 0;
+    const hasBomb = giocateDaMostrare.some(g => g.isBomb);
 
-    if (idx >= 0) {
-      const prev = arr[idx];
-      const merged = Object.assign({}, prev, snapshot);
-      if (prev.risultatoFinale) {
-        merged.risultatoFinale = prev.risultatoFinale;
-      }
-      arr[idx] = merged;
-    } else {
-      arr.push(snapshot);
-    }
-
-    scriviPending(arr);
-
-    if (window.PerformanceDB && window.PerformanceDB.isWriter()) {
-      if (uploadTimer) clearTimeout(uploadTimer);
-      uploadTimer = setTimeout(() => {
-        flushUpload();
-      }, DEBOUNCE_MS);
-    }
-  };
-
-  // ============================================================
-  // UPLOAD VERSO GITHUB (raggruppa per giorno)
-  // ============================================================
-
-  const uploadInCorso = { value: false };
-
-  const flushUpload = async (opts) => {
-    const silent = opts && opts.silent;
-    if (uploadInCorso.value) return { ok: false, motivo: 'in-corso' };
-    if (!window.PerformanceDB || !window.PerformanceDB.isWriter()) {
-      return { ok: false, motivo: 'readonly' };
-    }
-
-    uploadInCorso.value = true;
-    const arr = leggiPending();
-    if (arr.length === 0) {
-      uploadInCorso.value = false;
-      return { ok: true, motivo: 'vuoto' };
-    }
-
-    const perGiorno = {};
-    arr.forEach(s => {
-      const d = s.data ? s.data.slice(0, 10) : null;
-      if (!d) return;
-      if (!perGiorno[d]) perGiorno[d] = [];
-      perGiorno[d].push(s);
-    });
-
-    let totaleUploadati = 0;
-    const errori = [];
-
-    for (const [data, snaps] of Object.entries(perGiorno)) {
-      try {
-        const r = await window.PerformanceDB.salvaGiorno(data, snaps);
-        if (r.ok) {
-          totaleUploadati += snaps.length;
-        } else {
-          errori.push(`${data}: ${r.error}`);
-        }
-      } catch (e) {
-        errori.push(`${data}: ${e.message}`);
-      }
-    }
-
-    uploadInCorso.value = false;
-
-    if (errori.length === 0) {
-      if (!silent) console.log(`✅ Performance: upload completato (${totaleUploadati} snapshot su ${Object.keys(perGiorno).length} giorni)`);
-      return { ok: true, uploadati: totaleUploadati };
-    } else {
-      console.warn('⚠️ Performance: upload parziale:', errori);
-      return { ok: false, errori };
-    }
-  };
-
-  // ============================================================
-  // AGGIORNA ESITI SUI PENDING (per upload GitHub opzionale)
-  // ============================================================
-
-  const aggiornaEsiti = (matches) => {
-    const arr = leggiPending();
-    let modificato = false;
-
-    const index = new Map();
-    matches.forEach(m => {
-      index.set(makeMatchKey(m.data, m.casa, m.ospiti), m);
-      index.set(makeMatchKey(m.data, m.ospiti, m.casa), m);
-    });
-
-    arr.forEach(snap => {
-      if (snap.risultatoFinale) return;
-      const match = index.get(snap.matchKey);
-      if (!match || match.stato !== 'Giocata') return;
-
-      snap.risultatoFinale = `${match.golCasa || 0}-${match.golOspite || 0}`;
-      snap.giocate.forEach(g => {
-        g.esito = calcolaEsitoGiocata(match, g.familyId, g.giocata);
-      });
-      modificato = true;
-    });
-
-    if (modificato) {
-      scriviPending(arr);
-      if (window.PerformanceDB && window.PerformanceDB.isWriter()) {
-        if (uploadTimer) clearTimeout(uploadTimer);
-        uploadTimer = setTimeout(() => flushUpload(), 2000);
-      }
-    }
-    return arr;
-  };
-
-  // ============================================================
-  // ⭐ HOOK PRINCIPALE: calcola snapshot da matches (Excel) + merge con remoto/pending
-  // ============================================================
-
-  const usePerformanceSnapshots = (matches) => {
-    const [pending, setPending] = useState(() => leggiPending());
-    const [remote, setRemote] = useState([]);
-    const [loading, setLoading] = useState(false);
-
-    // Ascolta aggiornamenti pending (per upload GitHub)
-    useEffect(() => {
-      const handler = (e) => setPending(e.detail || leggiPending());
-      const storageHandler = (e) => {
-        if (e.key === STORAGE_KEY) setPending(leggiPending());
-      };
-      window.addEventListener('performance-updated', handler);
-      window.addEventListener('storage', storageHandler);
-      return () => {
-        window.removeEventListener('performance-updated', handler);
-        window.removeEventListener('storage', storageHandler);
-      };
-    }, []);
-
-    // Carica DB remoto (opzionale, per dati condivisi da altri utenti)
-    useEffect(() => {
-      if (!window.PerformanceDB) return;
-      let cancelled = false;
-      (async () => {
-        setLoading(true);
-        try {
-          const giorni = await window.PerformanceDB.listaGiorniDisponibili();
-          if (giorni.length === 0) { setLoading(false); return; }
-          const from = giorni[0];
-          const to = giorni[giorni.length - 1];
-          const snaps = await window.PerformanceDB.leggiIntervallo(from, to);
-          if (!cancelled) setRemote(snaps);
-        } catch (e) {
-          console.warn('Performance: errore caricamento DB remoto:', e);
-        }
-        if (!cancelled) setLoading(false);
-      })();
-      return () => { cancelled = true; };
-    }, []);
-
-    // ⭐ CALCOLA SNAPSHOT DAI MATCHES (Excel = fonte primaria)
-    const daExcel = useMemo(() => {
-      if (!matches || matches.length === 0) return [];
-      if (typeof window.computeMatchStats !== 'function') return [];
-      if (typeof window.FAMIGLIE_GIOCATE !== 'object') return [];
-
-      const partiteGiocate = matches.filter(m => m.stato === 'Giocata');
-      if (partiteGiocate.length === 0) return [];
-
-      console.log(`📊 Performance: calcolo snapshot per ${partiteGiocate.length} partite giocate...`);
-      const t0 = performance.now();
-      const out = [];
-
-      partiteGiocate.forEach((match, idx) => {
-        try {
-          const giocate = calcolaTutteGiocatePerPartita(match, matches);
-          if (!giocate || giocate.length === 0) return;
-
-          const giocateConEsito = giocate.map(g => ({
-            ...g,
-            esito: calcolaEsitoGiocata(match, g.familyId, g.giocata),
-          }));
-
-          out.push({
-            matchKey: makeMatchKey(match.data, match.casa, match.ospiti),
-            data: match.data,
-            ora: match.ora || '',
-            campionato: match.campionato || '',
-            casa: match.casa || '',
-            ospiti: match.ospiti || '',
-            risultatoFinale: `${match.golCasa || 0}-${match.golOspite || 0}`,
-            salvatoIl: new Date().toISOString(),
-            giocate: giocateConEsito,
-          });
-
-          if (idx > 0 && idx % 100 === 0) {
-            console.log(`   ... ${idx}/${partiteGiocate.length}`);
-          }
-        } catch (e) {
-          console.warn(`⚠️ Errore calcolo snapshot per ${match.casa}-${match.ospiti}:`, e.message);
-        }
-      });
-
-      const t1 = performance.now();
-      console.log(`✅ Performance: ${out.length} snapshot calcolati in ${Math.round(t1 - t0)}ms`);
-      return out;
-    }, [matches]);
-
-    // Merge: Excel (primario) + remoto (arricchimento) + pending (upload in coda)
-    const tutti = useMemo(() => {
-      const map = new Map();
-      // 1. Remoto (base)
-      remote.forEach(s => map.set(s.matchKey, s));
-      // 2. Excel (sovrascrive, è la fonte primaria)
-      daExcel.forEach(s => map.set(s.matchKey, s));
-      // 3. Pending locale (più recente)
-      pending.forEach(s => map.set(s.matchKey, s));
-      return Array.from(map.values());
-    }, [pending, remote, daExcel]);
-
-    return {
-      snapshots: tutti,
-      loading,
-      pending,
-      remote,
-      daExcel,
-    };
-  };
-
-  // ============================================================
-  // AGGREGAZIONE: matrice campionato × giocata
-  // ============================================================
-
-  const costruisciMatrice = (snapshots) => {
-    const matrix = {};
-    const tutteGiocateSet = new Set();
-
-    snapshots.forEach(snap => {
-      if (!snap.risultatoFinale) return;
-      const camp = snap.campionato || 'N/D';
-      if (!matrix[camp]) matrix[camp] = {};
-
-      snap.giocate.forEach(g => {
-        if (g.esito !== 'V' && g.esito !== 'P') return;
-        const label = g.displayLabel || g.giocata;
-        tutteGiocateSet.add(label);
-
-        if (!matrix[camp][label]) matrix[camp][label] = { V: 0, P: 0, tot: 0 };
-        matrix[camp][label].tot++;
-        if (g.esito === 'V') matrix[camp][label].V++;
-        else matrix[camp][label].P++;
-      });
-    });
-
-    const campionati = Object.keys(matrix).sort((a, b) => {
-      const ka = champSortKey(a);
-      const kb = champSortKey(b);
-      if (ka !== kb) return ka - kb;
-      return a.localeCompare(b);
-    });
-
-    const tutteGiocate = Array.from(tutteGiocateSet).sort((a, b) => {
-      const order = (s) => {
-        if (s.startsWith('Over ')) return 1;
-        if (s.startsWith('Under ')) return 2;
-        if (s === 'GG' || s === 'NG') return 3;
-        if (s === '1' || s === 'X' || s === '2') return 4;
-        if (s === '1X' || s === '12' || s === 'X2') return 5;
-        if (s.startsWith('MG ')) return 6;
-        return 7;
-      };
-      const oa = order(a);
-      const ob = order(b);
-      if (oa !== ob) return oa - ob;
-      return a.localeCompare(b);
-    });
-
-    return { matrix, campionati, tutteGiocate };
-  };
-
-  // ============================================================
-  // COLORE PER CELLA
-  // ============================================================
-
-  const cellColor = (pct, tot, minGiocate) => {
-    if (tot < minGiocate) return { bg: 'transparent', fg: 'var(--text-muted)', opacity: 0.3 };
-    if (pct >= 80) return { bg: 'rgba(111, 207, 151, 0.35)', fg: 'var(--win)', opacity: 1 };
-    if (pct >= 65) return { bg: 'rgba(111, 207, 151, 0.15)', fg: 'var(--win)', opacity: 1 };
-    if (pct >= 45) return { bg: 'rgba(255, 255, 255, 0.05)', fg: 'var(--text)', opacity: 1 };
-    if (pct >= 30) return { bg: 'rgba(235, 87, 87, 0.10)', fg: 'var(--lose)', opacity: 1 };
-    return { bg: 'rgba(235, 87, 87, 0.25)', fg: 'var(--lose)', opacity: 1 };
-  };
-
-  // ============================================================
-  // TABELLA MATRICE
-  // ============================================================
-
-  const MatriceCampionato = ({ snapshots }) => {
-    const [minGiocate, setMinGiocate] = useState(1);
-    const [filtroCampionato, setFiltroCampionato] = useState('Tutti');
-    const [filtroFamiglia, setFiltroFamiglia] = useState('Tutte');
-    const [sortCol, setSortCol] = useState(null);
-    const [sortDir, setSortDir] = useState('desc');
-    const [dettaglio, setDettaglio] = useState(null);
-
-    const { matrix, campionati, tutteGiocate } = useMemo(
-      () => costruisciMatrice(snapshots),
-      [snapshots]
-    );
-
-    const inFamiglia = (label, fam) => {
-      if (fam === 'Tutte') return true;
-      if (fam === 'Over') return label.startsWith('Over ');
-      if (fam === 'Under') return label.startsWith('Under ');
-      if (fam === 'GG/NG') return label === 'GG' || label === 'NG';
-      if (fam === 'MG') return label.startsWith('MG ');
-      if (fam === 'FISSE') return ['1', 'X', '2'].includes(label);
-      if (fam === 'DC') return ['1X', '12', 'X2'].includes(label);
-      if (fam === 'Combinazioni') return label.includes('+');
-      return true;
+    const handleClick = (e) => {
+      e.stopPropagation();
+      onSelect(match.id);
     };
 
-    const giocateFiltrate = tutteGiocate.filter(g => inFamiglia(g, filtroFamiglia));
-
-    const campionatiFiltrati = filtroCampionato === 'Tutti'
-      ? campionati
-      : campionati.filter(c => c === filtroCampionato);
-
-    let campionatiOrdinati = [...campionatiFiltrati];
-    if (sortCol) {
-      campionatiOrdinati.sort((a, b) => {
-        const va = matrix[a][sortCol];
-        const vb = matrix[b][sortCol];
-        const pa = va && va.tot >= minGiocate ? (va.V / va.tot) * 100 : -1;
-        const pb = vb && vb.tot >= minGiocate ? (vb.V / vb.tot) * 100 : -1;
-        return sortDir === 'desc' ? pb - pa : pa - pb;
-      });
-    }
-
-    const handleSort = (col) => {
-      if (sortCol === col) {
-        setSortDir(sortDir === 'desc' ? 'asc' : 'desc');
-      } else {
-        setSortCol(col);
-        setSortDir('desc');
-      }
-    };
-
-    const exportCSV = () => {
-      const sep = ';';
-      const lines = [];
-      lines.push(['Campionato', ...giocateFiltrate].join(sep));
-      campionatiOrdinati.forEach(camp => {
-        const row = [camp];
-        giocateFiltrate.forEach(g => {
-          const v = matrix[camp][g];
-          if (!v || v.tot < minGiocate) {
-            row.push('');
-          } else {
-            const pct = Math.round((v.V / v.tot) * 100);
-            row.push(`${pct}% (${v.tot})`);
-          }
-        });
-        lines.push(row.join(sep));
-      });
-      const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `performance_${new Date().toISOString().slice(0, 10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    };
-
-    if (campionati.length === 0) {
-      return (
-        <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
-          <div style={{ fontSize: '48px', marginBottom: '12px' }}>📊</div>
-          <h3 style={{ color: 'var(--accent)', marginBottom: '8px' }}>Nessun dato di performance</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
-            Assicurati che il file Excel contenga partite con <b>stato = "Giocata"</b> e i relativi gol.
-            <br />
-            Il calcolo è automatico: ogni volta che ricarichi l'Excel, la matrice si aggiorna.
-          </p>
-        </div>
-      );
-    }
+    const formattedDate = match.data ? formatDateEU(match.data) : 'N/D';
 
     return (
-      <div>
-        <div className="card" style={{ padding: '12px 14px', marginBottom: '12px' }}>
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Min giocate:</label>
-              <input type="number" min="1" max="200" value={minGiocate}
-                onChange={e => setMinGiocate(Math.max(1, parseInt(e.target.value) || 1))}
-                style={{ width: '70px', padding: '4px 8px', fontSize: '12px' }} />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Campionato:</label>
-              <select value={filtroCampionato} onChange={e => setFiltroCampionato(e.target.value)}
-                style={{ padding: '4px 8px', fontSize: '12px', maxWidth: '220px' }}>
-                <option value="Tutti">Tutti ({campionati.length})</option>
-                {campionati.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Famiglia:</label>
-              <select value={filtroFamiglia} onChange={e => setFiltroFamiglia(e.target.value)}
-                style={{ padding: '4px 8px', fontSize: '12px' }}>
-                <option>Tutte</option>
-                <option>Over</option>
-                <option>Under</option>
-                <option>GG/NG</option>
-                <option>MG</option>
-                <option>FISSE</option>
-                <option>DC</option>
-                <option>Combinazioni</option>
-              </select>
-            </div>
-            <button className="btn btn-secondary" onClick={exportCSV}
-              style={{ fontSize: '12px', padding: '6px 14px', marginLeft: 'auto' }}>
-              📥 Esporta CSV
-            </button>
+      <div className="match-tab" style={{ borderLeftColor: champColor }} onClick={handleClick}>
+        <div className="score-badge">
+          <span className={`giocata-pct ${getPercentualeClasse(score)}`}>
+            {isNaN(score) ? 0 : score}%
+          </span>
+          {hasBomb && <span className="bomb-inline">💣</span>}
+        </div>
+
+        <div className="tab-header" style={{ background: champColor }}>
+          <span>{match.campionato || 'N/D'}</span>
+        </div>
+
+        <div className="match-info">{match.campionato} - Giornata: {match.round || 'N/A'}</div>
+        <div className="match-info">📅 {formattedDate} - ⏰ {match.ora || 'TBD'}</div>
+
+        <div className="teams-row">
+          <div className="team">
+            <TeamLogo teamName={match.casa} championship={match.campionato} size={50} />
+            <div className="team-name">{match.casa || 'Casa'}</div>
+          </div>
+          <div className="vs">VS</div>
+          <div className="team">
+            <TeamLogo teamName={match.ospiti} championship={match.campionato} size={50} />
+            <div className="team-name">{match.ospiti || 'Ospite'}</div>
           </div>
         </div>
 
-        <div className="card" style={{ padding: '12px', overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', minWidth: '1200px' }}>
-            <thead>
-              <tr style={{ background: 'var(--surface)' }}>
-                <th style={{
-                  padding: '8px 10px', textAlign: 'left', position: 'sticky', left: 0, zIndex: 2,
-                  background: 'var(--surface)', borderBottom: '2px solid var(--border)',
-                  fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-muted)',
-                }}>
-                  Campionato
-                </th>
-                {giocateFiltrate.map(g => (
-                  <th key={g}
-                    onClick={() => handleSort(g)}
-                    style={{
-                      padding: '6px 8px', textAlign: 'center', cursor: 'pointer',
-                      borderBottom: '2px solid var(--border)', whiteSpace: 'nowrap',
-                      fontSize: '10px', textTransform: 'uppercase',
-                      color: sortCol === g ? 'var(--accent)' : 'var(--text-muted)',
-                      background: sortCol === g ? 'rgba(243, 156, 18, 0.1)' : 'var(--surface)',
-                    }}>
-                    {g} {sortCol === g && (sortDir === 'desc' ? '▼' : '▲')}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {campionatiOrdinati.map(camp => (
-                <tr key={camp} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{
-                    padding: '6px 10px', fontWeight: 'bold', position: 'sticky', left: 0,
-                    background: 'var(--card)', zIndex: 1,
+        <div className="form-row-compact">
+          <div className="form-block-compact">
+            <div className="form-label">Forma</div>
+            <div className="form-squares">{renderFormSquares(homeForm.form)}</div>
+            <div className="form-pct-compact">{homeForm.pct || 0}%</div>
+            <div className="form-bar"><div className="form-bar-fill" style={{ width: (homeForm.pct || 0) + '%' }}></div></div>
+          </div>
+          <div className="form-block-compact">
+            <div className="form-label">Forma</div>
+            <div className="form-squares">{renderFormSquares(awayForm.form)}</div>
+            <div className="form-pct-compact">{awayForm.pct || 0}%</div>
+            <div className="form-bar"><div className="form-bar-fill" style={{ width: (awayForm.pct || 0) + '%' }}></div></div>
+          </div>
+        </div>
+
+        <div className="form-diff">
+          📊 Differenza forma:{' '}
+          <span className={diff >= 20 ? 'diff-alta' : 'diff-bassa'}>
+            {isNaN(diff) ? 0 : diff}%
+          </span>
+        </div>
+
+        <div className="form-xg">
+          <span className="xg-home">⚽ xG {match.casa}: {renderXgValue(homeForm.mediaGolFatti || 0)}</span>
+          <span className="xg-away">⚽ xG {match.ospiti}: {renderXgValue(awayForm.mediaGolFatti || 0)}</span>
+        </div>
+
+        <div className="bet-row-vertical">
+          {giocateDaMostrare.length > 0 ? (
+            giocateDaMostrare.map((g, idx) => {
+              const pctColor = getColorForPct(g.pct);
+              const bgColor = getBadgeBackground(g.pct);
+              const borderStyle = getBadgeBorder(g.pct);
+              const isBomb = g.pct >= 90;
+
+              return (
+                <div key={idx}
+                  className={`bet-item-vertical ${isBomb ? 'bomb' : ''}`}
+                  style={{
+                    borderColor: pctColor,
+                    background: isBomb ? 'var(--accent)' : bgColor,
+                    border: isBomb ? '2px solid var(--accent)' : borderStyle,
+                    animation: isBomb ? 'bomb-glow 1s infinite alternate' : 'none'
                   }}>
-                    {camp}
-                  </td>
-                  {giocateFiltrate.map(g => {
-                    const v = matrix[camp][g];
-                    if (!v || v.tot < minGiocate) {
-                      return (
-                        <td key={g} style={{
-                          padding: '6px 8px', textAlign: 'center', color: 'var(--text-muted)',
-                          opacity: 0.3, fontSize: '11px',
-                        }}>—</td>
-                      );
-                    }
-                    const pct = Math.round((v.V / v.tot) * 100);
-                    const c = cellColor(pct, v.tot, minGiocate);
-                    return (
-                      <td key={g}
-                        onClick={() => setDettaglio({ camp, giocata: g })}
-                        style={{
-                          padding: '6px 8px', textAlign: 'center', cursor: 'pointer',
-                          background: c.bg, color: c.fg, fontWeight: 'bold',
-                          fontSize: '12px', opacity: c.opacity,
-                        }}>
-                        {pct}%
-                        <div style={{ fontSize: '9px', opacity: 0.6 }}>({v.tot})</div>
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {dettaglio && (
-          <div className="heatmap-detail-overlay" onClick={() => setDettaglio(null)}>
-            <div className="heatmap-detail-modal" onClick={e => e.stopPropagation()}
-              style={{ maxWidth: '900px', maxHeight: '85vh', overflowY: 'auto' }}>
-              <button className="close-btn" onClick={() => setDettaglio(null)}>✖</button>
-              <h3 style={{ color: 'var(--accent)', marginBottom: '12px' }}>
-                {dettaglio.camp} — {dettaglio.giocata}
-              </h3>
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                {(() => {
-                  const v = matrix[dettaglio.camp][dettaglio.giocata];
-                  const pct = Math.round((v.V / v.tot) * 100);
-                  return `${v.V} vinte / ${v.P} perse (${pct}% su ${v.tot} giocate)`;
-                })()}
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                {snapshots
-                  .filter(s => s.campionato === dettaglio.camp)
-                  .filter(s => s.giocate.some(g => (g.displayLabel || g.giocata) === dettaglio.giocata))
-                  .slice(-100)
-                  .reverse()
-                  .map((s, i) => {
-                    const g = s.giocate.find(x => (x.displayLabel || x.giocata) === dettaglio.giocata);
-                    if (!g) return null;
-                    const isV = g.esito === 'V';
-                    const isP = g.esito === 'P';
-                    return (
-                      <div key={i} style={{
-                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                        padding: '6px 10px', borderRadius: '6px',
-                        background: isV ? 'rgba(111, 207, 151, 0.1)' : isP ? 'rgba(235, 87, 87, 0.1)' : 'var(--surface)',
-                        border: `1px solid ${isV ? 'var(--win)' : isP ? 'var(--lose)' : 'var(--border)'}`,
-                        fontSize: '12px',
-                      }}>
-                        <span>📅 {s.data} — ⚽ {s.casa} {s.risultatoFinale || '?-?'} {s.ospiti}</span>
-                        <span style={{ fontWeight: 'bold', color: isV ? 'var(--win)' : isP ? 'var(--lose)' : 'var(--text-muted)' }}>
-                          {isV ? '✅ V' : isP ? '❌ P' : '⏳'} ({g.pct}%)
-                        </span>
-                      </div>
-                    );
-                  })}
-              </div>
+                  <span className="bet-label" style={{ color: isBomb ? '#000' : pctColor }}>
+                    {isBomb && '💣 '}
+                    <span style={{ fontWeight: 'bold', fontSize: '13px', color: isBomb ? '#000' : pctColor }}>
+                      {g.displayLabel || g.label}
+                    </span>
+                  </span>
+                  <span className="bet-value">
+                    <span className={`giocata-pct ${getPercentualeClasse(g.pct)}`}>
+                      {g.pct}% {isBomb && <span className="bomb-icon">💣</span>}
+                    </span>
+                    <QuotaBox
+                      match={match}
+                      familyId={g.familyId}
+                      giocata={g.giocata}
+                      pctTua={g.pct}
+                    />
+                    <div className="combinata-detail" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                      {g.familyIcon} {g.familyName}
+                    </div>
+                  </span>
+                </div>
+              );
+            })
+          ) : (
+            <div className="bet-item-vertical" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+              <span>Nessuna giocata disponibile</span>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================================
+  // FILTRI
+  // ============================================================
+
+  const GiorniFilters = ({ selected, onChange }) => {
+    const options = [1, 2, 3, 4, 5, 6, 7];
+    return (
+      <div className="giorni-filters">
+        {options.map(g => (
+          <button key={g}
+            className={`giorno-btn ${selected === g ? 'active' : 'inactive'}`}
+            onClick={() => onChange(g)}>
+            📅 {g} {g === 1 ? 'Giorno' : 'Giorni'}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
+  const ChampFilters = ({ selectedChamps, onToggle, onSelectAll, onClearAll }) => {
+    const CHAMPIONSHIP_LIST = window.CHAMPIONSHIP_LIST;
+    const getChampColor = window.getChampColor;
+    const activeCount = Object.values(selectedChamps).filter(v => v).length;
+    const total = Object.keys(selectedChamps).length;
+
+    return (
+      <div className="champ-filters-container">
+        <div className="champ-filters-grid">
+          {CHAMPIONSHIP_LIST.map(champ => {
+            const isActive = selectedChamps[champ] !== false;
+            const color = getChampColor(champ);
+            return (
+              <button key={champ}
+                className={`champ-filter-btn ${isActive ? 'active' : 'inactive'}`}
+                style={{
+                  borderColor: isActive ? color : 'var(--border)',
+                  background: isActive ? color : 'var(--surface)',
+                  color: isActive ? '#000' : 'var(--text-muted)',
+                }}
+                onClick={() => onToggle(champ)}
+                title={champ}>
+                <span className="champ-color-dot" style={{ background: color }} />
+                <span className="champ-name">{champ.length > 20 ? champ.substring(0, 18) + '…' : champ}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="champ-actions">
+          <button className="btn-sm btn-select-all" onClick={onSelectAll}>✅ Seleziona Tutti</button>
+          <button className="btn-sm btn-clear-all" onClick={onClearAll}>❌ Svuota Selezione</button>
+          <span className="champ-count-badge">{activeCount} / {total}</span>
+        </div>
+      </div>
+    );
+  };
+
+  const VisualizzaGiocateSwitch = ({ mode, setMode, selectedFamiglie }) => {
+    const countScelte = (selectedFamiglie || []).length;
+    const totalFamiglie = Object.keys(window.FAMIGLIE_GIOCATE || {}).length;
+
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        flexWrap: 'wrap',
+        marginTop: '12px',
+        padding: '10px 14px',
+        background: 'var(--surface)',
+        borderRadius: '8px',
+        border: '2px solid var(--border)',
+      }}>
+        <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text)' }}>
+          🎯 Giocate da mostrare:
+        </span>
+        <div style={{
+          display: 'flex',
+          background: 'var(--card)',
+          borderRadius: '8px',
+          padding: '3px',
+          border: '1px solid var(--border)',
+        }}>
+          <button
+            onClick={() => setMode('scelte')}
+            style={{
+              padding: '6px 16px',
+              fontSize: '12px',
+              fontWeight: mode === 'scelte' ? 'bold' : 'normal',
+              borderRadius: '6px',
+              border: 'none',
+              cursor: 'pointer',
+              background: mode === 'scelte' ? 'var(--accent)' : 'transparent',
+              color: mode === 'scelte' ? '#000' : 'var(--text-muted)',
+              transition: 'all 0.2s',
+            }}
+          >
+            ⭐ Scelte ({countScelte})
+          </button>
+          <button
+            onClick={() => setMode('tutte')}
+            style={{
+              padding: '6px 16px',
+              fontSize: '12px',
+              fontWeight: mode === 'tutte' ? 'bold' : 'normal',
+              borderRadius: '6px',
+              border: 'none',
+              cursor: 'pointer',
+              background: mode === 'tutte' ? 'var(--accent)' : 'transparent',
+              color: mode === 'tutte' ? '#000' : 'var(--text-muted)',
+              transition: 'all 0.2s',
+            }}
+          >
+            🌐 Tutte ({totalFamiglie})
+          </button>
+        </div>
+        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+          {mode === 'scelte'
+            ? 'Mostra le 3 migliori giocate tra le famiglie scelte in Impostazioni'
+            : 'Mostra le 3 migliori giocate tra tutte le famiglie disponibili (incluso GG/NG)'}
+        </span>
       </div>
     );
   };
@@ -827,216 +498,104 @@
   // COMPONENTE PRINCIPALE
   // ============================================================
 
-  function PerformanceComponent({ matches, championships, onSelectMatch }) {
-    const { snapshots, loading, pending, remote, daExcel } = usePerformanceSnapshots(matches);
-    const [uploading, setUploading] = useState(false);
-    const [msg, setMsg] = useState(null);
-    const isWriter = window.PerformanceDB ? window.PerformanceDB.isWriter() : false;
+  function PalinsestoComponent({ matches, selectedFamiglie, onSelectMatch, weatherCache }) {
+    const normalizeDate = window.normalizeDate;
+    const getTodayStr = window.getTodayStr;
+    const addDaysToDateStr = window.addDaysToDateStr;
 
-    // Aggiorna esiti sui pending (per upload opzionale su GitHub)
-    useEffect(() => {
-      if (!matches || matches.length === 0) return;
-      const t = setTimeout(() => {
-        aggiornaEsiti(matches);
-      }, 500);
-      return () => clearTimeout(t);
-    }, [matches]);
+    const { giorni: selectedGiorni, setGiorni: setSelectedGiorni } =
+      window.FiltriCampionati.useGiorniRange();
 
-    // Upload automatico su beforeunload (solo admin)
-    useEffect(() => {
-      const handler = () => {
-        if (isWriter && leggiPending().length > 0) {
-          try { flushUpload({ silent: true }); } catch (e) {}
-        }
-      };
-      window.addEventListener('beforeunload', handler);
-      return () => window.removeEventListener('beforeunload', handler);
-    }, [isWriter]);
+    const {
+      filtro: selectedChamps,
+      toggleCampionato: toggleChamp,
+      selezionaTutti: selectAllChamps,
+      deselezionaTutti: clearAllChamps,
+    } = window.FiltriCampionati.useFiltroCampionati();
 
-    const handleUploadManuale = async () => {
-      if (!window.PerformanceDB) return;
-      if (!isWriter) {
-        setMsg({ type: 'warning', text: '⚠️ Solo l\'admin può fare upload su GitHub' });
-        setTimeout(() => setMsg(null), 3000);
-        return;
-      }
+    const { mode: visualizzaMode, setMode: setVisualizzaMode } =
+      window.FiltriCampionati.useVisualizzaGiocateMode();
 
-      setUploading(true);
-      setMsg({ type: 'info', text: '⏳ Preparazione upload...' });
+    const getActiveChamps = () => Object.keys(selectedChamps).filter(c => selectedChamps[c]);
 
-      // Salva TUTTI gli snapshot calcolati da Excel nel pending
-      // così vengono caricati su GitHub
+    const futureMatches = useMemo(() => {
       try {
-        const tuttiDaSalvare = daExcel || [];
-        if (tuttiDaSalvare.length === 0) {
-          setMsg({ type: 'warning', text: '⚠️ Nessuno snapshot da caricare' });
-          setUploading(false);
-          setTimeout(() => setMsg(null), 3000);
-          return;
-        }
+        const activeChamps = getActiveChamps();
+        const todayStr = getTodayStr();
+        const maxDateStr = addDaysToDateStr(todayStr, selectedGiorni);
 
-        // Raggruppa per data e salva
-        const perGiorno = {};
-        tuttiDaSalvare.forEach(s => {
-          const d = s.data ? s.data.slice(0, 10) : null;
-          if (!d) return;
-          if (!perGiorno[d]) perGiorno[d] = [];
-          perGiorno[d].push(s);
+        let list = matches.filter(m => m.stato === 'Futura');
+        if (activeChamps.length > 0) {
+          list = list.filter(m => activeChamps.includes(m.campionato));
+        }
+        list = list.filter(m => {
+          if (!m.data) return false;
+          const normalized = normalizeDate(m.data);
+          if (!normalized) return false;
+          return normalized >= todayStr && normalized <= maxDateStr;
         });
-
-        setMsg({ type: 'info', text: `⏳ Upload di ${Object.keys(perGiorno).length} giorni...` });
-
-        let totaleOk = 0;
-        let errori = [];
-        let giorniOk = 0;
-
-        for (const [data, snaps] of Object.entries(perGiorno)) {
-          try {
-            const r = await window.PerformanceDB.salvaGiorno(data, snaps);
-            if (r.ok) {
-              totaleOk += snaps.length;
-              giorniOk++;
-            } else {
-              errori.push(`${data}: ${r.error}`);
-            }
-          } catch (e) {
-            errori.push(`${data}: ${e.message}`);
-          }
-          // Aggiorna messaggio ogni 10 giorni
-          if (giorniOk % 10 === 0) {
-            setMsg({ type: 'info', text: `⏳ Upload... ${giorniOk}/${Object.keys(perGiorno).length} giorni` });
-          }
-        }
-
-        setUploading(false);
-
-        if (errori.length === 0) {
-          setMsg({ type: 'success', text: `✅ Caricati ${totaleOk} snapshot (${giorniOk} giorni) su GitHub` });
-        } else {
-          setMsg({ type: 'warning', text: `⚠️ Caricati ${totaleOk} snapshot, ${errori.length} errori: ${errori.slice(0, 3).join(', ')}` });
-        }
+        list.sort((a, b) => {
+          const da = normalizeDate(a.data);
+          const db = normalizeDate(b.data);
+          if (!da || !db) return 0;
+          return da.localeCompare(db);
+        });
+        return list;
       } catch (e) {
-        setUploading(false);
-        setMsg({ type: 'error', text: `❌ ${e.message}` });
+        console.error('Errore filtro Palinsesto:', e);
+        return [];
       }
-
-      setTimeout(() => setMsg(null), 8000);
-    };
-
-    const risolti = snapshots.filter(s => s.risultatoFinale).length;
-    const inAttesa = snapshots.length - risolti;
-    const pendingCount = pending.length;
-    const daExcelCount = daExcel ? daExcel.length : 0;
-    const remoteCount = remote ? remote.length : 0;
+    }, [matches, selectedGiorni, selectedChamps]);
 
     return (
       <div>
-        {/* HEADER */}
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          flexWrap: 'wrap', gap: '12px', marginBottom: '16px', padding: '10px 14px',
-          background: 'var(--surface)', borderRadius: '8px', border: '1px solid var(--border)',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-            <h2 style={{ margin: 0, color: 'var(--accent)', fontSize: '18px' }}>📈 Storico Performance</h2>
-            <span style={{
-              fontSize: '11px', fontWeight: 'bold', padding: '3px 10px', borderRadius: '10px',
-              background: isWriter ? 'var(--win)' : 'var(--surface)',
-              color: isWriter ? '#000' : 'var(--text-muted)',
-              border: isWriter ? 'none' : '1px solid var(--border)',
-            }}>
-              {isWriter ? '✍️ Scrittore' : '👁️ Solo lettura'}
-            </span>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              {snapshots.length} snapshot ({risolti} risolti • {inAttesa} in attesa)
-              {daExcelCount > 0 && ` • 📊 ${daExcelCount} da Excel`}
-              {remoteCount > 0 && ` • ☁️ ${remoteCount} da GitHub`}
-              {pendingCount > 0 && ` • 💾 ${pendingCount} in coda`}
-              {loading && ' • 🔄 caricamento...'}
-            </span>
-          </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            {isWriter && (
-              <button className="btn" onClick={handleUploadManuale}
-                disabled={uploading || daExcelCount === 0}
-                style={{ fontSize: '12px', padding: '6px 14px',
-                  opacity: (uploading || daExcelCount === 0) ? 0.5 : 1 }}>
-                {uploading ? '⏳ Upload...' : '☁️ Pubblica su GitHub'}
-              </button>
-            )}
-            {!isWriter && (
-              <button className="btn btn-secondary"
-                onClick={() => {
-                  if (window.PerformanceDB) window.PerformanceDB.clearCache();
-                  window.location.reload();
-                }}
-                style={{ fontSize: '12px', padding: '6px 14px' }}>
-                🔄 Sincronizza
-              </button>
-            )}
-          </div>
+        <div style={{ marginBottom: '12px' }}>
+          <GiorniFilters selected={selectedGiorni} onChange={setSelectedGiorni} />
+          <ChampFilters
+            selectedChamps={selectedChamps}
+            onToggle={toggleChamp}
+            onSelectAll={selectAllChamps}
+            onClearAll={clearAllChamps}
+          />
+
+          <VisualizzaGiocateSwitch
+            mode={visualizzaMode}
+            setMode={setVisualizzaMode}
+            selectedFamiglie={selectedFamiglie}
+          />
         </div>
 
-        {/* INFO BOX */}
-        <div className="card" style={{
-          padding: '10px 14px', marginBottom: '12px',
-          background: 'rgba(52, 152, 219, 0.08)',
-          border: '1px solid #3498db', borderRadius: '8px',
-          fontSize: '12px', color: 'var(--text)',
-        }}>
-          ℹ️ <b>Fonte dati automatica:</b> gli snapshot vengono calcolati direttamente dal file Excel caricato
-          ({daExcelCount} partite giocate con risultato). Ogni volta che ricarichi l'Excel, la matrice si aggiorna.
-          {isWriter && (
-            <span> Gli admin possono pubblicare i risultati su GitHub con il pulsante <b>☁️ Pubblica su GitHub</b>.</span>
-          )}
-        </div>
+        <h2 style={{ marginBottom: '14px' }}>
+          📅 Palinsesto - Prossimi {selectedGiorni} {selectedGiorni > 1 ? 'Giorni' : 'Giorno'}
+        </h2>
 
-        {msg && (
-          <div style={{
-            marginBottom: '12px', padding: '10px 14px', borderRadius: '6px',
-            background: msg.type === 'success' ? 'rgba(111, 207, 151, 0.15)'
-              : msg.type === 'error' ? 'rgba(235, 87, 87, 0.15)'
-              : msg.type === 'warning' ? 'rgba(243, 156, 18, 0.15)'
-              : 'rgba(52, 152, 219, 0.15)',
-            border: `1px solid ${msg.type === 'success' ? 'var(--win)'
-              : msg.type === 'error' ? 'var(--lose)'
-              : msg.type === 'warning' ? 'var(--accent)'
-              : '#3498db'}`,
-            color: msg.type === 'success' ? 'var(--win)'
-              : msg.type === 'error' ? 'var(--lose)'
-              : msg.type === 'warning' ? 'var(--accent)'
-              : '#3498db',
-            fontSize: '13px', fontWeight: 'bold',
-          }}>
-            {msg.text}
+        {futureMatches.length === 0 ? (
+          <div className="empty-state">
+            Nessuna partita disponibile nelle prossime {selectedGiorni} giornate.
+          </div>
+        ) : (
+          <div className="matches-grid">
+            {futureMatches.map(m => {
+              const weatherKey = `${m.campionato}_${m.data}`;
+              const weather = weatherCache[weatherKey] || null;
+              return (
+                <MatchTab
+                  key={m.id}
+                  match={m}
+                  allMatches={matches}
+                  onSelect={onSelectMatch}
+                  selectedFamiglie={selectedFamiglie}
+                  weatherCache={weatherCache}
+                />
+              );
+            })}
           </div>
         )}
-
-        <MatriceCampionato snapshots={snapshots} />
       </div>
     );
   }
 
-  // ============================================================
-  // ESPOSIZIONE GLOBALE
-  // ============================================================
-
-  window.PerformanceComponent = PerformanceComponent;
-  window.PerformanceUtils = {
-    STORAGE_KEY,
-    leggiPending,
-    scriviPending,
-    salvaSnapshot,
-    aggiornaEsiti,
-    flushUpload,
-    calcolaEsitoGiocata,
-    calcolaTutteGiocatePerPartita,
-    usePerformanceSnapshots,
-    costruisciMatrice,
-    makeMatchKey,
-    CHAMP_ORDER,
-  };
-
-  console.log('✅ Modulo Performance v5 caricato - calcolo automatico da Excel + upload GitHub opzionale');
+  window.PalinsestoComponent = PalinsestoComponent;
+  console.log('✅ Modulo Palinsesto v5 caricato - snapshot calcolati da performance.js');
 
 })();
