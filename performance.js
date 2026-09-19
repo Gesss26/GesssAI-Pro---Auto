@@ -551,14 +551,15 @@
     return { matrix, campionati, tutteGiocate };
   };
 
-  const cellColor = (pct, tot, minGiocate) => {
-    if (tot < minGiocate) return { bg: 'transparent', fg: 'var(--text-muted)', opacity: 0.3 };
-    if (pct >= 80) return { bg: 'rgba(111, 207, 151, 0.35)', fg: 'var(--win)', opacity: 1 };
-    if (pct >= 65) return { bg: 'rgba(111, 207, 151, 0.15)', fg: 'var(--win)', opacity: 1 };
-    if (pct >= 45) return { bg: 'rgba(255, 255, 255, 0.05)', fg: 'var(--text)', opacity: 1 };
-    if (pct >= 30) return { bg: 'rgba(235, 87, 87, 0.10)', fg: 'var(--lose)', opacity: 1 };
-    return { bg: 'rgba(235, 87, 87, 0.25)', fg: 'var(--lose)', opacity: 1 };
-  };
+const cellColor = (pct, tot, minGiocate) => {
+  if (tot < minGiocate) return { bg: 'transparent', fg: 'var(--text-muted)', opacity: 0.3 };
+  if (pct >= 90) return { bg: 'rgba(243, 156, 18, 0.35)', fg: 'var(--accent)', opacity: 1 };  // 🥇 ORO
+  if (pct >= 80) return { bg: 'rgba(111, 207, 151, 0.35)', fg: 'var(--win)', opacity: 1 };
+  if (pct >= 65) return { bg: 'rgba(111, 207, 151, 0.15)', fg: 'var(--win)', opacity: 1 };
+  if (pct >= 45) return { bg: 'rgba(255, 255, 255, 0.05)', fg: 'var(--text)', opacity: 1 };
+  if (pct >= 30) return { bg: 'rgba(235, 87, 87, 0.10)', fg: 'var(--lose)', opacity: 1 };
+  return { bg: 'rgba(235, 87, 87, 0.25)', fg: 'var(--lose)', opacity: 1 };
+};
 
   // ============================================================
   // SELETTORE GIOCATE (stile Schedina)
