@@ -2,11 +2,13 @@
   {
     "username": "Gesss",
     "hash": "48a97a5e37163b556c0e8cc13a0d3e9201e95ddf93b0ecc9c4a75bac9ff39272",
-    "creatoIl": "2026-09-18T08:34:23.168Z"
+    "creatoIl": "2026-09-18T08:34:23.168Z",
+    "role": "admin"
   },
   {
     "username": "cris",
     "hash": "a2a6a1fa8cd93259a0ec651f0d45bb1950d687dea415de8fa23bae2b1870f602",
-    "creatoIl": "2026-09-18T10:17:45.807Z"
-  },
+    "creatoIl": "2026-09-18T10:17:45.807Z",
+    "role": "user"
+  }
 ]
