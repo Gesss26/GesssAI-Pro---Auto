@@ -23,12 +23,15 @@
 <!-- Moduli esterni -->
 <script type="text/javascript" src="meteo.js"></script>
 <script src="filtri-campionati.js"></script>
-<script type="text/babel" src="performance.js"></script>
 <script type="text/babel" src="quote-manager.js"></script>
 <script type="text/babel" src="schedina.js"></script>
 
 <!-- ⭐ GESTIONE CONTO (deve essere prima di home.js) -->
 <script type="text/babel" src="gestione-conto.js"></script>
+
+<!-- ⭐ PERFORMANCE DB (client GitHub) - PRIMA di performance.js e palinsesto.js -->
+<script type="text/babel" src="performance-db.js"></script>
+<script type="text/babel" src="performance.js"></script>
 
 <script type="text/babel" src="home.js"></script>
 <script type="text/babel" src="impostazioni.js"></script>
@@ -1521,7 +1524,6 @@
         return saved ? parseInt(saved) : 100;
       });
 
-      // ⭐ AUTO-DOWNLOAD QUOTE ALL'AVVIO
       useEffect(() => {
         if (window.QuoteManager && typeof window.QuoteManager.initAutoDownload === 'function') {
           window.QuoteManager.initAutoDownload();
@@ -1546,7 +1548,6 @@
         }
       }, []);
 
-      // ⭐ MODIFICATO: POPOLA LA WEATHER CACHE BILANCIANDO TRA CAMPIONATI
       useEffect(() => {
         if (!matches || matches.length === 0) return;
         if (typeof window.fetchWeatherForMatch !== 'function') {
@@ -1556,7 +1557,6 @@
 
         const todayStr = getTodayStr();
 
-        // Prendi TUTTE le partite future con data valida
         const partiteFuture = matches.filter(m => {
           if (m.stato !== 'Futura') return false;
           if (!m.data) return false;
@@ -1569,7 +1569,6 @@
           return;
         }
 
-        // ⭐ Raggruppa per campionato per bilanciare
         const perCampionato = {};
         partiteFuture.forEach(m => {
           const camp = m.campionato || 'Sconosciuto';
@@ -1577,11 +1576,9 @@
           perCampionato[camp].push(m);
         });
 
-        // ⭐ Prendi max 5 partite per campionato (così copri tutti i campionati)
         const MAX_PER_CAMPIONATO = 5;
         const partiteBilanciate = [];
         Object.entries(perCampionato).forEach(([camp, lista]) => {
-          // Ordina per data (le più vicine prima)
           const ordinate = lista.slice().sort((a, b) => {
             const da = normalizeDate(a.data);
             const db = normalizeDate(b.data);
@@ -1709,7 +1706,6 @@
           </div>
 
           <div className="container">
-            {/* ⭐ BANNER ALERT PDF NON AGGIORNATO */}
             {window.QuoteManager && window.QuoteManager.BannerAlertPDF && (
               <window.QuoteManager.BannerAlertPDF />
             )}

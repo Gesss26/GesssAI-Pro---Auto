@@ -5,11 +5,12 @@
 // - ⭐ Sync utenti su GitHub (excel/utenti.json) con MERGE intelligente
 // - ⭐ PAT hardcodato per uso interno (tutti i dispositivi lo usano)
 // - ⭐ PAT mascherato nel pannello (mostra solo ultimi 3 caratteri)
-// - ⭐ FIX: eliminaUtente ora rimuove DAVVERO l'utente da GitHub
-// - ⭐ FIX: creaUtente crea anche il file Excel iniziale su GitHub
 // - ⭐ Export/Import manuale utenti (backup JSON)
 // - ⭐ FIX: parsing SALDO INIZIALE dal file Excel
 // - ⭐ FIX: saldo 0€ gestito correttamente
+// - ⭐ FIX: priorità a raw.githubusercontent (evita cache CDN)
+// - ⭐ NUOVO: campo role (admin/user) + auto-promozione ADMIN_USERNAMES
+// - ⭐ NUOVO: promuovi/rimuovi admin dal pannello (solo admin)
 // - Settimana: Giovedì → Mercoledì successivo
 // - Input data italiano GG/MM/AAAA
 // ============================================================
@@ -42,15 +43,22 @@
   //    con permessi limitati al solo repo.
   // ============================================================
 
-  // ⭐ SOSTITUISCI QUESTO CON IL TUO PAT REALE
   const DEFAULT_PAT = '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';
+
+  // ⭐ Admin hardcoded: questi username sono SEMPRE admin (match esatto, case-insensitive)
+  const ADMIN_USERNAMES = ['gesss'];
+
+  const isHardcodedAdmin = (username) => {
+    if (!username) return false;
+    return ADMIN_USERNAMES.includes(username.trim().toLowerCase());
+  };
 
   const storageKeyConto = (user) => `ft_gestione_conto_${user}`;
   const storageKeySaldo = (user) => `ft_gestione_saldo_${user}`;
   const excelFilename = (user) => `gestione_${user}.xlsx`;
 
   // ============================================================
-  // CRIPTO: SHA-256
+  // CRIPTO: SHA-256 (Web Crypto API)
   // ============================================================
 
   const sha256 = async (text) => {
@@ -66,7 +74,7 @@
   };
 
   // ============================================================
-  // PAT: getter/setter con fallback a DEFAULT_PAT
+  // ⭐ PAT: getter/setter con fallback a DEFAULT_PAT
   // ============================================================
 
   const getPAT = () => {
@@ -85,7 +93,6 @@
     return !savedPAT || !savedPAT.trim();
   };
 
-  // ⭐ Maschera un PAT mostrando solo gli ultimi 3 caratteri
   const mascheraPAT = (pat) => {
     if (!pat || pat.length < 4) return 'xxx...xxx';
     const ultimi3 = pat.slice(-3);
@@ -135,7 +142,23 @@
   };
 
   // ============================================================
-  // MERGE UTENTI (locali + remoti) - solo per aggiungere
+  // ⭐ VERIFICA RUOLO
+  // ============================================================
+
+  const isAdmin = (username) => {
+    if (!username) return false;
+    if (isHardcodedAdmin(username)) return true;
+    const u = getUtente(username);
+    return u && u.role === 'admin';
+  };
+
+  const isCurrentUserAdmin = () => {
+    const sessione = loadSessione();
+    return isAdmin(sessione);
+  };
+
+  // ============================================================
+  // MERGE UTENTI (locali + remoti) con auto-promozione admin
   // ============================================================
 
   const mergeUtenti = (locali, remoti) => {
@@ -157,6 +180,16 @@
         }
       }
     });
+
+    // ⭐ AUTO-PROMOZIONE ADMIN: ad ogni merge, forza role=admin sugli hardcoded
+    map.forEach((u, key) => {
+      if (isHardcodedAdmin(u.username)) {
+        u.role = 'admin';
+      } else if (!u.role) {
+        u.role = 'user';
+      }
+    });
+
     return Array.from(map.values());
   };
 
@@ -187,7 +220,6 @@
     return null;
   };
 
-  // ⭐ Upload con MERGE (per AGGIUNGERE utenti senza perdere quelli di altri dispositivi)
   const caricaUtentiSuGitHub = async () => {
     const pat = getPAT();
     if (!pat) {
@@ -222,29 +254,6 @@
       USERS_FILE,
       content,
       `Update utenti.json - ${new Date().toISOString().slice(0, 19)}`
-    );
-  };
-
-  // ⭐ NUOVO: Upload FORZATO senza merge (per ELIMINARE utenti)
-  const caricaUtentiSuGitHubForzato = async () => {
-    const pat = getPAT();
-    if (!pat) {
-      console.warn('⚠️ PAT non configurato');
-      return { ok: false, error: 'PAT non configurato' };
-    }
-
-    // NON fare merge: usa SOLO la lista locale
-    const utenti = loadUtenti();
-    console.log(`📤 Upload FORZATO (no merge): ${utenti.length} utenti →`, utenti.map(u => u.username));
-
-    const json = JSON.stringify(utenti, null, 2);
-    const encoder = new TextEncoder();
-    const content = encoder.encode(json);
-
-    return await caricaFileSuGitHub(
-      USERS_FILE,
-      content,
-      `Update utenti.json (forzato) - ${new Date().toISOString().slice(0, 19)}`
     );
   };
 
@@ -293,41 +302,23 @@
       username: uname,
       hash,
       creatoIl: new Date().toISOString(),
+      role: isHardcodedAdmin(uname) ? 'admin' : 'user',
     });
     saveUtenti(utenti);
 
-    // ⭐ 1. Upload utenti.json con merge (non perdere utenti di altri)
-    if (getPAT()) {
+    const pat = getPAT();
+    if (pat) {
       caricaUtentiSuGitHub().then(r => {
         if (r.ok) console.log('✅ utenti.json aggiornato su GitHub dopo registrazione');
         else console.warn('⚠️ Upload utenti fallito:', r.error);
       });
-    }
-
-    // ⭐ 2. Crea anche file Excel vuoto su GitHub (per far esistere il file)
-    if (getPAT()) {
-      (async () => {
-        try {
-          const wb = buildWorkbook(uname, [], DEFAULT_SALDO_INIZIALE);
-          const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-          const filepath = `${EXCEL_DIR}/${excelFilename(uname)}`;
-          const result = await caricaFileSuGitHub(
-            filepath,
-            wbout,
-            `Crea file gestione iniziale per ${uname} - ${new Date().toISOString().slice(0, 19)}`
-          );
-          if (result.ok) console.log(`✅ File Excel iniziale creato per ${uname}`);
-          else console.warn(`⚠️ File Excel per ${uname} non creato:`, result.error);
-        } catch (e) {
-          console.warn('⚠️ Errore creazione file Excel iniziale:', e);
-        }
-      })();
+    } else {
+      console.warn('⚠️ PAT non configurato - utente salvato solo in locale');
     }
 
     return uname;
   };
 
-  // ⭐ FIX: eliminaUtente ora usa upload FORZATO (no merge)
   const eliminaUtente = (username) => {
     const utenti = loadUtenti().filter(u => u.username !== username);
     saveUtenti(utenti);
@@ -338,14 +329,61 @@
       localStorage.removeItem(STORAGE_SESSION);
     }
 
-    // ⭐ FIX: upload FORZATO senza merge (per rimuovere davvero da GitHub)
     if (getPAT()) {
-      caricaUtentiSuGitHubForzato().then(r => {
-        if (r.ok) console.log('✅ utenti.json aggiornato su GitHub (delete forzato)');
+      caricaUtentiSuGitHub().then(r => {
+        if (r.ok) console.log('✅ utenti.json aggiornato su GitHub (delete)');
         else console.warn('⚠️ Upload utenti fallito:', r.error);
       });
     }
   };
+
+  // ============================================================
+  // ⭐ PROMUOVI / RIMUOVI ADMIN
+  // ============================================================
+
+  const promuoviAdmin = async (username) => {
+    if (!isCurrentUserAdmin()) {
+      throw new Error('Solo un admin può promuovere altri admin');
+    }
+    if (isHardcodedAdmin(username)) {
+      throw new Error('Questo utente è già admin di sistema');
+    }
+    const utenti = loadUtenti();
+    const idx = utenti.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+    if (idx < 0) throw new Error('Utente non trovato');
+    utenti[idx].role = 'admin';
+    saveUtenti(utenti);
+
+    if (getPAT()) {
+      const r = await caricaUtentiSuGitHub();
+      if (!r.ok) throw new Error('Upload fallito: ' + r.error);
+    }
+    return true;
+  };
+
+  const rimuoviAdmin = async (username) => {
+    if (!isCurrentUserAdmin()) {
+      throw new Error('Solo un admin può rimuovere admin');
+    }
+    if (isHardcodedAdmin(username)) {
+      throw new Error('Questo utente è admin di sistema, non può essere declassato');
+    }
+    const utenti = loadUtenti();
+    const idx = utenti.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+    if (idx < 0) throw new Error('Utente non trovato');
+    utenti[idx].role = 'user';
+    saveUtenti(utenti);
+
+    if (getPAT()) {
+      const r = await caricaUtentiSuGitHub();
+      if (!r.ok) throw new Error('Upload fallito: ' + r.error);
+    }
+    return true;
+  };
+
+  // ============================================================
+  // VERIFICA PASSWORD
+  // ============================================================
 
   const verificaPassword = async (username, password) => {
     const u = getUtente(username);
@@ -742,7 +780,7 @@
   };
 
   // ============================================================
-  // INPUT DATA ITALIANO
+  // INPUT DATA ITALIANO (GG / MM / AAAA)
   // ============================================================
 
   const DataInputItaliano = ({ value, onChange }) => {
@@ -1042,44 +1080,54 @@
               gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
               gap: '12px', marginBottom: '16px',
             }}>
-              {utenti.map(u => (
-                <div key={u.username} style={{ position: 'relative' }}>
-                  <button
-                    onClick={() => { setSelectedUser(u); setPassword(''); setMsg(null); }}
-                    style={{
-                      width: '100%', padding: '16px 12px', background: 'var(--surface)',
-                      border: '2px solid var(--border)', borderRadius: '12px',
-                      cursor: 'pointer', transition: 'all 0.15s',
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-                  >
-                    <div style={{
-                      width: '48px', height: '48px', borderRadius: '50%',
-                      background: 'var(--accent)', color: '#000', display: 'flex',
-                      alignItems: 'center', justifyContent: 'center',
-                      fontSize: '20px', fontWeight: 'bold',
-                    }}>
-                      {u.username.charAt(0).toUpperCase()}
-                    </div>
-                    <div style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text)' }}>
-                      {u.username}
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => handleDelete(u)}
-                    title="Elimina utente"
-                    style={{
-                      position: 'absolute', top: '-6px', right: '-6px',
-                      background: 'var(--lose)', color: '#fff', border: 'none',
-                      borderRadius: '50%', width: '24px', height: '24px',
-                      cursor: 'pointer', fontWeight: 'bold', fontSize: '12px',
-                      boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
-                    }}
-                  >✕</button>
-                </div>
-              ))}
+              {utenti.map(u => {
+                const userIsAdmin = isAdmin(u.username);
+                return (
+                  <div key={u.username} style={{ position: 'relative' }}>
+                    <button
+                      onClick={() => { setSelectedUser(u); setPassword(''); setMsg(null); }}
+                      style={{
+                        width: '100%', padding: '16px 12px', background: 'var(--surface)',
+                        border: userIsAdmin ? '2px solid var(--accent)' : '2px solid var(--border)',
+                        borderRadius: '12px',
+                        cursor: 'pointer', transition: 'all 0.15s',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = userIsAdmin ? 'var(--accent)' : 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                    >
+                      <div style={{
+                        width: '48px', height: '48px', borderRadius: '50%',
+                        background: 'var(--accent)', color: '#000', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center',
+                        fontSize: '20px', fontWeight: 'bold',
+                      }}>
+                        {u.username.charAt(0).toUpperCase()}
+                      </div>
+                      <div style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text)' }}>
+                        {u.username}
+                      </div>
+                      {userIsAdmin && (
+                        <span style={{
+                          fontSize: '9px', padding: '1px 6px', borderRadius: '6px',
+                          background: 'var(--accent)', color: '#000', fontWeight: 'bold',
+                        }}>👑 Admin</span>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(u)}
+                      title="Elimina utente"
+                      style={{
+                        position: 'absolute', top: '-6px', right: '-6px',
+                        background: 'var(--lose)', color: '#fff', border: 'none',
+                        borderRadius: '50%', width: '24px', height: '24px',
+                        cursor: 'pointer', fontWeight: 'bold', fontSize: '12px',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+                      }}
+                    >✕</button>
+                  </div>
+                );
+              })}
 
               <button
                 onClick={() => { setShowAdd(true); setMsg(null); }}
@@ -1903,8 +1951,13 @@
             <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>
               Utente attivo
             </div>
-            <div style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--accent)' }}>
+            <div style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '8px' }}>
               {username}
+              {isAdmin(username) && (
+                <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '8px', background: 'var(--accent)', color: '#000', fontWeight: 'bold' }}>
+                  👑 Admin
+                </span>
+              )}
             </div>
           </div>
           <button
@@ -2129,6 +2182,7 @@
 
   // ============================================================
   // PANNELLO GESTIONE UTENTI (per Impostazioni)
+  // ⭐ Con badge admin + pulsanti promuovi/rimuovi
   // ============================================================
 
   function GestioneUtentiPanel() {
@@ -2192,33 +2246,6 @@
         setUtenti(loadUtenti());
         if (result.ok) {
           setMsg({ type: 'success', text: `✅ Utenti caricati su GitHub!` });
-        } else {
-          setMsg({ type: 'error', text: '❌ ' + result.error });
-        }
-      } catch (e) {
-        setMsg({ type: 'error', text: '❌ ' + e.message });
-      } finally {
-        setSyncing(false);
-        setTimeout(() => setMsg(null), 6000);
-      }
-    };
-
-    // ⭐ NUOVO: upload forzato (no merge) - per rimuovere utenti
-    const handleForzaUploadSenzaMerge = async () => {
-      if (utenti.length === 0) {
-        setMsg({ type: 'error', text: '⚠️ Nessun utente locale' });
-        setTimeout(() => setMsg(null), 3000);
-        return;
-      }
-      if (!window.confirm('⚠️ Attenzione: questo upload SOVRASCRIVE la lista su GitHub con SOLO i tuoi utenti locali.\n\nUsa SOLO se vuoi rimuovere utenti.\n\nContinuare?')) return;
-      
-      setSyncing(true);
-      setMsg({ type: 'info', text: `⏳ Upload forzato (no merge)...` });
-      try {
-        const result = await caricaUtentiSuGitHubForzato();
-        setUtenti(loadUtenti());
-        if (result.ok) {
-          setMsg({ type: 'success', text: `✅ Utenti caricati (forzato)! Ora su GitHub ci sono solo i tuoi.` });
         } else {
           setMsg({ type: 'error', text: '❌ ' + result.error });
         }
@@ -2327,6 +2354,7 @@
 
     const patEffettivo = getPAT();
     const patMascherato = mascheraPAT(patEffettivo);
+    const iAmAdmin = isCurrentUserAdmin();
 
     return (
       <div>
@@ -2334,6 +2362,11 @@
           <h3 style={{ margin: '0 0 12px 0', color: 'var(--accent)', fontSize: '16px' }}>
             👥 Utenti Registrati ({utenti.length})
             {syncing && <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginLeft: '10px', fontWeight: 'normal' }}>🔄 sync...</span>}
+            {iAmAdmin && (
+              <span style={{ fontSize: '11px', marginLeft: '10px', padding: '2px 8px', borderRadius: '8px', background: 'var(--accent)', color: '#000', fontWeight: 'bold' }}>
+                👑 Sei admin
+              </span>
+            )}
           </h3>
 
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '14px' }}>
@@ -2353,20 +2386,8 @@
                 cursor: (syncing || utenti.length === 0) ? 'not-allowed' : 'pointer',
                 opacity: (syncing || utenti.length === 0) ? 0.5 : 1,
               }}
-              title="Carica gli utenti locali su GitHub (con merge - mantiene utenti di altri dispositivi)">
-              📤 Carica (merge) ({utenti.length})
-            </button>
-
-            {/* ⭐ NUOVO: upload forzato senza merge */}
-            <button onClick={handleForzaUploadSenzaMerge} disabled={syncing || utenti.length === 0}
-              style={{
-                padding: '6px 14px', background: '#e67e22', color: '#fff',
-                border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '11px',
-                cursor: (syncing || utenti.length === 0) ? 'not-allowed' : 'pointer',
-                opacity: (syncing || utenti.length === 0) ? 0.5 : 1,
-              }}
-              title="SOVRASCRIVE la lista su GitHub con SOLO i tuoi utenti locali (per rimuovere utenti)">
-              ⚠️ Upload forzato
+              title="Carica gli utenti locali su GitHub (con merge)">
+              📤 Carica su GitHub ({utenti.length})
             </button>
 
             <button onClick={handleEsportaUtenti}
@@ -2393,39 +2414,108 @@
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {utenti.map(u => (
-                <div key={u.username} style={{
-                  display: 'flex', alignItems: 'center', gap: '12px',
-                  padding: '10px 14px', background: 'var(--surface)',
-                  border: '1px solid var(--border)', borderRadius: '10px',
-                }}>
-                  <div style={{
-                    width: '38px', height: '38px', borderRadius: '50%',
-                    background: 'var(--accent)', color: '#000',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '16px', fontWeight: 'bold',
+              {utenti.map(u => {
+                const userIsAdmin = isAdmin(u.username);
+                const hardcoded = isHardcodedAdmin(u.username);
+                return (
+                  <div key={u.username} style={{
+                    display: 'flex', alignItems: 'center', gap: '12px',
+                    padding: '10px 14px', background: 'var(--surface)',
+                    border: userIsAdmin ? '2px solid var(--accent)' : '1px solid var(--border)',
+                    borderRadius: '10px',
                   }}>
-                    {u.username.charAt(0).toUpperCase()}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text)' }}>
-                      {u.username}
-                    </div>
-                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-                      Creato il {formatDateIT(u.creatoIl.slice(0, 10))}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleDelete(u)}
-                    style={{
-                      padding: '6px 12px', background: 'var(--lose)', color: '#fff',
-                      border: 'none', borderRadius: '6px', cursor: 'pointer',
-                      fontWeight: 'bold', fontSize: '11px',
+                    <div style={{
+                      width: '38px', height: '38px', borderRadius: '50%',
+                      background: userIsAdmin ? 'var(--accent)' : 'var(--border)',
+                      color: userIsAdmin ? '#000' : 'var(--text)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '16px', fontWeight: 'bold',
                     }}>
-                    🗑️ Elimina
-                  </button>
-                </div>
-              ))}
+                      {u.username.charAt(0).toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        {u.username}
+                        {userIsAdmin && (
+                          <span style={{
+                            fontSize: '11px', padding: '2px 8px', borderRadius: '8px',
+                            background: 'var(--accent)', color: '#000', fontWeight: 'bold',
+                          }}>
+                            👑 Admin{hardcoded && ' (sistema)'}
+                          </span>
+                        )}
+                        {!userIsAdmin && (
+                          <span style={{
+                            fontSize: '10px', padding: '2px 8px', borderRadius: '8px',
+                            background: 'var(--card)', color: 'var(--text-muted)',
+                            border: '1px solid var(--border)',
+                          }}>
+                            👤 User
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                        Creato il {formatDateIT(u.creatoIl.slice(0, 10))}
+                      </div>
+                    </div>
+
+                    {iAmAdmin && !hardcoded && !userIsAdmin && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            await promuoviAdmin(u.username);
+                            setUtenti(loadUtenti());
+                            setMsg({ type: 'success', text: `👑 ${u.username} è ora admin` });
+                            setTimeout(() => setMsg(null), 3000);
+                          } catch (e) {
+                            setMsg({ type: 'error', text: '❌ ' + e.message });
+                            setTimeout(() => setMsg(null), 4000);
+                          }
+                        }}
+                        style={{
+                          padding: '6px 12px', background: 'var(--accent)', color: '#000',
+                          border: 'none', borderRadius: '6px', cursor: 'pointer',
+                          fontWeight: 'bold', fontSize: '11px',
+                        }}>
+                        👑 Promuovi
+                      </button>
+                    )}
+
+                    {iAmAdmin && !hardcoded && userIsAdmin && (
+                      <button
+                        onClick={async () => {
+                          if (!window.confirm(`Rimuovere admin da ${u.username}?`)) return;
+                          try {
+                            await rimuoviAdmin(u.username);
+                            setUtenti(loadUtenti());
+                            setMsg({ type: 'success', text: `👤 ${u.username} non è più admin` });
+                            setTimeout(() => setMsg(null), 3000);
+                          } catch (e) {
+                            setMsg({ type: 'error', text: '❌ ' + e.message });
+                            setTimeout(() => setMsg(null), 4000);
+                          }
+                        }}
+                        style={{
+                          padding: '6px 12px', background: 'var(--surface)', color: 'var(--text)',
+                          border: '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer',
+                          fontWeight: 'bold', fontSize: '11px',
+                        }}>
+                        ⬇️ Rimuovi
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => handleDelete(u)}
+                      style={{
+                        padding: '6px 12px', background: 'var(--lose)', color: '#fff',
+                        border: 'none', borderRadius: '6px', cursor: 'pointer',
+                        fontWeight: 'bold', fontSize: '11px',
+                      }}>
+                      🗑️ Elimina
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
 
@@ -2540,7 +2630,7 @@
 
           <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 14px 0', lineHeight: '1.5' }}>
             Il PAT è già <b>configurato di default</b> nel sistema. Puoi inserire il tuo PAT personale
-            qui sotto solo se vuoi sovrascriverlo.
+            qui sotto solo se vuoi sovrascriverlo (es. per usare un account GitHub diverso).
             <br />
             ⚠️ Lascia vuoto per usare il PAT di sistema.
           </p>
@@ -2635,7 +2725,6 @@
     sincronizzaUtenti,
     scaricaUtentiDaGitHub,
     caricaUtentiSuGitHub,
-    caricaUtentiSuGitHubForzato,  // ⭐ NUOVO
     parseSaldoSafe,
     coalesceSaldo,
     parseExcelGestione,
@@ -2643,6 +2732,12 @@
     saveGestioneToLocal,
     formatDateIT,
     excelFilename,
+    isAdmin,
+    isCurrentUserAdmin,
+    isHardcodedAdmin,
+    promuoviAdmin,
+    rimuoviAdmin,
+    ADMIN_USERNAMES,
     GITHUB_USER,
     GITHUB_REPO,
     GITHUB_BRANCH,
@@ -2650,6 +2745,6 @@
     DEFAULT_PAT,
   };
 
-  console.log('✅ Modulo Gestione Conto caricato - con FIX eliminazione utenti + creazione file Excel iniziale');
+  console.log('✅ Modulo Gestione Conto caricato - PAT hardcodato + mascherato + merge intelligente + ruoli admin');
 
 })();

@@ -4,6 +4,7 @@
 // È la FONTE DI VERITÀ per il filtro campionati, giorni e modalità giocate.
 // Etichette MG: 0-2/1-3 = "MG Casa", 1-4/2-5 = "MG Tot".
 // Salva automaticamente gli snapshot per lo Storico Performance.
+// ⭐ MOD 2026-09: salva TUTTE le giocate di TUTTE le famiglie (non solo top 3)
 // ============================================================
 
 (function () {
@@ -94,7 +95,6 @@
   const QuotaBox = ({ match, familyId, giocata, pctTua }) => {
     const [quotaInfo, setQuotaInfo] = useState(null);
 
-    // Dipendenza dal "trigger" quote per aggiornare quando caricano
     const { numPartite, dataMaxPDF } = window.QuoteManager ? window.QuoteManager.useQuote() : { numPartite: 0, dataMaxPDF: null };
 
     useEffect(() => {
@@ -265,19 +265,67 @@
       return giocateDaMostrare.sort((a, b) => b.pct - a.pct).slice(0, 3);
     };
 
+    // ⭐ TUTTE le giocate (non solo top 3) per lo snapshot Performance
+    const getTutteGiocatePerSnapshot = () => {
+      if (stats.error) return [];
+      const homeMG = stats.homeMG || {};
+      const awayMG = stats.awayMG || {};
+      const mgTot = stats.mgTot || {};
+      const homeRange = getMultigolRange(match.casa, allMatches);
+      const awayRange = getMultigolRange(match.ospiti, allMatches);
+      const out = [];
+
+      Object.keys(FAMIGLIE_GIOCATE).forEach(familyId => {
+        const family = FAMIGLIE_GIOCATE[familyId];
+        if (!family) return;
+
+        // Per ogni famiglia, salva TUTTE le opzioni (non solo la migliore)
+        family.options.forEach(opt => {
+          let pct = 0;
+          if (familyId === 'gg_ng') {
+            const ggNgResult = calcolaGG_NG ? calcolaGG_NG(stats) : null;
+            if (ggNgResult) {
+              if (opt === 'GG') pct = ggNgResult.gg || 0;
+              else if (opt === 'NG') pct = ggNgResult.ng || 0;
+            }
+          } else {
+            // Usa getGiocataPct globale per l'opzione specifica
+            if (window.getGiocataPct) {
+              pct = window.getGiocataPct(opt, stats, homeMG, awayMG, mgTot);
+            }
+          }
+
+          if (pct > 0) {
+            out.push({
+              familyId,
+              familyLabel: family.label,
+              familyIcon: family.icon,
+              giocata: opt,
+              label: opt,
+              displayLabel: formatGiocataLabel(familyId, opt),
+              pct,
+            });
+          }
+        });
+      });
+
+      return out;
+    };
+
     const giocateDaMostrare = getGiocateDaMostrare();
     const score = giocateDaMostrare.length > 0
       ? Math.round(giocateDaMostrare.reduce((s, g) => s + g.pct, 0) / giocateDaMostrare.length)
       : 0;
     const hasBomb = giocateDaMostrare.some(g => g.isBomb);
 
-    // Salva snapshot performance quando la partita è "Futura" e ha giocate
+    // ⭐ Salva snapshot performance con TUTTE le giocate di TUTTE le famiglie
     useEffect(() => {
-      if (!match || match.stato !== 'Futura') return;
-      if (!giocateDaMostrare || giocateDaMostrare.length === 0) return;
-      const top3 = giocateDaMostrare.slice(0, 3);
-      salvaSnapshotPerformance(match, top3);
-    }, [match.id, match.stato]);
+      if (!match) return;
+      const tutteGiocate = getTutteGiocatePerSnapshot();
+      if (!tutteGiocate || tutteGiocate.length === 0) return;
+      salvaSnapshotPerformance(match, tutteGiocate);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [match.id, match.stato, match.golCasa, match.golOspite]);
 
     const handleClick = (e) => {
       e.stopPropagation();
@@ -368,7 +416,6 @@
                     <span className={`giocata-pct ${getPercentualeClasse(g.pct)}`}>
                       {g.pct}% {isBomb && <span className="bomb-icon">💣</span>}
                     </span>
-                    {/* ⭐ QUOTA PDF ACCANTO */}
                     <QuotaBox
                       match={match}
                       familyId={g.familyId}
@@ -618,6 +665,6 @@
   }
 
   window.PalinsestoComponent = PalinsestoComponent;
-  console.log('✅ Modulo Palinsesto caricato - con quote PDF visibili');
+  console.log('✅ Modulo Palinsesto caricato - con quote PDF visibili + snapshot TUTTE le giocate');
 
 })();
