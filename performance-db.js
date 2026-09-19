@@ -5,6 +5,8 @@
 // - Solo gli admin (vedi gestione-conto.js) possono scrivere
 // - Cache locale 5 min per non ri-scaricare file già letti
 // - Merge download-before-upload per evitare sovrascritture
+// - ⭐ FIX v2: retry automatico su 409 Conflict (SHA cambiato)
+// - ⭐ FIX v2: sopprime 404 rumorosi in console (opzionale)
 // ============================================================
 
 (function () {
@@ -20,7 +22,7 @@
   const DB_DIR = 'data/performance';
 
   const CACHE_KEY_PREFIX = 'ft_perfdb_cache_';
-  const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minuti
+  const CACHE_TTL_MS = 5 * 60 * 1000;
 
   const DEBUG = true;
 
@@ -31,7 +33,6 @@
   const getPAT = () => {
     const saved = localStorage.getItem('ft_github_pat');
     if (saved && saved.trim()) return saved.trim();
-    // Fallback: importa DEFAULT_PAT da gestione-conto (esposto globalmente)
     if (window.GestioneContoUtils && window.GestioneContoUtils.DEFAULT_PAT) {
       return window.GestioneContoUtils.DEFAULT_PAT;
     }
@@ -130,14 +131,13 @@
       }
     }
 
-    // Prova prima raw.githubusercontent (più fresco), poi jsdelivr (CDN)
     const urls = [urlRaw(dateStr), urlCdn(dateStr)];
 
     for (const url of urls) {
       try {
         const resp = await fetch(`${url}?t=${Date.now()}`, { cache: 'no-store' });
         if (!resp.ok) {
-          if (resp.status === 404) continue;
+          // Silenzio sui 404 (file giorno non esistente) — è normale
           continue;
         }
         const data = await resp.json();
@@ -149,8 +149,7 @@
       }
     }
 
-    // Nessun file trovato per questo giorno
-    if (DEBUG) console.log(`ℹ️ PerformanceDB: nessun file per ${dateStr}`);
+    // Nessun file per questo giorno (comportamento normale)
     return { date: dateStr, snapshots: [] };
   };
 
@@ -183,7 +182,6 @@
       }
     }
 
-    // Unisci tutti gli snapshot
     const allSnapshots = [];
     risultati.forEach(r => {
       if (r && Array.isArray(r.snapshots)) {
@@ -228,7 +226,7 @@
         .map(f => f.name.replace('.json', ''))
         .sort();
 
-      if (DEBUG) console.log(`📋 PerformanceDB: ${giorni.length} giorni disponibili (${giorni[0]} → ${giorni[giorni.length - 1]})`);
+      if (DEBUG && giorni.length > 0) console.log(`📋 PerformanceDB: ${giorni.length} giorni disponibili (${giorni[0]} → ${giorni[giorni.length - 1]})`);
       return giorni;
     } catch (e) {
       if (DEBUG) console.warn('⚠️ PerformanceDB: listaGiorniDisponibili errore:', e.message);
@@ -256,11 +254,9 @@
       if (attuale && Array.isArray(attuale.snapshots)) {
         esistenti = attuale.snapshots;
       }
-    } catch (e) {
-      // OK, nessun file esistente
-    }
+    } catch (e) {}
 
-    // 2. Merge per matchKey (deduplica)
+    // 2. Merge per matchKey
     const map = new Map();
     esistenti.forEach(s => {
       if (s && s.matchKey) map.set(s.matchKey, s);
@@ -270,9 +266,7 @@
       if (!s || !s.matchKey) return;
       const prev = map.get(s.matchKey);
       if (prev) {
-        // Unisci i campi: prendi i nuovi (che hanno esito aggiornato) e preserva i vecchi mancanti
         map.set(s.matchKey, Object.assign({}, prev, s, {
-          // Le giocate: prendi quelle nuove (possono avere esito risolto)
           giocate: s.giocate && s.giocate.length ? s.giocate : (prev.giocate || []),
         }));
       } else {
@@ -293,7 +287,7 @@
     const encoder = new TextEncoder();
     const content = encoder.encode(json);
 
-    // 3. Controllo dimensione (limite 1 MB Contents API)
+    // 3. Controllo dimensione (limite 1 MB Contents API, margine a 900 KB)
     if (content.byteLength > 900 * 1024) {
       return { ok: false, error: `File troppo grande (${(content.byteLength / 1024).toFixed(0)} KB > 900 KB)` };
     }
@@ -301,7 +295,6 @@
     // 4. Upload via Contents API
     const result = await caricaFileSuGitHub(dateStr, content);
     if (result.ok) {
-      // Invalida cache locale per questo giorno
       localStorage.removeItem(CACHE_KEY_PREFIX + dateStr);
       if (DEBUG) console.log(`✅ PerformanceDB: salvato ${dateStr} (${mergedSnapshots.length} snapshot, ${(content.byteLength / 1024).toFixed(1)} KB)`);
     }
@@ -309,7 +302,7 @@
   };
 
   // ============================================================
-  // UPLOAD FILE SU GITHUB (Contents API)
+  // UPLOAD FILE SU GITHUB (Contents API) — con retry su 409
   // ============================================================
 
   function arrayBufferToBase64(buffer) {
@@ -329,12 +322,11 @@
     if (!pat) return { ok: false, error: 'PAT non configurato' };
 
     const apiUrl = urlApi(dateStr);
-    const filepath = `${DB_DIR}/${dateStr}.json`;
 
-    // Recupera SHA esistente (necessario per update)
+    // Recupera SHA esistente
     let sha = null;
     try {
-      const checkResp = await fetch(apiUrl + `?ref=${GITHUB_BRANCH}`, {
+      const checkResp = await fetch(apiUrl + `?ref=${GITHUB_BRANCH}&t=${Date.now()}`, {
         headers: {
           'Authorization': `token ${pat}`,
           'Accept': 'application/vnd.github+json',
@@ -348,36 +340,69 @@
 
     const base64 = arrayBufferToBase64(content);
 
-    const body = {
-      message: `Performance DB update ${dateStr} - ${new Date().toISOString().slice(0, 19)}`,
-      content: base64,
-      branch: GITHUB_BRANCH,
+    const buildBody = (shaVal) => {
+      const b = {
+        message: `Performance DB update ${dateStr} - ${new Date().toISOString().slice(0, 19)}`,
+        content: base64,
+        branch: GITHUB_BRANCH,
+      };
+      if (shaVal) b.sha = shaVal;
+      return b;
     };
-    if (sha) body.sha = sha;
 
-    try {
-      const resp = await fetch(apiUrl, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `token ${pat}`,
-          'Accept': 'application/vnd.github+json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
+    // Retry su 409 Conflict (SHA cambiato tra GET e PUT)
+    for (let tentativo = 0; tentativo < 3; tentativo++) {
+      const body = buildBody(sha);
 
-      if (resp.ok) return { ok: true };
+      try {
+        const resp = await fetch(apiUrl, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${pat}`,
+            'Accept': 'application/vnd.github+json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
 
-      const err = await resp.json().catch(() => ({}));
-      let msg = err.message || `HTTP ${resp.status}`;
-      if (resp.status === 401) msg = 'PAT non valido o scaduto';
-      if (resp.status === 403) msg = 'Permessi insufficienti';
-      if (resp.status === 404) msg = 'Repo non trovato';
-      if (resp.status === 422) msg = 'File troppo grande o SHA non valido';
-      return { ok: false, error: msg };
-    } catch (e) {
-      return { ok: false, error: 'Errore rete: ' + e.message };
+        if (resp.ok) return { ok: true };
+
+        // 409 Conflict → rileggi SHA e riprova
+        if (resp.status === 409 && tentativo < 2) {
+          if (DEBUG) console.log(`🔄 Retry ${tentativo + 1}/3 per ${dateStr} (409 Conflict)`);
+          try {
+            const shaResp = await fetch(apiUrl + `?ref=${GITHUB_BRANCH}&t=${Date.now()}`, {
+              headers: {
+                'Authorization': `token ${pat}`,
+                'Accept': 'application/vnd.github+json',
+              },
+            });
+            if (shaResp.ok) {
+              const shaData = await shaResp.json();
+              sha = shaData.sha;
+            }
+          } catch (e) {}
+          await new Promise(r => setTimeout(r, 1000));
+          continue;
+        }
+
+        const err = await resp.json().catch(() => ({}));
+        let msg = err.message || `HTTP ${resp.status}`;
+        if (resp.status === 401) msg = 'PAT non valido o scaduto';
+        if (resp.status === 403) msg = 'Permessi insufficienti';
+        if (resp.status === 404) msg = 'Repo non trovato';
+        if (resp.status === 409) msg = 'Conflitto SHA (dopo 3 tentativi)';
+        if (resp.status === 422) msg = 'File troppo grande o SHA non valido';
+        return { ok: false, error: msg };
+      } catch (e) {
+        if (tentativo === 2) {
+          return { ok: false, error: 'Errore rete: ' + e.message };
+        }
+        await new Promise(r => setTimeout(r, 1000));
+      }
     }
+
+    return { ok: false, error: 'Troppi tentativi falliti' };
   }
 
   // ============================================================
@@ -385,7 +410,6 @@
   // ============================================================
 
   window.PerformanceDB = {
-    // Info
     isWriter,
     getCurrentUser,
     toDateStr,
@@ -394,19 +418,13 @@
     GITHUB_USER,
     GITHUB_REPO,
     GITHUB_BRANCH,
-
-    // Lettura
     leggiGiorno,
     leggiIntervallo,
     listaGiorniDisponibili,
-
-    // Scrittura
     salvaGiorno,
-
-    // Cache
     clearCache,
   };
 
-  console.log('✅ PerformanceDB caricato - DB GitHub in ' + DB_DIR);
+  console.log('✅ PerformanceDB v2 caricato - DB GitHub in ' + DB_DIR + ' + retry su 409');
 
 })();

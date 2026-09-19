@@ -1,10 +1,12 @@
 // ============================================================
-// performance.js - Modulo Storico Performance (v3 - DB GitHub)
+// performance.js - Modulo Storico Performance (v4 - DB GitHub)
 // - Salva TUTTE le giocate di TUTTE le famiglie
 // - Scrive su GitHub (solo admin) + localStorage locale
 // - Upload debounced + manuale + on beforeunload
 // - Tabella matrice Campionato × Giocata con filtri ed export CSV
-// - ⭐ NUOVO: pulsante "Importa partite giocate" per recuperare storico
+// - ⭐ Pulsante "Importa partite giocate" per recuperare storico
+// - ⭐ FIX v4: gestione localStorage pieno (riduzione progressiva)
+// - ⭐ FIX v4: MAX_LOCAL = 5000 (evita quota exceeded)
 // - Ordinamento campionati: Italiane → Top 5 → Serie B estere
 // ============================================================
 
@@ -15,7 +17,7 @@
 
   const STORAGE_KEY = 'ft_performance_pending';
   const DEBOUNCE_MS = 5 * 60 * 1000;
-  const MAX_LOCAL = 50000;
+  const MAX_LOCAL = 5000; // ⭐ Ridotto da 50000 a 5000 per evitare quota exceeded
 
   // ============================================================
   // ORDINE CAMPIONATI (per tabella)
@@ -41,7 +43,7 @@
   };
 
   // ============================================================
-  // STORAGE LOCALE (buffer + UI)
+  // STORAGE LOCALE (buffer + UI) — con riduzione progressiva
   // ============================================================
 
   const leggiPending = () => {
@@ -56,12 +58,45 @@
   };
 
   const scriviPending = (arr) => {
+    // Helper: prova a salvare una lista
+    const trySave = (list) => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+      return true;
+    };
+
     try {
       const limited = arr.slice(-MAX_LOCAL);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(limited));
+      trySave(limited);
       window.dispatchEvent(new CustomEvent('performance-updated', { detail: limited }));
+      return;
     } catch (e) {
-      console.warn('Errore salvataggio pending performance:', e);
+      // QuotaExceededError? Riduci progressivamente
+      if (e.name === 'QuotaExceededError' || e.code === 22 || /quota/i.test(e.message)) {
+        console.warn('⚠️ localStorage pieno. Riduco la dimensione del buffer...');
+        const sizes = [3000, 2000, 1000, 500, 200, 100, 50];
+        for (const size of sizes) {
+          try {
+            const limited = arr.slice(-size);
+            trySave(limited);
+            console.log(`✅ Buffer ridotto a ${limited.length} snapshot`);
+            window.dispatchEvent(new CustomEvent('performance-updated', { detail: limited }));
+            return;
+          } catch (e2) {
+            // Prova la prossima dimensione
+          }
+        }
+        // Fallback estremo: svuota e salva solo gli ultimi 20
+        try {
+          const minimal = arr.slice(-20);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(minimal));
+          console.warn('⚠️ Buffer di emergenza: solo 20 snapshot in locale');
+          window.dispatchEvent(new CustomEvent('performance-updated', { detail: minimal }));
+        } catch (e3) {
+          console.error('❌ Impossibile salvare anche il buffer minimo:', e3);
+        }
+      } else {
+        console.warn('Errore salvataggio pending performance:', e);
+      }
     }
   };
 
@@ -162,8 +197,7 @@
   };
 
   // ============================================================
-  // ⭐ CALCOLA TUTTE LE GIOCATE DI TUTTE LE FAMIGLIE PER UNA PARTITA
-  // (usato dall'importazione retroattiva delle partite già giocate)
+  // CALCOLA TUTTE LE GIOCATE DI TUTTE LE FAMIGLIE PER UNA PARTITA
   // ============================================================
 
   const calcolaTutteGiocatePerPartita = (match, allMatches) => {
@@ -796,7 +830,6 @@
       setImportandoGiocate(true);
       setMsg({ type: 'info', text: `⏳ Importazione di ${partiteGiocate.length} partite...` });
 
-      // Aspetta un tick per far vedere il messaggio
       await new Promise(r => setTimeout(r, 100));
 
       let importate = 0;
@@ -812,7 +845,6 @@
             salvaSnapshot(match, tutteGiocate);
             importate++;
 
-            // Aggiorna il messaggio ogni 100 partite
             if (i % 100 === 0 && i > 0) {
               setMsg({ type: 'info', text: `⏳ Importazione... ${i}/${partiteGiocate.length}` });
               await new Promise(r => setTimeout(r, 0));
@@ -827,7 +859,6 @@
           text: `✅ Importate ${importate} partite (${errori} errori). Upload su GitHub in corso...`
         });
 
-        // Upload immediato (senza debounce)
         if (window.PerformanceDB && window.PerformanceDB.isWriter()) {
           const r = await flushUpload({ silent: true });
           if (r.ok) {
@@ -908,7 +939,7 @@
           </div>
         </div>
 
-        {/* ⭐ IMPORTA PARTITE GIÀ GIOCATE */}
+        {/* IMPORTA PARTITE GIÀ GIOCATE */}
         {isWriter && partiteGiocateDisponibili > 0 && (
           <div className="card" style={{
             padding: '10px 14px', marginBottom: '12px',
@@ -982,6 +1013,6 @@
     CHAMP_ORDER,
   };
 
-  console.log('✅ Modulo Performance v3 caricato - DB GitHub + matrice Campionato × Giocata + import partite giocate');
+  console.log('✅ Modulo Performance v4 caricato - DB GitHub + matrice Campionato × Giocata + import partite giocate + buffer ridotto');
 
 })();
