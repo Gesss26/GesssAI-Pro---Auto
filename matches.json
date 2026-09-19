@@ -636,12 +636,12 @@
     "giornata": "6",
     "squadra_casa": "VfL Wolfsburg",
     "squadra_ospite": "Darmstadt 98",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "5–1",
+    "gol_casa": "5",
+    "gol_ospite": "1",
     "citta": "Wolfsburg",
     "stadio": "Volkswagen Arena",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "2. Bundesliga",
@@ -650,12 +650,12 @@
     "giornata": "6",
     "squadra_casa": "Greuther Fürth",
     "squadra_ospite": "Magdeburg",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Fürth",
     "stadio": "Sportpark Ronhof Thomas Sommer",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "2. Bundesliga",
@@ -682,7 +682,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Kaiserslautern",
-    "stadio": "Fritz Walter Stadion",
+    "stadio": "Fritz-Walter-Stadion",
     "stato": "Futura"
   },
   {
@@ -710,7 +710,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Dresden",
-    "stadio": "Rudolf-Harbig-Stadion",
+    "stadio": "Rudolf-Harbig Stadion",
     "stato": "Futura"
   },
   {
@@ -738,7 +738,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Bielefeld",
-    "stadio": "",
+    "stadio": "Schüco-Arena",
     "stato": "Futura"
   },
   {
@@ -752,7 +752,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Cottbus",
-    "stadio": "LEAG Energie Stadion",
+    "stadio": "Stadion der Freundschaft",
     "stato": "Futura"
   },
   {
@@ -8073,8 +8073,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Belo Horizonte",
-    "stadio": "MRV Arena",
+    "citta": "Bello Harisanta",
+    "stadio": "Arena MRV",
     "stato": "Futura"
   },
   {
@@ -8087,7 +8087,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Mirassol",
+    "citta": "Mirasol",
     "stadio": "José Maria de Campos Maia",
     "stato": "Futura"
   },
@@ -8102,7 +8102,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Belem",
-    "stadio": "Estadio Evandro Almeida",
+    "stadio": "Mangueirao",
     "stato": "Futura"
   },
   {
@@ -8130,7 +8130,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Sao Paulo",
-    "stadio": "Estadio Do MorumBIS",
+    "stadio": "Morumbi",
     "stato": "Futura"
   },
   {
@@ -8171,8 +8171,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Salvador",
-    "stadio": "Barradao",
+    "citta": "El Salvador",
+    "stadio": "Estadio Manoel Barradas",
     "stato": "Futura"
   },
   {
@@ -9988,12 +9988,12 @@
     "giornata": "4",
     "squadra_casa": "Bayern München",
     "squadra_ospite": "Union Berlin",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "7–0",
+    "gol_casa": "7",
+    "gol_ospite": "0",
     "citta": "Munich",
     "stadio": "Allianz Arena",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Bundesliga",
@@ -15070,12 +15070,12 @@
     "giornata": "8",
     "squadra_casa": "Bristol City",
     "squadra_ospite": "Watford",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Bristol",
     "stadio": "Ashton Gate Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -15115,8 +15115,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Stoke on Trent",
-    "stadio": "Bet365 Stadium",
+    "citta": "Stoke-On-Trent",
+    "stadio": "bet365 Stadium",
     "stato": "Futura"
   },
   {
@@ -15186,7 +15186,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Lincoln",
-    "stadio": "LNER stadium",
+    "stadio": "Sincil Bank",
     "stato": "Futura"
   },
   {
@@ -22518,12 +22518,12 @@
     "giornata": "7",
     "squadra_casa": "Waalwijk",
     "squadra_ospite": "MVV",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "6–1",
+    "gol_casa": "6",
+    "gol_ospite": "1",
     "citta": "Waalwijk",
     "stadio": "Mandemakers Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -22532,12 +22532,12 @@
     "giornata": "7",
     "squadra_casa": "Jong AZ",
     "squadra_ospite": "FC Volendam",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Wijdewormer",
+    "risultato": "4–1",
+    "gol_casa": "4",
+    "gol_ospite": "1",
+    "citta": "Alkmaar",
     "stadio": "AFAS Trainingscomplex",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -22546,12 +22546,12 @@
     "giornata": "7",
     "squadra_casa": "Almere City FC",
     "squadra_ospite": "Heracles",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Almere",
     "stadio": "Yanmar Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -22560,12 +22560,12 @@
     "giornata": "7",
     "squadra_casa": "FC Den Bosch",
     "squadra_ospite": "Helmond Sport",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "'s-Hertogenbosch",
-    "stadio": "De Vliert",
-    "stato": "Futura"
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
+    "citta": "'S-Hertogenbosch",
+    "stadio": "Stadion de Vliert",
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -22574,12 +22574,12 @@
     "giornata": "7",
     "squadra_casa": "FC Eindhoven",
     "squadra_ospite": "FC Emmen",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–1",
+    "gol_casa": "3",
+    "gol_ospite": "1",
     "citta": "Eindhoven",
     "stadio": "Jan Louwers Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -22588,12 +22588,12 @@
     "giornata": "7",
     "squadra_casa": "FC OSS",
     "squadra_ospite": "FC Dordrecht",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Oss",
+    "risultato": "3–0",
+    "gol_casa": "3",
+    "gol_ospite": "0",
+    "citta": "Os",
     "stadio": "Frans Heesen Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -22602,12 +22602,12 @@
     "giornata": "7",
     "squadra_casa": "Jong Ajax",
     "squadra_ospite": "Roda",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Ouder-Amstel",
-    "stadio": "Sportcomplex De Toekomst",
-    "stato": "Futura"
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
+    "citta": "Amsterdam",
+    "stadio": "Sportpark De Toekomst",
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -22616,12 +22616,12 @@
     "giornata": "7",
     "squadra_casa": "Jong FC Utrecht",
     "squadra_ospite": "VVV Venlo",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–3",
+    "gol_casa": "1",
+    "gol_ospite": "3",
     "citta": "Utrecht",
     "stadio": "Sportcomplex Zoudenbalch",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -22647,7 +22647,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Doetinchem",
+    "citta": "Dutinghem",
     "stadio": "De Vijverberg",
     "stato": "Futura"
   },
@@ -27698,12 +27698,12 @@
     "giornata": "7",
     "squadra_casa": "Groningen",
     "squadra_ospite": "PEC Zwolle",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–0",
+    "gol_casa": "3",
+    "gol_ospite": "0",
     "citta": "Groningen",
-    "stadio": "Euroborg",
-    "stato": "Futura"
+    "stadio": "Hitachi Capital Mobility Stadion",
+    "stato": "Giocata"
   },
   {
     "campionato": "Eredivisie",
@@ -27715,8 +27715,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Den Haag",
-    "stadio": "WerkTalent Stadion",
+    "citta": "The Hague",
+    "stadio": "Bingoal Stadion",
     "stato": "Futura"
   },
   {
@@ -27730,7 +27730,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Rotterdam",
-    "stadio": "Sparta Stadion Het Kasteel",
+    "stadio": "Sparta Stadium Het Kasteel",
     "stato": "Futura"
   },
   {
@@ -27772,7 +27772,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Rotterdam",
-    "stadio": "De Kuip",
+    "stadio": "Stadion Feijenoord",
     "stato": "Futura"
   },
   {
@@ -27786,7 +27786,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Alkmaar",
-    "stadio": "AFAS Stadion",
+    "stadio": "AFAS Stadion（Alkmaar）",
     "stato": "Futura"
   },
   {
@@ -27814,7 +27814,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Nijmegen",
-    "stadio": "Goffertstadion",
+    "stadio": "Stadion de Goffert",
     "stato": "Futura"
   },
   {
@@ -34782,12 +34782,12 @@
     "giornata": "7",
     "squadra_casa": "Gent",
     "squadra_ospite": "Standard Liege",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Gent",
-    "stadio": "Planet Group Arena",
-    "stato": "Futura"
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
+    "citta": "Ghent",
+    "stadio": "Ghelamco Arena",
+    "stato": "Giocata"
   },
   {
     "campionato": "Jupiler Pro League",
@@ -34799,8 +34799,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Heverlee",
-    "stadio": "Den Dreef",
+    "citta": "Heverley",
+    "stadio": "Den Dreef Stadium",
     "stato": "Futura"
   },
   {
@@ -34828,7 +34828,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Lommel",
-    "stadio": "Soevereinstadion",
+    "stadio": "Soeverein stadion",
     "stato": "Futura"
   },
   {
@@ -34841,7 +34841,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Anderlecht",
+    "citta": "Brussels",
     "stadio": "Lotto Park",
     "stato": "Futura"
   },
@@ -34855,7 +34855,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Deurne",
+    "citta": "Antwerp",
     "stadio": "Bosuilstadion",
     "stato": "Futura"
   },
@@ -34869,8 +34869,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Sint-Truiden",
-    "stadio": "Daio Wasabi Stayen",
+    "citta": "Saint Redon",
+    "stadio": "Stayen",
     "stato": "Futura"
   },
   {
@@ -34883,8 +34883,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Brugge",
-    "stadio": "Jan Breydel Stadion",
+    "citta": "Bruges",
+    "stadio": "Jan Breydel Stadium",
     "stato": "Futura"
   },
   {
@@ -40764,7 +40764,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Chuncheon",
-    "stadio": "Chuncheon Songam Stadium",
+    "stadio": "Chuncheon Songam Sports Town",
     "stato": "Futura"
   },
   {
@@ -40792,7 +40792,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Incheon",
-    "stadio": "Sungui Arena Park",
+    "stadio": "Incheon Football Stadium",
     "stato": "Futura"
   },
   {
@@ -41897,8 +41897,8 @@
     "risultato": "1–0",
     "gol_casa": "1",
     "gol_ospite": "0",
-    "citta": "Sevilla",
-    "stadio": "Estadio de La Cartuja",
+    "citta": "Seville",
+    "stadio": "Benito Villamarín",
     "stato": "Giocata"
   },
   {
@@ -41912,7 +41912,7 @@
     "gol_casa": "1",
     "gol_ospite": "3",
     "citta": "Malaga",
-    "stadio": "Estadio La Rosaleda",
+    "stadio": "La Rosaleda",
     "stato": "Giocata"
   },
   {
@@ -41922,12 +41922,12 @@
     "giornata": "7",
     "squadra_casa": "Espanyol",
     "squadra_ospite": "Elche",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Cornella de Llobregat",
+    "risultato": "1–3",
+    "gol_casa": "1",
+    "gol_ospite": "3",
+    "citta": "Cornella",
     "stadio": "RCDE Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "La Liga",
@@ -41981,7 +41981,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Sevilla",
+    "citta": "Seville",
     "stadio": "Estadio Ramón Sánchez-Pizjuán",
     "stato": "Futura"
   },
@@ -41996,7 +41996,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Getafe",
-    "stadio": "Coliseum",
+    "stadio": "Coliseum Alfonso Pérez",
     "stato": "Futura"
   },
   {
@@ -42010,7 +42010,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Madrid",
-    "stadio": "Metropolitano Stadium",
+    "stadio": "Riyadh Air Metropolitano",
     "stato": "Futura"
   },
   {
@@ -42024,7 +42024,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Villarreal",
-    "stadio": "Estadio de la Ceramica",
+    "stadio": "Estadio de la Cerámica",
     "stato": "Futura"
   },
   {
@@ -42038,7 +42038,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "La Coruna",
-    "stadio": "Estadio Municipal de Riazor",
+    "stadio": "Estadio de Riazor",
     "stato": "Futura"
   },
   {
@@ -42051,7 +42051,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Valencia",
+    "citta": "Valdivia",
     "stadio": "Estadio de Mestalla",
     "stato": "Futura"
   },
@@ -42296,20 +42296,6 @@
   {
     "campionato": "La Liga",
     "data": "18/10/2026",
-    "ora": "15:00",
-    "giornata": "9",
-    "squadra_casa": "Getafe",
-    "squadra_ospite": "Rayo Vallecano",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Getafe",
-    "stadio": "Coliseum",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "La Liga",
-    "data": "18/10/2026",
     "ora": "16:30",
     "giornata": "9",
     "squadra_casa": "Malaga",
@@ -42333,6 +42319,20 @@
     "gol_ospite": "",
     "citta": "Madrid",
     "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "La Liga",
+    "data": "19/10/2026",
+    "ora": "19:00",
+    "giornata": "9",
+    "squadra_casa": "Getafe",
+    "squadra_ospite": "Rayo Vallecano",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Getafe",
+    "stadio": "Coliseum",
     "stato": "Futura"
   },
   {
@@ -51698,7 +51698,7 @@
     "gol_casa": "2",
     "gol_ospite": "1",
     "citta": "La Plata",
-    "stadio": "Estadio Jorge Luis Hirschi",
+    "stadio": "Estadio Ciudad de La Plata",
     "stato": "Giocata"
   },
   {
@@ -51712,7 +51712,7 @@
     "gol_casa": "4",
     "gol_ospite": "3",
     "citta": "Mendoza",
-    "stadio": "Estadio Juan Bautista Gargantini",
+    "stadio": "Estadio Bautista Gargantini",
     "stato": "Giocata"
   },
   {
@@ -51725,7 +51725,7 @@
     "risultato": "1–2",
     "gol_casa": "1",
     "gol_ospite": "2",
-    "citta": "Tucuman",
+    "citta": "San Miguel de Tucuman",
     "stadio": "Estadio Monumental Jose Fierro",
     "stato": "Giocata"
   },
@@ -51740,7 +51740,7 @@
     "gol_casa": "2",
     "gol_ospite": "1",
     "citta": "Cordoba",
-    "stadio": "Estadio Mario Alberto Kempes",
+    "stadio": "Mario Alberto Kempes",
     "stato": "Giocata"
   },
   {
@@ -51754,7 +51754,7 @@
     "gol_casa": "1",
     "gol_ospite": "1",
     "citta": "Junin",
-    "stadio": "Estadio Eva Peron",
+    "stadio": "Estadio Eva Perón",
     "stato": "Giocata"
   },
   {
@@ -51782,7 +51782,7 @@
     "gol_casa": "1",
     "gol_ospite": "1",
     "citta": "Buenos Aires",
-    "stadio": "Estadio Diego Armando Maradona",
+    "stadio": "Diego Armando Maradona",
     "stato": "Giocata"
   },
   {
@@ -51795,7 +51795,7 @@
     "risultato": "1–1",
     "gol_casa": "1",
     "gol_ospite": "1",
-    "citta": "Avellaneda",
+    "citta": "Buenos Aires",
     "stadio": "Libertadores de America",
     "stato": "Giocata"
   },
@@ -51824,7 +51824,7 @@
     "gol_casa": "1",
     "gol_ospite": "1",
     "citta": "Buenos Aires",
-    "stadio": "Estadio Florencio Sola",
+    "stadio": "Florencio Sola",
     "stato": "Giocata"
   },
   {
@@ -51837,7 +51837,7 @@
     "risultato": "0–3",
     "gol_casa": "0",
     "gol_ospite": "3",
-    "citta": "Buenos Aires",
+    "citta": "Flores",
     "stadio": "Estadio Guillermo Laza",
     "stato": "Giocata"
   },
@@ -51862,12 +51862,12 @@
     "giornata": "10",
     "squadra_casa": "Central Cordoba de Santiago",
     "squadra_ospite": "Defensa Y Justicia",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Santiago del Estero",
-    "stadio": "Estadio Unico Madre de Ciudades",
-    "stato": "Futura"
+    "stadio": "Estadio Alfredo Terrera",
+    "stato": "Giocata"
   },
   {
     "campionato": "Liga Profesional Argentina",
@@ -51876,12 +51876,12 @@
     "giornata": "10",
     "squadra_casa": "Racing Club",
     "squadra_ospite": "Sarmiento Junin",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Avellaneda",
-    "stadio": "Estadio Juan Domingo Perón",
-    "stato": "Futura"
+    "risultato": "3–1",
+    "gol_casa": "3",
+    "gol_ospite": "1",
+    "citta": "Buenos Aires",
+    "stadio": "Estadio Presidente Perón",
+    "stato": "Giocata"
   },
   {
     "campionato": "Liga Profesional Argentina",
@@ -53378,7 +53378,7 @@
     "gol_casa": "0",
     "gol_ospite": "2",
     "citta": "Toulouse",
-    "stadio": "Stadium de Toulouse",
+    "stadio": "Stadium Municipal",
     "stato": "Giocata"
   },
   {
@@ -53406,7 +53406,7 @@
     "gol_casa": "2",
     "gol_ospite": "2",
     "citta": "Le Mans",
-    "stadio": "Stade Marie-Marvingt",
+    "stadio": "MMArena",
     "stato": "Giocata"
   },
   {
@@ -53420,7 +53420,7 @@
     "gol_casa": "0",
     "gol_ospite": "2",
     "citta": "Angers",
-    "stadio": "Stade Raymond-Kopa",
+    "stadio": "Stade Raymond Kopa",
     "stato": "Giocata"
   },
   {
@@ -53434,7 +53434,7 @@
     "gol_casa": "0",
     "gol_ospite": "1",
     "citta": "Le Havre",
-    "stadio": "Stade Oceane",
+    "stadio": "Stade Océane",
     "stato": "Giocata"
   },
   {
@@ -53462,7 +53462,7 @@
     "gol_casa": "2",
     "gol_ospite": "2",
     "citta": "Lille",
-    "stadio": "Stade Pierre-Mauroy",
+    "stadio": "Decathlon Arena - Stade Pierre Mauroy",
     "stato": "Giocata"
   },
   {
@@ -53490,7 +53490,7 @@
     "gol_casa": "1",
     "gol_ospite": "1",
     "citta": "Lyon",
-    "stadio": "Parc Olympique Lyonnais",
+    "stadio": "Groupama Stadium",
     "stato": "Giocata"
   },
   {
@@ -53504,7 +53504,7 @@
     "gol_casa": "1",
     "gol_ospite": "2",
     "citta": "Lorient",
-    "stadio": "Stade du Moustoir",
+    "stadio": "Stade Yves Allainmat-Le Moustoir",
     "stato": "Giocata"
   },
   {
@@ -53518,7 +53518,7 @@
     "gol_casa": "2",
     "gol_ospite": "2",
     "citta": "Brest",
-    "stadio": "Stade Francis-Le Ble",
+    "stadio": "Stade Francis-Le-Blé",
     "stato": "Giocata"
   },
   {
@@ -53545,7 +53545,7 @@
     "risultato": "3–0",
     "gol_casa": "3",
     "gol_ospite": "0",
-    "citta": "Paris",
+    "citta": "Isilemulino",
     "stadio": "Stade Jean Bouin",
     "stato": "Giocata"
   },
@@ -53588,7 +53588,7 @@
     "gol_casa": "0",
     "gol_ospite": "1",
     "citta": "Toulouse",
-    "stadio": "Stadium de Toulouse",
+    "stadio": "Stadium Municipal",
     "stato": "Giocata"
   },
   {
@@ -53700,7 +53700,7 @@
     "gol_casa": "2",
     "gol_ospite": "3",
     "citta": "Marseille",
-    "stadio": "Orange Vélodrome",
+    "stadio": "CEPAC Vélodrome",
     "stato": "Giocata"
   },
   {
@@ -53836,12 +53836,12 @@
     "giornata": "5",
     "squadra_casa": "Monaco",
     "squadra_ospite": "Lens",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Monaco",
     "stadio": "Stade Louis II",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Ligue 1",
@@ -54209,36 +54209,50 @@
   },
   {
     "campionato": "Ligue 1",
-    "data": "24/10/2026",
-    "ora": "15:00",
+    "data": "23/10/2026",
+    "ora": "18:45",
     "giornata": "8",
-    "squadra_casa": "Angers",
-    "squadra_ospite": "Lorient",
+    "squadra_casa": "Brest",
+    "squadra_ospite": "Nice",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Angers",
-    "stadio": "Stade Raymond-Kopa",
+    "citta": "Brest",
+    "stadio": "Stade Francis-Le-Blé",
     "stato": "Futura"
   },
   {
     "campionato": "Ligue 1",
     "data": "24/10/2026",
-    "ora": "15:00",
+    "ora": "15:15",
     "giornata": "8",
-    "squadra_casa": "Marseille",
-    "squadra_ospite": "Le Havre",
+    "squadra_casa": "Toulouse",
+    "squadra_ospite": "Estac Troyes",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Marseille",
-    "stadio": "",
+    "citta": "Toulouse",
+    "stadio": "Stadium Municipal",
     "stato": "Futura"
   },
   {
     "campionato": "Ligue 1",
     "data": "24/10/2026",
-    "ora": "15:00",
+    "ora": "18:45",
+    "giornata": "8",
+    "squadra_casa": "Lens",
+    "squadra_ospite": "Paris FC",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Lens",
+    "stadio": "Stade Bollaert-Delelis",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Ligue 1",
+    "data": "25/10/2026",
+    "ora": "14:00",
     "giornata": "8",
     "squadra_casa": "Monaco",
     "squadra_ospite": "Lille",
@@ -54251,8 +54265,36 @@
   },
   {
     "campionato": "Ligue 1",
-    "data": "24/10/2026",
-    "ora": "15:00",
+    "data": "25/10/2026",
+    "ora": "16:15",
+    "giornata": "8",
+    "squadra_casa": "Angers",
+    "squadra_ospite": "Lorient",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Angers",
+    "stadio": "Stade Raymond-Kopa",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Ligue 1",
+    "data": "25/10/2026",
+    "ora": "16:15",
+    "giornata": "8",
+    "squadra_casa": "Marseille",
+    "squadra_ospite": "Le Havre",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Marseille",
+    "stadio": "Orange Vélodrome",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Ligue 1",
+    "data": "25/10/2026",
+    "ora": "16:15",
     "giornata": "8",
     "squadra_casa": "Rennes",
     "squadra_ospite": "Strasbourg",
@@ -54265,36 +54307,8 @@
   },
   {
     "campionato": "Ligue 1",
-    "data": "24/10/2026",
-    "ora": "15:00",
-    "giornata": "8",
-    "squadra_casa": "Toulouse",
-    "squadra_ospite": "Estac Troyes",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Toulouse",
-    "stadio": "Stadium de Toulouse",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Ligue 1",
-    "data": "24/10/2026",
-    "ora": "15:00",
-    "giornata": "8",
-    "squadra_casa": "Brest",
-    "squadra_ospite": "Nice",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Brest",
-    "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Ligue 1",
-    "data": "24/10/2026",
-    "ora": "15:00",
+    "data": "25/10/2026",
+    "ora": "16:15",
     "giornata": "8",
     "squadra_casa": "Auxerre",
     "squadra_ospite": "Le Mans",
@@ -54302,21 +54316,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Auxerre",
-    "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Ligue 1",
-    "data": "24/10/2026",
-    "ora": "15:00",
-    "giornata": "8",
-    "squadra_casa": "Lens",
-    "squadra_ospite": "Paris FC",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Lens",
-    "stadio": "Stade Bollaert-Delelis",
+    "stadio": "Stade de l'Abbé-Deschamps",
     "stato": "Futura"
   },
   {
@@ -54335,50 +54335,36 @@
   },
   {
     "campionato": "Ligue 1",
-    "data": "31/10/2026",
-    "ora": "16:00",
+    "data": "30/10/2026",
+    "ora": "18:00",
+    "giornata": "9",
+    "squadra_casa": "Le Havre",
+    "squadra_ospite": "Paris Saint Germain",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Le Havre",
+    "stadio": "Stade Océane",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Ligue 1",
+    "data": "30/10/2026",
+    "ora": "20:05",
     "giornata": "9",
     "squadra_casa": "Lille",
     "squadra_ospite": "Lens",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Villeneuve d'Ascq",
+    "citta": "Lille",
     "stadio": "Stade Pierre-Mauroy",
     "stato": "Futura"
   },
   {
     "campionato": "Ligue 1",
     "data": "31/10/2026",
-    "ora": "16:00",
-    "giornata": "9",
-    "squadra_casa": "Lyon",
-    "squadra_ospite": "Angers",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Lyon",
-    "stadio": "Parc Olympique Lyonnais",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Ligue 1",
-    "data": "31/10/2026",
-    "ora": "16:00",
-    "giornata": "9",
-    "squadra_casa": "Marseille",
-    "squadra_ospite": "Toulouse",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Marseille",
-    "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Ligue 1",
-    "data": "31/10/2026",
-    "ora": "16:00",
+    "ora": "16:15",
     "giornata": "9",
     "squadra_casa": "Nice",
     "squadra_ospite": "Rennes",
@@ -54392,21 +54378,21 @@
   {
     "campionato": "Ligue 1",
     "data": "31/10/2026",
-    "ora": "16:00",
+    "ora": "19:45",
     "giornata": "9",
-    "squadra_casa": "Strasbourg",
-    "squadra_ospite": "Auxerre",
+    "squadra_casa": "Lyon",
+    "squadra_ospite": "Angers",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Strasbourg",
-    "stadio": "Stade de la Meinau",
+    "citta": "Lyon",
+    "stadio": "Groupama Stadium",
     "stato": "Futura"
   },
   {
     "campionato": "Ligue 1",
     "data": "31/10/2026",
-    "ora": "16:00",
+    "ora": "19:45",
     "giornata": "9",
     "squadra_casa": "Lorient",
     "squadra_ospite": "Brest",
@@ -54420,7 +54406,7 @@
   {
     "campionato": "Ligue 1",
     "data": "31/10/2026",
-    "ora": "16:00",
+    "ora": "19:45",
     "giornata": "9",
     "squadra_casa": "Estac Troyes",
     "squadra_ospite": "Le Mans",
@@ -54428,55 +54414,83 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Troyes",
-    "stadio": "",
+    "stadio": "Stade de l'Aube",
     "stato": "Futura"
   },
   {
     "campionato": "Ligue 1",
-    "data": "31/10/2026",
-    "ora": "16:00",
+    "data": "01/11/2026",
+    "ora": "14:00",
     "giornata": "9",
-    "squadra_casa": "Le Havre",
-    "squadra_ospite": "Paris Saint Germain",
+    "squadra_casa": "Strasbourg",
+    "squadra_ospite": "Auxerre",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Le Havre",
-    "stadio": "",
+    "citta": "Strasbourg",
+    "stadio": "Stade de la Meinau",
     "stato": "Futura"
   },
   {
     "campionato": "Ligue 1",
-    "data": "31/10/2026",
-    "ora": "16:00",
+    "data": "01/11/2026",
+    "ora": "16:15",
     "giornata": "9",
     "squadra_casa": "Paris FC",
     "squadra_ospite": "Monaco",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Paris",
+    "citta": "Isilemulino",
     "stadio": "Stade Jean Bouin",
     "stato": "Futura"
   },
   {
     "campionato": "Ligue 1",
-    "data": "07/11/2026",
-    "ora": "16:00",
-    "giornata": "10",
-    "squadra_casa": "Angers",
-    "squadra_ospite": "Nice",
+    "data": "01/11/2026",
+    "ora": "19:45",
+    "giornata": "9",
+    "squadra_casa": "Marseille",
+    "squadra_ospite": "Toulouse",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Angers",
-    "stadio": "Stade Raymond-Kopa",
+    "citta": "Marseille",
+    "stadio": "Orange Vélodrome",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Ligue 1",
+    "data": "06/11/2026",
+    "ora": "19:45",
+    "giornata": "10",
+    "squadra_casa": "Toulouse",
+    "squadra_ospite": "Strasbourg",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Toulouse",
+    "stadio": "Stadium Municipal",
     "stato": "Futura"
   },
   {
     "campionato": "Ligue 1",
     "data": "07/11/2026",
-    "ora": "16:00",
+    "ora": "16:15",
+    "giornata": "10",
+    "squadra_casa": "Auxerre",
+    "squadra_ospite": "Paris FC",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Auxerre",
+    "stadio": "Stade de l'Abbé-Deschamps",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Ligue 1",
+    "data": "07/11/2026",
+    "ora": "19:45",
     "giornata": "10",
     "squadra_casa": "Paris Saint Germain",
     "squadra_ospite": "Estac Troyes",
@@ -54489,8 +54503,8 @@
   },
   {
     "campionato": "Ligue 1",
-    "data": "07/11/2026",
-    "ora": "16:00",
+    "data": "08/11/2026",
+    "ora": "14:00",
     "giornata": "10",
     "squadra_casa": "Rennes",
     "squadra_ospite": "Lille",
@@ -54503,22 +54517,22 @@
   },
   {
     "campionato": "Ligue 1",
-    "data": "07/11/2026",
-    "ora": "16:00",
+    "data": "08/11/2026",
+    "ora": "16:15",
     "giornata": "10",
-    "squadra_casa": "Toulouse",
-    "squadra_ospite": "Strasbourg",
+    "squadra_casa": "Angers",
+    "squadra_ospite": "Nice",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Toulouse",
-    "stadio": "Stadium de Toulouse",
+    "citta": "Angers",
+    "stadio": "Stade Raymond-Kopa",
     "stato": "Futura"
   },
   {
     "campionato": "Ligue 1",
-    "data": "07/11/2026",
-    "ora": "16:00",
+    "data": "08/11/2026",
+    "ora": "16:15",
     "giornata": "10",
     "squadra_casa": "Brest",
     "squadra_ospite": "Lyon",
@@ -54526,27 +54540,13 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Brest",
-    "stadio": "",
+    "stadio": "Stade Francis-Le-Blé",
     "stato": "Futura"
   },
   {
     "campionato": "Ligue 1",
-    "data": "07/11/2026",
-    "ora": "16:00",
-    "giornata": "10",
-    "squadra_casa": "Auxerre",
-    "squadra_ospite": "Paris FC",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Auxerre",
-    "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Ligue 1",
-    "data": "07/11/2026",
-    "ora": "16:00",
+    "data": "08/11/2026",
+    "ora": "16:15",
     "giornata": "10",
     "squadra_casa": "Le Havre",
     "squadra_ospite": "Lorient",
@@ -54554,13 +54554,13 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Havre",
-    "stadio": "",
+    "stadio": "Stade Océane",
     "stato": "Futura"
   },
   {
     "campionato": "Ligue 1",
-    "data": "07/11/2026",
-    "ora": "16:00",
+    "data": "08/11/2026",
+    "ora": "16:15",
     "giornata": "10",
     "squadra_casa": "Le Mans",
     "squadra_ospite": "Monaco",
@@ -54568,12 +54568,12 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Mans",
-    "stadio": "Stade Marie-Marvingt",
+    "stadio": "MMArena",
     "stato": "Futura"
   },
   {
     "campionato": "Ligue 1",
-    "data": "07/11/2026",
+    "data": "08/11/2026",
     "ora": "19:45",
     "giornata": "10",
     "squadra_casa": "Lens",
@@ -54587,36 +54587,22 @@
   },
   {
     "campionato": "Ligue 1",
-    "data": "21/11/2026",
-    "ora": "16:00",
+    "data": "20/11/2026",
+    "ora": "19:45",
     "giornata": "11",
-    "squadra_casa": "Lille",
-    "squadra_ospite": "Lyon",
+    "squadra_casa": "Estac Troyes",
+    "squadra_ospite": "Le Havre",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Villeneuve d'Ascq",
-    "stadio": "Stade Pierre-Mauroy",
+    "citta": "Troyes",
+    "stadio": "Stade de l'Aube",
     "stato": "Futura"
   },
   {
     "campionato": "Ligue 1",
     "data": "21/11/2026",
-    "ora": "16:00",
-    "giornata": "11",
-    "squadra_casa": "Marseille",
-    "squadra_ospite": "Le Mans",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Marseille",
-    "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Ligue 1",
-    "data": "21/11/2026",
-    "ora": "16:00",
+    "ora": "16:15",
     "giornata": "11",
     "squadra_casa": "Nice",
     "squadra_ospite": "Paris Saint Germain",
@@ -54630,7 +54616,21 @@
   {
     "campionato": "Ligue 1",
     "data": "21/11/2026",
-    "ora": "16:00",
+    "ora": "19:45",
+    "giornata": "11",
+    "squadra_casa": "Lille",
+    "squadra_ospite": "Lyon",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Lille",
+    "stadio": "Stade Pierre-Mauroy",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Ligue 1",
+    "data": "21/11/2026",
+    "ora": "19:45",
     "giornata": "11",
     "squadra_casa": "Monaco",
     "squadra_ospite": "Auxerre",
@@ -54644,7 +54644,7 @@
   {
     "campionato": "Ligue 1",
     "data": "21/11/2026",
-    "ora": "16:00",
+    "ora": "19:45",
     "giornata": "11",
     "squadra_casa": "Strasbourg",
     "squadra_ospite": "Brest",
@@ -54658,49 +54658,7 @@
   {
     "campionato": "Ligue 1",
     "data": "21/11/2026",
-    "ora": "16:00",
-    "giornata": "11",
-    "squadra_casa": "Lorient",
-    "squadra_ospite": "Rennes",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Lorient",
-    "stadio": "Stade du Moustoir",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Ligue 1",
-    "data": "21/11/2026",
-    "ora": "16:00",
-    "giornata": "11",
-    "squadra_casa": "Estac Troyes",
-    "squadra_ospite": "Le Havre",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Troyes",
-    "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Ligue 1",
-    "data": "21/11/2026",
-    "ora": "16:00",
-    "giornata": "11",
-    "squadra_casa": "Paris FC",
-    "squadra_ospite": "Angers",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Paris",
-    "stadio": "Stade Jean Bouin",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Ligue 1",
-    "data": "21/11/2026",
-    "ora": "16:00",
+    "ora": "19:45",
     "giornata": "11",
     "squadra_casa": "Lens",
     "squadra_ospite": "Toulouse",
@@ -54713,8 +54671,64 @@
   },
   {
     "campionato": "Ligue 1",
+    "data": "22/11/2026",
+    "ora": "14:00",
+    "giornata": "11",
+    "squadra_casa": "Paris FC",
+    "squadra_ospite": "Angers",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Isilemulino",
+    "stadio": "Stade Jean Bouin",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Ligue 1",
+    "data": "22/11/2026",
+    "ora": "16:15",
+    "giornata": "11",
+    "squadra_casa": "Lorient",
+    "squadra_ospite": "Rennes",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Lorient",
+    "stadio": "Stade du Moustoir",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Ligue 1",
+    "data": "22/11/2026",
+    "ora": "19:45",
+    "giornata": "11",
+    "squadra_casa": "Marseille",
+    "squadra_ospite": "Le Mans",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Marseille",
+    "stadio": "Orange Vélodrome",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Ligue 1",
+    "data": "27/11/2026",
+    "ora": "19:45",
+    "giornata": "12",
+    "squadra_casa": "Brest",
+    "squadra_ospite": "Paris FC",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Brest",
+    "stadio": "Stade Francis-Le-Blé",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Ligue 1",
     "data": "28/11/2026",
-    "ora": "16:00",
+    "ora": "16:15",
     "giornata": "12",
     "squadra_casa": "Angers",
     "squadra_ospite": "Lens",
@@ -54728,21 +54742,7 @@
   {
     "campionato": "Ligue 1",
     "data": "28/11/2026",
-    "ora": "16:00",
-    "giornata": "12",
-    "squadra_casa": "Lyon",
-    "squadra_ospite": "Monaco",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Lyon",
-    "stadio": "Parc Olympique Lyonnais",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Ligue 1",
-    "data": "28/11/2026",
-    "ora": "16:00",
+    "ora": "19:45",
     "giornata": "12",
     "squadra_casa": "Nice",
     "squadra_ospite": "Estac Troyes",
@@ -54756,7 +54756,7 @@
   {
     "campionato": "Ligue 1",
     "data": "28/11/2026",
-    "ora": "16:00",
+    "ora": "19:45",
     "giornata": "12",
     "squadra_casa": "Paris Saint Germain",
     "squadra_ospite": "Lorient",
@@ -54770,49 +54770,7 @@
   {
     "campionato": "Ligue 1",
     "data": "28/11/2026",
-    "ora": "16:00",
-    "giornata": "12",
-    "squadra_casa": "Toulouse",
-    "squadra_ospite": "Rennes",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Toulouse",
-    "stadio": "Stadium de Toulouse",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Ligue 1",
-    "data": "28/11/2026",
-    "ora": "16:00",
-    "giornata": "12",
-    "squadra_casa": "Brest",
-    "squadra_ospite": "Paris FC",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Brest",
-    "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Ligue 1",
-    "data": "28/11/2026",
-    "ora": "16:00",
-    "giornata": "12",
-    "squadra_casa": "Auxerre",
-    "squadra_ospite": "Marseille",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Auxerre",
-    "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Ligue 1",
-    "data": "28/11/2026",
-    "ora": "16:00",
+    "ora": "19:45",
     "giornata": "12",
     "squadra_casa": "Le Havre",
     "squadra_ospite": "Strasbourg",
@@ -54820,13 +54778,13 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Havre",
-    "stadio": "",
+    "stadio": "Stade Océane",
     "stato": "Futura"
   },
   {
     "campionato": "Ligue 1",
     "data": "28/11/2026",
-    "ora": "16:00",
+    "ora": "19:45",
     "giornata": "12",
     "squadra_casa": "Le Mans",
     "squadra_ospite": "Lille",
@@ -54834,7 +54792,49 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Mans",
-    "stadio": "Stade Marie-Marvingt",
+    "stadio": "MMArena",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Ligue 1",
+    "data": "29/11/2026",
+    "ora": "14:00",
+    "giornata": "12",
+    "squadra_casa": "Auxerre",
+    "squadra_ospite": "Marseille",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Auxerre",
+    "stadio": "Stade de l'Abbé-Deschamps",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Ligue 1",
+    "data": "29/11/2026",
+    "ora": "16:15",
+    "giornata": "12",
+    "squadra_casa": "Toulouse",
+    "squadra_ospite": "Rennes",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Toulouse",
+    "stadio": "Stadium Municipal",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Ligue 1",
+    "data": "29/11/2026",
+    "ora": "19:45",
+    "giornata": "12",
+    "squadra_casa": "Lyon",
+    "squadra_ospite": "Monaco",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Lyon",
+    "stadio": "Groupama Stadium",
     "stato": "Futura"
   },
   {
@@ -54847,7 +54847,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Villeneuve d'Ascq",
+    "citta": "Lille",
     "stadio": "Stade Pierre-Mauroy",
     "stato": "Futura"
   },
@@ -54862,7 +54862,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Marseille",
-    "stadio": "",
+    "stadio": "Orange Vélodrome",
     "stato": "Futura"
   },
   {
@@ -54918,7 +54918,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Toulouse",
-    "stadio": "Stadium de Toulouse",
+    "stadio": "Stadium Municipal",
     "stato": "Futura"
   },
   {
@@ -54932,7 +54932,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Troyes",
-    "stadio": "",
+    "stadio": "Stade de l'Aube",
     "stato": "Futura"
   },
   {
@@ -54945,7 +54945,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Paris",
+    "citta": "Isilemulino",
     "stadio": "Stade Jean Bouin",
     "stato": "Futura"
   },
@@ -55044,7 +55044,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Brest",
-    "stadio": "",
+    "stadio": "Stade Francis-Le-Blé",
     "stato": "Futura"
   },
   {
@@ -55058,7 +55058,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Auxerre",
-    "stadio": "",
+    "stadio": "Stade de l'Abbé-Deschamps",
     "stato": "Futura"
   },
   {
@@ -55072,7 +55072,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Havre",
-    "stadio": "",
+    "stadio": "Stade Océane",
     "stato": "Futura"
   },
   {
@@ -55099,7 +55099,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Villeneuve d'Ascq",
+    "citta": "Lille",
     "stadio": "Stade Pierre-Mauroy",
     "stato": "Futura"
   },
@@ -55128,7 +55128,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Toulouse",
-    "stadio": "Stadium de Toulouse",
+    "stadio": "Stadium Municipal",
     "stato": "Futura"
   },
   {
@@ -55156,7 +55156,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Brest",
-    "stadio": "",
+    "stadio": "Stade Francis-Le-Blé",
     "stato": "Futura"
   },
   {
@@ -55170,7 +55170,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Troyes",
-    "stadio": "",
+    "stadio": "Stade de l'Aube",
     "stato": "Futura"
   },
   {
@@ -55183,7 +55183,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Paris",
+    "citta": "Isilemulino",
     "stadio": "Stade Jean Bouin",
     "stato": "Futura"
   },
@@ -55198,7 +55198,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Mans",
-    "stadio": "Stade Marie-Marvingt",
+    "stadio": "MMArena",
     "stato": "Futura"
   },
   {
@@ -55240,7 +55240,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Lyon",
-    "stadio": "Parc Olympique Lyonnais",
+    "stadio": "Groupama Stadium",
     "stato": "Futura"
   },
   {
@@ -55254,7 +55254,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Marseille",
-    "stadio": "",
+    "stadio": "Orange Vélodrome",
     "stato": "Futura"
   },
   {
@@ -55324,7 +55324,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Auxerre",
-    "stadio": "",
+    "stadio": "Stade de l'Abbé-Deschamps",
     "stato": "Futura"
   },
   {
@@ -55337,7 +55337,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Paris",
+    "citta": "Isilemulino",
     "stadio": "Stade Jean Bouin",
     "stato": "Futura"
   },
@@ -55351,7 +55351,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Villeneuve d'Ascq",
+    "citta": "Lille",
     "stadio": "Stade Pierre-Mauroy",
     "stato": "Futura"
   },
@@ -55394,7 +55394,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Toulouse",
-    "stadio": "Stadium de Toulouse",
+    "stadio": "Stadium Municipal",
     "stato": "Futura"
   },
   {
@@ -55422,7 +55422,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Troyes",
-    "stadio": "",
+    "stadio": "Stade de l'Aube",
     "stato": "Futura"
   },
   {
@@ -55436,7 +55436,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Havre",
-    "stadio": "",
+    "stadio": "Stade Océane",
     "stato": "Futura"
   },
   {
@@ -55464,7 +55464,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Mans",
-    "stadio": "Stade Marie-Marvingt",
+    "stadio": "MMArena",
     "stato": "Futura"
   },
   {
@@ -55492,7 +55492,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Lyon",
-    "stadio": "Parc Olympique Lyonnais",
+    "stadio": "Groupama Stadium",
     "stato": "Futura"
   },
   {
@@ -55506,7 +55506,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Marseille",
-    "stadio": "",
+    "stadio": "Orange Vélodrome",
     "stato": "Futura"
   },
   {
@@ -55548,7 +55548,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Toulouse",
-    "stadio": "Stadium de Toulouse",
+    "stadio": "Stadium Municipal",
     "stato": "Futura"
   },
   {
@@ -55562,7 +55562,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Brest",
-    "stadio": "",
+    "stadio": "Stade Francis-Le-Blé",
     "stato": "Futura"
   },
   {
@@ -55575,7 +55575,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Paris",
+    "citta": "Isilemulino",
     "stadio": "Stade Jean Bouin",
     "stato": "Futura"
   },
@@ -55590,7 +55590,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Mans",
-    "stadio": "Stade Marie-Marvingt",
+    "stadio": "MMArena",
     "stato": "Futura"
   },
   {
@@ -55660,7 +55660,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Auxerre",
-    "stadio": "",
+    "stadio": "Stade de l'Abbé-Deschamps",
     "stato": "Futura"
   },
   {
@@ -55674,7 +55674,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Troyes",
-    "stadio": "",
+    "stadio": "Stade de l'Aube",
     "stato": "Futura"
   },
   {
@@ -55688,7 +55688,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Havre",
-    "stadio": "",
+    "stadio": "Stade Océane",
     "stato": "Futura"
   },
   {
@@ -55729,7 +55729,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Villeneuve d'Ascq",
+    "citta": "Lille",
     "stadio": "Stade Pierre-Mauroy",
     "stato": "Futura"
   },
@@ -55744,7 +55744,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Lyon",
-    "stadio": "Parc Olympique Lyonnais",
+    "stadio": "Groupama Stadium",
     "stato": "Futura"
   },
   {
@@ -55758,7 +55758,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Marseille",
-    "stadio": "",
+    "stadio": "Orange Vélodrome",
     "stato": "Futura"
   },
   {
@@ -55772,7 +55772,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Toulouse",
-    "stadio": "Stadium de Toulouse",
+    "stadio": "Stadium Municipal",
     "stato": "Futura"
   },
   {
@@ -55800,7 +55800,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Brest",
-    "stadio": "",
+    "stadio": "Stade Francis-Le-Blé",
     "stato": "Futura"
   },
   {
@@ -55814,7 +55814,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Auxerre",
-    "stadio": "",
+    "stadio": "Stade de l'Abbé-Deschamps",
     "stato": "Futura"
   },
   {
@@ -55827,7 +55827,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Paris",
+    "citta": "Isilemulino",
     "stadio": "Stade Jean Bouin",
     "stato": "Futura"
   },
@@ -55842,7 +55842,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Mans",
-    "stadio": "Stade Marie-Marvingt",
+    "stadio": "MMArena",
     "stato": "Futura"
   },
   {
@@ -55869,7 +55869,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Villeneuve d'Ascq",
+    "citta": "Lille",
     "stadio": "Stade Pierre-Mauroy",
     "stato": "Futura"
   },
@@ -55954,7 +55954,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Havre",
-    "stadio": "",
+    "stadio": "Stade Océane",
     "stato": "Futura"
   },
   {
@@ -55982,7 +55982,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Lyon",
-    "stadio": "Parc Olympique Lyonnais",
+    "stadio": "Groupama Stadium",
     "stato": "Futura"
   },
   {
@@ -55996,7 +55996,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Marseille",
-    "stadio": "",
+    "stadio": "Orange Vélodrome",
     "stato": "Futura"
   },
   {
@@ -56038,7 +56038,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Brest",
-    "stadio": "",
+    "stadio": "Stade Francis-Le-Blé",
     "stato": "Futura"
   },
   {
@@ -56052,7 +56052,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Auxerre",
-    "stadio": "",
+    "stadio": "Stade de l'Abbé-Deschamps",
     "stato": "Futura"
   },
   {
@@ -56066,7 +56066,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Troyes",
-    "stadio": "",
+    "stadio": "Stade de l'Aube",
     "stato": "Futura"
   },
   {
@@ -56080,7 +56080,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Mans",
-    "stadio": "Stade Marie-Marvingt",
+    "stadio": "MMArena",
     "stato": "Futura"
   },
   {
@@ -56121,7 +56121,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Villeneuve d'Ascq",
+    "citta": "Lille",
     "stadio": "Stade Pierre-Mauroy",
     "stato": "Futura"
   },
@@ -56144,13 +56144,13 @@
     "data": "06/03/2027",
     "ora": "16:00",
     "giornata": "23",
-    "squadra_casa": "Rennes",
-    "squadra_ospite": "Paris Saint Germain",
+    "squadra_casa": "Paris Saint Germain",
+    "squadra_ospite": "Rennes",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Rennes",
-    "stadio": "Roazhon Park",
+    "citta": "Paris",
+    "stadio": "Parc des Princes",
     "stato": "Futura"
   },
   {
@@ -56164,7 +56164,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Toulouse",
-    "stadio": "Stadium de Toulouse",
+    "stadio": "Stadium Municipal",
     "stato": "Futura"
   },
   {
@@ -56178,7 +56178,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Troyes",
-    "stadio": "",
+    "stadio": "Stade de l'Aube",
     "stato": "Futura"
   },
   {
@@ -56192,7 +56192,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Havre",
-    "stadio": "",
+    "stadio": "Stade Océane",
     "stato": "Futura"
   },
   {
@@ -56205,7 +56205,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Paris",
+    "citta": "Isilemulino",
     "stadio": "Stade Jean Bouin",
     "stato": "Futura"
   },
@@ -56234,7 +56234,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Lyon",
-    "stadio": "Parc Olympique Lyonnais",
+    "stadio": "Groupama Stadium",
     "stato": "Futura"
   },
   {
@@ -56248,7 +56248,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Marseille",
-    "stadio": "",
+    "stadio": "Orange Vélodrome",
     "stato": "Futura"
   },
   {
@@ -56290,7 +56290,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Brest",
-    "stadio": "",
+    "stadio": "Stade Francis-Le-Blé",
     "stato": "Futura"
   },
   {
@@ -56304,7 +56304,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Auxerre",
-    "stadio": "",
+    "stadio": "Stade de l'Abbé-Deschamps",
     "stato": "Futura"
   },
   {
@@ -56318,7 +56318,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Havre",
-    "stadio": "",
+    "stadio": "Stade Océane",
     "stato": "Futura"
   },
   {
@@ -56331,7 +56331,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Paris",
+    "citta": "Isilemulino",
     "stadio": "Stade Jean Bouin",
     "stato": "Futura"
   },
@@ -56346,7 +56346,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Mans",
-    "stadio": "Stade Marie-Marvingt",
+    "stadio": "MMArena",
     "stato": "Futura"
   },
   {
@@ -56416,7 +56416,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Toulouse",
-    "stadio": "Stadium de Toulouse",
+    "stadio": "Stadium Municipal",
     "stato": "Futura"
   },
   {
@@ -56444,7 +56444,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Troyes",
-    "stadio": "",
+    "stadio": "Stade de l'Aube",
     "stato": "Futura"
   },
   {
@@ -56499,7 +56499,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Villeneuve d'Ascq",
+    "citta": "Lille",
     "stadio": "Stade Pierre-Mauroy",
     "stato": "Futura"
   },
@@ -56542,7 +56542,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Brest",
-    "stadio": "",
+    "stadio": "Stade Francis-Le-Blé",
     "stato": "Futura"
   },
   {
@@ -56556,7 +56556,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Auxerre",
-    "stadio": "",
+    "stadio": "Stade de l'Abbé-Deschamps",
     "stato": "Futura"
   },
   {
@@ -56570,7 +56570,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Havre",
-    "stadio": "",
+    "stadio": "Stade Océane",
     "stato": "Futura"
   },
   {
@@ -56583,7 +56583,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Paris",
+    "citta": "Isilemulino",
     "stadio": "Stade Jean Bouin",
     "stato": "Futura"
   },
@@ -56598,7 +56598,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Mans",
-    "stadio": "Stade Marie-Marvingt",
+    "stadio": "MMArena",
     "stato": "Futura"
   },
   {
@@ -56611,7 +56611,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Villeneuve d'Ascq",
+    "citta": "Lille",
     "stadio": "Stade Pierre-Mauroy",
     "stato": "Futura"
   },
@@ -56626,7 +56626,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Lyon",
-    "stadio": "Parc Olympique Lyonnais",
+    "stadio": "Groupama Stadium",
     "stato": "Futura"
   },
   {
@@ -56640,7 +56640,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Marseille",
-    "stadio": "",
+    "stadio": "Orange Vélodrome",
     "stato": "Futura"
   },
   {
@@ -56710,7 +56710,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Troyes",
-    "stadio": "",
+    "stadio": "Stade de l'Aube",
     "stato": "Futura"
   },
   {
@@ -56724,7 +56724,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Mans",
-    "stadio": "Stade Marie-Marvingt",
+    "stadio": "MMArena",
     "stato": "Futura"
   },
   {
@@ -56794,7 +56794,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Toulouse",
-    "stadio": "Stadium de Toulouse",
+    "stadio": "Stadium Municipal",
     "stato": "Futura"
   },
   {
@@ -56808,7 +56808,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Brest",
-    "stadio": "",
+    "stadio": "Stade Francis-Le-Blé",
     "stato": "Futura"
   },
   {
@@ -56822,7 +56822,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Auxerre",
-    "stadio": "",
+    "stadio": "Stade de l'Abbé-Deschamps",
     "stato": "Futura"
   },
   {
@@ -56836,7 +56836,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Havre",
-    "stadio": "",
+    "stadio": "Stade Océane",
     "stato": "Futura"
   },
   {
@@ -56863,7 +56863,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Villeneuve d'Ascq",
+    "citta": "Lille",
     "stadio": "Stade Pierre-Mauroy",
     "stato": "Futura"
   },
@@ -56878,7 +56878,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Lyon",
-    "stadio": "Parc Olympique Lyonnais",
+    "stadio": "Groupama Stadium",
     "stato": "Futura"
   },
   {
@@ -56892,7 +56892,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Marseille",
-    "stadio": "",
+    "stadio": "Orange Vélodrome",
     "stato": "Futura"
   },
   {
@@ -56948,7 +56948,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Troyes",
-    "stadio": "",
+    "stadio": "Stade de l'Aube",
     "stato": "Futura"
   },
   {
@@ -56961,7 +56961,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Paris",
+    "citta": "Isilemulino",
     "stadio": "Stade Jean Bouin",
     "stato": "Futura"
   },
@@ -56976,7 +56976,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Mans",
-    "stadio": "Stade Marie-Marvingt",
+    "stadio": "MMArena",
     "stato": "Futura"
   },
   {
@@ -57046,7 +57046,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Toulouse",
-    "stadio": "Stadium de Toulouse",
+    "stadio": "Stadium Municipal",
     "stato": "Futura"
   },
   {
@@ -57060,7 +57060,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Auxerre",
-    "stadio": "",
+    "stadio": "Stade de l'Abbé-Deschamps",
     "stato": "Futura"
   },
   {
@@ -57074,7 +57074,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Troyes",
-    "stadio": "",
+    "stadio": "Stade de l'Aube",
     "stato": "Futura"
   },
   {
@@ -57088,7 +57088,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Havre",
-    "stadio": "",
+    "stadio": "Stade Océane",
     "stato": "Futura"
   },
   {
@@ -57172,7 +57172,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Brest",
-    "stadio": "",
+    "stadio": "Stade Francis-Le-Blé",
     "stato": "Futura"
   },
   {
@@ -57185,7 +57185,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Paris",
+    "citta": "Isilemulino",
     "stadio": "Stade Jean Bouin",
     "stato": "Futura"
   },
@@ -57214,7 +57214,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Mans",
-    "stadio": "Stade Marie-Marvingt",
+    "stadio": "MMArena",
     "stato": "Futura"
   },
   {
@@ -57241,7 +57241,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Villeneuve d'Ascq",
+    "citta": "Lille",
     "stadio": "Stade Pierre-Mauroy",
     "stato": "Futura"
   },
@@ -57256,7 +57256,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Lyon",
-    "stadio": "Parc Olympique Lyonnais",
+    "stadio": "Groupama Stadium",
     "stato": "Futura"
   },
   {
@@ -57270,7 +57270,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Marseille",
-    "stadio": "",
+    "stadio": "Orange Vélodrome",
     "stato": "Futura"
   },
   {
@@ -57326,7 +57326,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Toulouse",
-    "stadio": "Stadium de Toulouse",
+    "stadio": "Stadium Municipal",
     "stato": "Futura"
   },
   {
@@ -57340,7 +57340,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Brest",
-    "stadio": "",
+    "stadio": "Stade Francis-Le-Blé",
     "stato": "Futura"
   },
   {
@@ -57354,7 +57354,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Auxerre",
-    "stadio": "",
+    "stadio": "Stade de l'Abbé-Deschamps",
     "stato": "Futura"
   },
   {
@@ -57396,7 +57396,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Toulouse",
-    "stadio": "Stadium de Toulouse",
+    "stadio": "Stadium Municipal",
     "stato": "Futura"
   },
   {
@@ -57424,7 +57424,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Troyes",
-    "stadio": "",
+    "stadio": "Stade de l'Aube",
     "stato": "Futura"
   },
   {
@@ -57438,7 +57438,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Havre",
-    "stadio": "",
+    "stadio": "Stade Océane",
     "stato": "Futura"
   },
   {
@@ -57451,7 +57451,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Paris",
+    "citta": "Isilemulino",
     "stadio": "Stade Jean Bouin",
     "stato": "Futura"
   },
@@ -57480,7 +57480,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Le Mans",
-    "stadio": "Stade Marie-Marvingt",
+    "stadio": "MMArena",
     "stato": "Futura"
   },
   {
@@ -57493,7 +57493,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Villeneuve d'Ascq",
+    "citta": "Lille",
     "stadio": "Stade Pierre-Mauroy",
     "stato": "Futura"
   },
@@ -57508,7 +57508,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Lyon",
-    "stadio": "Parc Olympique Lyonnais",
+    "stadio": "Groupama Stadium",
     "stato": "Futura"
   },
   {
@@ -57522,7 +57522,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Marseille",
-    "stadio": "",
+    "stadio": "Orange Vélodrome",
     "stato": "Futura"
   },
   {
@@ -57592,7 +57592,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Brest",
-    "stadio": "",
+    "stadio": "Stade Francis-Le-Blé",
     "stato": "Futura"
   },
   {
@@ -57606,7 +57606,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Auxerre",
-    "stadio": "",
+    "stadio": "Stade de l'Abbé-Deschamps",
     "stato": "Futura"
   },
   {
@@ -58372,12 +58372,12 @@
     "giornata": "7",
     "squadra_casa": "Reims",
     "squadra_ospite": "Montpellier",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Reims",
     "stadio": "Stade Auguste-Delaune",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Ligue 2",
@@ -58386,12 +58386,12 @@
     "giornata": "7",
     "squadra_casa": "Grenoble",
     "squadra_ospite": "Clermont",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Grenoble",
     "stadio": "Stade des Alpes",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Ligue 2",
@@ -58400,12 +58400,12 @@
     "giornata": "7",
     "squadra_casa": "Laval",
     "squadra_ospite": "Sochaux",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Laval",
-    "stadio": "Stade Francis Le Basser",
-    "stato": "Futura"
+    "stadio": "Stade Francis-Le Basser",
+    "stato": "Giocata"
   },
   {
     "campionato": "Ligue 2",
@@ -58414,12 +58414,12 @@
     "giornata": "7",
     "squadra_casa": "Pau",
     "squadra_ospite": "Dunkerque",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Pau",
     "stadio": "Nouste Camp",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Ligue 2",
@@ -58428,12 +58428,12 @@
     "giornata": "7",
     "squadra_casa": "Rodez",
     "squadra_ospite": "Nancy",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–4",
+    "gol_casa": "3",
+    "gol_ospite": "4",
     "citta": "Rodez",
-    "stadio": "Stade Paul-Lignon",
-    "stato": "Futura"
+    "stadio": "Stade Paul Lignon",
+    "stato": "Giocata"
   },
   {
     "campionato": "Ligue 2",
@@ -58442,12 +58442,12 @@
     "giornata": "7",
     "squadra_casa": "Annecy",
     "squadra_ospite": "Dijon",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Annecy",
-    "stadio": "Parc des Sports",
-    "stato": "Futura"
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
+    "citta": "Avignon",
+    "stadio": "Parc des Sports d’Annecy",
+    "stato": "Giocata"
   },
   {
     "campionato": "Ligue 2",
@@ -58473,8 +58473,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Boulogne-sur-Mer",
-    "stadio": "",
+    "citta": "Boulogne-Sur-Mer",
+    "stadio": "Stade de la Libération",
     "stato": "Futura"
   },
   {
@@ -66930,7 +66930,7 @@
     "gol_casa": "0",
     "gol_ospite": "1",
     "citta": "Columbus",
-    "stadio": "ScottsMiracle-Gro Field",
+    "stadio": "Lower.com Field",
     "stato": "Giocata"
   },
   {
@@ -67014,7 +67014,7 @@
     "gol_casa": "4",
     "gol_ospite": "2",
     "citta": "St. Louis",
-    "stadio": "CITYPARK",
+    "stadio": "Energizer Park",
     "stato": "Giocata"
   },
   {
@@ -67122,12 +67122,12 @@
     "giornata": "26",
     "squadra_casa": "New York City FC",
     "squadra_ospite": "New York Red Bulls",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "New York",
+    "risultato": "0–1",
+    "gol_casa": "0",
+    "gol_ospite": "1",
+    "citta": "Bronx",
     "stadio": "Yankee Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -69600,12 +69600,12 @@
     "giornata": "5",
     "squadra_casa": "Brentford",
     "squadra_ospite": "Chelsea",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–0",
+    "gol_casa": "3",
+    "gol_ospite": "0",
     "citta": "London",
-    "stadio": "Brentford Community Stadium",
-    "stato": "Futura"
+    "stadio": "Gtech Community Stadium",
+    "stato": "Giocata"
   },
   {
     "campionato": "Premier League",
@@ -69631,8 +69631,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Newcastle",
-    "stadio": "St. James' Park",
+    "citta": "Newcastle upon Tyne",
+    "stadio": "St James' Park",
     "stato": "Futura"
   },
   {
@@ -69659,8 +69659,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Brighton",
-    "stadio": "Amex Stadium",
+    "citta": "Falmer",
+    "stadio": "American Express Stadium",
     "stato": "Futura"
   },
   {
@@ -75120,7 +75120,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Funchal",
-    "stadio": "",
+    "stadio": "Estádio da Madeira",
     "stato": "Futura"
   },
   {
@@ -75134,7 +75134,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Barcelos",
-    "stadio": "",
+    "stadio": "Estadio Cidade de Barcelos",
     "stato": "Futura"
   },
   {
@@ -75147,8 +75147,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Alverca do Ribatejo",
-    "stadio": "FC Alverca Sports Complex",
+    "citta": "Alverkaduribajo",
+    "stadio": "Complexo Desportivo FC Alverca",
     "stato": "Futura"
   },
   {
@@ -75162,7 +75162,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Lisbon",
-    "stadio": "",
+    "stadio": "Estádio José Alvalade",
     "stato": "Futura"
   },
   {
@@ -75175,8 +75175,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "",
-    "stadio": "",
+    "citta": "Guimarães",
+    "stadio": "Estádio D. Afonso Henriques",
     "stato": "Futura"
   },
   {
@@ -75190,7 +75190,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Amadora",
-    "stadio": "",
+    "stadio": "Estadio Jose Gomes",
     "stato": "Futura"
   },
   {
@@ -75204,7 +75204,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Ponta Delgada",
-    "stadio": "",
+    "stadio": "Estádio de São Miguel",
     "stato": "Futura"
   },
   {
@@ -75217,8 +75217,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Estoril",
-    "stadio": "Estadio Antonio Coimbra da Mota",
+    "citta": "Cascais",
+    "stadio": "Estádio António Coimbra da Mota",
     "stato": "Futura"
   },
   {
@@ -75232,7 +75232,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Porto",
-    "stadio": "",
+    "stadio": "Estádio do Dragão",
     "stato": "Futura"
   },
   {
@@ -79166,7 +79166,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Paisley",
-    "stadio": "The SMISA Stadium",
+    "stadio": "The SMiSA Stadium",
     "stato": "Futura"
   },
   {
@@ -79208,7 +79208,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Kilmarnock",
-    "stadio": "Rugby Park",
+    "stadio": "The BBSP Stadium Rugby Park",
     "stato": "Futura"
   },
   {
@@ -82186,12 +82186,12 @@
     "giornata": "6",
     "squadra_casa": "Albacete",
     "squadra_ospite": "Cordoba",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Albacete",
-    "stadio": "Estadio Carlos Belmonte",
-    "stato": "Futura"
+    "stadio": "Carlos Belmonte",
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -82204,7 +82204,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "San Sebastian",
-    "stadio": "Estadio Zubieta",
+    "stadio": "Estadio Ciudad Deportiva Zubieta",
     "stato": "Futura"
   },
   {
@@ -82217,7 +82217,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Encamp",
+    "citta": "Andorra",
     "stadio": "Estadi de la FAF",
     "stato": "Futura"
   },
@@ -82232,7 +82232,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Castellon",
-    "stadio": "Estadio Municipal de Castalia",
+    "stadio": "Estadio Municipal Castalia",
     "stato": "Futura"
   },
   {
@@ -82245,8 +82245,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Elda",
-    "stadio": "Estadio Nuevo Pepico Amat",
+    "citta": "Alicante",
+    "stadio": "Nuevo Pepico Amat",
     "stato": "Futura"
   },
   {
@@ -82260,7 +82260,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Cadiz",
-    "stadio": "JP Financial Estadio",
+    "stadio": "Nuevo Mirandilla",
     "stato": "Futura"
   },
   {
@@ -82274,7 +82274,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Sabadell",
-    "stadio": "Estadi de la Nova Creu Alta",
+    "stadio": "Nova Creu Alta",
     "stato": "Futura"
   },
   {
@@ -82301,8 +82301,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Las Palmas",
-    "stadio": "Estadio de Gran Canaria",
+    "citta": "Las Palmas de Gran Canaria",
+    "stadio": "Gran Canaria",
     "stato": "Futura"
   },
   {
@@ -82315,8 +82315,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "",
-    "stadio": "",
+    "citta": "Almeria",
+    "stadio": "UD Almería Stadium",
     "stato": "Futura"
   },
   {
@@ -82330,7 +82330,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Leganes",
-    "stadio": "Estadio Municipal de Butarque",
+    "stadio": "Municipal de Butarque",
     "stato": "Futura"
   },
   {
@@ -88321,8 +88321,8 @@
     "risultato": "1–1",
     "gol_casa": "1",
     "gol_ospite": "1",
-    "citta": "Genoa",
-    "stadio": "Stadio Luigi Ferraris",
+    "citta": "Genova",
+    "stadio": "Luigi Ferraris",
     "stato": "Giocata"
   },
   {
@@ -88364,7 +88364,7 @@
     "gol_casa": "3",
     "gol_ospite": "2",
     "citta": "Lecce",
-    "stadio": "Stadio Via del Mare",
+    "stadio": "Via del Mare",
     "stato": "Giocata"
   },
   {
@@ -88406,7 +88406,7 @@
     "gol_casa": "0",
     "gol_ospite": "2",
     "citta": "Turin",
-    "stadio": "Stadio Olimpico di Torino",
+    "stadio": "Stadio Olimpico Grande Torino",
     "stato": "Giocata"
   },
   {
@@ -88433,7 +88433,7 @@
     "risultato": "5–3",
     "gol_casa": "5",
     "gol_ospite": "3",
-    "citta": "Milan",
+    "citta": "Milano",
     "stadio": "San Siro/Giuseppe Meazza",
     "stato": "Giocata"
   },
@@ -88444,12 +88444,12 @@
     "giornata": "5",
     "squadra_casa": "Monza",
     "squadra_ospite": "Sassuolo",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Monza",
-    "stadio": "",
-    "stato": "Futura"
+    "stadio": "U-Power Stadium",
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie A",
@@ -88818,20 +88818,20 @@
   {
     "campionato": "Serie A",
     "data": "18/10/2026",
-    "ora": "16:30",
+    "ora": "18:45",
     "giornata": "7",
-    "squadra_casa": "Parma",
-    "squadra_ospite": "Torino",
+    "squadra_casa": "Juventus",
+    "squadra_ospite": "Lazio",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Parma",
-    "stadio": "Stadio Ennio Tardini",
+    "citta": "Turin",
+    "stadio": "Allianz Stadium",
     "stato": "Futura"
   },
   {
     "campionato": "Serie A",
-    "data": "18/10/2026",
+    "data": "19/10/2026",
     "ora": "16:30",
     "giornata": "7",
     "squadra_casa": "Monza",
@@ -88845,16 +88845,16 @@
   },
   {
     "campionato": "Serie A",
-    "data": "18/10/2026",
+    "data": "19/10/2026",
     "ora": "18:45",
     "giornata": "7",
-    "squadra_casa": "Juventus",
-    "squadra_ospite": "Lazio",
+    "squadra_casa": "Parma",
+    "squadra_ospite": "Torino",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Turin",
-    "stadio": "Allianz Stadium",
+    "citta": "Parma",
+    "stadio": "Stadio Ennio Tardini",
     "stato": "Futura"
   },
   {
@@ -93764,12 +93764,12 @@
     "giornata": "5",
     "squadra_casa": "Juve Stabia",
     "squadra_ospite": "Cesena",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Castellammare di Stabia",
     "stadio": "Stadio Romeo Menti",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie B",
@@ -93796,7 +93796,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Palermo",
-    "stadio": "Stadio Renzo Barbera",
+    "stadio": "Renzo Barbera",
     "stato": "Futura"
   },
   {
@@ -93824,7 +93824,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Genoa",
-    "stadio": "Stadio Luigi Ferraris",
+    "stadio": "Luigi Ferraris",
     "stato": "Futura"
   },
   {
@@ -93838,7 +93838,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Ascoli Piceno",
-    "stadio": "Stadio Cino e Lillo Del Duca",
+    "stadio": "Cino e Lillo Del Duca",
     "stato": "Futura"
   },
   {
@@ -93852,7 +93852,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Verona",
-    "stadio": "",
+    "stadio": "Marc'Antonio Bentegodi",
     "stato": "Futura"
   },
   {
@@ -93866,7 +93866,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Arezzo",
-    "stadio": "Citta di Arezzo",
+    "stadio": "Stadio Città di Arezzo",
     "stato": "Futura"
   },
   {
@@ -93894,7 +93894,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Modena",
-    "stadio": "Stadio Alberto Braglia",
+    "stadio": "Alberto Braglia",
     "stato": "Futura"
   },
   {
@@ -99297,8 +99297,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "",
-    "stadio": "",
+    "citta": "Zanica",
+    "stadio": "AlbinoLeffe",
     "stato": "Futura"
   },
   {
@@ -99353,8 +99353,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "",
-    "stadio": "",
+    "citta": "Treviso",
+    "stadio": "Stadio Omobono Tenni",
     "stato": "Futura"
   },
   {
@@ -117358,7 +117358,7 @@
     "gol_casa": "1",
     "gol_ospite": "0",
     "citta": "Tianjin",
-    "stadio": "Olympic Sports Center Stadium",
+    "stadio": "TEDA Football Stadium",
     "stato": "Giocata"
   },
   {
@@ -117382,12 +117382,12 @@
     "giornata": "22",
     "squadra_casa": "Hangzhou Greentown",
     "squadra_ospite": "Wuhan Three Towns",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Huizhou",
-    "stadio": "Huizhou Olympic Stadium",
-    "stato": "Futura"
+    "risultato": "4–1",
+    "gol_casa": "4",
+    "gol_ospite": "1",
+    "citta": "Hangzhou",
+    "stadio": "Huanglong Stadium",
+    "stato": "Giocata"
   },
   {
     "campionato": "Super League Grecia",
@@ -118365,7 +118365,7 @@
     "risultato": "0–2",
     "gol_casa": "0",
     "gol_ospite": "2",
-    "citta": "Istanbul",
+    "citta": "Esenyurt",
     "stadio": "Esenyurt Necmi Kadioglu Stadi",
     "stato": "Giocata"
   },
@@ -118394,7 +118394,7 @@
     "gol_casa": "1",
     "gol_ospite": "0",
     "citta": "Konya",
-    "stadio": "Konya Buyuksehir Belediye Stadium",
+    "stadio": "Medas Konya Büyüksehir Belediyesi Stadium",
     "stato": "Giocata"
   },
   {
@@ -118408,7 +118408,7 @@
     "gol_casa": "2",
     "gol_ospite": "2",
     "citta": "Alanya",
-    "stadio": "Alanya Oba Stadium",
+    "stadio": "Bahcesehir Okullari Stadium",
     "stato": "Giocata"
   },
   {
@@ -118422,7 +118422,7 @@
     "gol_casa": "1",
     "gol_ospite": "2",
     "citta": "Ankara",
-    "stadio": "Eryaman Stadium",
+    "stadio": "Eryaman Stadyumu",
     "stato": "Giocata"
   },
   {
@@ -118436,7 +118436,7 @@
     "gol_casa": "1",
     "gol_ospite": "0",
     "citta": "Istanbul",
-    "stadio": "Rams Park",
+    "stadio": "Rams Park Stadyumu",
     "stato": "Giocata"
   },
   {
@@ -118450,7 +118450,7 @@
     "gol_casa": "5",
     "gol_ospite": "0",
     "citta": "Diyarbakır",
-    "stadio": "Diyarbakir Stadium",
+    "stadio": "Şilbe Spor Kompleksi",
     "stato": "Giocata"
   },
   {
@@ -118474,12 +118474,12 @@
     "giornata": "6",
     "squadra_casa": "Kasımpaşa",
     "squadra_ospite": "Konyaspor",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Istanbul",
-    "stadio": "",
-    "stato": "Futura"
+    "stadio": "Recep Tayyip Erdogan Stadium",
+    "stato": "Giocata"
   },
   {
     "campionato": "Süper Lig",
@@ -118806,20 +118806,6 @@
   {
     "campionato": "Süper Lig",
     "data": "18/10/2026",
-    "ora": "12:00",
-    "giornata": "8",
-    "squadra_casa": "Trabzonspor",
-    "squadra_ospite": "Beşiktaş",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Trabzon",
-    "stadio": "Papara Park",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Süper Lig",
-    "data": "18/10/2026",
     "ora": "13:00",
     "giornata": "8",
     "squadra_casa": "Kocaelispor",
@@ -118843,6 +118829,20 @@
     "gol_ospite": "",
     "citta": "Istanbul",
     "stadio": "Basaksehir Fatih Terim Stadium",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Süper Lig",
+    "data": "19/10/2026",
+    "ora": "17:00",
+    "giornata": "8",
+    "squadra_casa": "Trabzonspor",
+    "squadra_ospite": "Beşiktaş",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Trabzon",
+    "stadio": "Papara Park",
     "stato": "Futura"
   },
   {
