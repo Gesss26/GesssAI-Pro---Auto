@@ -1167,12 +1167,37 @@
         else awayLosses++;
       });
 
-      const p1 = totalGames > 0 ? ((homeWins + awayLosses) / totalGames) * 100 : 0;
-      const pX = totalGames > 0 ? ((homeDraws + awayDraws) / totalGames) * 100 : 0;
-      const p2 = totalGames > 0 ? ((homeLosses + awayWins) / totalGames) * 100 : 0;
-      const p1X = totalGames > 0 ? ((homeWins + homeDraws) / totalGames) * 100 : 0;
-      const p12 = totalGames > 0 ? ((homeWins + awayWins) / totalGames) * 100 : 0;
-      const pX2 = totalGames > 0 ? ((homeLosses + awayWins) / totalGames) * 100 : 0;
+            // ========================================================
+      // CALCOLO PERCENTUALI 1 - X - 2 (CORRETTO)
+      // ========================================================
+      // Logica:
+      //   1  = vittoria squadra di CASA     → dalle partite di CASA
+      //   2  = vittoria squadra OSPITE      → dalle partite dell'OSPITE
+      //   X  = pareggio                     → media dei pareggi delle due squadre
+      //   DC = SOMMA delle componenti (1X = p1 + pX, ecc.)
+      // ========================================================
+
+      const homePlayed = homeGames.length;
+      const awayPlayed = awayGames.length;
+
+      // Percentuali squadra di CASA (dalle sue partite)
+      const homeWinPct  = homePlayed > 0 ? (homeWins   / homePlayed) * 100 : 0;
+      const homeDrawPct = homePlayed > 0 ? (homeDraws  / homePlayed) * 100 : 0;
+
+      // Percentuali squadra OSPITE (dalle sue partite)
+      const awayWinPct  = awayPlayed > 0 ? (awayWins   / awayPlayed) * 100 : 0;
+      const awayDrawPct = awayPlayed > 0 ? (awayDraws  / awayPlayed) * 100 : 0;
+
+      // Esiti singoli
+      const p1 = homeWinPct;
+      const p2 = awayWinPct;
+      // Pareggio: media tra i due pareggi (proxy ragionevole)
+      const pX = (homeDrawPct + awayDrawPct) / 2;
+
+      // Doppia Chance = SOMMA delle componenti (cap a 100%)
+      const p1X = Math.min(100, p1 + pX);
+      const p12 = Math.min(100, p1 + p2);
+      const pX2 = Math.min(100, pX + p2);
 
       const allGamesForGoals = [...homeGames, ...awayGames];
       const goalTotals = allGamesForGoals.map(g => g.golCasa + g.golOspite);

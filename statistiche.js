@@ -4,6 +4,7 @@
 // Include sezione GG / NG in MatchDetail (tra Under/Over e Multigol).
 // GG-NG sempre visibile in Riepilogo AI (dopo Under/Over).
 // Etichette MG: 0-2/1-3 = "MG Casa", 1-4/2-5 = "MG Tot".
+// ✅ FIX Doppia Chance: DC = SOMMA delle componenti (non media)
 // ============================================================
 
 (function () {
@@ -21,8 +22,6 @@
     if (label.startsWith('Under ')) return label.replace('.', ',');
 
     if (familyId === 'multigol') {
-      // 0-2 e 1-3 sono calcolati sulla squadra di CASA
-      // 1-4 e 2-5 sono calcolati sul TOTALE partita
       if (label === '0-2' || label === '1-3') return `MG Casa ${label}`;
       if (label === '1-4' || label === '2-5') return `MG Tot ${label}`;
       return `MG ${label}`;
@@ -62,6 +61,20 @@
     }
 
     return label;
+  };
+
+  // ============================================================
+  // ⭐ HELPER: CALCOLO DOPPIA CHANCE (SOMMA DELLE COMPONENTI)
+  // ============================================================
+  const calcDC = (mc, dcCode) => {
+    if (!mc) return 0;
+    const hw = mc.homeWins || 0;
+    const d  = mc.draws || 0;
+    const aw = mc.awayWins || 0;
+    if (dcCode === '1X') return Math.min(100, hw + d);
+    if (dcCode === '12') return Math.min(100, hw + aw);
+    if (dcCode === 'X2') return Math.min(100, d + aw);
+    return 0;
   };
 
   // ============================================================
@@ -236,6 +249,9 @@
       }
     };
 
+    // ============================================================
+    // CALCOLO PCT DA MONTE CARLO - CON FIX DOPPIA CHANCE
+    // ============================================================
     const calcPctFromSim = (familyId, giocata) => {
       const totalSim = mc?.numSimulations || 10000;
 
@@ -249,11 +265,14 @@
         if (giocata === 'X') return mc?.draws || 0;
         if (giocata === '2') return mc?.awayWins || 0;
       }
+
+      // ⭐ FIX DC: SOMMA delle componenti (non media!)
       if (familyId === 'dc') {
-        if (giocata === '1X') return Math.round(((mc?.homeWins || 0) + (mc?.draws || 0)) / 2);
-        if (giocata === '12') return Math.round(((mc?.homeWins || 0) + (mc?.awayWins || 0)) / 2);
-        if (giocata === 'X2') return Math.round(((mc?.draws || 0) + (mc?.awayWins || 0)) / 2);
+        if (giocata === '1X') return calcDC(mc, '1X');
+        if (giocata === '12') return calcDC(mc, '12');
+        if (giocata === 'X2') return calcDC(mc, 'X2');
       }
+
       if (familyId === 'over') {
         if (giocata === 'Over 1.5') return mc?.over15 || 0;
         if (giocata === 'Over 2.5') return mc?.over25 || 0;
@@ -280,12 +299,11 @@
         }
         return Math.round((count / totalSim) * 100);
       }
+
+      // ⭐ FIX DC_UNDER
       if (familyId === 'dc_under') {
         const [dc, up] = giocata.split('+');
-        let dcP = 0;
-        if (dc === '1X') dcP = Math.round(((mc?.homeWins || 0) + (mc?.draws || 0)) / 2);
-        else if (dc === '12') dcP = Math.round(((mc?.homeWins || 0) + (mc?.awayWins || 0)) / 2);
-        else if (dc === 'X2') dcP = Math.round(((mc?.draws || 0) + (mc?.awayWins || 0)) / 2);
+        const dcP = calcDC(mc, dc);
         let uP = 0;
         if (up === 'U1.5') uP = mc?.under15 || 0;
         else if (up === 'U2.5') uP = mc?.under25 || 0;
@@ -293,12 +311,11 @@
         else if (up === 'U4.5') uP = mc?.under45 || 0;
         return Math.round((dcP + uP) / 2);
       }
+
+      // ⭐ FIX DC_OVER
       if (familyId === 'dc_over') {
         const [dc, op] = giocata.split('+');
-        let dcP = 0;
-        if (dc === '1X') dcP = Math.round(((mc?.homeWins || 0) + (mc?.draws || 0)) / 2);
-        else if (dc === '12') dcP = Math.round(((mc?.homeWins || 0) + (mc?.awayWins || 0)) / 2);
-        else if (dc === 'X2') dcP = Math.round(((mc?.draws || 0) + (mc?.awayWins || 0)) / 2);
+        const dcP = calcDC(mc, dc);
         let oP = 0;
         if (op === 'O1.5') oP = mc?.over15 || 0;
         else if (op === 'O2.5') oP = mc?.over25 || 0;
@@ -306,6 +323,7 @@
         else if (op === 'O4.5') oP = mc?.over45 || 0;
         return Math.round((dcP + oP) / 2);
       }
+
       if (familyId === 'mg_casa_ospite') {
         const [p1, p2] = giocata.split('+');
         let count = 0;
@@ -324,12 +342,11 @@
         }
         return Math.round((count / totalSim) * 100);
       }
+
+      // ⭐ FIX DC_MULTIGOL
       if (familyId === 'dc_multigol') {
         const [dc, mg] = giocata.split('+');
-        let dcP = 0;
-        if (dc === '1X') dcP = Math.round(((mc?.homeWins || 0) + (mc?.draws || 0)) / 2);
-        else if (dc === '12') dcP = Math.round(((mc?.homeWins || 0) + (mc?.awayWins || 0)) / 2);
-        else if (dc === 'X2') dcP = Math.round(((mc?.draws || 0) + (mc?.awayWins || 0)) / 2);
+        const dcP = calcDC(mc, dc);
         let countMG = 0;
         for (const [key, c] of Object.entries(mc?.risultati || {})) {
           const [gC, gO] = key.split('-').map(Number);
@@ -399,9 +416,6 @@
       );
     };
 
-    // Prepara lista famiglie da mostrare:
-    // - Le famiglie selezionate (max 3)
-    // - GG-NG sempre presente (inserito dopo "under" o "over" se non già selezionato)
     const famiglieDaMostrare = (() => {
       const ORDINE_PREFERITO = ['gg_ng', 'fisse', 'dc', 'over', 'under', 'multigol', 'dc_over', 'dc_under', 'mg_casa_ospite', 'dc_multigol'];
 
@@ -983,7 +997,6 @@
           ))}
         </div>
 
-        {/* ⭐ SEZIONE GG / NG */}
         {ggngData && (
           <div className="card detail-section">
             <h4>⚽ GG / NG</h4>
@@ -1687,6 +1700,6 @@
   window.Standings = Standings;
   window.TeamMatchesHistory = TeamMatchesHistory;
 
-  console.log('✅ Modulo Statistiche caricato - MG Casa/Tot + sezione GG/NG in MatchDetail');
+  console.log('✅ Modulo Statistiche caricato - DC FIXED (somma componenti) + MG Casa/Tot + GG/NG in MatchDetail');
 
 })();
