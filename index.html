@@ -667,7 +667,6 @@
     // ============================================================
     // CAMPIONATI ESCLUSI (filtro globale)
     // ============================================================
-
     const CAMPIONATI_ESCLUSI = new Set([
       'Liga Profesional Argentina',
       'Brasileirão Serie A',
@@ -684,7 +683,6 @@
     // ============================================================
     // CARICAMENTO DATI
     // ============================================================
-
     let dataLoaded = false;
 
     async function loadScrapedData(forceReload = false) {
@@ -865,7 +863,6 @@
     // ============================================================
     // COSTANTI
     // ============================================================
-
     const THEMES = {
       'Scuro Blu Notte': { bg: '#0f1419', surface: '#1a2028', card: '#232b36', banner: '#2c3642', text: '#e6edf3', textMuted: '#ffff00', accent: '#f39c12', accent2: '#e67e22', border: '#30363d', tabActive: '#f39c12' },
       'Chiaro': { bg: '#f5f7fa', surface: '#ffffff', card: '#ffffff', banner: '#e8ecf1', text: '#1a2028', textMuted: '#000000', accent: '#1976d2', accent2: '#0d47a1', border: '#cfd8dc', tabActive: '#1976d2' },
@@ -898,7 +895,6 @@
     // ============================================================
     // FUNZIONI UTILITÀ
     // ============================================================
-
     const getChampColor = (champName) => {
       if (!champName) return '#95a5a6';
       for (const [key, color] of Object.entries(CHAMPIONSHIP_COLORS)) {
@@ -1008,7 +1004,6 @@
     // ============================================================
     // TEAM LOGO
     // ============================================================
-
     const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
       const [hasError, setHasError] = useState(false);
       const [tryUnderscore, setTryUnderscore] = useState(false);
@@ -1075,10 +1070,13 @@
     };
 
     // ============================================================
-    // FAMIGLIE GIOCATE (8 opzioni MG + 9 combinazioni MG Casa+Ospite)
+    // FAMIGLIE GIOCATE
     // ============================================================
-
     const FAMIGLIE_GIOCATE = {
+      fisse: { id: 'fisse', label: 'FISSE', icon: '🎯', desc: 'Sceglie la migliore tra 1, X, 2', options: ['1', 'X', '2'] },
+      dc: { id: 'dc', label: 'DOPPIA CHANCE', icon: '🛡️', desc: 'Sceglie la migliore tra 1X, 12, X2', options: ['1X', '12', 'X2'] },
+      over: { id: 'over', label: 'OVER', icon: '⬆️', desc: 'Sceglie la migliore tra Over 1.5, 2.5, 3.5, 4.5', options: ['Over 1.5', 'Over 2.5', 'Over 3.5', 'Over 4.5'] },
+      under: { id: 'under', label: 'UNDER', icon: '⬇️', desc: 'Sceglie la migliore tra Under 1.5, 2.5, 3.5, 4.5', options: ['Under 1.5', 'Under 2.5', 'Under 3.5', 'Under 4.5'] },
       gg_ng: {
         id: 'gg_ng',
         label: 'GG - NG',
@@ -1086,10 +1084,6 @@
         desc: 'Goal-Goal / No Goal: entrambe segnano oppure no',
         options: ['GG', 'NG']
       },
-      fisse: { id: 'fisse', label: 'FISSE', icon: '🎯', desc: 'Sceglie la migliore tra 1, X, 2', options: ['1', 'X', '2'] },
-      dc: { id: 'dc', label: 'DOPPIA CHANCE', icon: '🛡️', desc: 'Sceglie la migliore tra 1X, 12, X2', options: ['1X', '12', 'X2'] },
-      over: { id: 'over', label: 'OVER', icon: '⬆️', desc: 'Sceglie la migliore tra Over 1.5, 2.5, 3.5, 4.5', options: ['Over 1.5', 'Over 2.5', 'Over 3.5', 'Over 4.5'] },
-      under: { id: 'under', label: 'UNDER', icon: '⬇️', desc: 'Sceglie la migliore tra Under 1.5, 2.5, 3.5, 4.5', options: ['Under 1.5', 'Under 2.5', 'Under 3.5', 'Under 4.5'] },
       multigol: {
         id: 'multigol',
         label: 'MULTIGOL',
@@ -1143,14 +1137,11 @@
       };
     };
 
-    // Multigol per singola squadra (0-1, 0-2, 1-3, 2-5)
     const getMultigolPerSquadra = (games, teamName, isHome) => {
       const total = games.length;
       if (total === 0) return { '0-1': 0, '0-2': 0, '1-3': 0, '2-5': 0 };
-
       const goals = games.map(g => isHome ? g.golCasa : g.golOspite);
       const count = (pred) => goals.filter(pred).length / total * 100;
-
       return {
         '0-1': count(g => g <= 1),
         '0-2': count(g => g <= 2),
@@ -1159,40 +1150,88 @@
       };
     };
 
-    // Multigol totale (1-4, 2-5) - unione partite
     const getMultigolTotale = (games) => {
       const total = games.length;
       if (total === 0) return { '1-4': 0, '2-5': 0 };
-
       const totalGoals = games.map(g => g.golCasa + g.golOspite);
       const count = (pred) => totalGoals.filter(pred).length / total * 100;
-
       return {
         '1-4': count(g => g >= 1 && g <= 4),
         '2-5': count(g => g >= 2 && g <= 5)
       };
     };
 
+    // ============================================================
+    // FUNZIONI CONGIUNTE (per combinate)
+    // ============================================================
+    // DC + UNDER: conta partite in cui è vera la DC E il totale < soglia
+    const calcolaDcUnder = (games, dc, soglia) => {
+      if (!games || games.length === 0) return 0;
+      let count = 0;
+      games.forEach(g => {
+        const tot = g.golCasa + g.golOspite;
+        const dcOk = (dc === '1X' && g.golCasa >= g.golOspite) ||
+                     (dc === '12' && g.golCasa !== g.golOspite) ||
+                     (dc === 'X2' && g.golCasa <= g.golOspite);
+        const underOk = tot < soglia;
+        if (dcOk && underOk) count++;
+      });
+      return Math.round((count / games.length) * 100);
+    };
+
+    const calcolaDcOver = (games, dc, soglia) => {
+      if (!games || games.length === 0) return 0;
+      let count = 0;
+      games.forEach(g => {
+        const tot = g.golCasa + g.golOspite;
+        const dcOk = (dc === '1X' && g.golCasa >= g.golOspite) ||
+                     (dc === '12' && g.golCasa !== g.golOspite) ||
+                     (dc === 'X2' && g.golCasa <= g.golOspite);
+        const overOk = tot > soglia;
+        if (dcOk && overOk) count++;
+      });
+      return Math.round((count / games.length) * 100);
+    };
+
+    const calcolaDcMgTot = (games, dc, min, max) => {
+      if (!games || games.length === 0) return 0;
+      let count = 0;
+      games.forEach(g => {
+        const tot = g.golCasa + g.golOspite;
+        const dcOk = (dc === '1X' && g.golCasa >= g.golOspite) ||
+                     (dc === '12' && g.golCasa !== g.golOspite) ||
+                     (dc === 'X2' && g.golCasa <= g.golOspite);
+        const mgOk = tot >= min && tot <= max;
+        if (dcOk && mgOk) count++;
+      });
+      return Math.round((count / games.length) * 100);
+    };
+
+    const calcolaMgCasaOspite = (games, rangeCasa, rangeOspite) => {
+      if (!games || games.length === 0) return 0;
+      const [minC, maxC] = rangeCasa.split('-').map(Number);
+      const [minO, maxO] = rangeOspite.split('-').map(Number);
+      let count = 0;
+      games.forEach(g => {
+        const casaOk = g.golCasa >= minC && g.golCasa <= maxC;
+        const ospiteOk = g.golOspite >= minO && g.golOspite <= maxO;
+        if (casaOk && ospiteOk) count++;
+      });
+      return Math.round((count / games.length) * 100);
+    };
+
     const computeMatchStats = (match, allMatches) => {
       const homeTeam = match.casa;
       const awayTeam = match.ospiti;
 
-      // Squadra di casa: solo partite IN CASA
-      const homeGames = allMatches.filter(m =>
-        m.stato === 'Giocata' && m.casa === homeTeam
-      );
-      // Squadra ospite: solo partite FUORI CASA
-      const awayGames = allMatches.filter(m =>
-        m.stato === 'Giocata' && m.ospiti === awayTeam
-      );
+      const homeGames = allMatches.filter(m => m.stato === 'Giocata' && m.casa === homeTeam);
+      const awayGames = allMatches.filter(m => m.stato === 'Giocata' && m.ospiti === awayTeam);
 
       if (homeGames.length === 0 || awayGames.length === 0) {
         return { error: 'Dati insufficienti (squadra senza partite).' };
       }
 
-      // ============================================================
-      // FISSE: p1, pX, p2 normalizzati a 100%
-      // ============================================================
+      // FISSE
       let homeWins = 0, homeDraws = 0, homeLosses = 0;
       homeGames.forEach(g => {
         const tg = g.golCasa, og = g.golOspite;
@@ -1200,7 +1239,6 @@
         else if (tg === og) homeDraws++;
         else homeLosses++;
       });
-
       let awayWins = 0, awayDraws = 0, awayLosses = 0;
       awayGames.forEach(g => {
         const tg = g.golOspite, og = g.golCasa;
@@ -1235,9 +1273,7 @@
       const p12 = Math.min(100, p1 + p2);
       const pX2 = Math.min(100, pX + p2);
 
-      // ============================================================
-      // OVER/UNDER: unione partite
-      // ============================================================
+      // UNIONE partite
       const allGamesMap = new Map();
       [...homeGames, ...awayGames].forEach(g => {
         if (!allGamesMap.has(g.id)) allGamesMap.set(g.id, g);
@@ -1251,9 +1287,6 @@
         return { threshold: t, under: 100 - over, over };
       });
 
-      // ============================================================
-      // MULTIGOL
-      // ============================================================
       const homeMG = getMultigolPerSquadra(homeGames, homeTeam, true);
       const awayMG = getMultigolPerSquadra(awayGames, awayTeam, false);
       const mgTot = getMultigolTotale(allGames);
@@ -1306,7 +1339,9 @@
       return { label: best.label, pct: Math.round(best.pct), range: best.range, details: ranges.map(r => ({ ...r, pct: Math.round(r.pct) })) };
     };
 
-    // Calcolo percentuale giocata
+    // ============================================================
+    // CALCOLO PERCENTUALE GIOCATA (con combinate corrette)
+    // ============================================================
     const getGiocataPct = (giocata, stats, homeMG, awayMG, mgTot) => {
       if (stats.error) return 0;
       const { p1, pX, p2, p1X, p12, pX2, underOver, allGames } = stats;
@@ -1346,7 +1381,7 @@
       if (giocata === 'Under 3.5') return Math.round(underOver[2]?.under || 0);
       if (giocata === 'Under 4.5') return Math.round(underOver[3]?.under || 0);
 
-      // MULTIGOL (8 opzioni)
+      // MULTIGOL
       if (giocata === 'MG Casa 0-2') return Math.round(homeMG['0-2'] || 0);
       if (giocata === 'MG Ospite 0-2') return Math.round(awayMG['0-2'] || 0);
       if (giocata === 'MG Casa 1-3') return Math.round(homeMG['1-3'] || 0);
@@ -1356,50 +1391,55 @@
       if (giocata === 'MG Tot 1-4') return Math.round(mgTot['1-4'] || 0);
       if (giocata === 'MG Tot 2-5') return Math.round(mgTot['2-5'] || 0);
 
-      // DC + OVER (media)
-      if (giocata.startsWith('1X+O')) { const over = giocata.replace('1X+O', 'Over '); return Math.round((p1X + getGiocataPct(over, stats, homeMG, awayMG, mgTot)) / 2); }
-      if (giocata.startsWith('12+O')) { const over = giocata.replace('12+O', 'Over '); return Math.round((p12 + getGiocataPct(over, stats, homeMG, awayMG, mgTot)) / 2); }
-      if (giocata.startsWith('X2+O')) { const over = giocata.replace('X2+O', 'Over '); return Math.round((pX2 + getGiocataPct(over, stats, homeMG, awayMG, mgTot)) / 2); }
-      // DC + UNDER (media)
-      if (giocata.startsWith('1X+U')) { const u = giocata.replace('1X+U', 'Under '); return Math.round((p1X + getGiocataPct(u, stats, homeMG, awayMG, mgTot)) / 2); }
-      if (giocata.startsWith('12+U')) { const u = giocata.replace('12+U', 'Under '); return Math.round((p12 + getGiocataPct(u, stats, homeMG, awayMG, mgTot)) / 2); }
-      if (giocata.startsWith('X2+U')) { const u = giocata.replace('X2+U', 'Under '); return Math.round((pX2 + getGiocataPct(u, stats, homeMG, awayMG, mgTot)) / 2); }
-
-      // MG CASA + OSPITE (media) es. '0-2+1-3'
-      if (giocata.includes('+') && !giocata.includes('X') && !giocata.includes('O') && !giocata.includes('U') && !giocata.startsWith('MG')) {
-        const parts = giocata.split('+');
-        let pct1 = 0;
-        if (parts[0] === '0-2') pct1 = homeMG['0-2'] || 0;
-        else if (parts[0] === '1-3') pct1 = homeMG['1-3'] || 0;
-        else if (parts[0] === '2-5') pct1 = homeMG['2-5'] || 0;
-        let pct2 = 0;
-        if (parts[1] === '0-2') pct2 = awayMG['0-2'] || 0;
-        else if (parts[1] === '1-3') pct2 = awayMG['1-3'] || 0;
-        else if (parts[1] === '2-5') pct2 = awayMG['2-5'] || 0;
-        return Math.round((pct1 + pct2) / 2);
+      // ⭐ DC + OVER (conteggio congiunto)
+      if (giocata.startsWith('1X+O')) {
+        const s = parseFloat(giocata.replace('1X+O', ''));
+        return calcolaDcOver(allGames, '1X', s);
+      }
+      if (giocata.startsWith('12+O')) {
+        const s = parseFloat(giocata.replace('12+O', ''));
+        return calcolaDcOver(allGames, '12', s);
+      }
+      if (giocata.startsWith('X2+O')) {
+        const s = parseFloat(giocata.replace('X2+O', ''));
+        return calcolaDcOver(allGames, 'X2', s);
       }
 
-      // DC + MULTIGOL (media) es. '1X+MG Tot 1-4'
+      // ⭐ DC + UNDER (conteggio congiunto)
+      if (giocata.startsWith('1X+U')) {
+        const s = parseFloat(giocata.replace('1X+U', ''));
+        return calcolaDcUnder(allGames, '1X', s);
+      }
+      if (giocata.startsWith('12+U')) {
+        const s = parseFloat(giocata.replace('12+U', ''));
+        return calcolaDcUnder(allGames, '12', s);
+      }
+      if (giocata.startsWith('X2+U')) {
+        const s = parseFloat(giocata.replace('X2+U', ''));
+        return calcolaDcUnder(allGames, 'X2', s);
+      }
+
+      // ⭐ MG CASA + OSPITE (conteggio congiunto)
+      if (giocata.includes('+') && !giocata.includes('X') && !giocata.includes('O') && !giocata.includes('U') && !giocata.startsWith('MG')) {
+        const parts = giocata.split('+');
+        return calcolaMgCasaOspite(allGames, parts[0], parts[1]);
+      }
+
+      // ⭐ DC + MULTIGOL (conteggio congiunto)
       if (giocata.startsWith('1X+MG')) {
         const mg = giocata.replace('1X+MG ', '');
-        let pctMG = 0;
-        if (mg === 'Tot 1-4') pctMG = mgTot['1-4'] || 0;
-        else if (mg === 'Tot 2-5') pctMG = mgTot['2-5'] || 0;
-        return Math.round((p1X + pctMG) / 2);
+        if (mg === 'Tot 1-4') return calcolaDcMgTot(allGames, '1X', 1, 4);
+        if (mg === 'Tot 2-5') return calcolaDcMgTot(allGames, '1X', 2, 5);
       }
       if (giocata.startsWith('12+MG')) {
         const mg = giocata.replace('12+MG ', '');
-        let pctMG = 0;
-        if (mg === 'Tot 1-4') pctMG = mgTot['1-4'] || 0;
-        else if (mg === 'Tot 2-5') pctMG = mgTot['2-5'] || 0;
-        return Math.round((p12 + pctMG) / 2);
+        if (mg === 'Tot 1-4') return calcolaDcMgTot(allGames, '12', 1, 4);
+        if (mg === 'Tot 2-5') return calcolaDcMgTot(allGames, '12', 2, 5);
       }
       if (giocata.startsWith('X2+MG')) {
         const mg = giocata.replace('X2+MG ', '');
-        let pctMG = 0;
-        if (mg === 'Tot 1-4') pctMG = mgTot['1-4'] || 0;
-        else if (mg === 'Tot 2-5') pctMG = mgTot['2-5'] || 0;
-        return Math.round((pX2 + pctMG) / 2);
+        if (mg === 'Tot 1-4') return calcolaDcMgTot(allGames, 'X2', 1, 4);
+        if (mg === 'Tot 2-5') return calcolaDcMgTot(allGames, 'X2', 2, 5);
       }
 
       return 0;
@@ -1417,18 +1457,6 @@
 
         if (familyId === 'dc_under' && opt === '12+U4.5') {
           pct = Math.round(get12Under45(stats._allMatches, stats._homeTeam, stats._awayTeam) || 0);
-        } else if (familyId === 'mg_casa_ospite') {
-          const parts = opt.split('+');
-          let pct1 = 0;
-          if (parts[0] === '0-2') pct1 = homeMG['0-2'] || 0;
-          else if (parts[0] === '1-3') pct1 = homeMG['1-3'] || 0;
-          else if (parts[0] === '2-5') pct1 = homeMG['2-5'] || 0;
-          let pct2 = 0;
-          if (parts[1] === '0-2') pct2 = awayMG['0-2'] || 0;
-          else if (parts[1] === '1-3') pct2 = awayMG['1-3'] || 0;
-          else if (parts[1] === '2-5') pct2 = awayMG['2-5'] || 0;
-          pct = Math.round((pct1 + pct2) / 2);
-          label = `${parts[0]}+${parts[1]}`;
         } else {
           pct = getGiocataPct(opt, stats, homeMG, awayMG, mgTot);
         }
@@ -1474,7 +1502,6 @@
     // ============================================================
     // ESPOSIZIONE GLOBALE
     // ============================================================
-
     window.computeMatchStats = computeMatchStats;
     window.getGiocataPct = getGiocataPct;
     window.getBestBetForFamily = getBestBetForFamily;
@@ -1505,7 +1532,6 @@
     // ============================================================
     // LOAD/SAVE STATE
     // ============================================================
-
     const loadState = () => {
       try {
         const localData = {
@@ -1542,7 +1568,6 @@
     // ============================================================
     // CLOCK
     // ============================================================
-
     const Clock = () => {
       const [now, setNow] = useState(new Date());
       useEffect(() => {
@@ -1566,7 +1591,6 @@
     // ============================================================
     // APP
     // ============================================================
-
     function App() {
       const [hasError, setHasError] = useState(false);
       const [errorMessage, setErrorMessage] = useState('');

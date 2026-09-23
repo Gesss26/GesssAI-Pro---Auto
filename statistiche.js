@@ -1,8 +1,8 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v2)
-// - MatchDetail semplificato (solo info partita + form)
+// statistiche.js - Modulo Statistiche (v3)
+// - MatchDetail semplificato (solo info partita + form + avversari)
 // - Tutte le giocate con percentuali + quote PDF affiancate
-// - Vista "Tutte le famiglie" sotto la classifica
+// - Ordine: FISSE → DC → OVER → UNDER → GG/NG → Multigol → resto
 // ============================================================
 
 (function () {
@@ -36,7 +36,7 @@
     if (familyId === 'dc_under') {
       const parts = label.split('+');
       if (parts.length === 2) {
-        const uLabel = parts[1].replace('U', 'Under ').replace('.', ',');
+        const uLabel = parts[1].replace('U', 'Under ').replace(',', '.');
         return `${parts[0]} + ${uLabel}`;
       }
     }
@@ -44,7 +44,7 @@
     if (familyId === 'dc_over') {
       const parts = label.split('+');
       if (parts.length === 2) {
-        const oLabel = parts[1].replace('O', 'Over ').replace('.', ',');
+        const oLabel = parts[1].replace('O', 'Over ').replace(',', '.');
         return `${parts[0]} + ${oLabel}`;
       }
     }
@@ -522,7 +522,7 @@
   };
 
   // ============================================================
-  // TUTTE LE FAMIGLIE (con quote PDF)
+  // TUTTE LE FAMIGLIE (con ordine + quote PDF)
   // ============================================================
   const TutteLeFamigliePanel = ({ match, allMatches }) => {
     const getChampColor = window.getChampColor;
@@ -533,40 +533,44 @@
     const stats = window.computeMatchStats(match, allMatches);
     if (stats.error) return null;
 
-    const sezioni = Object.entries(FAMIGLIE).map(([familyId, family]) => {
-      const opzioni = family.options.map(opt => {
-        let pct = 0;
+    // ⭐ ORDINE RICHIESTO: FISSE → DC → OVER → UNDER → GG/NG → Multigol → resto
+    const ORDINE = ['fisse', 'dc', 'over', 'under', 'gg_ng', 'multigol', 'dc_over', 'dc_under', 'mg_casa_ospite', 'dc_multigol'];
 
-        if (familyId === 'gg_ng') {
-          const ggNg = window.calcolaGG_NG(stats);
-          pct = opt === 'GG' ? (ggNg?.gg || 0) : (ggNg?.ng || 0);
-        } else {
-          pct = getGiocataPct(opt, stats, stats.homeMG, stats.awayMG, stats.mgTot);
-        }
+    const sezioni = ORDINE
+      .filter(familyId => FAMIGLIE[familyId])
+      .map(familyId => {
+        const family = FAMIGLIE[familyId];
+        const opzioni = family.options.map(opt => {
+          let pct = 0;
 
-        // ⭐ QUOTA PDF
-        let quota = null;
-        let fonteQuota = null;
-        let edge = null;
-        let isValue = false;
+          if (familyId === 'gg_ng') {
+            const ggNg = window.calcolaGG_NG(stats);
+            pct = opt === 'GG' ? (ggNg?.gg || 0) : (ggNg?.ng || 0);
+          } else {
+            pct = getGiocataPct(opt, stats, stats.homeMG, stats.awayMG, stats.mgTot);
+          }
 
-        if (window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function') {
-          try {
-            const q = window.QuoteManager.analizzaGiocata(match, familyId, opt, pct);
-            if (q && q.quotaBook) {
-              quota = q.quotaBook;
-              edge = q.edge;
-              isValue = q.isValue;
-              fonteQuota = 'PDF';
-            }
-          } catch (e) {}
-        }
+          // QUOTA PDF
+          let quota = null;
+          let edge = null;
+          let isValue = false;
 
-        return { opt, pct, quota, fonteQuota, edge, isValue };
+          if (window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function') {
+            try {
+              const q = window.QuoteManager.analizzaGiocata(match, familyId, opt, pct);
+              if (q && q.quotaBook) {
+                quota = q.quotaBook;
+                edge = q.edge;
+                isValue = q.isValue;
+              }
+            } catch (e) {}
+          }
+
+          return { opt, pct, quota, edge, isValue };
+        });
+
+        return { familyId, family, opzioni };
       });
-
-      return { familyId, family, opzioni };
-    });
 
     return (
       <div className="card" style={{ marginTop: '20px' }}>
@@ -574,7 +578,7 @@
           📊 Tutte le Giocate — {match.casa} vs {match.ospiti}
         </h3>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
           {sezioni.map(({ familyId, family, opzioni }) => (
             <div key={familyId} style={{
               background: 'var(--surface)', borderRadius: '10px',
@@ -589,7 +593,7 @@
               </h4>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                {opzioni.map(({ opt, pct, quota, fonteQuota, edge, isValue }) => (
+                {opzioni.map(({ opt, pct, quota, edge, isValue }) => (
                   <div key={opt} style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     padding: '6px 8px', borderRadius: '6px',
@@ -614,7 +618,7 @@
                             fontWeight: 'bold',
                             border: isValue ? '1px solid var(--win)' : '1px solid transparent',
                           }}>
-                          {fonteQuota === 'PDF' ? '💰' : '📊'} {quota.toFixed(2)}
+                          💰 {quota.toFixed(2)}
                           {isValue && edge && <span> +{edge}%</span>}
                         </span>
                       )}
@@ -627,7 +631,7 @@
         </div>
 
         <div style={{ marginTop: '12px', fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center' }}>
-          💰 = Quota Marathonbet (PDF) • 📊 = Quota stimata
+          💰 = Quota Marathonbet (PDF) • Se assente, il mercato non è offerto o il PDF non è aggiornato
         </div>
       </div>
     );
@@ -1322,6 +1326,6 @@
   window.TeamMatchesHistory = TeamMatchesHistory;
   window.TutteLeFamigliePanel = TutteLeFamigliePanel;
 
-  console.log('✅ Modulo Statistiche v2 caricato - MatchDetail semplificato + quote in Tutte le giocate');
+  console.log('✅ Modulo Statistiche v3 caricato - MatchDetail semplificato + quote + ordine FISSE/DC/OVER/UNDER/GG-NG');
 
 })();

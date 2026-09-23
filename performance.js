@@ -1,9 +1,9 @@
 // ============================================================
-// performance.js - Modulo Storico Performance (v8)
+// performance.js - Modulo Storico Performance (v9)
 // - Calcola TUTTI gli snapshot direttamente da matches (Excel)
 // - Filtro "🎯 Seleziona Giocate" stile Schedina
 // - La matrice Campionato × Giocata si popola automaticamente
-// - ✅ FIX v8: conteggi uniformi (no pct > 0), etichette uniformi
+// - ✅ FIX v9: combinate con logica congiunta (DC+Over, DC+Under, ecc.)
 // ============================================================
 
 (function () {
@@ -101,42 +101,62 @@
   };
 
   // ============================================================
-  // CALCOLO ESITO (con fix parsing virgola/punto)
+  // CALCOLO ESITO GIOCATA (con logica congiunta)
   // ============================================================
-
-  const matchRange = (val, range) => {
-    const [min, max] = String(range).split('-').map(Number);
-    if (isNaN(min) || isNaN(max)) return false;
-    return val >= min && val <= max;
-  };
 
   const calcolaEsitoGiocata = (match, familyId, giocataLabel) => {
     const gC = match.golCasa || 0;
     const gO = match.golOspite || 0;
     const tot = gC + gO;
 
+    // Helper: verifica DC (Doppia Chance)
+    const dcOk = (dc) => {
+      if (dc === '1X') return gC >= gO;
+      if (dc === '12') return gC !== gO;
+      if (dc === 'X2') return gC <= gO;
+      return false;
+    };
+
+    // Helper: verifica range (es. "0-2" → min 0, max 2, estremi inclusi)
+    const matchRange = (val, range) => {
+      const [min, max] = String(range).split('-').map(Number);
+      if (isNaN(min) || isNaN(max)) return false;
+      return val >= min && val <= max;
+    };
+
+    // ===== FISSE =====
     if (familyId === 'fisse') {
       if (giocataLabel === '1') return gC > gO ? 'V' : 'P';
       if (giocataLabel === 'X') return gC === gO ? 'V' : 'P';
       if (giocataLabel === '2') return gC < gO ? 'V' : 'P';
     }
+
+    // ===== DOPPIA CHANCE =====
     if (familyId === 'dc') {
-      if (giocataLabel === '1X') return gC >= gO ? 'V' : 'P';
-      if (giocataLabel === '12') return gC !== gO ? 'V' : 'P';
-      if (giocataLabel === 'X2') return gC <= gO ? 'V' : 'P';
+      if (giocataLabel === '1X') return dcOk('1X') ? 'V' : 'P';
+      if (giocataLabel === '12') return dcOk('12') ? 'V' : 'P';
+      if (giocataLabel === 'X2') return dcOk('X2') ? 'V' : 'P';
     }
+
+    // ===== OVER =====
     if (familyId === 'over') {
       const s = parseFloat(String(giocataLabel).replace('Over ', '').replace(',', '.'));
       if (!isNaN(s)) return tot > s ? 'V' : 'P';
     }
+
+    // ===== UNDER =====
     if (familyId === 'under') {
       const s = parseFloat(String(giocataLabel).replace('Under ', '').replace(',', '.'));
       if (!isNaN(s)) return tot < s ? 'V' : 'P';
     }
+
+    // ===== GG / NG =====
     if (familyId === 'gg_ng') {
       if (giocataLabel === 'Goal-Goal' || giocataLabel === 'GG') return (gC > 0 && gO > 0) ? 'V' : 'P';
       if (giocataLabel === 'No Goal' || giocataLabel === 'NG') return (gC === 0 || gO === 0) ? 'V' : 'P';
     }
+
+    // ===== MULTIGOL (8 opzioni) =====
     if (familyId === 'multigol') {
       if (giocataLabel === 'MG Casa 0-2') return gC <= 2 ? 'V' : 'P';
       if (giocataLabel === 'MG Ospite 0-2') return gO <= 2 ? 'V' : 'P';
@@ -147,47 +167,65 @@
       if (giocataLabel === 'MG Tot 1-4') return (tot >= 1 && tot <= 4) ? 'V' : 'P';
       if (giocataLabel === 'MG Tot 2-5') return (tot >= 2 && tot <= 5) ? 'V' : 'P';
     }
+
+    // ===== MG CASA + OSPITE (conteggio congiunto) =====
+    // es. '0-2+1-3' → casa 0-2 E ospite 1-3
     if (familyId === 'mg_casa_ospite') {
       const parts = String(giocataLabel).split('+');
       if (parts.length === 2) {
-        const c1 = matchRange(gC, parts[0]);
-        const c2 = matchRange(gO, parts[1]);
-        return (c1 && c2) ? 'V' : 'P';
+        const casaOk = matchRange(gC, parts[0]);
+        const ospiteOk = matchRange(gO, parts[1]);
+        return (casaOk && ospiteOk) ? 'V' : 'P';
       }
     }
+
+    // ===== DC + OVER (conteggio congiunto) =====
+    // es. '1X+O2.5' → DC 1X E Over 2.5
     if (familyId === 'dc_over') {
       const parts = String(giocataLabel).split('+');
       if (parts.length === 2) {
-        const dcOk = calcolaEsitoGiocata(match, 'dc', parts[0]) === 'V';
-        const oOk = calcolaEsitoGiocata(match, 'over', 'Over ' + parts[1].replace('O', '')) === 'V';
-        return (dcOk && oOk) ? 'V' : 'P';
+        const dc = parts[0];
+        const overStr = parts[1].replace('O', '').replace(',', '.');
+        const s = parseFloat(overStr);
+        if (!isNaN(s)) {
+          return (dcOk(dc) && tot > s) ? 'V' : 'P';
+        }
       }
     }
+
+    // ===== DC + UNDER (conteggio congiunto) =====
+    // es. '1X+U2.5' → DC 1X E Under 2.5
     if (familyId === 'dc_under') {
       const parts = String(giocataLabel).split('+');
       if (parts.length === 2) {
-        const dcOk = calcolaEsitoGiocata(match, 'dc', parts[0]) === 'V';
-        const uOk = calcolaEsitoGiocata(match, 'under', 'Under ' + parts[1].replace('U', '')) === 'V';
-        return (dcOk && uOk) ? 'V' : 'P';
+        const dc = parts[0];
+        const underStr = parts[1].replace('U', '').replace(',', '.');
+        const s = parseFloat(underStr);
+        if (!isNaN(s)) {
+          return (dcOk(dc) && tot < s) ? 'V' : 'P';
+        }
       }
     }
+
+    // ===== DC + MULTIGOL (conteggio congiunto) =====
+    // es. '1X+MG Tot 1-4' → DC 1X E MG Tot 1-4
     if (familyId === 'dc_multigol') {
       const parts = String(giocataLabel).split('+');
       if (parts.length === 2) {
-        const dcOk = calcolaEsitoGiocata(match, 'dc', parts[0]) === 'V';
+        const dc = parts[0];
         const mg = parts[1];
         let mgOk = false;
         if (mg === 'MG Tot 1-4') mgOk = tot >= 1 && tot <= 4;
         else if (mg === 'MG Tot 2-5') mgOk = tot >= 2 && tot <= 5;
-        return (dcOk && mgOk) ? 'V' : 'P';
+        return (dcOk(dc) && mgOk) ? 'V' : 'P';
       }
     }
+
     return null;
   };
 
   // ============================================================
   // CALCOLA TUTTE LE GIOCATE DI TUTTE LE FAMIGLIE
-  // ⭐ FIX: includi SEMPRE tutte le giocate (anche con pct = 0)
   // ============================================================
 
   const calcolaTutteGiocatePerPartita = (match, allMatches) => {
@@ -226,7 +264,7 @@
           }
         }
 
-        // ✅ FIX: includi SEMPRE, anche se pct = 0
+        // Includi SEMPRE (anche se pct = 0) per avere conteggi uniformi
         out.push({
           familyId,
           familyLabel: family.label,
@@ -1193,6 +1231,6 @@
     CHAMP_ORDER,
   };
 
-  console.log('✅ Modulo Performance v8 caricato - conteggi uniformi + etichette uniformi');
+  console.log('✅ Modulo Performance v9 caricato - combinate con logica congiunta');
 
 })();
