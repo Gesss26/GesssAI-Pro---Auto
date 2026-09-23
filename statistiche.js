@@ -1,8 +1,7 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v3)
-// - MatchDetail semplificato (solo info partita + form + avversari)
-// - Tutte le giocate con percentuali + quote PDF affiancate
-// - Ordine: FISSE → DC → OVER → UNDER → GG/NG → Multigol → resto
+// statistiche.js - Modulo Statistiche (v4)
+// - Ordine Tutte le Giocate: FISSE → DC → GG/NG → OVER → UNDER → Multigol → resto
+// - Quote affiancate con fallback visibile "📊 N/D" se mancante
 // ============================================================
 
 (function () {
@@ -396,7 +395,7 @@
   };
 
   // ============================================================
-  // MATCH DETAIL (SEMPLIFICATO: solo info + form + avversari)
+  // MATCH DETAIL (SEMPLIFICATO)
   // ============================================================
   const MatchDetail = ({ match, allMatches }) => {
     const calcFormAndStats = window.calcFormAndStats;
@@ -522,7 +521,7 @@
   };
 
   // ============================================================
-  // TUTTE LE FAMIGLIE (con ordine + quote PDF)
+  // TUTTE LE FAMIGLIE (con ordine corretto + quote con fallback)
   // ============================================================
   const TutteLeFamigliePanel = ({ match, allMatches }) => {
     const getChampColor = window.getChampColor;
@@ -533,8 +532,30 @@
     const stats = window.computeMatchStats(match, allMatches);
     if (stats.error) return null;
 
-    // ⭐ ORDINE RICHIESTO: FISSE → DC → OVER → UNDER → GG/NG → Multigol → resto
-    const ORDINE = ['fisse', 'dc', 'over', 'under', 'gg_ng', 'multigol', 'dc_over', 'dc_under', 'mg_casa_ospite', 'dc_multigol'];
+    // ⭐ ORDINE: FISSE → DC → GG/NG → OVER → UNDER → Multigol → resto
+    const ORDINE = ['fisse', 'dc', 'gg_ng', 'over', 'under', 'multigol', 'dc_over', 'dc_under', 'mg_casa_ospite', 'dc_multigol'];
+
+    // Verifica disponibilità QuoteManager
+    const hasQM = !!(window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function');
+    const qmStatus = (() => {
+      if (!hasQM) return '❌ QuoteManager non disponibile';
+      try {
+        const meta = window.PDFQuoteParser?.leggiMeta?.();
+        if (!meta || !meta.numPartite) return '⚠️ PDF non caricato (0 partite)';
+        return `✅ PDF caricato (${meta.numPartite} partite)`;
+      } catch (e) {
+        return '⚠️ Impossibile leggere meta PDF';
+      }
+    })();
+
+    // ⭐ DEBUG: log stato QuoteManager
+    useEffect(() => {
+      console.log('🔍 TutteLeFamigliePanel — Stato QuoteManager:', qmStatus);
+      if (hasQM) {
+        const sampleQ = window.QuoteManager.analizzaGiocata(match, 'fisse', '1', 50);
+        console.log('🔍 Test analizzaGiocata (fisse/1):', sampleQ);
+      }
+    }, [match.id]);
 
     const sezioni = ORDINE
       .filter(familyId => FAMIGLIE[familyId])
@@ -550,23 +571,27 @@
             pct = getGiocataPct(opt, stats, stats.homeMG, stats.awayMG, stats.mgTot);
           }
 
-          // QUOTA PDF
+          // QUOTA
           let quota = null;
           let edge = null;
           let isValue = false;
+          let fonte = 'N/D';
 
-          if (window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function') {
+          if (hasQM) {
             try {
               const q = window.QuoteManager.analizzaGiocata(match, familyId, opt, pct);
               if (q && q.quotaBook) {
                 quota = q.quotaBook;
                 edge = q.edge;
                 isValue = q.isValue;
+                fonte = 'PDF';
               }
-            } catch (e) {}
+            } catch (e) {
+              console.warn(`⚠️ Errore quota ${familyId}/${opt}:`, e.message);
+            }
           }
 
-          return { opt, pct, quota, edge, isValue };
+          return { opt, pct, quota, edge, isValue, fonte };
         });
 
         return { familyId, family, opzioni };
@@ -574,9 +599,29 @@
 
     return (
       <div className="card" style={{ marginTop: '20px' }}>
-        <h3 style={{ color: 'var(--accent)', marginBottom: '16px' }}>
+        <h3 style={{ color: 'var(--accent)', marginBottom: '8px' }}>
           📊 Tutte le Giocate — {match.casa} vs {match.ospiti}
         </h3>
+
+        {/* Status QuoteManager */}
+        <div style={{
+          marginBottom: '12px', padding: '6px 12px', borderRadius: '6px',
+          background: 'var(--surface)', border: '1px solid var(--border)',
+          fontSize: '11px', color: 'var(--text-muted)',
+          display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px'
+        }}>
+          <span>💰 <b>Stato Quote PDF:</b> {qmStatus}</span>
+          {hasQM && (
+            <button
+              onClick={() => { if (window.QuoteManager.scaricaEAggiorna) window.QuoteManager.scaricaEAggiorna(true); }}
+              style={{
+                background: 'transparent', border: 'none', color: 'var(--accent)',
+                cursor: 'pointer', fontSize: '11px', fontWeight: 'bold', textDecoration: 'underline'
+              }}>
+              🔄 Ricarica PDF
+            </button>
+          )}
+        </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
           {sezioni.map(({ familyId, family, opzioni }) => (
@@ -593,7 +638,7 @@
               </h4>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                {opzioni.map(({ opt, pct, quota, edge, isValue }) => (
+                {opzioni.map(({ opt, pct, quota, edge, isValue, fonte }) => (
                   <div key={opt} style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     padding: '6px 8px', borderRadius: '6px',
@@ -608,20 +653,31 @@
                         style={{ fontSize: '11px', padding: '2px 8px' }}>
                         {pct}%
                       </span>
-                      {quota && (
-                        <span
-                          title={isValue ? `VALUE BET! Edge: +${edge}%` : `Quota Marathonbet`}
-                          style={{
-                            fontSize: '11px', padding: '2px 6px', borderRadius: '4px',
-                            background: isValue ? 'rgba(111, 207, 151, 0.2)' : 'rgba(243, 156, 18, 0.15)',
-                            color: isValue ? 'var(--win)' : 'var(--accent)',
-                            fontWeight: 'bold',
-                            border: isValue ? '1px solid var(--win)' : '1px solid transparent',
-                          }}>
-                          💰 {quota.toFixed(2)}
-                          {isValue && edge && <span> +{edge}%</span>}
-                        </span>
-                      )}
+                      {/* QUOTA con fallback visibile */}
+                      <span
+                        title={quota ? (isValue ? `VALUE BET! Edge: +${edge}%` : `Quota Marathonbet`) : 'Quota non disponibile'}
+                        style={{
+                          fontSize: '11px', padding: '2px 6px', borderRadius: '4px',
+                          background: quota
+                            ? (isValue ? 'rgba(111, 207, 151, 0.2)' : 'rgba(243, 156, 18, 0.15)')
+                            : 'rgba(139, 148, 158, 0.1)',
+                          color: quota
+                            ? (isValue ? 'var(--win)' : 'var(--accent)')
+                            : 'var(--text-muted)',
+                          fontWeight: 'bold',
+                          border: quota && isValue ? '1px solid var(--win)' : '1px solid transparent',
+                          minWidth: '52px',
+                          textAlign: 'center',
+                        }}>
+                        {quota ? (
+                          <>
+                            💰 {quota.toFixed(2)}
+                            {isValue && edge && <span> +{edge}%</span>}
+                          </>
+                        ) : (
+                          <>📊 N/D</>
+                        )}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -631,7 +687,7 @@
         </div>
 
         <div style={{ marginTop: '12px', fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center' }}>
-          💰 = Quota Marathonbet (PDF) • Se assente, il mercato non è offerto o il PDF non è aggiornato
+          💰 = Quota Marathonbet (PDF) • 📊 N/D = Quota non disponibile
         </div>
       </div>
     );
@@ -1326,6 +1382,6 @@
   window.TeamMatchesHistory = TeamMatchesHistory;
   window.TutteLeFamigliePanel = TutteLeFamigliePanel;
 
-  console.log('✅ Modulo Statistiche v3 caricato - MatchDetail semplificato + quote + ordine FISSE/DC/OVER/UNDER/GG-NG');
+  console.log('✅ Modulo Statistiche v4 caricato - ordine corretto + fallback quote visibile');
 
 })();
