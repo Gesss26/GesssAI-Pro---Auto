@@ -1,12 +1,8 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche esterno (COMPLETO)
-// LEGGE il filtro campionati dal Palinsesto (fonte di verità).
-// Include sezione GG / NG in MatchDetail (tra Under/Over e Multigol).
-// GG-NG sempre visibile in Riepilogo AI (dopo Under/Over).
-// Etichette MG: 8 opzioni (Casa/Ospite 0-2, 1-3, 2-5 + Tot 1-4, 2-5)
-// ✅ FIX Doppia Chance: DC = SOMMA delle componenti (non media)
-// ✅ FIX Multigol: 8 opzioni separate con conteggio frequenze
-// ✅ NEW: Vista "Tutte le famiglie" sotto la classifica
+// statistiche.js - Modulo Statistiche (v2)
+// - MatchDetail semplificato (solo info partita + form)
+// - Tutte le giocate con percentuali + quote PDF affiancate
+// - Vista "Tutte le famiglie" sotto la classifica
 // ============================================================
 
 (function () {
@@ -16,18 +12,14 @@
 
   // ============================================================
   // FORMATTAZIONE ETICHETTE GIOCATE
-  // Le etichette MG arrivano già formattate ('MG Casa 0-2', 'MG Tot 1-4', ecc.)
   // ============================================================
   const formatGiocataLabel = (familyId, label) => {
     if (!label) return '—';
 
     if (label.startsWith('Over '))  return label;
-    if (label.startsWith('Under ')) return label.replace('.', ',');
+    if (label.startsWith('Under ')) return label;
 
-    if (familyId === 'multigol') {
-      // Le etichette sono già formattate dal sistema: 'MG Casa 0-2', ecc.
-      return label;
-    }
+    if (familyId === 'multigol') return label;
 
     if (familyId === 'mg_casa_ospite') {
       const parts = label.split('+');
@@ -66,7 +58,7 @@
   };
 
   // ============================================================
-  // HELPER: CALCOLO DOPPIA CHANCE (SOMMA DELLE COMPONENTI)
+  // HELPER: CALCOLO DOPPIA CHANCE
   // ============================================================
   const calcDC = (mc, dcCode) => {
     if (!mc) return 0;
@@ -80,9 +72,8 @@
   };
 
   // ============================================================
-  // SIMULAZIONE MONTE CARLO + POISSON (per AIAnalysis)
+  // SIMULAZIONE MONTE CARLO (per AIAnalysis)
   // ============================================================
-
   const getTeamPoissonParams = (teamName, allMatches) => {
     const matches = allMatches.filter(m =>
       m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName)
@@ -98,9 +89,11 @@
     const mediaFatti = golFatti / matches.length;
     const mediaSubiti = golSubiti / matches.length;
     const leagueAvg = 1.35;
-    const attacco = Math.max(0.3, mediaFatti / leagueAvg);
-    const difesa = Math.max(0.3, mediaSubiti / leagueAvg);
-    return { attacco, difesa, partite: matches.length };
+    return {
+      attacco: Math.max(0.3, mediaFatti / leagueAvg),
+      difesa: Math.max(0.3, mediaSubiti / leagueAvg),
+      partite: matches.length
+    };
   };
 
   const simulatePoissonMatch = (lambdaCasa, lambdaOspite) => {
@@ -192,7 +185,6 @@
   // ============================================================
   // AI ANALYSIS
   // ============================================================
-
   const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
     const getChampColor = window.getChampColor;
     const getPercentualeClasse = window.getPercentualeClasse;
@@ -230,7 +222,6 @@
       }
     };
 
-    // Calcolo pct da Monte Carlo
     const calcPctFromSim = (familyId, giocata) => {
       const totalSim = mc?.numSimulations || 10000;
 
@@ -238,19 +229,16 @@
         if (giocata === 'GG') return mc?.gg || 0;
         if (giocata === 'NG') return mc?.ng || 0;
       }
-
       if (familyId === 'fisse') {
         if (giocata === '1') return mc?.homeWins || 0;
         if (giocata === 'X') return mc?.draws || 0;
         if (giocata === '2') return mc?.awayWins || 0;
       }
-
       if (familyId === 'dc') {
         if (giocata === '1X') return calcDC(mc, '1X');
         if (giocata === '12') return calcDC(mc, '12');
         if (giocata === 'X2') return calcDC(mc, 'X2');
       }
-
       if (familyId === 'over') {
         if (giocata === 'Over 1.5') return mc?.over15 || 0;
         if (giocata === 'Over 2.5') return mc?.over25 || 0;
@@ -263,8 +251,6 @@
         if (giocata === 'Under 3.5') return mc?.under35 || 0;
         if (giocata === 'Under 4.5') return mc?.under45 || 0;
       }
-
-      // Multigol: usa MC
       if (familyId === 'multigol') {
         let count = 0;
         for (const [key, c] of Object.entries(mc?.risultati || {})) {
@@ -283,7 +269,6 @@
         }
         return Math.round((count / totalSim) * 100);
       }
-
       return 0;
     };
 
@@ -325,12 +310,10 @@
         const ib = ORDINE_PREFERITO.indexOf(b);
         return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
       });
-
       const lista = [];
       selezionateOrdinate.forEach(fid => {
         if (fid && !lista.includes(fid)) lista.push(fid);
       });
-
       if (!lista.includes('gg_ng')) {
         const posUnder = lista.indexOf('under');
         const posOver = lista.indexOf('over');
@@ -338,7 +321,6 @@
         else if (posOver !== -1) lista.splice(posOver + 1, 0, 'gg_ng');
         else lista.push('gg_ng');
       }
-
       return lista;
     })();
 
@@ -414,20 +396,15 @@
   };
 
   // ============================================================
-  // MATCH DETAIL
+  // MATCH DETAIL (SEMPLIFICATO: solo info + form + avversari)
   // ============================================================
-
   const MatchDetail = ({ match, allMatches }) => {
-    const computeMatchStats = window.computeMatchStats;
     const calcFormAndStats = window.calcFormAndStats;
     const getChampColor = window.getChampColor;
     const formatDateEU = window.formatDateEU;
     const TeamLogo = window.TeamLogo;
     const parseDate = window.parseDate;
     const getXgClasse = window.getXgClasse;
-
-    const stats = computeMatchStats(match, allMatches);
-    if (stats.error) return <div className="card"><p>{stats.error}</p></div>;
 
     const homeForm = calcFormAndStats(allMatches, match.casa);
     const awayForm = calcFormAndStats(allMatches, match.ospiti);
@@ -455,47 +432,6 @@
     const last5Home = getLast5Games(match.casa);
     const last5Away = getLast5Games(match.ospiti);
 
-    const getStatClasse = (valore) => {
-      if (valore >= 90) return 'flag-bomb';
-      if (valore >= 66.67) return 'flag-green';
-      if (valore >= 33.34) return 'flag-white';
-      return 'flag-red';
-    };
-
-    const renderStatBox = (label, value) => {
-      const numValue = typeof value === 'number' ? value : 0;
-      const roundedValue = Math.round(numValue);
-      const cls = getStatClasse(numValue);
-      const isBomb = numValue >= 90;
-      return (
-        <div className={`detail-stat-box ${cls}`}>
-          <span className="label">{label}</span>
-          <span className="value" style={{ color: '#000', fontSize: '20px', fontWeight: 'bold' }}>
-            {roundedValue}% {isBomb && <span className="bomb-icon">💣</span>}
-          </span>
-        </div>
-      );
-    };
-
-    const renderMultigolRow = (data, title, color = 'var(--accent)') => (
-      <div style={{ marginBottom: '12px' }}>
-        <div style={{ fontWeight: 'bold', color: color, marginBottom: '6px', fontSize: '14px' }}>{title}</div>
-        <div className="detail-row">
-          {Object.entries(data).map(([label, value]) => {
-            const pct = Math.round(value);
-            const displayLabel = label === '2-4' ? 'Over 1,5' : label;
-            const cls = getStatClasse(pct);
-            return (
-              <div key={label} className={`detail-stat-box ${cls}`} style={{ flex: 1, minWidth: '60px' }}>
-                <span className="label" style={{ fontSize: '11px' }}>{displayLabel}</span>
-                <span className="value" style={{ fontSize: '18px', color: '#000' }}>{pct}%</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-
     const renderXgValue = (value) => {
       const num = parseFloat(value);
       if (isNaN(num)) return <span className="xg-value xg-white">N/A</span>;
@@ -503,186 +439,91 @@
       return <span className={`xg-value ${cls}`}>{num.toFixed(1)}</span>;
     };
 
-    const calcolaGGNGLocale = () => {
-      const games = stats.allGames || [];
-      if (games.length === 0) return null;
-
-      let gg = 0, ng = 0;
-      games.forEach(g => {
-        if (g.golCasa > 0 && g.golOspite > 0) gg++;
-        else ng++;
-      });
-      const total = games.length;
-      return {
-        gg: Math.round((gg / total) * 100),
-        ng: Math.round((ng / total) * 100),
-        totalePartite: total
-      };
-    };
-
-    const ggngData = calcolaGGNGLocale();
-
     return (
-      <div>
-        <div className="card">
-          <h2 style={{ color: getChampColor(match.campionato) }}>{match.campionato}</h2>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', margin: '8px 0' }}>
-            <span><b>Giornata:</b> {match.round}</span>
-            <span><b>Data:</b> {formatDateEU(match.data)}</span>
-            <span><b>Ora:</b> {match.ora || 'TBD'}</span>
-          </div>
+      <div className="card">
+        <h2 style={{ color: getChampColor(match.campionato) }}>{match.campionato}</h2>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', margin: '8px 0' }}>
+          <span><b>Giornata:</b> {match.round}</span>
+          <span><b>Data:</b> {formatDateEU(match.data)}</span>
+          <span><b>Ora:</b> {match.ora || 'TBD'}</span>
+        </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', fontSize: '24px', fontWeight: 'bold', margin: '12px 0', alignItems: 'center' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <TeamLogo teamName={match.casa} championship={match.campionato} size={50} />
-              <span style={{ marginTop: '8px', color: getChampColor(match.campionato) }}>{match.casa}</span>
-            </div>
-            <span style={{ color: 'var(--text-muted)', fontSize: '20px' }}>VS</span>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <TeamLogo teamName={match.ospiti} championship={match.campionato} size={50} />
-              <span style={{ marginTop: '8px', color: getChampColor(match.campionato) }}>{match.ospiti}</span>
-            </div>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', fontSize: '24px', fontWeight: 'bold', margin: '12px 0', alignItems: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <TeamLogo teamName={match.casa} championship={match.campionato} size={50} />
+            <span style={{ marginTop: '8px', color: getChampColor(match.campionato) }}>{match.casa}</span>
           </div>
-
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', margin: '8px 0' }}>
-            <div style={{ flex: 1, minWidth: '200px' }}>
-              <h4 style={{ color: getChampColor(match.campionato) }}>{match.casa}</h4>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span>Forma:</span>
-                <div className="form-squares" style={{ display: 'inline-flex' }}>{renderFormSquares(homeForm.form)}</div>
-              </div>
-              <div>Partite giocate: {stats.homeGames.length}</div>
-              <div>V - P - S: {stats.homeStats.wins} - {stats.homeStats.draws} - {stats.homeStats.losses}</div>
-              <div>xG: {renderXgValue(homeForm.mediaGolFatti || 0)}</div>
-            </div>
-            <div style={{ flex: 1, minWidth: '200px' }}>
-              <h4 style={{ color: getChampColor(match.campionato) }}>{match.ospiti}</h4>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span>Forma:</span>
-                <div className="form-squares" style={{ display: 'inline-flex' }}>{renderFormSquares(awayForm.form)}</div>
-              </div>
-              <div>Partite giocate: {stats.awayGames.length}</div>
-              <div>V - P - S: {stats.awayStats.wins} - {stats.awayStats.draws} - {stats.awayStats.losses}</div>
-              <div>xG: {renderXgValue(awayForm.mediaGolFatti || 0)}</div>
-            </div>
-          </div>
-
-          <div className="opponents-row">
-            <div className="opponents-col">
-              <b>Ultimi avversari ({match.casa})</b>
-              {last5Home.map(g => {
-                const rc = getResultColor(g, match.casa);
-                const oppName = g.casa === match.casa ? g.ospiti : g.casa;
-                return (
-                  <div key={g.id} className="opp-item">
-                    <span>{oppName}</span>
-                    <span>
-                      <span className={`opp-result-indicator ${rc}`}></span>
-                      ({g.golCasa}-{g.golOspite})
-                    </span>
-                  </div>
-                );
-              })}
-              <div className="opp-form-pct">{homeForm.pct}%</div>
-              <div className="opp-form-bar"><div className="opp-form-bar-fill" style={{ width: homeForm.pct + '%' }}></div></div>
-            </div>
-            <div className="opponents-col">
-              <b>Ultimi avversari ({match.ospiti})</b>
-              {last5Away.map(g => {
-                const rc = getResultColor(g, match.ospiti);
-                const oppName = g.casa === match.ospiti ? g.ospiti : g.casa;
-                return (
-                  <div key={g.id} className="opp-item">
-                    <span>{oppName}</span>
-                    <span>
-                      <span className={`opp-result-indicator ${rc}`}></span>
-                      ({g.golCasa}-{g.golOspite})
-                    </span>
-                  </div>
-                );
-              })}
-              <div className="opp-form-pct">{awayForm.pct}%</div>
-              <div className="opp-form-bar"><div className="opp-form-bar-fill" style={{ width: awayForm.pct + '%' }}></div></div>
-            </div>
+          <span style={{ color: 'var(--text-muted)', fontSize: '20px' }}>VS</span>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <TeamLogo teamName={match.ospiti} championship={match.campionato} size={50} />
+            <span style={{ marginTop: '8px', color: getChampColor(match.campionato) }}>{match.ospiti}</span>
           </div>
         </div>
 
-        <div className="card detail-section">
-          <h4>⚡ FISSE</h4>
-          <div className="detail-row">
-            {renderStatBox('1', stats.p1)}
-            {renderStatBox('X', stats.pX)}
-            {renderStatBox('2', stats.p2)}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', margin: '8px 0' }}>
+          <div style={{ flex: 1, minWidth: '200px' }}>
+            <h4 style={{ color: getChampColor(match.campionato) }}>{match.casa}</h4>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>Forma:</span>
+              <div className="form-squares" style={{ display: 'inline-flex' }}>{renderFormSquares(homeForm.form)}</div>
+            </div>
+            <div>xG: {renderXgValue(homeForm.mediaGolFatti || 0)}</div>
+          </div>
+          <div style={{ flex: 1, minWidth: '200px' }}>
+            <h4 style={{ color: getChampColor(match.campionato) }}>{match.ospiti}</h4>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>Forma:</span>
+              <div className="form-squares" style={{ display: 'inline-flex' }}>{renderFormSquares(awayForm.form)}</div>
+            </div>
+            <div>xG: {renderXgValue(awayForm.mediaGolFatti || 0)}</div>
           </div>
         </div>
 
-        <div className="card detail-section">
-          <h4>🛡️ DOPPIA CHANCE</h4>
-          <div className="detail-row">
-            {renderStatBox('1X', stats.p1X)}
-            {renderStatBox('12', stats.p12)}
-            {renderStatBox('X2', stats.pX2)}
+        <div className="opponents-row">
+          <div className="opponents-col">
+            <b>Ultimi avversari ({match.casa})</b>
+            {last5Home.map(g => {
+              const rc = getResultColor(g, match.casa);
+              const oppName = g.casa === match.casa ? g.ospiti : g.casa;
+              return (
+                <div key={g.id} className="opp-item">
+                  <span>{oppName}</span>
+                  <span>
+                    <span className={`opp-result-indicator ${rc}`}></span>
+                    ({g.golCasa}-{g.golOspite})
+                  </span>
+                </div>
+              );
+            })}
+            <div className="opp-form-pct">{homeForm.pct}%</div>
+            <div className="opp-form-bar"><div className="opp-form-bar-fill" style={{ width: homeForm.pct + '%' }}></div></div>
           </div>
-        </div>
-
-        <div className="card detail-section">
-          <h4>📊 UNDER / OVER</h4>
-          {stats.underOver.map(u => (
-            <div key={u.threshold} className="detail-row">
-              <div className="detail-stat-box" style={{ flex: '0 0 70px', background: 'var(--surface)' }}>
-                <span className="label" style={{ color: '#ffff00' }}>Soglia</span>
-                <span className="value" style={{ color: '#fff', fontSize: '14px' }}>{u.threshold}</span>
-              </div>
-              {renderStatBox('Under', u.under)}
-              {renderStatBox('Over', u.over)}
-            </div>
-          ))}
-        </div>
-
-        {ggngData && (
-          <div className="card detail-section">
-            <h4>⚽ GG / NG</h4>
-            <div className="detail-row">
-              {renderStatBox('GG (Goal-Goal)', ggngData.gg)}
-              {renderStatBox('NG (No Goal)', ggngData.ng)}
-            </div>
-            <div style={{
-              marginTop: '8px',
-              fontSize: '11px',
-              color: 'var(--text-muted)',
-              textAlign: 'center',
-              fontStyle: 'italic'
-            }}>
-              📊 Basato su {ggngData.totalePartite} partite (unione casa + ospite, senza duplicati)
-            </div>
+          <div className="opponents-col">
+            <b>Ultimi avversari ({match.ospiti})</b>
+            {last5Away.map(g => {
+              const rc = getResultColor(g, match.ospiti);
+              const oppName = g.casa === match.ospiti ? g.ospiti : g.casa;
+              return (
+                <div key={g.id} className="opp-item">
+                  <span>{oppName}</span>
+                  <span>
+                    <span className={`opp-result-indicator ${rc}`}></span>
+                    ({g.golCasa}-{g.golOspite})
+                  </span>
+                </div>
+              );
+            })}
+            <div className="opp-form-pct">{awayForm.pct}%</div>
+            <div className="opp-form-bar"><div className="opp-form-bar-fill" style={{ width: awayForm.pct + '%' }}></div></div>
           </div>
-        )}
-
-        <div className="card detail-section">
-          <h4>📊 MULTIGOL</h4>
-          {renderMultigolRow({
-            '0-2': stats.homeMG['0-2'],
-            '1-3': stats.homeMG['1-3'],
-            '2-5': stats.homeMG['2-5']
-          }, `🏠 ${match.casa} (solo in casa)`, getChampColor(match.campionato))}
-          {renderMultigolRow({
-            '0-2': stats.awayMG['0-2'],
-            '1-3': stats.awayMG['1-3'],
-            '2-5': stats.awayMG['2-5']
-          }, `✈️ ${match.ospiti} (solo fuori casa)`, getChampColor(match.campionato))}
-          {renderMultigolRow({
-            '1-4': stats.mgTot['1-4'],
-            '2-5': stats.mgTot['2-5']
-          }, '📊 Totale partita (unione)', 'var(--accent)')}
         </div>
       </div>
     );
   };
 
   // ============================================================
-  // TUTTE LE FAMIGLIE (VISTA AGGIUNTIVA)
+  // TUTTE LE FAMIGLIE (con quote PDF)
   // ============================================================
-
   const TutteLeFamigliePanel = ({ match, allMatches }) => {
     const getChampColor = window.getChampColor;
     const getPercentualeClasse = window.getPercentualeClasse;
@@ -703,21 +544,25 @@
           pct = getGiocataPct(opt, stats, stats.homeMG, stats.awayMG, stats.mgTot);
         }
 
-        // Quota (opzionale)
+        // ⭐ QUOTA PDF
         let quota = null;
         let fonteQuota = null;
+        let edge = null;
+        let isValue = false;
 
         if (window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function') {
           try {
             const q = window.QuoteManager.analizzaGiocata(match, familyId, opt, pct);
             if (q && q.quotaBook) {
               quota = q.quotaBook;
+              edge = q.edge;
+              isValue = q.isValue;
               fonteQuota = 'PDF';
             }
           } catch (e) {}
         }
 
-        return { opt, pct, quota, fonteQuota };
+        return { opt, pct, quota, fonteQuota, edge, isValue };
       });
 
       return { familyId, family, opzioni };
@@ -739,35 +584,38 @@
               <h4 style={{
                 color: familyId === 'gg_ng' ? '#e74c3c' : 'var(--accent)',
                 marginBottom: '8px', fontSize: '14px',
-                display: 'flex', justifyContent: 'space-between'
               }}>
-                <span>{family.icon} {family.label}</span>
+                {family.icon} {family.label}
               </h4>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                {opzioni.map(({ opt, pct, quota, fonteQuota }) => (
+                {opzioni.map(({ opt, pct, quota, fonteQuota, edge, isValue }) => (
                   <div key={opt} style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     padding: '6px 8px', borderRadius: '6px',
                     background: 'var(--card)',
                     fontSize: '12px',
                   }}>
-                    <span style={{ fontWeight: 'bold', color: 'var(--text)' }}>
+                    <span style={{ fontWeight: 'bold', color: 'var(--text)', flex: 1 }}>
                       {formatGiocataLabel(familyId, opt)}
                     </span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span className={`giocata-pct ${getPercentualeClasse(pct)}`}
                         style={{ fontSize: '11px', padding: '2px 8px' }}>
                         {pct}%
                       </span>
                       {quota && (
-                        <span style={{
-                          fontSize: '11px', padding: '2px 6px', borderRadius: '4px',
-                          background: fonteQuota === 'PDF' ? 'rgba(111, 207, 151, 0.15)' : 'rgba(243, 156, 18, 0.15)',
-                          color: fonteQuota === 'PDF' ? 'var(--win)' : 'var(--accent)',
-                          fontWeight: 'bold',
-                        }}>
+                        <span
+                          title={isValue ? `VALUE BET! Edge: +${edge}%` : `Quota Marathonbet`}
+                          style={{
+                            fontSize: '11px', padding: '2px 6px', borderRadius: '4px',
+                            background: isValue ? 'rgba(111, 207, 151, 0.2)' : 'rgba(243, 156, 18, 0.15)',
+                            color: isValue ? 'var(--win)' : 'var(--accent)',
+                            fontWeight: 'bold',
+                            border: isValue ? '1px solid var(--win)' : '1px solid transparent',
+                          }}>
                           {fonteQuota === 'PDF' ? '💰' : '📊'} {quota.toFixed(2)}
+                          {isValue && edge && <span> +{edge}%</span>}
                         </span>
                       )}
                     </div>
@@ -788,7 +636,6 @@
   // ============================================================
   // STANDINGS
   // ============================================================
-
   const Standings = ({ matches, filterChampionship, highlightTeams = [] }) => {
     const [view, setView] = useState('generale');
     const TeamLogo = window.TeamLogo;
@@ -911,7 +758,6 @@
   // ============================================================
   // RISULTATI FREQUENTI
   // ============================================================
-
   const RisultatiFrequenti = ({ teamName, allMatches }) => {
     const parseDate = window.parseDate;
     const getFrequenti = (team) => {
@@ -988,7 +834,6 @@
   // ============================================================
   // FREQUENZA GOL
   // ============================================================
-
   const FrequenzaGol = ({ teamName, allMatches }) => {
     const getChampColor = window.getChampColor;
     const teamMatches = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName));
@@ -1047,7 +892,6 @@
   // ============================================================
   // INDICE AFFIDABILITA
   // ============================================================
-
   const IndiceAffidabilita = ({ teamName, allMatches }) => {
     const teamMatches = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName));
     const count = teamMatches.length;
@@ -1094,7 +938,6 @@
   // ============================================================
   // TEAM MATCHES HISTORY
   // ============================================================
-
   const TeamMatchesHistory = ({ teamName, championship, allMatches }) => {
     const parseDate = window.parseDate;
     const formatDateEU = window.formatDateEU;
@@ -1198,9 +1041,95 @@
   };
 
   // ============================================================
+  // WEATHER PROFESSIONALE
+  // ============================================================
+  const WeatherProfessionale = ({ weatherData, city, matchDate }) => {
+    if (!weatherData) {
+      return (
+        <div className="weather-professionale" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+          <div style={{ fontSize: '48px', marginBottom: '8px' }}>🌤️</div>
+          <p>Dati meteo non disponibili per {city || 'questa località'}</p>
+          <p style={{ fontSize: '12px' }}>Open-Meteo è gratuito e non richiede chiave API</p>
+        </div>
+      );
+    }
+
+    const getWeatherIcon = (desc, rain) => {
+      if (!desc) return '🌤️';
+      const d = desc.toLowerCase();
+      if (rain > 5) return '🌧️';
+      if (rain > 1) return '🌦️';
+      if (d.includes('sereno')) return '☀️';
+      if (d.includes('nuvoloso') || d.includes('coperto')) return '☁️';
+      if (d.includes('nebbia')) return '🌫️';
+      if (d.includes('pioggia')) return '🌧️';
+      if (d.includes('temporale')) return '⛈️';
+      if (d.includes('neve')) return '❄️';
+      return '🌤️';
+    };
+
+    const getRiskLevel = (weather) => {
+      let risk = 0;
+      if (weather.rain > 5) risk += 3;
+      else if (weather.rain > 1) risk += 2;
+      else if (weather.rain > 0.5) risk += 1;
+      if (weather.wind_speed > 15) risk += 3;
+      else if (weather.wind_speed > 10) risk += 2;
+      else if (weather.wind_speed > 5) risk += 1;
+      if (weather.temp < -5 || weather.temp > 35) risk += 2;
+      else if (weather.temp < 0 || weather.temp > 30) risk += 1;
+      if (weather.weather && (weather.weather.includes('Temporale') || weather.weather.includes('temporale'))) risk += 3;
+      if (risk >= 6) return { level: 'high', label: '🔴 ALTO - Rischio di rinvio o condizioni proibitive' };
+      if (risk >= 4) return { level: 'medium', label: '🟡 MEDIO - Possibili difficoltà per i giocatori' };
+      if (risk >= 2) return { level: 'low', label: '🟢 BASSO - Condizioni accettabili' };
+      return { level: 'low', label: '🟢 OTTIMALE - Condizioni perfette per il calcio' };
+    };
+
+    const risk = getRiskLevel(weatherData);
+    const icon = getWeatherIcon(weatherData.weather, weatherData.rain);
+
+    return (
+      <div className="weather-professionale">
+        <div className="weather-header">
+          <div className="weather-icon-main">{icon}</div>
+          <div className="weather-info-main">
+            <div className="weather-temp-main">{Math.round(weatherData.temp)}°C</div>
+            <div className="weather-desc-main">{weatherData.weather || 'N/A'}</div>
+            <div className="weather-city-main">📍 {city || 'Località non specificata'} • 📅 {weatherData.forecast_date || matchDate || 'N/A'}</div>
+          </div>
+          <div style={{ textAlign: 'right', minWidth: '100px' }}>
+            <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Temp. min / max</div>
+            <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--accent)' }}>
+              {Math.round(weatherData.temp_min)}° / {Math.round(weatherData.temp_max)}°
+            </div>
+          </div>
+        </div>
+
+        <div className="weather-details-grid">
+          <div className="weather-detail-item">
+            <div className="wd-icon">💨</div>
+            <div className="wd-value">{Math.round(weatherData.wind_speed)} m/s</div>
+            <div className="wd-label">Vento</div>
+          </div>
+          <div className="weather-detail-item">
+            <div className="wd-icon">🌧️</div>
+            <div className="wd-value">{weatherData.rain > 0 ? weatherData.rain + ' mm' : '0 mm'}</div>
+            <div className="wd-label">Precipitazioni</div>
+          </div>
+        </div>
+
+        <div className="weather-risk">
+          <span className="risk-icon">⚠️</span>
+          <span className="risk-text"><b>Valutazione meteo:</b> {risk.label}</span>
+          <span className={`risk-badge ${risk.level}`}>{risk.level.toUpperCase()}</span>
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================================
   // COMPONENTE PRINCIPALE
   // ============================================================
-
   function StatisticheComponent({ matches, selectedMatchId, selectedFamiglie, weatherCache }) {
     const [statsSubTab, setStatsSubTab] = useState('Classifica');
     const getChampColor = window.getChampColor;
@@ -1265,7 +1194,7 @@
               </div>
             </div>
 
-            {/* ⭐ VISTA TUTTE LE FAMIGLIE */}
+            {/* VISTA TUTTE LE FAMIGLIE */}
             {selectedMatch && (
               <TutteLeFamigliePanel match={selectedMatch} allMatches={matchesFiltrati} />
             )}
@@ -1381,97 +1310,8 @@
   }
 
   // ============================================================
-  // WEATHER PROFESSIONALE (invariato)
-  // ============================================================
-
-  const WeatherProfessionale = ({ weatherData, city, matchDate }) => {
-    if (!weatherData) {
-      return (
-        <div className="weather-professionale" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
-          <div style={{ fontSize: '48px', marginBottom: '8px' }}>🌤️</div>
-          <p>Dati meteo non disponibili per {city || 'questa località'}</p>
-          <p style={{ fontSize: '12px' }}>Open-Meteo è gratuito e non richiede chiave API</p>
-        </div>
-      );
-    }
-
-    const getWeatherIcon = (desc, rain) => {
-      if (!desc) return '🌤️';
-      const d = desc.toLowerCase();
-      if (rain > 5) return '🌧️';
-      if (rain > 1) return '🌦️';
-      if (d.includes('sereno')) return '☀️';
-      if (d.includes('nuvoloso') || d.includes('coperto')) return '☁️';
-      if (d.includes('nebbia')) return '🌫️';
-      if (d.includes('pioggia')) return '🌧️';
-      if (d.includes('temporale')) return '⛈️';
-      if (d.includes('neve')) return '❄️';
-      return '🌤️';
-    };
-
-    const getRiskLevel = (weather) => {
-      let risk = 0;
-      if (weather.rain > 5) risk += 3;
-      else if (weather.rain > 1) risk += 2;
-      else if (weather.rain > 0.5) risk += 1;
-      if (weather.wind_speed > 15) risk += 3;
-      else if (weather.wind_speed > 10) risk += 2;
-      else if (weather.wind_speed > 5) risk += 1;
-      if (weather.temp < -5 || weather.temp > 35) risk += 2;
-      else if (weather.temp < 0 || weather.temp > 30) risk += 1;
-      if (weather.weather && (weather.weather.includes('Temporale') || weather.weather.includes('temporale'))) risk += 3;
-      if (risk >= 6) return { level: 'high', label: '🔴 ALTO - Rischio di rinvio o condizioni proibitive' };
-      if (risk >= 4) return { level: 'medium', label: '🟡 MEDIO - Possibili difficoltà per i giocatori' };
-      if (risk >= 2) return { level: 'low', label: '🟢 BASSO - Condizioni accettabili' };
-      return { level: 'low', label: '🟢 OTTIMALE - Condizioni perfette per il calcio' };
-    };
-
-    const risk = getRiskLevel(weatherData);
-    const icon = getWeatherIcon(weatherData.weather, weatherData.rain);
-
-    return (
-      <div className="weather-professionale">
-        <div className="weather-header">
-          <div className="weather-icon-main">{icon}</div>
-          <div className="weather-info-main">
-            <div className="weather-temp-main">{Math.round(weatherData.temp)}°C</div>
-            <div className="weather-desc-main">{weatherData.weather || 'N/A'}</div>
-            <div className="weather-city-main">📍 {city || 'Località non specificata'} • 📅 {weatherData.forecast_date || matchDate || 'N/A'}</div>
-          </div>
-          <div style={{ textAlign: 'right', minWidth: '100px' }}>
-            <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Temp. min / max</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--accent)' }}>
-              {Math.round(weatherData.temp_min)}° / {Math.round(weatherData.temp_max)}°
-            </div>
-          </div>
-        </div>
-
-        <div className="weather-details-grid">
-          <div className="weather-detail-item">
-            <div className="wd-icon">💨</div>
-            <div className="wd-value">{Math.round(weatherData.wind_speed)} m/s</div>
-            <div className="wd-label">Vento</div>
-          </div>
-          <div className="weather-detail-item">
-            <div className="wd-icon">🌧️</div>
-            <div className="wd-value">{weatherData.rain > 0 ? weatherData.rain + ' mm' : '0 mm'}</div>
-            <div className="wd-label">Precipitazioni</div>
-          </div>
-        </div>
-
-        <div className="weather-risk">
-          <span className="risk-icon">⚠️</span>
-          <span className="risk-text"><b>Valutazione meteo:</b> {risk.label}</span>
-          <span className={`risk-badge ${risk.level}`}>{risk.level.toUpperCase()}</span>
-        </div>
-      </div>
-    );
-  };
-
-  // ============================================================
   // ESPOSIZIONE GLOBALE
   // ============================================================
-
   window.StatisticheComponent = StatisticheComponent;
   window.AIAnalysis = AIAnalysis;
   window.WeatherProfessionale = WeatherProfessionale;
@@ -1482,6 +1322,6 @@
   window.TeamMatchesHistory = TeamMatchesHistory;
   window.TutteLeFamigliePanel = TutteLeFamigliePanel;
 
-  console.log('✅ Modulo Statistiche caricato - DC somma + 8 opzioni MG + vista Tutte le famiglie');
+  console.log('✅ Modulo Statistiche v2 caricato - MatchDetail semplificato + quote in Tutte le giocate');
 
 })();

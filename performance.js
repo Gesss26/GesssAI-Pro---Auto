@@ -1,9 +1,9 @@
 // ============================================================
-// performance.js - Modulo Storico Performance (v6 - Selettore Schedina)
-// - ⭐ v5: calcola TUTTI gli snapshot direttamente da matches (Excel)
-// - ⭐ v6: filtro "🎯 Seleziona Giocate" stile Schedina
+// performance.js - Modulo Storico Performance (v8)
+// - Calcola TUTTI gli snapshot direttamente da matches (Excel)
+// - Filtro "🎯 Seleziona Giocate" stile Schedina
 // - La matrice Campionato × Giocata si popola automaticamente
-// - Il DB GitHub è solo cache opzionale per condivisione
+// - ✅ FIX v8: conteggi uniformi (no pct > 0), etichette uniformi
 // ============================================================
 
 (function () {
@@ -14,10 +14,6 @@
   const STORAGE_KEY = 'ft_performance_pending';
   const DEBOUNCE_MS = 5 * 60 * 1000;
   const MAX_LOCAL = 5000;
-
-  // ============================================================
-  // ORDINE CAMPIONATI
-  // ============================================================
 
   const CHAMP_ORDER = [
     'Serie A', 'Serie B', 'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C',
@@ -105,7 +101,7 @@
   };
 
   // ============================================================
-  // CALCOLO ESITO
+  // CALCOLO ESITO (con fix parsing virgola/punto)
   // ============================================================
 
   const matchRange = (val, range) => {
@@ -130,11 +126,11 @@
       if (giocataLabel === 'X2') return gC <= gO ? 'V' : 'P';
     }
     if (familyId === 'over') {
-      const s = parseFloat(String(giocataLabel).replace('Over ', ''));
+      const s = parseFloat(String(giocataLabel).replace('Over ', '').replace(',', '.'));
       if (!isNaN(s)) return tot > s ? 'V' : 'P';
     }
     if (familyId === 'under') {
-      const s = parseFloat(String(giocataLabel).replace('Under ', ''));
+      const s = parseFloat(String(giocataLabel).replace('Under ', '').replace(',', '.'));
       if (!isNaN(s)) return tot < s ? 'V' : 'P';
     }
     if (familyId === 'gg_ng') {
@@ -142,10 +138,14 @@
       if (giocataLabel === 'No Goal' || giocataLabel === 'NG') return (gC === 0 || gO === 0) ? 'V' : 'P';
     }
     if (familyId === 'multigol') {
-      if (giocataLabel === '0-2') return gC <= 2 ? 'V' : 'P';
-      if (giocataLabel === '1-3') return (gC >= 1 && gC <= 3) ? 'V' : 'P';
-      if (giocataLabel === '1-4') return (tot >= 1 && tot <= 4) ? 'V' : 'P';
-      if (giocataLabel === '2-5') return (tot >= 2 && tot <= 5) ? 'V' : 'P';
+      if (giocataLabel === 'MG Casa 0-2') return gC <= 2 ? 'V' : 'P';
+      if (giocataLabel === 'MG Ospite 0-2') return gO <= 2 ? 'V' : 'P';
+      if (giocataLabel === 'MG Casa 1-3') return (gC >= 1 && gC <= 3) ? 'V' : 'P';
+      if (giocataLabel === 'MG Ospite 1-3') return (gO >= 1 && gO <= 3) ? 'V' : 'P';
+      if (giocataLabel === 'MG Casa 2-5') return (gC >= 2 && gC <= 5) ? 'V' : 'P';
+      if (giocataLabel === 'MG Ospite 2-5') return (gO >= 2 && gO <= 5) ? 'V' : 'P';
+      if (giocataLabel === 'MG Tot 1-4') return (tot >= 1 && tot <= 4) ? 'V' : 'P';
+      if (giocataLabel === 'MG Tot 2-5') return (tot >= 2 && tot <= 5) ? 'V' : 'P';
     }
     if (familyId === 'mg_casa_ospite') {
       const parts = String(giocataLabel).split('+');
@@ -177,10 +177,8 @@
         const dcOk = calcolaEsitoGiocata(match, 'dc', parts[0]) === 'V';
         const mg = parts[1];
         let mgOk = false;
-        if (mg === '0-2') mgOk = tot <= 2;
-        else if (mg === '1-3') mgOk = tot >= 1 && tot <= 3;
-        else if (mg === '1-4') mgOk = tot >= 1 && tot <= 4;
-        else if (mg === '2-5') mgOk = tot >= 2 && tot <= 5;
+        if (mg === 'MG Tot 1-4') mgOk = tot >= 1 && tot <= 4;
+        else if (mg === 'MG Tot 2-5') mgOk = tot >= 2 && tot <= 5;
         return (dcOk && mgOk) ? 'V' : 'P';
       }
     }
@@ -189,6 +187,7 @@
 
   // ============================================================
   // CALCOLA TUTTE LE GIOCATE DI TUTTE LE FAMIGLIE
+  // ⭐ FIX: includi SEMPRE tutte le giocate (anche con pct = 0)
   // ============================================================
 
   const calcolaTutteGiocatePerPartita = (match, allMatches) => {
@@ -227,17 +226,16 @@
           }
         }
 
-        if (pct > 0) {
-          out.push({
-            familyId,
-            familyLabel: family.label,
-            familyIcon: family.icon,
-            giocata: opt,
-            label: opt,
-            displayLabel: opt,
-            pct,
-          });
-        }
+        // ✅ FIX: includi SEMPRE, anche se pct = 0
+        out.push({
+          familyId,
+          familyLabel: family.label,
+          familyIcon: family.icon,
+          giocata: opt,
+          label: opt,
+          displayLabel: opt,
+          pct,
+        });
       });
     });
 
@@ -395,7 +393,7 @@
   };
 
   // ============================================================
-  // HOOK PRINCIPALE: snapshot da matches + merge remoto/pending
+  // HOOK PRINCIPALE
   // ============================================================
 
   const usePerformanceSnapshots = (matches) => {
@@ -447,11 +445,27 @@
       console.log(`📊 Performance: calcolo snapshot per ${partiteGiocate.length} partite giocate...`);
       const t0 = performance.now();
       const out = [];
+      let scartate = 0;
 
       partiteGiocate.forEach((match, idx) => {
         try {
+          const stats = window.computeMatchStats(match, matches);
+          if (stats.error) {
+            scartate++;
+            if (scartate <= 10) {
+              console.warn(`⚠️ Scartata ${match.casa}-${match.ospiti} (${match.campionato}): ${stats.error}`);
+            }
+            return;
+          }
+
           const giocate = calcolaTutteGiocatePerPartita(match, matches);
-          if (!giocate || giocate.length === 0) return;
+          if (!giocate || giocate.length === 0) {
+            scartate++;
+            if (scartate <= 10) {
+              console.warn(`⚠️ Scartata ${match.casa}-${match.ospiti}: 0 giocate`);
+            }
+            return;
+          }
 
           const giocateConEsito = giocate.map(g => ({
             ...g,
@@ -474,12 +488,13 @@
             console.log(`   ... ${idx}/${partiteGiocate.length}`);
           }
         } catch (e) {
+          scartate++;
           console.warn(`⚠️ Errore calcolo snapshot per ${match.casa}-${match.ospiti}:`, e.message);
         }
       });
 
       const t1 = performance.now();
-      console.log(`✅ Performance: ${out.length} snapshot calcolati in ${Math.round(t1 - t0)}ms`);
+      console.log(`✅ Performance: ${out.length} snapshot calcolati in ${Math.round(t1 - t0)}ms (scartate: ${scartate})`);
       return out;
     }, [matches]);
 
@@ -551,15 +566,15 @@
     return { matrix, campionati, tutteGiocate };
   };
 
-const cellColor = (pct, tot, minGiocate) => {
-  if (tot < minGiocate) return { bg: 'transparent', fg: 'var(--text-muted)', opacity: 0.3 };
-  if (pct >= 90) return { bg: 'rgba(243, 156, 18, 0.35)', fg: 'var(--accent)', opacity: 1 };  // 🥇 ORO
-  if (pct >= 80) return { bg: 'rgba(111, 207, 151, 0.35)', fg: 'var(--win)', opacity: 1 };
-  if (pct >= 65) return { bg: 'rgba(111, 207, 151, 0.15)', fg: 'var(--win)', opacity: 1 };
-  if (pct >= 45) return { bg: 'rgba(255, 255, 255, 0.05)', fg: 'var(--text)', opacity: 1 };
-  if (pct >= 30) return { bg: 'rgba(235, 87, 87, 0.10)', fg: 'var(--lose)', opacity: 1 };
-  return { bg: 'rgba(235, 87, 87, 0.25)', fg: 'var(--lose)', opacity: 1 };
-};
+  const cellColor = (pct, tot, minGiocate) => {
+    if (tot < minGiocate) return { bg: 'transparent', fg: 'var(--text-muted)', opacity: 0.3 };
+    if (pct >= 90) return { bg: 'rgba(243, 156, 18, 0.35)', fg: 'var(--accent)', opacity: 1 };
+    if (pct >= 80) return { bg: 'rgba(111, 207, 151, 0.35)', fg: 'var(--win)', opacity: 1 };
+    if (pct >= 65) return { bg: 'rgba(111, 207, 151, 0.15)', fg: 'var(--win)', opacity: 1 };
+    if (pct >= 45) return { bg: 'rgba(255, 255, 255, 0.05)', fg: 'var(--text)', opacity: 1 };
+    if (pct >= 30) return { bg: 'rgba(235, 87, 87, 0.10)', fg: 'var(--lose)', opacity: 1 };
+    return { bg: 'rgba(235, 87, 87, 0.25)', fg: 'var(--lose)', opacity: 1 };
+  };
 
   // ============================================================
   // SELETTORE GIOCATE (stile Schedina)
@@ -1178,6 +1193,6 @@ const cellColor = (pct, tot, minGiocate) => {
     CHAMP_ORDER,
   };
 
-  console.log('✅ Modulo Performance v6 caricato - selettore giocate stile Schedina + calcolo da Excel');
+  console.log('✅ Modulo Performance v8 caricato - conteggi uniformi + etichette uniformi');
 
 })();

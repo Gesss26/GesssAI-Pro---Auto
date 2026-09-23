@@ -9,7 +9,6 @@
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-<!-- PDF.js per leggere il PDF Marathonbet -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   if (typeof pdfjsLib !== 'undefined') {
@@ -17,19 +16,15 @@
   }
 </script>
 
-<!-- Parser PDF (DEVE essere caricato PRIMA di quote-manager) -->
 <script src="pdf-quote-parser.js"></script>
 
-<!-- Moduli esterni -->
 <script type="text/javascript" src="meteo.js"></script>
 <script src="filtri-campionati.js"></script>
 <script type="text/babel" src="quote-manager.js"></script>
 <script type="text/babel" src="schedina.js"></script>
 
-<!-- GESTIONE CONTO (deve essere prima di home.js) -->
 <script type="text/babel" src="gestione-conto.js"></script>
 
-<!-- PERFORMANCE DB (client GitHub) - PRIMA di performance.js e palinsesto.js -->
 <script type="text/babel" src="performance-db.js"></script>
 <script type="text/babel" src="performance.js"></script>
 
@@ -1080,7 +1075,7 @@
     };
 
     // ============================================================
-    // FAMIGLIE GIOCATE (aggiornate con 8 opzioni MG)
+    // FAMIGLIE GIOCATE (8 opzioni MG + 9 combinazioni MG Casa+Ospite)
     // ============================================================
 
     const FAMIGLIE_GIOCATE = {
@@ -1113,8 +1108,8 @@
       },
       dc_over: { id: 'dc_over', label: 'DC + OVER', icon: '🔗', desc: 'Sceglie la migliore tra tutte le 12 combinazioni DC+Over', options: ['1X+O1.5', '12+O1.5', 'X2+O1.5', '1X+O2.5', '12+O2.5', 'X2+O2.5', '1X+O3.5', '12+O3.5', 'X2+O3.5', '1X+O4.5', '12+O4.5', 'X2+O4.5'] },
       dc_under: { id: 'dc_under', label: 'DC + UNDER', icon: '🔗', desc: 'Sceglie la migliore tra tutte le 12 combinazioni DC+Under', options: ['1X+U1.5', '12+U1.5', 'X2+U1.5', '1X+U2.5', '12+U2.5', 'X2+U2.5', '1X+U3.5', '12+U3.5', 'X2+U3.5', '1X+U4.5', '12+U4.5', 'X2+U4.5'] },
-      mg_casa_ospite: { id: 'mg_casa_ospite', label: 'MG CASA + OSPITE', icon: '⚔️', desc: 'Sceglie la migliore tra tutte le 16 combinazioni', options: ['0-1+0-1', '0-1+0-2', '0-1+1-3', '0-1+2-5', '0-2+0-1', '0-2+0-2', '0-2+1-3', '0-2+2-5', '1-3+0-1', '1-3+0-2', '1-3+1-3', '1-3+2-5', '2-5+0-1', '2-5+0-2', '2-5+1-3', '2-5+2-5'] },
-      dc_multigol: { id: 'dc_multigol', label: 'DC + MULTIGOL', icon: '🔗', desc: 'Sceglie la migliore tra tutte le 12 combinazioni DC+MG', options: ['1X+MG Tot 1-4', '12+MG Tot 1-4', 'X2+MG Tot 1-4', '1X+MG Tot 2-5', '12+MG Tot 2-5', 'X2+MG Tot 2-5'] }
+      mg_casa_ospite: { id: 'mg_casa_ospite', label: 'MG CASA + OSPITE', icon: '⚔️', desc: 'Sceglie la migliore tra tutte le 9 combinazioni', options: ['0-2+0-2', '0-2+1-3', '0-2+2-5', '1-3+0-2', '1-3+1-3', '1-3+2-5', '2-5+0-2', '2-5+1-3', '2-5+2-5'] },
+      dc_multigol: { id: 'dc_multigol', label: 'DC + MULTIGOL', icon: '🔗', desc: 'Sceglie la migliore tra tutte le 6 combinazioni DC+MG', options: ['1X+MG Tot 1-4', '12+MG Tot 1-4', 'X2+MG Tot 1-4', '1X+MG Tot 2-5', '12+MG Tot 2-5', 'X2+MG Tot 2-5'] }
     };
 
     const DEFAULT_FAMIGLIE = ['dc_under', 'mg_casa_ospite', 'over'];
@@ -1148,22 +1143,23 @@
       };
     };
 
-    // ⭐ CALCOLO MULTIGOL PER SINGOLA SQUADRA (con range inclusivi)
+    // Multigol per singola squadra (0-1, 0-2, 1-3, 2-5)
     const getMultigolPerSquadra = (games, teamName, isHome) => {
       const total = games.length;
-      if (total === 0) return { '0-2': 0, '1-3': 0, '2-5': 0 };
+      if (total === 0) return { '0-1': 0, '0-2': 0, '1-3': 0, '2-5': 0 };
 
       const goals = games.map(g => isHome ? g.golCasa : g.golOspite);
       const count = (pred) => goals.filter(pred).length / total * 100;
 
       return {
-        '0-2': count(g => g <= 2),                        // 0, 1, 2
-        '1-3': count(g => g >= 1 && g <= 3),              // 1, 2, 3
-        '2-5': count(g => g >= 2 && g <= 5)               // 2, 3, 4, 5
+        '0-1': count(g => g <= 1),
+        '0-2': count(g => g <= 2),
+        '1-3': count(g => g >= 1 && g <= 3),
+        '2-5': count(g => g >= 2 && g <= 5)
       };
     };
 
-    // ⭐ CALCOLO MULTIGOL TOTALE (unione partite)
+    // Multigol totale (1-4, 2-5) - unione partite
     const getMultigolTotale = (games) => {
       const total = games.length;
       if (total === 0) return { '1-4': 0, '2-5': 0 };
@@ -1172,8 +1168,8 @@
       const count = (pred) => totalGoals.filter(pred).length / total * 100;
 
       return {
-        '1-4': count(g => g >= 1 && g <= 4),              // 1, 2, 3, 4
-        '2-5': count(g => g >= 2 && g <= 5)               // 2, 3, 4, 5
+        '1-4': count(g => g >= 1 && g <= 4),
+        '2-5': count(g => g >= 2 && g <= 5)
       };
     };
 
@@ -1181,11 +1177,11 @@
       const homeTeam = match.casa;
       const awayTeam = match.ospiti;
 
-      // Partite squadra di casa (solo IN CASA)
+      // Squadra di casa: solo partite IN CASA
       const homeGames = allMatches.filter(m =>
         m.stato === 'Giocata' && m.casa === homeTeam
       );
-      // Partite squadra ospite (solo FUORI CASA)
+      // Squadra ospite: solo partite FUORI CASA
       const awayGames = allMatches.filter(m =>
         m.stato === 'Giocata' && m.ospiti === awayTeam
       );
@@ -1221,7 +1217,6 @@
       const awayWinPct  = (awayWins   / awayPlayed) * 100;
       const awayDrawPct = (awayDraws  / awayPlayed) * 100;
 
-      // Forza relativa per normalizzare a 100%
       const homeStrength = homeWinPct;
       const awayStrength = awayWinPct;
       const drawStrength = (homeDrawPct + awayDrawPct) / 2;
@@ -1236,15 +1231,12 @@
         p1 = 33.33; pX = 33.33; p2 = 33.34;
       }
 
-      // ============================================================
-      // DOPPIA CHANCE: somma componenti (cap 100)
-      // ============================================================
       const p1X = Math.min(100, p1 + pX);
       const p12 = Math.min(100, p1 + p2);
       const pX2 = Math.min(100, pX + p2);
 
       // ============================================================
-      // OVER/UNDER: sull'UNIONE delle partite
+      // OVER/UNDER: unione partite
       // ============================================================
       const allGamesMap = new Map();
       [...homeGames, ...awayGames].forEach(g => {
@@ -1262,11 +1254,8 @@
       // ============================================================
       // MULTIGOL
       // ============================================================
-      // Squadra di casa: solo partite IN CASA
       const homeMG = getMultigolPerSquadra(homeGames, homeTeam, true);
-      // Squadra ospite: solo partite FUORI CASA
       const awayMG = getMultigolPerSquadra(awayGames, awayTeam, false);
-      // Totale: unione partite
       const mgTot = getMultigolTotale(allGames);
 
       return {
@@ -1317,10 +1306,10 @@
       return { label: best.label, pct: Math.round(best.pct), range: best.range, details: ranges.map(r => ({ ...r, pct: Math.round(r.pct) })) };
     };
 
-    // ⭐ CALCOLO PERCENTUALE GIOCATA
+    // Calcolo percentuale giocata
     const getGiocataPct = (giocata, stats, homeMG, awayMG, mgTot) => {
       if (stats.error) return 0;
-      const { p1, pX, p2, p1X, p12, pX2, underOver, homeGames, awayGames, allGames } = stats;
+      const { p1, pX, p2, p1X, p12, pX2, underOver, allGames } = stats;
 
       // GG/NG (unione partite)
       if (giocata === 'GG' || giocata === 'NG') {
@@ -1380,13 +1369,11 @@
       if (giocata.includes('+') && !giocata.includes('X') && !giocata.includes('O') && !giocata.includes('U') && !giocata.startsWith('MG')) {
         const parts = giocata.split('+');
         let pct1 = 0;
-        if (parts[0] === '0-1') pct1 = 0;
-        else if (parts[0] === '0-2') pct1 = homeMG['0-2'] || 0;
+        if (parts[0] === '0-2') pct1 = homeMG['0-2'] || 0;
         else if (parts[0] === '1-3') pct1 = homeMG['1-3'] || 0;
         else if (parts[0] === '2-5') pct1 = homeMG['2-5'] || 0;
         let pct2 = 0;
-        if (parts[1] === '0-1') pct2 = 0;
-        else if (parts[1] === '0-2') pct2 = awayMG['0-2'] || 0;
+        if (parts[1] === '0-2') pct2 = awayMG['0-2'] || 0;
         else if (parts[1] === '1-3') pct2 = awayMG['1-3'] || 0;
         else if (parts[1] === '2-5') pct2 = awayMG['2-5'] || 0;
         return Math.round((pct1 + pct2) / 2);
@@ -1433,13 +1420,11 @@
         } else if (familyId === 'mg_casa_ospite') {
           const parts = opt.split('+');
           let pct1 = 0;
-          if (parts[0] === '0-1') pct1 = 0;
-          else if (parts[0] === '0-2') pct1 = homeMG['0-2'] || 0;
+          if (parts[0] === '0-2') pct1 = homeMG['0-2'] || 0;
           else if (parts[0] === '1-3') pct1 = homeMG['1-3'] || 0;
           else if (parts[0] === '2-5') pct1 = homeMG['2-5'] || 0;
           let pct2 = 0;
-          if (parts[1] === '0-1') pct2 = 0;
-          else if (parts[1] === '0-2') pct2 = awayMG['0-2'] || 0;
+          if (parts[1] === '0-2') pct2 = awayMG['0-2'] || 0;
           else if (parts[1] === '1-3') pct2 = awayMG['1-3'] || 0;
           else if (parts[1] === '2-5') pct2 = awayMG['2-5'] || 0;
           pct = Math.round((pct1 + pct2) / 2);
@@ -1453,7 +1438,7 @@
         }
       });
 
-      if (best && bestPct > 0) return { giocata: best, label: bestLabel, pct: bestPct, isBomb: bestPct >= 90 };
+      if (best && bestPct >= 0) return { giocata: best, label: bestLabel, pct: bestPct, isBomb: bestPct >= 90 };
       return null;
     };
 
