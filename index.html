@@ -681,72 +681,103 @@
     };
 
     // ============================================================
-    // CARICAMENTO DATI
+    // CARICAMENTO DATI (SINGLETON - una sola esecuzione)
     // ============================================================
-    let dataLoaded = false;
 
-    async function loadScrapedData(forceReload = false) {
-      console.log('📂 Caricamento dati da Excel...');
-      try {
-        if (forceReload) {
-          localStorage.removeItem('ft_matches');
-          localStorage.removeItem('ft_champs');
-        }
+    // Stato interno del singleton: evita chiamate duplicate
+    let _loadScrapedDataPromise = null;
+    let _loadScrapedDataResult = null;
 
-        const paths = [
-          '/GesssAI-Pro---Auto/excel/GesssAI_Input.xlsx',
-          '/excel/GesssAI_Input.xlsx',
-          'https://gesss26.github.io/GesssAI-Pro---Auto/excel/GesssAI_Input.xlsx'
-        ];
-
-        let excelData = null;
-        for (const path of paths) {
-          try {
-            console.log('📂 Tentativo:', path);
-            const response = await fetch(path);
-            if (response.ok) {
-              console.log('✅ File Excel trovato!');
-              const arrayBuffer = await response.arrayBuffer();
-              excelData = processExcelData(arrayBuffer);
-              if (excelData) break;
-            }
-          } catch (e) {
-            console.warn('❌ Errore:', e.message);
-          }
-        }
-
-        if (excelData) return excelData;
-
-        console.log('📂 Fallback JSON...');
-        const jsonPaths = [
-          '/GesssAI-Pro---Auto/data/matches.json',
-          '/data/matches.json',
-          'https://gesss26.github.io/GesssAI-Pro---Auto/data/matches.json'
-        ];
-        for (const path of jsonPaths) {
-          try {
-            const response = await fetch(path);
-            if (response.ok) {
-              const data = await response.json();
-              console.log('✅ JSON caricato:', data.matches?.length || 0, 'partite');
-              if (data.matches) {
-                const filteredMatches = filtraCampionatiEsclusi(data.matches);
-                const filteredChamps = (data.championships || []).filter(c => !CAMPIONATI_ESCLUSI.has(c.name));
-                localStorage.setItem('ft_matches', JSON.stringify(filteredMatches));
-                localStorage.setItem('ft_champs', JSON.stringify(filteredChamps));
-                dataLoaded = true;
-                return { matches: filteredMatches, championships: filteredChamps };
-              }
-            }
-          } catch (e) {
-            console.warn('❌ JSON fallback:', e.message);
-          }
-        }
-        return null;
-      } catch (error) {
-        console.error('❌ Errore:', error.message);
-        return null;
+    function loadScrapedData(forceReload = false) {
+      // Se già in corso, ritorna la stessa Promise (nessun nuovo fetch)
+      if (_loadScrapedDataPromise && !forceReload) {
+        console.log('⏩ loadScrapedData: riuso Promise esistente');
+        return _loadScrapedDataPromise;
       }
+
+      // Se già completato e non forceReload, ritorna il risultato cached
+      if (_loadScrapedDataResult && !forceReload) {
+        console.log('⏩ loadScrapedData: riuso risultato cached');
+        return Promise.resolve(_loadScrapedDataResult);
+      }
+
+      if (forceReload) {
+        _loadScrapedDataResult = null;
+        localStorage.removeItem('ft_matches');
+        localStorage.removeItem('ft_champs');
+      }
+
+      _loadScrapedDataPromise = (async () => {
+        console.log('📂 Caricamento dati da Excel... (unica esecuzione)');
+        try {
+          const paths = [
+            '/GesssAI-Pro---Auto/excel/GesssAI_Input.xlsx',
+            '/excel/GesssAI_Input.xlsx',
+            'https://gesss26.github.io/GesssAI-Pro---Auto/excel/GesssAI_Input.xlsx'
+          ];
+
+          let excelData = null;
+          for (const path of paths) {
+            try {
+              console.log('📂 Tentativo:', path);
+              const response = await fetch(path, { cache: 'no-store' });
+              if (response.ok) {
+                console.log('✅ File Excel trovato!');
+                const arrayBuffer = await response.arrayBuffer();
+                excelData = processExcelData(arrayBuffer);
+                if (excelData) break;
+              }
+            } catch (e) {
+              console.warn('❌ Errore:', e.message);
+            }
+          }
+
+          if (excelData) {
+            _loadScrapedDataResult = excelData;
+            _loadScrapedDataPromise = null; // libera la Promise, mantieni il risultato
+            return excelData;
+          }
+
+          // Fallback JSON
+          console.log('📂 Fallback JSON...');
+          const jsonPaths = [
+            '/GesssAI-Pro---Auto/data/matches.json',
+            '/data/matches.json',
+            'https://gesss26.github.io/GesssAI-Pro---Auto/data/matches.json'
+          ];
+          for (const path of jsonPaths) {
+            try {
+              const response = await fetch(path, { cache: 'no-store' });
+              if (response.ok) {
+                const data = await response.json();
+                if (data.matches) {
+                  console.log('✅ JSON caricato:', data.matches.length, 'partite');
+                  const filteredMatches = filtraCampionatiEsclusi(data.matches);
+                  const filteredChamps = (data.championships || [])
+                    .filter(c => !CAMPIONATI_ESCLUSI.has(c.name));
+                  localStorage.setItem('ft_matches', JSON.stringify(filteredMatches));
+                  localStorage.setItem('ft_champs', JSON.stringify(filteredChamps));
+                  const result = { matches: filteredMatches, championships: filteredChamps };
+                  _loadScrapedDataResult = result;
+                  _loadScrapedDataPromise = null;
+                  return result;
+                }
+              }
+            } catch (e) {
+              console.warn('❌ JSON fallback:', e.message);
+            }
+          }
+
+          _loadScrapedDataPromise = null;
+          return null;
+        } catch (error) {
+          console.error('❌ Errore:', error.message);
+          _loadScrapedDataPromise = null;
+          return null;
+        }
+      })();
+
+      return _loadScrapedDataPromise;
     }
 
     function processExcelData(arrayBuffer) {
@@ -851,7 +882,6 @@
 
         localStorage.setItem('ft_matches', JSON.stringify(matchesFiltrati));
         localStorage.setItem('ft_champs', JSON.stringify(championshipsFiltrati));
-        dataLoaded = true;
 
         return { matches: matchesFiltrati, championships: championshipsFiltrati };
       } catch (error) {
@@ -1164,7 +1194,6 @@
     // ============================================================
     // FUNZIONI CONGIUNTE (per combinate)
     // ============================================================
-    // DC + UNDER: conta partite in cui è vera la DC E il totale < soglia
     const calcolaDcUnder = (games, dc, soglia) => {
       if (!games || games.length === 0) return 0;
       let count = 0;
@@ -1231,7 +1260,6 @@
         return { error: 'Dati insufficienti (squadra senza partite).' };
       }
 
-      // FISSE
       let homeWins = 0, homeDraws = 0, homeLosses = 0;
       homeGames.forEach(g => {
         const tg = g.golCasa, og = g.golOspite;
@@ -1273,7 +1301,6 @@
       const p12 = Math.min(100, p1 + p2);
       const pX2 = Math.min(100, pX + p2);
 
-      // UNIONE partite
       const allGamesMap = new Map();
       [...homeGames, ...awayGames].forEach(g => {
         if (!allGamesMap.has(g.id)) allGamesMap.set(g.id, g);
@@ -1339,14 +1366,10 @@
       return { label: best.label, pct: Math.round(best.pct), range: best.range, details: ranges.map(r => ({ ...r, pct: Math.round(r.pct) })) };
     };
 
-    // ============================================================
-    // CALCOLO PERCENTUALE GIOCATA (con combinate corrette)
-    // ============================================================
     const getGiocataPct = (giocata, stats, homeMG, awayMG, mgTot) => {
       if (stats.error) return 0;
       const { p1, pX, p2, p1X, p12, pX2, underOver, allGames } = stats;
 
-      // GG/NG (unione partite)
       if (giocata === 'GG' || giocata === 'NG') {
         const games = allGames || [];
         if (games.length === 0) return 0;
@@ -1359,29 +1382,24 @@
         return Math.round(((total - ggCount) / total) * 100);
       }
 
-      // FISSE
       if (giocata === '1') return Math.round(p1);
       if (giocata === 'X') return Math.round(pX);
       if (giocata === '2') return Math.round(p2);
 
-      // DC
       if (giocata === '1X') return Math.round(p1X);
       if (giocata === '12') return Math.round(p12);
       if (giocata === 'X2') return Math.round(pX2);
 
-      // OVER
       if (giocata === 'Over 1.5') return Math.round(underOver[0]?.over || 0);
       if (giocata === 'Over 2.5') return Math.round(underOver[1]?.over || 0);
       if (giocata === 'Over 3.5') return Math.round(underOver[2]?.over || 0);
       if (giocata === 'Over 4.5') return Math.round(underOver[3]?.over || 0);
 
-      // UNDER
       if (giocata === 'Under 1.5') return Math.round(underOver[0]?.under || 0);
       if (giocata === 'Under 2.5') return Math.round(underOver[1]?.under || 0);
       if (giocata === 'Under 3.5') return Math.round(underOver[2]?.under || 0);
       if (giocata === 'Under 4.5') return Math.round(underOver[3]?.under || 0);
 
-      // MULTIGOL
       if (giocata === 'MG Casa 0-2') return Math.round(homeMG['0-2'] || 0);
       if (giocata === 'MG Ospite 0-2') return Math.round(awayMG['0-2'] || 0);
       if (giocata === 'MG Casa 1-3') return Math.round(homeMG['1-3'] || 0);
@@ -1391,7 +1409,6 @@
       if (giocata === 'MG Tot 1-4') return Math.round(mgTot['1-4'] || 0);
       if (giocata === 'MG Tot 2-5') return Math.round(mgTot['2-5'] || 0);
 
-      // ⭐ DC + OVER (conteggio congiunto)
       if (giocata.startsWith('1X+O')) {
         const s = parseFloat(giocata.replace('1X+O', ''));
         return calcolaDcOver(allGames, '1X', s);
@@ -1405,7 +1422,6 @@
         return calcolaDcOver(allGames, 'X2', s);
       }
 
-      // ⭐ DC + UNDER (conteggio congiunto)
       if (giocata.startsWith('1X+U')) {
         const s = parseFloat(giocata.replace('1X+U', ''));
         return calcolaDcUnder(allGames, '1X', s);
@@ -1419,13 +1435,11 @@
         return calcolaDcUnder(allGames, 'X2', s);
       }
 
-      // ⭐ MG CASA + OSPITE (conteggio congiunto)
       if (giocata.includes('+') && !giocata.includes('X') && !giocata.includes('O') && !giocata.includes('U') && !giocata.startsWith('MG')) {
         const parts = giocata.split('+');
         return calcolaMgCasaOspite(allGames, parts[0], parts[1]);
       }
 
-      // ⭐ DC + MULTIGOL (conteggio congiunto)
       if (giocata.startsWith('1X+MG')) {
         const mg = giocata.replace('1X+MG ', '');
         if (mg === 'Tot 1-4') return calcolaDcMgTot(allGames, '1X', 1, 4);
@@ -1526,6 +1540,7 @@
     window.CAMPIONATI_ESCLUSI = CAMPIONATI_ESCLUSI;
     window.filtraCampionatiEsclusi = filtraCampionatiEsclusi;
     window.calcolaGG_NG = calcolaGG_NG;
+    window.loadScrapedData = loadScrapedData;
 
     console.log('✅ Funzioni globali esposte per i moduli esterni');
 
@@ -1543,14 +1558,6 @@
         };
         localData.matches = filtraCampionatiEsclusi(localData.matches);
         localData.championships = localData.championships.filter(c => !CAMPIONATI_ESCLUSI.has(c.name));
-
-        if (localData.matches.length === 0) {
-          loadScrapedData().then(data => {
-            if (data && data.matches && data.matches.length > 0 && window.updateAppData) {
-              window.updateAppData(data);
-            }
-          });
-        }
         return localData;
       } catch (e) {
         return { championships: [], matches: [], theme: 'Scuro Blu Notte', customTheme: null, selectedFamiglie: ['dc_under', 'mg_casa_ospite', 'over'] };
@@ -1617,24 +1624,38 @@
         }
       }, []);
 
+      // ============================================================
+      // CARICAMENTO DATI - UNA SOLA VOLTA ALL'AVVIO
+      // ============================================================
       useEffect(() => {
-        try {
-          const loadData = async () => {
+        let cancelled = false;
+        (async () => {
+          try {
+            // Se localStorage ha già i dati, skip ricaricamento Excel
+            const cachedMatches = JSON.parse(localStorage.getItem('ft_matches') || '[]');
+            if (cachedMatches.length > 0 && matches.length > 0) {
+              console.log(`⏩ ${matches.length} partite già in localStorage, skip ricaricamento Excel`);
+              return;
+            }
+
             const data = await loadScrapedData();
-            if (data && data.matches && data.matches.length > 0) {
+            if (!cancelled && data && data.matches && data.matches.length > 0) {
               setMatches(data.matches);
               setChampionships(data.championships || []);
               console.log(`✅ ${data.matches.length} partite caricate!`);
             }
-          };
-          loadData();
-        } catch (e) {
-          console.error('Errore caricamento:', e);
-          setHasError(true);
-          setErrorMessage(e.message);
-        }
+          } catch (e) {
+            console.error('Errore caricamento:', e);
+            setHasError(true);
+            setErrorMessage(e.message);
+          }
+        })();
+        return () => { cancelled = true; };
       }, []);
 
+      // ============================================================
+      // CARICAMENTO METEO - LIMITATO E DEDUPLICATO
+      // ============================================================
       useEffect(() => {
         if (!matches || matches.length === 0) return;
         if (typeof window.fetchWeatherForMatch !== 'function') {
@@ -1971,12 +1992,9 @@
 
     console.log('🚀 Avvio GesssAI-Pro');
 
-    loadScrapedData(true).then(data => {
-      if (data && data.matches && data.matches.length > 0) {
-        console.log(`✅ ${data.matches.length} partite caricate all'avvio!`);
-        if (window.updateAppData) window.updateAppData(data);
-      }
-    });
+    // ⚠️ Il caricamento dati avviene UNA SOLA VOLTA dentro App() tramite useEffect.
+    // Non chiamare loadScrapedData() qui: causerebbe un doppio/triplo caricamento.
+    console.log('ℹ️ Caricamento dati delegato al componente App (singleton)');
 
     try {
       const rootElement = document.getElementById('root');

@@ -1,6 +1,7 @@
 // ============================================================
 // METEO.JS - DATI METEO E COORDINATE PER GesssAI-Pro
 // Aggiornato con tutte le squadre dal file GesssAI_Input.xlsx
+// ✅ FIX v3: range date corretto (UTC) + coda rate-limit + deduplicazione
 // ============================================================
 
 // ============================================================
@@ -88,47 +89,13 @@ const CHAMPIONSHIP_COUNTRY = {
   'Super Lig': 'TR',
   'Turkish Süper Lig': 'TR',
   
-  // USA/CANADA
-  'Major League Soccer': 'US',
-  'MLS': 'US',
-  'NWSL': 'US',
-  'National Women\'s Soccer League': 'US',
-  
-  // AUSTRALIA
-  'A-League': 'AU',
-  'A-League Men': 'AU',
-  
-  // SVEZIA
-  'Allsvenskan': 'SE',
-  
-  // NORVEGIA
-  'Eliteserien': 'NO',
-  
-  // DANIMARCA
-  'Danish Superliga': 'DK',
-  
-  // SVIZZERA
-  'Swiss Super League': 'CH',
-  
-  // AUSTRIA
-  'Austrian Bundesliga': 'AT',
-  
-  // RUSSIA
-  'Russian Premier League': 'RU',
-  
-  // MESSICO
-  'Liga MX': 'MX'
-};
+  };
 
 // ============================================================
 // MAPPA CITTÀ PER CAMPIONATO
 // ============================================================
 
 const CITTÀ_PER_CAMPIONATO = {
-  // ARGENTINA
-  'Liga Profesional': 'Buenos Aires',
-  'Liga Profesional Argentina': 'Buenos Aires',
-  
   // BELGIO
   'Jupiler Pro League': 'Bruxelles',
   'Belgian Pro League': 'Bruxelles',
@@ -205,36 +172,6 @@ const CITTÀ_PER_CAMPIONATO = {
   'Super Lig': 'Istanbul',
   'Turkish Süper Lig': 'Istanbul',
   
-  // USA/CANADA
-  'Major League Soccer': 'New York',
-  'MLS': 'New York',
-  'NWSL': 'New York',
-  'National Women\'s Soccer League': 'New York',
-  
-  // AUSTRALIA
-  'A-League': 'Sydney',
-  'A-League Men': 'Sydney',
-  
-  // SVEZIA
-  'Allsvenskan': 'Stoccolma',
-  
-  // NORVEGIA
-  'Eliteserien': 'Oslo',
-  
-  // DANIMARCA
-  'Danish Superliga': 'Copenaghen',
-  
-  // SVIZZERA
-  'Swiss Super League': 'Berna',
-  
-  // AUSTRIA
-  'Austrian Bundesliga': 'Vienna',
-  
-  // RUSSIA
-  'Russian Premier League': 'Mosca',
-  
-  // MESSICO
-  'Liga MX': 'Città del Messico'
 };
 
 // ============================================================
@@ -242,60 +179,6 @@ const CITTÀ_PER_CAMPIONATO = {
 // ============================================================
 
 const TEAM_CITY_MAP = {
-  // ============================================
-  // ARGENTINA - LIGA PROFESIONAL
-  // ============================================
-  'Aldosivi': 'Mar del Plata',
-  'Argentinos JRS': 'Buenos Aires',
-  'Argentinos Juniors': 'Buenos Aires',
-  'Atletico Tucuman': 'San Miguel de Tucumán',
-  'Atlético Tucumán': 'San Miguel de Tucumán',
-  'Banfield': 'Banfield',
-  'Barracas Central': 'Buenos Aires',
-  'Belgrano': 'Córdoba',
-  'Belgrano Cordoba': 'Córdoba',
-  'Boca Juniors': 'Buenos Aires',
-  'Central Cordoba': 'Santiago del Estero',
-  'Central Cordoba de Santiago': 'Santiago del Estero',
-  'Defensa y Justicia': 'Florencio Varela',
-  'Defensa Y Justicia': 'Florencio Varela',
-  'Deportivo Riestra': 'Buenos Aires',
-  'Estudiantes': 'La Plata',
-  'Estudiantes de La Plata': 'La Plata',
-  'Estudiantes de Rio Cuarto': 'Río Cuarto',
-  'Estudiantes L.P.': 'La Plata',
-  'Gimnasia La Plata': 'La Plata',
-  'Gimnasia LP': 'La Plata',
-  'Gimnasia L.P.': 'La Plata',
-  'Gimnasia M.': 'Mendoza',
-  'Godoy Cruz': 'Mendoza',
-  'Huracan': 'Buenos Aires',
-  'Huracán': 'Buenos Aires',
-  'Independiente': 'Avellaneda',
-  'Independiente Rivadavia': 'Mendoza',
-  'Independ. Rivadavia': 'Mendoza',
-  'Instituto Cordoba': 'Córdoba',
-  'Instituto Córdoba': 'Córdoba',
-  'Lanus': 'Lanús',
-  'Lanús': 'Lanús',
-  'Newell\'s Old Boys': 'Rosario',
-  'Newells Old Boys': 'Rosario',
-  'Platense': 'Vicente López',
-  'Racing Club': 'Avellaneda',
-  'River Plate': 'Buenos Aires',
-  'Rosario Central': 'Rosario',
-  'San Lorenzo': 'Buenos Aires',
-  'Sarmiento': 'Junín',
-  'Sarmiento Junin': 'Junín',
-  'Talleres': 'Córdoba',
-  'Talleres Cordoba': 'Córdoba',
-  'Tigre': 'Tigre',
-  'Union': 'Santa Fe',
-  'Union de Santa Fe': 'Santa Fe',
-  'Union Santa Fe': 'Santa Fe',
-  'Vélez Sarsfield': 'Buenos Aires',
-  'Velez Sarsfield': 'Buenos Aires',
-  
   // ============================================
   // BELGIO - JUPILER PRO LEAGUE
   // ============================================
@@ -323,41 +206,6 @@ const TEAM_CITY_MAP = {
   'Lommel United': 'Lommel',
   'SK Beveren': 'Beveren',
   'RAAL La Louvière': 'La Louvière',
-  
-  // ============================================
-  // BRASILE - SERIE A
-  // ============================================
-  'Athletico Paranaense': 'Curitiba',
-  'Atletico Paranaense': 'Curitiba',
-  'Atletico-MG': 'Belo Horizonte',
-  'Atlético Mineiro': 'Belo Horizonte',
-  'Bahia': 'Salvador',
-  'Botafogo': 'Rio de Janeiro',
-  'Ceara': 'Fortaleza',
-  'Chapecoense-sc': 'Chapecó',
-  'Corinthians': 'San Paolo',
-  'Coritiba': 'Curitiba',
-  'Cruzeiro': 'Belo Horizonte',
-  'Flamengo': 'Rio de Janeiro',
-  'Fluminense': 'Rio de Janeiro',
-  'Fortaleza': 'Fortaleza',
-  'Gremio': 'Porto Alegre',
-  'Grêmio': 'Porto Alegre',
-  'Internacional': 'Porto Alegre',
-  'Juventude': 'Caxias do Sul',
-  'Mirassol': 'Mirassol',
-  'Palmeiras': 'San Paolo',
-  'RB Bragantino': 'Bragança Paulista',
-  'Red Bull Bragantino': 'Bragança Paulista',
-  'Remo': 'Belém',
-  'Santos': 'Santos',
-  'Sao Paulo': 'San Paolo',
-  'São Paulo': 'San Paolo',
-  'Sport Recife': 'Recife',
-  'Vasco DA Gama': 'Rio de Janeiro',
-  'Vasco da Gama': 'Rio de Janeiro',
-  'Vitoria': 'Salvador',
-  'Vitória': 'Salvador',
   
   // ============================================
   // CINA - SUPER LEAGUE (etichettata come Grecia nell'Excel)
@@ -750,7 +598,7 @@ const TEAM_CITY_MAP = {
   'Sestri Levante': 'Sestri Levante',
   'SPAL': 'Ferrara',
   'Torres': 'Sassari',
-  'Vado': 'Savona',
+  'Vado': 'Sestri Levante',
   'Vis Pesaro': 'Pesaro',
   
   // SERIE C - GIRONE C
@@ -779,18 +627,6 @@ const TEAM_CITY_MAP = {
   'Team Altamura': 'Altamura',
   'Trapani': 'Trapani',
   'Turris': 'Torre del Greco',
-  
-  // SERIE A WOMEN
-  'Juventus Women': 'Torino',
-  'Roma Women': 'Roma',
-  'Milan Women': 'Milano',
-  'Inter Women': 'Milano',
-  'Fiorentina Women': 'Firenze',
-  'Sassuolo Women': 'Reggio Emilia',
-  'Sampdoria Women': 'Genova',
-  'Como Women': 'Como',
-  'Napoli Women': 'Napoli',
-  'Lazio Women': 'Roma',
   
   // ============================================
   // COREA - K LEAGUE 1
@@ -977,235 +813,13 @@ const TEAM_CITY_MAP = {
   'Trabzonspor': 'Trabzon',
   'Amed': 'Diyarbakır',
   
-  // ============================================
-  // USA/CANADA - MLS
-  // ============================================
-  'Atlanta United': 'Atlanta',
-  'Austin FC': 'Austin',
-  'Charlotte FC': 'Charlotte',
-  'Chicago Fire': 'Chicago',
-  'FC Cincinnati': 'Cincinnati',
-  'Colorado Rapids': 'Denver',
-  'Columbus Crew': 'Columbus',
-  'D.C. United': 'Washington',
-  'DC United': 'Washington',
-  'FC Dallas': 'Dallas',
-  'Houston Dynamo': 'Houston',
-  'Inter Miami CF': 'Miami',
-  'Inter Miami': 'Miami',
-  'LA Galaxy': 'Los Angeles',
-  'Los Angeles Galaxy': 'Los Angeles',
-  'Los Angeles FC': 'Los Angeles',
-  'Minnesota United': 'Minneapolis',
-  'CF Montreal': 'Montreal',
-  'Nashville SC': 'Nashville',
-  'New England Revolution': 'Boston',
-  'New York City FC': 'New York',
-  'New York Red Bulls': 'New York',
-  'Orlando City': 'Orlando',
-  'Philadelphia Union': 'Philadelphia',
-  'Portland Timbers': 'Portland',
-  'Real Salt Lake': 'Salt Lake City',
-  'San Jose Earthquakes': 'San Jose',
-  'Seattle Sounders': 'Seattle',
-  'Sporting Kansas City': 'Kansas City',
-  'St. Louis City SC': 'St. Louis',
-  'Toronto FC': 'Toronto',
-  'Vancouver Whitecaps': 'Vancouver',
-  'San Diego': 'San Diego',
-  'San Diego FC': 'San Diego',
-  
-  // NWSL
-  'Angel City FC': 'Los Angeles',
-  'Bay FC': 'San Jose',
-  'Chicago Stars': 'Chicago',
-  'Houston Dash': 'Houston',
-  'Kansas City Current': 'Kansas City',
-  'NJ/NY Gotham FC': 'New York',
-  'North Carolina Courage': 'Raleigh',
-  'Orlando Pride': 'Orlando',
-  'Portland Thorns': 'Portland',
-  'Racing Louisville': 'Louisville',
-  'San Diego Wave': 'San Diego',
-  'Seattle Reign': 'Seattle',
-  'Utah Royals': 'Salt Lake City',
-  'Washington Spirit': 'Washington',
-  
-  // ============================================
-  // AUSTRALIA - A-LEAGUE
-  // ============================================
-  'Sydney FC': 'Sydney',
-  'Melbourne Victory': 'Melbourne',
-  'Melbourne City': 'Melbourne',
-  'Western Sydney Wanderers': 'Sydney',
-  'Brisbane Roar': 'Brisbane',
-  'Perth Glory': 'Perth',
-  'Adelaide United': 'Adelaide',
-  'Central Coast Mariners': 'Gosford',
-  'Newcastle Jets': 'Newcastle',
-  'Wellington Phoenix': 'Wellington',
-  'Macarthur FC': 'Sydney',
-  'Western United': 'Melbourne',
-  
-  // ============================================
-  // SVEZIA - ALLSVENSKAN
-  // ============================================
-  'Malmö FF': 'Malmö',
-  'AIK': 'Stoccolma',
-  'IFK Göteborg': 'Göteborg',
-  'Hammarby IF': 'Stoccolma',
-  'Djurgårdens IF': 'Stoccolma',
-  'BK Häcken': 'Göteborg',
-  'Elfsborg': 'Borås',
-  'Kalmar FF': 'Kalmar',
-  'Norrköping': 'Norrköping',
-  'Sirius': 'Uppsala',
-  'Varbergs BoIS': 'Varberg',
-  'Degerfors': 'Degerfors',
-  'Mjällby': 'Hällevik',
-  'Värnamo': 'Värnamo',
-  
-  // ============================================
-  // NORVEGIA - ELITESERIEN
-  // ============================================
-  'Bodø/Glimt': 'Bodø',
-  'Molde FK': 'Molde',
-  'Rosenborg': 'Trondheim',
-  'Vålerenga': 'Oslo',
-  'Brann': 'Bergen',
-  'Lillestrøm': 'Lillestrøm',
-  'Odd': 'Skien',
-  'Strømsgodset': 'Drammen',
-  'Viking': 'Stavanger',
-  'Sarpsborg 08': 'Sarpsborg',
-  'Stabæk': 'Bærum',
-  'Tromsø': 'Tromsø',
-  'HamKam': 'Hamar',
-  'Sandefjord': 'Sandefjord',
-  
-  // ============================================
-  // DANIMARCA - DANISH SUPERLIGA
-  // ============================================
-  'FC København': 'Copenaghen',
-  'Brøndby IF': 'Brøndby',
-  'FC Midtjylland': 'Herning',
-  'AGF': 'Aarhus',
-  'Randers FC': 'Randers',
-  'OB': 'Odense',
-  'Aalborg BK': 'Aalborg',
-  'Viborg FF': 'Viborg',
-  'Silkeborg IF': 'Silkeborg',
-  'FC Nordsjælland': 'Farum',
-  'Lyngby BK': 'Kongens Lyngby',
-  'Vejle BK': 'Vejle',
-  
-  // ============================================
-  // SVIZZERA - SWISS SUPER LEAGUE
-  // ============================================
-  'Basel': 'Basilea',
-  'BSC Young Boys': 'Berna',
-  'Young Boys': 'Berna',
-  'FC Basel': 'Basilea',
-  'Grasshoppers': 'Zurigo',
-  'Grasshopper': 'Zurigo',
-  'Lugano': 'Lugano',
-  'FC Lugano': 'Lugano',
-  'Luzern': 'Lucerna',
-  'FC Luzern': 'Lucerna',
-  'Servette': 'Ginevra',
-  'Servette FC': 'Ginevra',
-  'Sion': 'Sion',
-  'FC Sion': 'Sion',
-  'St. Gallen': 'San Gallo',
-  'FC St. Gallen': 'San Gallo',
-  'Thun': 'Thun',
-  'Winterthur': 'Winterthur',
-  'FC Winterthur': 'Winterthur',
-  'Yverdon Sport': 'Yverdon-les-Bains',
-  'Zurich': 'Zurigo',
-  'FC Zürich': 'Zurigo',
-  
-  // ============================================
-  // AUSTRIA - AUSTRIAN BUNDESLIGA
-  // ============================================
-  'Red Bull Salzburg': 'Salisburgo',
-  'Sturm Graz': 'Graz',
-  'LASK': 'Linz',
-  'Rapid Vienna': 'Vienna',
-  'Austria Vienna': 'Vienna',
-  'Wolfsberger AC': 'Wolfsberg',
-  'WSG Tirol': 'Innsbruck',
-  'Austria Klagenfurt': 'Klagenfurt',
-  'SC Rheindorf Altach': 'Altach',
-  'Blau-Weiß Linz': 'Linz',
-  'TSV Hartberg': 'Hartberg',
-  'SV Ried': 'Ried im Innkreis',
-  
-  // ============================================
-  // RUSSIA - RUSSIAN PREMIER LEAGUE
-  // ============================================
-  'Zenit Saint Petersburg': 'San Pietroburgo',
-  'Spartak Moscow': 'Mosca',
-  'CSKA Moscow': 'Mosca',
-  'Lokomotiv Moscow': 'Mosca',
-  'Dynamo Moscow': 'Mosca',
-  'Krasnodar': 'Krasnodar',
-  'Rostov': 'Rostov sul Don',
-  'Sochi': 'Sochi',
-  'Krylya Sovetov': 'Samara',
-  'Nizhny Novgorod': 'Nižnij Novgorod',
-  'Ural': 'Ekaterinburg',
-  'Akhmat Grozny': 'Grozny',
-  'Rubin Kazan': 'Kazan',
-  'Orenburg': 'Orenburg',
-  'Fakel Voronezh': 'Voronezh',
-  'Khimki': 'Khimki',
-  
-  // ============================================
-  // MESSICO - LIGA MX
-  // ============================================
-  'Club América': 'Città del Messico',
-  'Guadalajara': 'Guadalajara',
-  'Monterrey': 'Monterrey',
-  'Tigres UANL': 'Monterrey',
-  'Cruz Azul': 'Città del Messico',
-  'Pumas UNAM': 'Città del Messico',
-  'Atlas': 'Guadalajara',
-  'Toluca': 'Toluca',
-  'Santos Laguna': 'Torreón',
-  'Pachuca': 'Pachuca',
-  'Tijuana': 'Tijuana',
-  'Necaxa': 'Aguascalientes',
-  'León': 'León',
-  'Puebla': 'Puebla',
-  'Mazatlán': 'Mazatlán',
-  'Juárez': 'Ciudad Juárez'
-};
+  };
 
 // ============================================================
 // COORDINATE PER LE CITTÀ (COMPLETE)
 // ============================================================
 
-const COORDS = {
-  // ARGENTINA
-  'Buenos Aires': { lat: -34.6037, lon: -58.3816 },
-  'Avellaneda': { lat: -34.6600, lon: -58.3700 },
-  'La Plata': { lat: -34.9200, lon: -57.9500 },
-  'Rosario': { lat: -32.9468, lon: -60.6393 },
-  'Córdoba': { lat: -31.4201, lon: -64.1888 },
-  'San Miguel de Tucumán': { lat: -26.8083, lon: -65.2176 },
-  'Santa Fe': { lat: -31.6333, lon: -60.7000 },
-  'Banfield': { lat: -34.7500, lon: -58.4000 },
-  'Lanús': { lat: -34.7000, lon: -58.4000 },
-  'Mendoza': { lat: -32.8908, lon: -68.8272 },
-  'Mar del Plata': { lat: -38.0055, lon: -57.5426 },
-  'Florencio Varela': { lat: -34.8167, lon: -58.2833 },
-  'Santiago del Estero': { lat: -27.7833, lon: -64.2667 },
-  'Río Cuarto': { lat: -33.1300, lon: -64.3500 },
-  'Vicente López': { lat: -34.5300, lon: -58.4800 },
-  'Junín': { lat: -34.5850, lon: -60.9450 },
-  'Tigre': { lat: -34.4260, lon: -58.5800 },
-  
+const COORDS = {  
   // BELGIO
   'Bruxelles': { lat: 50.8503, lon: 4.3517 },
   'Bruges': { lat: 51.2093, lon: 3.2247 },
@@ -1226,24 +840,6 @@ const COORDS = {
   'Lommel': { lat: 51.2300, lon: 5.3100 },
   'Beveren': { lat: 51.2100, lon: 4.2500 },
   'La Louvière': { lat: 50.4800, lon: 4.1800 },
-  
-  // BRASILE
-  'Rio de Janeiro': { lat: -22.9068, lon: -43.1729 },
-  'San Paolo': { lat: -23.5505, lon: -46.6333 },
-  'Santos': { lat: -23.9608, lon: -46.3322 },
-  'Porto Alegre': { lat: -30.0346, lon: -51.2177 },
-  'Belo Horizonte': { lat: -19.9191, lon: -43.9387 },
-  'Salvador': { lat: -12.9777, lon: -38.5016 },
-  'Fortaleza': { lat: -3.7319, lon: -38.5267 },
-  'Curitiba': { lat: -25.4290, lon: -49.2671 },
-  'Goiânia': { lat: -16.6869, lon: -49.2648 },
-  'Cuiabá': { lat: -15.6014, lon: -56.0979 },
-  'Chapecó': { lat: -27.1000, lon: -52.6200 },
-  'Mirassol': { lat: -20.8200, lon: -49.5200 },
-  'Bragança Paulista': { lat: -22.9500, lon: -46.5400 },
-  'Belém': { lat: -1.4558, lon: -48.4902 },
-  'Caxias do Sul': { lat: -29.1678, lon: -51.1794 },
-  'Recife': { lat: -8.0476, lon: -34.8770 },
   
   // CINA
   'Pechino': { lat: 39.9042, lon: 116.4074 },
@@ -1681,155 +1277,6 @@ const COORDS = {
   'Erzurum': { lat: 39.9000, lon: 41.2700 },
   'Izmit': { lat: 40.7667, lon: 29.9167 },
   'Diyarbakır': { lat: 37.9144, lon: 40.2306 },
-  
-  // USA/CANADA
-  'New York': { lat: 40.7128, lon: -74.0060 },
-  'Los Angeles': { lat: 34.0522, lon: -118.2437 },
-  'Chicago': { lat: 41.8781, lon: -87.6298 },
-  'Houston': { lat: 29.7604, lon: -95.3698 },
-  'Phoenix': { lat: 33.4484, lon: -112.0740 },
-  'Philadelphia': { lat: 39.9526, lon: -75.1652 },
-  'San Diego': { lat: 32.7157, lon: -117.1611 },
-  'Dallas': { lat: 32.7767, lon: -96.7970 },
-  'San Jose': { lat: 37.3382, lon: -121.8863 },
-  'Austin': { lat: 30.2672, lon: -97.7431 },
-  'Columbus': { lat: 39.9612, lon: -82.9988 },
-  'San Francisco': { lat: 37.7749, lon: -122.4194 },
-  'Charlotte': { lat: 35.2271, lon: -80.8431 },
-  'Indianapolis': { lat: 39.7684, lon: -86.1581 },
-  'Seattle': { lat: 47.6062, lon: -122.3321 },
-  'Denver': { lat: 39.7392, lon: -104.9903 },
-  'Washington': { lat: 38.9072, lon: -77.0369 },
-  'Boston': { lat: 42.3601, lon: -71.0589 },
-  'Nashville': { lat: 36.1627, lon: -86.7816 },
-  'Portland': { lat: 45.5051, lon: -122.6750 },
-  'Las Vegas': { lat: 36.1699, lon: -115.1398 },
-  'Detroit': { lat: 42.3314, lon: -83.0458 },
-  'Memphis': { lat: 35.1495, lon: -90.0490 },
-  'Louisville': { lat: 38.2527, lon: -85.7585 },
-  'Baltimore': { lat: 39.2904, lon: -76.6122 },
-  'Milwaukee': { lat: 43.0389, lon: -87.9065 },
-  'Kansas City': { lat: 39.0997, lon: -94.5786 },
-  'Miami': { lat: 25.7617, lon: -80.1918 },
-  'Atlanta': { lat: 33.7490, lon: -84.3880 },
-  'Orlando': { lat: 28.5383, lon: -81.3792 },
-  'Minneapolis': { lat: 44.9778, lon: -93.2650 },
-  'Cleveland': { lat: 41.4993, lon: -81.6944 },
-  'Pittsburgh': { lat: 40.4406, lon: -79.9959 },
-  'St. Louis': { lat: 38.6270, lon: -90.1994 },
-  'Cincinnati': { lat: 39.1031, lon: -84.5120 },
-  'Salt Lake City': { lat: 40.7608, lon: -111.8910 },
-  'Raleigh': { lat: 35.7796, lon: -78.6382 },
-  'Toronto': { lat: 43.6532, lon: -79.3832 },
-  'Vancouver': { lat: 49.2827, lon: -123.1207 },
-  'Montreal': { lat: 45.5017, lon: -73.5673 },
-  
-  // AUSTRALIA
-  'Sydney': { lat: -33.8688, lon: 151.2093 },
-  'Melbourne': { lat: -37.8136, lon: 144.9631 },
-  'Brisbane': { lat: -27.4698, lon: 153.0251 },
-  'Perth': { lat: -31.9505, lon: 115.8605 },
-  'Adelaide': { lat: -34.9285, lon: 138.6007 },
-  'Newcastle': { lat: -32.9283, lon: 151.7817 },
-  'Gosford': { lat: -33.4244, lon: 151.3422 },
-  'Wellington': { lat: -41.2865, lon: 174.7762 },
-  
-  // SVEZIA
-  'Stoccolma': { lat: 59.3293, lon: 18.0686 },
-  'Malmö': { lat: 55.6050, lon: 13.0038 },
-  'Göteborg': { lat: 57.7089, lon: 11.9746 },
-  'Borås': { lat: 57.7210, lon: 12.9401 },
-  'Kalmar': { lat: 56.6616, lon: 16.3616 },
-  'Norrköping': { lat: 58.5940, lon: 16.1826 },
-  'Uppsala': { lat: 59.8586, lon: 17.6389 },
-  'Varberg': { lat: 57.1055, lon: 12.2508 },
-  'Degerfors': { lat: 59.2380, lon: 14.4310 },
-  'Hällevik': { lat: 56.0200, lon: 14.7100 },
-  'Värnamo': { lat: 57.1800, lon: 14.0400 },
-  
-  // NORVEGIA
-  'Oslo': { lat: 59.9139, lon: 10.7522 },
-  'Bodø': { lat: 67.2820, lon: 14.3751 },
-  'Molde': { lat: 62.7333, lon: 7.1833 },
-  'Trondheim': { lat: 63.4305, lon: 10.3951 },
-  'Bergen': { lat: 60.3913, lon: 5.3221 },
-  'Lillestrøm': { lat: 59.9540, lon: 11.0490 },
-  'Skien': { lat: 59.2090, lon: 9.6090 },
-  'Drammen': { lat: 59.7439, lon: 10.2045 },
-  'Stavanger': { lat: 58.9700, lon: 5.7331 },
-  'Sarpsborg': { lat: 59.2833, lon: 11.1167 },
-  'Bærum': { lat: 59.9250, lon: 10.4500 },
-  'Tromsø': { lat: 69.6492, lon: 18.9553 },
-  'Hamar': { lat: 60.7945, lon: 11.0680 },
-  'Sandefjord': { lat: 59.1310, lon: 10.2160 },
-  
-  // DANIMARCA
-  'Copenaghen': { lat: 55.6761, lon: 12.5683 },
-  'Brøndby': { lat: 55.6500, lon: 12.4167 },
-  'Herning': { lat: 56.1360, lon: 8.9760 },
-  'Aarhus': { lat: 56.1629, lon: 10.2039 },
-  'Randers': { lat: 56.4600, lon: 10.0400 },
-  'Odense': { lat: 55.3959, lon: 10.3883 },
-  'Aalborg': { lat: 57.0488, lon: 9.9217 },
-  'Viborg': { lat: 56.4532, lon: 9.4020 },
-  'Silkeborg': { lat: 56.1698, lon: 9.5450 },
-  'Farum': { lat: 55.8100, lon: 12.3700 },
-  'Kongens Lyngby': { lat: 55.7700, lon: 12.5000 },
-  'Vejle': { lat: 55.7090, lon: 9.5350 },
-  
-  // SVIZZERA
-  'Berna': { lat: 46.9480, lon: 7.4474 },
-  'Basilea': { lat: 47.5596, lon: 7.5886 },
-  'Ginevra': { lat: 46.2044, lon: 6.1432 },
-  'Zurigo': { lat: 47.3769, lon: 8.5417 },
-  'Lugano': { lat: 46.0050, lon: 8.9520 },
-  'San Gallo': { lat: 47.4240, lon: 9.3770 },
-  'Sion': { lat: 46.2340, lon: 7.3620 },
-  'Losanna': { lat: 46.5197, lon: 6.6323 },
-  'Yverdon-les-Bains': { lat: 46.7780, lon: 6.6410 },
-  'Winterthur': { lat: 47.4980, lon: 8.7260 },
-  'Lucerna': { lat: 47.0500, lon: 8.3060 },
-  'Thun': { lat: 46.7580, lon: 7.6280 },
-  
-  // AUSTRIA
-  'Vienna': { lat: 48.2082, lon: 16.3738 },
-  'Salisburgo': { lat: 47.8095, lon: 13.0550 },
-  'Graz': { lat: 47.0707, lon: 15.4395 },
-  'Linz': { lat: 48.3069, lon: 14.2858 },
-  'Wolfsberg': { lat: 46.8400, lon: 14.8400 },
-  'Innsbruck': { lat: 47.2692, lon: 11.4041 },
-  'Klagenfurt': { lat: 46.6248, lon: 14.3052 },
-  'Altach': { lat: 47.3500, lon: 9.6500 },
-  'Hartberg': { lat: 47.2833, lon: 15.9667 },
-  'Ried im Innkreis': { lat: 48.2167, lon: 13.4833 },
-  
-  // RUSSIA
-  'Mosca': { lat: 55.7558, lon: 37.6173 },
-  'San Pietroburgo': { lat: 59.9343, lon: 30.3351 },
-  'Krasnodar': { lat: 45.0355, lon: 38.9750 },
-  'Rostov sul Don': { lat: 47.2357, lon: 39.7015 },
-  'Sochi': { lat: 43.5855, lon: 39.7231 },
-  'Samara': { lat: 53.1959, lon: 50.1000 },
-  'Nižnij Novgorod': { lat: 56.2965, lon: 43.9361 },
-  'Ekaterinburg': { lat: 56.8389, lon: 60.6057 },
-  'Grozny': { lat: 43.3180, lon: 45.6980 },
-  'Kazan': { lat: 55.7887, lon: 49.1221 },
-  'Orenburg': { lat: 51.7682, lon: 55.0970 },
-  'Voronezh': { lat: 51.6606, lon: 39.2003 },
-  'Khimki': { lat: 55.8884, lon: 37.4450 },
-  
-  // MESSICO
-  'Città del Messico': { lat: 19.4326, lon: -99.1332 },
-  'Guadalajara': { lat: 20.6597, lon: -103.3496 },
-  'Monterrey': { lat: 25.6866, lon: -100.3161 },
-  'Torreón': { lat: 25.5420, lon: -103.4070 },
-  'Pachuca': { lat: 20.1200, lon: -98.7330 },
-  'Tijuana': { lat: 32.5149, lon: -117.0382 },
-  'Aguascalientes': { lat: 21.8798, lon: -102.2960 },
-  'León': { lat: 21.1250, lon: -101.6820 },
-  'Puebla': { lat: 19.0414, lon: -98.2063 },
-  'Mazatlán': { lat: 23.2494, lon: -106.4111 },
-  'Ciudad Juárez': { lat: 31.7450, lon: -106.4370 }
 };
 
 // ============================================================
@@ -1876,11 +1323,7 @@ function getCountryFlagHtml(champName) {
   if (!champName) return '<span class="flag-emoji">🌍</span>';
   
   // Cerca corrispondenza esatta
-  const exactMatchMap = {
-    // ARGENTINA
-    'Liga Profesional': 'AR',
-    'Liga Profesional Argentina': 'AR',
-    
+  const exactMatchMap = {    
     // BELGIO
     'Jupiler Pro League': 'BE',
     'Belgian Pro League': 'BE',
@@ -1956,37 +1399,6 @@ function getCountryFlagHtml(champName) {
     'Süper Lig': 'TR',
     'Super Lig': 'TR',
     'Turkish Süper Lig': 'TR',
-    
-    // USA/CANADA
-    'Major League Soccer': 'US',
-    'MLS': 'US',
-    'NWSL': 'US',
-    'National Women\'s Soccer League': 'US',
-    
-    // AUSTRALIA
-    'A-League': 'AU',
-    'A-League Men': 'AU',
-    
-    // SVEZIA
-    'Allsvenskan': 'SE',
-    
-    // NORVEGIA
-    'Eliteserien': 'NO',
-    
-    // DANIMARCA
-    'Danish Superliga': 'DK',
-    
-    // SVIZZERA
-    'Swiss Super League': 'CH',
-    
-    // AUSTRIA
-    'Austrian Bundesliga': 'AT',
-    
-    // RUSSIA
-    'Russian Premier League': 'RU',
-    
-    // MESSICO
-    'Liga MX': 'MX'
   };
   
   if (exactMatchMap[champName]) {
@@ -1999,17 +1411,13 @@ function getCountryFlagHtml(champName) {
     'Premier': 'GB', 'Championship': 'GB', 'League': 'GB',
     'Serie': 'IT', 'Bundesliga': 'DE', 'Ligue': 'FR',
     'La Liga': 'ES', 'Eredivisie': 'NL', 'Primeira': 'PT',
-    'Liga Portugal': 'PT', 'MLS': 'US', 'NWSL': 'US',
+    'Liga Portugal': 'PT',
     'A-League': 'AU', 'Scottish': 'GB', 'Süper Lig': 'TR',
     'Super Lig': 'TR', 'J1': 'JP', 'K League': 'KR',
-    'Liga Profesional': 'AR', 'Jupiler': 'BE', 'Serie A (Brasile)': 'BR',
+    'Liga Profesional': 'AR', 'Jupiler': 'BE',
     'Super League': 'CN', 'Eerste Divisie': 'NL',
     'Segunda División': 'ES', 'Premiership': 'GB',
-    'Allsvenskan': 'SE', 'Eliteserien': 'NO',
-    'Danish Superliga': 'DK', 'Swiss Super League': 'CH',
-    'Austrian Bundesliga': 'AT', 'Russian Premier League': 'RU',
-    'Liga MX': 'MX'
-  };
+ };
   
   const sortedKeys = Object.keys(partialMatchMap).sort((a, b) => b.length - a.length);
   for (const key of sortedKeys) {
@@ -2023,80 +1431,129 @@ function getCountryFlagHtml(champName) {
 }
 
 // ============================================================
-// FUNZIONE PER IL METEO (CON LE COORDINATE AGGIORNATE)
+// CODA RATE-LIMIT PER LE RICHIESTE METEO
+// ============================================================
+// Serializza le chiamate (max 1 ogni 250ms) ed evita richieste duplicate
+// ============================================================
+const _weatherQueue = {
+  pending: new Map(),     // chiave "città::data" -> Promise in corso
+  lastCallAt: 0,
+  MIN_INTERVAL_MS: 250,
+};
+
+async function _weatherThrottle() {
+  const now = Date.now();
+  const elapsed = now - _weatherQueue.lastCallAt;
+  const wait = Math.max(0, _weatherQueue.MIN_INTERVAL_MS - elapsed);
+  if (wait > 0) await new Promise(r => setTimeout(r, wait));
+  _weatherQueue.lastCallAt = Date.now();
+}
+
+// ============================================================
+// FUNZIONE PER IL METEO (CON FIX RANGE DATE + CODA)
 // ============================================================
 
 async function fetchWeatherForMatch(match) {
   if (!match) return null;
+
   const city = getCityForMatch(match.casa, match.campionato);
   if (!city) {
     console.warn('⚠️ Città non trovata per:', match.casa, match.campionato);
     return null;
   }
-  
-  let coord = COORDS[city];
-  if (!coord) {
-    // Prova geocoding se la città non è nella mappa
-    try {
-      const geoRes = await fetch(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=it&format=json`
-      );
-      if (geoRes.ok) {
-        const geoData = await geoRes.json();
-        if (geoData.results && geoData.results.length > 0) {
-          coord = { lat: geoData.results[0].latitude, lon: geoData.results[0].longitude };
-          console.log(`🌍 Geocodificata ${city} -> ${coord.lat}, ${coord.lon}`);
-        }
-      }
-    } catch (e) { console.warn('Geocoding fallito per', city); }
-  }
-  
-  if (!coord) {
-    console.warn(`⚠️ Coordinate non trovate per ${city}, meteo non disponibile`);
-    return null;
-  }
-  
+
+  // ⭐ Normalizza la data in formato YYYY-MM-DD
   let dateToUse;
   if (match.data && match.data.match(/^\d{2}\/\d{2}\/\d{4}/)) {
     const parts = match.data.split('/');
     dateToUse = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
   } else if (match.data && match.data.match(/^\d{4}-\d{2}-\d{2}/)) {
-    dateToUse = match.data;
+    dateToUse = match.data.slice(0, 10);
   } else {
-    dateToUse = new Date().toISOString().slice(0, 10);
+    console.warn(`⚠️ Data non valida per meteo: "${match.data}" (${city})`);
+    return null;
   }
-  
-  // Verifica range date (Open-Meteo supporta ~16 giorni)
+
+  // ⭐ FIX: Verifica range date PRIMA di qualsiasi fetch
+  //    Usa mezzanotte UTC per evitare problemi di fuso orario.
+  //    Open-Meteo forecast supporta ~16 giorni. Oltre, l'API restituisce 400.
   const today = new Date();
-  const matchDate = new Date(dateToUse);
-  const diffDays = Math.ceil((matchDate - today) / (1000 * 60 * 60 * 24));
+  today.setUTCHours(0, 0, 0, 0);
+  const matchDate = new Date(dateToUse + 'T00:00:00Z');
+
+  if (isNaN(matchDate.getTime())) {
+    console.warn(`⚠️ Data non valida per meteo: "${dateToUse}" (${city})`);
+    return null;
+  }
+
+  const diffDays = Math.round((matchDate - today) / (1000 * 60 * 60 * 24));
+
   if (diffDays < -1 || diffDays > 16) {
-    console.warn(`⚠️ Data ${dateToUse} fuori range per meteo (diff: ${diffDays} giorni)`);
-    return null;
+    console.warn(`⚠️ Data ${dateToUse} fuori range per meteo (diff: ${diffDays} giorni) [${city}]`);
+    return null; // ⭐ ESCI QUI: nessuna fetch, nessun 400
   }
-  
-  try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${coord.lat}&longitude=${coord.lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode&timezone=auto&start_date=${dateToUse}&end_date=${dateToUse}`;
-    console.log(`🌤️ Richiesta meteo per ${city} (${dateToUse}): ${url}`);
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    if (!data.daily) { console.warn('⚠️ Nessun dato daily per', city); return null; }
-    const weatherCode = data.daily.weathercode?.[0] || 0;
-    return {
-      temp: data.current_weather?.temperature || 0,
-      temp_min: data.daily.temperature_2m_min?.[0] || 0,
-      temp_max: data.daily.temperature_2m_max?.[0] || 0,
-      weather: getWeatherDescription(weatherCode),
-      wind_speed: data.current_weather?.windspeed || 0,
-      rain: data.daily.precipitation_sum?.[0] || 0,
-      forecast_date: dateToUse,
-      city: city
-    };
-  } catch (error) {
-    console.warn('❌ Errore meteo per', city, error.message);
-    return null;
+
+  // ⭐ Deduplicazione: se c'è già una richiesta in corso per la stessa chiave, riusala
+  const cacheKey = `${city}::${dateToUse}`;
+  if (_weatherQueue.pending.has(cacheKey)) {
+    return _weatherQueue.pending.get(cacheKey);
   }
+
+  const promise = (async () => {
+    let coord = COORDS[city];
+    if (!coord) {
+      // Prova geocoding se la città non è nella mappa
+      try {
+        const geoRes = await fetch(
+          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=it&format=json`
+        );
+        if (geoRes.ok) {
+          const geoData = await geoRes.json();
+          if (geoData.results && geoData.results.length > 0) {
+            coord = { lat: geoData.results[0].latitude, lon: geoData.results[0].longitude };
+            console.log(`🌍 Geocodificata ${city} -> ${coord.lat}, ${coord.lon}`);
+          }
+        }
+      } catch (e) { console.warn('Geocoding fallito per', city); }
+    }
+
+    if (!coord) {
+      console.warn(`⚠️ Coordinate non trovate per ${city}, meteo non disponibile`);
+      return null;
+    }
+
+    try {
+      // ⭐ Throttle: max 1 richiesta ogni 250ms per non saturare l'API
+      await _weatherThrottle();
+
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${coord.lat}&longitude=${coord.lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode&timezone=auto&start_date=${dateToUse}&end_date=${dateToUse}`;
+      console.log(`🌤️ Richiesta meteo per ${city} (${dateToUse})`);
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      if (!data.daily) { console.warn('⚠️ Nessun dato daily per', city); return null; }
+      const weatherCode = data.daily.weathercode?.[0] || 0;
+      return {
+        temp: data.current_weather?.temperature || 0,
+        temp_min: data.daily.temperature_2m_min?.[0] || 0,
+        temp_max: data.daily.temperature_2m_max?.[0] || 0,
+        weather: getWeatherDescription(weatherCode),
+        wind_speed: data.current_weather?.windspeed || 0,
+        rain: data.daily.precipitation_sum?.[0] || 0,
+        forecast_date: dateToUse,
+        city: city
+      };
+    } catch (error) {
+      console.warn('❌ Errore meteo per', city, error.message);
+      return null;
+    } finally {
+      // Rilascia la chiave dalla coda
+      _weatherQueue.pending.delete(cacheKey);
+    }
+  })();
+
+  _weatherQueue.pending.set(cacheKey, promise);
+  return promise;
 }
 
 function getWeatherDescription(code) {
