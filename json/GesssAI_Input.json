@@ -10361,6 +10361,20 @@
   },
   {
     "campionato": "Bundesliga",
+    "data": "23/10/2026",
+    "ora": "18:30",
+    "giornata": "7",
+    "squadra_casa": "VfB Stuttgart",
+    "squadra_ospite": "Borussia Mönchengladbach",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Stuttgart",
+    "stadio": "MHPArena",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Bundesliga",
     "data": "24/10/2026",
     "ora": "13:30",
     "giornata": "7",
@@ -10427,20 +10441,6 @@
     "gol_ospite": "",
     "citta": "Augsburg",
     "stadio": "WWK Arena",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Bundesliga",
-    "data": "24/10/2026",
-    "ora": "13:30",
-    "giornata": "7",
-    "squadra_casa": "VfB Stuttgart",
-    "squadra_ospite": "Borussia Mönchengladbach",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Stuttgart",
-    "stadio": "MHPArena",
     "stato": "Futura"
   },
   {
@@ -22662,7 +22662,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Dordrecht",
-    "stadio": "M-Scores Stadion",
+    "stadio": "GN Bouw Stadion",
     "stato": "Futura"
   },
   {
@@ -35029,6 +35029,20 @@
   },
   {
     "campionato": "Jupiler Pro League",
+    "data": "23/10/2026",
+    "ora": "18:45",
+    "giornata": "9",
+    "squadra_casa": "Kortrijk",
+    "squadra_ospite": "KV Mechelen",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Kortrijk",
+    "stadio": "Guldensporen Stadion",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Jupiler Pro League",
     "data": "24/10/2026",
     "ora": "15:00",
     "giornata": "9",
@@ -35081,20 +35095,6 @@
     "gol_ospite": "",
     "citta": "Gent",
     "stadio": "Planet Group Arena",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Jupiler Pro League",
-    "data": "24/10/2026",
-    "ora": "15:00",
-    "giornata": "9",
-    "squadra_casa": "Kortrijk",
-    "squadra_ospite": "KV Mechelen",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Kortrijk",
-    "stadio": "Guldensporen Stadion",
     "stato": "Futura"
   },
   {
@@ -67126,7 +67126,7 @@
     "gol_casa": "2",
     "gol_ospite": "2",
     "citta": "Santa Clara",
-    "stadio": "Levi's Stadium",
+    "stadio": "PayPal Park",
     "stato": "Giocata"
   },
   {
@@ -69604,7 +69604,7 @@
     "gol_casa": "3",
     "gol_ospite": "0",
     "citta": "London",
-    "stadio": "Gtech Community Stadium",
+    "stadio": "Brentford Community Stadium",
     "stato": "Giocata"
   },
   {
@@ -69631,7 +69631,7 @@
     "risultato": "2–1",
     "gol_casa": "2",
     "gol_ospite": "1",
-    "citta": "Newcastle upon Tyne",
+    "citta": "Newcastle",
     "stadio": "St James' Park",
     "stato": "Giocata"
   },
@@ -69659,8 +69659,8 @@
     "risultato": "3–0",
     "gol_casa": "3",
     "gol_ospite": "0",
-    "citta": "Falmer",
-    "stadio": "American Express Stadium",
+    "citta": "Brighton",
+    "stadio": "Amex Stadium",
     "stato": "Giocata"
   },
   {
@@ -75363,8 +75363,8 @@
   },
   {
     "campionato": "Primeira Liga",
-    "data": "25/10/2026",
-    "ora": "16:00",
+    "data": "23/10/2026",
+    "ora": "19:45",
     "giornata": "9",
     "squadra_casa": "Vitória SC",
     "squadra_ospite": "Maritimo",
@@ -82344,7 +82344,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Girona",
-    "stadio": "Estadio Municipal de Montilivi",
+    "stadio": "Estadi Montilivi",
     "stato": "Futura"
   },
   {
@@ -88859,6 +88859,20 @@
   },
   {
     "campionato": "Serie A",
+    "data": "23/10/2026",
+    "ora": "18:45",
+    "giornata": "8",
+    "squadra_casa": "Torino",
+    "squadra_ospite": "Monza",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Turin",
+    "stadio": "Stadio Olimpico di Torino",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie A",
     "data": "25/10/2026",
     "ora": "17:30",
     "giornata": "8",
@@ -88939,20 +88953,6 @@
     "gol_ospite": "",
     "citta": "Bergamo",
     "stadio": "New Balance Arena",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie A",
-    "data": "25/10/2026",
-    "ora": "17:30",
-    "giornata": "8",
-    "squadra_casa": "Torino",
-    "squadra_ospite": "Monza",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Turin",
-    "stadio": "Stadio Olimpico di Torino",
     "stato": "Futura"
   },
   {
@@ -104710,20 +104710,6 @@
     "data": "26/09/2026",
     "ora": "15:30",
     "giornata": "7",
-    "squadra_casa": "Latina",
-    "squadra_ospite": "Atalanta II",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Latina",
-    "stadio": "Stadio Domenico Francioni",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie C - Girone B",
-    "data": "26/09/2026",
-    "ora": "15:30",
-    "giornata": "7",
     "squadra_casa": "Livorno",
     "squadra_ospite": "Pianese",
     "risultato": "",
@@ -105099,6 +105085,20 @@
   },
   {
     "campionato": "Serie C - Girone B",
+    "data": "14/10/2026",
+    "ora": "13:00",
+    "giornata": "7",
+    "squadra_casa": "Latina",
+    "squadra_ospite": "Atalanta II",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Latina",
+    "stadio": "Stadio Domenico Francioni",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie C - Girone B",
     "data": "16/10/2026",
     "ora": "18:30",
     "giornata": "10",
@@ -105239,6 +105239,48 @@
   },
   {
     "campionato": "Serie C - Girone B",
+    "data": "23/10/2026",
+    "ora": "18:30",
+    "giornata": "11",
+    "squadra_casa": "Perugia",
+    "squadra_ospite": "Pescara",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Perugia",
+    "stadio": "Stadio Renato Curi",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie C - Girone B",
+    "data": "23/10/2026",
+    "ora": "18:30",
+    "giornata": "11",
+    "squadra_casa": "Pineto",
+    "squadra_ospite": "Gubbio",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Pineto",
+    "stadio": "Mimmo Pavone-Alessandro Mariani",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie C - Girone B",
+    "data": "23/10/2026",
+    "ora": "18:30",
+    "giornata": "11",
+    "squadra_casa": "Ostia Mare",
+    "squadra_ospite": "Vado",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "",
+    "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie C - Girone B",
     "data": "25/10/2026",
     "ora": "17:00",
     "giornata": "11",
@@ -105249,20 +105291,6 @@
     "gol_ospite": "",
     "citta": "La Spezia",
     "stadio": "Stadio Alberto Picco",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie C - Girone B",
-    "data": "25/10/2026",
-    "ora": "17:00",
-    "giornata": "11",
-    "squadra_casa": "Perugia",
-    "squadra_ospite": "Pescara",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Perugia",
-    "stadio": "Stadio Renato Curi",
     "stato": "Futura"
   },
   {
@@ -105319,34 +105347,6 @@
     "gol_ospite": "",
     "citta": "Grosseto",
     "stadio": "Stadio Carlo Zecchini",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie C - Girone B",
-    "data": "25/10/2026",
-    "ora": "17:00",
-    "giornata": "11",
-    "squadra_casa": "Pineto",
-    "squadra_ospite": "Gubbio",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Pineto",
-    "stadio": "Mimmo Pavone-Alessandro Mariani",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie C - Girone B",
-    "data": "25/10/2026",
-    "ora": "17:00",
-    "giornata": "11",
-    "squadra_casa": "Ostia Mare",
-    "squadra_ospite": "Vado",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "",
-    "stadio": "",
     "stato": "Futura"
   },
   {
@@ -110559,6 +110559,34 @@
   },
   {
     "campionato": "Serie C - Girone C",
+    "data": "23/10/2026",
+    "ora": "18:30",
+    "giornata": "11",
+    "squadra_casa": "Casertana",
+    "squadra_ospite": "Bari",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Caserta",
+    "stadio": "Stadio Alberto Pinto",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie C - Girone C",
+    "data": "23/10/2026",
+    "ora": "18:30",
+    "giornata": "11",
+    "squadra_casa": "Team Altamura",
+    "squadra_ospite": "Potenza",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Altamura",
+    "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie C - Girone C",
     "data": "25/10/2026",
     "ora": "17:00",
     "giornata": "11",
@@ -110590,20 +110618,6 @@
     "data": "25/10/2026",
     "ora": "17:00",
     "giornata": "11",
-    "squadra_casa": "Casertana",
-    "squadra_ospite": "Bari",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Caserta",
-    "stadio": "Stadio Alberto Pinto",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie C - Girone C",
-    "data": "25/10/2026",
-    "ora": "17:00",
-    "giornata": "11",
     "squadra_casa": "Catania",
     "squadra_ospite": "Giugliano",
     "risultato": "",
@@ -110625,20 +110639,6 @@
     "gol_ospite": "",
     "citta": "Picerno",
     "stadio": "Stadio Comunale Donato Curcio",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie C - Girone C",
-    "data": "25/10/2026",
-    "ora": "17:00",
-    "giornata": "11",
-    "squadra_casa": "Team Altamura",
-    "squadra_ospite": "Potenza",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Altamura",
-    "stadio": "",
     "stato": "Futura"
   },
   {
@@ -118847,6 +118847,20 @@
   },
   {
     "campionato": "Süper Lig",
+    "data": "23/10/2026",
+    "ora": "17:00",
+    "giornata": "9",
+    "squadra_casa": "Alanyaspor",
+    "squadra_ospite": "Kocaelispor",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Alanya",
+    "stadio": "Alanya Oba Stadium",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Süper Lig",
     "data": "25/10/2026",
     "ora": "12:00",
     "giornata": "9",
@@ -118899,20 +118913,6 @@
     "gol_ospite": "",
     "citta": "Izmir",
     "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Süper Lig",
-    "data": "25/10/2026",
-    "ora": "12:00",
-    "giornata": "9",
-    "squadra_casa": "Alanyaspor",
-    "squadra_ospite": "Kocaelispor",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Alanya",
-    "stadio": "Alanya Oba Stadium",
     "stato": "Futura"
   },
   {
