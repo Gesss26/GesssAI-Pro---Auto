@@ -670,13 +670,10 @@
                           textAlign: 'center',
                         }}>
                         {quota ? (
-                          <>
-                            💰 {quota.toFixed(2)}
-                            {isValue && edge && <span>}
-                          </>
+                        <>💰 {quota.toFixed(2)}</>
                         ) : (
-                          <>📊 N/D</>
-                        )}
+                        <>📊 N/D</>
+                       )}
                       </span>
                     </div>
                   </div>
