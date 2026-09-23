@@ -1,7 +1,7 @@
 // ============================================================
 // schedina.js - Modulo Schedina con quote PDF visibili
 // Quote mostrate accanto a ogni giocata (con value bet evidenziato)
-// Rimuove il sub-tab "Quote Book" (le quote ora sono integrate)
+// ✅ FIX v6: Multigol con 8 opzioni + etichette formattate
 // ============================================================
 
 const formatGiocataLabel = (familyId, label) => {
@@ -11,9 +11,8 @@ const formatGiocataLabel = (familyId, label) => {
   if (label.startsWith('Under ')) return label.replace('.', ',');
 
   if (familyId === 'multigol') {
-    if (label === '0-2' || label === '1-3') return `MG Casa ${label}`;
-    if (label === '1-4' || label === '2-5') return `MG Tot ${label}`;
-    return `MG ${label}`;
+    // Le etichette sono già formattate dal sistema: 'MG Casa 0-2', ecc.
+    return label;
   }
 
   if (familyId === 'mg_casa_ospite') {
@@ -25,7 +24,7 @@ const formatGiocataLabel = (familyId, label) => {
 
   if (familyId === 'dc_multigol') {
     const parts = label.split('+');
-    if (parts.length === 2) return `${parts[0]} + MG Tot ${parts[1]}`;
+    if (parts.length === 2) return `${parts[0]} + ${parts[1]}`;
   }
 
   if (familyId === 'dc_under') {
@@ -749,7 +748,6 @@ const SchedinaComponent = ({
     return (
     <div className="schedina-container">
 
-      {/* 🚨 BANNER SCADENZA QUOTE */}
       {window.QuoteManager?.BannerScadenzaQuote && (
         <window.QuoteManager.BannerScadenzaQuote />
       )}
@@ -1249,7 +1247,7 @@ const SchedinaComponent = ({
         </div>
       </div>
 
-      {/* ===== LISTA PARTITE CON QUOTE ===== */}
+      {/* LISTA PARTITE CON QUOTE */}
       <div className="card" style={{marginTop: '16px'}}>
         <h4 style={{marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap'}}>
           <span>📋 Partite Disponibili ({partiteDisponibili.length})</span>
@@ -1347,7 +1345,6 @@ const SchedinaComponent = ({
                             <span className={`giocata-pct ${getPercentualeClasse(g.pct)}`} style={{fontSize: '11px', padding: '1px 6px'}}>
                               {g.pct}% {g.isBomb && '💣'}
                             </span>
-                            {/* ⭐ QUOTA PDF */}
                             <QuotaInline match={m} familyId={g.familyId} giocata={g.giocata} pctTua={g.pct} size="sm" />
                           </div>
                         );
@@ -1370,7 +1367,7 @@ const SchedinaComponent = ({
         )}
       </div>
 
-      {/* ===== SCHEDINE SALVATE ===== */}
+      {/* SCHEDINE SALVATE */}
       {schedineSalvate.length > 0 && (
         <div className="card" style={{marginTop: '16px', border: '2px solid var(--accent)'}}>
           <h4 style={{color: 'var(--accent)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px'}}>
@@ -1449,7 +1446,7 @@ const SchedinaComponent = ({
         </div>
       )}
 
-      {/* ===== MODAL SCHEDINA ===== */}
+      {/* MODAL SCHEDINA */}
       {showSchedinaModal && schedinaCreata && (
         <div className="heatmap-detail-overlay" onClick={() => setShowSchedinaModal(false)}>
           <div className="heatmap-detail-modal" onClick={e => e.stopPropagation()} style={{maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto'}}>
@@ -1510,7 +1507,6 @@ const SchedinaComponent = ({
                               <span className={`giocata-pct ${getPercentualeClasse(g.pct)}`} style={{fontSize: '12px', padding: '1px 6px'}}>
                                 {g.pct}% {g.isBomb && '💣'}
                               </span>
-                              {/* ⭐ QUOTA PDF NEL MODAL */}
                               <QuotaInline match={m} familyId={g.familyId} giocata={g.giocata} pctTua={g.pct} size="lg" />
                               <span style={{fontSize: '8px', color: 'var(--text-muted)'}}>
                                 {g.familyIcon} {g.familyLabel}
@@ -1580,4 +1576,4 @@ const SchedinaComponent = ({
 };
 
 window.SchedinaComponent = SchedinaComponent;
-console.log('✅ SchedinaComponent caricato - con quote PDF + sub-tab rimosso');
+console.log('✅ SchedinaComponent v6 caricato - 8 opzioni MG + etichette formattate');

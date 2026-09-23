@@ -3,6 +3,7 @@
 // LEGGE il filtro campionati dal Palinsesto (fonte di verità).
 // Include 3 tab: "🌍 Seleziona una Nazione", "💰 Gestione Conto" (default), "📈 Performance".
 // Quote mostrate accanto alle giocate (con value bet evidenziato)
+// ✅ FIX v6: Multigol con 8 opzioni + etichette formattate
 // ============================================================
 
 (function () {
@@ -110,7 +111,7 @@
   const SCHEDINA_STORAGE_KEY = 'ft_schedina_selezioni';
 
   // ============================================================
-  // COMPONENTE QUOTA INLINE (per tabella giornata)
+  // COMPONENTE QUOTA INLINE
   // ============================================================
   const QuotaInline = ({ match, familyId, giocata, pctTua, size = 'sm' }) => {
     const [quotaInfo, setQuotaInfo] = useState(null);
@@ -194,18 +195,18 @@
 
   // ============================================================
   // ETICHETTA LEGGIBILE PER GIOCATE
+  // Le etichette MG arrivano già formattate ('MG Casa 0-2', 'MG Tot 1-4', ecc.)
   // ============================================================
 
-  const formatGiocataLabel = (familyId, label, giocata) => {
+  const formatGiocataLabel = (familyId, label) => {
     if (!label) return '—';
 
     if (label.startsWith('Over '))  return label;
     if (label.startsWith('Under ')) return label.replace('.', ',');
 
     if (familyId === 'multigol') {
-      if (label === '0-2' || label === '1-3') return `MG Casa ${label}`;
-      if (label === '1-4' || label === '2-5') return `MG Tot ${label}`;
-      return `MG ${label}`;
+      // Le etichette sono già formattate dal sistema
+      return label;
     }
 
     if (familyId === 'mg_casa_ospite') {
@@ -217,7 +218,7 @@
 
     if (familyId === 'dc_multigol') {
       const parts = label.split('+');
-      if (parts.length === 2) return `${parts[0]} + MG Tot ${parts[1]}`;
+      if (parts.length === 2) return `${parts[0]} + ${parts[1]}`;
     }
 
     if (familyId === 'dc_under') {
@@ -454,7 +455,6 @@
         <span className={`giocata-pct ${cls}`} style={{ fontSize: '13px' }}>
           {pct}% {isBomb && <span className="bomb-icon" style={{ fontSize: '12px' }}>💣</span>}
         </span>
-        {/* ⭐ QUOTA PDF */}
         <QuotaInline
           match={match}
           familyId={giocataObj.familyId}
@@ -483,7 +483,7 @@
       const res = calcolaTop3Giocate(match, allMatches);
       const formatted = res.map(g => ({
         ...g,
-        label: formatGiocataLabel(g.familyId, g.label, g.giocata),
+        label: formatGiocataLabel(g.familyId, g.label),
       }));
       setTop3(formatted);
     }, [match.id]);
@@ -782,13 +782,11 @@
   };
 
   // ============================================================
-  // COMPONENTE PRINCIPALE: HOME (con 3 tab)
-  // Ordine tab: 🌍 Nazioni | 💰 Gestione Conto (default) | 📈 Performance
+  // COMPONENTE PRINCIPALE: HOME
   // ============================================================
 
   function HomeComponent({ matches, championships, onSelectMatch, setTab, selectedFamiglie, weatherCache }) {
-    // ⭐ SWITCH: GestioneConto (default) / Nazioni / Performance
-    const [homeTab, setHomeTab] = useState('Nazioni');
+    const [homeTab, setHomeTab] = useState('GestioneConto');
     const [nazioneSelezionata, setNazioneSelezionata] = useState(null);
 
     const { filtro: filtroCampionati, campionatiAttivi } =
@@ -830,7 +828,6 @@
     );
 
     const renderTabContent = () => {
-      // ⭐ GESTIONE CONTO
       if (homeTab === 'GestioneConto') {
         return window.GestioneContoComponent ? (
           <window.GestioneContoComponent />
@@ -870,15 +867,12 @@
 
     return (
       <div>
-        {/* 🚨 BANNER SCADENZA QUOTE */}
         {window.QuoteManager?.BannerScadenzaQuote && (
           <window.QuoteManager.BannerScadenzaQuote />
         )}
 
-        {/* Banner filtro visibile solo nelle tab Nazioni/Performance */}
         {homeTab !== 'GestioneConto' && <BannerFiltro />}
 
-        {/* ⭐ SWITCH CON 3 TAB - Ordine: Nazioni | Gestione Conto (default) | Performance */}
         <div className="sub-tabs" style={{ marginBottom: '16px', flexWrap: 'wrap' }}>
           <button
             className={homeTab === 'Nazioni' ? 'active' : ''}
@@ -926,6 +920,6 @@
     CHINESE_TEAMS,
   };
 
-  console.log('✅ Modulo Home caricato - con Gestione Conto (default) + quote PDF visibili');
+  console.log('✅ Modulo Home caricato - 8 opzioni MG + etichette formattate');
 
 })();

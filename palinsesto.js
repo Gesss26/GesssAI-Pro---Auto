@@ -2,8 +2,8 @@
 // palinsesto.js - Modulo Palinsesto con quote visibili
 // Mostra quote PDF accanto a ogni giocata (con value bet)
 // È la FONTE DI VERITÀ per il filtro campionati, giorni e modalità giocate.
-// Etichette MG: 0-2/1-3 = "MG Casa", 1-4/2-5 = "MG Tot".
-// ⭐ v5: NON salva più snapshot (li calcola performance.js da Excel)
+// Etichette MG: 8 opzioni (Casa/Ospite 0-2, 1-3, 2-5 + Tot 1-4, 2-5)
+// ✅ FIX v6: Multigol con 8 opzioni + etichette già formattate
 // ============================================================
 
 (function () {
@@ -13,6 +13,7 @@
 
   // ============================================================
   // FORMATTAZIONE ETICHETTE GIOCATE
+  // Le etichette MG arrivano già formattate ('MG Casa 0-2', 'MG Tot 1-4', ecc.)
   // ============================================================
   const formatGiocataLabel = (familyId, label) => {
     if (!label) return '—';
@@ -21,9 +22,8 @@
     if (label.startsWith('Under ')) return label.replace('.', ',');
 
     if (familyId === 'multigol') {
-      if (label === '0-2' || label === '1-3') return `MG Casa ${label}`;
-      if (label === '1-4' || label === '2-5') return `MG Tot ${label}`;
-      return `MG ${label}`;
+      // Le etichette sono già formattate dal sistema: 'MG Casa 0-2', ecc.
+      return label;
     }
 
     if (familyId === 'mg_casa_ospite') {
@@ -35,7 +35,7 @@
 
     if (familyId === 'dc_multigol') {
       const parts = label.split('+');
-      if (parts.length === 2) return `${parts[0]} + MG Tot ${parts[1]}`;
+      if (parts.length === 2) return `${parts[0]} + ${parts[1]}`;
     }
 
     if (familyId === 'dc_under') {
@@ -77,7 +77,7 @@
   };
 
   // ============================================================
-  // COMPONENTE: BOX QUOTA (con value bet evidenziato)
+  // COMPONENTE: BOX QUOTA
   // ============================================================
   const QuotaBox = ({ match, familyId, giocata, pctTua }) => {
     const [quotaInfo, setQuotaInfo] = useState(null);
@@ -596,6 +596,6 @@
   }
 
   window.PalinsestoComponent = PalinsestoComponent;
-  console.log('✅ Modulo Palinsesto v5 caricato - snapshot calcolati da performance.js');
+  console.log('✅ Modulo Palinsesto v6 caricato - 8 opzioni MG + etichette formattate');
 
 })();

@@ -3,8 +3,10 @@
 // LEGGE il filtro campionati dal Palinsesto (fonte di verità).
 // Include sezione GG / NG in MatchDetail (tra Under/Over e Multigol).
 // GG-NG sempre visibile in Riepilogo AI (dopo Under/Over).
-// Etichette MG: 0-2/1-3 = "MG Casa", 1-4/2-5 = "MG Tot".
+// Etichette MG: 8 opzioni (Casa/Ospite 0-2, 1-3, 2-5 + Tot 1-4, 2-5)
 // ✅ FIX Doppia Chance: DC = SOMMA delle componenti (non media)
+// ✅ FIX Multigol: 8 opzioni separate con conteggio frequenze
+// ✅ NEW: Vista "Tutte le famiglie" sotto la classifica
 // ============================================================
 
 (function () {
@@ -14,6 +16,7 @@
 
   // ============================================================
   // FORMATTAZIONE ETICHETTE GIOCATE
+  // Le etichette MG arrivano già formattate ('MG Casa 0-2', 'MG Tot 1-4', ecc.)
   // ============================================================
   const formatGiocataLabel = (familyId, label) => {
     if (!label) return '—';
@@ -22,9 +25,8 @@
     if (label.startsWith('Under ')) return label.replace('.', ',');
 
     if (familyId === 'multigol') {
-      if (label === '0-2' || label === '1-3') return `MG Casa ${label}`;
-      if (label === '1-4' || label === '2-5') return `MG Tot ${label}`;
-      return `MG ${label}`;
+      // Le etichette sono già formattate dal sistema: 'MG Casa 0-2', ecc.
+      return label;
     }
 
     if (familyId === 'mg_casa_ospite') {
@@ -36,7 +38,7 @@
 
     if (familyId === 'dc_multigol') {
       const parts = label.split('+');
-      if (parts.length === 2) return `${parts[0]} + MG Tot ${parts[1]}`;
+      if (parts.length === 2) return `${parts[0]} + ${parts[1]}`;
     }
 
     if (familyId === 'dc_under') {
@@ -64,7 +66,7 @@
   };
 
   // ============================================================
-  // ⭐ HELPER: CALCOLO DOPPIA CHANCE (SOMMA DELLE COMPONENTI)
+  // HELPER: CALCOLO DOPPIA CHANCE (SOMMA DELLE COMPONENTI)
   // ============================================================
   const calcDC = (mc, dcCode) => {
     if (!mc) return 0;
@@ -78,7 +80,7 @@
   };
 
   // ============================================================
-  // SIMULAZIONE MONTE CARLO + POISSON
+  // SIMULAZIONE MONTE CARLO + POISSON (per AIAnalysis)
   // ============================================================
 
   const getTeamPoissonParams = (teamName, allMatches) => {
@@ -170,26 +172,6 @@
       if (gC !== gO && (gC + gO) < 4.5) c12U45 += count;
     }
 
-    let c02_02 = 0, c13_13 = 0, c02_13 = 0, c13_02 = 0, c25_25 = 0;
-    for (const [key, count] of Object.entries(risultati)) {
-      const [gC, gO] = key.split('-').map(Number);
-      if (gC <= 2 && gO <= 2) c02_02 += count;
-      if (gC >= 1 && gC <= 3 && gO >= 1 && gO <= 3) c13_13 += count;
-      if (gC <= 2 && gO >= 1 && gO <= 3) c02_13 += count;
-      if (gC >= 1 && gC <= 3 && gO <= 2) c13_02 += count;
-      if (gC >= 2 && gC <= 5 && gO >= 2 && gO <= 5) c25_25 += count;
-    }
-
-    const combinazioni = [
-      { label: '0-2 + 0-2', pct: pct(c02_02) },
-      { label: '1-3 + 1-3', pct: pct(c13_13) },
-      { label: '0-2 + 1-3', pct: pct(c02_13) },
-      { label: '1-3 + 0-2', pct: pct(c13_02) },
-      { label: '2-5 + 2-5', pct: pct(c25_25) }
-    ];
-    let bestCombinata = combinazioni[0];
-    for (const c of combinazioni) if (c.pct > bestCombinata.pct) bestCombinata = c;
-
     return {
       homeWins: pct(homeWins), draws: pct(draws), awayWins: pct(awayWins),
       over15: pct(over15), under15: pct(under15),
@@ -203,8 +185,7 @@
       homeAttacco: homeAttacco.toFixed(2), homeDifesa: homeDifesa.toFixed(2),
       awayAttacco: awayAttacco.toFixed(2), awayDifesa: awayDifesa.toFixed(2),
       partiteAnalizzate: Math.min(homeParams.partite, awayParams.partite),
-      numSimulations: n, risultati,
-      combinataLabel: bestCombinata.label, combinataPct: bestCombinata.pct, combinazioni
+      numSimulations: n, risultati
     };
   };
 
@@ -249,9 +230,7 @@
       }
     };
 
-    // ============================================================
-    // CALCOLO PCT DA MONTE CARLO - CON FIX DOPPIA CHANCE
-    // ============================================================
+    // Calcolo pct da Monte Carlo
     const calcPctFromSim = (familyId, giocata) => {
       const totalSim = mc?.numSimulations || 10000;
 
@@ -266,7 +245,6 @@
         if (giocata === '2') return mc?.awayWins || 0;
       }
 
-      // ⭐ FIX DC: SOMMA delle componenti (non media!)
       if (familyId === 'dc') {
         if (giocata === '1X') return calcDC(mc, '1X');
         if (giocata === '12') return calcDC(mc, '12');
@@ -285,82 +263,27 @@
         if (giocata === 'Under 3.5') return mc?.under35 || 0;
         if (giocata === 'Under 4.5') return mc?.under45 || 0;
       }
+
+      // Multigol: usa MC
       if (familyId === 'multigol') {
         let count = 0;
         for (const [key, c] of Object.entries(mc?.risultati || {})) {
           const [gC, gO] = key.split('-').map(Number);
           const total = gC + gO;
           let matchMG = false;
-          if (giocata === '0-2' && total <= 2) matchMG = true;
-          else if (giocata === '1-3' && total >= 1 && total <= 3) matchMG = true;
-          else if (giocata === '1-4' && total >= 1 && total <= 4) matchMG = true;
-          else if (giocata === '2-5' && total >= 2 && total <= 5) matchMG = true;
+          if (giocata === 'MG Casa 0-2' && gC <= 2) matchMG = true;
+          else if (giocata === 'MG Ospite 0-2' && gO <= 2) matchMG = true;
+          else if (giocata === 'MG Casa 1-3' && gC >= 1 && gC <= 3) matchMG = true;
+          else if (giocata === 'MG Ospite 1-3' && gO >= 1 && gO <= 3) matchMG = true;
+          else if (giocata === 'MG Casa 2-5' && gC >= 2 && gC <= 5) matchMG = true;
+          else if (giocata === 'MG Ospite 2-5' && gO >= 2 && gO <= 5) matchMG = true;
+          else if (giocata === 'MG Tot 1-4' && total >= 1 && total <= 4) matchMG = true;
+          else if (giocata === 'MG Tot 2-5' && total >= 2 && total <= 5) matchMG = true;
           if (matchMG) count += c;
         }
         return Math.round((count / totalSim) * 100);
       }
 
-      // ⭐ FIX DC_UNDER
-      if (familyId === 'dc_under') {
-        const [dc, up] = giocata.split('+');
-        const dcP = calcDC(mc, dc);
-        let uP = 0;
-        if (up === 'U1.5') uP = mc?.under15 || 0;
-        else if (up === 'U2.5') uP = mc?.under25 || 0;
-        else if (up === 'U3.5') uP = mc?.under35 || 0;
-        else if (up === 'U4.5') uP = mc?.under45 || 0;
-        return Math.round((dcP + uP) / 2);
-      }
-
-      // ⭐ FIX DC_OVER
-      if (familyId === 'dc_over') {
-        const [dc, op] = giocata.split('+');
-        const dcP = calcDC(mc, dc);
-        let oP = 0;
-        if (op === 'O1.5') oP = mc?.over15 || 0;
-        else if (op === 'O2.5') oP = mc?.over25 || 0;
-        else if (op === 'O3.5') oP = mc?.over35 || 0;
-        else if (op === 'O4.5') oP = mc?.over45 || 0;
-        return Math.round((dcP + oP) / 2);
-      }
-
-      if (familyId === 'mg_casa_ospite') {
-        const [p1, p2] = giocata.split('+');
-        let count = 0;
-        for (const [key, c] of Object.entries(mc?.risultati || {})) {
-          const [gC, gO] = key.split('-').map(Number);
-          let mc1 = false, mc2 = false;
-          if (p1 === '0-1' && gC <= 1) mc1 = true;
-          else if (p1 === '0-2' && gC <= 2) mc1 = true;
-          else if (p1 === '1-3' && gC >= 1 && gC <= 3) mc1 = true;
-          else if (p1 === '2-5' && gC >= 2 && gC <= 5) mc1 = true;
-          if (p2 === '0-1' && gO <= 1) mc2 = true;
-          else if (p2 === '0-2' && gO <= 2) mc2 = true;
-          else if (p2 === '1-3' && gO >= 1 && gO <= 3) mc2 = true;
-          else if (p2 === '2-5' && gO >= 2 && gO <= 5) mc2 = true;
-          if (mc1 && mc2) count += c;
-        }
-        return Math.round((count / totalSim) * 100);
-      }
-
-      // ⭐ FIX DC_MULTIGOL
-      if (familyId === 'dc_multigol') {
-        const [dc, mg] = giocata.split('+');
-        const dcP = calcDC(mc, dc);
-        let countMG = 0;
-        for (const [key, c] of Object.entries(mc?.risultati || {})) {
-          const [gC, gO] = key.split('-').map(Number);
-          const total = gC + gO;
-          let m = false;
-          if (mg === '0-2' && total <= 2) m = true;
-          else if (mg === '1-3' && total >= 1 && total <= 3) m = true;
-          else if (mg === '1-4' && total >= 1 && total <= 4) m = true;
-          else if (mg === '2-5' && total >= 2 && total <= 5) m = true;
-          if (m) countMG += c;
-        }
-        const mgP = Math.round((countMG / totalSim) * 100);
-        return Math.round((dcP + mgP) / 2);
-      }
       return 0;
     };
 
@@ -394,31 +317,8 @@
       );
     }
 
-    const renderPctBox = (value, label, icon = '') => {
-      const rounded = Math.round(value);
-      const cls = getPercentualeClasse(rounded);
-      const isBomb = rounded >= 90;
-      return (
-        <div style={{
-          background: 'var(--card)', padding: '12px 16px', borderRadius: '8px',
-          textAlign: 'center', border: isBomb ? '2px solid var(--accent)' : '1px solid var(--border)',
-          flex: '1', minWidth: '100px'
-        }}>
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>
-            {icon} {label}
-          </div>
-          <div style={{ fontSize: '28px', fontWeight: 'bold', marginTop: '4px' }}>
-            <span className={`giocata-pct ${cls}`}>
-              {rounded}% {isBomb && <span className="bomb-icon">💣</span>}
-            </span>
-          </div>
-        </div>
-      );
-    };
-
     const famiglieDaMostrare = (() => {
       const ORDINE_PREFERITO = ['gg_ng', 'fisse', 'dc', 'over', 'under', 'multigol', 'dc_over', 'dc_under', 'mg_casa_ospite', 'dc_multigol'];
-
       const selezionate = (selectedFamiglie || []).slice(0, 3);
       const selezionateOrdinate = [...selezionate].sort((a, b) => {
         const ia = ORDINE_PREFERITO.indexOf(a);
@@ -434,13 +334,9 @@
       if (!lista.includes('gg_ng')) {
         const posUnder = lista.indexOf('under');
         const posOver = lista.indexOf('over');
-        if (posUnder !== -1) {
-          lista.splice(posUnder + 1, 0, 'gg_ng');
-        } else if (posOver !== -1) {
-          lista.splice(posOver + 1, 0, 'gg_ng');
-        } else {
-          lista.push('gg_ng');
-        }
+        if (posUnder !== -1) lista.splice(posUnder + 1, 0, 'gg_ng');
+        else if (posOver !== -1) lista.splice(posOver + 1, 0, 'gg_ng');
+        else lista.push('gg_ng');
       }
 
       return lista;
@@ -487,11 +383,7 @@
           {famiglieDaMostrare.map((familyId, idx) => {
             const best = getBestFamily(familyId);
             if (!best || best.pct < 0) {
-              return (
-                <div key={idx} style={{ background: 'var(--card)', padding: '12px', borderRadius: '8px', textAlign: 'center' }}>
-                  N/D
-                </div>
-              );
+              return <div key={idx} style={{ background: 'var(--card)', padding: '12px', borderRadius: '8px', textAlign: 'center' }}>N/D</div>;
             }
             const isBomb = best.isBomb;
             const isGGNG = familyId === 'gg_ng';
@@ -517,259 +409,12 @@
             );
           })}
         </div>
-
-        <div style={{ marginTop: '16px', background: 'var(--surface)', borderRadius: '8px', border: '1px solid var(--border)', overflow: 'hidden' }}>
-          <div style={{
-            padding: '14px 16px', display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-            gap: '10px', color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', background: 'var(--card)'
-          }}>
-            <div><span style={{ fontSize: '12px' }}>λ Casa</span><br /><span style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '22px' }}>{mc.lambdaCasa}</span></div>
-            <div><span style={{ fontSize: '12px' }}>λ Ospite</span><br /><span style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '22px' }}>{mc.lambdaOspite}</span></div>
-            <div><span style={{ fontSize: '12px' }}>Attacco Casa</span><br /><span style={{ color: 'var(--win)', fontWeight: 'bold', fontSize: '22px' }}>{mc.homeAttacco}</span></div>
-            <div><span style={{ fontSize: '12px' }}>Difesa Casa</span><br /><span style={{ color: 'var(--lose)', fontWeight: 'bold', fontSize: '22px' }}>{mc.homeDifesa}</span></div>
-            <div><span style={{ fontSize: '12px' }}>Attacco Ospite</span><br /><span style={{ color: 'var(--win)', fontWeight: 'bold', fontSize: '22px' }}>{mc.awayAttacco}</span></div>
-            <div><span style={{ fontSize: '12px' }}>Difesa Ospite</span><br /><span style={{ color: 'var(--lose)', fontWeight: 'bold', fontSize: '22px' }}>{mc.awayDifesa}</span></div>
-          </div>
-          <div style={{ padding: '16px 18px', background: 'rgba(243, 156, 18, 0.06)', borderTop: '2px solid var(--border)' }}>
-            <div style={{ fontSize: '16px', color: 'var(--accent)', fontWeight: 'bold', marginBottom: '10px' }}>
-              📖 Cosa significano questi valori?
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '8px 20px', fontSize: '15px', lineHeight: '1.5' }}>
-              <div style={{ padding: '8px 12px', background: 'rgba(243, 156, 18, 0.08)', borderRadius: '6px', borderLeft: '3px solid var(--accent)' }}>
-                <b style={{ color: 'var(--accent)' }}>λ Casa</b>
-                <span style={{ display: 'block', fontSize: '14px', color: 'var(--text-muted)' }}>Tasso medio gol previsti per la squadra di casa. Più alto = più gol.</span>
-              </div>
-              <div style={{ padding: '8px 12px', background: 'rgba(243, 156, 18, 0.08)', borderRadius: '6px', borderLeft: '3px solid var(--accent)' }}>
-                <b style={{ color: 'var(--accent)' }}>λ Ospite</b>
-                <span style={{ display: 'block', fontSize: '14px', color: 'var(--text-muted)' }}>Tasso medio gol previsti per la squadra ospite.</span>
-              </div>
-              <div style={{ padding: '8px 12px', background: 'rgba(111, 207, 151, 0.08)', borderRadius: '6px', borderLeft: '3px solid var(--win)' }}>
-                <b style={{ color: 'var(--win)' }}>Attacco</b>
-                <span style={{ display: 'block', fontSize: '14px', color: 'var(--text-muted)' }}>&gt;1.0 = attacco forte, &lt;1.0 = debole.</span>
-              </div>
-              <div style={{ padding: '8px 12px', background: 'rgba(235, 87, 87, 0.08)', borderRadius: '6px', borderLeft: '3px solid var(--lose)' }}>
-                <b style={{ color: 'var(--lose)' }}>Difesa</b>
-                <span style={{ display: 'block', fontSize: '14px', color: 'var(--text-muted)' }}>Più basso = difesa migliore.</span>
-              </div>
-            </div>
-            <div style={{ marginTop: '12px', padding: '12px 16px', background: 'var(--card)', borderRadius: '6px', border: '1px solid var(--border)', fontSize: '14px', color: 'var(--text-muted)' }}>
-              📊 <b style={{ color: 'var(--accent)' }}>{mc.partiteAnalizzate}</b> partite analizzate • 🔄 <b style={{ color: 'var(--accent)' }}>{mc.numSimulations}</b> simulazioni
-              {mc.partiteAnalizzate < 5 && <span style={{ marginLeft: '12px', color: 'var(--draw)' }}>⚠️ Poche partite</span>}
-              {mc.partiteAnalizzate >= 10 && <span style={{ marginLeft: '12px', color: 'var(--win)' }}>✅ Campione affidabile</span>}
-            </div>
-          </div>
-        </div>
       </div>
     );
   };
 
   // ============================================================
-  // WEATHER PROFESSIONALE
-  // ============================================================
-
-  const WeatherProfessionale = ({ weatherData, city, matchDate }) => {
-    if (!weatherData) {
-      return (
-        <div className="weather-professionale" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
-          <div style={{ fontSize: '48px', marginBottom: '8px' }}>🌤️</div>
-          <p>Dati meteo non disponibili per {city || 'questa località'}</p>
-          <p style={{ fontSize: '12px' }}>Open-Meteo è gratuito e non richiede chiave API</p>
-        </div>
-      );
-    }
-
-    const getWeatherIcon = (desc, rain) => {
-      if (!desc) return '🌤️';
-      const d = desc.toLowerCase();
-      if (rain > 5) return '🌧️';
-      if (rain > 1) return '🌦️';
-      if (d.includes('sereno')) return '☀️';
-      if (d.includes('nuvoloso') || d.includes('coperto')) return '☁️';
-      if (d.includes('nebbia')) return '🌫️';
-      if (d.includes('pioggia')) return '🌧️';
-      if (d.includes('temporale')) return '⛈️';
-      if (d.includes('neve')) return '❄️';
-      return '🌤️';
-    };
-
-    const getRiskLevel = (weather) => {
-      let risk = 0;
-      if (weather.rain > 5) risk += 3;
-      else if (weather.rain > 1) risk += 2;
-      else if (weather.rain > 0.5) risk += 1;
-      if (weather.wind_speed > 15) risk += 3;
-      else if (weather.wind_speed > 10) risk += 2;
-      else if (weather.wind_speed > 5) risk += 1;
-      if (weather.temp < -5 || weather.temp > 35) risk += 2;
-      else if (weather.temp < 0 || weather.temp > 30) risk += 1;
-      if (weather.weather && (weather.weather.includes('Temporale') || weather.weather.includes('temporale'))) risk += 3;
-      if (risk >= 6) return { level: 'high', label: '🔴 ALTO - Rischio di rinvio o condizioni proibitive' };
-      if (risk >= 4) return { level: 'medium', label: '🟡 MEDIO - Possibili difficoltà per i giocatori' };
-      if (risk >= 2) return { level: 'low', label: '🟢 BASSO - Condizioni accettabili' };
-      return { level: 'low', label: '🟢 OTTIMALE - Condizioni perfette per il calcio' };
-    };
-
-    const risk = getRiskLevel(weatherData);
-    const icon = getWeatherIcon(weatherData.weather, weatherData.rain);
-
-    return (
-      <div className="weather-professionale">
-        <div className="weather-header">
-          <div className="weather-icon-main">{icon}</div>
-          <div className="weather-info-main">
-            <div className="weather-temp-main">{Math.round(weatherData.temp)}°C</div>
-            <div className="weather-desc-main">{weatherData.weather || 'N/A'}</div>
-            <div className="weather-city-main">📍 {city || 'Località non specificata'} • 📅 {weatherData.forecast_date || matchDate || 'N/A'}</div>
-          </div>
-          <div style={{ textAlign: 'right', minWidth: '100px' }}>
-            <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Temp. min / max</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--accent)' }}>
-              {Math.round(weatherData.temp_min)}° / {Math.round(weatherData.temp_max)}°
-            </div>
-          </div>
-        </div>
-
-        <div className="weather-details-grid">
-          <div className="weather-detail-item">
-            <div className="wd-icon">💨</div>
-            <div className="wd-value">{Math.round(weatherData.wind_speed)} m/s</div>
-            <div className="wd-label">Vento</div>
-          </div>
-          <div className="weather-detail-item">
-            <div className="wd-icon">🌧️</div>
-            <div className="wd-value">{weatherData.rain > 0 ? weatherData.rain + ' mm' : '0 mm'}</div>
-            <div className="wd-label">Precipitazioni</div>
-          </div>
-        </div>
-
-        <div className="weather-risk">
-          <span className="risk-icon">⚠️</span>
-          <span className="risk-text"><b>Valutazione meteo:</b> {risk.label}</span>
-          <span className={`risk-badge ${risk.level}`}>{risk.level.toUpperCase()}</span>
-        </div>
-      </div>
-    );
-  };
-
-  // ============================================================
-  // INDICE AFFIDABILITA
-  // ============================================================
-
-  const IndiceAffidabilita = ({ teamName, allMatches }) => {
-    const teamMatches = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName));
-    const count = teamMatches.length;
-    if (count === 0) return null;
-    const affidabilita = Math.min(count / 20 * 100, 100);
-    const results = teamMatches.map(m => {
-      const isHome = m.casa === teamName;
-      const tg = isHome ? m.golCasa : m.golOspite;
-      const og = isHome ? m.golOspite : m.golCasa;
-      return tg > og ? 3 : (tg === og ? 1 : 0);
-    });
-    const media = results.reduce((s, r) => s + r, 0) / results.length;
-    const varianza = results.reduce((s, r) => s + Math.pow(r - media, 2), 0) / results.length;
-    const stabilita = Math.max(0, 100 - (varianza / 4 * 100));
-
-    return (
-      <div className="card">
-        <h4>🎯 Indice di Affidabilità - {teamName}</h4>
-        <div className="affidabilita-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-          <div>
-            <div style={{ fontSize: '28px', fontWeight: 'bold', color: affidabilita > 70 ? 'var(--win)' : 'var(--draw)' }}>
-              {Math.round(affidabilita)}%
-            </div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Affidabilità</div>
-            <div className="form-bar"><div className="form-bar-fill" style={{ width: `${affidabilita}%`, background: affidabilita > 70 ? 'var(--win)' : 'var(--draw)' }}></div></div>
-          </div>
-          <div>
-            <div style={{ fontSize: '28px', fontWeight: 'bold', color: stabilita > 60 ? 'var(--win)' : 'var(--draw)' }}>
-              {Math.round(stabilita)}%
-            </div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Stabilità</div>
-            <div className="form-bar"><div className="form-bar-fill" style={{ width: `${stabilita}%`, background: stabilita > 60 ? 'var(--win)' : 'var(--draw)' }}></div></div>
-          </div>
-          <div>
-            <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--accent)' }}>{count}</div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Partite analizzate</div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{count < 10 ? '⚠️ Poche partite' : '✅ Campione sufficiente'}</div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // ============================================================
-  // ANALISI METEO (impatto sui risultati)
-  // ============================================================
-
-  const AnalisiMeteo = ({ matches, weatherCache }) => {
-    const analyzeWeatherImpact = () => {
-      const analysis = {
-        pioggia: { totale: 0, over25: 0, gol: 0, over35: 0 },
-        sole: { totale: 0, over25: 0, gol: 0, over35: 0 },
-        vento: { totale: 0, over25: 0, gol: 0, over35: 0 },
-        freddo: { totale: 0, over25: 0, gol: 0, over35: 0 }
-      };
-      matches.filter(m => m.stato === 'Giocata').forEach(m => {
-        const weather = weatherCache[`${m.campionato}_${m.data}`];
-        if (!weather) return;
-        const total = m.golCasa + m.golOspite;
-        const isOver25 = total > 2.5;
-        const isOver35 = total > 3.5;
-        const isGol = m.golCasa > 0 && m.golOspite > 0;
-        let condition = 'sole';
-        if (weather.rain > 1) condition = 'pioggia';
-        else if (weather.wind_speed > 5) condition = 'vento';
-        else if (weather.temp < 5) condition = 'freddo';
-        analysis[condition].totale++;
-        if (isOver25) analysis[condition].over25++;
-        if (isOver35) analysis[condition].over35++;
-        if (isGol) analysis[condition].gol++;
-      });
-      return analysis;
-    };
-
-    const data = analyzeWeatherImpact();
-    const entries = Object.entries(data);
-    if (entries.every(([_, s]) => s.totale === 0)) return null;
-
-    return (
-      <div className="card">
-        <h4>🌤️ Impatto Meteo sui Risultati</h4>
-        <div className="weather-impact-grid">
-          {entries.map(([condition, stats]) => {
-            const pctOver25 = stats.totale ? Math.round((stats.over25 / stats.totale) * 100) : 0;
-            const pctOver35 = stats.totale ? Math.round((stats.over35 / stats.totale) * 100) : 0;
-            const pctGol = stats.totale ? Math.round((stats.gol / stats.totale) * 100) : 0;
-            const emoji = condition === 'pioggia' ? '🌧️' : (condition === 'vento' ? '💨' : (condition === 'freddo' ? '❄️' : '☀️'));
-            return (
-              <div key={condition} className="weather-stat">
-                <div className="weather-icon">{emoji}</div>
-                <div className="weather-label">{condition}</div>
-                <div className="weather-pct">
-                  <span>Over 2.5: {pctOver25}%</span>
-                  <div className="form-bar"><div className="form-bar-fill" style={{ width: `${pctOver25}%`, background: pctOver25 > 60 ? 'var(--win)' : 'var(--draw)' }} /></div>
-                </div>
-                <div className="weather-pct">
-                  <span>Over 3.5: {pctOver35}%</span>
-                  <div className="form-bar"><div className="form-bar-fill" style={{ width: `${pctOver35}%`, background: pctOver35 > 40 ? 'var(--win)' : 'var(--draw)' }} /></div>
-                </div>
-                <div className="weather-pct">
-                  <span>Gol (GG): {pctGol}%</span>
-                  <div className="form-bar"><div className="form-bar-fill" style={{ width: `${pctGol}%`, background: pctGol > 60 ? 'var(--win)' : 'var(--draw)' }} /></div>
-                </div>
-                <div className="weather-count">📊 {stats.totale} partite</div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  // ============================================================
-  // MATCH DETAIL (completo, con sezione GG/NG)
+  // MATCH DETAIL
   // ============================================================
 
   const MatchDetail = ({ match, allMatches }) => {
@@ -859,18 +504,15 @@
     };
 
     const calcolaGGNGLocale = () => {
-      const homeGames = stats.homeGames || [];
-      const awayGames = stats.awayGames || [];
-      const allGames = [...homeGames, ...awayGames];
-      const uniqueGames = Array.from(new Map(allGames.map(g => [g.id, g])).values());
-      if (uniqueGames.length === 0) return null;
+      const games = stats.allGames || [];
+      if (games.length === 0) return null;
 
       let gg = 0, ng = 0;
-      uniqueGames.forEach(g => {
+      games.forEach(g => {
         if (g.golCasa > 0 && g.golOspite > 0) gg++;
         else ng++;
       });
-      const total = uniqueGames.length;
+      const total = games.length;
       return {
         gg: Math.round((gg / total) * 100),
         ng: Math.round((ng / total) * 100),
@@ -1011,16 +653,133 @@
               textAlign: 'center',
               fontStyle: 'italic'
             }}>
-              📊 Basato su {ggngData.totalePartite} partite (casa + ospite unite, senza duplicati)
+              📊 Basato su {ggngData.totalePartite} partite (unione casa + ospite, senza duplicati)
             </div>
           </div>
         )}
 
         <div className="card detail-section">
           <h4>📊 MULTIGOL</h4>
-          {renderMultigolRow(stats.homeMG, `🏠 ${match.casa}`, getChampColor(match.campionato))}
-          {renderMultigolRow(stats.awayMG, `✈️ ${match.ospiti}`, getChampColor(match.campionato))}
-          {renderMultigolRow(stats.mgTot, '📊 Totale', 'var(--accent)')}
+          {renderMultigolRow({
+            '0-2': stats.homeMG['0-2'],
+            '1-3': stats.homeMG['1-3'],
+            '2-5': stats.homeMG['2-5']
+          }, `🏠 ${match.casa} (solo in casa)`, getChampColor(match.campionato))}
+          {renderMultigolRow({
+            '0-2': stats.awayMG['0-2'],
+            '1-3': stats.awayMG['1-3'],
+            '2-5': stats.awayMG['2-5']
+          }, `✈️ ${match.ospiti} (solo fuori casa)`, getChampColor(match.campionato))}
+          {renderMultigolRow({
+            '1-4': stats.mgTot['1-4'],
+            '2-5': stats.mgTot['2-5']
+          }, '📊 Totale partita (unione)', 'var(--accent)')}
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================================
+  // TUTTE LE FAMIGLIE (VISTA AGGIUNTIVA)
+  // ============================================================
+
+  const TutteLeFamigliePanel = ({ match, allMatches }) => {
+    const getChampColor = window.getChampColor;
+    const getPercentualeClasse = window.getPercentualeClasse;
+    const FAMIGLIE = window.FAMIGLIE_GIOCATE;
+    const getGiocataPct = window.getGiocataPct;
+
+    const stats = window.computeMatchStats(match, allMatches);
+    if (stats.error) return null;
+
+    const sezioni = Object.entries(FAMIGLIE).map(([familyId, family]) => {
+      const opzioni = family.options.map(opt => {
+        let pct = 0;
+
+        if (familyId === 'gg_ng') {
+          const ggNg = window.calcolaGG_NG(stats);
+          pct = opt === 'GG' ? (ggNg?.gg || 0) : (ggNg?.ng || 0);
+        } else {
+          pct = getGiocataPct(opt, stats, stats.homeMG, stats.awayMG, stats.mgTot);
+        }
+
+        // Quota (opzionale)
+        let quota = null;
+        let fonteQuota = null;
+
+        if (window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function') {
+          try {
+            const q = window.QuoteManager.analizzaGiocata(match, familyId, opt, pct);
+            if (q && q.quotaBook) {
+              quota = q.quotaBook;
+              fonteQuota = 'PDF';
+            }
+          } catch (e) {}
+        }
+
+        return { opt, pct, quota, fonteQuota };
+      });
+
+      return { familyId, family, opzioni };
+    });
+
+    return (
+      <div className="card" style={{ marginTop: '20px' }}>
+        <h3 style={{ color: 'var(--accent)', marginBottom: '16px' }}>
+          📊 Tutte le Giocate — {match.casa} vs {match.ospiti}
+        </h3>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+          {sezioni.map(({ familyId, family, opzioni }) => (
+            <div key={familyId} style={{
+              background: 'var(--surface)', borderRadius: '10px',
+              border: familyId === 'gg_ng' ? '2px solid #e74c3c' : '1px solid var(--border)',
+              padding: '12px',
+            }}>
+              <h4 style={{
+                color: familyId === 'gg_ng' ? '#e74c3c' : 'var(--accent)',
+                marginBottom: '8px', fontSize: '14px',
+                display: 'flex', justifyContent: 'space-between'
+              }}>
+                <span>{family.icon} {family.label}</span>
+              </h4>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {opzioni.map(({ opt, pct, quota, fonteQuota }) => (
+                  <div key={opt} style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    padding: '6px 8px', borderRadius: '6px',
+                    background: 'var(--card)',
+                    fontSize: '12px',
+                  }}>
+                    <span style={{ fontWeight: 'bold', color: 'var(--text)' }}>
+                      {formatGiocataLabel(familyId, opt)}
+                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span className={`giocata-pct ${getPercentualeClasse(pct)}`}
+                        style={{ fontSize: '11px', padding: '2px 8px' }}>
+                        {pct}%
+                      </span>
+                      {quota && (
+                        <span style={{
+                          fontSize: '11px', padding: '2px 6px', borderRadius: '4px',
+                          background: fonteQuota === 'PDF' ? 'rgba(111, 207, 151, 0.15)' : 'rgba(243, 156, 18, 0.15)',
+                          color: fonteQuota === 'PDF' ? 'var(--win)' : 'var(--accent)',
+                          fontWeight: 'bold',
+                        }}>
+                          {fonteQuota === 'PDF' ? '💰' : '📊'} {quota.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ marginTop: '12px', fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center' }}>
+          💰 = Quota Marathonbet (PDF) • 📊 = Quota stimata
         </div>
       </div>
     );
@@ -1286,7 +1045,54 @@
   };
 
   // ============================================================
-  // TEAM MATCHES HISTORY (per tab Scontri)
+  // INDICE AFFIDABILITA
+  // ============================================================
+
+  const IndiceAffidabilita = ({ teamName, allMatches }) => {
+    const teamMatches = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName));
+    const count = teamMatches.length;
+    if (count === 0) return null;
+    const affidabilita = Math.min(count / 20 * 100, 100);
+    const results = teamMatches.map(m => {
+      const isHome = m.casa === teamName;
+      const tg = isHome ? m.golCasa : m.golOspite;
+      const og = isHome ? m.golOspite : m.golCasa;
+      return tg > og ? 3 : (tg === og ? 1 : 0);
+    });
+    const media = results.reduce((s, r) => s + r, 0) / results.length;
+    const varianza = results.reduce((s, r) => s + Math.pow(r - media, 2), 0) / results.length;
+    const stabilita = Math.max(0, 100 - (varianza / 4 * 100));
+
+    return (
+      <div className="card">
+        <h4>🎯 Indice di Affidabilità - {teamName}</h4>
+        <div className="affidabilita-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+          <div>
+            <div style={{ fontSize: '28px', fontWeight: 'bold', color: affidabilita > 70 ? 'var(--win)' : 'var(--draw)' }}>
+              {Math.round(affidabilita)}%
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Affidabilità</div>
+            <div className="form-bar"><div className="form-bar-fill" style={{ width: `${affidabilita}%`, background: affidabilita > 70 ? 'var(--win)' : 'var(--draw)' }}></div></div>
+          </div>
+          <div>
+            <div style={{ fontSize: '28px', fontWeight: 'bold', color: stabilita > 60 ? 'var(--win)' : 'var(--draw)' }}>
+              {Math.round(stabilita)}%
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Stabilità</div>
+            <div className="form-bar"><div className="form-bar-fill" style={{ width: `${stabilita}%`, background: stabilita > 60 ? 'var(--win)' : 'var(--draw)' }}></div></div>
+          </div>
+          <div>
+            <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--accent)' }}>{count}</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Partite analizzate</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{count < 10 ? '⚠️ Poche partite' : '✅ Campione sufficiente'}</div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================================
+  // TEAM MATCHES HISTORY
   // ============================================================
 
   const TeamMatchesHistory = ({ teamName, championship, allMatches }) => {
@@ -1392,127 +1198,6 @@
   };
 
   // ============================================================
-  // HEATMAP GIOCATE
-  // ============================================================
-
-  const HeatmapGiocate = ({ matches, championships, onSelectChampionship }) => {
-    const getChampColor = window.getChampColor;
-    const getHeatmapColorClass = window.getHeatmapColorClass;
-    const [filterChamp, setFilterChamp] = useState('Tutti');
-
-    const analyzeChampionships = () => {
-      const champs = {};
-      if (championships && championships.length > 0) {
-        championships.forEach(c => {
-          if (c && c.name) {
-            champs[c.name] = {
-              over15: { total: 0, successi: 0 },
-              '12under45': { total: 0, successi: 0 },
-              multigolCasa13: { total: 0, successi: 0 },
-              multigolOspite13: { total: 0, successi: 0 },
-              multigolCasa02: { total: 0, successi: 0 },
-              multigolOspite02: { total: 0, successi: 0 }
-            };
-          }
-        });
-      }
-      matches.filter(m => m && m.stato === 'Giocata').forEach(m => {
-        if (!m.campionato) return;
-        if (!champs[m.campionato]) {
-          champs[m.campionato] = {
-            over15: { total: 0, successi: 0 }, '12under45': { total: 0, successi: 0 },
-            multigolCasa13: { total: 0, successi: 0 }, multigolOspite13: { total: 0, successi: 0 },
-            multigolCasa02: { total: 0, successi: 0 }, multigolOspite02: { total: 0, successi: 0 }
-          };
-        }
-        const total = (m.golCasa || 0) + (m.golOspite || 0);
-        const ch = champs[m.campionato];
-        ch.over15.total++;
-        if (total > 1.5) ch.over15.successi++;
-        ch['12under45'].total++;
-        if (m.golCasa !== m.golOspite && total < 4.5) ch['12under45'].successi++;
-        ch.multigolCasa13.total++;
-        if (m.golCasa >= 1 && m.golCasa <= 3) ch.multigolCasa13.successi++;
-        ch.multigolOspite13.total++;
-        if (m.golOspite >= 1 && m.golOspite <= 3) ch.multigolOspite13.successi++;
-        ch.multigolCasa02.total++;
-        if (m.golCasa <= 2) ch.multigolCasa02.successi++;
-        ch.multigolOspite02.total++;
-        if (m.golOspite <= 2) ch.multigolOspite02.successi++;
-      });
-      return champs;
-    };
-
-    const data = analyzeChampionships();
-    let entries = Object.entries(data);
-    entries.sort((a, b) => (b[1]?.over15?.total || 0) - (a[1]?.over15?.total || 0));
-    if (filterChamp !== 'Tutti') entries = entries.filter(([champ]) => champ === filterChamp);
-    const allChamps = Object.keys(data).sort();
-
-    if (entries.length === 0) {
-      return <div className="card"><h4>🔥 Heatmap Giocate per Campionato</h4><div className="empty-state">Nessun campionato importato.</div></div>;
-    }
-
-    const getPct = (stat) => stat && stat.total ? Math.round((stat.successi / stat.total) * 100) : 0;
-    const totalEntries = entries.length;
-
-    return (
-      <div className="card" style={{ padding: '14px 16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
-          <h4 style={{ margin: 0, fontSize: '18px' }}>🔥 Heatmap Giocate per Campionato</h4>
-          <select value={filterChamp} onChange={e => setFilterChamp(e.target.value)} style={{ maxWidth: '200px' }}>
-            <option value="Tutti">📊 Tutti ({totalEntries})</option>
-            {allChamps.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </div>
-
-        <div className="standings-table-wrap">
-          <table className="heatmap-table" style={{ fontSize: '14px', width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={{ padding: '6px 8px', fontSize: '12px', textAlign: 'left', background: 'var(--surface)', borderBottom: '2px solid var(--border)' }}>Campionato</th>
-                <th style={{ padding: '6px 8px', fontSize: '12px', textAlign: 'center', background: 'var(--surface)', borderBottom: '2px solid var(--border)' }}>Over 1.5</th>
-                <th style={{ padding: '6px 8px', fontSize: '12px', textAlign: 'center', background: 'var(--surface)', borderBottom: '2px solid var(--border)' }}>12+U4.5</th>
-                <th style={{ padding: '6px 8px', fontSize: '12px', textAlign: 'center', background: 'var(--surface)', borderBottom: '2px solid var(--border)' }}>MG Casa 1-3</th>
-                <th style={{ padding: '6px 8px', fontSize: '12px', textAlign: 'center', background: 'var(--surface)', borderBottom: '2px solid var(--border)' }}>MG Ospite 1-3</th>
-                <th style={{ padding: '6px 8px', fontSize: '12px', textAlign: 'center', background: 'var(--surface)', borderBottom: '2px solid var(--border)' }}>MG Casa 0-2</th>
-                <th style={{ padding: '6px 8px', fontSize: '12px', textAlign: 'center', background: 'var(--surface)', borderBottom: '2px solid var(--border)' }}>MG Ospite 0-2</th>
-                <th style={{ padding: '6px 8px', fontSize: '12px', textAlign: 'center', background: 'var(--surface)', borderBottom: '2px solid var(--border)' }}>📊</th>
-              </tr>
-            </thead>
-            <tbody>
-              {entries.map(([champ, stats]) => {
-                const pctOver15 = getPct(stats?.over15);
-                const pct12 = getPct(stats?.['12under45']);
-                const pctMGH = getPct(stats?.multigolCasa13);
-                const pctMGA = getPct(stats?.multigolOspite13);
-                const pctMGH02 = getPct(stats?.multigolCasa02);
-                const pctMGA02 = getPct(stats?.multigolOspite02);
-                const totalGames = stats?.over15?.total || 0;
-                const color = getChampColor(champ);
-                const hasMatches = totalGames > 0;
-                const fmt = (p) => hasMatches ? `${p}%` : '-';
-                return (
-                  <tr key={champ} onClick={() => hasMatches && onSelectChampionship && onSelectChampionship(champ)} style={{ cursor: hasMatches ? 'pointer' : 'default', opacity: hasMatches ? 1 : 0.5 }}>
-                    <td style={{ color: color, fontWeight: 'bold', fontSize: '14px', padding: '4px 8px', borderBottom: '1px solid var(--border)' }}>{champ}</td>
-                    <td style={{ textAlign: 'center', padding: '4px 6px', borderBottom: '1px solid var(--border)', fontWeight: 'bold' }}><span className={getHeatmapColorClass(pctOver15)}>{fmt(pctOver15)}</span></td>
-                    <td style={{ textAlign: 'center', padding: '4px 6px', borderBottom: '1px solid var(--border)', fontWeight: 'bold' }}><span className={getHeatmapColorClass(pct12)}>{fmt(pct12)}</span></td>
-                    <td style={{ textAlign: 'center', padding: '4px 6px', borderBottom: '1px solid var(--border)', fontWeight: 'bold' }}><span className={getHeatmapColorClass(pctMGH)}>{fmt(pctMGH)}</span></td>
-                    <td style={{ textAlign: 'center', padding: '4px 6px', borderBottom: '1px solid var(--border)', fontWeight: 'bold' }}><span className={getHeatmapColorClass(pctMGA)}>{fmt(pctMGA)}</span></td>
-                    <td style={{ textAlign: 'center', padding: '4px 6px', borderBottom: '1px solid var(--border)', fontWeight: 'bold' }}><span className={getHeatmapColorClass(pctMGH02)}>{fmt(pctMGH02)}</span></td>
-                    <td style={{ textAlign: 'center', padding: '4px 6px', borderBottom: '1px solid var(--border)', fontWeight: 'bold' }}><span className={getHeatmapColorClass(pctMGA02)}>{fmt(pctMGA02)}</span></td>
-                    <td style={{ fontSize: '13px', color: 'var(--text-muted)', textAlign: 'center', padding: '4px 6px', borderBottom: '1px solid var(--border)' }}>{hasMatches ? totalGames : '-'}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  };
-
-  // ============================================================
   // COMPONENTE PRINCIPALE
   // ============================================================
 
@@ -1554,29 +1239,36 @@
         </div>
 
         {statsSubTab === 'Classifica' && (
-          <div className="stats-two-col">
-            <div>
-              {selectedMatch ? (
-                <MatchDetail match={selectedMatch} allMatches={matchesFiltrati} />
-              ) : (
-                <div className="stats-placeholder">
-                  <p>👈 Seleziona una partita dal <b>Palinsesto</b> per vedere le statistiche.</p>
-                </div>
-              )}
+          <div>
+            <div className="stats-two-col">
+              <div>
+                {selectedMatch ? (
+                  <MatchDetail match={selectedMatch} allMatches={matchesFiltrati} />
+                ) : (
+                  <div className="stats-placeholder">
+                    <p>👈 Seleziona una partita dal <b>Palinsesto</b> per vedere le statistiche.</p>
+                  </div>
+                )}
+              </div>
+              <div>
+                {selectedMatch ? (
+                  <>
+                    <h3 style={{ marginBottom: '12px', color: getChampColor(selectedMatch.campionato) }}>
+                      Classifica - {selectedMatch.campionato}
+                    </h3>
+                    <Standings matches={matchesFiltrati} filterChampionship={selectedMatch.campionato}
+                      highlightTeams={[selectedMatch.casa, selectedMatch.ospiti]} />
+                  </>
+                ) : (
+                  <div className="stats-placeholder"><p>📊 Seleziona una partita per la classifica.</p></div>
+                )}
+              </div>
             </div>
-            <div>
-              {selectedMatch ? (
-                <>
-                  <h3 style={{ marginBottom: '12px', color: getChampColor(selectedMatch.campionato) }}>
-                    Classifica - {selectedMatch.campionato}
-                  </h3>
-                  <Standings matches={matchesFiltrati} filterChampionship={selectedMatch.campionato}
-                    highlightTeams={[selectedMatch.casa, selectedMatch.ospiti]} />
-                </>
-              ) : (
-                <div className="stats-placeholder"><p>📊 Seleziona una partita per la classifica.</p></div>
-              )}
-            </div>
+
+            {/* ⭐ VISTA TUTTE LE FAMIGLIE */}
+            {selectedMatch && (
+              <TutteLeFamigliePanel match={selectedMatch} allMatches={matchesFiltrati} />
+            )}
           </div>
         )}
 
@@ -1617,7 +1309,6 @@
                     <IndiceAffidabilita teamName={selectedMatch.ospiti} allMatches={matchesFiltrati} />
                   </div>
                 </div>
-                <AnalisiMeteo matches={matchesFiltrati} weatherCache={weatherCache} />
               </div>
             ) : (
               <div className="stats-placeholder"><p>👈 Seleziona una partita per il riepilogo AI.</p></div>
@@ -1689,17 +1380,108 @@
     );
   }
 
+  // ============================================================
+  // WEATHER PROFESSIONALE (invariato)
+  // ============================================================
+
+  const WeatherProfessionale = ({ weatherData, city, matchDate }) => {
+    if (!weatherData) {
+      return (
+        <div className="weather-professionale" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+          <div style={{ fontSize: '48px', marginBottom: '8px' }}>🌤️</div>
+          <p>Dati meteo non disponibili per {city || 'questa località'}</p>
+          <p style={{ fontSize: '12px' }}>Open-Meteo è gratuito e non richiede chiave API</p>
+        </div>
+      );
+    }
+
+    const getWeatherIcon = (desc, rain) => {
+      if (!desc) return '🌤️';
+      const d = desc.toLowerCase();
+      if (rain > 5) return '🌧️';
+      if (rain > 1) return '🌦️';
+      if (d.includes('sereno')) return '☀️';
+      if (d.includes('nuvoloso') || d.includes('coperto')) return '☁️';
+      if (d.includes('nebbia')) return '🌫️';
+      if (d.includes('pioggia')) return '🌧️';
+      if (d.includes('temporale')) return '⛈️';
+      if (d.includes('neve')) return '❄️';
+      return '🌤️';
+    };
+
+    const getRiskLevel = (weather) => {
+      let risk = 0;
+      if (weather.rain > 5) risk += 3;
+      else if (weather.rain > 1) risk += 2;
+      else if (weather.rain > 0.5) risk += 1;
+      if (weather.wind_speed > 15) risk += 3;
+      else if (weather.wind_speed > 10) risk += 2;
+      else if (weather.wind_speed > 5) risk += 1;
+      if (weather.temp < -5 || weather.temp > 35) risk += 2;
+      else if (weather.temp < 0 || weather.temp > 30) risk += 1;
+      if (weather.weather && (weather.weather.includes('Temporale') || weather.weather.includes('temporale'))) risk += 3;
+      if (risk >= 6) return { level: 'high', label: '🔴 ALTO - Rischio di rinvio o condizioni proibitive' };
+      if (risk >= 4) return { level: 'medium', label: '🟡 MEDIO - Possibili difficoltà per i giocatori' };
+      if (risk >= 2) return { level: 'low', label: '🟢 BASSO - Condizioni accettabili' };
+      return { level: 'low', label: '🟢 OTTIMALE - Condizioni perfette per il calcio' };
+    };
+
+    const risk = getRiskLevel(weatherData);
+    const icon = getWeatherIcon(weatherData.weather, weatherData.rain);
+
+    return (
+      <div className="weather-professionale">
+        <div className="weather-header">
+          <div className="weather-icon-main">{icon}</div>
+          <div className="weather-info-main">
+            <div className="weather-temp-main">{Math.round(weatherData.temp)}°C</div>
+            <div className="weather-desc-main">{weatherData.weather || 'N/A'}</div>
+            <div className="weather-city-main">📍 {city || 'Località non specificata'} • 📅 {weatherData.forecast_date || matchDate || 'N/A'}</div>
+          </div>
+          <div style={{ textAlign: 'right', minWidth: '100px' }}>
+            <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Temp. min / max</div>
+            <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--accent)' }}>
+              {Math.round(weatherData.temp_min)}° / {Math.round(weatherData.temp_max)}°
+            </div>
+          </div>
+        </div>
+
+        <div className="weather-details-grid">
+          <div className="weather-detail-item">
+            <div className="wd-icon">💨</div>
+            <div className="wd-value">{Math.round(weatherData.wind_speed)} m/s</div>
+            <div className="wd-label">Vento</div>
+          </div>
+          <div className="weather-detail-item">
+            <div className="wd-icon">🌧️</div>
+            <div className="wd-value">{weatherData.rain > 0 ? weatherData.rain + ' mm' : '0 mm'}</div>
+            <div className="wd-label">Precipitazioni</div>
+          </div>
+        </div>
+
+        <div className="weather-risk">
+          <span className="risk-icon">⚠️</span>
+          <span className="risk-text"><b>Valutazione meteo:</b> {risk.label}</span>
+          <span className={`risk-badge ${risk.level}`}>{risk.level.toUpperCase()}</span>
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================================
+  // ESPOSIZIONE GLOBALE
+  // ============================================================
+
   window.StatisticheComponent = StatisticheComponent;
   window.AIAnalysis = AIAnalysis;
   window.WeatherProfessionale = WeatherProfessionale;
   window.IndiceAffidabilita = IndiceAffidabilita;
-  window.AnalisiMeteo = AnalisiMeteo;
-  window.HeatmapGiocate = HeatmapGiocate;
   window.RisultatiFrequenti = RisultatiFrequenti;
   window.FrequenzaGol = FrequenzaGol;
   window.Standings = Standings;
   window.TeamMatchesHistory = TeamMatchesHistory;
+  window.TutteLeFamigliePanel = TutteLeFamigliePanel;
 
-  console.log('✅ Modulo Statistiche caricato - DC FIXED (somma componenti) + MG Casa/Tot + GG/NG in MatchDetail');
+  console.log('✅ Modulo Statistiche caricato - DC somma + 8 opzioni MG + vista Tutte le famiglie');
 
 })();
