@@ -155,7 +155,6 @@
         }}
       >
         💰{quotaBook.toFixed(2)}
-        {isValue && <span>+{edge}%</span>}
       </span>
     );
   };

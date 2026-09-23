@@ -672,7 +672,7 @@
                         {quota ? (
                           <>
                             💰 {quota.toFixed(2)}
-                            {isValue && edge && <span> +{edge}%</span>}
+                            {isValue && edge && <span>}
                           </>
                         ) : (
                           <>📊 N/D</>

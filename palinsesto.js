@@ -120,9 +120,6 @@
       >
         <span>💰</span>
         <span>{quotaBook.toFixed(2)}</span>
-        {isValue && (
-          <span style={{ color: 'var(--win)' }}>+{edge}%</span>
-        )}
       </div>
     );
   };

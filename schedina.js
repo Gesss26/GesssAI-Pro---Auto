@@ -96,7 +96,6 @@ const QuotaInline = ({ match, familyId, giocata, pctTua, size = 'sm' }) => {
       }}
     >
       💰{quotaBook.toFixed(2)}
-      {isValue && <span>+{edge}%</span>}
     </span>
   );
 };
