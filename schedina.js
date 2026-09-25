@@ -1,9 +1,9 @@
 // ============================================================
 // schedina.js - Modulo Schedina con quote PDF visibili
 // Quote mostrate accanto a ogni giocata (con value bet evidenziato)
-// ✅ FIX v7: Selezione giocate singole raggruppate per famiglia
-//            (max 3) + "Tutte" = tutte le famiglie
-//            Score card = media delle giocate selezionate disponibili
+// ✅ FIX v8: Selezione giocate singole raggruppate per famiglia (max 3)
+//            + 2 switch: ordinamento (data/pct) e tipo giocate (calcolate/scelte)
+//            Score card adattivo allo switch attivo
 // ============================================================
 
 const formatGiocataLabel = (familyId, label) => {
@@ -54,8 +54,6 @@ const formatGiocataLabel = (familyId, label) => {
 
 // ============================================================
 // GRUPPI GIOCATE PER LA SELEZIONE IN SCHEDINA
-// Ogni gruppo ha: id famiglia, label, icon, e lista di giocate singole
-// con label formattata pronta per la UI
 // ============================================================
 
 const GRUPPI_GIOCATE = [
@@ -302,7 +300,6 @@ const SchedinaComponent = ({
   const [partiteSelezionate, setPartiteSelezionate] = useState([]);
   const [schedinaCreata, setSchedinaCreata] = useState(null);
   const [loading, setLoading] = useState(false);
-  // ⭐ MODIFICATO: ora contiene giocate specifiche (max 3) oppure ['tutte']
   const [giocateSelezionate, setGiocateSelezionate] = useState(['tutte']);
   const [showSchedinaModal, setShowSchedinaModal] = useState(false);
   const [casualitaLevel, setCasualitaLevel] = useState(30);
@@ -313,6 +310,10 @@ const SchedinaComponent = ({
   });
   const [numeroPartiteDaSelezionare, setNumeroPartiteDaSelezionare] = useState(5);
   const [filtroOrario, setFiltroOrario] = useState('dopo_ora');
+
+  // ⭐ NUOVI STATI: switch ordinamento e tipo giocate
+  const [ordinamento, setOrdinamento] = useState('data_pct'); // 'data_pct' | 'pct_data'
+  const [tipoGiocate, setTipoGiocate] = useState('calcolate'); // 'calcolate' | 'scelte'
 
   const MAX_GIOCATE = 3;
 
@@ -430,12 +431,19 @@ const SchedinaComponent = ({
 
   // ============================================================
   // CALCOLO GIOCATE PER PARTITA
-  // Se "tutte" → tutte le opzioni di tutte le famiglie
-  // Se selezionate → solo le giocate specifiche scelte
+  // Restituisce ENTRAMBE le liste: calcolate + scelte
   // ============================================================
   const calcolaTop3GiocatePerPartita = (match) => {
     const stats = computeMatchStats(match, matches);
-    if (stats.error) return { top3: [], score: 0, tutteGiocate: [] };
+    if (stats.error) {
+      return {
+        top3Calcolate: [],
+        top3Scelte: [],
+        scoreCalcolate: 0,
+        scoreScelte: 0,
+        tutteGiocate: []
+      };
+    }
 
     stats._allMatches = matches;
     stats._homeTeam = match.casa;
@@ -447,65 +455,61 @@ const SchedinaComponent = ({
     const homeRange = getMultigolRange(match.casa, matches);
     const awayRange = getMultigolRange(match.ospiti, matches);
 
-    const tutte = [];
+    // ============================================================
+    // 1. TOP 3 CALCOLATE (tutte le famiglie, migliori per pct)
+    // ============================================================
+    const tutteCalcolate = [];
+
+    Object.keys(window.FAMIGLIE_GIOCATE || {}).forEach(familyId => {
+      const family = window.FAMIGLIE_GIOCATE[familyId];
+      if (!family) return;
+
+      let best = null;
+
+      if (familyId === 'gg_ng') {
+        const ggNgResult = calcolaGG_NG ? calcolaGG_NG(stats) : null;
+        if (ggNgResult) {
+          best = {
+            ...ggNgResult,
+            familyId: 'gg_ng',
+            familyLabel: family.label,
+            familyIcon: family.icon,
+          };
+        }
+      } else {
+        const bestBet = getBestBetForFamily(familyId, stats, homeRange, awayRange, homeMG, awayMG, mgTot);
+        if (bestBet && bestBet.pct > 0) {
+          best = {
+            ...bestBet,
+            familyId: familyId,
+            familyLabel: family.label,
+            familyIcon: family.icon,
+          };
+        }
+      }
+
+      if (best && best.pct > 0) {
+        best.displayLabel = formatGiocataLabel(familyId, best.label);
+        tutteCalcolate.push(best);
+      }
+    });
+
+    tutteCalcolate.sort((a, b) => b.pct - a.pct);
+    const top3Calcolate = tutteCalcolate.slice(0, 3);
+    const scoreCalcolate = top3Calcolate.length > 0
+      ? Math.round(top3Calcolate.reduce((s, g) => s + g.pct, 0) / top3Calcolate.length)
+      : 0;
+
+    // ============================================================
+    // 2. TOP SCELTE (solo le giocate selezionate dall'utente)
+    // ============================================================
+    const top3Scelte = [];
     const isTutteMode = giocateSelezionate.includes('tutte') || giocateSelezionate.length === 0;
 
-    if (isTutteMode) {
-      // Comportamento attuale: analizza TUTTE le famiglie, prendi la migliore per famiglia
-      Object.keys(window.FAMIGLIE_GIOCATE || {}).forEach(familyId => {
-        const family = window.FAMIGLIE_GIOCATE[familyId];
-        if (!family) return;
+    if (!isTutteMode) {
+      giocateSelezionate.forEach(sel => {
+        if (typeof sel !== 'object' || !sel.familyId || !sel.giocata) return;
 
-        let best = null;
-
-        if (familyId === 'gg_ng') {
-          const ggNgResult = calcolaGG_NG ? calcolaGG_NG(stats) : null;
-          if (ggNgResult) {
-            best = {
-              ...ggNgResult,
-              familyId: 'gg_ng',
-              familyLabel: family.label,
-              familyIcon: family.icon,
-            };
-          }
-        } else {
-          const bestBet = getBestBetForFamily(familyId, stats, homeRange, awayRange, homeMG, awayMG, mgTot);
-          if (bestBet && bestBet.pct > 0) {
-            best = {
-              ...bestBet,
-              familyId: familyId,
-              familyLabel: family.label,
-              familyIcon: family.icon,
-            };
-          }
-        }
-
-        if (best && best.pct > 0) {
-          best.displayLabel = formatGiocataLabel(familyId, best.label);
-          tutte.push(best);
-        }
-      });
-
-      tutte.sort((a, b) => b.pct - a.pct);
-      const top3 = tutte.slice(0, 3);
-      const score = top3.length > 0
-        ? Math.round(top3.reduce((s, g) => s + g.pct, 0) / top3.length)
-        : 0;
-
-      return { top3, score, tutteGiocate: tutte };
-    }
-
-    // ⭐ MODALITÀ SELEZIONE SPECIFICA
-    // Per ogni giocata selezionata, trova la pct e la famiglia
-    const giocateTrovate = [];
-
-    giocateSelezionate.forEach(sel => {
-      // sel può essere:
-      // - stringa "Over 2.5" (per famiglie con giocate uniche)
-      // - stringa con familyId? No, meglio struttura {familyId, giocata}
-      // Per semplicità, gestiamo stringhe tipo "familyId::giocata"
-      // Ma per ora usiamo direttamente l'oggetto
-      if (typeof sel === 'object' && sel.familyId && sel.giocata) {
         const { familyId, giocata } = sel;
         const family = window.FAMIGLIE_GIOCATE[familyId];
         if (!family) return;
@@ -521,7 +525,7 @@ const SchedinaComponent = ({
         }
 
         if (pct > 0) {
-          giocateTrovate.push({
+          top3Scelte.push({
             familyId,
             familyLabel: family.label,
             familyIcon: family.icon,
@@ -532,47 +536,74 @@ const SchedinaComponent = ({
             isBomb: pct >= 90,
           });
         }
-      }
-    });
+      });
 
-    giocateTrovate.sort((a, b) => b.pct - a.pct);
-    const top3 = giocateTrovate.slice(0, 3);
-    const score = top3.length > 0
-      ? Math.round(top3.reduce((s, g) => s + g.pct, 0) / top3.length)
+      top3Scelte.sort((a, b) => b.pct - a.pct);
+    }
+
+    const scoreScelte = top3Scelte.length > 0
+      ? Math.round(top3Scelte.reduce((s, g) => s + g.pct, 0) / top3Scelte.length)
       : 0;
 
-    return { top3, score, tutteGiocate: giocateTrovate };
+    return {
+      top3Calcolate,
+      top3Scelte,
+      scoreCalcolate,
+      scoreScelte,
+      tutteGiocate: tutteCalcolate
+    };
   };
 
+  // ============================================================
+  // LISTA PARTITE ORDINATA IN BASE ALLO SWITCH
+  // ============================================================
   const partiteDisponibili = useMemo(() => {
     const partite = getPartiteDisponibili();
     const partiteConDettagli = partite.map(m => {
       const dettagli = calcolaTop3GiocatePerPartita(m);
       return {
         ...m,
-        top3: dettagli.top3,
-        score: dettagli.score,
+        top3Calcolate: dettagli.top3Calcolate,
+        top3Scelte: dettagli.top3Scelte,
+        scoreCalcolate: dettagli.scoreCalcolate,
+        scoreScelte: dettagli.scoreScelte,
         tutteGiocate: dettagli.tutteGiocate || []
       };
     });
 
+    // ⭐ Ordinamento in base allo switch
     return partiteConDettagli.sort((a, b) => {
       const dateA = normalizeDate(a.data);
       const dateB = normalizeDate(b.data);
 
-      if (dateA && dateB && dateA !== dateB) {
-        return dateA.localeCompare(dateB);
-      }
+      const scoreA = tipoGiocate === 'scelte' ? (a.scoreScelte || 0) : (a.scoreCalcolate || 0);
+      const scoreB = tipoGiocate === 'scelte' ? (b.scoreScelte || 0) : (b.scoreCalcolate || 0);
 
-      if (a.score !== b.score) {
-        return (b.score || 0) - (a.score || 0);
+      if (ordinamento === 'data_pct') {
+        // Data crescente → score decrescente
+        if (dateA && dateB && dateA !== dateB) {
+          return dateA.localeCompare(dateB);
+        }
+        if (scoreA !== scoreB) {
+          return scoreB - scoreA;
+        }
+        const oraA = a.ora || '00:00';
+        const oraB = b.ora || '00:00';
+        return oraA.localeCompare(oraB);
+      } else {
+        // Score decrescente → data crescente
+        if (scoreA !== scoreB) {
+          return scoreB - scoreA;
+        }
+        if (dateA && dateB && dateA !== dateB) {
+          return dateA.localeCompare(dateB);
+        }
+        const oraA = a.ora || '00:00';
+        const oraB = b.ora || '00:00';
+        return oraA.localeCompare(oraB);
       }
-
-      const oraA = a.ora || '00:00';
-      const oraB = b.ora || '00:00';
-      return oraA.localeCompare(oraB);
     });
-  }, [getPartiteDisponibili, giocateSelezionate, selectedFamiglie]);
+  }, [getPartiteDisponibili, giocateSelezionate, selectedFamiglie, ordinamento, tipoGiocate]);
 
   const selezionaNumeroPartite = (n) => {
     if (partiteDisponibili.length === 0) {
@@ -583,13 +614,20 @@ const SchedinaComponent = ({
     const numeroDaPrendere = Math.min(n, partiteDisponibili.length, 10);
     let messaggioExtra = '';
 
+    // ⭐ Ordina per score decrescente per prendere le migliori
+    const ordinatePerScore = [...partiteDisponibili].sort((a, b) => {
+      const scoreA = tipoGiocate === 'scelte' ? (a.scoreScelte || 0) : (a.scoreCalcolate || 0);
+      const scoreB = tipoGiocate === 'scelte' ? (b.scoreScelte || 0) : (b.scoreCalcolate || 0);
+      return scoreB - scoreA;
+    });
+
     let migliori;
     if (casualitaLevel > 80) {
       const shuffled = shuffleArray(partiteDisponibili);
       migliori = shuffled.slice(0, numeroDaPrendere);
       messaggioExtra = ` 🎲🎲🎲 (scelte casualmente!)`;
     } else {
-      migliori = partiteDisponibili.slice(0, numeroDaPrendere);
+      migliori = ordinatePerScore.slice(0, numeroDaPrendere);
     }
 
     const miglioriOrdinate = ordinaPartitePerDataOra(migliori);
@@ -614,9 +652,10 @@ const SchedinaComponent = ({
       return;
     }
 
+    // ⭐ Raggruppa per score (coerente con switch tipoGiocate)
     const partitePerScore = {};
     partiteDisponibili.forEach(m => {
-      const score = m.score;
+      const score = tipoGiocate === 'scelte' ? (m.scoreScelte || 0) : (m.scoreCalcolate || 0);
       if (!partitePerScore[score]) partitePerScore[score] = [];
       partitePerScore[score].push(m);
     });
@@ -713,12 +752,14 @@ const SchedinaComponent = ({
 
     const schedina = partiteOrdinate.map(m => {
       const dettagli = calcolaTop3GiocatePerPartita(m);
+      const top3 = tipoGiocate === 'scelte' ? dettagli.top3Scelte : dettagli.top3Calcolate;
+      const score = tipoGiocate === 'scelte' ? dettagli.scoreScelte : dettagli.scoreCalcolate;
       return {
         ...m,
-        top3: dettagli.top3,
-        score: dettagli.score,
-        giocata: dettagli.top3[0] || null,
-        pct: dettagli.top3[0]?.pct || 0
+        top3,
+        score,
+        giocata: top3[0] || null,
+        pct: top3[0]?.pct || 0
       };
     });
 
@@ -738,6 +779,7 @@ const SchedinaComponent = ({
       data: new Date().toISOString(),
       dataFormattata: new Date().toLocaleString('it-IT'),
       giocateSelezionate: JSON.parse(JSON.stringify(giocateSelezionate)),
+      tipoGiocate: tipoGiocate,
       campionatiSelezionati: [...campionatiSelezionati],
       timestamp: new Date().toLocaleString('it-IT'),
       dataInizio: dataInizio,
@@ -779,6 +821,8 @@ const SchedinaComponent = ({
     setGiocateSelezionate(prev => {
       // Se è "tutte", la prima selezione specifica sostituisce "tutte"
       if (prev.includes('tutte')) {
+        // ⭐ Se eravamo in modalità "scelte" e ora selezioniamo una giocata, resta "scelte"
+        // Se eravamo in "calcolate" e selezioniamo, passiamo a "scelte" automaticamente? No, l'utente decide.
         return [{ familyId, giocata }];
       }
 
@@ -804,15 +848,33 @@ const SchedinaComponent = ({
 
   const selezionaTutteGiocate = () => {
     setGiocateSelezionate(['tutte']);
+    // ⭐ Se era attivo "scelte", torna a "calcolate" perché non ci sono più giocate specifiche
+    if (tipoGiocate === 'scelte') {
+      setTipoGiocate('calcolate');
+    }
   };
 
   const deselezionaTutteGiocate = () => {
     setGiocateSelezionate(['tutte']);
+    if (tipoGiocate === 'scelte') {
+      setTipoGiocate('calcolate');
+    }
   };
 
   const conteggioGiocateSelezionate = () => {
     if (giocateSelezionate.includes('tutte')) return 0;
     return giocateSelezionate.filter(s => typeof s === 'object').length;
+  };
+
+  // ⭐ HANDLER SWITCH TIPO GIOCATE
+  const handleTipoGiocateChange = (nuovoTipo) => {
+    if (nuovoTipo === 'scelte' && giocateSelezionate.includes('tutte')) {
+      showAlert('info', 'ℹ️ Nessuna giocata scelta. Seleziona almeno una giocata specifica o usa "⭐ Tutte".');
+      setGiocateSelezionate(['tutte']);
+      setTipoGiocate('calcolate');
+      return;
+    }
+    setTipoGiocate(nuovoTipo);
   };
 
   const formatSchedinaText = (schedina) => {
@@ -842,7 +904,6 @@ const SchedinaComponent = ({
       lines.push(`🏆 Campionati: ${champsDisplay}`);
     }
 
-    // Mostra le giocate selezionate
     if (schedina.giocateSelezionate) {
       if (schedina.giocateSelezionate.includes('tutte')) {
         lines.push(`🎯 Giocate: Tutte le famiglie`);
@@ -972,6 +1033,9 @@ const SchedinaComponent = ({
     setPartiteSelezionate(partiteOrdinate);
     if (schedina.giocateSelezionate) {
       setGiocateSelezionate(schedina.giocateSelezionate);
+    }
+    if (schedina.tipoGiocate) {
+      setTipoGiocate(schedina.tipoGiocate);
     }
     setShowSchedinaModal(true);
     showAlert('success', `📂 Schedina caricata! ${schedina.numPartite} partite, media ${schedina.media}%`);
@@ -1406,7 +1470,11 @@ const SchedinaComponent = ({
             <span>🏆 <b>{campionatiSelezionati.length}</b> campionati attivi</span>
             <span>📅 Range: <b>{giorniRange} giorno/i</b></span>
             <span>⭐ Media score: <b style={{color: 'var(--accent)'}}>
-              {partiteDisponibili.length > 0 ? Math.round(partiteDisponibili.reduce((s, m) => s + m.score, 0) / partiteDisponibili.length) : 0}%
+              {partiteDisponibili.length > 0
+                ? Math.round(partiteDisponibili.reduce((s, m) =>
+                    s + (tipoGiocate === 'scelte' ? (m.scoreScelte || 0) : (m.scoreCalcolate || 0)), 0)
+                  / partiteDisponibili.length)
+                : 0}%
             </b></span>
             <span>🎯 Selezionate: <b style={{color: 'var(--win)'}}>{partiteSelezionate.length}</b> / {numeroPartiteDaSelezionare}</span>
           </div>
@@ -1515,14 +1583,113 @@ const SchedinaComponent = ({
 
       {/* LISTA PARTITE CON QUOTE */}
       <div className="card" style={{marginTop: '16px'}}>
-        <h4 style={{marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap'}}>
+        <h4 style={{
+          marginBottom: '12px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '10px'
+        }}>
           <span>📋 Partite Disponibili ({partiteDisponibili.length})</span>
-          {partiteSelezionate.length > 0 && (
-            <span style={{fontSize: '12px', color: 'var(--text-muted)'}}>
-              {partiteSelezionate.length} selezionate ✅
-            </span>
-          )}
+
+          {/* ⭐ SWITCH A DESTRA */}
+          <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center'}}>
+
+            {/* Switch 1: Ordinamento */}
+            <div style={{
+              display: 'flex',
+              background: 'var(--surface)',
+              borderRadius: '6px',
+              padding: '3px',
+              border: '1px solid var(--border)',
+            }}>
+              <button
+                onClick={() => setOrdinamento('data_pct')}
+                title="Data crescente → % card decrescente"
+                style={{
+                  padding: '4px 10px',
+                  fontSize: '10px',
+                  fontWeight: ordinamento === 'data_pct' ? 'bold' : 'normal',
+                  borderRadius: '4px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: ordinamento === 'data_pct' ? 'var(--accent)' : 'transparent',
+                  color: ordinamento === 'data_pct' ? '#000' : 'var(--text-muted)',
+                  transition: 'all 0.2s',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                📅 Data + %
+              </button>
+              <button
+                onClick={() => setOrdinamento('pct_data')}
+                title="% card decrescente → data crescente"
+                style={{
+                  padding: '4px 10px',
+                  fontSize: '10px',
+                  fontWeight: ordinamento === 'pct_data' ? 'bold' : 'normal',
+                  borderRadius: '4px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: ordinamento === 'pct_data' ? 'var(--accent)' : 'transparent',
+                  color: ordinamento === 'pct_data' ? '#000' : 'var(--text-muted)',
+                  transition: 'all 0.2s',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                ⭐ % + Data
+              </button>
+            </div>
+
+            {/* Switch 2: Tipo giocate */}
+            <div style={{
+              display: 'flex',
+              background: 'var(--surface)',
+              borderRadius: '6px',
+              padding: '3px',
+              border: '1px solid var(--border)',
+            }}>
+              <button
+                onClick={() => handleTipoGiocateChange('calcolate')}
+                title="Mostra le 3 giocate con % più alta"
+                style={{
+                  padding: '4px 10px',
+                  fontSize: '10px',
+                  fontWeight: tipoGiocate === 'calcolate' ? 'bold' : 'normal',
+                  borderRadius: '4px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: tipoGiocate === 'calcolate' ? 'var(--accent2)' : 'transparent',
+                  color: tipoGiocate === 'calcolate' ? '#000' : 'var(--text-muted)',
+                  transition: 'all 0.2s',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                🎯 Calcolate
+              </button>
+              <button
+                onClick={() => handleTipoGiocateChange('scelte')}
+                title="Mostra le giocate scelte dall'utente"
+                style={{
+                  padding: '4px 10px',
+                  fontSize: '10px',
+                  fontWeight: tipoGiocate === 'scelte' ? 'bold' : 'normal',
+                  borderRadius: '4px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: tipoGiocate === 'scelte' ? 'var(--win)' : 'transparent',
+                  color: tipoGiocate === 'scelte' ? '#000' : 'var(--text-muted)',
+                  transition: 'all 0.2s',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                ✅ Scelte
+              </button>
+            </div>
+          </div>
         </h4>
+
         {partiteDisponibili.length === 0 ? (
           <div className="empty-state" style={{padding: '30px', textAlign: 'center', color: 'var(--text-muted)'}}>
             <div style={{fontSize: '24px', marginBottom: '8px'}}>⏰</div>
@@ -1532,6 +1699,9 @@ const SchedinaComponent = ({
           <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
             {partiteDisponibili.map(m => {
               const isSelected = partiteSelezionate.some(p => p.id === m.id);
+              const top3DaMostrare = tipoGiocate === 'scelte' ? m.top3Scelte : m.top3Calcolate;
+              const scoreDaMostrare = tipoGiocate === 'scelte' ? m.scoreScelte : m.scoreCalcolate;
+              const nessunaGiocataScelta = tipoGiocate === 'scelte' && (!top3DaMostrare || top3DaMostrare.length === 0);
 
               return (
                 <div
@@ -1578,8 +1748,12 @@ const SchedinaComponent = ({
                     flexWrap: 'wrap',
                     minWidth: '320px'
                   }}>
-                    {m.top3 && m.top3.length > 0 ? (
-                      m.top3.map((g, idx) => {
+                    {nessunaGiocataScelta ? (
+                      <span style={{fontSize: '11px', color: 'var(--text-muted)', fontStyle: 'italic'}}>
+                        Nessuna giocata scelta
+                      </span>
+                    ) : top3DaMostrare && top3DaMostrare.length > 0 ? (
+                      top3DaMostrare.map((g, idx) => {
                         const isGGNG = g.familyId === 'gg_ng';
                         return (
                           <div
@@ -1621,8 +1795,8 @@ const SchedinaComponent = ({
                   </div>
 
                   <div style={{display: 'flex', alignItems: 'center', gap: '6px', minWidth: '50px', justifyContent: 'flex-end'}}>
-                    <span className={`giocata-pct ${getPercentualeClasse(m.score)}`} style={{fontSize: '13px', padding: '2px 10px'}}>
-                      {m.score}%
+                    <span className={`giocata-pct ${getPercentualeClasse(scoreDaMostrare)}`} style={{fontSize: '13px', padding: '2px 10px'}}>
+                      {scoreDaMostrare}%
                     </span>
                     {isSelected && <span style={{color: 'var(--win)', fontSize: '14px'}}>✅</span>}
                   </div>
@@ -1842,4 +2016,4 @@ const SchedinaComponent = ({
 };
 
 window.SchedinaComponent = SchedinaComponent;
-console.log('✅ SchedinaComponent v7 caricato - selezione giocate singole (max 3) raggruppate per famiglia');
+console.log('✅ SchedinaComponent v8 caricato - 2 switch (ordinamento + tipo giocate) + score adattivo');
