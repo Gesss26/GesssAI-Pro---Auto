@@ -1,7 +1,9 @@
 // ============================================================
 // schedina.js - Modulo Schedina con quote PDF visibili
 // Quote mostrate accanto a ogni giocata (con value bet evidenziato)
-// ✅ FIX v6: Multigol con 8 opzioni + etichette formattate
+// ✅ FIX v7: Selezione giocate singole raggruppate per famiglia
+//            (max 3) + "Tutte" = tutte le famiglie
+//            Score card = media delle giocate selezionate disponibili
 // ============================================================
 
 const formatGiocataLabel = (familyId, label) => {
@@ -11,7 +13,6 @@ const formatGiocataLabel = (familyId, label) => {
   if (label.startsWith('Under ')) return label.replace('.', ',');
 
   if (familyId === 'multigol') {
-    // Le etichette sono già formattate dal sistema: 'MG Casa 0-2', ecc.
     return label;
   }
 
@@ -50,6 +51,162 @@ const formatGiocataLabel = (familyId, label) => {
 
   return label;
 };
+
+// ============================================================
+// GRUPPI GIOCATE PER LA SELEZIONE IN SCHEDINA
+// Ogni gruppo ha: id famiglia, label, icon, e lista di giocate singole
+// con label formattata pronta per la UI
+// ============================================================
+
+const GRUPPI_GIOCATE = [
+  {
+    familyId: 'fisse',
+    label: 'FISSE',
+    icon: '🎯',
+    giocate: [
+      { giocata: '1', label: '1' },
+      { giocata: 'X', label: 'X' },
+      { giocata: '2', label: '2' },
+    ]
+  },
+  {
+    familyId: 'dc',
+    label: 'DOPPIA CHANCE',
+    icon: '🛡️',
+    giocate: [
+      { giocata: '1X', label: '1X' },
+      { giocata: '12', label: '12' },
+      { giocata: 'X2', label: 'X2' },
+    ]
+  },
+  {
+    familyId: 'over',
+    label: 'OVER',
+    icon: '⬆️',
+    giocate: [
+      { giocata: 'Over 1.5', label: 'Over 1.5' },
+      { giocata: 'Over 2.5', label: 'Over 2.5' },
+      { giocata: 'Over 3.5', label: 'Over 3.5' },
+      { giocata: 'Over 4.5', label: 'Over 4.5' },
+    ]
+  },
+  {
+    familyId: 'under',
+    label: 'UNDER',
+    icon: '⬇️',
+    giocate: [
+      { giocata: 'Under 1.5', label: 'Under 1.5' },
+      { giocata: 'Under 2.5', label: 'Under 2.5' },
+      { giocata: 'Under 3.5', label: 'Under 3.5' },
+      { giocata: 'Under 4.5', label: 'Under 4.5' },
+    ]
+  },
+  {
+    familyId: 'gg_ng',
+    label: 'GG - NG',
+    icon: '⚽',
+    giocate: [
+      { giocata: 'GG', label: 'GG' },
+      { giocata: 'NG', label: 'NG' },
+    ]
+  },
+  {
+    familyId: 'multigol',
+    label: 'MULTIGOL CASA',
+    icon: '📊',
+    giocate: [
+      { giocata: 'MG Casa 0-2', label: 'MG Casa 0-2' },
+      { giocata: 'MG Casa 1-3', label: 'MG Casa 1-3' },
+      { giocata: 'MG Casa 2-5', label: 'MG Casa 2-5' },
+    ]
+  },
+  {
+    familyId: 'multigol',
+    label: 'MULTIGOL OSPITE',
+    icon: '📊',
+    giocate: [
+      { giocata: 'MG Ospite 0-2', label: 'MG Ospite 0-2' },
+      { giocata: 'MG Ospite 1-3', label: 'MG Ospite 1-3' },
+      { giocata: 'MG Ospite 2-5', label: 'MG Ospite 2-5' },
+    ]
+  },
+  {
+    familyId: 'multigol',
+    label: 'MULTIGOL TOTALE',
+    icon: '📊',
+    giocate: [
+      { giocata: 'MG Tot 1-4', label: 'MG Tot 1-4' },
+      { giocata: 'MG Tot 2-5', label: 'MG Tot 2-5' },
+    ]
+  },
+  {
+    familyId: 'dc_over',
+    label: 'DC + OVER',
+    icon: '🔗',
+    giocate: [
+      { giocata: '1X+O1.5', label: '1X+Over 1.5' },
+      { giocata: '12+O1.5', label: '12+Over 1.5' },
+      { giocata: 'X2+O1.5', label: 'X2+Over 1.5' },
+      { giocata: '1X+O2.5', label: '1X+Over 2.5' },
+      { giocata: '12+O2.5', label: '12+Over 2.5' },
+      { giocata: 'X2+O2.5', label: 'X2+Over 2.5' },
+      { giocata: '1X+O3.5', label: '1X+Over 3.5' },
+      { giocata: '12+O3.5', label: '12+Over 3.5' },
+      { giocata: 'X2+O3.5', label: 'X2+Over 3.5' },
+      { giocata: '1X+O4.5', label: '1X+Over 4.5' },
+      { giocata: '12+O4.5', label: '12+Over 4.5' },
+      { giocata: 'X2+O4.5', label: 'X2+Over 4.5' },
+    ]
+  },
+  {
+    familyId: 'dc_under',
+    label: 'DC + UNDER',
+    icon: '🔗',
+    giocate: [
+      { giocata: '1X+U1.5', label: '1X+Under 1.5' },
+      { giocata: '12+U1.5', label: '12+Under 1.5' },
+      { giocata: 'X2+U1.5', label: 'X2+Under 1.5' },
+      { giocata: '1X+U2.5', label: '1X+Under 2.5' },
+      { giocata: '12+U2.5', label: '12+Under 2.5' },
+      { giocata: 'X2+U2.5', label: 'X2+Under 2.5' },
+      { giocata: '1X+U3.5', label: '1X+Under 3.5' },
+      { giocata: '12+U3.5', label: '12+Under 3.5' },
+      { giocata: 'X2+U3.5', label: 'X2+Under 3.5' },
+      { giocata: '1X+U4.5', label: '1X+Under 4.5' },
+      { giocata: '12+U4.5', label: '12+Under 4.5' },
+      { giocata: 'X2+U4.5', label: 'X2+Under 4.5' },
+    ]
+  },
+  {
+    familyId: 'mg_casa_ospite',
+    label: 'MG CASA + OSPITE',
+    icon: '⚔️',
+    giocate: [
+      { giocata: '0-2+0-2', label: '0-2 Casa + 0-2 Ospite' },
+      { giocata: '0-2+1-3', label: '0-2 Casa + 1-3 Ospite' },
+      { giocata: '0-2+2-5', label: '0-2 Casa + 2-5 Ospite' },
+      { giocata: '1-3+0-2', label: '1-3 Casa + 0-2 Ospite' },
+      { giocata: '1-3+1-3', label: '1-3 Casa + 1-3 Ospite' },
+      { giocata: '1-3+2-5', label: '1-3 Casa + 2-5 Ospite' },
+      { giocata: '2-5+0-2', label: '2-5 Casa + 0-2 Ospite' },
+      { giocata: '2-5+1-3', label: '2-5 Casa + 1-3 Ospite' },
+      { giocata: '2-5+2-5', label: '2-5 Casa + 2-5 Ospite' },
+    ]
+  },
+  {
+    familyId: 'dc_multigol',
+    label: 'DC + MULTIGOL',
+    icon: '🔗',
+    giocate: [
+      { giocata: '1X+MG Tot 1-4', label: '1X+MG Tot 1-4' },
+      { giocata: '12+MG Tot 1-4', label: '12+MG Tot 1-4' },
+      { giocata: 'X2+MG Tot 1-4', label: 'X2+MG Tot 1-4' },
+      { giocata: '1X+MG Tot 2-5', label: '1X+MG Tot 2-5' },
+      { giocata: '12+MG Tot 2-5', label: '12+MG Tot 2-5' },
+      { giocata: 'X2+MG Tot 2-5', label: 'X2+MG Tot 2-5' },
+    ]
+  },
+];
 
 // ============================================================
 // COMPONENTE: PICCOLA QUOTA INLINE
@@ -126,6 +283,8 @@ const SchedinaComponent = ({
   const getTodayStr = window.getTodayStr;
   const addDaysToDateStr = window.addDaysToDateStr;
   const formatDateEU = window.formatDateEU;
+  const getGiocataPct = window.getGiocataPct;
+  const calcolaGG_NG = window.calcolaGG_NG;
 
   const { giorni: giorniRange, setGiorni: setGiorniRange } =
     window.FiltriCampionati.useGiorniRange();
@@ -143,6 +302,7 @@ const SchedinaComponent = ({
   const [partiteSelezionate, setPartiteSelezionate] = useState([]);
   const [schedinaCreata, setSchedinaCreata] = useState(null);
   const [loading, setLoading] = useState(false);
+  // ⭐ MODIFICATO: ora contiene giocate specifiche (max 3) oppure ['tutte']
   const [giocateSelezionate, setGiocateSelezionate] = useState(['tutte']);
   const [showSchedinaModal, setShowSchedinaModal] = useState(false);
   const [casualitaLevel, setCasualitaLevel] = useState(30);
@@ -153,6 +313,8 @@ const SchedinaComponent = ({
   });
   const [numeroPartiteDaSelezionare, setNumeroPartiteDaSelezionare] = useState(5);
   const [filtroOrario, setFiltroOrario] = useState('dopo_ora');
+
+  const MAX_GIOCATE = 3;
 
   const shuffleArray = (array) => {
     const shuffled = [...array];
@@ -266,6 +428,11 @@ const SchedinaComponent = ({
     return partite;
   }, [matches, campionatiSelezionati, giorniRange, filtroOrario]);
 
+  // ============================================================
+  // CALCOLO GIOCATE PER PARTITA
+  // Se "tutte" → tutte le opzioni di tutte le famiglie
+  // Se selezionate → solo le giocate specifiche scelte
+  // ============================================================
   const calcolaTop3GiocatePerPartita = (match) => {
     const stats = computeMatchStats(match, matches);
     if (stats.error) return { top3: [], score: 0, tutteGiocate: [] };
@@ -280,58 +447,101 @@ const SchedinaComponent = ({
     const homeRange = getMultigolRange(match.casa, matches);
     const awayRange = getMultigolRange(match.ospiti, matches);
 
-    const famiglieDaAnalizzare = giocateSelezionate.includes('tutte') || giocateSelezionate.length === 0
-      ? Object.keys(window.FAMIGLIE_GIOCATE || {})
-      : giocateSelezionate;
-
     const tutte = [];
+    const isTutteMode = giocateSelezionate.includes('tutte') || giocateSelezionate.length === 0;
 
-    famiglieDaAnalizzare.forEach(familyId => {
-      const family = window.FAMIGLIE_GIOCATE[familyId];
-      if (!family) return;
+    if (isTutteMode) {
+      // Comportamento attuale: analizza TUTTE le famiglie, prendi la migliore per famiglia
+      Object.keys(window.FAMIGLIE_GIOCATE || {}).forEach(familyId => {
+        const family = window.FAMIGLIE_GIOCATE[familyId];
+        if (!family) return;
 
-      let best = null;
+        let best = null;
 
-      if (familyId === 'gg_ng') {
-        const ggNgResult = window.calcolaGG_NG ? window.calcolaGG_NG(stats) : null;
-        if (ggNgResult) {
-          best = {
-            ...ggNgResult,
-            familyId: 'gg_ng',
+        if (familyId === 'gg_ng') {
+          const ggNgResult = calcolaGG_NG ? calcolaGG_NG(stats) : null;
+          if (ggNgResult) {
+            best = {
+              ...ggNgResult,
+              familyId: 'gg_ng',
+              familyLabel: family.label,
+              familyIcon: family.icon,
+            };
+          }
+        } else {
+          const bestBet = getBestBetForFamily(familyId, stats, homeRange, awayRange, homeMG, awayMG, mgTot);
+          if (bestBet && bestBet.pct > 0) {
+            best = {
+              ...bestBet,
+              familyId: familyId,
+              familyLabel: family.label,
+              familyIcon: family.icon,
+            };
+          }
+        }
+
+        if (best && best.pct > 0) {
+          best.displayLabel = formatGiocataLabel(familyId, best.label);
+          tutte.push(best);
+        }
+      });
+
+      tutte.sort((a, b) => b.pct - a.pct);
+      const top3 = tutte.slice(0, 3);
+      const score = top3.length > 0
+        ? Math.round(top3.reduce((s, g) => s + g.pct, 0) / top3.length)
+        : 0;
+
+      return { top3, score, tutteGiocate: tutte };
+    }
+
+    // ⭐ MODALITÀ SELEZIONE SPECIFICA
+    // Per ogni giocata selezionata, trova la pct e la famiglia
+    const giocateTrovate = [];
+
+    giocateSelezionate.forEach(sel => {
+      // sel può essere:
+      // - stringa "Over 2.5" (per famiglie con giocate uniche)
+      // - stringa con familyId? No, meglio struttura {familyId, giocata}
+      // Per semplicità, gestiamo stringhe tipo "familyId::giocata"
+      // Ma per ora usiamo direttamente l'oggetto
+      if (typeof sel === 'object' && sel.familyId && sel.giocata) {
+        const { familyId, giocata } = sel;
+        const family = window.FAMIGLIE_GIOCATE[familyId];
+        if (!family) return;
+
+        let pct = 0;
+        if (familyId === 'gg_ng') {
+          const ggNg = calcolaGG_NG ? calcolaGG_NG(stats) : null;
+          if (ggNg) {
+            pct = giocata === 'GG' ? ggNg.gg : ggNg.ng;
+          }
+        } else {
+          pct = getGiocataPct(giocata, stats, homeMG, awayMG, mgTot);
+        }
+
+        if (pct > 0) {
+          giocateTrovate.push({
+            familyId,
             familyLabel: family.label,
             familyIcon: family.icon,
-          };
+            giocata,
+            label: giocata,
+            displayLabel: formatGiocataLabel(familyId, giocata),
+            pct: Math.round(pct),
+            isBomb: pct >= 90,
+          });
         }
-      } else {
-        const bestBet = getBestBetForFamily(familyId, stats, homeRange, awayRange, homeMG, awayMG, mgTot);
-        if (bestBet && bestBet.pct > 0) {
-          best = {
-            ...bestBet,
-            familyId: familyId,
-            familyLabel: family.label,
-            familyIcon: family.icon,
-          };
-        }
-      }
-
-      if (best && best.pct > 0) {
-        best.displayLabel = formatGiocataLabel(familyId, best.label);
-        tutte.push(best);
       }
     });
 
-    tutte.sort((a, b) => b.pct - a.pct);
-
-    const top3 = tutte.slice(0, 3);
+    giocateTrovate.sort((a, b) => b.pct - a.pct);
+    const top3 = giocateTrovate.slice(0, 3);
     const score = top3.length > 0
       ? Math.round(top3.reduce((s, g) => s + g.pct, 0) / top3.length)
       : 0;
 
-    return {
-      top3: top3,
-      score: score,
-      tutteGiocate: tutte
-    };
+    return { top3, score, tutteGiocate: giocateTrovate };
   };
 
   const partiteDisponibili = useMemo(() => {
@@ -527,7 +737,7 @@ const SchedinaComponent = ({
       numPartite: schedina.length,
       data: new Date().toISOString(),
       dataFormattata: new Date().toLocaleString('it-IT'),
-      giocateSelezionate: [...giocateSelezionate],
+      giocateSelezionate: JSON.parse(JSON.stringify(giocateSelezionate)),
       campionatiSelezionati: [...campionatiSelezionati],
       timestamp: new Date().toLocaleString('it-IT'),
       dataInizio: dataInizio,
@@ -554,21 +764,41 @@ const SchedinaComponent = ({
     showAlert('info', '🔄 Schedina resettata');
   };
 
-  const toggleGiocata = (giocataId) => {
+  // ============================================================
+  // GESTIONE SELEZIONE GIOCATE (max 3)
+  // ============================================================
+
+  const isGiocataSelezionata = (familyId, giocata) => {
+    if (giocateSelezionate.includes('tutte')) return false;
+    return giocateSelezionate.some(
+      s => typeof s === 'object' && s.familyId === familyId && s.giocata === giocata
+    );
+  };
+
+  const toggleGiocata = (familyId, giocata) => {
     setGiocateSelezionate(prev => {
-      if (giocataId === 'tutte') {
-        return ['tutte'];
+      // Se è "tutte", la prima selezione specifica sostituisce "tutte"
+      if (prev.includes('tutte')) {
+        return [{ familyId, giocata }];
       }
 
-      const newSelection = prev.includes(giocataId)
-        ? prev.filter(id => id !== giocataId)
-        : [...prev.filter(id => id !== 'tutte'), giocataId];
+      const exists = prev.some(
+        s => typeof s === 'object' && s.familyId === familyId && s.giocata === giocata
+      );
 
-      if (newSelection.length === 0) {
-        return ['tutte'];
+      if (exists) {
+        const newSel = prev.filter(
+          s => !(typeof s === 'object' && s.familyId === familyId && s.giocata === giocata)
+        );
+        return newSel.length === 0 ? ['tutte'] : newSel;
       }
 
-      return newSelection;
+      if (prev.length >= MAX_GIOCATE) {
+        showAlert('error', `⚠️ Massimo ${MAX_GIOCATE} giocate selezionabili!`);
+        return prev;
+      }
+
+      return [...prev, { familyId, giocata }];
     });
   };
 
@@ -577,10 +807,12 @@ const SchedinaComponent = ({
   };
 
   const deselezionaTutteGiocate = () => {
-    setGiocateSelezionate([]);
-    setTimeout(() => {
-      setGiocateSelezionate(prev => prev.length === 0 ? ['tutte'] : prev);
-    }, 0);
+    setGiocateSelezionate(['tutte']);
+  };
+
+  const conteggioGiocateSelezionate = () => {
+    if (giocateSelezionate.includes('tutte')) return 0;
+    return giocateSelezionate.filter(s => typeof s === 'object').length;
   };
 
   const formatSchedinaText = (schedina) => {
@@ -608,6 +840,20 @@ const SchedinaComponent = ({
         ? 'Tutti'
         : schedina.campionatiSelezionati.join(', ');
       lines.push(`🏆 Campionati: ${champsDisplay}`);
+    }
+
+    // Mostra le giocate selezionate
+    if (schedina.giocateSelezionate) {
+      if (schedina.giocateSelezionate.includes('tutte')) {
+        lines.push(`🎯 Giocate: Tutte le famiglie`);
+      } else {
+        const labels = schedina.giocateSelezionate
+          .filter(s => typeof s === 'object')
+          .map(s => formatGiocataLabel(s.familyId, s.giocata));
+        if (labels.length > 0) {
+          lines.push(`🎯 Giocate: ${labels.join(' • ')}`);
+        }
+      }
     }
 
     lines.push('───────────────────');
@@ -731,20 +977,11 @@ const SchedinaComponent = ({
     showAlert('success', `📂 Schedina caricata! ${schedina.numPartite} partite, media ${schedina.media}%`);
   };
 
-  const famiglieDisponibili = [
-    { id: 'tutte', label: '⭐ Tutte', icon: '⭐' },
-    ...Object.entries(window.FAMIGLIE_GIOCATE || {}).map(([id, family]) => ({
-      id: id,
-      label: family.label,
-      icon: family.icon
-    }))
-  ];
-
   // ============================================================
   // RENDER
   // ============================================================
 
-    return (
+  return (
     <div className="schedina-container">
 
       {window.QuoteManager?.BannerScadenzaQuote && (
@@ -881,7 +1118,7 @@ const SchedinaComponent = ({
           </div>
         </div>
 
-        {/* SEZIONE 2: GIOCATE */}
+        {/* SEZIONE 2: GIOCATE (raggruppate per famiglia) */}
         <div style={{
           marginBottom: '20px',
           padding: '14px 16px',
@@ -900,8 +1137,11 @@ const SchedinaComponent = ({
           }}>
             <span style={{fontSize: '15px', fontWeight: 'bold', color: 'var(--text)'}}>
               🎯 Seleziona Giocate
+              <span style={{fontSize: '11px', color: 'var(--text-muted)', marginLeft: '8px', fontWeight: 'normal'}}>
+                (max {MAX_GIOCATE} giocate singole • "Tutte" = tutte le famiglie)
+              </span>
             </span>
-            <div style={{display: 'flex', gap: '6px'}}>
+            <div style={{display: 'flex', gap: '6px', alignItems: 'center'}}>
               <button
                 className="btn"
                 onClick={selezionaTutteGiocate}
@@ -933,51 +1173,78 @@ const SchedinaComponent = ({
                 ❌ Deseleziona
               </button>
               <span style={{fontSize: '11px', color: 'var(--text-muted)', padding: '3px 10px', background: 'var(--surface)', borderRadius: '4px'}}>
-                {giocateSelezionate.includes('tutte') ? '⭐ Tutte' : `${giocateSelezionate.length} selezionate`}
+                {giocateSelezionate.includes('tutte')
+                  ? '⭐ Tutte le famiglie'
+                  : `${conteggioGiocateSelezionate()} / ${MAX_GIOCATE} selezionate`}
               </span>
             </div>
           </div>
-          <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
-            {famiglieDisponibili.map(f => {
-              const isSelected = giocateSelezionate.includes(f.id);
-              const isTutte = f.id === 'tutte';
-              const isGGNG = f.id === 'gg_ng';
-              return (
-                <button
-                  key={f.id}
-                  onClick={() => toggleGiocata(f.id)}
-                  style={{
-                    padding: '6px 16px',
-                    borderRadius: '8px',
-                    border: isSelected
-                      ? (isGGNG ? '2px solid #e74c3c' : '2px solid var(--accent)')
-                      : '1px solid var(--border)',
-                    background: isSelected
-                      ? (isGGNG ? 'rgba(231, 76, 60, 0.12)' : 'rgba(243, 156, 18, 0.10)')
-                      : 'var(--surface)',
-                    color: isSelected
-                      ? (isGGNG ? '#e74c3c' : 'var(--accent)')
-                      : 'var(--text-muted)',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    fontWeight: isSelected ? 'bold' : 'normal',
-                    transition: 'all 0.2s',
-                    opacity: isSelected ? 1 : 0.6,
-                    boxShadow: isSelected
-                      ? (isGGNG ? '0 0 20px rgba(231, 76, 60, 0.2)' : '0 0 15px rgba(243, 156, 18, 0.15)')
-                      : 'none'
-                  }}
-                >
-                  {isSelected ? '✅' : (isTutte ? '⭐' : f.icon)} {f.label}
-                  {isGGNG && <span style={{fontSize: '11px', marginLeft: '4px', color: '#e74c3c'}}>⚽</span>}
-                </button>
-              );
-            })}
+
+          {/* GRUPPI GIOCATE */}
+          <div style={{display: 'flex', flexDirection: 'column', gap: '14px'}}>
+            {GRUPPI_GIOCATE.map((gruppo, gIdx) => (
+              <div key={`${gruppo.familyId}-${gIdx}`} style={{
+                background: 'var(--card)',
+                borderRadius: '8px',
+                padding: '10px 12px',
+                border: '1px solid var(--border)',
+              }}>
+                <div style={{
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  color: 'var(--accent)',
+                  marginBottom: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}>
+                  <span style={{fontSize: '14px'}}>{gruppo.icon}</span>
+                  <span>{gruppo.label}</span>
+                </div>
+                <div style={{display: 'flex', gap: '6px', flexWrap: 'wrap'}}>
+                  {gruppo.giocate.map((g, i) => {
+                    const isSelected = isGiocataSelezionata(gruppo.familyId, g.giocata);
+                    const isGGNG = gruppo.familyId === 'gg_ng';
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => toggleGiocata(gruppo.familyId, g.giocata)}
+                        style={{
+                          padding: '5px 12px',
+                          borderRadius: '6px',
+                          border: isSelected
+                            ? (isGGNG ? '2px solid #e74c3c' : '2px solid var(--accent)')
+                            : '1px solid var(--border)',
+                          background: isSelected
+                            ? (isGGNG ? 'rgba(231, 76, 60, 0.15)' : 'rgba(243, 156, 18, 0.15)')
+                            : 'var(--surface)',
+                          color: isSelected
+                            ? (isGGNG ? '#e74c3c' : 'var(--accent)')
+                            : 'var(--text-muted)',
+                          cursor: 'pointer',
+                          fontSize: '11px',
+                          fontWeight: isSelected ? 'bold' : 'normal',
+                          transition: 'all 0.2s',
+                          opacity: isSelected ? 1 : 0.85,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {isSelected ? '✅ ' : ''}{g.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
-          <div style={{fontSize: '10px', color: 'var(--text-muted)', marginTop: '6px', fontStyle: 'italic'}}>
+
+          <div style={{fontSize: '10px', color: 'var(--text-muted)', marginTop: '10px', fontStyle: 'italic'}}>
             {giocateSelezionate.includes('tutte')
-              ? '⭐ Analizza TUTTE le famiglie di giocate (incluso GG - NG) → Top 3 giocate'
-              : `📊 Analizza ${giocateSelezionate.length} famiglia/e: ${giocateSelezionate.map(id => window.FAMIGLIE_GIOCATE[id]?.label || id).join(', ')} → Top ${Math.min(3, giocateSelezionate.length)} giocate`}
+              ? '⭐ Analizza TUTTE le famiglie di giocate (incluso GG - NG) → Top 3 giocate per partita'
+              : `📊 Analizza le giocate selezionate: ${giocateSelezionate
+                  .filter(s => typeof s === 'object')
+                  .map(s => formatGiocataLabel(s.familyId, s.giocata))
+                  .join(' • ')}`}
           </div>
         </div>
 
@@ -1575,4 +1842,4 @@ const SchedinaComponent = ({
 };
 
 window.SchedinaComponent = SchedinaComponent;
-console.log('✅ SchedinaComponent v6 caricato - 8 opzioni MG + etichette formattate');
+console.log('✅ SchedinaComponent v7 caricato - selezione giocate singole (max 3) raggruppate per famiglia');
