@@ -7074,20 +7074,6 @@
     "data": "29/07/2026",
     "ora": "20:00",
     "giornata": "21",
-    "squadra_casa": "Atletico-MG",
-    "squadra_ospite": "RB Bragantino",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Belo Horizonte",
-    "stadio": "MRV Arena",
-    "stato": "Posticipata"
-  },
-  {
-    "campionato": "Brasileirão Serie A",
-    "data": "29/07/2026",
-    "ora": "20:00",
-    "giornata": "21",
     "squadra_casa": "Chapecoense-sc",
     "squadra_ospite": "Vasco DA Gama",
     "risultato": "",
@@ -7095,20 +7081,6 @@
     "gol_ospite": "",
     "citta": "",
     "stadio": "",
-    "stato": "Posticipata"
-  },
-  {
-    "campionato": "Brasileirão Serie A",
-    "data": "29/07/2026",
-    "ora": "20:00",
-    "giornata": "21",
-    "squadra_casa": "Sao Paulo",
-    "squadra_ospite": "Santos",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Sao Paulo",
-    "stadio": "Estadio Do MorumBIS",
     "stato": "Posticipata"
   },
   {
@@ -8073,8 +8045,8 @@
     "risultato": "1–1",
     "gol_casa": "1",
     "gol_ospite": "1",
-    "citta": "Bello Harisanta",
-    "stadio": "Arena MRV",
+    "citta": "Belo Horizonte",
+    "stadio": "MRV Arena",
     "stato": "Giocata"
   },
   {
@@ -8087,7 +8059,7 @@
     "risultato": "2–0",
     "gol_casa": "2",
     "gol_ospite": "0",
-    "citta": "Mirasol",
+    "citta": "Mirassol",
     "stadio": "José Maria de Campos Maia",
     "stato": "Giocata"
   },
@@ -8102,7 +8074,7 @@
     "gol_casa": "1",
     "gol_ospite": "2",
     "citta": "Belem",
-    "stadio": "Mangueirao",
+    "stadio": "Estadio Evandro Almeida",
     "stato": "Giocata"
   },
   {
@@ -8130,7 +8102,7 @@
     "gol_casa": "1",
     "gol_ospite": "0",
     "citta": "Sao Paulo",
-    "stadio": "Morumbi",
+    "stadio": "Estadio Do MorumBIS",
     "stato": "Giocata"
   },
   {
@@ -8171,8 +8143,8 @@
     "risultato": "1–3",
     "gol_casa": "1",
     "gol_ospite": "3",
-    "citta": "El Salvador",
-    "stadio": "Estadio Manoel Barradas",
+    "citta": "Salvador",
+    "stadio": "Barradao",
     "stato": "Giocata"
   },
   {
@@ -8202,6 +8174,34 @@
     "citta": "Curitiba",
     "stadio": "Arena da Baixada",
     "stato": "Giocata"
+  },
+  {
+    "campionato": "Brasileirão Serie A",
+    "data": "02/10/2026",
+    "ora": "23:00",
+    "giornata": "21",
+    "squadra_casa": "Sao Paulo",
+    "squadra_ospite": "Santos",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Sao Paulo",
+    "stadio": "Estadio Do MorumBIS",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Brasileirão Serie A",
+    "data": "03/10/2026",
+    "ora": "21:30",
+    "giornata": "21",
+    "squadra_casa": "Atletico-MG",
+    "squadra_ospite": "RB Bragantino",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Belo Horizonte",
+    "stadio": "MRV Arena",
+    "stato": "Futura"
   },
   {
     "campionato": "Brasileirão Serie A",
@@ -8298,7 +8298,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Santos",
-    "stadio": "Estádio Urbano Caldeira",
+    "stadio": "Estadio Urbano Caldeira",
     "stato": "Futura"
   },
   {
@@ -8340,7 +8340,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Sao Paulo",
-    "stadio": "Allianz Parque",
+    "stadio": "Nubank Parque",
     "stato": "Futura"
   },
   {
@@ -8368,7 +8368,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Sao Paulo",
-    "stadio": "Morumbi",
+    "stadio": "Estadio Do MorumBIS",
     "stato": "Futura"
   },
   {
@@ -8424,7 +8424,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Sao Paulo",
-    "stadio": "Allianz Parque",
+    "stadio": "Nubank Parque",
     "stato": "Futura"
   },
   {
@@ -8443,8 +8443,8 @@
   },
   {
     "campionato": "Brasileirão Serie A",
-    "data": "11/10/2026",
-    "ora": "22:30",
+    "data": "12/10/2026",
+    "ora": "19:00",
     "giornata": "30",
     "squadra_casa": "Coritiba",
     "squadra_ospite": "Botafogo",
@@ -22658,12 +22658,12 @@
     "giornata": "8",
     "squadra_casa": "FC Dordrecht",
     "squadra_ospite": "Almere City FC",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–2",
+    "gol_casa": "3",
+    "gol_ospite": "2",
     "citta": "Dordrecht",
     "stadio": "GN Bouw Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -34799,8 +34799,8 @@
     "risultato": "2–0",
     "gol_casa": "2",
     "gol_ospite": "0",
-    "citta": "Heverley",
-    "stadio": "Den Dreef Stadium",
+    "citta": "Heverlee",
+    "stadio": "Den Dreef",
     "stato": "Giocata"
   },
   {
@@ -34828,7 +34828,7 @@
     "gol_casa": "0",
     "gol_ospite": "0",
     "citta": "Lommel",
-    "stadio": "Soeverein Stadion",
+    "stadio": "Soevereinstadion",
     "stato": "Giocata"
   },
   {
@@ -34841,7 +34841,7 @@
     "risultato": "3–0",
     "gol_casa": "3",
     "gol_ospite": "0",
-    "citta": "Brussels",
+    "citta": "Anderlecht",
     "stadio": "Lotto Park",
     "stato": "Giocata"
   },
@@ -34855,7 +34855,7 @@
     "risultato": "0–2",
     "gol_casa": "0",
     "gol_ospite": "2",
-    "citta": "Antwerp",
+    "citta": "Deurne",
     "stadio": "Bosuilstadion",
     "stato": "Giocata"
   },
@@ -34869,8 +34869,8 @@
     "risultato": "0–2",
     "gol_casa": "0",
     "gol_ospite": "2",
-    "citta": "Saint Redon",
-    "stadio": "Stayen",
+    "citta": "Sint-Truiden",
+    "stadio": "Daio Wasabi Stayen",
     "stato": "Giocata"
   },
   {
@@ -34883,8 +34883,8 @@
     "risultato": "3–0",
     "gol_casa": "3",
     "gol_ospite": "0",
-    "citta": "Bruges",
-    "stadio": "Jan Breydel Stadium",
+    "citta": "Brugge",
+    "stadio": "Jan Breydel Stadion",
     "stato": "Giocata"
   },
   {
@@ -75434,20 +75434,6 @@
   {
     "campionato": "Primeira Liga",
     "data": "25/10/2026",
-    "ora": "16:00",
-    "giornata": "9",
-    "squadra_casa": "Santa Clara",
-    "squadra_ospite": "Benfica",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Ponta Delgada",
-    "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Primeira Liga",
-    "data": "25/10/2026",
     "ora": "18:00",
     "giornata": "9",
     "squadra_casa": "Nacional",
@@ -75484,6 +75470,20 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Lisbon",
+    "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Primeira Liga",
+    "data": "26/10/2026",
+    "ora": "18:45",
+    "giornata": "9",
+    "squadra_casa": "Santa Clara",
+    "squadra_ospite": "Benfica",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Ponta Delgada",
     "stadio": "",
     "stato": "Futura"
   },
@@ -82340,12 +82340,12 @@
     "giornata": "7",
     "squadra_casa": "Girona",
     "squadra_ospite": "Albacete",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Girona",
     "stadio": "Estadi Montilivi",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -82400,7 +82400,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Vigo",
-    "stadio": "Municipal de Barreiro",
+    "stadio": "Municipal de Balaídos",
     "stato": "Futura"
   },
   {
@@ -82484,7 +82484,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Leganes",
-    "stadio": "Estadio Municipal de Butarque",
+    "stadio": "Municipal de Butarque",
     "stato": "Futura"
   },
   {
@@ -104758,7 +104758,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "",
-    "stadio": "",
+    "stadio": "Stadio Pasquale Giannattasio",
     "stato": "Futura"
   },
   {
@@ -110077,8 +110077,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "",
-    "stadio": "",
+    "citta": "Barletta",
+    "stadio": "Stadio Comunale Cosimo Puttilli",
     "stato": "Futura"
   },
   {
@@ -110091,8 +110091,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "",
-    "stadio": "",
+    "citta": "Agropoli",
+    "stadio": "Stadio Raffaele Guariglia",
     "stato": "Futura"
   },
   {
@@ -110658,7 +110658,7 @@
   {
     "campionato": "Serie C - Girone C",
     "data": "25/10/2026",
-    "ora": "13:30",
+    "ora": "14:00",
     "giornata": "11",
     "squadra_casa": "Catania",
     "squadra_ospite": "Giugliano",
@@ -110671,8 +110671,8 @@
   },
   {
     "campionato": "Serie C - Girone C",
-    "data": "25/10/2026",
-    "ora": "17:00",
+    "data": "26/10/2026",
+    "ora": "19:30",
     "giornata": "11",
     "squadra_casa": "Crotone",
     "squadra_ospite": "Casarano",
@@ -110685,8 +110685,8 @@
   },
   {
     "campionato": "Serie C - Girone C",
-    "data": "25/10/2026",
-    "ora": "17:00",
+    "data": "26/10/2026",
+    "ora": "19:30",
     "giornata": "11",
     "squadra_casa": "AZ Picerno",
     "squadra_ospite": "Salernitana",
@@ -117498,7 +117498,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Chongqing",
-    "stadio": "Tongliang Long Stadium",
+    "stadio": "Longxing Football Stadium",
     "stato": "Futura"
   },
   {
@@ -118505,8 +118505,8 @@
     "risultato": "2–0",
     "gol_casa": "2",
     "gol_ospite": "0",
-    "citta": "Kocaeli",
-    "stadio": "Yildiz Entegre Kocaeli Stadyumu",
+    "citta": "Izmit",
+    "stadio": "Turka Arac Muayene Kocaeli Stadyumu",
     "stato": "Giocata"
   },
   {
@@ -118548,7 +118548,7 @@
     "gol_casa": "8",
     "gol_ospite": "0",
     "citta": "Istanbul",
-    "stadio": "Chobani Stadium",
+    "stadio": "Chobani Stadium Fenerbahce Sukru Saracoglu",
     "stato": "Giocata"
   },
   {
@@ -118702,7 +118702,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Istanbul",
-    "stadio": "Besiktas Park",
+    "stadio": "Tupras Stadium",
     "stato": "Futura"
   },
   {
@@ -118904,48 +118904,6 @@
   {
     "campionato": "Süper Lig",
     "data": "25/10/2026",
-    "ora": "12:00",
-    "giornata": "9",
-    "squadra_casa": "Beşiktaş",
-    "squadra_ospite": "Başakşehir",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Istanbul",
-    "stadio": "Besiktas Park",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Süper Lig",
-    "data": "25/10/2026",
-    "ora": "12:00",
-    "giornata": "9",
-    "squadra_casa": "Galatasaray",
-    "squadra_ospite": "Fenerbahçe",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Istanbul",
-    "stadio": "Rams Park",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Süper Lig",
-    "data": "25/10/2026",
-    "ora": "12:00",
-    "giornata": "9",
-    "squadra_casa": "Rizespor",
-    "squadra_ospite": "Trabzonspor",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Rize",
-    "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Süper Lig",
-    "data": "25/10/2026",
     "ora": "13:00",
     "giornata": "9",
     "squadra_casa": "Konyaspor",
@@ -118969,6 +118927,48 @@
     "gol_ospite": "",
     "citta": "Izmir",
     "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Süper Lig",
+    "data": "26/10/2026",
+    "ora": "16:00",
+    "giornata": "9",
+    "squadra_casa": "Beşiktaş",
+    "squadra_ospite": "Başakşehir",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Istanbul",
+    "stadio": "Besiktas Park",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Süper Lig",
+    "data": "26/10/2026",
+    "ora": "16:00",
+    "giornata": "9",
+    "squadra_casa": "Rizespor",
+    "squadra_ospite": "Trabzonspor",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Rize",
+    "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Süper Lig",
+    "data": "26/10/2026",
+    "ora": "18:30",
+    "giornata": "9",
+    "squadra_casa": "Galatasaray",
+    "squadra_ospite": "Fenerbahçe",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Istanbul",
+    "stadio": "Rams Park",
     "stato": "Futura"
   },
   {
