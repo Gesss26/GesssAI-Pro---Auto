@@ -22672,12 +22672,12 @@
     "giornata": "8",
     "squadra_casa": "Heracles",
     "squadra_ospite": "Vitesse",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Armello",
     "stadio": "Polman Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -22686,12 +22686,12 @@
     "giornata": "8",
     "squadra_casa": "NAC Breda",
     "squadra_ospite": "FC Eindhoven",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "4–2",
+    "gol_casa": "4",
+    "gol_ospite": "2",
     "citta": "Breda",
     "stadio": "Rat Verlegh Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -22700,12 +22700,12 @@
     "giornata": "8",
     "squadra_casa": "FC Emmen",
     "squadra_ospite": "FC OSS",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Emmen",
     "stadio": "De Oude Meerdijk",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -22714,12 +22714,12 @@
     "giornata": "8",
     "squadra_casa": "MVV",
     "squadra_ospite": "Helmond Sport",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Maastricht",
     "stadio": "De Geusselt",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -22728,12 +22728,12 @@
     "giornata": "8",
     "squadra_casa": "Roda",
     "squadra_ospite": "Waalwijk",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Kerkrade",
     "stadio": "Parkstad Limburg",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -22742,12 +22742,12 @@
     "giornata": "8",
     "squadra_casa": "FC Volendam",
     "squadra_ospite": "VVV Venlo",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–2",
+    "gol_casa": "3",
+    "gol_ospite": "2",
     "citta": "Volendam",
     "stadio": "Kras Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -67332,12 +67332,12 @@
     "giornata": "27",
     "squadra_casa": "Philadelphia Union",
     "squadra_ospite": "Orlando City",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "4–2",
+    "gol_casa": "4",
+    "gol_ospite": "2",
     "citta": "Philadelphia",
     "stadio": "Talen Energy Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -67346,12 +67346,12 @@
     "giornata": "27",
     "squadra_casa": "Atlanta United",
     "squadra_ospite": "New York City FC",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Atlanta",
     "stadio": "Atlanta Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -67360,12 +67360,12 @@
     "giornata": "27",
     "squadra_casa": "CF Montreal",
     "squadra_ospite": "FC Cincinnati",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–1",
+    "gol_casa": "3",
+    "gol_ospite": "1",
     "citta": "Montreal",
     "stadio": "Saputo Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -67374,12 +67374,12 @@
     "giornata": "27",
     "squadra_casa": "Charlotte FC",
     "squadra_ospite": "Chicago Fire",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–1",
+    "gol_casa": "0",
+    "gol_ospite": "1",
     "citta": "Charlotte",
     "stadio": "Bank of America Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -67393,7 +67393,7 @@
     "gol_ospite": "",
     "citta": "Harrison",
     "stadio": "Sports Illustrated Stadium",
-    "stato": "Futura"
+    "stato": "Posticipata"
   },
   {
     "campionato": "Major League Soccer",
@@ -67402,12 +67402,12 @@
     "giornata": "27",
     "squadra_casa": "FC Dallas",
     "squadra_ospite": "Los Angeles FC",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Frisco",
     "stadio": "Toyota Stadium(Texas)",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -67416,12 +67416,12 @@
     "giornata": "27",
     "squadra_casa": "Seattle Sounders",
     "squadra_ospite": "Minnesota United",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–1",
+    "gol_casa": "3",
+    "gol_ospite": "1",
     "citta": "Seattle",
     "stadio": "Lumen Field",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -67430,12 +67430,12 @@
     "giornata": "27",
     "squadra_casa": "Nashville SC",
     "squadra_ospite": "Toronto FC",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Nashville",
     "stadio": "Geodis Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -67444,12 +67444,12 @@
     "giornata": "27",
     "squadra_casa": "Austin FC",
     "squadra_ospite": "San Diego",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–3",
+    "gol_casa": "3",
+    "gol_ospite": "3",
     "citta": "Austin",
     "stadio": "Q2 Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -67458,12 +67458,12 @@
     "giornata": "27",
     "squadra_casa": "Houston Dynamo",
     "squadra_ospite": "Sporting Kansas City",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–2",
+    "gol_casa": "0",
+    "gol_ospite": "2",
     "citta": "Houston",
     "stadio": "BBVA Compass Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -67472,12 +67472,12 @@
     "giornata": "27",
     "squadra_casa": "Real Salt Lake",
     "squadra_ospite": "New England Revolution",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–0",
+    "gol_casa": "3",
+    "gol_ospite": "0",
     "citta": "Sandy",
     "stadio": "Rio Tinto Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -67486,12 +67486,12 @@
     "giornata": "27",
     "squadra_casa": "Los Angeles Galaxy",
     "squadra_ospite": "Colorado Rapids",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–2",
+    "gol_casa": "3",
+    "gol_ospite": "2",
     "citta": "Los Angeles",
     "stadio": "Dignity Health Sports Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -67500,12 +67500,12 @@
     "giornata": "27",
     "squadra_casa": "Vancouver Whitecaps",
     "squadra_ospite": "DC United",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–3",
+    "gol_casa": "3",
+    "gol_ospite": "3",
     "citta": "Vancouver",
     "stadio": "BC Place",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -67514,12 +67514,12 @@
     "giornata": "27",
     "squadra_casa": "San Jose Earthquakes",
     "squadra_ospite": "Portland Timbers",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–1",
+    "gol_casa": "3",
+    "gol_ospite": "1",
     "citta": "San Jose",
     "stadio": "Avaya Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -82354,12 +82354,12 @@
     "giornata": "7",
     "squadra_casa": "AD Ceuta FC",
     "squadra_ospite": "Real Sociedad II",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–1",
+    "gol_casa": "3",
+    "gol_ospite": "1",
     "citta": "Ceuta",
     "stadio": "Estadio Municipal Alfonso Murube",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -82368,12 +82368,12 @@
     "giornata": "7",
     "squadra_casa": "Granada",
     "squadra_ospite": "FC Andorra",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–3",
+    "gol_casa": "2",
+    "gol_ospite": "3",
     "citta": "Granada",
     "stadio": "Nuevo Los Cármenes",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -82382,12 +82382,12 @@
     "giornata": "7",
     "squadra_casa": "Tenerife",
     "squadra_ospite": "Cadiz",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Santa Cruz de Tenerife",
     "stadio": "Heliodoro Rodríguez López",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -82396,12 +82396,12 @@
     "giornata": "7",
     "squadra_casa": "Celta de Vigo II",
     "squadra_ospite": "Sabadell",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Vigo",
     "stadio": "Municipal de Balaídos",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -88999,7 +88999,7 @@
   },
   {
     "campionato": "Serie A",
-    "data": "28/10/2026",
+    "data": "27/10/2026",
     "ora": "17:30",
     "giornata": "9",
     "squadra_casa": "Sassuolo",
@@ -89009,6 +89009,34 @@
     "gol_ospite": "",
     "citta": "Reggio Emilia",
     "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie A",
+    "data": "27/10/2026",
+    "ora": "19:45",
+    "giornata": "9",
+    "squadra_casa": "AS Roma",
+    "squadra_ospite": "Cagliari",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Rome",
+    "stadio": "Stadio Olimpico",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie A",
+    "data": "27/10/2026",
+    "ora": "19:45",
+    "giornata": "9",
+    "squadra_casa": "Torino",
+    "squadra_ospite": "Como",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Turin",
+    "stadio": "Stadio Olimpico di Torino",
     "stato": "Futura"
   },
   {
@@ -89044,20 +89072,6 @@
     "data": "28/10/2026",
     "ora": "17:30",
     "giornata": "9",
-    "squadra_casa": "AS Roma",
-    "squadra_ospite": "Cagliari",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Rome",
-    "stadio": "Stadio Olimpico",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie A",
-    "data": "28/10/2026",
-    "ora": "17:30",
-    "giornata": "9",
     "squadra_casa": "Fiorentina",
     "squadra_ospite": "Atalanta",
     "risultato": "",
@@ -89065,20 +89079,6 @@
     "gol_ospite": "",
     "citta": "Florence",
     "stadio": "Stadio Artemio Franchi",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie A",
-    "data": "28/10/2026",
-    "ora": "17:30",
-    "giornata": "9",
-    "squadra_casa": "Torino",
-    "squadra_ospite": "Como",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Turin",
-    "stadio": "Stadio Olimpico di Torino",
     "stato": "Futura"
   },
   {
@@ -99364,12 +99364,12 @@
     "giornata": "7",
     "squadra_casa": "Giana Erminio",
     "squadra_ospite": "PRO Vercelli",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Gorgonzola",
     "stadio": "Stadio Citta di Gorgonzola",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99378,12 +99378,12 @@
     "giornata": "7",
     "squadra_casa": "Lumezzane",
     "squadra_ospite": "Folgore Caratese",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Lumezzane",
     "stadio": "Tullio Saleri",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99392,12 +99392,12 @@
     "giornata": "7",
     "squadra_casa": "Pergolettese",
     "squadra_ospite": "Trento",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Crema",
     "stadio": "Giuseppe Voltini",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99406,12 +99406,12 @@
     "giornata": "7",
     "squadra_casa": "Novara",
     "squadra_ospite": "Ospitaletto",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–2",
+    "gol_casa": "0",
+    "gol_ospite": "2",
     "citta": "Novara",
     "stadio": "Stadio Silvio Piola",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99420,12 +99420,12 @@
     "giornata": "7",
     "squadra_casa": "Desenzano Calvina",
     "squadra_ospite": "Juventus U23",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Ospitaletto",
     "stadio": "Stadio Comunale Gino Corioni",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99434,12 +99434,12 @@
     "giornata": "7",
     "squadra_casa": "Cittadella",
     "squadra_ospite": "Lecco",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–0",
+    "gol_casa": "3",
+    "gol_ospite": "0",
     "citta": "Cittadella",
     "stadio": "Stadio Pier Cesare Tombolato",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -104684,12 +104684,12 @@
     "giornata": "7",
     "squadra_casa": "Pineto",
     "squadra_ospite": "Grosseto",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–4",
+    "gol_casa": "0",
+    "gol_ospite": "4",
     "citta": "Pineto",
     "stadio": "Mimmo Pavone-Alessandro Mariani",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -104698,12 +104698,12 @@
     "giornata": "7",
     "squadra_casa": "Torres",
     "squadra_ospite": "Vado",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Sassari",
     "stadio": "Vanni Sanna",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -104712,12 +104712,12 @@
     "giornata": "7",
     "squadra_casa": "Livorno",
     "squadra_ospite": "Pianese",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–2",
+    "gol_casa": "3",
+    "gol_ospite": "2",
     "citta": "Livorno",
     "stadio": "Stadio Armando Picchi",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -104726,12 +104726,12 @@
     "giornata": "7",
     "squadra_casa": "Sambenedettese",
     "squadra_ospite": "Campobasso FC",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "San Benedetto del Tronto",
     "stadio": "Stadio Comunale Riviera delle Palme",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -110004,12 +110004,12 @@
     "giornata": "7",
     "squadra_casa": "Crotone",
     "squadra_ospite": "Salernitana",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Crotone",
     "stadio": "Stadio Ezio Scida",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -110018,12 +110018,12 @@
     "giornata": "7",
     "squadra_casa": "Bari",
     "squadra_ospite": "Cosenza",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Bari",
     "stadio": "Stadio San Nicola",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -110032,12 +110032,12 @@
     "giornata": "7",
     "squadra_casa": "AZ Picerno",
     "squadra_ospite": "Audace Cerignola",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Picerno",
     "stadio": "Stadio Comunale Donato Curcio",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -110046,12 +110046,12 @@
     "giornata": "7",
     "squadra_casa": "Cavese",
     "squadra_ospite": "Savoia",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "4–2",
+    "gol_casa": "4",
+    "gol_ospite": "2",
     "citta": "Cava de' Tirreni",
     "stadio": "Stadio Simonetta Lamberti",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -110163,20 +110163,6 @@
     "gol_ospite": "",
     "citta": "Giugliano",
     "stadio": "Stadio Alberto De Cristofaro",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie C - Girone C",
-    "data": "03/10/2026",
-    "ora": "15:30",
-    "giornata": "8",
-    "squadra_casa": "Inter U23",
-    "squadra_ospite": "Scafatese",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Sesto San Giovanni",
-    "stadio": "Stadio Ernesto Breda",
     "stato": "Futura"
   },
   {
@@ -110695,6 +110681,20 @@
     "gol_ospite": "",
     "citta": "Picerno",
     "stadio": "Stadio Comunale Donato Curcio",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie C - Girone C",
+    "data": "27/10/2026",
+    "ora": "13:30",
+    "giornata": "8",
+    "squadra_casa": "Inter U23",
+    "squadra_ospite": "Scafatese",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Sesto San Giovanni",
+    "stadio": "Stadio Ernesto Breda",
     "stato": "Futura"
   },
   {
@@ -117406,6 +117406,20 @@
   {
     "campionato": "Super League Grecia",
     "data": "09/10/2026",
+    "ora": "11:35",
+    "giornata": "27",
+    "squadra_casa": "Qingdao Jonoon",
+    "squadra_ospite": "Beijing Guoan",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Qingdao",
+    "stadio": "Qingdao Youth Football Stadium",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Super League Grecia",
+    "data": "09/10/2026",
     "ora": "12:00",
     "giornata": "27",
     "squadra_casa": "Hangzhou Greentown",
@@ -117443,20 +117457,6 @@
     "gol_ospite": "",
     "citta": "Chengdu",
     "stadio": "Chengdu Phoenix Hill Sports Park",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Super League Grecia",
-    "data": "10/10/2026",
-    "ora": "12:00",
-    "giornata": "27",
-    "squadra_casa": "Qingdao Jonoon",
-    "squadra_ospite": "Beijing Guoan",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Qingdao",
-    "stadio": "Qingdao Youth Football Stadium",
     "stato": "Futura"
   },
   {
