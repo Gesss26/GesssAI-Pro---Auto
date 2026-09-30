@@ -8186,7 +8186,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Sao Paulo",
-    "stadio": "Estadio Do MorumBIS",
+    "stadio": "Morumbi",
     "stato": "Futura"
   },
   {
@@ -10487,6 +10487,20 @@
   },
   {
     "campionato": "Bundesliga",
+    "data": "30/10/2026",
+    "ora": "19:30",
+    "giornata": "8",
+    "squadra_casa": "SV Elversberg",
+    "squadra_ospite": "FSV Mainz 05",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Spiesen-Elversberg",
+    "stadio": "Waldstadion Kaiserlinde",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Bundesliga",
     "data": "31/10/2026",
     "ora": "14:30",
     "giornata": "8",
@@ -10595,20 +10609,6 @@
     "gol_ospite": "",
     "citta": "Berlin",
     "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Bundesliga",
-    "data": "31/10/2026",
-    "ora": "14:30",
-    "giornata": "8",
-    "squadra_casa": "SV Elversberg",
-    "squadra_ospite": "FSV Mainz 05",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Spiesen-Elversberg",
-    "stadio": "Waldstadion Kaiserlinde",
     "stato": "Futura"
   },
   {
@@ -22774,7 +22774,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Helmond",
-    "stadio": "GS Staalwerken Stadion",
+    "stadio": "Lavans Stadion",
     "stato": "Futura"
   },
   {
@@ -35155,6 +35155,20 @@
   },
   {
     "campionato": "Jupiler Pro League",
+    "data": "30/10/2026",
+    "ora": "19:45",
+    "giornata": "10",
+    "squadra_casa": "Zulte Waregem",
+    "squadra_ospite": "Club Brugge",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Waregem",
+    "stadio": "Elindus Arena",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Jupiler Pro League",
     "data": "31/10/2026",
     "ora": "16:00",
     "giornata": "10",
@@ -35193,20 +35207,6 @@
     "gol_ospite": "",
     "citta": "Anderlecht",
     "stadio": "Lotto Park",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Jupiler Pro League",
-    "data": "31/10/2026",
-    "ora": "16:00",
-    "giornata": "10",
-    "squadra_casa": "Zulte Waregem",
-    "squadra_ospite": "Club Brugge",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Waregem",
-    "stadio": "Elindus Arena",
     "stato": "Futura"
   },
   {
@@ -52075,8 +52075,22 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Avellaneda",
-    "stadio": "",
+    "citta": "Buenos Aires",
+    "stadio": "Libertadores de America",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Liga Profesional Argentina",
+    "data": "03/10/2026",
+    "ora": "00:30",
+    "giornata": "11",
+    "squadra_casa": "Boca Juniors",
+    "squadra_ospite": "Union Santa Fe",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Buenos Aires",
+    "stadio": "Estadio Alberto J. Armando",
     "stato": "Futura"
   },
   {
@@ -52189,20 +52203,6 @@
     "gol_ospite": "",
     "citta": "Cordoba",
     "stadio": "Estadio Mario Alberto Kempes",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Liga Profesional Argentina",
-    "data": "04/10/2026",
-    "ora": "22:15",
-    "giornata": "11",
-    "squadra_casa": "Boca Juniors",
-    "squadra_ospite": "Union Santa Fe",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Buenos Aires",
-    "stadio": "Estadio Alberto J. Armando",
     "stato": "Futura"
   },
   {
@@ -75489,6 +75489,20 @@
   },
   {
     "campionato": "Primeira Liga",
+    "data": "30/10/2026",
+    "ora": "20:15",
+    "giornata": "10",
+    "squadra_casa": "Casa Pia",
+    "squadra_ospite": "Sporting CP",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Rio Maior",
+    "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Primeira Liga",
     "data": "01/11/2026",
     "ora": "16:00",
     "giornata": "10",
@@ -75596,20 +75610,6 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Barcelos",
-    "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Primeira Liga",
-    "data": "01/11/2026",
-    "ora": "16:00",
-    "giornata": "10",
-    "squadra_casa": "Casa Pia",
-    "squadra_ospite": "Sporting CP",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Rio Maior",
     "stadio": "",
     "stato": "Futura"
   },
@@ -82497,8 +82497,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Elda",
-    "stadio": "Estadio Nuevo Pepico Amat",
+    "citta": "Alicante",
+    "stadio": "Nuevo Pepico Amat",
     "stato": "Futura"
   },
   {
@@ -100059,6 +100059,20 @@
   },
   {
     "campionato": "Serie C - Girone A",
+    "data": "30/10/2026",
+    "ora": "19:30",
+    "giornata": "12",
+    "squadra_casa": "Albinoleffe",
+    "squadra_ospite": "Pergolettese",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Zanica",
+    "stadio": "AlbinoLeffe",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie C - Girone A",
     "data": "01/11/2026",
     "ora": "17:00",
     "giornata": "12",
@@ -100097,20 +100111,6 @@
     "gol_ospite": "",
     "citta": "Gorgonzola",
     "stadio": "Stadio Citta di Gorgonzola",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie C - Girone A",
-    "data": "01/11/2026",
-    "ora": "17:00",
-    "giornata": "12",
-    "squadra_casa": "Albinoleffe",
-    "squadra_ospite": "Pergolettese",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Zanica",
-    "stadio": "AlbinoLeffe",
     "stato": "Futura"
   },
   {
@@ -105379,6 +105379,20 @@
   },
   {
     "campionato": "Serie C - Girone B",
+    "data": "30/10/2026",
+    "ora": "19:30",
+    "giornata": "12",
+    "squadra_casa": "Reggiana",
+    "squadra_ospite": "Sambenedettese",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Reggio Emilia",
+    "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie C - Girone B",
     "data": "01/11/2026",
     "ora": "17:00",
     "giornata": "12",
@@ -105445,20 +105459,6 @@
     "gol_ospite": "",
     "citta": "Livorno",
     "stadio": "Stadio Armando Picchi",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie C - Girone B",
-    "data": "01/11/2026",
-    "ora": "17:00",
-    "giornata": "12",
-    "squadra_casa": "Reggiana",
-    "squadra_ospite": "Sambenedettese",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Reggio Emilia",
-    "stadio": "",
     "stato": "Futura"
   },
   {
@@ -118973,6 +118973,20 @@
   },
   {
     "campionato": "Süper Lig",
+    "data": "30/10/2026",
+    "ora": "17:00",
+    "giornata": "10",
+    "squadra_casa": "Konyaspor",
+    "squadra_ospite": "Galatasaray",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Konya",
+    "stadio": "Konya Buyuksehir Belediye Stadium",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Süper Lig",
     "data": "01/11/2026",
     "ora": "12:00",
     "giornata": "10",
@@ -118983,20 +118997,6 @@
     "gol_ospite": "",
     "citta": "Istanbul",
     "stadio": "Basaksehir Fatih Terim Stadium",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Süper Lig",
-    "data": "01/11/2026",
-    "ora": "12:00",
-    "giornata": "10",
-    "squadra_casa": "Konyaspor",
-    "squadra_ospite": "Galatasaray",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Konya",
-    "stadio": "Konya Buyuksehir Belediye Stadium",
     "stato": "Futura"
   },
   {
