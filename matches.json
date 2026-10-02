@@ -22872,7 +22872,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Venlo",
-    "stadio": "Seacon - De Koel",
+    "stadio": "Seacon Stadion De Koel",
     "stato": "Futura"
   },
   {
@@ -52151,22 +52151,8 @@
   },
   {
     "campionato": "Liga Profesional Argentina",
-    "data": "03/10/2026",
-    "ora": "22:15",
-    "giornata": "11",
-    "squadra_casa": "Argentinos JRS",
-    "squadra_ospite": "Tigre",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Buenos Aires",
-    "stadio": "Estadio Diego Armando Maradona",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Liga Profesional Argentina",
     "data": "04/10/2026",
-    "ora": "00:30",
+    "ora": "17:45",
     "giornata": "11",
     "squadra_casa": "Huracan",
     "squadra_ospite": "Aldosivi",
@@ -52174,7 +52160,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Buenos Aires",
-    "stadio": "",
+    "stadio": "Estadio Tomas Adolfo Duco",
     "stato": "Futura"
   },
   {
@@ -52203,6 +52189,20 @@
     "gol_ospite": "",
     "citta": "Cordoba",
     "stadio": "Estadio Mario Alberto Kempes",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Liga Profesional Argentina",
+    "data": "04/10/2026",
+    "ora": "22:15",
+    "giornata": "11",
+    "squadra_casa": "Argentinos JRS",
+    "squadra_ospite": "Tigre",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Buenos Aires",
+    "stadio": "Diego Armando Maradona",
     "stato": "Futura"
   },
   {
@@ -67542,12 +67542,12 @@
     "giornata": "24",
     "squadra_casa": "Seattle Sounders",
     "squadra_ospite": "Sporting Kansas City",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Seattle",
     "stadio": "Lumen Field",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -82568,7 +82568,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "San Sebastian",
-    "stadio": "Estadio Zubieta",
+    "stadio": "Estadio Ciudad Deportiva Zubieta",
     "stato": "Futura"
   },
   {
@@ -82581,8 +82581,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "",
-    "stadio": "",
+    "citta": "Gijon",
+    "stadio": "El Molinón-Enrique Castro Quini",
     "stato": "Futura"
   },
   {
@@ -82595,8 +82595,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Las Palmas",
-    "stadio": "Estadio de Gran Canaria",
+    "citta": "Las Palmas de Gran Canaria",
+    "stadio": "Gran Canaria",
     "stato": "Futura"
   },
   {
@@ -82610,7 +82610,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Castellon",
-    "stadio": "Estadio Municipal de Castalia",
+    "stadio": "Estadio Municipal Castalia",
     "stato": "Futura"
   },
   {
@@ -82624,7 +82624,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Girona",
-    "stadio": "Estadio Municipal de Montilivi",
+    "stadio": "Estadi Montilivi",
     "stato": "Futura"
   },
   {
@@ -104827,8 +104827,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "",
-    "stadio": "",
+    "citta": "Sestri Levante",
+    "stadio": "Giuseppe Sivori",
     "stato": "Futura"
   },
   {
