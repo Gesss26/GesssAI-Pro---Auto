@@ -8182,12 +8182,12 @@
     "giornata": "21",
     "squadra_casa": "Sao Paulo",
     "squadra_ospite": "Santos",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Sao Paulo",
     "stadio": "Morumbi",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Brasileirão Serie A",
@@ -22770,12 +22770,12 @@
     "giornata": "9",
     "squadra_casa": "Helmond Sport",
     "squadra_ospite": "Heracles",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Helmond",
     "stadio": "Lavans Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -52072,12 +52072,12 @@
     "giornata": "11",
     "squadra_casa": "Independiente",
     "squadra_ospite": "Instituto Cordoba",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–4",
+    "gol_casa": "1",
+    "gol_ospite": "4",
     "citta": "Buenos Aires",
     "stadio": "Libertadores de America",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Liga Profesional Argentina",
@@ -52086,12 +52086,12 @@
     "giornata": "11",
     "squadra_casa": "Boca Juniors",
     "squadra_ospite": "Union Santa Fe",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–0",
+    "gol_casa": "3",
+    "gol_ospite": "0",
     "citta": "Buenos Aires",
     "stadio": "Alberto J. Armando",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Liga Profesional Argentina",
@@ -52100,12 +52100,12 @@
     "giornata": "11",
     "squadra_casa": "Independ. Rivadavia",
     "squadra_ospite": "Gimnasia L.P.",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Mendoza",
     "stadio": "Estadio Bautista Gargantini",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Liga Profesional Argentina",
@@ -52215,8 +52215,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Cordoba",
-    "stadio": "",
+    "citta": "Rio Cuarto",
+    "stadio": "Antonio Candini",
     "stato": "Futura"
   },
   {
@@ -52229,7 +52229,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Buenos Aires",
+    "citta": "Flores",
     "stadio": "Estadio Guillermo Laza",
     "stato": "Futura"
   },
@@ -52258,7 +52258,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Buenos Aires",
-    "stadio": "",
+    "stadio": "Jose Amalfitani",
     "stato": "Futura"
   },
   {
@@ -82494,12 +82494,12 @@
     "giornata": "8",
     "squadra_casa": "Eldense",
     "squadra_ospite": "Oviedo",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "4–1",
+    "gol_casa": "4",
+    "gol_ospite": "1",
     "citta": "Alicante",
     "stadio": "Nuevo Pepico Amat",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -82638,7 +82638,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Cordoba",
-    "stadio": "",
+    "stadio": "Estadio Nuevo Arcángel",
     "stato": "Futura"
   },
   {
@@ -99600,20 +99600,6 @@
     "data": "04/10/2026",
     "ora": "15:30",
     "giornata": "8",
-    "squadra_casa": "Juventus U23",
-    "squadra_ospite": "Lumezzane",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Alessandria",
-    "stadio": "Stadio Giuseppe Moccagatta",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie C - Girone A",
-    "data": "04/10/2026",
-    "ora": "15:30",
-    "giornata": "8",
     "squadra_casa": "Dolomiti Bellunesi",
     "squadra_ospite": "Novara",
     "risultato": "",
@@ -99775,6 +99761,20 @@
     "gol_ospite": "",
     "citta": "",
     "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie C - Girone A",
+    "data": "13/10/2026",
+    "ora": "14:00",
+    "giornata": "8",
+    "squadra_casa": "Juventus U23",
+    "squadra_ospite": "Lumezzane",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Alessandria",
+    "stadio": "Stadio Giuseppe Moccagatta",
     "stato": "Futura"
   },
   {
