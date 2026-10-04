@@ -8196,12 +8196,12 @@
     "giornata": "21",
     "squadra_casa": "Atletico-MG",
     "squadra_ospite": "RB Bragantino",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Bello Harisanta",
     "stadio": "Arena MRV",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Brasileirão Serie A",
@@ -22784,12 +22784,12 @@
     "giornata": "9",
     "squadra_casa": "Vitesse",
     "squadra_ospite": "NAC Breda",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Arnhem",
     "stadio": "GelreDome",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -22798,12 +22798,12 @@
     "giornata": "9",
     "squadra_casa": "FC OSS",
     "squadra_ospite": "MVV",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "4–1",
+    "gol_casa": "4",
+    "gol_ospite": "1",
     "citta": "Os",
     "stadio": "Frans Heesen Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -22812,12 +22812,12 @@
     "giornata": "9",
     "squadra_casa": "Waalwijk",
     "squadra_ospite": "FC Emmen",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Waalwijk",
     "stadio": "Mandemakers Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -22826,12 +22826,12 @@
     "giornata": "9",
     "squadra_casa": "Almere City FC",
     "squadra_ospite": "FC Volendam",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Almere",
     "stadio": "Yanmar Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -22840,12 +22840,12 @@
     "giornata": "9",
     "squadra_casa": "FC Den Bosch",
     "squadra_ospite": "FC Dordrecht",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "'S-Hertogenbosch",
     "stadio": "Stadion de Vliert",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -22854,12 +22854,12 @@
     "giornata": "9",
     "squadra_casa": "FC Eindhoven",
     "squadra_ospite": "De Graafschap",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Eindhoven",
     "stadio": "Jan Louwers Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -52114,12 +52114,12 @@
     "giornata": "11",
     "squadra_casa": "Defensa Y Justicia",
     "squadra_ospite": "San Lorenzo",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–0",
+    "gol_casa": "3",
+    "gol_ospite": "0",
     "citta": "Julio Costa",
     "stadio": "Estadio Norberto Tomaghello",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Liga Profesional Argentina",
@@ -52128,12 +52128,12 @@
     "giornata": "11",
     "squadra_casa": "Atletico Tucuman",
     "squadra_ospite": "Barracas Central",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–3",
+    "gol_casa": "2",
+    "gol_ospite": "3",
     "citta": "Tucumán San Miguel",
     "stadio": "Estadio Monumental Jose Fierro",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Liga Profesional Argentina",
@@ -52142,12 +52142,12 @@
     "giornata": "11",
     "squadra_casa": "Newells Old Boys",
     "squadra_ospite": "Lanus",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Rosario",
     "stadio": "Estadio Marcelo Bielsa",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Liga Profesional Argentina",
@@ -82508,12 +82508,12 @@
     "giornata": "8",
     "squadra_casa": "Albacete",
     "squadra_ospite": "Eibar",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–3",
+    "gol_casa": "1",
+    "gol_ospite": "3",
     "citta": "Albacete",
     "stadio": "Carlos Belmonte",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -82522,12 +82522,12 @@
     "giornata": "8",
     "squadra_casa": "Almeria",
     "squadra_ospite": "Burgos",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Almeria",
     "stadio": "UD Almería Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -82536,12 +82536,12 @@
     "giornata": "8",
     "squadra_casa": "Cadiz",
     "squadra_ospite": "Leganes",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "4–0",
+    "gol_casa": "4",
+    "gol_ospite": "0",
     "citta": "Cadiz",
     "stadio": "Nuevo Mirandilla",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -82555,7 +82555,7 @@
     "gol_ospite": "",
     "citta": "Sabadell",
     "stadio": "Nova Creu Alta",
-    "stato": "Futura"
+    "stato": "Posticipata"
   },
   {
     "campionato": "Segunda División",
@@ -99504,12 +99504,12 @@
     "giornata": "8",
     "squadra_casa": "Cittadella",
     "squadra_ospite": "Albinoleffe",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Cittadella",
     "stadio": "Stadio Pier Cesare Tombolato",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99518,12 +99518,12 @@
     "giornata": "8",
     "squadra_casa": "Arzignano Valchiampo",
     "squadra_ospite": "Pergolettese",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Arzignano",
     "stadio": "Tommaso Dal Molin",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99532,12 +99532,12 @@
     "giornata": "8",
     "squadra_casa": "PRO Vercelli",
     "squadra_ospite": "Athletic Carpi",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Vercelli",
     "stadio": "Stadio Silvio Piola",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99546,12 +99546,12 @@
     "giornata": "8",
     "squadra_casa": "Folgore Caratese",
     "squadra_ospite": "Desenzano Calvina",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "",
     "stadio": "",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99560,12 +99560,12 @@
     "giornata": "8",
     "squadra_casa": "Ospitaletto",
     "squadra_ospite": "Renate",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Ospitaletto",
     "stadio": "Stadio Comunale Gino Corioni",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -104810,12 +104810,12 @@
     "giornata": "8",
     "squadra_casa": "Gubbio",
     "squadra_ospite": "Perugia",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–3",
+    "gol_casa": "1",
+    "gol_ospite": "3",
     "citta": "Gubbio",
     "stadio": "Stadio Pietro Barbetti",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -104824,12 +104824,12 @@
     "giornata": "8",
     "squadra_casa": "Vado",
     "squadra_ospite": "Forli",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Sestri Levante",
     "stadio": "Giuseppe Sivori",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -104838,12 +104838,12 @@
     "giornata": "8",
     "squadra_casa": "Livorno",
     "squadra_ospite": "Pescara",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–1",
+    "gol_casa": "0",
+    "gol_ospite": "1",
     "citta": "Livorno",
     "stadio": "Stadio Armando Picchi",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -104852,12 +104852,12 @@
     "giornata": "8",
     "squadra_casa": "Grosseto",
     "squadra_ospite": "Sambenedettese",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–3",
+    "gol_casa": "1",
+    "gol_ospite": "3",
     "citta": "Grosseto",
     "stadio": "Stadio Carlo Zecchini",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -110130,12 +110130,12 @@
     "giornata": "8",
     "squadra_casa": "Cavese",
     "squadra_ospite": "Casertana",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Cava de' Tirreni",
     "stadio": "Stadio Simonetta Lamberti",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -110144,12 +110144,12 @@
     "giornata": "8",
     "squadra_casa": "Sorrento",
     "squadra_ospite": "Casarano",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Picerno",
     "stadio": "Stadio Comunale Donato Curcio",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -110158,12 +110158,12 @@
     "giornata": "8",
     "squadra_casa": "Giugliano",
     "squadra_ospite": "Barletta",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Giugliano",
     "stadio": "Stadio Alberto De Cristofaro",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -110172,12 +110172,12 @@
     "giornata": "8",
     "squadra_casa": "SS Monopoli",
     "squadra_ospite": "Savoia",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Monopoli",
     "stadio": "Stadio Vito Simone Veneziani",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -110186,12 +110186,12 @@
     "giornata": "8",
     "squadra_casa": "Catania",
     "squadra_ospite": "Crotone",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Catania",
     "stadio": "Stadio Angelo Massimino",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
