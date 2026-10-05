@@ -8199,8 +8199,8 @@
     "risultato": "1–0",
     "gol_casa": "1",
     "gol_ospite": "0",
-    "citta": "Bello Harisanta",
-    "stadio": "Arena MRV",
+    "citta": "Belo Horizonte",
+    "stadio": "MRV Arena",
     "stato": "Giocata"
   },
   {
@@ -8242,7 +8242,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Belem",
-    "stadio": "Estadio Evandro Almeida",
+    "stadio": "Mangueirao",
     "stato": "Futura"
   },
   {
@@ -8255,8 +8255,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Salvador",
-    "stadio": "Barradao",
+    "citta": "El Salvador",
+    "stadio": "Estadio Manoel Barradas",
     "stato": "Futura"
   },
   {
@@ -8270,7 +8270,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Rio de Janeiro",
-    "stadio": "Estadio Olimpico Nilton Santos",
+    "stadio": "Estádio Nilton Santos",
     "stato": "Futura"
   },
   {
@@ -22868,12 +22868,12 @@
     "giornata": "9",
     "squadra_casa": "VVV Venlo",
     "squadra_ospite": "Roda",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Venlo",
     "stadio": "Seacon Stadion De Koel",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Eerste Divisie",
@@ -52090,7 +52090,7 @@
     "gol_casa": "3",
     "gol_ospite": "0",
     "citta": "Buenos Aires",
-    "stadio": "Alberto J. Armando",
+    "stadio": "Estadio Alberto J. Armando",
     "stato": "Giocata"
   },
   {
@@ -52104,7 +52104,7 @@
     "gol_casa": "1",
     "gol_ospite": "1",
     "citta": "Mendoza",
-    "stadio": "Estadio Bautista Gargantini",
+    "stadio": "Estadio Juan Bautista Gargantini",
     "stato": "Giocata"
   },
   {
@@ -52117,7 +52117,7 @@
     "risultato": "3–0",
     "gol_casa": "3",
     "gol_ospite": "0",
-    "citta": "Julio Costa",
+    "citta": "Gobernador Julio A. Costa",
     "stadio": "Estadio Norberto Tomaghello",
     "stato": "Giocata"
   },
@@ -52131,7 +52131,7 @@
     "risultato": "2–3",
     "gol_casa": "2",
     "gol_ospite": "3",
-    "citta": "Tucumán San Miguel",
+    "citta": "Tucuman",
     "stadio": "Estadio Monumental Jose Fierro",
     "stato": "Giocata"
   },
@@ -52156,12 +52156,12 @@
     "giornata": "11",
     "squadra_casa": "Huracan",
     "squadra_ospite": "Aldosivi",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Buenos Aires",
     "stadio": "Estadio Tomas Adolfo Duco",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Liga Profesional Argentina",
@@ -52184,12 +52184,12 @@
     "giornata": "11",
     "squadra_casa": "Talleres Cordoba",
     "squadra_ospite": "Belgrano Cordoba",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–1",
+    "gol_casa": "0",
+    "gol_ospite": "1",
     "citta": "Cordoba",
     "stadio": "Estadio Mario Alberto Kempes",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Liga Profesional Argentina",
@@ -52198,12 +52198,12 @@
     "giornata": "11",
     "squadra_casa": "Argentinos JRS",
     "squadra_ospite": "Tigre",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Buenos Aires",
     "stadio": "Diego Armando Maradona",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Liga Profesional Argentina",
@@ -52212,12 +52212,12 @@
     "giornata": "11",
     "squadra_casa": "Estudiantes de Rio Cuarto",
     "squadra_ospite": "Racing Club",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Rio Cuarto",
     "stadio": "Antonio Candini",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Liga Profesional Argentina",
@@ -82550,12 +82550,12 @@
     "giornata": "8",
     "squadra_casa": "Sabadell",
     "squadra_ospite": "FC Andorra",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Sabadell",
     "stadio": "Nova Creu Alta",
-    "stato": "Posticipata"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -82564,12 +82564,12 @@
     "giornata": "8",
     "squadra_casa": "Real Sociedad II",
     "squadra_ospite": "Granada",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–3",
+    "gol_casa": "2",
+    "gol_ospite": "3",
     "citta": "San Sebastian",
     "stadio": "Estadio Ciudad Deportiva Zubieta",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -82578,12 +82578,12 @@
     "giornata": "8",
     "squadra_casa": "Sporting Gijon",
     "squadra_ospite": "Celta de Vigo II",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–2",
+    "gol_casa": "3",
+    "gol_ospite": "2",
     "citta": "Gijon",
     "stadio": "El Molinón-Enrique Castro Quini",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -82592,12 +82592,12 @@
     "giornata": "8",
     "squadra_casa": "Las Palmas",
     "squadra_ospite": "Valladolid",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Las Palmas de Gran Canaria",
     "stadio": "Gran Canaria",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -82606,12 +82606,12 @@
     "giornata": "8",
     "squadra_casa": "Castellón",
     "squadra_ospite": "AD Ceuta FC",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Castellon",
     "stadio": "Estadio Municipal Castalia",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -82620,12 +82620,12 @@
     "giornata": "8",
     "squadra_casa": "Girona",
     "squadra_ospite": "Mallorca",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Girona",
     "stadio": "Estadi Montilivi",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Segunda División",
@@ -99549,8 +99549,8 @@
     "risultato": "1–2",
     "gol_casa": "1",
     "gol_ospite": "2",
-    "citta": "",
-    "stadio": "",
+    "citta": "Zanica",
+    "stadio": "AlbinoLeffe",
     "stato": "Giocata"
   },
   {
@@ -99574,12 +99574,12 @@
     "giornata": "8",
     "squadra_casa": "Lecco",
     "squadra_ospite": "Union Brescia",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Lecco",
     "stadio": "Stadio Rigamonti Ceppi",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99588,12 +99588,12 @@
     "giornata": "8",
     "squadra_casa": "Treviso",
     "squadra_ospite": "Giana Erminio",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "",
-    "stadio": "",
-    "stato": "Futura"
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
+    "citta": "Treviso",
+    "stadio": "Stadio Omobono Tenni",
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99602,12 +99602,12 @@
     "giornata": "8",
     "squadra_casa": "Dolomiti Bellunesi",
     "squadra_ospite": "Novara",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Feltre",
     "stadio": "Zugni Tauro",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -99616,12 +99616,12 @@
     "giornata": "8",
     "squadra_casa": "Alcione",
     "squadra_ospite": "Trento",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Sesto San Giovanni",
     "stadio": "Stadio Ernesto Breda",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -104866,12 +104866,12 @@
     "giornata": "8",
     "squadra_casa": "Guidonia Montecelio 1937",
     "squadra_ospite": "Pineto",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Guidonia Montecelio",
     "stadio": "Stadio Citta dell Aria",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -104880,12 +104880,12 @@
     "giornata": "8",
     "squadra_casa": "Pianese",
     "squadra_ospite": "Ravenna",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Piancastagnaio",
     "stadio": "Stadio Comunale",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -104894,12 +104894,12 @@
     "giornata": "8",
     "squadra_casa": "Campobasso FC",
     "squadra_ospite": "Torres",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Campobasso",
     "stadio": "Stadio Nuovo Romagnoli",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -104908,12 +104908,12 @@
     "giornata": "8",
     "squadra_casa": "Reggiana",
     "squadra_ospite": "Spezia",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–1",
+    "gol_casa": "0",
+    "gol_ospite": "1",
     "citta": "Reggio Emilia",
     "stadio": "",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -104922,12 +104922,12 @@
     "giornata": "8",
     "squadra_casa": "Latina",
     "squadra_ospite": "Ostia Mare",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Latina",
     "stadio": "Stadio Domenico Francioni",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone B",
@@ -110200,12 +110200,12 @@
     "giornata": "8",
     "squadra_casa": "Cosenza",
     "squadra_ospite": "Foggia",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–2",
+    "gol_casa": "0",
+    "gol_ospite": "2",
     "citta": "Cosenza",
     "stadio": "Stadio San Vito-Luigi Marulla",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -110214,12 +110214,12 @@
     "giornata": "8",
     "squadra_casa": "Salernitana",
     "squadra_ospite": "Bari",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Salerno",
     "stadio": "Stadio Arechi",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -110228,12 +110228,12 @@
     "giornata": "8",
     "squadra_casa": "Potenza",
     "squadra_ospite": "AZ Picerno",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "4–2",
+    "gol_casa": "4",
+    "gol_ospite": "2",
     "citta": "Potenza",
     "stadio": "Stadio Comunale Alfredo Viviani",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -110242,12 +110242,12 @@
     "giornata": "8",
     "squadra_casa": "Audace Cerignola",
     "squadra_ospite": "Team Altamura",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Cerignola",
     "stadio": "Stadio Domenico Monterisi",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
