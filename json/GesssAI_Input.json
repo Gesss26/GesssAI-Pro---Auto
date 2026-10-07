@@ -1261,6 +1261,34 @@
   },
   {
     "campionato": "2. Bundesliga",
+    "data": "06/11/2026",
+    "ora": "17:30",
+    "giornata": "11",
+    "squadra_casa": "Dynamo Dresden",
+    "squadra_ospite": "Greuther Fürth",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Dresden",
+    "stadio": "Rudolf-Harbig-Stadion",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "2. Bundesliga",
+    "data": "06/11/2026",
+    "ora": "17:30",
+    "giornata": "11",
+    "squadra_casa": "Eintracht Braunschweig",
+    "squadra_ospite": "Energie Cottbus",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Braunschweig",
+    "stadio": "Eintracht-Stadion",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "2. Bundesliga",
     "data": "07/11/2026",
     "ora": "12:30",
     "giornata": "11",
@@ -1334,20 +1362,6 @@
     "data": "07/11/2026",
     "ora": "12:30",
     "giornata": "11",
-    "squadra_casa": "Dynamo Dresden",
-    "squadra_ospite": "Greuther Fürth",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Dresden",
-    "stadio": "Rudolf-Harbig-Stadion",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "2. Bundesliga",
-    "data": "07/11/2026",
-    "ora": "12:30",
-    "giornata": "11",
     "squadra_casa": "Holstein Kiel",
     "squadra_ospite": "Arminia Bielefeld",
     "risultato": "",
@@ -1355,20 +1369,6 @@
     "gol_ospite": "",
     "citta": "Kiel",
     "stadio": "Holstein-Stadion",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "2. Bundesliga",
-    "data": "07/11/2026",
-    "ora": "12:30",
-    "giornata": "11",
-    "squadra_casa": "Eintracht Braunschweig",
-    "squadra_ospite": "Energie Cottbus",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Braunschweig",
-    "stadio": "Eintracht-Stadion",
     "stato": "Futura"
   },
   {
@@ -8340,7 +8340,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Sao Paulo",
-    "stadio": "Nubank Parque",
+    "stadio": "Allianz Parque",
     "stato": "Futura"
   },
   {
@@ -8948,34 +8948,6 @@
   {
     "campionato": "Brasileirão Serie A",
     "data": "04/11/2026",
-    "ora": "21:00",
-    "giornata": "34",
-    "squadra_casa": "Cruzeiro",
-    "squadra_ospite": "Bahia",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Belo Horizonte",
-    "stadio": "Estádio Mineirão",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Brasileirão Serie A",
-    "data": "04/11/2026",
-    "ora": "21:00",
-    "giornata": "34",
-    "squadra_casa": "Vitoria",
-    "squadra_ospite": "Fluminense",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Salvador",
-    "stadio": "Barradao",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Brasileirão Serie A",
-    "data": "04/11/2026",
     "ora": "22:30",
     "giornata": "34",
     "squadra_casa": "Atletico Paranaense",
@@ -9041,6 +9013,34 @@
     "gol_ospite": "",
     "citta": "Sao Paulo",
     "stadio": "Allianz Parque",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Brasileirão Serie A",
+    "data": "06/11/2026",
+    "ora": "00:30",
+    "giornata": "34",
+    "squadra_casa": "Cruzeiro",
+    "squadra_ospite": "Bahia",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Belo Horizonte",
+    "stadio": "Estádio Mineirão",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Brasileirão Serie A",
+    "data": "06/11/2026",
+    "ora": "23:00",
+    "giornata": "34",
+    "squadra_casa": "Vitoria",
+    "squadra_ospite": "Fluminense",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Salvador",
+    "stadio": "Barradao",
     "stato": "Futura"
   },
   {
@@ -22885,7 +22885,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Doetinchem",
+    "citta": "Dutinghem",
     "stadio": "De Vijverberg",
     "stato": "Futura"
   },
@@ -22913,8 +22913,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Almelo",
-    "stadio": "Asito Stadium",
+    "citta": "Armello",
+    "stadio": "Polman Stadion",
     "stato": "Futura"
   },
   {
@@ -22928,7 +22928,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Dordrecht",
-    "stadio": "M-Scores Stadion",
+    "stadio": "GN Bouw Stadion",
     "stato": "Futura"
   },
   {
@@ -22969,7 +22969,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Wijdewormer",
+    "citta": "Alkmaar",
     "stadio": "AFAS Trainingscomplex",
     "stato": "Futura"
   },
@@ -22997,7 +22997,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Oss",
+    "citta": "Os",
     "stadio": "Frans Heesen Stadion",
     "stato": "Futura"
   },
@@ -23011,8 +23011,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Ouder-Amstel",
-    "stadio": "Sportcomplex De Toekomst",
+    "citta": "Amsterdam",
+    "stadio": "Sportpark De Toekomst",
     "stato": "Futura"
   },
   {
@@ -40848,7 +40848,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Chuncheon",
-    "stadio": "Chuncheon Songam Stadium",
+    "stadio": "Chuncheon Songam Sports Town",
     "stato": "Futura"
   },
   {
@@ -40862,7 +40862,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Incheon",
-    "stadio": "Sungui Arena Park",
+    "stadio": "Incheon Football Stadium",
     "stato": "Futura"
   },
   {
@@ -42052,7 +42052,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Malaga",
-    "stadio": "Estadio La Rosaleda",
+    "stadio": "La Rosaleda",
     "stato": "Futura"
   },
   {
@@ -52230,7 +52230,7 @@
     "gol_casa": "3",
     "gol_ospite": "0",
     "citta": "La Plata",
-    "stadio": "Estadio Jorge Luis Hirschi",
+    "stadio": "Estadio Ciudad de La Plata",
     "stato": "Giocata"
   },
   {
@@ -52272,7 +52272,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Mar del Plata",
-    "stadio": "",
+    "stadio": "Estadio Jose Maria Minella",
     "stato": "Futura"
   },
   {
@@ -52299,7 +52299,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Cordoba",
+    "citta": "Avellaneda",
     "stadio": "Estadio Presidente Peron",
     "stato": "Futura"
   },
@@ -58516,7 +58516,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Nancy",
-    "stadio": "Stade Marcel Picot",
+    "stadio": "Stade Marcel-Picot",
     "stato": "Futura"
   },
   {
@@ -58529,8 +58529,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Montbéliard",
-    "stadio": "Stade Auguste Bonal",
+    "citta": "Montbeliard",
+    "stadio": "Stade Bonal",
     "stato": "Futura"
   },
   {
@@ -58557,7 +58557,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Dunkerque",
+    "citta": "Dunkirk",
     "stadio": "Stade Marcel Tribut",
     "stato": "Futura"
   },
@@ -67556,12 +67556,12 @@
     "giornata": "16",
     "squadra_casa": "Chicago Fire",
     "squadra_ospite": "Vancouver Whitecaps",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–1",
+    "gol_casa": "3",
+    "gol_ospite": "1",
     "citta": "Chicago",
     "stadio": "Soldier Field",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Major League Soccer",
@@ -75245,8 +75245,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Moreira de Conegos",
-    "stadio": "Parque Joaquim de Almeida Freitas",
+    "citta": "Guimarães",
+    "stadio": "Parque Joaquim Almeida Freitas",
     "stato": "Futura"
   },
   {
@@ -75260,7 +75260,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Braga",
-    "stadio": "",
+    "stadio": "Estádio Municipal de Braga",
     "stato": "Futura"
   },
   {
@@ -93908,7 +93908,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Avellino",
-    "stadio": "Stadio Partenio-Adriano Lombardi",
+    "stadio": "Partenio-Adriano Lombardi",
     "stato": "Futura"
   },
   {
@@ -94599,6 +94599,20 @@
   },
   {
     "campionato": "Serie B",
+    "data": "06/11/2026",
+    "ora": "19:30",
+    "giornata": "11",
+    "squadra_casa": "Ascoli",
+    "squadra_ospite": "Palermo",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Ascoli Piceno",
+    "stadio": "Stadio Cino e Lillo Del Duca",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie B",
     "data": "07/11/2026",
     "ora": "14:00",
     "giornata": "11",
@@ -94609,20 +94623,6 @@
     "gol_ospite": "",
     "citta": "Benevento",
     "stadio": "Stadio Ciro Vigorito",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie B",
-    "data": "07/11/2026",
-    "ora": "14:00",
-    "giornata": "11",
-    "squadra_casa": "Ascoli",
-    "squadra_ospite": "Palermo",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Ascoli Piceno",
-    "stadio": "Stadio Cino e Lillo Del Duca",
     "stato": "Futura"
   },
   {
@@ -118940,7 +118940,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Istanbul",
-    "stadio": "Besiktas Park",
+    "stadio": "Tupras Stadium",
     "stato": "Futura"
   },
   {
