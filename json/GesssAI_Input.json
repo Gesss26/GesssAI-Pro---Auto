@@ -877,7 +877,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Hamburg",
+    "citta": "St. Pauli Burger",
     "stadio": "Millerntor-Stadion",
     "stato": "Futura"
   },
@@ -1332,6 +1332,20 @@
   {
     "campionato": "2. Bundesliga",
     "data": "07/11/2026",
+    "ora": "19:30",
+    "giornata": "11",
+    "squadra_casa": "Hertha BSC",
+    "squadra_ospite": "VfL Wolfsburg",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Berlin",
+    "stadio": "Olympiastadion",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "2. Bundesliga",
+    "data": "08/11/2026",
     "ora": "12:30",
     "giornata": "11",
     "squadra_casa": "VfL Bochum",
@@ -1345,7 +1359,7 @@
   },
   {
     "campionato": "2. Bundesliga",
-    "data": "07/11/2026",
+    "data": "08/11/2026",
     "ora": "12:30",
     "giornata": "11",
     "squadra_casa": "Magdeburg",
@@ -1359,7 +1373,7 @@
   },
   {
     "campionato": "2. Bundesliga",
-    "data": "07/11/2026",
+    "data": "08/11/2026",
     "ora": "12:30",
     "giornata": "11",
     "squadra_casa": "1. FC Heidenheim",
@@ -1369,20 +1383,6 @@
     "gol_ospite": "",
     "citta": "Heidenheim",
     "stadio": "Voith-Arena",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "2. Bundesliga",
-    "data": "07/11/2026",
-    "ora": "19:30",
-    "giornata": "11",
-    "squadra_casa": "Hertha BSC",
-    "squadra_ospite": "VfL Wolfsburg",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Berlin",
-    "stadio": "Olympiastadion",
     "stato": "Futura"
   },
   {
@@ -8294,12 +8294,12 @@
     "giornata": "29",
     "squadra_casa": "Santos",
     "squadra_ospite": "Flamengo",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Santos",
     "stadio": "Estádio Urbano Caldeira",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Brasileirão Serie A",
@@ -8308,12 +8308,12 @@
     "giornata": "29",
     "squadra_casa": "Atletico Paranaense",
     "squadra_ospite": "Atletico-MG",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Curitiba",
     "stadio": "Arena da Baixada",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Brasileirão Serie A",
@@ -8322,12 +8322,12 @@
     "giornata": "29",
     "squadra_casa": "Fluminense",
     "squadra_ospite": "Coritiba",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "4–0",
+    "gol_casa": "4",
+    "gol_ospite": "0",
     "citta": "Rio de Janeiro",
     "stadio": "Estádio do Maracanã",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Brasileirão Serie A",
@@ -8336,12 +8336,12 @@
     "giornata": "29",
     "squadra_casa": "Palmeiras",
     "squadra_ospite": "Bahia",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Sao Paulo",
-    "stadio": "Allianz Parque",
-    "stato": "Futura"
+    "stadio": "Nubank Parque",
+    "stato": "Giocata"
   },
   {
     "campionato": "Brasileirão Serie A",
@@ -8368,7 +8368,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Sao Paulo",
-    "stadio": "Estadio Do MorumBIS",
+    "stadio": "Morumbi",
     "stato": "Futura"
   },
   {
@@ -8381,8 +8381,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Belo Horizonte",
-    "stadio": "MRV Arena",
+    "citta": "Bello Harisanta",
+    "stadio": "Arena MRV",
     "stato": "Futura"
   },
   {
@@ -8437,7 +8437,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Salvador",
+    "citta": "El Salvador",
     "stadio": "Arena Fonte Nova",
     "stato": "Futura"
   },
@@ -10230,7 +10230,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Freiburg",
-    "stadio": "Europa-Park Stadion",
+    "stadio": "Europa-Park-Stadion",
     "stato": "Futura"
   },
   {
@@ -22942,7 +22942,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Kerkrade",
-    "stadio": "Parkstad Limburg Stadion",
+    "stadio": "Parkstad Limburg",
     "stato": "Futura"
   },
   {
@@ -27912,7 +27912,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Zwolle",
-    "stadio": "",
+    "stadio": "MAC³PARK Stadion",
     "stato": "Futura"
   },
   {
@@ -27925,8 +27925,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Velsen-Zuid",
-    "stadio": "BUKO Stadion",
+    "citta": "Felsen",
+    "stadio": "Sportpark Schoonenberg",
     "stato": "Futura"
   },
   {
@@ -27940,7 +27940,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Rotterdam",
-    "stadio": "Stadion Woudestein",
+    "stadio": "Van Donge & De Roo Stadion",
     "stato": "Futura"
   },
   {
@@ -40830,12 +40830,12 @@
     "giornata": "31",
     "squadra_casa": "Daejeon Citizen",
     "squadra_ospite": "Jeonbuk Motors",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Daejeon",
     "stadio": "Daejeon World Cup Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "K League 1",
@@ -40844,12 +40844,12 @@
     "giornata": "31",
     "squadra_casa": "Gangwon FC",
     "squadra_ospite": "Bucheon FC 1995",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Gangneung",
     "stadio": "Gangneung Stadium",
-    "stato": "Futura"
+    "stato": "In corso"
   },
   {
     "campionato": "K League 1",
@@ -40858,12 +40858,12 @@
     "giornata": "31",
     "squadra_casa": "Incheon United",
     "squadra_ospite": "Pohang Steelers",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–0",
+    "gol_casa": "3",
+    "gol_ospite": "0",
     "citta": "Incheon",
     "stadio": "Incheon Football Stadium",
-    "stato": "Futura"
+    "stato": "In corso"
   },
   {
     "campionato": "K League 1",
@@ -52370,7 +52370,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Buenos Aires",
-    "stadio": "Estadio Monumental",
+    "stadio": "El Monumental",
     "stato": "Futura"
   },
   {
@@ -52397,8 +52397,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Buenos Aires",
-    "stadio": "",
+    "citta": "Florida",
+    "stadio": "Estadio Ciudad de Vicente Lopez",
     "stato": "Futura"
   },
   {
@@ -52412,7 +52412,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Rosario",
-    "stadio": "Estadio Gigante de Arroyito",
+    "stadio": "Estadio Dr. Lisandro de la Torre",
     "stato": "Futura"
   },
   {
@@ -52425,8 +52425,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Avellaneda",
-    "stadio": "",
+    "citta": "Buenos Aires",
+    "stadio": "Estadio Juan Domingo Perón",
     "stato": "Futura"
   },
   {
@@ -67756,7 +67756,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Los Angeles",
-    "stadio": "BMO Stadium",
+    "stadio": "Banc of California Stadium",
     "stato": "Futura"
   },
   {
@@ -67770,7 +67770,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Saint Louis",
-    "stadio": "CITYPARK",
+    "stadio": "Citypark",
     "stato": "Futura"
   },
   {
@@ -75315,8 +75315,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Vila do Conde",
-    "stadio": "",
+    "citta": "Condi Town",
+    "stadio": "Estádio dos Arcos",
     "stato": "Futura"
   },
   {
@@ -75330,7 +75330,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Lisbon",
-    "stadio": "",
+    "stadio": "Estádio da Luz",
     "stato": "Futura"
   },
   {
@@ -75343,8 +75343,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Arouca",
-    "stadio": "",
+    "citta": "Aruca",
+    "stadio": "Estádio Municipal de Arouca",
     "stato": "Futura"
   },
   {
@@ -82693,7 +82693,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Encamp",
+    "citta": "Andorra",
     "stadio": "Estadi de la FAF",
     "stato": "Futura"
   },
@@ -82707,8 +82707,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "",
-    "stadio": "",
+    "citta": "Almeria",
+    "stadio": "UD Almería Stadium",
     "stato": "Futura"
   },
   {
@@ -82721,7 +82721,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Palma de Mallorca",
+    "citta": "Parma",
     "stadio": "Estadi Mallorca Son Moix",
     "stato": "Futura"
   },
@@ -82736,7 +82736,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Cadiz",
-    "stadio": "JP Financial Estadio",
+    "stadio": "Nuevo Mirandilla",
     "stato": "Futura"
   },
   {
@@ -88672,7 +88672,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Reggio Emilia",
-    "stadio": "",
+    "stadio": "Mapei Stadium – Città del Tricolore",
     "stato": "Futura"
   },
   {
@@ -94019,8 +94019,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Padova",
-    "stadio": "Stadio Euganeo",
+    "citta": "Padua",
+    "stadio": "Stadio Comunale Euganeo",
     "stato": "Futura"
   },
   {
@@ -94034,7 +94034,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Modena",
-    "stadio": "Stadio Alberto Braglia",
+    "stadio": "Alberto Braglia",
     "stato": "Futura"
   },
   {
@@ -94630,20 +94630,6 @@
     "data": "07/11/2026",
     "ora": "14:00",
     "giornata": "11",
-    "squadra_casa": "Virtus Entella",
-    "squadra_ospite": "Modena",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Chiavari",
-    "stadio": "Stadio Comunale",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie B",
-    "data": "07/11/2026",
-    "ora": "14:00",
-    "giornata": "11",
     "squadra_casa": "Pisa",
     "squadra_ospite": "Sudtirol",
     "risultato": "",
@@ -94684,34 +94670,6 @@
   {
     "campionato": "Serie B",
     "data": "07/11/2026",
-    "ora": "14:00",
-    "giornata": "11",
-    "squadra_casa": "Carrarese",
-    "squadra_ospite": "Sampdoria",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Carrara",
-    "stadio": "Stadio dei Marmi",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie B",
-    "data": "07/11/2026",
-    "ora": "14:00",
-    "giornata": "11",
-    "squadra_casa": "Vicenza",
-    "squadra_ospite": "Cremonese",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Vicenza",
-    "stadio": "Stadio Romeo Menti",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Serie B",
-    "data": "07/11/2026",
     "ora": "16:15",
     "giornata": "11",
     "squadra_casa": "Mantova",
@@ -94735,6 +94693,48 @@
     "gol_ospite": "",
     "citta": "Benevento",
     "stadio": "Stadio Ciro Vigorito",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie B",
+    "data": "08/11/2026",
+    "ora": "14:00",
+    "giornata": "11",
+    "squadra_casa": "Virtus Entella",
+    "squadra_ospite": "Modena",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Chiavari",
+    "stadio": "Stadio Comunale",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie B",
+    "data": "08/11/2026",
+    "ora": "16:15",
+    "giornata": "11",
+    "squadra_casa": "Carrarese",
+    "squadra_ospite": "Sampdoria",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Carrara",
+    "stadio": "Stadio dei Marmi",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Serie B",
+    "data": "08/11/2026",
+    "ora": "18:30",
+    "giornata": "11",
+    "squadra_casa": "Vicenza",
+    "squadra_ospite": "Cremonese",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Vicenza",
+    "stadio": "Stadio Romeo Menti",
     "stato": "Futura"
   },
   {
@@ -105149,8 +105149,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "",
-    "stadio": "",
+    "citta": "Sestri Levante",
+    "stadio": "Giuseppe Sivori",
     "stato": "Futura"
   },
   {
