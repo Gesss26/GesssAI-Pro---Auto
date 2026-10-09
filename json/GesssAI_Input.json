@@ -40844,12 +40844,12 @@
     "giornata": "31",
     "squadra_casa": "Gangwon FC",
     "squadra_ospite": "Bucheon FC 1995",
-    "risultato": "1–0",
-    "gol_casa": "1",
+    "risultato": "2–0",
+    "gol_casa": "2",
     "gol_ospite": "0",
     "citta": "Gangneung",
     "stadio": "Gangneung Stadium",
-    "stato": "In corso"
+    "stato": "Giocata"
   },
   {
     "campionato": "K League 1",
@@ -40863,7 +40863,7 @@
     "gol_ospite": "0",
     "citta": "Incheon",
     "stadio": "Incheon Football Stadium",
-    "stato": "In corso"
+    "stato": "Giocata"
   },
   {
     "campionato": "K League 1",
