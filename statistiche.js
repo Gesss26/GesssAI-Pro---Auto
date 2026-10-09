@@ -1,5 +1,7 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v4)
+// statistiche.js - Modulo Statistiche (v5 - FIX combinazioni DC)
+// - Fix: DC+Over/Under ora usa probabilità congiunta dal Monte Carlo
+// - Fix: calcDC non maschera più errori con Math.min(100, ...)
 // - Ordine Tutte le Giocate: FISSE → DC → GG/NG → OVER → UNDER → Multigol → resto
 // - Quote affiancate con fallback visibile "📊 N/D" se mancante
 // ============================================================
@@ -57,21 +59,241 @@
   };
 
   // ============================================================
-  // HELPER: CALCOLO DOPPIA CHANCE
+  // HELPER: CALCOLO DOPPIA CHANCE (FIX v5)
+  // - Non usa più Math.min(100, ...) che mascherava errori
+  // - Normalizza esplicitamente perché homeWins+draws+awayWins dovrebbe = 100
   // ============================================================
   const calcDC = (mc, dcCode) => {
     if (!mc) return 0;
     const hw = mc.homeWins || 0;
     const d  = mc.draws || 0;
     const aw = mc.awayWins || 0;
-    if (dcCode === '1X') return Math.min(100, hw + d);
-    if (dcCode === '12') return Math.min(100, hw + aw);
-    if (dcCode === 'X2') return Math.min(100, d + aw);
+
+    // Normalizza: se la somma non è 100, riproporziona
+    const total = hw + d + aw;
+    if (total === 0) return 0;
+    const norm = 100 / total;
+    const hwN = hw * norm;
+    const dN  = d  * norm;
+    const awN = aw * norm;
+
+    if (dcCode === '1X') return Math.round(hwN + dN);
+    if (dcCode === '12') return Math.round(hwN + awN);
+    if (dcCode === 'X2') return Math.round(dN + awN);
     return 0;
   };
 
   // ============================================================
-  // SIMULAZIONE MONTE CARLO (per AIAnalysis)
+  // FIX v5: PROBABILITÀ COMBINATA DC + OVER/UNDER DAL MONTE CARLO
+  // Calcola P(DC ∧ Over/Under X.5) contando i casi reali.
+  // Questa è l'unica stima corretta: P(A∧B) ≠ P(A)+P(B).
+  // ============================================================
+  const calcolaCombinata = (mc, dcCode, tipo, soglia) => {
+    if (!mc || !mc.risultati) return 0;
+    const totalSim = mc.numSimulations || 10000;
+    if (totalSim === 0) return 0;
+
+    let count = 0;
+    for (const [key, c] of Object.entries(mc.risultati)) {
+      const [gC, gO] = key.split('-').map(Number);
+      const totale = gC + gO;
+
+      // Verifica condizione DC
+      let dcOk = false;
+      if (dcCode === '1X') dcOk = gC >= gO;          // casa vince o pareggia
+      else if (dcCode === '12') dcOk = gC !== gO;    // casa o ospite vince
+      else if (dcCode === 'X2') dcOk = gO >= gC;     // ospite vince o pareggia
+      if (!dcOk) continue;
+
+      // Verifica condizione Over/Under
+      let ouOk = false;
+      if (tipo === 'over')  ouOk = totale > soglia;
+      else if (tipo === 'under') ouOk = totale < soglia;
+      if (!ouOk) continue;
+
+      count += c;
+    }
+    return Math.round((count / totalSim) * 100);
+  };
+
+  // ============================================================
+  // FIX v5: probabilità combinata DC + Multigol
+  // ============================================================
+  const calcolaCombinataDCMultigol = (mc, dcCode, mgLabel) => {
+    if (!mc || !mc.risultati) return 0;
+    const totalSim = mc.numSimulations || 10000;
+    if (totalSim === 0) return 0;
+
+    // Parse range multigol (es. "MG Casa 1-3", "MG Ospite 0-2", "MG Tot 1-4")
+    const mgMatch = mgLabel.match(/MG\s+(Casa|Ospite|Tot)\s+(\d+)-(\d+)/);
+    if (!mgMatch) return 0;
+    const [, target, minStr, maxStr] = mgMatch;
+    const minV = parseInt(minStr, 10);
+    const maxV = parseInt(maxStr, 10);
+
+    let count = 0;
+    for (const [key, c] of Object.entries(mc.risultati)) {
+      const [gC, gO] = key.split('-').map(Number);
+      const totale = gC + gO;
+
+      let dcOk = false;
+      if (dcCode === '1X') dcOk = gC >= gO;
+      else if (dcCode === '12') dcOk = gC !== gO;
+      else if (dcCode === 'X2') dcOk = gO >= gC;
+      if (!dcOk) continue;
+
+      let mgOk = false;
+      if (target === 'Casa')        mgOk = gC >= minV && gC <= maxV;
+      else if (target === 'Ospite') mgOk = gO >= minV && gO <= maxV;
+      else if (target === 'Tot')    mgOk = totale >= minV && totale <= maxV;
+      if (!mgOk) continue;
+
+      count += c;
+    }
+    return Math.round((count / totalSim) * 100);
+  };
+
+  // ============================================================
+  // FIX v5: probabilità combinata MG Casa + MG Ospite
+  // ============================================================
+  const calcolaCombinataMGCasaOspite = (mc, label) => {
+    if (!mc || !mc.risultati) return 0;
+    const totalSim = mc.numSimulations || 10000;
+    if (totalSim === 0) return 0;
+
+    // label tipo: "0-2+1-3" (MG Casa 0-2 + MG Ospite 1-3)
+    const parts = label.split('+');
+    if (parts.length !== 2) return 0;
+
+    const parseRange = (s) => {
+      // Supporta "0-2", "Casa 0-2", "Ospite 1-3", "Tot 1-4"
+      const m = s.match(/(\d+)-(\d+)/);
+      if (!m) return null;
+      return { min: parseInt(m[1], 10), max: parseInt(m[2], 10) };
+    };
+
+    const r1 = parseRange(parts[0]);
+    const r2 = parseRange(parts[1]);
+    if (!r1 || !r2) return 0;
+
+    let count = 0;
+    for (const [key, c] of Object.entries(mc.risultati)) {
+      const [gC, gO] = key.split('-').map(Number);
+      if (gC >= r1.min && gC <= r1.max && gO >= r2.min && gO <= r2.max) {
+        count += c;
+      }
+    }
+    return Math.round((count / totalSim) * 100);
+  };
+
+  // ============================================================
+  // FIX v5: probabilità multigol semplice (singola)
+  // ============================================================
+  const calcolaMultigol = (mc, label) => {
+    if (!mc || !mc.risultati) return 0;
+    const totalSim = mc.numSimulations || 10000;
+    if (totalSim === 0) return 0;
+
+    const mgMatch = label.match(/MG\s+(Casa|Ospite|Tot)\s+(\d+)-(\d+)/);
+    if (!mgMatch) return 0;
+    const [, target, minStr, maxStr] = mgMatch;
+    const minV = parseInt(minStr, 10);
+    const maxV = parseInt(maxStr, 10);
+
+    let count = 0;
+    for (const [key, c] of Object.entries(mc.risultati)) {
+      const [gC, gO] = key.split('-').map(Number);
+      const totale = gC + gO;
+      let ok = false;
+      if (target === 'Casa')        ok = gC >= minV && gC <= maxV;
+      else if (target === 'Ospite') ok = gO >= minV && gO <= maxV;
+      else if (target === 'Tot')    ok = totale >= minV && totale <= maxV;
+      if (ok) count += c;
+    }
+    return Math.round((count / totalSim) * 100);
+  };
+
+  // ============================================================
+  // FIX v5: calcolo percentuale unificato per tutte le famiglie
+  // Usa il Monte Carlo quando disponibile per le combinazioni,
+  // altrimenti fallback su getGiocataPct per le famiglie semplici.
+  // ============================================================
+  const calcolaPctGiocata = (familyId, opt, mc, stats) => {
+    // Se abbiamo il Monte Carlo, usiamolo per TUTTE le famiglie
+    if (mc && mc.risultati) {
+      if (familyId === 'fisse') {
+        if (opt === '1') return mc.homeWins || 0;
+        if (opt === 'X') return mc.draws || 0;
+        if (opt === '2') return mc.awayWins || 0;
+      }
+      if (familyId === 'dc') {
+        return calcDC(mc, opt);
+      }
+      if (familyId === 'gg_ng') {
+        if (opt === 'GG' || opt === 'Goal-Goal') return mc.gg || 0;
+        if (opt === 'NG' || opt === 'No Goal')   return mc.ng || 0;
+      }
+      if (familyId === 'over') {
+        if (opt === 'Over 1.5') return mc.over15 || 0;
+        if (opt === 'Over 2.5') return mc.over25 || 0;
+        if (opt === 'Over 3.5') return mc.over35 || 0;
+        if (opt === 'Over 4.5') return mc.over45 || 0;
+      }
+      if (familyId === 'under') {
+        if (opt === 'Under 1.5') return mc.under15 || 0;
+        if (opt === 'Under 2.5') return mc.under25 || 0;
+        if (opt === 'Under 3.5') return mc.under35 || 0;
+        if (opt === 'Under 4.5') return mc.under45 || 0;
+      }
+      if (familyId === 'multigol') {
+        return calcolaMultigol(mc, opt);
+      }
+      if (familyId === 'dc_over') {
+        // opt tipo "X2+O1,5" o "1X+O2,5"
+        const parts = opt.split('+');
+        if (parts.length === 2) {
+          const dcCode = parts[0]; // 1X, 12, X2
+          const oPart = parts[1].replace('O', '').replace(',', '.');
+          const soglia = parseFloat(oPart);
+          if (!isNaN(soglia)) {
+            return calcolaCombinata(mc, dcCode, 'over', soglia);
+          }
+        }
+      }
+      if (familyId === 'dc_under') {
+        const parts = opt.split('+');
+        if (parts.length === 2) {
+          const dcCode = parts[0];
+          const uPart = parts[1].replace('U', '').replace(',', '.');
+          const soglia = parseFloat(uPart);
+          if (!isNaN(soglia)) {
+            return calcolaCombinata(mc, dcCode, 'under', soglia);
+          }
+        }
+      }
+      if (familyId === 'dc_multigol') {
+        const parts = opt.split('+');
+        if (parts.length === 2) {
+          const dcCode = parts[0];
+          const mgLabel = parts[1];
+          return calcolaCombinataDCMultigol(mc, dcCode, mgLabel);
+        }
+      }
+      if (familyId === 'mg_casa_ospite') {
+        return calcolaCombinataMGCasaOspite(mc, opt);
+      }
+    }
+
+    // Fallback: usa getGiocataPct globale (per famiglie semplici senza MC)
+    if (typeof window.getGiocataPct === 'function' && stats) {
+      return window.getGiocataPct(opt, stats, stats.homeMG, stats.awayMG, stats.mgTot) || 0;
+    }
+
+    return 0;
+  };
+
+  // ============================================================
+  // SIMULAZIONE MONTE CARLO
   // ============================================================
   const getTeamPoissonParams = (teamName, allMatches) => {
     const matches = allMatches.filter(m =>
@@ -221,54 +443,9 @@
       }
     };
 
+    // FIX v5: usa la funzione unificata
     const calcPctFromSim = (familyId, giocata) => {
-      const totalSim = mc?.numSimulations || 10000;
-
-      if (familyId === 'gg_ng') {
-        if (giocata === 'GG') return mc?.gg || 0;
-        if (giocata === 'NG') return mc?.ng || 0;
-      }
-      if (familyId === 'fisse') {
-        if (giocata === '1') return mc?.homeWins || 0;
-        if (giocata === 'X') return mc?.draws || 0;
-        if (giocata === '2') return mc?.awayWins || 0;
-      }
-      if (familyId === 'dc') {
-        if (giocata === '1X') return calcDC(mc, '1X');
-        if (giocata === '12') return calcDC(mc, '12');
-        if (giocata === 'X2') return calcDC(mc, 'X2');
-      }
-      if (familyId === 'over') {
-        if (giocata === 'Over 1.5') return mc?.over15 || 0;
-        if (giocata === 'Over 2.5') return mc?.over25 || 0;
-        if (giocata === 'Over 3.5') return mc?.over35 || 0;
-        if (giocata === 'Over 4.5') return mc?.over45 || 0;
-      }
-      if (familyId === 'under') {
-        if (giocata === 'Under 1.5') return mc?.under15 || 0;
-        if (giocata === 'Under 2.5') return mc?.under25 || 0;
-        if (giocata === 'Under 3.5') return mc?.under35 || 0;
-        if (giocata === 'Under 4.5') return mc?.under45 || 0;
-      }
-      if (familyId === 'multigol') {
-        let count = 0;
-        for (const [key, c] of Object.entries(mc?.risultati || {})) {
-          const [gC, gO] = key.split('-').map(Number);
-          const total = gC + gO;
-          let matchMG = false;
-          if (giocata === 'MG Casa 0-2' && gC <= 2) matchMG = true;
-          else if (giocata === 'MG Ospite 0-2' && gO <= 2) matchMG = true;
-          else if (giocata === 'MG Casa 1-3' && gC >= 1 && gC <= 3) matchMG = true;
-          else if (giocata === 'MG Ospite 1-3' && gO >= 1 && gO <= 3) matchMG = true;
-          else if (giocata === 'MG Casa 2-5' && gC >= 2 && gC <= 5) matchMG = true;
-          else if (giocata === 'MG Ospite 2-5' && gO >= 2 && gO <= 5) matchMG = true;
-          else if (giocata === 'MG Tot 1-4' && total >= 1 && total <= 4) matchMG = true;
-          else if (giocata === 'MG Tot 2-5' && total >= 2 && total <= 5) matchMG = true;
-          if (matchMG) count += c;
-        }
-        return Math.round((count / totalSim) * 100);
-      }
-      return 0;
+      return calcolaPctGiocata(familyId, giocata, mc, null);
     };
 
     const getBestFamily = (familyId) => {
@@ -521,15 +698,33 @@
   };
 
   // ============================================================
-  // TUTTE LE FAMIGLIE (con ordine corretto + quote con fallback)
+  // TUTTE LE FAMIGLIE (FIX v5: usa Monte Carlo per combinazioni)
   // ============================================================
   const TutteLeFamigliePanel = ({ match, allMatches }) => {
     const getChampColor = window.getChampColor;
     const getPercentualeClasse = window.getPercentualeClasse;
     const FAMIGLIE = window.FAMIGLIE_GIOCATE;
-    const getGiocataPct = window.getGiocataPct;
 
     const stats = window.computeMatchStats(match, allMatches);
+
+    // FIX v5: carica/calcola Monte Carlo
+    const [mc, setMc] = useState(null);
+    useEffect(() => {
+      if (!match) return;
+      const saved = localStorage.getItem(`ft_mc_${match.id}`);
+      if (saved) {
+        try { setMc(JSON.parse(saved)); return; } catch (e) {}
+      }
+      // Se non c'è, calcolalo subito
+      try {
+        const result = simulateMatches(match.casa, match.ospiti, allMatches, 10000);
+        setMc(result);
+        localStorage.setItem(`ft_mc_${match.id}`, JSON.stringify(result));
+      } catch (e) {
+        console.warn('Errore MC in TutteLeFamiglie:', e);
+      }
+    }, [match, allMatches]);
+
     if (stats.error) return null;
 
     // ⭐ ORDINE: FISSE → DC → GG/NG → OVER → UNDER → Multigol → resto
@@ -548,7 +743,6 @@
       }
     })();
 
-    // ⭐ DEBUG: log stato QuoteManager
     useEffect(() => {
       console.log('🔍 TutteLeFamigliePanel — Stato QuoteManager:', qmStatus);
       if (hasQM) {
@@ -562,14 +756,8 @@
       .map(familyId => {
         const family = FAMIGLIE[familyId];
         const opzioni = family.options.map(opt => {
-          let pct = 0;
-
-          if (familyId === 'gg_ng') {
-            const ggNg = window.calcolaGG_NG(stats);
-            pct = opt === 'GG' ? (ggNg?.gg || 0) : (ggNg?.ng || 0);
-          } else {
-            pct = getGiocataPct(opt, stats, stats.homeMG, stats.awayMG, stats.mgTot);
-          }
+          // FIX v5: usa la funzione unificata che sfrutta il Monte Carlo
+          const pct = calcolaPctGiocata(familyId, opt, mc, stats);
 
           // QUOTA
           let quota = null;
@@ -622,6 +810,17 @@
             </button>
           )}
         </div>
+
+        {/* Avviso se MC non pronto */}
+        {!mc && (
+          <div style={{
+            marginBottom: '12px', padding: '6px 12px', borderRadius: '6px',
+            background: 'rgba(243, 156, 18, 0.1)', border: '1px solid var(--accent)',
+            fontSize: '11px', color: 'var(--text-muted)'
+          }}>
+            ⏳ Monte Carlo in caricamento... Le combinazioni DC+Over/Under verranno calcolate correttamente tra poco.
+          </div>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
           {sezioni.map(({ familyId, family, opzioni }) => (
@@ -1379,6 +1578,6 @@
   window.TeamMatchesHistory = TeamMatchesHistory;
   window.TutteLeFamigliePanel = TutteLeFamigliePanel;
 
-  console.log('✅ Modulo Statistiche v4 caricato - ordine corretto + fallback quote visibile');
+  console.log('✅ Modulo Statistiche v5 caricato - FIX combinazioni DC (probabilità congiunta da Monte Carlo)');
 
 })();
