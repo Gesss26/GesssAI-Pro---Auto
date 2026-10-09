@@ -1346,13 +1346,13 @@
       const awayProfile = profiloSquadra(awayGames, awayTeam);
 
       // Segni
-      const p1 = homeProfile.p1;
-      const p2 = awayProfile.p2;
+      const p1 = homeProfile.p1;    // vittorie Lens
+      const p2 = awayProfile.p1;    // vittorie Lyon  ← CAMBIATO
       const pX = Math.round((homeProfile.pX + awayProfile.pX) / 2);
 
       // Doppie chance
-      const p1X = homeProfile.p1 + homeProfile.pX;
-      const pX2 = awayProfile.pX + awayProfile.p2;
+      const p1X = homeProfile.p1 + homeProfile.pX;   // Lens vince o pareggia → OK
+      const pX2 = awayProfile.pX + awayProfile.p1;   // pareggi + vittorie Lyon  ← CAMBIATO
       const p12 = Math.round(
         ((homeProfile.p1 + homeProfile.p2) + (awayProfile.p1 + awayProfile.p2)) / 2
       );
