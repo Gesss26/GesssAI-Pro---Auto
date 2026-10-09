@@ -1135,9 +1135,8 @@
     const DEFAULT_FAMIGLIE = ['dc_under', 'mg_casa_ospite', 'over'];
 
     // ============================================================
-    // CALCOLI
+    // CALCOLI FORM (V/P/S ultime 5) — indipendente, resta com'era
     // ============================================================
-
     const calcFormAndStats = (matches, teamName) => {
       const played = matches
         .filter(m => m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName))
@@ -1163,223 +1162,9 @@
       };
     };
 
-    // ⭐ NUOVA: accetta teamName invece di isHome, prende i gol fatti dalla squadra specificata
-    const getMultigolPerSquadra = (games, teamName) => {
-      const total = games.length;
-      if (total === 0) return { '0-1': 0, '0-2': 0, '1-3': 0, '2-5': 0 };
-      const goals = games.map(g => g.casa === teamName ? g.golCasa : g.golOspite);
-      const count = (pred) => goals.filter(pred).length / total * 100;
-      return {
-        '0-1': count(g => g <= 1),
-        '0-2': count(g => g <= 2),
-        '1-3': count(g => g >= 1 && g <= 3),
-        '2-5': count(g => g >= 2 && g <= 5)
-      };
-    };
-
-    const getMultigolTotale = (games) => {
-      const total = games.length;
-      if (total === 0) return { '1-4': 0, '2-5': 0 };
-      const totalGoals = games.map(g => g.golCasa + g.golOspite);
-      const count = (pred) => totalGoals.filter(pred).length / total * 100;
-      return {
-        '1-4': count(g => g >= 1 && g <= 4),
-        '2-5': count(g => g >= 2 && g <= 5)
-      };
-    };
-
     // ============================================================
-    // FUNZIONI CONGIUNTE (per combinate)
+    // MULTIGOL RANGE (heatmap) — invariata
     // ============================================================
-    const calcolaDcUnder = (games, dc, soglia) => {
-      if (!games || games.length === 0) return 0;
-      let count = 0;
-      games.forEach(g => {
-        const tot = g.golCasa + g.golOspite;
-        const dcOk = (dc === '1X' && g.golCasa >= g.golOspite) ||
-                     (dc === '12' && g.golCasa !== g.golOspite) ||
-                     (dc === 'X2' && g.golCasa <= g.golOspite);
-        const underOk = tot < soglia;
-        if (dcOk && underOk) count++;
-      });
-      return Math.round((count / games.length) * 100);
-    };
-
-    const calcolaDcOver = (games, dc, soglia) => {
-      if (!games || games.length === 0) return 0;
-      let count = 0;
-      games.forEach(g => {
-        const tot = g.golCasa + g.golOspite;
-        const dcOk = (dc === '1X' && g.golCasa >= g.golOspite) ||
-                     (dc === '12' && g.golCasa !== g.golOspite) ||
-                     (dc === 'X2' && g.golCasa <= g.golOspite);
-        const overOk = tot > soglia;
-        if (dcOk && overOk) count++;
-      });
-      return Math.round((count / games.length) * 100);
-    };
-
-    const calcolaDcMgTot = (games, dc, min, max) => {
-      if (!games || games.length === 0) return 0;
-      let count = 0;
-      games.forEach(g => {
-        const tot = g.golCasa + g.golOspite;
-        const dcOk = (dc === '1X' && g.golCasa >= g.golOspite) ||
-                     (dc === '12' && g.golCasa !== g.golOspite) ||
-                     (dc === 'X2' && g.golCasa <= g.golOspite);
-        const mgOk = tot >= min && tot <= max;
-        if (dcOk && mgOk) count++;
-      });
-      return Math.round((count / games.length) * 100);
-    };
-
-    const calcolaMgCasaOspite = (games, rangeCasa, rangeOspite) => {
-      if (!games || games.length === 0) return 0;
-      const [minC, maxC] = rangeCasa.split('-').map(Number);
-      const [minO, maxO] = rangeOspite.split('-').map(Number);
-      let count = 0;
-      games.forEach(g => {
-        const casaOk = g.golCasa >= minC && g.golCasa <= maxC;
-        const ospiteOk = g.golOspite >= minO && g.golOspite <= maxO;
-        if (casaOk && ospiteOk) count++;
-      });
-      return Math.round((count / games.length) * 100);
-    };
-
-    // ============================================================
-    // ⭐ COMPUTE MATCH STATS — LOGICA CORRETTA
-    // 1. Prende TUTTE le partite di ciascuna squadra (casa + trasferta)
-    // 2. Calcola V/P/S di ciascuna squadra
-    // 3. 1 = (%V_casa + %S_ospite) / 2
-    //    X = (%P_casa + %P_ospite) / 2
-    //    2 = (%S_casa + %V_ospite) / 2
-    // 4. Arrotonda: decimale <= 0.50 → difetto, > 0.50 → eccesso
-    // 5. Corregge la differenza (per arrivare a 100) SOLO sulla X
-    // ============================================================
-    const computeMatchStats = (match, allMatches) => {
-      const homeTeam = match.casa;
-      const awayTeam = match.ospiti;
-
-      // ⭐ TUTTE le partite giocate di ciascuna squadra (casa + trasferta)
-      const homeGames = allMatches.filter(m =>
-        m.stato === 'Giocata' && (m.casa === homeTeam || m.ospiti === homeTeam)
-      );
-      const awayGames = allMatches.filter(m =>
-        m.stato === 'Giocata' && (m.casa === awayTeam || m.ospiti === awayTeam)
-      );
-
-      if (homeGames.length === 0 || awayGames.length === 0) {
-        return { error: 'Dati insufficienti (squadra senza partite).' };
-      }
-
-      // ⭐ V/P/S per la squadra di casa (da tutte le sue partite)
-      let homeWins = 0, homeDraws = 0, homeLosses = 0;
-      homeGames.forEach(g => {
-        const isHome = g.casa === homeTeam;
-        const tg = isHome ? g.golCasa : g.golOspite;
-        const og = isHome ? g.golOspite : g.golCasa;
-        if (tg > og) homeWins++;
-        else if (tg === og) homeDraws++;
-        else homeLosses++;
-      });
-
-      // ⭐ V/P/S per la squadra ospite (da tutte le sue partite)
-      let awayWins = 0, awayDraws = 0, awayLosses = 0;
-      awayGames.forEach(g => {
-        const isHome = g.casa === awayTeam;
-        const tg = isHome ? g.golCasa : g.golOspite;
-        const og = isHome ? g.golOspite : g.golCasa;
-        if (tg > og) awayWins++;
-        else if (tg === og) awayDraws++;
-        else awayLosses++;
-      });
-
-      const homePlayed = homeGames.length;
-      const awayPlayed = awayGames.length;
-
-      const homeWinPct   = (homeWins   / homePlayed) * 100;
-      const homeDrawPct  = (homeDraws  / homePlayed) * 100;
-      const homeLossPct  = (homeLosses / homePlayed) * 100;
-
-      const awayWinPct   = (awayWins   / awayPlayed) * 100;
-      const awayDrawPct  = (awayDraws  / awayPlayed) * 100;
-      const awayLossPct  = (awayLosses / awayPlayed) * 100;
-
-      // ⭐ MEDIA dei due profili:
-      //   1 = (%V_casa + %S_ospite) / 2
-      //   X = (%P_casa + %P_ospite) / 2
-      //   2 = (%S_casa + %V_ospite) / 2
-      const p1Raw = (homeWinPct  + awayLossPct) / 2;
-      const pXRaw = (homeDrawPct + awayDrawPct) / 2;
-      const p2Raw = (homeLossPct + awayWinPct)  / 2;
-
-      // ⭐ Arrotondamento: decimale <= 0.50 → difetto, > 0.50 → eccesso
-      const arrotonda = (v) => {
-        const parteIntera = Math.floor(v);
-        const decimale = v - parteIntera;
-        return decimale > 0.50 ? parteIntera + 1 : parteIntera;
-      };
-
-      let p1 = arrotonda(p1Raw);
-      let pX = arrotonda(pXRaw);
-      let p2 = arrotonda(p2Raw);
-
-      // ⭐ Correzione: la differenza va tolta/aggiunta SOLO alla X
-      const somma = p1 + pX + p2;
-      if (somma !== 100) {
-        const diff = 100 - somma;
-        pX = pX + diff;
-        if (pX < 0) pX = 0;
-        if (pX > 100) pX = 100;
-      }
-
-      const p1X = Math.min(100, p1 + pX);
-      const p12 = Math.min(100, p1 + p2);
-      const pX2 = Math.min(100, pX + p2);
-
-      // ⭐ UNIONE partite (per Over/Under, GG/NG, Multigol, ecc.)
-      const allGamesMap = new Map();
-      [...homeGames, ...awayGames].forEach(g => {
-        if (!allGamesMap.has(g.id)) allGamesMap.set(g.id, g);
-      });
-      const allGames = Array.from(allGamesMap.values());
-
-      const goalTotals = allGames.map(g => g.golCasa + g.golOspite);
-      const thresholds = [1.5, 2.5, 3.5, 4.5];
-      const underOver = thresholds.map(t => {
-        const over = goalTotals.filter(gt => gt > t).length / goalTotals.length * 100;
-        return { threshold: t, under: 100 - over, over };
-      });
-
-      const homeMG = getMultigolPerSquadra(homeGames, homeTeam);
-      const awayMG = getMultigolPerSquadra(awayGames, awayTeam);
-      const mgTot = getMultigolTotale(allGames);
-
-      return {
-        p1, pX, p2, p1X, p12, pX2, underOver, homeMG, awayMG, mgTot,
-        homeGames, awayGames, allGames,
-        homeStats: { wins: homeWins, draws: homeDraws, losses: homeLosses, played: homeGames.length },
-        awayStats: { wins: awayWins, draws: awayDraws, losses: awayLosses, played: awayGames.length },
-        totalGames: allGames.length
-      };
-    };
-
-    const get12Under45 = (allMatches, homeTeam, awayTeam) => {
-      const homeGames = allMatches.filter(m => m.stato === 'Giocata' && m.casa === homeTeam);
-      const awayGames = allMatches.filter(m => m.stato === 'Giocata' && m.ospiti === awayTeam);
-      const allGamesMap = new Map();
-      [...homeGames, ...awayGames].forEach(g => {
-        if (!allGamesMap.has(g.id)) allGamesMap.set(g.id, g);
-      });
-      const allGames = Array.from(allGamesMap.values());
-      if (!allGames.length) return 0;
-      const count = allGames.filter(g => {
-        const total = g.golCasa + g.golOspite;
-        return g.golCasa !== g.golOspite && total < 4.5;
-      }).length;
-      return (count / allGames.length) * 100;
-    };
-
     const getMultigolRange = (teamName, allMatches) => {
       const matches = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName));
       if (matches.length === 0) return { label: 'N/A', pct: 0, range: 'default', details: [] };
@@ -1403,140 +1188,350 @@
       return { label: best.label, pct: Math.round(best.pct), range: best.range, details: ranges.map(r => ({ ...r, pct: Math.round(r.pct) })) };
     };
 
+    // ============================================================
+    // ⭐ PROFILO SQUADRA — nuova base di calcolo
+    // Statistiche calcolate SOLO sulle partite di quella squadra.
+    // ============================================================
+    const profiloSquadra = (games, teamName) => {
+      const total = games.length;
+      const empty = {
+        p1: 0, pX: 0, p2: 0,
+        over: { 1.5: 0, 2.5: 0, 3.5: 0, 4.5: 0 },
+        under: { 1.5: 0, 2.5: 0, 3.5: 0, 4.5: 0 },
+        gg: 0, ng: 0,
+        mg: { '0-1': 0, '0-2': 0, '1-3': 0, '2-5': 0 },
+        mgTot: { '1-4': 0, '2-5': 0 },
+        played: 0
+      };
+      if (total === 0) return empty;
+
+      let wins = 0, draws = 0, losses = 0;
+      let ggCount = 0, ngCount = 0;
+      const overCount = { 1.5: 0, 2.5: 0, 3.5: 0, 4.5: 0 };
+      const underCount = { 1.5: 0, 2.5: 0, 3.5: 0, 4.5: 0 };
+      const mgCount = { '0-1': 0, '0-2': 0, '1-3': 0, '2-5': 0 };
+      const mgTotCount = { '1-4': 0, '2-5': 0 };
+
+      games.forEach(g => {
+        const isHome = g.casa === teamName;
+        const tg = isHome ? g.golCasa : g.golOspite;
+        const og = isHome ? g.golOspite : g.golCasa;
+        const tot = g.golCasa + g.golOspite;
+
+        if (tg > og) wins++;
+        else if (tg === og) draws++;
+        else losses++;
+
+        [1.5, 2.5, 3.5, 4.5].forEach(s => {
+          if (tot > s) overCount[s]++;
+          else underCount[s]++;
+        });
+
+        if (g.golCasa > 0 && g.golOspite > 0) ggCount++;
+        else ngCount++;
+
+        if (tg <= 1) mgCount['0-1']++;
+        if (tg <= 2) mgCount['0-2']++;
+        if (tg >= 1 && tg <= 3) mgCount['1-3']++;
+        if (tg >= 2 && tg <= 5) mgCount['2-5']++;
+
+        if (tot >= 1 && tot <= 4) mgTotCount['1-4']++;
+        if (tot >= 2 && tot <= 5) mgTotCount['2-5']++;
+      });
+
+      const pct = (n) => Math.round((n / total) * 100);
+
+      return {
+        p1: pct(wins),
+        pX: pct(draws),
+        p2: pct(losses),
+        over: {
+          1.5: pct(overCount[1.5]),
+          2.5: pct(overCount[2.5]),
+          3.5: pct(overCount[3.5]),
+          4.5: pct(overCount[4.5])
+        },
+        under: {
+          1.5: pct(underCount[1.5]),
+          2.5: pct(underCount[2.5]),
+          3.5: pct(underCount[3.5]),
+          4.5: pct(underCount[4.5])
+        },
+        gg: pct(ggCount),
+        ng: pct(ngCount),
+        mg: {
+          '0-1': pct(mgCount['0-1']),
+          '0-2': pct(mgCount['0-2']),
+          '1-3': pct(mgCount['1-3']),
+          '2-5': pct(mgCount['2-5'])
+        },
+        mgTot: {
+          '1-4': pct(mgTotCount['1-4']),
+          '2-5': pct(mgTotCount['2-5'])
+        },
+        played: total
+      };
+    };
+
+    // ============================================================
+    // HELPER per calcoli su una singola squadra
+    // ============================================================
+    const _dcOk = (tg, og, dc) =>
+      (dc === '1X' && tg >= og) ||
+      (dc === '12' && tg !== og) ||
+      (dc === 'X2' && tg <= og);
+
+    const _squadraCalc = (games, teamName, filterFn) => {
+      if (!games || games.length === 0) return 0;
+      let count = 0;
+      games.forEach(g => {
+        const isHome = g.casa === teamName;
+        const tg = isHome ? g.golCasa : g.golOspite;
+        const og = isHome ? g.golOspite : g.golCasa;
+        const tot = g.golCasa + g.golOspite;
+        if (filterFn(tg, og, tot)) count++;
+      });
+      return Math.round((count / games.length) * 100);
+    };
+
+    const calcolaDcOverSquadra = (games, teamName, dc, soglia) =>
+      _squadraCalc(games, teamName, (tg, og, tot) => _dcOk(tg, og, dc) && tot > soglia);
+
+    const calcolaDcUnderSquadra = (games, teamName, dc, soglia) =>
+      _squadraCalc(games, teamName, (tg, og, tot) => _dcOk(tg, og, dc) && tot < soglia);
+
+    const calcolaDcMgTotSquadra = (games, teamName, dc, min, max) =>
+      _squadraCalc(games, teamName, (tg, og, tot) => _dcOk(tg, og, dc) && tot >= min && tot <= max);
+
+    // MG Casa + MG Ospite → solo partite casalinghe della squadra di casa
+    const calcolaMgCasaOspiteSquadra = (games, teamName, rangeCasa, rangeOspite) => {
+      const homeOnly = games.filter(g => g.casa === teamName);
+      if (homeOnly.length === 0) return 0;
+      const [minC, maxC] = rangeCasa.split('-').map(Number);
+      const [minO, maxO] = rangeOspite.split('-').map(Number);
+      let count = 0;
+      homeOnly.forEach(g => {
+        if (g.golCasa >= minC && g.golCasa <= maxC &&
+            g.golOspite >= minO && g.golOspite <= maxO) count++;
+      });
+      return Math.round((count / homeOnly.length) * 100);
+    };
+
+    // 12 + Under 4.5 → media delle due squadre
+    const get12Under45Media = (homeGames, awayGames, homeTeam, awayTeam) => {
+      const a = calcolaDcUnderSquadra(homeGames, homeTeam, '12', 4.5);
+      const b = calcolaDcUnderSquadra(awayGames, awayTeam, '12', 4.5);
+      return Math.round((a + b) / 2);
+    };
+
+    // ============================================================
+    // COMPUTE MATCH STATS — versione corretta
+    // ============================================================
+    const computeMatchStats = (match, allMatches) => {
+      const homeTeam = match.casa;
+      const awayTeam = match.ospiti;
+
+      const homeGames = allMatches.filter(m =>
+        m.stato === 'Giocata' && (m.casa === homeTeam || m.ospiti === homeTeam)
+      );
+      const awayGames = allMatches.filter(m =>
+        m.stato === 'Giocata' && (m.casa === awayTeam || m.ospiti === awayTeam)
+      );
+
+      if (homeGames.length === 0 || awayGames.length === 0) {
+        return { error: 'Dati insufficienti (squadra senza partite).' };
+      }
+
+      const homeProfile = profiloSquadra(homeGames, homeTeam);
+      const awayProfile = profiloSquadra(awayGames, awayTeam);
+
+      // Segni
+      const p1 = homeProfile.p1;
+      const p2 = awayProfile.p2;
+      const pX = Math.round((homeProfile.pX + awayProfile.pX) / 2);
+
+      // Doppie chance
+      const p1X = homeProfile.p1 + homeProfile.pX;
+      const pX2 = awayProfile.pX + awayProfile.p2;
+      const p12 = Math.round(
+        ((homeProfile.p1 + homeProfile.p2) + (awayProfile.p1 + awayProfile.p2)) / 2
+      );
+
+      // Over / Under come media
+      const underOver = [1.5, 2.5, 3.5, 4.5].map(s => ({
+        threshold: s,
+        over: Math.round((homeProfile.over[s] + awayProfile.over[s]) / 2),
+        under: Math.round((homeProfile.under[s] + awayProfile.under[s]) / 2)
+      }));
+
+      // GG / NG come media
+      const gg = Math.round((homeProfile.gg + awayProfile.gg) / 2);
+      const ng = Math.round((homeProfile.ng + awayProfile.ng) / 2);
+
+      // Multigol
+      const homeMG = homeProfile.mg;
+      const awayMG = awayProfile.mg;
+      const mgTot = {
+        '1-4': Math.round((homeProfile.mgTot['1-4'] + awayProfile.mgTot['1-4']) / 2),
+        '2-5': Math.round((homeProfile.mgTot['2-5'] + awayProfile.mgTot['2-5']) / 2)
+      };
+
+      return {
+        p1, pX, p2, p1X, p12, pX2,
+        underOver, gg, ng,
+        homeMG, awayMG, mgTot,
+        homeGames, awayGames,
+        homeStats: {
+          wins: homeProfile.p1, draws: homeProfile.pX, losses: homeProfile.p2,
+          played: homeProfile.played
+        },
+        awayStats: {
+          wins: awayProfile.p1, draws: awayProfile.pX, losses: awayProfile.p2,
+          played: awayProfile.played
+        },
+        totalGames: homeGames.length + awayGames.length,
+        _homeTeam: homeTeam,
+        _awayTeam: awayTeam
+      };
+    };
+
+    // ============================================================
+    // GET GIOCATA PCT — usa i profili corretti
+    // ============================================================
     const getGiocataPct = (giocata, stats, homeMG, awayMG, mgTot) => {
       if (stats.error) return 0;
-      const { p1, pX, p2, p1X, p12, pX2, underOver, allGames } = stats;
-
-      if (giocata === 'GG' || giocata === 'NG') {
-        const games = allGames || [];
-        if (games.length === 0) return 0;
-        let ggCount = 0;
-        games.forEach(g => {
-          if (g.golCasa > 0 && g.golOspite > 0) ggCount++;
-        });
-        const total = games.length;
-        if (giocata === 'GG') return Math.round((ggCount / total) * 100);
-        return Math.round(((total - ggCount) / total) * 100);
-      }
+      const { p1, pX, p2, p1X, p12, pX2, underOver, gg, ng,
+              homeGames, awayGames, _homeTeam, _awayTeam } = stats;
 
       if (giocata === '1') return Math.round(p1);
       if (giocata === 'X') return Math.round(pX);
       if (giocata === '2') return Math.round(p2);
-
       if (giocata === '1X') return Math.round(p1X);
       if (giocata === '12') return Math.round(p12);
       if (giocata === 'X2') return Math.round(pX2);
 
-      if (giocata === 'Over 1.5') return Math.round(underOver[0]?.over || 0);
-      if (giocata === 'Over 2.5') return Math.round(underOver[1]?.over || 0);
-      if (giocata === 'Over 3.5') return Math.round(underOver[2]?.over || 0);
-      if (giocata === 'Over 4.5') return Math.round(underOver[3]?.over || 0);
+      if (giocata === 'GG') return gg;
+      if (giocata === 'NG') return ng;
 
-      if (giocata === 'Under 1.5') return Math.round(underOver[0]?.under || 0);
-      if (giocata === 'Under 2.5') return Math.round(underOver[1]?.under || 0);
-      if (giocata === 'Under 3.5') return Math.round(underOver[2]?.under || 0);
-      if (giocata === 'Under 4.5') return Math.round(underOver[3]?.under || 0);
+      if (giocata === 'Over 1.5') return underOver[0]?.over || 0;
+      if (giocata === 'Over 2.5') return underOver[1]?.over || 0;
+      if (giocata === 'Over 3.5') return underOver[2]?.over || 0;
+      if (giocata === 'Over 4.5') return underOver[3]?.over || 0;
 
-      if (giocata === 'MG Casa 0-2') return Math.round(homeMG['0-2'] || 0);
-      if (giocata === 'MG Ospite 0-2') return Math.round(awayMG['0-2'] || 0);
-      if (giocata === 'MG Casa 1-3') return Math.round(homeMG['1-3'] || 0);
-      if (giocata === 'MG Ospite 1-3') return Math.round(awayMG['1-3'] || 0);
-      if (giocata === 'MG Casa 2-5') return Math.round(homeMG['2-5'] || 0);
-      if (giocata === 'MG Ospite 2-5') return Math.round(awayMG['2-5'] || 0);
-      if (giocata === 'MG Tot 1-4') return Math.round(mgTot['1-4'] || 0);
-      if (giocata === 'MG Tot 2-5') return Math.round(mgTot['2-5'] || 0);
+      if (giocata === 'Under 1.5') return underOver[0]?.under || 0;
+      if (giocata === 'Under 2.5') return underOver[1]?.under || 0;
+      if (giocata === 'Under 3.5') return underOver[2]?.under || 0;
+      if (giocata === 'Under 4.5') return underOver[3]?.under || 0;
 
+      if (giocata === 'MG Casa 0-2') return homeMG['0-2'] || 0;
+      if (giocata === 'MG Ospite 0-2') return awayMG['0-2'] || 0;
+      if (giocata === 'MG Casa 1-3') return homeMG['1-3'] || 0;
+      if (giocata === 'MG Ospite 1-3') return awayMG['1-3'] || 0;
+      if (giocata === 'MG Casa 2-5') return homeMG['2-5'] || 0;
+      if (giocata === 'MG Ospite 2-5') return awayMG['2-5'] || 0;
+      if (giocata === 'MG Tot 1-4') return mgTot['1-4'] || 0;
+      if (giocata === 'MG Tot 2-5') return mgTot['2-5'] || 0;
+
+      // 1X + Over → solo squadra di casa
       if (giocata.startsWith('1X+O')) {
         const s = parseFloat(giocata.replace('1X+O', ''));
-        return calcolaDcOver(allGames, '1X', s);
+        return calcolaDcOverSquadra(homeGames, _homeTeam, '1X', s);
       }
-      if (giocata.startsWith('12+O')) {
-        const s = parseFloat(giocata.replace('12+O', ''));
-        return calcolaDcOver(allGames, '12', s);
-      }
+      // X2 + Over → solo squadra ospite
       if (giocata.startsWith('X2+O')) {
         const s = parseFloat(giocata.replace('X2+O', ''));
-        return calcolaDcOver(allGames, 'X2', s);
+        return calcolaDcOverSquadra(awayGames, _awayTeam, 'X2', s);
+      }
+      // 12 + Over → media delle due squadre
+      if (giocata.startsWith('12+O')) {
+        const s = parseFloat(giocata.replace('12+O', ''));
+        const a = calcolaDcOverSquadra(homeGames, _homeTeam, '12', s);
+        const b = calcolaDcOverSquadra(awayGames, _awayTeam, '12', s);
+        return Math.round((a + b) / 2);
       }
 
+      // 1X + Under → solo squadra di casa
       if (giocata.startsWith('1X+U')) {
         const s = parseFloat(giocata.replace('1X+U', ''));
-        return calcolaDcUnder(allGames, '1X', s);
+        return calcolaDcUnderSquadra(homeGames, _homeTeam, '1X', s);
       }
-      if (giocata.startsWith('12+U')) {
-        const s = parseFloat(giocata.replace('12+U', ''));
-        return calcolaDcUnder(allGames, '12', s);
-      }
+      // X2 + Under → solo squadra ospite
       if (giocata.startsWith('X2+U')) {
         const s = parseFloat(giocata.replace('X2+U', ''));
-        return calcolaDcUnder(allGames, 'X2', s);
+        return calcolaDcUnderSquadra(awayGames, _awayTeam, 'X2', s);
+      }
+      // 12 + Under → media delle due squadre
+      if (giocata.startsWith('12+U')) {
+        const s = parseFloat(giocata.replace('12+U', ''));
+        const a = calcolaDcUnderSquadra(homeGames, _homeTeam, '12', s);
+        const b = calcolaDcUnderSquadra(awayGames, _awayTeam, '12', s);
+        return Math.round((a + b) / 2);
       }
 
-      if (giocata.includes('+') && !giocata.includes('X') && !giocata.includes('O') && !giocata.includes('U') && !giocata.startsWith('MG')) {
-        const parts = giocata.split('+');
-        return calcolaMgCasaOspite(allGames, parts[0], parts[1]);
-      }
-
+      // DC + MG Tot
       if (giocata.startsWith('1X+MG')) {
         const mg = giocata.replace('1X+MG ', '');
-        if (mg === 'Tot 1-4') return calcolaDcMgTot(allGames, '1X', 1, 4);
-        if (mg === 'Tot 2-5') return calcolaDcMgTot(allGames, '1X', 2, 5);
-      }
-      if (giocata.startsWith('12+MG')) {
-        const mg = giocata.replace('12+MG ', '');
-        if (mg === 'Tot 1-4') return calcolaDcMgTot(allGames, '12', 1, 4);
-        if (mg === 'Tot 2-5') return calcolaDcMgTot(allGames, '12', 2, 5);
+        if (mg === 'Tot 1-4') return calcolaDcMgTotSquadra(homeGames, _homeTeam, '1X', 1, 4);
+        if (mg === 'Tot 2-5') return calcolaDcMgTotSquadra(homeGames, _homeTeam, '1X', 2, 5);
       }
       if (giocata.startsWith('X2+MG')) {
         const mg = giocata.replace('X2+MG ', '');
-        if (mg === 'Tot 1-4') return calcolaDcMgTot(allGames, 'X2', 1, 4);
-        if (mg === 'Tot 2-5') return calcolaDcMgTot(allGames, 'X2', 2, 5);
+        if (mg === 'Tot 1-4') return calcolaDcMgTotSquadra(awayGames, _awayTeam, 'X2', 1, 4);
+        if (mg === 'Tot 2-5') return calcolaDcMgTotSquadra(awayGames, _awayTeam, 'X2', 2, 5);
+      }
+      if (giocata.startsWith('12+MG')) {
+        const mg = giocata.replace('12+MG ', '');
+        const min = mg === 'Tot 1-4' ? 1 : 2;
+        const max = mg === 'Tot 1-4' ? 4 : 5;
+        const a = calcolaDcMgTotSquadra(homeGames, _homeTeam, '12', min, max);
+        const b = calcolaDcMgTotSquadra(awayGames, _awayTeam, '12', min, max);
+        return Math.round((a + b) / 2);
+      }
+
+      // MG Casa + MG Ospite → solo partite casalinghe della squadra di casa
+      if (giocata.includes('+') && /^\d-\d\+\d-\d$/.test(giocata)) {
+        const parts = giocata.split('+');
+        return calcolaMgCasaOspiteSquadra(homeGames, _homeTeam, parts[0], parts[1]);
       }
 
       return 0;
     };
 
+    // ============================================================
+    // BEST BET FOR FAMILY
+    // ============================================================
     const getBestBetForFamily = (familyId, stats, homeRange, awayRange, homeMG, awayMG, mgTot) => {
       if (stats.error) return null;
       const family = FAMIGLIE_GIOCATE[familyId];
       if (!family) return null;
 
-      let best = null, bestPct = -1, bestLabel = '';
+      let best = null, bestPct = -1;
       family.options.forEach(opt => {
         let pct = 0;
-        let label = opt;
-
         if (familyId === 'dc_under' && opt === '12+U4.5') {
-          pct = Math.round(get12Under45(stats._allMatches, stats._homeTeam, stats._awayTeam) || 0);
+          pct = get12Under45Media(stats.homeGames, stats.awayGames, stats._homeTeam, stats._awayTeam);
         } else {
           pct = getGiocataPct(opt, stats, homeMG, awayMG, mgTot);
         }
-
         if (pct > bestPct) {
-          bestPct = pct; best = opt; bestLabel = label;
+          bestPct = pct;
+          best = opt;
         }
       });
 
-      if (best && bestPct >= 0) return { giocata: best, label: bestLabel, pct: bestPct, isBomb: bestPct >= 90 };
+      if (best && bestPct >= 0) return { giocata: best, label: best, pct: bestPct, isBomb: bestPct >= 90 };
       return null;
     };
 
+    // ============================================================
+    // GG/NG HELPER
+    // ============================================================
     const calcolaGG_NG = (stats) => {
       if (stats.error) return null;
-      const games = stats.allGames || [];
-      if (games.length === 0) return null;
-
-      let gg = 0, ng = 0;
-      games.forEach(g => {
-        if (g.golCasa > 0 && g.golOspite > 0) gg++;
-        else ng++;
-      });
-      const total = games.length;
-      const pctGG = Math.round((gg / total) * 100);
-      const pctNG = Math.round((ng / total) * 100);
+      const pctGG = stats.gg;
+      const pctNG = stats.ng;
       const migliore = pctGG > pctNG ? 'GG' : 'NG';
       const pctMigliore = Math.max(pctGG, pctNG);
-
       return {
         giocata: migliore,
         label: migliore === 'GG' ? 'Goal-Goal' : 'No Goal',
@@ -1578,6 +1573,14 @@
     window.filtraCampionatiEsclusi = filtraCampionatiEsclusi;
     window.calcolaGG_NG = calcolaGG_NG;
     window.loadScrapedData = loadScrapedData;
+
+    // Nuove funzioni esposte (per eventuali moduli esterni)
+    window.profiloSquadra = profiloSquadra;
+    window.calcolaDcOverSquadra = calcolaDcOverSquadra;
+    window.calcolaDcUnderSquadra = calcolaDcUnderSquadra;
+    window.calcolaDcMgTotSquadra = calcolaDcMgTotSquadra;
+    window.calcolaMgCasaOspiteSquadra = calcolaMgCasaOspiteSquadra;
+    window.get12Under45Media = get12Under45Media;
 
     console.log('✅ Funzioni globali esposte per i moduli esterni');
 
@@ -2027,7 +2030,6 @@
     }
 
     console.log('🚀 Avvio GesssAI-Pro');
-
     console.log('ℹ️ Caricamento dati delegato al componente App (singleton)');
 
     try {
