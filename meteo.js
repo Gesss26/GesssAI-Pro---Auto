@@ -2,6 +2,7 @@
 // METEO.JS - DATI METEO E COORDINATE PER GesssAI-Pro
 // Aggiornato con tutte le squadre dal file GesssAI_Input.xlsx
 // ✅ FIX v3: range date corretto (UTC) + coda rate-limit + deduplicazione
+// ✅ FIX v4: aggiunta variante senza apostrofo 's-Hertogenbosch + Novara
 // ============================================================
 
 // ============================================================
@@ -661,7 +662,7 @@ const TEAM_CITY_MAP = {
   'Cambuur': 'Leeuwarden',
   'De Graafschap': 'Doetinchem',
   'Excelsior': 'Rotterdam',
-  'FC Den Bosch': 's-Hertogenbosch',
+  'FC Den Bosch': '\'s-Hertogenbosch',
   'FC Dordrecht': 'Dordrecht',
   'FC Eindhoven': 'Eindhoven',
   'FC Emmen': 'Emmen',
@@ -1070,6 +1071,7 @@ const COORDS = {
   'Carrara': { lat: 44.0798, lon: 10.0998 },
   'Bolzano': { lat: 46.4980, lon: 11.3548 },
   'Vercelli': { lat: 45.3211, lon: 8.4197 },
+  'Novara': { lat: 45.4469, lon: 8.6212 },
   'Busto Arsizio': { lat: 45.6109, lon: 8.8499 },
   'Albino': { lat: 45.7630, lon: 9.7930 },
   'Gorgonzola': { lat: 45.5300, lon: 9.4100 },
@@ -1178,6 +1180,7 @@ const COORDS = {
   'Sittard': { lat: 50.9983, lon: 5.8694 },
   'Volendam': { lat: 52.4950, lon: 5.0700 },
   '\'s-Hertogenbosch': { lat: 51.6978, lon: 5.3037 },
+  's-Hertogenbosch':   { lat: 51.6978, lon: 5.3037 },
   'Doetinchem': { lat: 51.9653, lon: 6.2938 },
   'Velsen': { lat: 52.4600, lon: 4.6300 },
   'Helmond': { lat: 51.4814, lon: 5.6538 },
