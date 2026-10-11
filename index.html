@@ -1154,7 +1154,7 @@
     /**
      * Calcola la % di una giocata.
      */
-    const getGiocataPct = (giocata, stats, homeMG, awayMG, mgTot) => {
+        const getGiocataPct = (giocata, stats, homeMG, awayMG, mgTot) => {
       if (!stats || stats.error) return 0;
 
       const { homeStats, awayStats } = stats;
@@ -1171,9 +1171,9 @@
       if (giocata === 'X') return Math.round(media(homeStats.pctPareggi, awayStats.pctPareggi));
       if (giocata === '2') return Math.round(awayStats.pctVittorie);
 
-      // DOPPIA CHANCE — logica corretta
-      if (giocata === '1X') return Math.round(homeStats.pct1X);   // ⭐ Solo Como
-      if (giocata === 'X2') return Math.round(awayStats.pctX2);   // ⭐ Solo Roma
+      // DC
+      if (giocata === '1X') return Math.round(homeStats.pct1X);
+      if (giocata === 'X2') return Math.round(awayStats.pctX2);
       if (giocata === '12') return Math.round(media(homeStats.pctNoPareggio, awayStats.pctNoPareggio));
 
       // OVER / UNDER
@@ -1186,16 +1186,13 @@
       if (giocata === 'Under 3.5') return Math.round(media(homeStats.pctUnder35, awayStats.pctUnder35));
       if (giocata === 'Under 4.5') return Math.round(media(homeStats.pctUnder45, awayStats.pctUnder45));
 
-      // MULTIGOL
+      // MULTIGOL (gol fatti dalla squadra) - media Como/Roma
       if (giocata === '0-2') return Math.round(media(homeStats.pctMG02, awayStats.pctMG02));
       if (giocata === '1-3') return Math.round(media(homeStats.pctMG13, awayStats.pctMG13));
-      if (giocata === '1-4') return Math.round(media(homeStats.pctMG14_Tot, awayStats.pctMG14_Tot));
-      if (giocata === '2-5') return Math.round(media(homeStats.pctMG25_Tot, awayStats.pctMG25_Tot));
+      if (giocata === '1-4') return Math.round(media(homeStats.pctMG14, awayStats.pctMG14));
+      if (giocata === '2-5') return Math.round(media(homeStats.pctMG25, awayStats.pctMG25));
 
-      // ============================================================
-      // COMBO DC + OVER — logica corretta
-      // 1X+X = solo Como | X2+X = solo Roma | 12+X = media
-      // ============================================================
+      // COMBO DC + OVER
       if (giocata === '1X+O1.5') return Math.round(homeStats.combo1X_over15);
       if (giocata === '1X+O2.5') return Math.round(homeStats.combo1X_over25);
       if (giocata === '1X+O3.5') return Math.round(homeStats.combo1X_over35);
@@ -1211,9 +1208,7 @@
       if (giocata === '12+O3.5') return Math.round(media(homeStats.combo12_over35, awayStats.combo12_over35));
       if (giocata === '12+O4.5') return Math.round(media(homeStats.combo12_over45, awayStats.combo12_over45));
 
-      // ============================================================
-      // COMBO DC + UNDER — logica corretta
-      // ============================================================
+      // COMBO DC + UNDER
       if (giocata === '1X+U1.5') return Math.round(homeStats.combo1X_under15);
       if (giocata === '1X+U2.5') return Math.round(homeStats.combo1X_under25);
       if (giocata === '1X+U3.5') return Math.round(homeStats.combo1X_under35);
@@ -1229,30 +1224,23 @@
       if (giocata === '12+U3.5') return Math.round(media(homeStats.combo12_under35, awayStats.combo12_under35));
       if (giocata === '12+U4.5') return Math.round(media(homeStats.combo12_under45, awayStats.combo12_under45));
 
-      // ============================================================
-      // COMBO DC + MULTIGOL — logica corretta
-      // Nota: nel codice attuale delle FAMIGLIE, le opzioni dc_multigol
-      // sono del tipo "1X+0-2" dove 0-2 e 1-3 e 1-4 mappano sullo stesso
-      // contatore combo*_mg14 (MG Tot 1-4), mentre 2-5 usa combo*_mg25.
-      // ============================================================
-      if (giocata === '1X+0-2') return Math.round(homeStats.combo1X_mg14);
-      if (giocata === '1X+1-3') return Math.round(homeStats.combo1X_mg14);
+      // COMBO DC + MULTIGOL (multigol sul TOTALE PARTITA)
+      if (giocata === '1X+0-2') return Math.round(homeStats.combo1X_mg02);
+      if (giocata === '1X+1-3') return Math.round(homeStats.combo1X_mg13);
       if (giocata === '1X+1-4') return Math.round(homeStats.combo1X_mg14);
       if (giocata === '1X+2-5') return Math.round(homeStats.combo1X_mg25);
 
-      if (giocata === 'X2+0-2') return Math.round(awayStats.comboX2_mg14);
-      if (giocata === 'X2+1-3') return Math.round(awayStats.comboX2_mg14);
+      if (giocata === 'X2+0-2') return Math.round(awayStats.comboX2_mg02);
+      if (giocata === 'X2+1-3') return Math.round(awayStats.comboX2_mg13);
       if (giocata === 'X2+1-4') return Math.round(awayStats.comboX2_mg14);
       if (giocata === 'X2+2-5') return Math.round(awayStats.comboX2_mg25);
 
-      if (giocata === '12+0-2') return Math.round(media(homeStats.combo12_mg14, awayStats.combo12_mg14));
-      if (giocata === '12+1-3') return Math.round(media(homeStats.combo12_mg14, awayStats.combo12_mg14));
+      if (giocata === '12+0-2') return Math.round(media(homeStats.combo12_mg02, awayStats.combo12_mg02));
+      if (giocata === '12+1-3') return Math.round(media(homeStats.combo12_mg13, awayStats.combo12_mg13));
       if (giocata === '12+1-4') return Math.round(media(homeStats.combo12_mg14, awayStats.combo12_mg14));
       if (giocata === '12+2-5') return Math.round(media(homeStats.combo12_mg25, awayStats.combo12_mg25));
 
-      // ============================================================
-      // MG CASA + OSPITE — probabilità congiunta
-      // ============================================================
+      // ⭐ MG CASA + OSPITE — media delle due percentuali
       if (giocata.includes('+') && !giocata.includes('X') && !giocata.includes('O') && !giocata.includes('U')) {
         const parts = giocata.split('+');
         if (parts.length === 2) {
@@ -1260,12 +1248,14 @@
             if (range === '0-1') return whichStats.pctMG01;
             if (range === '0-2') return whichStats.pctMG02;
             if (range === '1-3') return whichStats.pctMG13;
+            if (range === '1-4') return whichStats.pctMG14;
             if (range === '2-5') return whichStats.pctMG25;
             return 0;
           };
           const pctCasa = getMGPct(parts[0], homeStats);
           const pctOspite = getMGPct(parts[1], awayStats);
-          return Math.round((pctCasa * pctOspite) / 100);
+          // ⭐ MEDIA, non probabilità congiunta
+          return Math.round((pctCasa + pctOspite) / 2);
         }
       }
 
