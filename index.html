@@ -276,21 +276,8 @@
   @media (max-width: 768px) { .stats-two-col { grid-template-columns: 1fr; } }
   .stats-placeholder { text-align: center; padding: 40px; color: var(--text-muted); font-size: 16px; }
 
-  .ai-analysis-box .weather-display { background: var(--card); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; border: 1px solid var(--border); }
-  .ai-analysis-box .weather-display .weather-main { display: flex; align-items: center; gap: 12px; }
-  .ai-analysis-box .weather-display .weather-icon { font-size: 32px; }
-  .ai-analysis-box .weather-display .weather-temp { font-size: 24px; font-weight: bold; color: var(--accent); }
-  .ai-analysis-box .weather-display .weather-desc { font-size: 13px; color: var(--text-muted); }
-  .ai-analysis-box .weather-display .weather-details { display: flex; gap: 16px; font-size: 12px; color: var(--text-muted); }
-  @media (max-width: 768px) {
-    .ai-analysis-box .weather-display { flex-direction: column; align-items: flex-start; }
-    .ai-analysis-box .weather-display .weather-details { flex-wrap: wrap; gap: 8px; }
-  }
-
   .ai-analysis-loading { text-align: center; padding: 20px; color: var(--text-muted); font-size: 14px; }
   .ai-analysis-error { background: var(--surface); padding: 14px 16px; border-radius: 8px; margin-top: 16px; border-left: 4px solid var(--lose); text-align: center; }
-  .ai-analysis-error .btn-go-key { margin-top: 8px; background: var(--accent); border: none; padding: 6px 16px; border-radius: 6px; color: #000; font-weight: bold; cursor: pointer; }
-  .ai-analysis-error .btn-go-key:hover { background: var(--accent2); }
 
   .freq-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -8px; padding: 0 8px; }
   .freq-table { width: 100%; min-width: 400px; border-collapse: collapse; font-size: 16px; }
@@ -298,38 +285,19 @@
   .freq-table td { padding: 10px 12px; text-align: center; border-bottom: 1px solid var(--border); font-size: 16px; }
   .freq-table td:first-child { font-size: 17px; font-weight: bold; color: var(--accent); }
   .freq-table td:nth-child(2) { font-size: 22px; font-weight: bold; }
-  .freq-table td:nth-child(3) { font-size: 17px; font-weight: bold; }
-  .freq-table td:nth-child(4) { font-size: 17px; font-weight: bold; }
-  .freq-table td:nth-child(4) .form-bar { height: 8px; width: 60px; }
-  .freq-result-badge { display: inline-block; padding: 5px 14px; border-radius: 14px; font-size: 14px; font-weight: bold; }
-  .freq-result-badge.win { background: var(--win); color: #000; }
-  .freq-result-badge.draw { background: var(--draw); color: #000; }
-  .freq-result-badge.loss { background: var(--lose); color: #fff; }
-  .card:has(.freq-table) h4, .card:has(.freq-table-wrap) h4 { font-size: 18px !important; }
 
   @media (max-width: 768px) {
     .freq-table { font-size: 14px; min-width: 350px; }
-    .freq-table th { font-size: 12px; padding: 6px 6px; }
-    .freq-table td { font-size: 14px; padding: 6px 6px; }
-    .freq-table td:first-child { font-size: 15px; }
-    .freq-table td:nth-child(2) { font-size: 19px; }
-    .freq-table td:nth-child(3) { font-size: 15px; }
-    .freq-table td:nth-child(4) { font-size: 15px; }
-    .freq-table td:nth-child(4) .form-bar { height: 6px; width: 40px; }
+    .freq-table th, .freq-table td { padding: 6px 6px; font-size: 14px; }
   }
   @media (max-width: 480px) {
     .freq-table { font-size: 12px; min-width: 280px; }
-    .freq-table th { font-size: 10px; padding: 4px 4px; }
-    .freq-table td { font-size: 12px; padding: 4px 4px; }
-    .freq-table td:first-child { font-size: 13px; }
-    .freq-table td:nth-child(2) { font-size: 16px; }
-    .freq-table td:nth-child(3) { font-size: 13px; }
-    .freq-table td:nth-child(4) { font-size: 13px; }
-    .freq-table td:nth-child(4) .form-bar { height: 5px; width: 30px; }
+    .freq-table th, .freq-table td { padding: 4px 4px; font-size: 12px; }
   }
 
   .intervalli-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 8px; }
   .interval-item { background: var(--surface); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
+
   .weather-impact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 8px; }
   .weather-stat { background: var(--surface); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
   .weather-stat .weather-icon { font-size: 28px; }
@@ -338,25 +306,12 @@
   .weather-stat .weather-count { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
 
   .home-widget { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 20px; border: 2px solid var(--accent); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
-  .home-widget .day-selector { display: flex; gap: 4px; background: var(--surface); border-radius: 8px; padding: 3px; }
-  .home-widget .day-selector button { padding: 4px 12px; border: none; background: transparent; color: var(--text-muted); border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
-  .home-widget .day-selector button.active { background: var(--accent); color: #000; font-weight: bold; }
-  .home-widget .day-selector button:hover:not(.active) { color: var(--text); }
-
-  .top-pick { animation: slideIn 0.3s ease-out; background: var(--surface); padding: 12px 16px; border-radius: 8px; margin: 12px 0; border-left: 4px solid var(--accent); }
-  @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-  .giocata-item { padding: 8px 12px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; border-radius: 6px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .giocata-item:hover { background: var(--surface); }
 
   .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
   .theme-card { padding: 16px; border-radius: 10px; cursor: pointer; text-align: center; border: 2px solid var(--border); transition: all 0.2s; }
   .theme-card:hover { transform: translateY(-2px); }
   .theme-card.active { border-color: var(--accent); box-shadow: 0 0 12px var(--accent); }
   .theme-name { font-weight: bold; margin-bottom: 6px; }
-
-  .champ-list { margin-top: 14px; }
-  .champ-item { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 12px; border-radius: 8px; margin-bottom: 8px; }
 
   .tabs-sub { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
   .tabs-sub button { padding: 8px 16px; background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 13px; }
@@ -414,46 +369,16 @@
 
   .analisi-compact { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
   .analisi-compact .card { padding: 12px; margin-bottom: 0; height: auto; min-height: auto; }
-  .analisi-compact .card h4 { font-size: 13px; margin-bottom: 4px; }
-  .analisi-compact .freq-table-wrap { margin: 0; padding: 0; }
-  .analisi-compact .freq-table { font-size: 13px; min-width: auto; }
-  .analisi-compact .freq-table th, .analisi-compact .freq-table td { padding: 4px 6px; font-size: 12px; }
-  .analisi-compact .freq-table td:first-child { font-size: 13px; }
-  .analisi-compact .freq-table td:nth-child(2) { font-size: 16px; }
-  .analisi-compact .form-bar { height: 4px; }
   @media (max-width: 768px) { .analisi-compact { grid-template-columns: 1fr; } }
-  .analisi-compact .weather-impact-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
-  .analisi-compact .weather-stat { padding: 8px; }
-  .analisi-compact .weather-stat .weather-icon { font-size: 20px; }
-  .analisi-compact .weather-stat .weather-label { font-size: 10px; }
-  .analisi-compact .weather-stat .weather-pct { font-size: 10px; }
 
   .citta-meteo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin-top: 8px; max-height: 300px; overflow-y: auto; padding-right: 8px; }
   .citta-meteo-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: var(--surface); border-radius: 6px; border: 1px solid var(--border); font-size: 13px; }
-  .citta-meteo-item .citta-nome { font-weight: bold; color: var(--text); }
-  .citta-meteo-item .citta-squadre { font-size: 11px; color: var(--text-muted); }
-  .citta-meteo-item .citta-weather { color: var(--accent); }
 
   .flag-icon { display: inline-block; vertical-align: middle; margin-right: 6px; width: 20px; height: 15px; border-radius: 2px; object-fit: cover; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
-  .campionato-con-bandiera { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 
   .file-drop-area { border: 2px dashed var(--border); border-radius: 12px; padding: 30px 20px; text-align: center; cursor: pointer; transition: all 0.3s; background: var(--surface); margin-bottom: 16px; }
   .file-drop-area:hover { border-color: var(--accent); background: var(--card); }
   .file-drop-area.dragging { border-color: var(--accent); background: rgba(243, 156, 18, 0.1); }
-  .column-mapping { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
-  .column-mapping .mapping-item { display: flex; align-items: center; gap: 8px; }
-  .column-mapping .mapping-item label { min-width: 120px; font-size: 13px; }
-  .column-mapping .mapping-item select { flex: 1; }
-  .file-preview { max-height: 300px; overflow-y: auto; margin-top: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
-  .file-preview table { width: 100%; font-size: 12px; border-collapse: collapse; }
-  .file-preview th { position: sticky; top: 0; background: var(--card); border-bottom: 2px solid var(--border); padding: 8px 10px; text-align: left; font-weight: 600; }
-  .file-preview td, .file-preview th { padding: 6px 10px; border-bottom: 1px solid var(--border); }
-  .file-preview tr:hover td { background: var(--card); }
-  @media (max-width: 768px) {
-    .column-mapping { grid-template-columns: 1fr; }
-    .column-mapping .mapping-item { flex-wrap: wrap; }
-    .column-mapping .mapping-item label { min-width: 100%; }
-  }
 
   .giocate-selector-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
   @media (max-width: 1024px) { .giocate-selector-grid { grid-template-columns: 1fr 1fr; } }
@@ -464,25 +389,21 @@
   .giocate-category .category-title { font-size: 13px; font-weight: bold; color: var(--text); display: flex; align-items: center; gap: 8px; }
   .giocate-category .category-title .icon { font-size: 18px; }
   .giocate-category .category-title .badge { font-size: 10px; background: var(--card); padding: 1px 8px; border-radius: 10px; color: var(--text-muted); margin-left: auto; }
-  .giocate-category .category-sub { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
-  .giocate-category .category-preview { font-size: 11px; color: var(--accent); margin-top: 6px; padding: 4px 8px; background: var(--card); border-radius: 4px; display: inline-block; }
 
   .selected-count { font-size: 13px; color: var(--text-muted); padding: 6px 12px; background: var(--surface); border-radius: 6px; border: 1px solid var(--border); }
   .selected-count .count-num { font-weight: bold; color: var(--accent); }
 
   .phone-simulator { background: #1a1a2e; border-radius: 40px; padding: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 0 0 2px #333; max-width: 420px; margin: 0 auto; position: relative; }
   .phone-simulator .phone-notch { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); width: 120px; height: 24px; background: #1a1a2e; border-radius: 0 0 12px 12px; z-index: 10; display: flex; align-items: center; justify-content: center; gap: 8px; }
-  .phone-simulator .phone-notch .notch-camera { width: 8px; height: 8px; background: #2a2a4e; border-radius: 50%; box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5); }
+  .phone-simulator .phone-notch .notch-camera { width: 8px; height: 8px; background: #2a2a4e; border-radius: 50%; }
   .phone-simulator .phone-notch .notch-speaker { width: 40px; height: 4px; background: #2a2a4e; border-radius: 2px; }
   .phone-simulator .phone-screen { background: var(--bg); border-radius: 28px; overflow: hidden; height: 780px; max-height: 80vh; position: relative; }
   .phone-simulator .phone-screen .phone-scroll { height: 100%; overflow-y: auto; padding: 0 4px; }
   .phone-simulator .phone-screen .phone-scroll::-webkit-scrollbar { width: 4px; }
-  .phone-simulator .phone-screen .phone-scroll::-webkit-scrollbar-track { background: transparent; }
   .phone-simulator .phone-screen .phone-scroll::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
   .phone-simulator .phone-home-indicator { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 120px; height: 4px; background: rgba(255, 255, 255, 0.3); border-radius: 2px; }
   @media (max-width: 500px) {
     .phone-simulator { border-radius: 24px; padding: 10px; max-width: 100%; }
-    .phone-simulator .phone-notch { top: 10px; width: 80px; height: 18px; }
     .phone-simulator .phone-screen { border-radius: 18px; height: 600px; }
   }
 
@@ -492,27 +413,10 @@
     .header .header-left { position: static; }
     .clock { position: static; width: 100%; text-align: center; margin-top: 8px; }
     .stats-two-col { grid-template-columns: 1fr; }
-    .home-widget .day-selector { flex-direction: row; flex-wrap: wrap; }
-    .giocata-item { flex-direction: column; align-items: stretch; text-align: center; }
-    .heatmap-detail-modal { padding: 16px; margin: 10px; max-height: 90vh; }
-    .ai-analysis-box .pronostico-mini { grid-template-columns: 1fr 1fr; }
-    .freq-table { min-width: 280px; font-size: 11px; }
-    .freq-table th, .freq-table td { padding: 4px 3px; font-size: 10px; }
-    .affidabilita-grid { grid-template-columns: 1fr 1fr; }
-    .intervalli-grid { grid-template-columns: 1fr 1fr; }
-    .weather-impact-grid { grid-template-columns: 1fr 1fr; }
-    .ai-analysis-box .consigli-grid { grid-template-columns: 1fr; }
-    .ai-result .consigli-grid { grid-template-columns: 1fr; }
     .standings-table { min-width: 400px; font-size: 11px; }
   }
   @media (max-width: 480px) {
-    .affidabilita-grid { grid-template-columns: 1fr; }
-    .intervalli-grid { grid-template-columns: 1fr; }
-    .weather-impact-grid { grid-template-columns: 1fr; }
-    .ai-analysis-box .pronostico-mini { grid-template-columns: 1fr; }
-    .freq-table { min-width: 220px; font-size: 10px; }
     .standings-table { min-width: 300px; font-size: 10px; }
-    .standings-table th, .standings-table td { padding: 3px 2px; }
     .match-tab .score-badge { font-size: 14px; padding: 1px 8px; }
     .team-name { font-size: 16px; }
     .detail-stat-box .value { font-size: 16px; }
@@ -526,59 +430,30 @@
   .heatmap-pct-green { color: #6fcf97 !important; font-weight: bold; }
   .heatmap-pct-white { color: #8b949e !important; font-weight: bold; }
   .heatmap-pct-red { color: #eb5757 !important; font-weight: bold; }
-  .heatmap-bg-bomb { background: rgba(243, 156, 18, 0.3) !important; }
-  .heatmap-bg-green { background: rgba(111, 207, 151, 0.2) !important; }
-  .heatmap-bg-white { background: rgba(139, 148, 158, 0.15) !important; }
-  .heatmap-bg-red { background: rgba(235, 87, 87, 0.15) !important; }
-
-  .schedina-container .card { padding: 16px; }
-  .schedina-container .form-group { margin-bottom: 0; }
-  .schedina-container .form-group label { font-size: 12px; }
-  .schedina-container select, .schedina-container input { padding: 6px 10px; font-size: 13px; }
-  .schedina-container .btn { font-size: 11px; padding: 4px 12px; }
-
-  .stat-explanation-tooltip { cursor: help; border-bottom: 1px dashed var(--text-muted); }
-  .stat-explanation-tooltip:hover { color: var(--accent); border-bottom-color: var(--accent); }
 
   .giorni-filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
   .giorno-btn { padding: 8px 18px; border-radius: 8px; border: 2px solid var(--border); background: var(--surface); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; min-height: 38px; display: flex; align-items: center; justify-content: center; white-space: nowrap; flex: 0 0 auto; }
-  .giorno-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); }
   .giorno-btn.active { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 20px rgba(243, 156, 18, 0.3); }
-  .giorno-btn.inactive { background: var(--surface); color: var(--text); border-color: var(--border); }
 
   .champ-filters-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; width: 100%; }
   .champ-filters-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; }
   .champ-filter-btn { padding: 6px 8px; border-radius: 6px; border: 2px solid var(--border); background: var(--surface); color: var(--text-muted); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; min-height: 34px; display: flex; align-items: center; justify-content: center; width: 100%; overflow: hidden; text-overflow: ellipsis; }
-  .champ-filter-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); }
+  .champ-filter-btn:hover { transform: translateY(-1px); }
   .champ-filter-btn.active { border-color: var(--accent); color: #000; }
-  .champ-filter-btn.inactive { border-color: var(--border); background: var(--surface); color: var(--text-muted); }
   .champ-filter-btn .champ-color-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; flex-shrink: 0; }
   .champ-filter-btn .champ-name { font-size: 10px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; }
 
-  .champ-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 8px; justify-content: flex-start; }
-  .champ-actions .btn-sm { padding: 6px 14px; font-size: 11px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; transition: all 0.2s; min-height: 34px; display: flex; align-items: center; justify-content: center; gap: 4px; }
-  .champ-actions .btn-sm:hover { transform: translateY(-1px); }
-  .champ-actions .btn-select-all { background: var(--accent); color: #000; }
-  .champ-actions .btn-select-all:hover { background: var(--accent2); }
-  .champ-actions .btn-clear-all { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
-  .champ-actions .btn-clear-all:hover { background: var(--card); }
-  .champ-count-badge { font-size: 12px; color: var(--text-muted); padding: 4px 12px; background: var(--surface); border-radius: 6px; border: 1px solid var(--border); font-weight: 600; }
-
   @media (max-width: 1024px) { .champ-filters-grid { grid-template-columns: repeat(4, 1fr); } }
   @media (max-width: 768px) {
-    .giorno-btn { padding: 6px 14px; font-size: 12px; min-height: 34px; }
     .champ-filters-grid { grid-template-columns: repeat(3, 1fr); gap: 4px; }
     .champ-filter-btn { padding: 4px 6px; font-size: 10px; min-height: 30px; }
     .champ-filter-btn .champ-name { font-size: 9px; }
-    .champ-actions .btn-sm { padding: 4px 10px; font-size: 10px; min-height: 30px; }
   }
   @media (max-width: 480px) {
-    .giorno-btn { padding: 4px 10px; font-size: 11px; min-height: 30px; }
     .champ-filters-grid { grid-template-columns: repeat(2, 1fr); gap: 4px; }
     .champ-filter-btn { padding: 3px 6px; font-size: 9px; min-height: 26px; }
     .champ-filter-btn .champ-name { font-size: 8px; }
     .champ-filter-btn .champ-color-dot { width: 8px; height: 8px; margin-right: 4px; }
-    .champ-actions .btn-sm { padding: 3px 8px; font-size: 9px; min-height: 26px; }
   }
 </style>
 </head>
@@ -1127,27 +1002,27 @@
     const calcolaStatsSquadra = (games, team) => {
       const total = games.length;
 
-      const emptyResult = {
-        partite: 0,
-        vittorie: 0, pareggi: 0, sconfitte: 0,
-        pctVittorie: 0, pctPareggi: 0, pctSconfitte: 0, pctNoPareggio: 0,
-        pctOver15: 0, pctOver25: 0, pctOver35: 0, pctOver45: 0,
-        pctUnder15: 0, pctUnder25: 0, pctUnder35: 0, pctUnder45: 0,
-        pctGG: 0, pctNG: 0,
-        pctMG01: 0, pctMG02: 0, pctMG13: 0, pctMG25: 0,
-        pctMG14_Tot: 0, pctMG25_Tot: 0,
-        combo1X_over15: 0, combo1X_over25: 0, combo1X_over35: 0, combo1X_over45: 0,
-        combo1X_under15: 0, combo1X_under25: 0, combo1X_under35: 0, combo1X_under45: 0,
-        combo12_over15: 0, combo12_over25: 0, combo12_over35: 0, combo12_over45: 0,
-        combo12_under15: 0, combo12_under25: 0, combo12_under35: 0, combo12_under45: 0,
-        comboX2_over15: 0, comboX2_over25: 0, comboX2_over35: 0, comboX2_over45: 0,
-        comboX2_under15: 0, comboX2_under25: 0, comboX2_under35: 0, comboX2_under45: 0,
-        combo1X_mg14: 0, combo1X_mg25: 0,
-        combo12_mg14: 0, combo12_mg25: 0,
-        comboX2_mg14: 0, comboX2_mg25: 0,
-      };
-
-      if (total === 0) return emptyResult;
+      if (total === 0) {
+        return {
+          partite: 0,
+          vittorie: 0, pareggi: 0, sconfitte: 0,
+          pctVittorie: 0, pctPareggi: 0, pctSconfitte: 0, pctNoPareggio: 0,
+          pctOver15: 0, pctOver25: 0, pctOver35: 0, pctOver45: 0,
+          pctUnder15: 0, pctUnder25: 0, pctUnder35: 0, pctUnder45: 0,
+          pctGG: 0, pctNG: 0,
+          pctMG01: 0, pctMG02: 0, pctMG13: 0, pctMG25: 0,
+          pctMG14_Tot: 0, pctMG25_Tot: 0,
+          combo1X_over15: 0, combo1X_over25: 0, combo1X_over35: 0, combo1X_over45: 0,
+          combo1X_under15: 0, combo1X_under25: 0, combo1X_under35: 0, combo1X_under45: 0,
+          combo12_over15: 0, combo12_over25: 0, combo12_over35: 0, combo12_over45: 0,
+          combo12_under15: 0, combo12_under25: 0, combo12_under35: 0, combo12_under45: 0,
+          comboX2_over15: 0, comboX2_over25: 0, comboX2_over35: 0, comboX2_over45: 0,
+          comboX2_under15: 0, comboX2_under25: 0, comboX2_under35: 0, comboX2_under45: 0,
+          combo1X_mg14: 0, combo1X_mg25: 0,
+          combo12_mg14: 0, combo12_mg25: 0,
+          comboX2_mg14: 0, comboX2_mg25: 0,
+        };
+      }
 
       let vittorie = 0, pareggi = 0, sconfitte = 0;
       let over15 = 0, over25 = 0, over35 = 0, over45 = 0;
@@ -1155,7 +1030,6 @@
       let mg01 = 0, mg02 = 0, mg13 = 0, mg25 = 0;
       let mg14_tot = 0, mg25_tot = 0;
 
-      // Contatori combo
       let combo1X_over15 = 0, combo1X_over25 = 0, combo1X_over35 = 0, combo1X_over45 = 0;
       let combo1X_under15 = 0, combo1X_under25 = 0, combo1X_under35 = 0, combo1X_under45 = 0;
       let combo12_over15 = 0, combo12_over25 = 0, combo12_over35 = 0, combo12_over45 = 0;
@@ -1168,11 +1042,10 @@
 
       games.forEach(g => {
         const isHome = g.casa === team;
-        const tg = isHome ? g.golCasa : g.golOspite;   // gol fatti dalla squadra
-        const og = isHome ? g.golOspite : g.golCasa;   // gol subiti dalla squadra
-        const tot = g.golCasa + g.golOspite;           // totale gol partita
+        const tg = isHome ? g.golCasa : g.golOspite;
+        const og = isHome ? g.golOspite : g.golCasa;
+        const tot = g.golCasa + g.golOspite;
 
-        // Esito
         const isVittoria = tg > og;
         const isPareggio = tg === og;
         const isSconfitta = tg < og;
@@ -1181,7 +1054,6 @@
         else if (isPareggio) pareggi++;
         else sconfitte++;
 
-        // Over/Under sul totale partita
         const o15 = tot > 1.5;
         const o25 = tot > 2.5;
         const o35 = tot > 3.5;
@@ -1191,21 +1063,17 @@
         if (o35) over35++;
         if (o45) over45++;
 
-        // GG/NG
         const isGG = g.golCasa > 0 && g.golOspite > 0;
         if (isGG) gg++;
 
-        // Multigol sui gol fatti dalla squadra
         if (tg <= 1) mg01++;
         if (tg <= 2) mg02++;
         if (tg >= 1 && tg <= 3) mg13++;
         if (tg >= 2 && tg <= 5) mg25++;
 
-        // Multigol sul totale partita
         if (tot >= 1 && tot <= 4) mg14_tot++;
         if (tot >= 2 && tot <= 5) mg25_tot++;
 
-        // Combo (Opzione C: entrambe le condizioni vere)
         const is1X = isVittoria || isPareggio;
         const is12 = !isPareggio;
         const isX2 = isSconfitta || isPareggio;
@@ -1272,7 +1140,6 @@
         pctMG25: pct(mg25),
         pctMG14_Tot: pct(mg14_tot),
         pctMG25_Tot: pct(mg25_tot),
-        // Combo
         combo1X_over15: pct(combo1X_over15),
         combo1X_over25: pct(combo1X_over25),
         combo1X_over35: pct(combo1X_over35),
@@ -1370,7 +1237,6 @@
           '1-3': awayStats.pctMG13,
           '2-5': awayStats.pctMG25,
         },
-        // Multigol totale (media tra le due squadre)
         mgTot: {
           '1-4': media(homeStats.pctMG14_Tot, awayStats.pctMG14_Tot),
           '2-5': media(homeStats.pctMG25_Tot, awayStats.pctMG25_Tot),
@@ -1398,29 +1264,21 @@
 
       const media = (a, b) => (a + b) / 2;
 
-      // ============================================================
       // GG / NG
-      // ============================================================
       if (giocata === 'GG') return Math.round(media(homeStats.pctGG, awayStats.pctGG));
       if (giocata === 'NG') return Math.round(media(homeStats.pctNG, awayStats.pctNG));
 
-      // ============================================================
-      // FISSE (1, X, 2)
-      // ============================================================
+      // FISSE
       if (giocata === '1') return Math.round(homeStats.pctVittorie);
       if (giocata === 'X') return Math.round(media(homeStats.pctPareggi, awayStats.pctPareggi));
       if (giocata === '2') return Math.round(awayStats.pctVittorie);
 
-      // ============================================================
       // DOPPIA CHANCE
-      // ============================================================
       if (giocata === '1X') return Math.round(homeStats.pctVittorie + homeStats.pctPareggi);
       if (giocata === 'X2') return Math.round(awayStats.pctVittorie + awayStats.pctPareggi);
       if (giocata === '12') return Math.round(media(homeStats.pctNoPareggio, awayStats.pctNoPareggio));
 
-      // ============================================================
       // OVER / UNDER
-      // ============================================================
       if (giocata === 'Over 1.5') return Math.round(media(homeStats.pctOver15, awayStats.pctOver15));
       if (giocata === 'Over 2.5') return Math.round(media(homeStats.pctOver25, awayStats.pctOver25));
       if (giocata === 'Over 3.5') return Math.round(media(homeStats.pctOver35, awayStats.pctOver35));
@@ -1430,17 +1288,13 @@
       if (giocata === 'Under 3.5') return Math.round(media(homeStats.pctUnder35, awayStats.pctUnder35));
       if (giocata === 'Under 4.5') return Math.round(media(homeStats.pctUnder45, awayStats.pctUnder45));
 
-      // ============================================================
-      // MULTIGOL (opzioni: 0-2, 1-3, 1-4, 2-5)
-      // ============================================================
+      // MULTIGOL
       if (giocata === '0-2') return Math.round(media(homeStats.pctMG02, awayStats.pctMG02));
       if (giocata === '1-3') return Math.round(media(homeStats.pctMG13, awayStats.pctMG13));
       if (giocata === '1-4') return Math.round(media(homeStats.pctMG14_Tot, awayStats.pctMG14_Tot));
       if (giocata === '2-5') return Math.round(media(homeStats.pctMG25_Tot, awayStats.pctMG25_Tot));
 
-      // ============================================================
-      // COMBO DC + OVER (Opzione C: conta quando entrambe sono vere)
-      // ============================================================
+      // COMBO DC + OVER
       if (giocata === '1X+O1.5') return Math.round(media(homeStats.combo1X_over15, awayStats.combo1X_over15));
       if (giocata === '12+O1.5') return Math.round(media(homeStats.combo12_over15, awayStats.combo12_over15));
       if (giocata === 'X2+O1.5') return Math.round(media(homeStats.comboX2_over15, awayStats.comboX2_over15));
@@ -1454,9 +1308,7 @@
       if (giocata === '12+O4.5') return Math.round(media(homeStats.combo12_over45, awayStats.combo12_over45));
       if (giocata === 'X2+O4.5') return Math.round(media(homeStats.comboX2_over45, awayStats.comboX2_over45));
 
-      // ============================================================
-      // COMBO DC + UNDER (Opzione C)
-      // ============================================================
+      // COMBO DC + UNDER
       if (giocata === '1X+U1.5') return Math.round(media(homeStats.combo1X_under15, awayStats.combo1X_under15));
       if (giocata === '12+U1.5') return Math.round(media(homeStats.combo12_under15, awayStats.combo12_under15));
       if (giocata === 'X2+U1.5') return Math.round(media(homeStats.comboX2_under15, awayStats.comboX2_under15));
@@ -1470,9 +1322,7 @@
       if (giocata === '12+U4.5') return Math.round(media(homeStats.combo12_under45, awayStats.combo12_under45));
       if (giocata === 'X2+U4.5') return Math.round(media(homeStats.comboX2_under45, awayStats.comboX2_under45));
 
-      // ============================================================
-      // COMBO DC + MULTIGOL (Opzione C)
-      // ============================================================
+      // COMBO DC + MULTIGOL
       if (giocata === '1X+0-2') return Math.round(media(homeStats.combo1X_mg14, awayStats.combo1X_mg14));
       if (giocata === '12+0-2') return Math.round(media(homeStats.combo12_mg14, awayStats.combo12_mg14));
       if (giocata === 'X2+0-2') return Math.round(media(homeStats.comboX2_mg14, awayStats.comboX2_mg14));
@@ -1486,10 +1336,7 @@
       if (giocata === '12+2-5') return Math.round(media(homeStats.combo12_mg25, awayStats.combo12_mg25));
       if (giocata === 'X2+2-5') return Math.round(media(homeStats.comboX2_mg25, awayStats.comboX2_mg25));
 
-      // ============================================================
-      // MG CASA + OSPITE (Interpretazione 1: probabilità congiunta)
-      // pct = (pctMG_Casa * pctMG_Ospite) / 100
-      // ============================================================
+      // MG CASA + OSPITE (probabilità congiunta)
       if (giocata.includes('+') && !giocata.includes('X') && !giocata.includes('O') && !giocata.includes('U')) {
         const parts = giocata.split('+');
         if (parts.length === 2) {
@@ -1502,7 +1349,6 @@
           };
           const pctCasa = getMGPct(parts[0], homeStats);
           const pctOspite = getMGPct(parts[1], awayStats);
-          // Interpretazione 1: probabilità congiunta
           return Math.round((pctCasa * pctOspite) / 100);
         }
       }
@@ -1511,7 +1357,7 @@
     };
 
     /**
-     * Migliore giocata per famiglia (usato da Home, Schedina, Statistiche).
+     * Migliore giocata per famiglia.
      */
     const getBestBetForFamily = (familyId, stats, homeRange, awayRange, homeMG, awayMG, mgTot) => {
       if (!stats || stats.error) return null;
@@ -1615,7 +1461,7 @@
           const tg = isHome ? g.golCasa : g.golOspite;
           const og = isHome ? g.golOspite : g.golCasa;
           const tot = g.golCasa + g.golOspite;
-          const is12 = tg !== og;  // vittoria o sconfitta (non pareggio)
+          const is12 = tg !== og;
           const isUnder45 = tot < 4.5;
           if (is12 && isUnder45) count++;
         });
@@ -1625,6 +1471,34 @@
       const pctHome = calcPct(homeGames, homeTeam);
       const pctAway = calcPct(awayGames, awayTeam);
       return (pctHome + pctAway) / 2;
+    };
+
+    /**
+     * Calcola forma e statistiche per la classifica.
+     */
+    const calcFormAndStats = (matches, teamName) => {
+      const played = matches
+        .filter(m => m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName))
+        .sort((a, b) => parseDate(b.data, b.ora) - parseDate(a.data, a.ora))
+        .slice(0, 5);
+      let form = '', points = 0, golFatti = 0, golSubiti = 0;
+      played.forEach(m => {
+        const isHome = m.casa === teamName;
+        const tg = isHome ? m.golCasa : m.golOspite;
+        const og = isHome ? m.golOspite : m.golCasa;
+        golFatti += tg; golSubiti += og;
+        if (tg > og) { form += 'V'; points += 3; }
+        else if (tg === og) { form += 'P'; points += 1; }
+        else form += 'S';
+      });
+      return {
+        form: form || '-----',
+        pct: played.length ? Math.round((points / (played.length * 3)) * 100) : 50,
+        golFatti, golSubiti,
+        mediaGolFatti: played.length ? (golFatti / played.length).toFixed(1) : 0,
+        mediaGolSubiti: played.length ? (golSubiti / played.length).toFixed(1) : 0,
+        partite: played.length
+      };
     };
 
     // ============================================================
@@ -1707,37 +1581,6 @@
     window.get12Under45 = get12Under45;
 
     console.log('✅ Funzioni globali esposte per i moduli esterni (v8 - LOGICA MEDIA DUE SQUADRE)');
-    // ============================================================
-    // CALC FORM AND STATS (forma ultime 5 partite)
-    // ============================================================
-
-    const calcFormAndStats = (matches, teamName) => {
-      const played = matches
-        .filter(m => m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName))
-        .sort((a, b) => parseDate(b.data, b.ora) - parseDate(a.data, a.ora))
-        .slice(0, 5);
-      let form = '', points = 0, golFatti = 0, golSubiti = 0;
-      played.forEach(m => {
-        const isHome = m.casa === teamName;
-        const tg = isHome ? m.golCasa : m.golOspite;
-        const og = isHome ? m.golOspite : m.golCasa;
-        golFatti += tg; golSubiti += og;
-        if (tg > og) { form += 'V'; points += 3; }
-        else if (tg === og) { form += 'P'; points += 1; }
-        else form += 'S';
-      });
-      return {
-        form: form || '-----',
-        pct: played.length ? Math.round((points / (played.length * 3)) * 100) : 50,
-        golFatti, golSubiti,
-        mediaGolFatti: played.length ? (golFatti / played.length).toFixed(1) : 0,
-        mediaGolSubiti: played.length ? (golSubiti / played.length).toFixed(1) : 0,
-        partite: played.length
-      };
-    };
-
-    window.calcFormAndStats = calcFormAndStats;
-
     // ============================================================
     // LOAD/SAVE STATE
     // ============================================================
@@ -1836,6 +1679,7 @@
         }
       }, []);
 
+      // ⭐ CARICAMENTO DATI EXCEL
       useEffect(() => {
         try {
           const loadData = async () => {
@@ -1853,6 +1697,33 @@
           setErrorMessage(e.message);
         }
       }, []);
+
+      // ⭐⭐⭐ CARICA METEO PER LA PARTITA SELEZIONATA ⭐⭐⭐
+      useEffect(() => {
+        if (!selectedMatchId) return;
+        const selectedMatch = matches.find(m => m.id === selectedMatchId);
+        if (!selectedMatch) return;
+
+        const weatherKey = `${selectedMatch.campionato}_${selectedMatch.data}`;
+
+        if (weatherCache[weatherKey]) return;
+
+        if (typeof window.fetchWeatherForMatch === 'function') {
+          console.log(`🌤️ Richiesta meteo per ${selectedMatch.casa} vs ${selectedMatch.ospiti}`);
+          window.fetchWeatherForMatch(selectedMatch).then(weather => {
+            if (weather) {
+              console.log(`✅ Meteo ricevuto per ${selectedMatch.casa}:`, weather);
+              setWeatherCache(prev => ({ ...prev, [weatherKey]: weather }));
+            } else {
+              console.warn(`⚠️ Meteo non disponibile per ${selectedMatch.casa}`);
+            }
+          }).catch(e => {
+            console.warn('❌ Errore meteo:', e);
+          });
+        } else {
+          console.warn('⚠️ fetchWeatherForMatch non disponibile');
+        }
+      }, [selectedMatchId, matches]);
 
       const updateDataFromScraper = (data) => {
         if (data && data.matches && data.matches.length > 0) {
