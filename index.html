@@ -76,31 +76,13 @@
     box-shadow: 0 4px 30px rgba(243, 156, 18, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
     letter-spacing: 2px; text-transform: uppercase; position: relative; overflow: hidden;
   }
-  #splashscreen .splash-btn::before {
-    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    transform: rotate(45deg); transition: all 0.5s ease;
-  }
   #splashscreen .splash-btn:hover { transform: scale(1.05); box-shadow: 0 6px 40px rgba(243, 156, 18, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.3); }
-  #splashscreen .splash-btn:hover::before { left: 100%; }
-  #splashscreen .splash-btn:active { transform: scale(0.95); }
   #splashscreen .splash-sub { margin-top: 20px; color: #8b949e; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; font-weight: 300; }
   #splashscreen .loader { margin-top: 25px; display: flex; gap: 8px; align-items: center; justify-content: center; }
   #splashscreen .loader .dot { width: 10px; height: 10px; border-radius: 50%; background: #f39c12; animation: pulse 1.4s ease-in-out infinite; }
   #splashscreen .loader .dot:nth-child(2) { animation-delay: 0.2s; }
   #splashscreen .loader .dot:nth-child(3) { animation-delay: 0.4s; }
   @keyframes pulse { 0%, 80%, 100% { transform: scale(0.4); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }
-  @media (max-width: 768px) {
-    #splashscreen .splash-logo { max-width: 90vw; max-height: 50vh; margin-bottom: 30px; }
-    #splashscreen .splash-btn { padding: 14px 35px; font-size: 17px; }
-    #splashscreen .splash-sub { font-size: 11px; }
-    #splashscreen .loader .dot { width: 8px; height: 8px; }
-  }
-  @media (max-width: 480px) {
-    #splashscreen .splash-logo { max-width: 95vw; max-height: 40vh; margin-bottom: 25px; }
-    #splashscreen .splash-btn { padding: 12px 28px; font-size: 15px; letter-spacing: 1px; }
-    #splashscreen .splash-sub { font-size: 10px; letter-spacing: 2px; }
-  }
 
   #root { display: none; min-height: 100vh; background: var(--bg); }
   #root.visible { display: block !important; }
@@ -112,42 +94,22 @@
   #error-container .error-msg { color: #8b949e; max-width: 600px; margin: 0 auto 20px; line-height: 1.6; }
   #error-container .error-details { background: #1a2028; padding: 16px 20px; border-radius: 8px; border: 1px solid #30363d; max-width: 700px; margin: 0 auto 20px; text-align: left; font-size: 13px; color: #8b949e; overflow: auto; max-height: 300px; }
   #error-container .error-details code { color: #e6edf3; font-family: monospace; font-size: 12px; word-break: break-all; }
-  #error-container .btn-retry { padding: 12px 30px; background: #f39c12; color: #000; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: all 0.3s; }
-  #error-container .btn-retry:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(243, 156, 18, 0.4); }
+  #error-container .btn-retry { padding: 12px 30px; background: #f39c12; color: #000; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
 
   .giocata-pct { display: inline-block; font-weight: bold; font-size: 14px; padding: 2px 10px; border-radius: 6px; color: #000 !important; }
-  .giocata-pct.flag-red { background: #eb5757; color: #000 !important; }
-  .giocata-pct.flag-white { background: #8b949e; color: #000 !important; }
-  .giocata-pct.flag-green { background: #6fcf97; color: #000 !important; }
-  .giocata-pct.flag-bomb { background: #f39c12; color: #000 !important; animation: bomb-glow 1s infinite alternate; box-shadow: 0 0 15px rgba(243, 156, 18, 0.4); }
-
-  .detail-stat-box { padding: 8px 12px; border-radius: 8px; text-align: center; border: 1px solid var(--border); background: var(--surface); transition: background 0.2s, transform 0.1s; min-width: 60px; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  .detail-stat-box:hover { transform: scale(1.02); }
-  .detail-stat-box .label { display: block; font-size: 14px; font-weight: 600; color: #ffff00; margin-bottom: 2px; }
-  .detail-stat-box .value { display: block; font-size: 20px; font-weight: bold; }
-  .detail-stat-box .bomb-icon { display: inline-block; font-size: 20px; animation: bomb-bounce 0.8s infinite ease-in-out; transform-origin: center; margin-left: 4px; }
-  .detail-stat-box.flag-red { background: #eb5757; }
-  .detail-stat-box.flag-red .value { color: #000; }
-  .detail-stat-box.flag-white { background: #8b949e; }
-  .detail-stat-box.flag-white .value { color: #000; }
-  .detail-stat-box.flag-green { background: #6fcf97; }
-  .detail-stat-box.flag-green .value { color: #000; }
-  .detail-stat-box.flag-bomb { background: #f39c12; animation: bomb-glow 1s infinite alternate; }
-  .detail-stat-box.flag-bomb .value { color: #000; }
+  .giocata-pct.flag-red { background: #eb5757; }
+  .giocata-pct.flag-white { background: #8b949e; }
+  .giocata-pct.flag-green { background: #6fcf97; }
+  .giocata-pct.flag-bomb { background: #f39c12; animation: bomb-glow 1s infinite alternate; }
 
   .xg-value { display: inline-block; padding: 2px 10px; border-radius: 6px; font-weight: bold; font-size: 13px; color: #000 !important; }
-  .xg-value.xg-red { background: #eb5757; color: #000 !important; }
-  .xg-value.xg-white { background: #8b949e; color: #000 !important; }
-  .xg-value.xg-blue { background: #3498db; color: #000 !important; }
+  .xg-value.xg-red { background: #eb5757; }
+  .xg-value.xg-white { background: #8b949e; }
+  .xg-value.xg-blue { background: #3498db; }
 
   @keyframes bomb-glow { 0% { box-shadow: 0 0 8px rgba(243, 156, 18, 0.4); } 50% { box-shadow: 0 0 25px rgba(243, 156, 18, 0.8); transform: scale(1.05); } 100% { box-shadow: 0 0 8px rgba(243, 156, 18, 0.4); } }
-  .bomb-icon { display: inline-block; font-size: 18px; margin-left: 4px; animation: bomb-bounce 0.8s infinite ease-in-out; transform-origin: center; }
+  .bomb-icon { display: inline-block; font-size: 18px; margin-left: 4px; animation: bomb-bounce 0.8s infinite ease-in-out; }
   @keyframes bomb-bounce { 0% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.3) rotate(10deg); } 100% { transform: scale(1) rotate(0deg); } }
-
-  .pct-rosso { color: var(--pct-rosso) !important; font-weight: bold; }
-  .pct-neutro { color: var(--pct-neutro) !important; font-weight: bold; }
-  .pct-verde { color: var(--pct-verde) !important; font-weight: bold; }
-  .pct-oro { color: var(--pct-oro) !important; font-weight: bold; text-shadow: 0 0 10px rgba(243, 156, 18, 0.3); }
 
   .multigol-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; color: #000; margin: 0 2px; }
   .multigol-badge.range-01 { background: #8b949e; }
@@ -156,10 +118,8 @@
   .multigol-badge.range-24 { background: #f39c12; }
   .multigol-badge.range-25 { background: #e67e22; }
   .multigol-badge.range-36 { background: #eb5757; }
-  .multigol-badge.range-default { background: var(--accent); }
 
   .header { background: var(--banner); padding: 16px 24px; border-bottom: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; gap: 16px; position: relative; }
-  .header .header-left { position: absolute; left: 24px; display: flex; align-items: center; gap: 16px; }
   .header .header-center { text-align: center; }
   .header .header-center .app-name { font-size: 28px; font-weight: bold; letter-spacing: 2px; }
   .header .header-center .app-name span { display: inline-block; }
@@ -169,8 +129,7 @@
   .clock-time { font-size: 16px; color: var(--accent); }
 
   .tabs-nav { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; }
-  .tabs-nav button { flex: 1; min-width: 120px; padding: 14px 12px; background: transparent; color: var(--text-muted); border: none; cursor: pointer; font-size: 14px; border-bottom: 3px solid transparent; transition: all 0.2s; font-weight: 600; white-space: nowrap; }
-  .tabs-nav button:hover { color: var(--text); background: var(--card); }
+  .tabs-nav button { flex: 1; min-width: 120px; padding: 14px 12px; background: transparent; color: var(--text-muted); border: none; cursor: pointer; font-size: 14px; border-bottom: 3px solid transparent; font-weight: 600; white-space: nowrap; }
   .tabs-nav button.active { color: var(--accent); border-bottom-color: var(--tab-active); background: var(--card); }
 
   .container { padding: 20px; max-width: 1400px; margin: 0 auto; }
@@ -179,14 +138,11 @@
   @media (max-width: 1024px) { .matches-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 768px) { .matches-grid { grid-template-columns: 1fr; } }
 
-  .match-tab { background: var(--card); border-radius: 12px; padding: 14px 16px; margin-bottom: 0; border: 1px solid var(--border); border-left-width: 6px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4); cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; position: relative; }
-  .match-tab:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6); }
+  .match-tab { background: var(--card); border-radius: 12px; padding: 14px 16px; border: 1px solid var(--border); border-left-width: 6px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4); cursor: pointer; position: relative; }
   .match-tab .score-badge { position: absolute; top: 10px; right: 12px; background: var(--accent); color: #000; font-weight: bold; font-size: 18px; padding: 2px 10px; border-radius: 20px; border: 2px solid var(--accent2); display: flex; align-items: center; gap: 6px; z-index: 10; }
-  .match-tab .score-badge .giocata-pct { font-size: 16px; padding: 0px 4px; background: transparent; }
-  .match-tab .score-badge .bomb-inline { font-size: 22px; animation: bomb-bounce 1s infinite ease-in-out; line-height: 1; display: inline-block; }
+  .match-tab .score-badge .bomb-inline { font-size: 22px; animation: bomb-bounce 1s infinite ease-in-out; display: inline-block; }
 
-  .match-tab-history { background: var(--card); border-radius: 12px; padding: 14px 16px; margin-bottom: 0; border: 1px solid var(--border); border-left-width: 6px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4); flex: 1; min-width: 300px; max-width: 420px; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
-  .match-tab-history:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6); }
+  .match-tab-history { background: var(--card); border-radius: 12px; padding: 14px 16px; border: 1px solid var(--border); border-left-width: 6px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4); flex: 1; min-width: 300px; max-width: 420px; cursor: pointer; }
   .match-tab-history .teams-row { display: flex; justify-content: space-around; align-items: center; padding: 4px 0; }
   .match-tab-history .score { font-size: 24px; font-weight: bold; padding: 0px 12px; }
   .match-tab-history .score-win { color: var(--win); }
@@ -198,14 +154,8 @@
   .team-name { font-weight: bold; font-size: 20px; text-align: center; }
   .vs { font-size: 18px; color: var(--accent); font-weight: bold; padding: 0 8px; flex-shrink: 0; }
 
-  .team-logo { transition: transform 0.2s ease; display: block; border-radius: 4px; }
-  .team-logo:hover { transform: scale(1.1); }
-  .team-logo-fallback { transition: transform 0.2s ease; display: flex !important; align-items: center; justify-content: center; margin: 0 auto; border-radius: 50%; background: var(--surface); border: 2px solid var(--border); font-weight: bold; color: var(--accent); flex-shrink: 0; line-height: 1; }
-  .team-logo-fallback:hover { transform: scale(1.1); }
-  .team .team-logo, .team .team-logo-fallback { margin-bottom: 2px; }
-
-  .standings-table .team-name-cell { display: flex !important; align-items: center !important; gap: 8px !important; }
-  .standings-table .team-name-cell .team-logo, .standings-table .team-name-cell .team-logo-fallback { flex-shrink: 0; }
+  .team-logo { display: block; border-radius: 4px; }
+  .team-logo-fallback { display: flex !important; align-items: center; justify-content: center; margin: 0 auto; border-radius: 50%; background: var(--surface); border: 2px solid var(--border); font-weight: bold; color: var(--accent); flex-shrink: 0; line-height: 1; }
 
   .form-row-compact { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; margin-bottom: 6px; }
   .form-block-compact { text-align: center; padding: 8px 6px; background: var(--surface); border-radius: 6px; }
@@ -217,9 +167,8 @@
   .form-square-S { background: var(--lose); }
   .form-pct-compact { font-size: 22px; font-weight: bold; color: var(--accent); line-height: 1; }
   .form-bar { height: 6px; background: var(--card); border-radius: 3px; overflow: hidden; margin-top: 4px; }
-  .form-bar-fill { height: 100%; background: linear-gradient(90deg, var(--win), var(--accent)); transition: width 0.3s; }
+  .form-bar-fill { height: 100%; background: linear-gradient(90deg, var(--win), var(--accent)); }
   .form-diff { text-align: center; font-size: 16px; font-weight: bold; color: var(--text-muted); margin-top: 6px; padding: 4px 8px; background: var(--surface); border-radius: 6px; }
-  .form-diff span { font-weight: bold; font-size: 18px; }
   .form-diff span.diff-alta { color: gold; }
   .form-diff span.diff-bassa { color: #ffffff; }
   .form-xg { display: flex; justify-content: space-around; align-items: center; padding: 4px 0; margin-top: 2px; font-size: 13px; color: var(--text-muted); background: var(--surface); border-radius: 6px; }
@@ -227,14 +176,12 @@
   .form-xg .xg-away { color: var(--accent); font-weight: bold; }
 
   .bet-row-vertical { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
-  .bet-item-vertical { background: var(--surface); padding: 4px 10px; border-radius: 6px; font-size: 12px; border: 1px solid var(--border); text-align: center; display: flex; justify-content: space-between; align-items: center; width: 100%; }
-  .bet-item-vertical .bet-label { font-size: 11px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.2px; color: var(--text-muted); flex: 0 0 auto; }
+  .bet-item-vertical { background: var(--surface); padding: 4px 10px; border-radius: 6px; font-size: 12px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; width: 100%; }
+  .bet-item-vertical .bet-label { font-size: 11px; text-transform: uppercase; font-weight: 600; color: var(--text-muted); }
   .bet-item-vertical .bet-value { font-weight: bold; font-size: 13px; color: var(--text); flex: 1; text-align: right; }
-  .bet-item-vertical .bet-value .giocata-pct { font-size: 14px; padding: 2px 8px; border-radius: 4px; display: inline-block; }
   .bet-item-vertical.bomb { border-color: var(--accent); background: var(--accent); animation: bomb-glow 1s infinite alternate; }
   .bet-item-vertical.bomb .bet-value { color: #000 !important; }
   .bet-item-vertical.bomb .bet-label { color: #000 !important; }
-  .bet-item-vertical .bet-value .combinata-detail { font-size: 10px; line-height: 1.2; text-align: right; color: var(--text-muted); }
 
   .tab-header { padding: 4px 12px; border-radius: 6px; margin-bottom: 6px; text-align: center; color: #fff; font-weight: bold; font-size: 13px; display: inline-block; }
   .match-info { text-align: center; color: var(--text-muted); font-size: 12px; margin-bottom: 6px; }
@@ -244,10 +191,8 @@
   .standings-table th { background: var(--surface); color: var(--text-muted); padding: 8px 6px; text-align: left; border-bottom: 2px solid var(--border); font-weight: 600; text-transform: uppercase; font-size: 11px; white-space: nowrap; }
   .standings-table td { padding: 6px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
   .standings-table tr.highlighted td { background: var(--accent) !important; color: #000 !important; font-weight: bold; }
-  .standings-table tr:hover td { background: var(--card); }
   .standings-table .pos { font-weight: bold; color: var(--accent); text-align: center; }
   .standings-table .team-name-cell { display: flex; align-items: center; gap: 8px; }
-  .standings-table .team-name-cell .team-name { font-weight: bold; font-size: 13px; }
   .standings-table .num { text-align: center; }
   .standings-table .points { font-weight: bold; color: var(--accent); text-align: center; }
 
@@ -255,61 +200,28 @@
   .sub-tabs button { padding: 8px 16px; background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 13px; }
   .sub-tabs button.active { background: var(--accent); color: #000; border-color: var(--accent); }
 
-  .detail-section { margin-bottom: 20px; }
-  .detail-section h4 { color: var(--accent); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; font-size: 16px; display: flex; align-items: center; gap: 8px; }
-  .detail-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
-  .detail-row .detail-stat-box { flex: 1; min-width: 60px; }
+  .stats-two-col { display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; }
+  @media (max-width: 768px) { .stats-two-col { grid-template-columns: 1fr; } }
+  .stats-placeholder { text-align: center; padding: 40px; color: var(--text-muted); font-size: 16px; }
 
   .opponents-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin: 8px 0; }
   .opponents-col { flex: 1; min-width: 120px; background: var(--surface); padding: 8px; border-radius: 6px; }
   .opponents-col .opp-item { font-size: 12px; padding: 2px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-  .opponents-col .opp-item:last-child { border-bottom: none; }
-  .opp-result-indicator { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-right: 4px; vertical-align: middle; }
+  .opp-result-indicator { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-right: 4px; }
   .opp-result-indicator.win { background: var(--win); }
   .opp-result-indicator.draw { background: var(--draw); }
   .opp-result-indicator.loss { background: var(--lose); }
   .opp-form-pct { font-size: 24px; font-weight: bold; color: var(--accent); text-align: center; margin-top: 6px; }
   .opp-form-bar { height: 8px; background: var(--card); border-radius: 4px; overflow: hidden; margin-top: 4px; }
-  .opp-form-bar-fill { height: 100%; background: linear-gradient(90deg, var(--win), var(--accent)); transition: width 0.3s; }
+  .opp-form-bar-fill { height: 100%; background: linear-gradient(90deg, var(--win), var(--accent)); }
 
-  .stats-two-col { display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; }
-  @media (max-width: 768px) { .stats-two-col { grid-template-columns: 1fr; } }
-  .stats-placeholder { text-align: center; padding: 40px; color: var(--text-muted); font-size: 16px; }
-
-  .ai-analysis-loading { text-align: center; padding: 20px; color: var(--text-muted); font-size: 14px; }
-  .ai-analysis-error { background: var(--surface); padding: 14px 16px; border-radius: 8px; margin-top: 16px; border-left: 4px solid var(--lose); text-align: center; }
-
-  .freq-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -8px; padding: 0 8px; }
+  .freq-table-wrap { overflow-x: auto; }
   .freq-table { width: 100%; min-width: 400px; border-collapse: collapse; font-size: 16px; }
-  .freq-table th { background: var(--surface); color: var(--text-muted); padding: 10px 12px; text-align: center; border-bottom: 2px solid var(--border); font-weight: 700; font-size: 14px; text-transform: uppercase; white-space: nowrap; }
-  .freq-table td { padding: 10px 12px; text-align: center; border-bottom: 1px solid var(--border); font-size: 16px; }
-  .freq-table td:first-child { font-size: 17px; font-weight: bold; color: var(--accent); }
-  .freq-table td:nth-child(2) { font-size: 22px; font-weight: bold; }
-
-  @media (max-width: 768px) {
-    .freq-table { font-size: 14px; min-width: 350px; }
-    .freq-table th, .freq-table td { padding: 6px 6px; font-size: 14px; }
-  }
-  @media (max-width: 480px) {
-    .freq-table { font-size: 12px; min-width: 280px; }
-    .freq-table th, .freq-table td { padding: 4px 4px; font-size: 12px; }
-  }
-
-  .intervalli-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 8px; }
-  .interval-item { background: var(--surface); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
-
-  .weather-impact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 8px; }
-  .weather-stat { background: var(--surface); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid var(--border); }
-  .weather-stat .weather-icon { font-size: 28px; }
-  .weather-stat .weather-label { font-size: 12px; font-weight: bold; text-transform: capitalize; margin: 4px 0; }
-  .weather-stat .weather-pct { font-size: 11px; margin: 4px 0; }
-  .weather-stat .weather-count { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
-
-  .home-widget { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 20px; border: 2px solid var(--accent); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+  .freq-table th { background: var(--surface); color: var(--text-muted); padding: 10px 12px; text-align: center; border-bottom: 2px solid var(--border); font-weight: 700; font-size: 14px; text-transform: uppercase; }
+  .freq-table td { padding: 10px 12px; text-align: center; border-bottom: 1px solid var(--border); }
 
   .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-  .theme-card { padding: 16px; border-radius: 10px; cursor: pointer; text-align: center; border: 2px solid var(--border); transition: all 0.2s; }
-  .theme-card:hover { transform: translateY(-2px); }
+  .theme-card { padding: 16px; border-radius: 10px; cursor: pointer; text-align: center; border: 2px solid var(--border); }
   .theme-card.active { border-color: var(--accent); box-shadow: 0 0 12px var(--accent); }
   .theme-name { font-weight: bold; margin-bottom: 6px; }
 
@@ -327,8 +239,7 @@
   input, select, textarea { width: 100%; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 8px; font-size: 14px; }
   input:focus, select:focus { outline: none; border-color: var(--accent); }
 
-  button.btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; background: var(--accent); color: #000; transition: all 0.2s; font-size: 14px; }
-  button.btn:hover { background: var(--accent2); transform: translateY(-1px); }
+  button.btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; background: var(--accent); color: #000; font-size: 14px; }
   button.btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
   button.btn-danger { background: var(--lose); color: #fff; }
 
@@ -341,104 +252,50 @@
   .heatmap-detail-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
   .heatmap-detail-modal { background: var(--card); border: 2px solid var(--accent); border-radius: 16px; padding: 24px; max-width: 700px; width: 100%; max-height: 80vh; overflow-y: auto; position: relative; }
   .heatmap-detail-modal .close-btn { position: absolute; top: 12px; right: 16px; background: none; border: none; color: var(--text); font-size: 24px; cursor: pointer; }
-  .heatmap-detail-modal .close-btn:hover { color: var(--lose); }
 
-  .home-btn-overlay { position: fixed; bottom: 30px; right: 30px; background: transparent !important; border: none !important; font-size: 48px !important; cursor: pointer !important; z-index: 9999 !important; color: var(--accent) !important; text-shadow: 0 0 20px rgba(243, 156, 18, 0.5) !important; transition: transform 0.3s ease !important; padding: 0 !important; line-height: 1 !important; width: auto !important; height: auto !important; }
-  .home-btn-overlay:hover { transform: scale(1.2) !important; }
+  .home-btn-overlay { position: fixed; bottom: 30px; right: 30px; background: transparent !important; border: none !important; font-size: 48px !important; cursor: pointer !important; z-index: 9999 !important; color: var(--accent) !important; padding: 0 !important; line-height: 1 !important; }
   @media (max-width: 768px) { .home-btn-overlay { font-size: 38px !important; bottom: 20px; right: 20px; } }
 
-  .weather-professionale { background: linear-gradient(135deg, var(--card), var(--surface)); border-radius: 16px; padding: 24px 28px; margin-bottom: 20px; border: 2px solid var(--border); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3); }
+  .weather-professionale { background: linear-gradient(135deg, var(--card), var(--surface)); border-radius: 16px; padding: 24px 28px; margin-bottom: 20px; border: 2px solid var(--border); }
   .weather-professionale .weather-header { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
-  .weather-professionale .weather-icon-main { font-size: 80px; line-height: 1; text-shadow: 0 0 40px rgba(243, 156, 18, 0.3); }
+  .weather-professionale .weather-icon-main { font-size: 80px; line-height: 1; }
   .weather-professionale .weather-info-main { flex: 1; min-width: 150px; }
-  .weather-professionale .weather-temp-main { font-size: 48px; font-weight: bold; color: var(--accent); line-height: 1.2; }
+  .weather-professionale .weather-temp-main { font-size: 48px; font-weight: bold; color: var(--accent); }
   .weather-professionale .weather-desc-main { font-size: 18px; color: var(--text); font-weight: 600; }
   .weather-professionale .weather-city-main { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
   .weather-professionale .weather-details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
   .weather-professionale .weather-detail-item { text-align: center; background: var(--surface); padding: 10px; border-radius: 10px; border: 1px solid var(--border); }
-  .weather-professionale .weather-detail-item .wd-icon { font-size: 24px; }
-  .weather-professionale .weather-detail-item .wd-value { font-size: 16px; font-weight: bold; color: var(--text); margin-top: 2px; }
-  .weather-professionale .weather-detail-item .wd-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; }
   .weather-professionale .weather-risk { margin-top: 14px; padding: 12px 16px; border-radius: 10px; background: var(--surface); border-left: 4px solid var(--accent); font-size: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .weather-professionale .weather-risk .risk-icon { font-size: 28px; }
-  .weather-professionale .weather-risk .risk-text { flex: 1; color: var(--text); }
-  .weather-professionale .weather-risk .risk-badge { padding: 4px 14px; border-radius: 20px; font-weight: bold; font-size: 12px; }
-  .risk-badge.low { background: var(--win); color: #000; }
-  .risk-badge.medium { background: var(--draw); color: #000; }
-  .risk-badge.high { background: var(--lose); color: #fff; }
+  .risk-badge.low { background: var(--win); color: #000; padding: 4px 14px; border-radius: 20px; font-weight: bold; font-size: 12px; }
+  .risk-badge.medium { background: var(--draw); color: #000; padding: 4px 14px; border-radius: 20px; font-weight: bold; font-size: 12px; }
+  .risk-badge.high { background: var(--lose); color: #fff; padding: 4px 14px; border-radius: 20px; font-weight: bold; font-size: 12px; }
 
   .analisi-compact { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
-  .analisi-compact .card { padding: 12px; margin-bottom: 0; height: auto; min-height: auto; }
   @media (max-width: 768px) { .analisi-compact { grid-template-columns: 1fr; } }
 
-  .citta-meteo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin-top: 8px; max-height: 300px; overflow-y: auto; padding-right: 8px; }
-  .citta-meteo-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: var(--surface); border-radius: 6px; border: 1px solid var(--border); font-size: 13px; }
-
-  .flag-icon { display: inline-block; vertical-align: middle; margin-right: 6px; width: 20px; height: 15px; border-radius: 2px; object-fit: cover; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); }
-
-  .file-drop-area { border: 2px dashed var(--border); border-radius: 12px; padding: 30px 20px; text-align: center; cursor: pointer; transition: all 0.3s; background: var(--surface); margin-bottom: 16px; }
-  .file-drop-area:hover { border-color: var(--accent); background: var(--card); }
-  .file-drop-area.dragging { border-color: var(--accent); background: rgba(243, 156, 18, 0.1); }
-
-  .giocate-selector-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-  @media (max-width: 1024px) { .giocate-selector-grid { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 600px) { .giocate-selector-grid { grid-template-columns: 1fr; } }
-  .giocate-category { background: var(--surface); border-radius: 10px; padding: 12px 14px; border: 2px solid var(--border); cursor: pointer; transition: all 0.2s; }
-  .giocate-category:hover { border-color: var(--accent); }
-  .giocate-category.active { border-color: var(--accent); background: rgba(243, 156, 18, 0.1); box-shadow: 0 0 20px rgba(243, 156, 18, 0.15); }
-  .giocate-category .category-title { font-size: 13px; font-weight: bold; color: var(--text); display: flex; align-items: center; gap: 8px; }
-  .giocate-category .category-title .icon { font-size: 18px; }
-  .giocate-category .category-title .badge { font-size: 10px; background: var(--card); padding: 1px 8px; border-radius: 10px; color: var(--text-muted); margin-left: auto; }
-
-  .selected-count { font-size: 13px; color: var(--text-muted); padding: 6px 12px; background: var(--surface); border-radius: 6px; border: 1px solid var(--border); }
-  .selected-count .count-num { font-weight: bold; color: var(--accent); }
-
-  .phone-simulator { background: #1a1a2e; border-radius: 40px; padding: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 0 0 2px #333; max-width: 420px; margin: 0 auto; position: relative; }
-  .phone-simulator .phone-notch { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); width: 120px; height: 24px; background: #1a1a2e; border-radius: 0 0 12px 12px; z-index: 10; display: flex; align-items: center; justify-content: center; gap: 8px; }
-  .phone-simulator .phone-notch .notch-camera { width: 8px; height: 8px; background: #2a2a4e; border-radius: 50%; }
-  .phone-simulator .phone-notch .notch-speaker { width: 40px; height: 4px; background: #2a2a4e; border-radius: 2px; }
+  .phone-simulator { background: #1a1a2e; border-radius: 40px; padding: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8); max-width: 420px; margin: 0 auto; position: relative; }
+  .phone-simulator .phone-notch { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); width: 120px; height: 24px; background: #1a1a2e; border-radius: 0 0 12px 12px; z-index: 10; }
   .phone-simulator .phone-screen { background: var(--bg); border-radius: 28px; overflow: hidden; height: 780px; max-height: 80vh; position: relative; }
   .phone-simulator .phone-screen .phone-scroll { height: 100%; overflow-y: auto; padding: 0 4px; }
-  .phone-simulator .phone-screen .phone-scroll::-webkit-scrollbar { width: 4px; }
-  .phone-simulator .phone-screen .phone-scroll::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
   .phone-simulator .phone-home-indicator { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 120px; height: 4px; background: rgba(255, 255, 255, 0.3); border-radius: 2px; }
-  @media (max-width: 500px) {
-    .phone-simulator { border-radius: 24px; padding: 10px; max-width: 100%; }
-    .phone-simulator .phone-screen { border-radius: 18px; height: 600px; }
-  }
 
   @media (max-width: 768px) {
     .match-tab, .match-tab-history { min-width: 100%; max-width: 100%; }
     .header { flex-direction: column; align-items: center; padding: 12px; }
-    .header .header-left { position: static; }
     .clock { position: static; width: 100%; text-align: center; margin-top: 8px; }
-    .stats-two-col { grid-template-columns: 1fr; }
-    .standings-table { min-width: 400px; font-size: 11px; }
-  }
-  @media (max-width: 480px) {
-    .standings-table { min-width: 300px; font-size: 10px; }
-    .match-tab .score-badge { font-size: 14px; padding: 1px 8px; }
-    .team-name { font-size: 16px; }
-    .detail-stat-box .value { font-size: 16px; }
   }
 
   .disclaimer-footer { margin-top: 30px; padding: 16px 20px; background: var(--surface); border-radius: 8px; border: 1px solid var(--border); font-size: 11px; color: var(--text-muted); line-height: 1.6; }
   .disclaimer-footer strong { color: var(--text); }
   .disclaimer-footer .highlight { color: var(--accent); font-weight: bold; }
 
-  .heatmap-pct-bomb { color: #f39c12 !important; font-weight: bold; text-shadow: 0 0 15px rgba(243, 156, 18, 0.5); }
-  .heatmap-pct-green { color: #6fcf97 !important; font-weight: bold; }
-  .heatmap-pct-white { color: #8b949e !important; font-weight: bold; }
-  .heatmap-pct-red { color: #eb5757 !important; font-weight: bold; }
-
   .giorni-filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
-  .giorno-btn { padding: 8px 18px; border-radius: 8px; border: 2px solid var(--border); background: var(--surface); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; min-height: 38px; display: flex; align-items: center; justify-content: center; white-space: nowrap; flex: 0 0 auto; }
-  .giorno-btn.active { background: var(--accent); color: #000; border-color: var(--accent); box-shadow: 0 0 20px rgba(243, 156, 18, 0.3); }
+  .giorno-btn { padding: 8px 18px; border-radius: 8px; border: 2px solid var(--border); background: var(--surface); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+  .giorno-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
 
   .champ-filters-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; width: 100%; }
   .champ-filters-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; }
-  .champ-filter-btn { padding: 6px 8px; border-radius: 6px; border: 2px solid var(--border); background: var(--surface); color: var(--text-muted); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; min-height: 34px; display: flex; align-items: center; justify-content: center; width: 100%; overflow: hidden; text-overflow: ellipsis; }
-  .champ-filter-btn:hover { transform: translateY(-1px); }
+  .champ-filter-btn { padding: 6px 8px; border-radius: 6px; border: 2px solid var(--border); background: var(--surface); color: var(--text-muted); font-size: 11px; font-weight: 600; cursor: pointer; min-height: 34px; display: flex; align-items: center; justify-content: center; overflow: hidden; text-overflow: ellipsis; }
   .champ-filter-btn.active { border-color: var(--accent); color: #000; }
   .champ-filter-btn .champ-color-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; flex-shrink: 0; }
   .champ-filter-btn .champ-name { font-size: 10px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; }
@@ -453,8 +310,30 @@
     .champ-filters-grid { grid-template-columns: repeat(2, 1fr); gap: 4px; }
     .champ-filter-btn { padding: 3px 6px; font-size: 9px; min-height: 26px; }
     .champ-filter-btn .champ-name { font-size: 8px; }
-    .champ-filter-btn .champ-color-dot { width: 8px; height: 8px; margin-right: 4px; }
   }
+
+  .file-drop-area { border: 2px dashed var(--border); border-radius: 12px; padding: 30px 20px; text-align: center; cursor: pointer; background: var(--surface); margin-bottom: 16px; }
+  .file-drop-area:hover { border-color: var(--accent); }
+  .file-drop-area.dragging { border-color: var(--accent); background: rgba(243, 156, 18, 0.1); }
+
+  .giocate-selector-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 1024px) { .giocate-selector-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .giocate-selector-grid { grid-template-columns: 1fr; } }
+  .giocate-category { background: var(--surface); border-radius: 10px; padding: 12px 14px; border: 2px solid var(--border); cursor: pointer; }
+  .giocate-category.active { border-color: var(--accent); background: rgba(243, 156, 18, 0.1); box-shadow: 0 0 20px rgba(243, 156, 18, 0.15); }
+  .giocate-category .category-title { font-size: 13px; font-weight: bold; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .giocate-category .category-title .icon { font-size: 18px; }
+  .giocate-category .category-title .badge { font-size: 10px; background: var(--card); padding: 1px 8px; border-radius: 10px; color: var(--text-muted); margin-left: auto; }
+
+  .selected-count { font-size: 13px; color: var(--text-muted); padding: 6px 12px; background: var(--surface); border-radius: 6px; border: 1px solid var(--border); }
+  .selected-count .count-num { font-weight: bold; color: var(--accent); }
+
+  .heatmap-pct-bomb { color: #f39c12 !important; font-weight: bold; }
+  .heatmap-pct-green { color: #6fcf97 !important; font-weight: bold; }
+  .heatmap-pct-white { color: #8b949e !important; font-weight: bold; }
+  .heatmap-pct-red { color: #eb5757 !important; font-weight: bold; }
+
+  .flag-icon { display: inline-block; vertical-align: middle; margin-right: 6px; width: 20px; height: 15px; border-radius: 2px; }
 </style>
 </head>
 <body>
@@ -489,7 +368,6 @@
 
   <div id="root"></div>
 
-  <!-- ⭐ GESTIONE SPLASHSCREEN + ERRORI GLOBALI -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       var splash = document.getElementById('splashscreen');
@@ -541,7 +419,6 @@
     });
   </script>
 
-  <!-- ⭐ SCRIPT PRINCIPALE (Babel) -->
   <script type="text/babel">
     const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
@@ -744,7 +621,7 @@
     }
 
     // ============================================================
-    // COSTANTI: TEMI, TAB, CAMPIONATI
+    // COSTANTI
     // ============================================================
 
     const THEMES = {
@@ -879,15 +756,8 @@
       return 'xg-red';
     };
 
-    const getHeatmapColorClass = (pct) => {
-      if (pct > 90) return 'heatmap-pct-bomb heatmap-bg-bomb';
-      if (pct >= 61) return 'heatmap-pct-green heatmap-bg-green';
-      if (pct >= 31) return 'heatmap-pct-white heatmap-bg-white';
-      return 'heatmap-pct-red heatmap-bg-red';
-    };
-
     // ============================================================
-    // TEAM LOGO (con fallback iniziali)
+    // TEAM LOGO
     // ============================================================
 
     const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
@@ -980,26 +850,33 @@
 
     const DEFAULT_FAMIGLIE = ['dc_under', 'mg_casa_ospite', 'over'];
     // ============================================================
-    // CALCOLI - LOGICA RISCRITTA v8
+    // CALCOLI - LOGICA CORRETTA v9
     // ============================================================
     // REGOLE:
-    // - Fisse: 1 = %vittorie casa | X = media pareggi | 2 = %vittorie ospite
-    // - DC: 1X = %vittorie+pareggi squadra casa | X2 = %vittorie+pareggi ospite
-    //       12 = media (%no pareggio casa, %no pareggio ospite)
+    // - Fisse: 1 = %vittorie Como | X = media pareggi | 2 = %vittorie Roma
+    // - DC:    1X = SOLO Como (vince+pareggia)   | X2 = SOLO Roma (vince+pareggia)
+    //          12 = media tra "no pareggio" di Como e Roma
     // - Over/Under: media delle due squadre (sul totale gol partita)
     // - GG/NG: media delle due squadre
     // - Multigol: media delle due squadre
-    // - Combo con "+": conta quante volte ENTRAMBE le condizioni sono vere
-    //                  per ogni squadra, poi media
+    // - Combo con "+": 1X+X = solo Como, X2+X = solo Roma, 12+X = media
+    //                  (ogni combo conta le partite in cui ENTRAMBE le condizioni
+    //                   sono vere, per la squadra di riferimento)
     // - MG Casa + Ospite: probabilità congiunta = (%casa * %ospite) / 100
     // ============================================================
 
     /**
      * Calcola le statistiche per una singola squadra.
-     * games = array di partite della squadra (già filtrate)
-     * team = nome squadra
+     * @param games array di partite della squadra
+     * @param team nome squadra
+     * @param isHomeTeam true se la squadra è di casa, false se è ospite
+     *
+     * IMPORTANTE: 1X, X2 e le combo DC vengono calcolate dal punto di vista
+     * della squadra in esame, in base al suo ruolo (casa o ospite).
+     * - Se isHomeTeam: 1X = vince||pareggia, X2 = perde||pareggia
+     * - Se !isHomeTeam: 1X = perde||pareggia, X2 = vince||pareggia
      */
-    const calcolaStatsSquadra = (games, team) => {
+    const calcolaStatsSquadra = (games, team, isHomeTeam) => {
       const total = games.length;
 
       if (total === 0) {
@@ -1007,6 +884,7 @@
           partite: 0,
           vittorie: 0, pareggi: 0, sconfitte: 0,
           pctVittorie: 0, pctPareggi: 0, pctSconfitte: 0, pctNoPareggio: 0,
+          pct1X: 0, pctX2: 0,
           pctOver15: 0, pctOver25: 0, pctOver35: 0, pctOver45: 0,
           pctUnder15: 0, pctUnder25: 0, pctUnder35: 0, pctUnder45: 0,
           pctGG: 0, pctNG: 0,
@@ -1029,6 +907,7 @@
       let gg = 0;
       let mg01 = 0, mg02 = 0, mg13 = 0, mg25 = 0;
       let mg14_tot = 0, mg25_tot = 0;
+      let cnt1X = 0, cntX2 = 0, cntNoPareggio = 0;
 
       let combo1X_over15 = 0, combo1X_over25 = 0, combo1X_over35 = 0, combo1X_over45 = 0;
       let combo1X_under15 = 0, combo1X_under25 = 0, combo1X_under35 = 0, combo1X_under45 = 0;
@@ -1074,12 +953,28 @@
         if (tot >= 1 && tot <= 4) mg14_tot++;
         if (tot >= 2 && tot <= 5) mg25_tot++;
 
-        const is1X = isVittoria || isPareggio;
-        const is12 = !isPareggio;
-        const isX2 = isSconfitta || isPareggio;
+        // ⭐ 1X e X2 dipendono dal ruolo della squadra
+        let is1X, isX2;
+        if (isHomeTeam) {
+          // Squadra di casa: 1X = vince o pareggia
+          is1X = isVittoria || isPareggio;
+          isX2 = isSconfitta || isPareggio;
+        } else {
+          // Squadra ospite: X2 = vince o pareggia
+          is1X = isSconfitta || isPareggio;
+          isX2 = isVittoria || isPareggio;
+        }
+
+        const is12 = isVittoria || isSconfitta;  // no pareggio (identico per casa/ospite)
+
+        if (is1X) cnt1X++;
+        if (isX2) cntX2++;
+        if (is12) cntNoPareggio++;
+
         const isMG14 = tot >= 1 && tot <= 4;
         const isMG25 = tot >= 2 && tot <= 5;
 
+        // COMBO 1X + Over/Under
         if (is1X && o15) combo1X_over15++;
         if (is1X && o25) combo1X_over25++;
         if (is1X && o35) combo1X_over35++;
@@ -1089,6 +984,7 @@
         if (is1X && !o35) combo1X_under35++;
         if (is1X && !o45) combo1X_under45++;
 
+        // COMBO 12 + Over/Under
         if (is12 && o15) combo12_over15++;
         if (is12 && o25) combo12_over25++;
         if (is12 && o35) combo12_over35++;
@@ -1098,6 +994,7 @@
         if (is12 && !o35) combo12_under35++;
         if (is12 && !o45) combo12_under45++;
 
+        // COMBO X2 + Over/Under
         if (isX2 && o15) comboX2_over15++;
         if (isX2 && o25) comboX2_over25++;
         if (isX2 && o35) comboX2_over35++;
@@ -1107,6 +1004,7 @@
         if (isX2 && !o35) comboX2_under35++;
         if (isX2 && !o45) comboX2_under45++;
 
+        // COMBO DC + Multigol
         if (is1X && isMG14) combo1X_mg14++;
         if (is1X && isMG25) combo1X_mg25++;
         if (is12 && isMG14) combo12_mg14++;
@@ -1123,7 +1021,9 @@
         pctVittorie: pct(vittorie),
         pctPareggi: pct(pareggi),
         pctSconfitte: pct(sconfitte),
-        pctNoPareggio: pct(vittorie + sconfitte),
+        pctNoPareggio: pct(cntNoPareggio),
+        pct1X: pct(cnt1X),
+        pctX2: pct(cntX2),
         pctOver15: pct(over15),
         pctOver25: pct(over25),
         pctOver35: pct(over35),
@@ -1175,7 +1075,6 @@
 
     /**
      * Statistiche complete del match.
-     * Restituisce valori mediati tra le due squadre + stats grezze.
      */
     const computeMatchStats = (match, allMatches) => {
       if (!match || !allMatches) return { error: 'Dati mancanti.' };
@@ -1194,8 +1093,9 @@
         return { error: 'Dati insufficienti.' };
       }
 
-      const homeStats = calcolaStatsSquadra(homeGames, homeTeam);
-      const awayStats = calcolaStatsSquadra(awayGames, awayTeam);
+      // ⭐ Passa true per Como (casa), false per Roma (ospite)
+      const homeStats = calcolaStatsSquadra(homeGames, homeTeam, true);
+      const awayStats = calcolaStatsSquadra(awayGames, awayTeam, false);
 
       const media = (a, b) => (a + b) / 2;
 
@@ -1205,9 +1105,9 @@
         pX: media(homeStats.pctPareggi, awayStats.pctPareggi),
         p2: awayStats.pctVittorie,
 
-        // DC
-        p1X: homeStats.pctVittorie + homeStats.pctPareggi,
-        pX2: awayStats.pctVittorie + awayStats.pctPareggi,
+        // DC — logica corretta
+        p1X: homeStats.pct1X,   // SOLO Como (vince o pareggia)
+        pX2: awayStats.pctX2,   // SOLO Roma (vince o pareggia)
         p12: media(homeStats.pctNoPareggio, awayStats.pctNoPareggio),
 
         // Over/Under
@@ -1224,7 +1124,7 @@
         pGG: media(homeStats.pctGG, awayStats.pctGG),
         pNG: media(homeStats.pctNG, awayStats.pctNG),
 
-        // Multigol squadra
+        // Multigol
         homeMG: {
           '0-1': homeStats.pctMG01,
           '0-2': homeStats.pctMG02,
@@ -1242,7 +1142,6 @@
           '2-5': media(homeStats.pctMG25_Tot, awayStats.pctMG25_Tot),
         },
 
-        // Stats grezze (usate da getGiocataPct)
         homeStats,
         awayStats,
         homeGames,
@@ -1254,7 +1153,6 @@
 
     /**
      * Calcola la % di una giocata.
-     * LOGICA: media delle due squadre per la maggior parte delle famiglie.
      */
     const getGiocataPct = (giocata, stats, homeMG, awayMG, mgTot) => {
       if (!stats || stats.error) return 0;
@@ -1273,9 +1171,9 @@
       if (giocata === 'X') return Math.round(media(homeStats.pctPareggi, awayStats.pctPareggi));
       if (giocata === '2') return Math.round(awayStats.pctVittorie);
 
-      // DOPPIA CHANCE
-      if (giocata === '1X') return Math.round(homeStats.pctVittorie + homeStats.pctPareggi);
-      if (giocata === 'X2') return Math.round(awayStats.pctVittorie + awayStats.pctPareggi);
+      // DOPPIA CHANCE — logica corretta
+      if (giocata === '1X') return Math.round(homeStats.pct1X);   // ⭐ Solo Como
+      if (giocata === 'X2') return Math.round(awayStats.pctX2);   // ⭐ Solo Roma
       if (giocata === '12') return Math.round(media(homeStats.pctNoPareggio, awayStats.pctNoPareggio));
 
       // OVER / UNDER
@@ -1294,49 +1192,67 @@
       if (giocata === '1-4') return Math.round(media(homeStats.pctMG14_Tot, awayStats.pctMG14_Tot));
       if (giocata === '2-5') return Math.round(media(homeStats.pctMG25_Tot, awayStats.pctMG25_Tot));
 
-      // COMBO DC + OVER
-      if (giocata === '1X+O1.5') return Math.round(media(homeStats.combo1X_over15, awayStats.combo1X_over15));
+      // ============================================================
+      // COMBO DC + OVER — logica corretta
+      // 1X+X = solo Como | X2+X = solo Roma | 12+X = media
+      // ============================================================
+      if (giocata === '1X+O1.5') return Math.round(homeStats.combo1X_over15);
+      if (giocata === '1X+O2.5') return Math.round(homeStats.combo1X_over25);
+      if (giocata === '1X+O3.5') return Math.round(homeStats.combo1X_over35);
+      if (giocata === '1X+O4.5') return Math.round(homeStats.combo1X_over45);
+
+      if (giocata === 'X2+O1.5') return Math.round(awayStats.comboX2_over15);
+      if (giocata === 'X2+O2.5') return Math.round(awayStats.comboX2_over25);
+      if (giocata === 'X2+O3.5') return Math.round(awayStats.comboX2_over35);
+      if (giocata === 'X2+O4.5') return Math.round(awayStats.comboX2_over45);
+
       if (giocata === '12+O1.5') return Math.round(media(homeStats.combo12_over15, awayStats.combo12_over15));
-      if (giocata === 'X2+O1.5') return Math.round(media(homeStats.comboX2_over15, awayStats.comboX2_over15));
-      if (giocata === '1X+O2.5') return Math.round(media(homeStats.combo1X_over25, awayStats.combo1X_over25));
       if (giocata === '12+O2.5') return Math.round(media(homeStats.combo12_over25, awayStats.combo12_over25));
-      if (giocata === 'X2+O2.5') return Math.round(media(homeStats.comboX2_over25, awayStats.comboX2_over25));
-      if (giocata === '1X+O3.5') return Math.round(media(homeStats.combo1X_over35, awayStats.combo1X_over35));
       if (giocata === '12+O3.5') return Math.round(media(homeStats.combo12_over35, awayStats.combo12_over35));
-      if (giocata === 'X2+O3.5') return Math.round(media(homeStats.comboX2_over35, awayStats.comboX2_over35));
-      if (giocata === '1X+O4.5') return Math.round(media(homeStats.combo1X_over45, awayStats.combo1X_over45));
       if (giocata === '12+O4.5') return Math.round(media(homeStats.combo12_over45, awayStats.combo12_over45));
-      if (giocata === 'X2+O4.5') return Math.round(media(homeStats.comboX2_over45, awayStats.comboX2_over45));
 
-      // COMBO DC + UNDER
-      if (giocata === '1X+U1.5') return Math.round(media(homeStats.combo1X_under15, awayStats.combo1X_under15));
+      // ============================================================
+      // COMBO DC + UNDER — logica corretta
+      // ============================================================
+      if (giocata === '1X+U1.5') return Math.round(homeStats.combo1X_under15);
+      if (giocata === '1X+U2.5') return Math.round(homeStats.combo1X_under25);
+      if (giocata === '1X+U3.5') return Math.round(homeStats.combo1X_under35);
+      if (giocata === '1X+U4.5') return Math.round(homeStats.combo1X_under45);
+
+      if (giocata === 'X2+U1.5') return Math.round(awayStats.comboX2_under15);
+      if (giocata === 'X2+U2.5') return Math.round(awayStats.comboX2_under25);
+      if (giocata === 'X2+U3.5') return Math.round(awayStats.comboX2_under35);
+      if (giocata === 'X2+U4.5') return Math.round(awayStats.comboX2_under45);
+
       if (giocata === '12+U1.5') return Math.round(media(homeStats.combo12_under15, awayStats.combo12_under15));
-      if (giocata === 'X2+U1.5') return Math.round(media(homeStats.comboX2_under15, awayStats.comboX2_under15));
-      if (giocata === '1X+U2.5') return Math.round(media(homeStats.combo1X_under25, awayStats.combo1X_under25));
       if (giocata === '12+U2.5') return Math.round(media(homeStats.combo12_under25, awayStats.combo12_under25));
-      if (giocata === 'X2+U2.5') return Math.round(media(homeStats.comboX2_under25, awayStats.comboX2_under25));
-      if (giocata === '1X+U3.5') return Math.round(media(homeStats.combo1X_under35, awayStats.combo1X_under35));
       if (giocata === '12+U3.5') return Math.round(media(homeStats.combo12_under35, awayStats.combo12_under35));
-      if (giocata === 'X2+U3.5') return Math.round(media(homeStats.comboX2_under35, awayStats.comboX2_under35));
-      if (giocata === '1X+U4.5') return Math.round(media(homeStats.combo1X_under45, awayStats.combo1X_under45));
       if (giocata === '12+U4.5') return Math.round(media(homeStats.combo12_under45, awayStats.combo12_under45));
-      if (giocata === 'X2+U4.5') return Math.round(media(homeStats.comboX2_under45, awayStats.comboX2_under45));
 
-      // COMBO DC + MULTIGOL
-      if (giocata === '1X+0-2') return Math.round(media(homeStats.combo1X_mg14, awayStats.combo1X_mg14));
+      // ============================================================
+      // COMBO DC + MULTIGOL — logica corretta
+      // Nota: nel codice attuale delle FAMIGLIE, le opzioni dc_multigol
+      // sono del tipo "1X+0-2" dove 0-2 e 1-3 e 1-4 mappano sullo stesso
+      // contatore combo*_mg14 (MG Tot 1-4), mentre 2-5 usa combo*_mg25.
+      // ============================================================
+      if (giocata === '1X+0-2') return Math.round(homeStats.combo1X_mg14);
+      if (giocata === '1X+1-3') return Math.round(homeStats.combo1X_mg14);
+      if (giocata === '1X+1-4') return Math.round(homeStats.combo1X_mg14);
+      if (giocata === '1X+2-5') return Math.round(homeStats.combo1X_mg25);
+
+      if (giocata === 'X2+0-2') return Math.round(awayStats.comboX2_mg14);
+      if (giocata === 'X2+1-3') return Math.round(awayStats.comboX2_mg14);
+      if (giocata === 'X2+1-4') return Math.round(awayStats.comboX2_mg14);
+      if (giocata === 'X2+2-5') return Math.round(awayStats.comboX2_mg25);
+
       if (giocata === '12+0-2') return Math.round(media(homeStats.combo12_mg14, awayStats.combo12_mg14));
-      if (giocata === 'X2+0-2') return Math.round(media(homeStats.comboX2_mg14, awayStats.comboX2_mg14));
-      if (giocata === '1X+1-3') return Math.round(media(homeStats.combo1X_mg14, awayStats.combo1X_mg14));
       if (giocata === '12+1-3') return Math.round(media(homeStats.combo12_mg14, awayStats.combo12_mg14));
-      if (giocata === 'X2+1-3') return Math.round(media(homeStats.comboX2_mg14, awayStats.comboX2_mg14));
-      if (giocata === '1X+1-4') return Math.round(media(homeStats.combo1X_mg14, awayStats.combo1X_mg14));
       if (giocata === '12+1-4') return Math.round(media(homeStats.combo12_mg14, awayStats.combo12_mg14));
-      if (giocata === 'X2+1-4') return Math.round(media(homeStats.comboX2_mg14, awayStats.comboX2_mg14));
-      if (giocata === '1X+2-5') return Math.round(media(homeStats.combo1X_mg25, awayStats.combo1X_mg25));
       if (giocata === '12+2-5') return Math.round(media(homeStats.combo12_mg25, awayStats.combo12_mg25));
-      if (giocata === 'X2+2-5') return Math.round(media(homeStats.comboX2_mg25, awayStats.comboX2_mg25));
 
-      // MG CASA + OSPITE (probabilità congiunta)
+      // ============================================================
+      // MG CASA + OSPITE — probabilità congiunta
+      // ============================================================
       if (giocata.includes('+') && !giocata.includes('X') && !giocata.includes('O') && !giocata.includes('U')) {
         const parts = giocata.split('+');
         if (parts.length === 2) {
@@ -1407,7 +1323,7 @@
     };
 
     /**
-     * Multigol range per la classifica (usa media delle due squadre).
+     * Multigol range per la classifica.
      */
     const getMultigolRange = (teamName, allMatches) => {
       const matches = allMatches.filter(m =>
@@ -1443,7 +1359,7 @@
     };
 
     /**
-     * 12 + Under 4.5 (formula speciale: entrambe le condizioni vere per ogni squadra).
+     * 12 + Under 4.5 (formula speciale).
      */
     const get12Under45 = (allMatches, homeTeam, awayTeam) => {
       const homeGames = allMatches.filter(m =>
@@ -1474,7 +1390,7 @@
     };
 
     /**
-     * Calcola forma e statistiche per la classifica.
+     * Calcola forma e statistiche.
      */
     const calcFormAndStats = (matches, teamName) => {
       const played = matches
@@ -1568,7 +1484,6 @@
     window.addDaysToDateStr = addDaysToDateStr;
     window.isDatePassed = isDatePassed;
     window.getXgClasse = getXgClasse;
-    window.getHeatmapColorClass = getHeatmapColorClass;
     window.FAMIGLIE_GIOCATE = FAMIGLIE_GIOCATE;
     window.DEFAULT_FAMIGLIE = DEFAULT_FAMIGLIE;
     window.TeamLogo = TeamLogo;
@@ -1580,7 +1495,7 @@
     window.calcolaGG_NG = calcolaGG_NG;
     window.get12Under45 = get12Under45;
 
-    console.log('✅ Funzioni globali esposte per i moduli esterni (v8 - LOGICA MEDIA DUE SQUADRE)');
+    console.log('✅ Funzioni globali esposte v9 - LOGICA CORRETTA (1X solo Como, X2 solo Roma, 12 media)');
     // ============================================================
     // LOAD/SAVE STATE
     // ============================================================
@@ -1980,7 +1895,7 @@
     // BOOT
     // ============================================================
 
-    console.log('🚀 Avvio GesssAI-Pro v8');
+    console.log('🚀 Avvio GesssAI-Pro v9 - LOGICA CORRETTA DC');
 
     localStorage.removeItem('ft_matches');
     localStorage.removeItem('ft_champs');
