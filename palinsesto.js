@@ -1,9 +1,8 @@
 // ============================================================
-// palinsesto.js - Modulo Palinsesto con quote visibili
-// Mostra quote PDF accanto a ogni giocata (con value bet)
-// È la FONTE DI VERITÀ per il filtro campionati, giorni e modalità giocate.
-// Etichette MG: 8 opzioni (Casa/Ospite 0-2, 1-3, 2-5 + Tot 1-4, 2-5)
-// ✅ FIX v6: Multigol con 8 opzioni + etichette già formattate
+// palinsesto.js - Modulo Palinsesto con quote visibili (v7)
+// ✅ FIX v7: MatchTab usa getGiocataPct direttamente (bypassa getBestBetForFamily)
+//            per allineare le % con "Statistiche → Tutte le Giocate"
+//            + normalizzazione di sicurezza su stats.p1/pX/p2
 // ============================================================
 
 (function () {
@@ -13,7 +12,6 @@
 
   // ============================================================
   // FORMATTAZIONE ETICHETTE GIOCATE
-  // Le etichette MG arrivano già formattate ('MG Casa 0-2', 'MG Tot 1-4', ecc.)
   // ============================================================
   const formatGiocataLabel = (familyId, label) => {
     if (!label) return '—';
@@ -22,7 +20,6 @@
     if (label.startsWith('Under ')) return label.replace('.', ',');
 
     if (familyId === 'multigol') {
-      // Le etichette sono già formattate dal sistema: 'MG Casa 0-2', ecc.
       return label;
     }
 
@@ -135,7 +132,7 @@
     const formatDateEU = window.formatDateEU;
     const TeamLogo = window.TeamLogo;
     const FAMIGLIE_GIOCATE = window.FAMIGLIE_GIOCATE;
-    const getBestBetForFamily = window.getBestBetForFamily;
+    const getGiocataPct = window.getGiocataPct;
     const getMultigolRange = window.getMultigolRange;
     const getPercentualeClasse = window.getPercentualeClasse;
     const calcolaGG_NG = window.calcolaGG_NG;
@@ -150,9 +147,35 @@
     const diff = Math.abs(homeForm.pct - awayForm.pct);
     const stats = computeMatchStats(match, allMatches);
 
+    // ⭐ Debug per Como
+    if (match.casa === 'Como' || match.ospiti === 'Como') {
+      console.log('🔬 STATS COMO (Palinsesto):', {
+        p1: stats.p1, pX: stats.pX, p2: stats.p2,
+        somma: (stats.p1 || 0) + (stats.pX || 0) + (stats.p2 || 0),
+        p1X: stats.p1X, p12: stats.p12, pX2: stats.pX2,
+        errore: stats.error,
+        allMatches_length: allMatches ? allMatches.length : 0,
+      });
+    }
+
     stats._allMatches = allMatches;
     stats._homeTeam = match.casa;
     stats._awayTeam = match.ospiti;
+
+    // ⭐ NORMALIZZAZIONE DI SICUREZZA: se p1+pX+p2 != 100, riproporziona
+    if (!stats.error && typeof stats.p1 === 'number' && typeof stats.pX === 'number' && typeof stats.p2 === 'number') {
+      const sommaP = stats.p1 + stats.pX + stats.p2;
+      if (sommaP > 0 && sommaP !== 100) {
+        console.warn(`⚠️ Palinsesto: p1+pX+p2 = ${sommaP} (atteso 100) per ${match.casa}-${match.ospiti}. Normalizzo.`);
+        stats.p1 = Math.round((stats.p1 / sommaP) * 100);
+        stats.p2 = Math.round((stats.p2 / sommaP) * 100);
+        stats.pX = 100 - stats.p1 - stats.p2;
+        if (stats.pX < 0) stats.pX = 0;
+        stats.p1X = Math.min(100, stats.p1 + stats.pX);
+        stats.p12 = Math.min(100, stats.p1 + stats.p2);
+        stats.pX2 = Math.min(100, stats.pX + stats.p2);
+      }
+    }
 
     const renderFormSquares = (formStr) => {
       if (!formStr) return <span>N/D</span>;
@@ -191,13 +214,17 @@
       return '1px solid #eb5757';
     };
 
+    // ============================================================
+    // ⭐ FIX v7: calcola la giocata migliore per ogni famiglia
+    //    usando getGiocataPct DIRETTAMENTE (come fa Tutte le Giocate)
+    //    invece di passare per getBestBetForFamily
+    // ============================================================
     const getGiocateDaMostrare = () => {
       if (stats.error) return [];
+
       const homeMG = stats.homeMG || {};
       const awayMG = stats.awayMG || {};
       const mgTot = stats.mgTot || {};
-      const homeRange = getMultigolRange(match.casa, allMatches);
-      const awayRange = getMultigolRange(match.ospiti, allMatches);
       const giocateDaMostrare = [];
 
       let famiglieDaAnalizzare;
@@ -218,17 +245,39 @@
         let best = null;
 
         if (familyId === 'gg_ng') {
+          // GG/NG ha logica dedicata
           const ggNgResult = calcolaGG_NG ? calcolaGG_NG(stats) : null;
           if (ggNgResult) {
             best = {
-              ...ggNgResult,
-              familyId: 'gg_ng',
-              familyLabel: family.label,
-              familyIcon: family.icon,
+              label: ggNgResult.giocata,
+              giocata: ggNgResult.giocata,
+              pct: ggNgResult.pct,
             };
           }
         } else {
-          best = getBestBetForFamily(familyId, stats, homeRange, awayRange, homeMG, awayMG, mgTot);
+          // ⭐ Loop esplicito sulle options, usando getGiocataPct
+          let bestPct = -1;
+          let bestOpt = null;
+          family.options.forEach(opt => {
+            let pct = 0;
+            try {
+              pct = getGiocataPct(opt, stats, homeMG, awayMG, mgTot) || 0;
+            } catch (e) {
+              console.warn(`Errore getGiocataPct ${familyId}/${opt}:`, e.message);
+              pct = 0;
+            }
+            if (pct > bestPct) {
+              bestPct = pct;
+              bestOpt = opt;
+            }
+          });
+          if (bestOpt && bestPct > 0) {
+            best = {
+              label: bestOpt,
+              giocata: bestOpt,
+              pct: bestPct,
+            };
+          }
         }
 
         if (best && best.pct > 0) {
@@ -593,6 +642,6 @@
   }
 
   window.PalinsestoComponent = PalinsestoComponent;
-  console.log('✅ Modulo Palinsesto v6 caricato - 8 opzioni MG + etichette formattate');
+  console.log('✅ Modulo Palinsesto v7 caricato - MatchTab usa getGiocataPct diretto (allineato a Tutte le Giocate)');
 
 })();
