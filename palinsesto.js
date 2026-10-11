@@ -1,8 +1,8 @@
 // ============================================================
-// palinsesto.js - Modulo Palinsesto con quote visibili (v7)
-// ✅ FIX v7: MatchTab usa getGiocataPct direttamente (bypassa getBestBetForFamily)
-//            per allineare le % con "Statistiche → Tutte le Giocate"
-//            + normalizzazione di sicurezza su stats.p1/pX/p2
+// palinsesto.js - Modulo Palinsesto con quote visibili (v8)
+// ✅ FIX v8: RIMOSSA normalizzazione p1/pX/p2 (causava disallineamento
+//            con Statistiche → Tutte le Giocate).
+//            Le % sono ora identiche a getGiocataPct senza modifiche.
 // ============================================================
 
 (function () {
@@ -147,35 +147,13 @@
     const diff = Math.abs(homeForm.pct - awayForm.pct);
     const stats = computeMatchStats(match, allMatches);
 
-    // ⭐ Debug per Como
-    if (match.casa === 'Como' || match.ospiti === 'Como') {
-      console.log('🔬 STATS COMO (Palinsesto):', {
-        p1: stats.p1, pX: stats.pX, p2: stats.p2,
-        somma: (stats.p1 || 0) + (stats.pX || 0) + (stats.p2 || 0),
-        p1X: stats.p1X, p12: stats.p12, pX2: stats.pX2,
-        errore: stats.error,
-        allMatches_length: allMatches ? allMatches.length : 0,
-      });
-    }
-
     stats._allMatches = allMatches;
     stats._homeTeam = match.casa;
     stats._awayTeam = match.ospiti;
 
-    // ⭐ NORMALIZZAZIONE DI SICUREZZA: se p1+pX+p2 != 100, riproporziona
-    if (!stats.error && typeof stats.p1 === 'number' && typeof stats.pX === 'number' && typeof stats.p2 === 'number') {
-      const sommaP = stats.p1 + stats.pX + stats.p2;
-      if (sommaP > 0 && sommaP !== 100) {
-        console.warn(`⚠️ Palinsesto: p1+pX+p2 = ${sommaP} (atteso 100) per ${match.casa}-${match.ospiti}. Normalizzo.`);
-        stats.p1 = Math.round((stats.p1 / sommaP) * 100);
-        stats.p2 = Math.round((stats.p2 / sommaP) * 100);
-        stats.pX = 100 - stats.p1 - stats.p2;
-        if (stats.pX < 0) stats.pX = 0;
-        stats.p1X = Math.min(100, stats.p1 + stats.pX);
-        stats.p12 = Math.min(100, stats.p1 + stats.p2);
-        stats.pX2 = Math.min(100, stats.pX + stats.p2);
-      }
-    }
+    // ⭐ v8: NESSUNA NORMALIZZAZIONE — i valori di p1/pX/p2 vengono
+    //    usati così come calcolati da computeMatchStats, esattamente
+    //    come fa getGiocataPct in "Tutte le Giocate".
 
     const renderFormSquares = (formStr) => {
       if (!formStr) return <span>N/D</span>;
@@ -215,9 +193,8 @@
     };
 
     // ============================================================
-    // ⭐ FIX v7: calcola la giocata migliore per ogni famiglia
+    // ⭐ v8: calcola la giocata migliore per ogni famiglia
     //    usando getGiocataPct DIRETTAMENTE (come fa Tutte le Giocate)
-    //    invece di passare per getBestBetForFamily
     // ============================================================
     const getGiocateDaMostrare = () => {
       if (stats.error) return [];
@@ -245,7 +222,6 @@
         let best = null;
 
         if (familyId === 'gg_ng') {
-          // GG/NG ha logica dedicata
           const ggNgResult = calcolaGG_NG ? calcolaGG_NG(stats) : null;
           if (ggNgResult) {
             best = {
@@ -255,7 +231,6 @@
             };
           }
         } else {
-          // ⭐ Loop esplicito sulle options, usando getGiocataPct
           let bestPct = -1;
           let bestOpt = null;
           family.options.forEach(opt => {
@@ -642,6 +617,6 @@
   }
 
   window.PalinsestoComponent = PalinsestoComponent;
-  console.log('✅ Modulo Palinsesto v7 caricato - MatchTab usa getGiocataPct diretto (allineato a Tutte le Giocate)');
+  console.log('✅ Modulo Palinsesto v8 caricato - RIMOSSA normalizzazione p1/pX/p2 (allineato a Tutte le Giocate)');
 
 })();
