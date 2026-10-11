@@ -1,7 +1,7 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v5 - FIX combinazioni DC)
-// - Fix: DC+Over/Under ora usa probabilità congiunta dal Monte Carlo
-// - Fix: calcDC non maschera più errori con Math.min(100, ...)
+// statistiche.js - Modulo Statistiche (v6 - NO MC in Tutte le Giocate)
+// - Tutte le Giocate usa SOLO getGiocataPct (allineato al Palinsesto)
+// - Riepilogo AI mantiene il Monte Carlo
 // - Ordine Tutte le Giocate: FISSE → DC → GG/NG → OVER → UNDER → Multigol → resto
 // - Quote affiancate con fallback visibile "📊 N/D" se mancante
 // ============================================================
@@ -59,9 +59,7 @@
   };
 
   // ============================================================
-  // HELPER: CALCOLO DOPPIA CHANCE (FIX v5)
-  // - Non usa più Math.min(100, ...) che mascherava errori
-  // - Normalizza esplicitamente perché homeWins+draws+awayWins dovrebbe = 100
+  // CALCOLO DOPPIA CHANCE (usato solo dal Riepilogo AI con MC)
   // ============================================================
   const calcDC = (mc, dcCode) => {
     if (!mc) return 0;
@@ -69,7 +67,6 @@
     const d  = mc.draws || 0;
     const aw = mc.awayWins || 0;
 
-    // Normalizza: se la somma non è 100, riproporziona
     const total = hw + d + aw;
     if (total === 0) return 0;
     const norm = 100 / total;
@@ -84,9 +81,7 @@
   };
 
   // ============================================================
-  // FIX v5: PROBABILITÀ COMBINATA DC + OVER/UNDER DAL MONTE CARLO
-  // Calcola P(DC ∧ Over/Under X.5) contando i casi reali.
-  // Questa è l'unica stima corretta: P(A∧B) ≠ P(A)+P(B).
+  // PROBABILITÀ COMBINATE DAL MONTE CARLO (solo per Riepilogo AI)
   // ============================================================
   const calcolaCombinata = (mc, dcCode, tipo, soglia) => {
     if (!mc || !mc.risultati) return 0;
@@ -98,14 +93,12 @@
       const [gC, gO] = key.split('-').map(Number);
       const totale = gC + gO;
 
-      // Verifica condizione DC
       let dcOk = false;
-      if (dcCode === '1X') dcOk = gC >= gO;          // casa vince o pareggia
-      else if (dcCode === '12') dcOk = gC !== gO;    // casa o ospite vince
-      else if (dcCode === 'X2') dcOk = gO >= gC;     // ospite vince o pareggia
+      if (dcCode === '1X') dcOk = gC >= gO;
+      else if (dcCode === '12') dcOk = gC !== gO;
+      else if (dcCode === 'X2') dcOk = gO >= gC;
       if (!dcOk) continue;
 
-      // Verifica condizione Over/Under
       let ouOk = false;
       if (tipo === 'over')  ouOk = totale > soglia;
       else if (tipo === 'under') ouOk = totale < soglia;
@@ -116,15 +109,11 @@
     return Math.round((count / totalSim) * 100);
   };
 
-  // ============================================================
-  // FIX v5: probabilità combinata DC + Multigol
-  // ============================================================
   const calcolaCombinataDCMultigol = (mc, dcCode, mgLabel) => {
     if (!mc || !mc.risultati) return 0;
     const totalSim = mc.numSimulations || 10000;
     if (totalSim === 0) return 0;
 
-    // Parse range multigol (es. "MG Casa 1-3", "MG Ospite 0-2", "MG Tot 1-4")
     const mgMatch = mgLabel.match(/MG\s+(Casa|Ospite|Tot)\s+(\d+)-(\d+)/);
     if (!mgMatch) return 0;
     const [, target, minStr, maxStr] = mgMatch;
@@ -153,20 +142,15 @@
     return Math.round((count / totalSim) * 100);
   };
 
-  // ============================================================
-  // FIX v5: probabilità combinata MG Casa + MG Ospite
-  // ============================================================
   const calcolaCombinataMGCasaOspite = (mc, label) => {
     if (!mc || !mc.risultati) return 0;
     const totalSim = mc.numSimulations || 10000;
     if (totalSim === 0) return 0;
 
-    // label tipo: "0-2+1-3" (MG Casa 0-2 + MG Ospite 1-3)
     const parts = label.split('+');
     if (parts.length !== 2) return 0;
 
     const parseRange = (s) => {
-      // Supporta "0-2", "Casa 0-2", "Ospite 1-3", "Tot 1-4"
       const m = s.match(/(\d+)-(\d+)/);
       if (!m) return null;
       return { min: parseInt(m[1], 10), max: parseInt(m[2], 10) };
@@ -186,9 +170,6 @@
     return Math.round((count / totalSim) * 100);
   };
 
-  // ============================================================
-  // FIX v5: probabilità multigol semplice (singola)
-  // ============================================================
   const calcolaMultigol = (mc, label) => {
     if (!mc || !mc.risultati) return 0;
     const totalSim = mc.numSimulations || 10000;
@@ -214,12 +195,13 @@
   };
 
   // ============================================================
-  // FIX v5: calcolo percentuale unificato per tutte le famiglie
-  // Usa il Monte Carlo quando disponibile per le combinazioni,
-  // altrimenti fallback su getGiocataPct per le famiglie semplici.
+  // ⭐ calcolaPctGiocata v6:
+  // - Se `mc` è presente (Riepilogo AI) → usa il Monte Carlo
+  // - Se `mc` è null (Tutte le Giocate) → usa SOLO getGiocataPct
+  // Questo allinea Tutte le Giocate al Palinsesto
   // ============================================================
   const calcolaPctGiocata = (familyId, opt, mc, stats) => {
-    // Se abbiamo il Monte Carlo, usiamolo per TUTTE le famiglie
+    // Se abbiamo il Monte Carlo, usiamolo (solo Riepilogo AI)
     if (mc && mc.risultati) {
       if (familyId === 'fisse') {
         if (opt === '1') return mc.homeWins || 0;
@@ -249,10 +231,9 @@
         return calcolaMultigol(mc, opt);
       }
       if (familyId === 'dc_over') {
-        // opt tipo "X2+O1,5" o "1X+O2,5"
         const parts = opt.split('+');
         if (parts.length === 2) {
-          const dcCode = parts[0]; // 1X, 12, X2
+          const dcCode = parts[0];
           const oPart = parts[1].replace('O', '').replace(',', '.');
           const soglia = parseFloat(oPart);
           if (!isNaN(soglia)) {
@@ -284,7 +265,7 @@
       }
     }
 
-    // Fallback: usa getGiocataPct globale (per famiglie semplici senza MC)
+    // ⭐ Fallback / Tutte le Giocate: SOLO getGiocataPct
     if (typeof window.getGiocataPct === 'function' && stats) {
       return window.getGiocataPct(opt, stats, stats.homeMG, stats.awayMG, stats.mgTot) || 0;
     }
@@ -293,7 +274,7 @@
   };
 
   // ============================================================
-  // SIMULAZIONE MONTE CARLO
+  // SIMULAZIONE MONTE CARLO (solo Riepilogo AI)
   // ============================================================
   const getTeamPoissonParams = (teamName, allMatches) => {
     const matches = allMatches.filter(m =>
@@ -404,7 +385,7 @@
   };
 
   // ============================================================
-  // AI ANALYSIS
+  // AI ANALYSIS (Riepilogo AI - MANTIENE il Monte Carlo)
   // ============================================================
   const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
     const getChampColor = window.getChampColor;
@@ -443,7 +424,6 @@
       }
     };
 
-    // FIX v5: usa la funzione unificata
     const calcPctFromSim = (familyId, giocata) => {
       return calcolaPctGiocata(familyId, giocata, mc, null);
     };
@@ -698,7 +678,7 @@
   };
 
   // ============================================================
-  // TUTTE LE FAMIGLIE (FIX v5: usa Monte Carlo per combinazioni)
+  // TUTTE LE FAMIGLIE (v6 - SENZA Monte Carlo)
   // ============================================================
   const TutteLeFamigliePanel = ({ match, allMatches }) => {
     const getChampColor = window.getChampColor;
@@ -706,31 +686,13 @@
     const FAMIGLIE = window.FAMIGLIE_GIOCATE;
 
     const stats = window.computeMatchStats(match, allMatches);
-
-    // FIX v5: carica/calcola Monte Carlo
-    const [mc, setMc] = useState(null);
-    useEffect(() => {
-      if (!match) return;
-      const saved = localStorage.getItem(`ft_mc_${match.id}`);
-      if (saved) {
-        try { setMc(JSON.parse(saved)); return; } catch (e) {}
-      }
-      // Se non c'è, calcolalo subito
-      try {
-        const result = simulateMatches(match.casa, match.ospiti, allMatches, 10000);
-        setMc(result);
-        localStorage.setItem(`ft_mc_${match.id}`, JSON.stringify(result));
-      } catch (e) {
-        console.warn('Errore MC in TutteLeFamiglie:', e);
-      }
-    }, [match, allMatches]);
+    // ⭐ v6: NIENTE Monte Carlo qui — solo getGiocataPct, per coerenza col Palinsesto
 
     if (stats.error) return null;
 
     // ⭐ ORDINE: FISSE → DC → GG/NG → OVER → UNDER → Multigol → resto
     const ORDINE = ['fisse', 'dc', 'gg_ng', 'over', 'under', 'multigol', 'dc_over', 'dc_under', 'mg_casa_ospite', 'dc_multigol'];
 
-    // Verifica disponibilità QuoteManager
     const hasQM = !!(window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function');
     const qmStatus = (() => {
       if (!hasQM) return '❌ QuoteManager non disponibile';
@@ -756,8 +718,8 @@
       .map(familyId => {
         const family = FAMIGLIE[familyId];
         const opzioni = family.options.map(opt => {
-          // FIX v5: usa la funzione unificata che sfrutta il Monte Carlo
-          const pct = calcolaPctGiocata(familyId, opt, mc, stats);
+          // ⭐ v6: passiamo `null` come `mc` → usa SOLO getGiocataPct
+          const pct = calcolaPctGiocata(familyId, opt, null, stats);
 
           // QUOTA
           let quota = null;
@@ -810,17 +772,6 @@
             </button>
           )}
         </div>
-
-        {/* Avviso se MC non pronto */}
-        {!mc && (
-          <div style={{
-            marginBottom: '12px', padding: '6px 12px', borderRadius: '6px',
-            background: 'rgba(243, 156, 18, 0.1)', border: '1px solid var(--accent)',
-            fontSize: '11px', color: 'var(--text-muted)'
-          }}>
-            ⏳ Monte Carlo in caricamento... Le combinazioni DC+Over/Under verranno calcolate correttamente tra poco.
-          </div>
-        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
           {sezioni.map(({ familyId, family, opzioni }) => (
@@ -1578,6 +1529,6 @@
   window.TeamMatchesHistory = TeamMatchesHistory;
   window.TutteLeFamigliePanel = TutteLeFamigliePanel;
 
-  console.log('✅ Modulo Statistiche v5 caricato - FIX combinazioni DC (probabilità congiunta da Monte Carlo)');
+  console.log('✅ Modulo Statistiche v6 caricato - Tutte le Giocate SENZA Monte Carlo (allineato al Palinsesto)');
 
 })();
