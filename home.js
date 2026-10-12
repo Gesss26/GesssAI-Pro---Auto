@@ -852,7 +852,7 @@
 
     const matchesPuliti = useMemo(() => {
       const normalizzati = normalizeMatches(matches);
-      return window.FiltriCampionati.filtaPartitePerCampionato(normalizzati);
+      return window.FiltriCampionati.filtraPartitePerCampionato(normalizzati);
     }, [matches, filtroCampionati]);
 
     // ⭐ Ascolta cambiamenti delle giocate selezionate in schedina.js
