@@ -1,6 +1,6 @@
 // ============================================================
 // home.js - Modulo Home (FUTURISTIC + MOBILE FIX + SWITCH CALCOLATE/SCELTE)
-// ✅ v2: refreshTick propagato a RigaPartita per aggiornamento live
+// ✅ v3: le "Scelte" leggono le famiglie configurate in Impostazioni → Giocate
 // ============================================================
 
 (function () {
@@ -83,6 +83,7 @@
   const NAZIONI_BASE_PATH = 'logos/Nazioni/';
   const SCHEDINA_STORAGE_KEY = 'ft_schedina_selezioni';
   const GIOCATE_SELEZIONATE_KEY = 'ft_giocate_selezionate';
+  const FAMIGLIE_SELEZIONATE_KEY = 'ft_selected_famiglie';
 
   // ============================================================
   // QUOTA INLINE
@@ -218,14 +219,18 @@
   };
 
   // ============================================================
-  // LETTURA GIOCATE SELEZIONATE (sincronizzata con schedina.js)
+  // LETTURA FAMIGLIE SELEZIONATE (da Impostazioni → Giocate)
   // ============================================================
-  const leggiGiocateSelezionate = () => {
+  const leggiFamiglieSelezionate = () => {
     try {
-      return JSON.parse(localStorage.getItem(GIOCATE_SELEZIONATE_KEY) || '["tutte"]');
-    } catch (e) {
-      return ['tutte'];
-    }
+      const saved = localStorage.getItem(FAMIGLIE_SELEZIONATE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    // Fallback: le famiglie di default
+    return window.DEFAULT_FAMIGLIE || ['dc_under', 'mg_casa_ospite', 'over'];
   };
 
   // ============================================================
@@ -247,7 +252,7 @@
     const awayRange = window.getMultigolRange(match.ospiti, allMatches);
 
     // ============================================================
-    // TOP 3 CALCOLATE
+    // TOP 3 CALCOLATE (tutte le famiglie, top % più alte)
     // ============================================================
     if (tipoGiocate === 'calcolate') {
       const tutte = [];
@@ -279,71 +284,42 @@
     }
 
     // ============================================================
-    // TOP 3 SCELTE (dall'utente in schedina.js)
+    // TOP 3 SCELTE (dalle famiglie configurate in Impostazioni)
     // ============================================================
-    const giocateSelezionate = leggiGiocateSelezionate();
-    const isTutteMode = giocateSelezionate.includes('tutte') || giocateSelezionate.length === 0;
+    const famiglieScelte = leggiFamiglieSelezionate();
+    if (!famiglieScelte || famiglieScelte.length === 0) return [];
 
-    if (isTutteMode) {
-      // In modalità "tutte" non ci sono giocate specifiche → fallback alle calcolate
-      const tutte = [];
-      Object.keys(window.FAMIGLIE_GIOCATE).forEach(familyId => {
-        const family = window.FAMIGLIE_GIOCATE[familyId];
-        if (!family) return;
-        let best = null;
-        if (familyId === 'gg_ng') {
-          const ggNgResult = window.calcolaGG_NG ? window.calcolaGG_NG(stats) : null;
-          if (ggNgResult) {
-            best = { ...ggNgResult, familyId: 'gg_ng', familyLabel: family.label, familyIcon: family.icon };
-          }
-        } else {
-          best = window.getBestBetForFamily(familyId, stats, homeRange, awayRange, homeMG, awayMG, mgTot);
-        }
-        if (best && best.pct > 0) {
-          tutte.push({
-            familyId, familyLabel: family.label, familyIcon: family.icon,
-            giocata: best.giocata, label: best.label, pct: best.pct, isBomb: best.pct >= 90,
-          });
-        }
-      });
-      tutte.sort((a, b) => b.pct - a.pct);
-      return tutte.slice(0, 3);
-    }
-
-    // Modalità "Scelte": mostra solo le giocate specifiche selezionate
-    const top3Scelte = [];
-    giocateSelezionate.forEach(sel => {
-      if (typeof sel !== 'object' || !sel.familyId || !sel.giocata) return;
-
-      const { familyId, giocata } = sel;
+    const tutte = [];
+    famiglieScelte.forEach(familyId => {
       const family = window.FAMIGLIE_GIOCATE[familyId];
       if (!family) return;
 
-      let pct = 0;
+      let best = null;
+
       if (familyId === 'gg_ng') {
-        const ggNg = window.calcolaGG_NG ? window.calcolaGG_NG(stats) : null;
-        if (ggNg) {
-          pct = giocata === 'GG' ? ggNg.gg : ggNg.ng;
+        const ggNgResult = window.calcolaGG_NG ? window.calcolaGG_NG(stats) : null;
+        if (ggNgResult) {
+          best = { ...ggNgResult, familyId: 'gg_ng', familyLabel: family.label, familyIcon: family.icon };
         }
       } else {
-        pct = window.getGiocataPct(giocata, stats, homeMG, awayMG, mgTot);
+        best = window.getBestBetForFamily(familyId, stats, homeRange, awayRange, homeMG, awayMG, mgTot);
       }
 
-      if (pct > 0) {
-        top3Scelte.push({
+      if (best && best.pct > 0) {
+        tutte.push({
           familyId,
           familyLabel: family.label,
           familyIcon: family.icon,
-          giocata,
-          label: giocata,
-          pct: Math.round(pct),
-          isBomb: pct >= 90,
+          giocata: best.giocata,
+          label: best.label,
+          pct: best.pct,
+          isBomb: best.pct >= 90,
         });
       }
     });
 
-    top3Scelte.sort((a, b) => b.pct - a.pct);
-    return top3Scelte.slice(0, 3);
+    tutte.sort((a, b) => b.pct - a.pct);
+    return tutte.slice(0, 3);
   };
 
   const leggiSelezioniSchedina = () => {
@@ -456,7 +432,6 @@
   // RIGA PARTITA — con refreshKey per aggiornamento live
   // ============================================================
   const RigaPartita = ({ match, allMatches, tipoGiocate, refreshKey }) => {
-    // ⭐ useMemo ricalcola quando cambiano match.id, tipoGiocate o refreshKey
     const top3 = useMemo(() => {
       const res = calcolaTop3Giocate(match, allMatches, tipoGiocate);
       return res.map(g => ({ ...g, label: formatGiocataLabel(g.familyId, g.label) }));
@@ -845,7 +820,7 @@
     const [nazioneSelezionata, setNazioneSelezionata] = useState(null);
     const [campionatoMobile, setCampionatoMobile] = useState(null);
     const [tipoGiocate, setTipoGiocate] = useState('calcolate');
-    const [refreshKey, setRefreshKey] = useState(0); // ⭐ forza re-render di RigaPartita
+    const [refreshKey, setRefreshKey] = useState(0);
     const isMobile = useIsMobile();
 
     const { filtro: filtroCampionati, campionatiAttivi } =
@@ -853,10 +828,10 @@
 
     const matchesPuliti = useMemo(() => {
       const normalizzati = normalizeMatches(matches);
-      return window.FiltriCampionati.filtraPartitePerCampionato(normalizzati); // ✅ fix typo
+      return window.FiltriCampionati.filtraPartitePerCampionato(normalizzati);
     }, [matches, filtroCampionati]);
 
-    // ⭐ Ascolta cambiamenti giocate selezionate → forza refresh
+    // ⭐ Ascolta cambiamenti delle famiglie selezionate in Impostazioni → Giocate
     useEffect(() => {
       const handler = () => {
         setRefreshKey(t => t + 1);
@@ -1083,7 +1058,7 @@
               </button>
               <button
                 onClick={() => setTipoGiocate('scelte')}
-                title="Mostra le giocate selezionate in Schedina"
+                title="Mostra le famiglie configurate in Impostazioni → Giocate"
                 style={{
                   padding: '6px 16px',
                   fontSize: '11px',
@@ -1102,7 +1077,7 @@
             <span style={{ fontSize: '10px', color: 'var(--text-dim)', fontStyle: 'italic' }}>
               {tipoGiocate === 'calcolate'
                 ? '🎯 Top 3 per percentuale'
-                : '✅ Solo giocate selezionate in Schedina'}
+                : '✅ Solo famiglie configurate in Impostazioni → Giocate'}
             </span>
           </div>
         )}
@@ -1118,9 +1093,9 @@
     formatGiocataLabel, getGiornataCorrente, calcolaTop3Giocate,
     leggiSelezioniSchedina, scriviSelezioniSchedina, toggleSelezioneSchedina,
     normalizeMatches, normalizeCampionato, CHINESE_TEAMS,
-    leggiGiocateSelezionate, GIOCATE_SELEZIONATE_KEY,
+    leggiFamiglieSelezionate, GIOCATE_SELEZIONATE_KEY, FAMIGLIE_SELEZIONATE_KEY,
   };
 
-  console.log('✅ Modulo Home FUTURISTIC v2 caricato (refreshKey propagato + fix typo)');
+  console.log('✅ Modulo Home FUTURISTIC v3 caricato (Scelte = famiglie da Impostazioni)');
 
 })();
