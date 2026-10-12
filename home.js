@@ -4,6 +4,7 @@
 // ✅ Bollini notifica campionati
 // ✅ Loghi campionati nei bottoni
 // ✅ Bottom panel partite di oggi
+// ✅ FIX: useFiltroCampionati (plurale)
 // ============================================================
 
 (function () {
@@ -131,8 +132,6 @@
 
               <div className="matches-grid">
                 {partite.map(m => {
-                  const MatchTab = window.PalinsestoComponent ? null : null;
-                  // Uso direttamente il componente MatchTab esposto
                   const MT = window.__MatchTabComponent;
                   if (MT) {
                     return (
@@ -293,6 +292,7 @@
     const [homeTab, setHomeTab] = useState('Giornata');
     const [champSelezionato, setChampSelezionato] = useState(null);
 
+    // ✅ FIX: useFiltroCampionati (plurale, non singolare)
     const { filtro: filtroCampionati, campionatiAttivi } =
       window.FiltriCampionati.useFiltroCampionati();
 
@@ -403,6 +403,30 @@
   }
 
   // ============================================================
+  // HELPER FUNCTIONS (compatibilità)
+  // ============================================================
+  function formatGiocataLabel(familyId, label) {
+    if (!label) return '—';
+    if (label.startsWith('Over '))  return label;
+    if (label.startsWith('Under ')) return label.replace('.', ',');
+    return label;
+  }
+
+  function calcolaTop3Giocate() { return []; }
+
+  function leggiSelezioniSchedina() {
+    try { return JSON.parse(localStorage.getItem('ft_schedina_selezioni') || '[]'); }
+    catch (e) { return []; }
+  }
+
+  function scriviSelezioniSchedina(arr) {
+    try { localStorage.setItem('ft_schedina_selezioni', JSON.stringify(arr)); }
+    catch (e) {}
+  }
+
+  function toggleSelezioneSchedina() { return false; }
+
+  // ============================================================
   // ESPOSIZIONE GLOBALE
   // ============================================================
   window.HomeComponent = HomeComponent;
@@ -418,25 +442,6 @@
     CHINESE_TEAMS,
   };
 
-  // Helper functions (exposed for compatibility)
-  function formatGiocataLabel(familyId, label) {
-    if (!label) return '—';
-    if (label.startsWith('Over '))  return label;
-    if (label.startsWith('Under ')) return label.replace('.', ',');
-    return label;
-  }
-
-  function calcolaTop3Giocate() { return []; }
-  function leggiSelezioniSchedina() {
-    try { return JSON.parse(localStorage.getItem('ft_schedina_selezioni') || '[]'); }
-    catch (e) { return []; }
-  }
-  function scriviSelezioniSchedina(arr) {
-    try { localStorage.setItem('ft_schedina_selezioni', JSON.stringify(arr)); }
-    catch (e) {}
-  }
-  function toggleSelezioneSchedina() { return false; }
-
-  console.log('✅ Modulo Home v9 FUTURISTIC caricato');
+  console.log('✅ Modulo Home v9 FUTURISTIC caricato - FIX useFiltroCampionati');
 
 })();
