@@ -1,5 +1,5 @@
 // ============================================================
-// home.js - Modulo Home (FUTURISTIC + CHAMP BAR PC + MOBILE SCROLL)
+// home.js - Modulo Home (FUTURISTIC + MOBILE FIX)
 // ============================================================
 
 (function () {
@@ -29,7 +29,6 @@
     return matches.map(normalizeCampionato);
   };
 
-  // Detect mobile
   const useIsMobile = () => {
     const [isMobile, setIsMobile] = useState(() => window.innerWidth < 900);
     useEffect(() => {
@@ -40,7 +39,6 @@
     return isMobile;
   };
 
-  // Stili griglia nazioni
   (function injectNazioniStyles() {
     if (document.getElementById('home-nazioni-styles')) return;
     const style = document.createElement('style');
@@ -414,9 +412,6 @@
     );
   };
 
-  // ============================================================
-  // SEZIONE CAMPIONATO (Tabella)
-  // ============================================================
   const SezioneCampionato = ({ campionato, matches, allMatches, hideHeader = false }) => {
     const partiteCampionato = matches
       .filter(m => m.campionato === campionato)
@@ -494,9 +489,6 @@
     );
   };
 
-  // ============================================================
-  // VISTA DETTAGLIO NAZIONE (PC)
-  // ============================================================
   const VistaNazione = ({ nazione, matches, onBack }) => {
     const info = NAZIONI[nazione];
     if (!info) return null;
@@ -572,12 +564,13 @@
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {campionati.map(camp => {
-          const color = window.getChampColor(camp);
+          const nome = camp.nome || camp;
           const nPartite = camp.nPartite || 0;
+          const color = window.getChampColor(nome);
           return (
             <button
-              key={camp.nome || camp}
-              onClick={() => onSelect(camp.nome || camp)}
+              key={nome}
+              onClick={() => onSelect(nome)}
               style={{
                 display: 'flex', alignItems: 'center', gap: '12px',
                 padding: '12px 14px', borderRadius: '12px',
@@ -587,10 +580,10 @@
                 boxShadow: `0 4px 16px ${color}33`,
               }}
             >
-              {window.ChampLogo && <window.ChampLogo campionato={camp.nome || camp} size={32} />}
+              {window.ChampLogo && <window.ChampLogo campionato={nome} size={32} />}
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text)' }}>
-                  {camp.nome || camp}
+                  {nome}
                 </div>
                 {nPartite > 0 && (
                   <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
@@ -749,61 +742,6 @@
   };
 
   // ============================================================
-  // CHAMP BAR ORIZZONTALE (PC)
-  // ============================================================
-  const ChampBar = ({ matches, campionatoSelezionato, onSelect }) => {
-    const normalizeDate = window.normalizeDate;
-    const todayStr = window.getTodayStr();
-
-    const campionatiDisponibili = useMemo(() => {
-      return window.CHAMPIONSHIP_LIST.filter(c =>
-        matches.some(m => m.campionato === c)
-      );
-    }, [matches]);
-
-    return (
-      <div className="champ-bar">
-        {campionatiDisponibili.map(camp => {
-          const color = window.getChampColor(camp);
-          const isActive = campionatoSelezionato === camp;
-          const nPartiteOggi = matches.filter(m =>
-            m.campionato === camp && m.stato === 'Futura' && normalizeDate(m.data) === todayStr
-          ).length;
-
-          return (
-            <button
-              key={camp}
-              onClick={() => onSelect(camp)}
-              className={`champ-bar-item ${isActive ? 'active' : ''}`}
-              style={{
-                borderColor: isActive ? 'var(--neon-cyan)' : `${color}66`,
-              }}
-            >
-              {window.ChampLogo && <window.ChampLogo campionato={camp} size={22} />}
-              <span className="champ-bar-name">
-                {camp
-                  .replace(' - Girone A', '/A')
-                  .replace(' - Girone B', '/B')
-                  .replace(' - Girone C', '/C')
-                  .replace('Jupiler Pro League', 'Jupiler')
-                  .replace('EFL Championship', 'Championship')
-                  .replace('Scottish Premiership', 'Scottish')
-                  .replace('Segunda División', 'Segunda')
-                  .replace('2. Bundesliga', '2. Bundes')
-                  .replace('Eerste Divisie', 'Eerste')
-                }
-              </span>
-              {nPartiteOggi > 0 && (
-                <span className="champ-bar-badge">{nPartiteOggi}</span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-    );
-  };
-
-  // ============================================================
   // COMPONENTE PRINCIPALE
   // ============================================================
   function HomeComponent({ matches, championships, onSelectMatch, setTab, selectedFamiglie, weatherCache }) {
@@ -865,7 +803,20 @@
         // Se una nazione è selezionata → lista campionati
         if (nazioneSelezionata) {
           const info = NAZIONI[nazioneSelezionata];
-          if (!info) return null;
+
+          if (!info) {
+            return (
+              <div className="card" style={{ textAlign: 'center', padding: '30px' }}>
+                <div style={{ color: 'var(--neon-red)', marginBottom: '12px' }}>
+                  Nazione non trovata
+                </div>
+                <button className="btn" onClick={() => setNazioneSelezionata(null)}>
+                  ← Torna alle nazioni
+                </button>
+              </div>
+            );
+          }
+
           const campionatiNazione = info.campionati
             .filter(c => matchesPuliti.some(m => m.campionato === c))
             .map(c => ({
@@ -891,10 +842,16 @@
                 </h2>
               </div>
 
-              <MobileCampScelta
-                campionati={campionatiNazione}
-                onSelect={(camp) => setCampionatoMobile(camp)}
-              />
+              {campionatiNazione.length === 0 ? (
+                <div className="card" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-dim)' }}>
+                  Nessun campionato disponibile per {nazioneSelezionata}
+                </div>
+              ) : (
+                <MobileCampScelta
+                  campionati={campionatiNazione}
+                  onSelect={(camp) => setCampionatoMobile(camp)}
+                />
+              )}
             </div>
           );
         }
@@ -983,6 +940,6 @@
     normalizeMatches, normalizeCampionato, CHINESE_TEAMS,
   };
 
-  console.log('✅ Modulo Home FUTURISTIC caricato');
+  console.log('✅ Modulo Home FUTURISTIC caricato (FIX MOBILE)');
 
 })();

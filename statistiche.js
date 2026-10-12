@@ -1,9 +1,7 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v6 - NO MC in Tutte le Giocate)
-// - Tutte le Giocate usa SOLO getGiocataPct (allineato al Palinsesto)
-// - Riepilogo AI mantiene il Monte Carlo
-// - Ordine Tutte le Giocate: FISSE → DC → GG/NG → OVER → UNDER → Multigol → resto
-// - Quote affiancate con fallback visibile "📊 N/D" se mancante
+// statistiche.js - Modulo Statistiche (v7)
+// ✅ Classifica con FORMA ultimi 5 + FASCIA GOL con %
+// ✅ Ultimi avversari sotto la squadra giusta
 // ============================================================
 
 (function () {
@@ -12,7 +10,7 @@
   const { useState, useEffect, useMemo } = React;
 
   // ============================================================
-  // FORMATTAZIONE ETICHETTE GIOCATE
+  // FORMATTAZIONE ETICHETTE
   // ============================================================
   const formatGiocataLabel = (familyId, label) => {
     if (!label) return '—';
@@ -24,9 +22,7 @@
 
     if (familyId === 'mg_casa_ospite') {
       const parts = label.split('+');
-      if (parts.length === 2) {
-        return `MG ${parts[0]} Casa + MG ${parts[1]} Ospite`;
-      }
+      if (parts.length === 2) return `MG ${parts[0]} Casa + MG ${parts[1]} Ospite`;
     }
 
     if (familyId === 'dc_multigol') {
@@ -59,7 +55,7 @@
   };
 
   // ============================================================
-  // CALCOLO DOPPIA CHANCE (usato solo dal Riepilogo AI con MC)
+  // CALCOLO DC
   // ============================================================
   const calcDC = (mc, dcCode) => {
     if (!mc) return 0;
@@ -80,9 +76,6 @@
     return 0;
   };
 
-  // ============================================================
-  // PROBABILITÀ COMBINATE DAL MONTE CARLO (solo per Riepilogo AI)
-  // ============================================================
   const calcolaCombinata = (mc, dcCode, tipo, soglia) => {
     if (!mc || !mc.risultati) return 0;
     const totalSim = mc.numSimulations || 10000;
@@ -194,23 +187,14 @@
     return Math.round((count / totalSim) * 100);
   };
 
-  // ============================================================
-  // ⭐ calcolaPctGiocata v6:
-  // - Se `mc` è presente (Riepilogo AI) → usa il Monte Carlo
-  // - Se `mc` è null (Tutte le Giocate) → usa SOLO getGiocataPct
-  // Questo allinea Tutte le Giocate al Palinsesto
-  // ============================================================
   const calcolaPctGiocata = (familyId, opt, mc, stats) => {
-    // Se abbiamo il Monte Carlo, usiamolo (solo Riepilogo AI)
     if (mc && mc.risultati) {
       if (familyId === 'fisse') {
         if (opt === '1') return mc.homeWins || 0;
         if (opt === 'X') return mc.draws || 0;
         if (opt === '2') return mc.awayWins || 0;
       }
-      if (familyId === 'dc') {
-        return calcDC(mc, opt);
-      }
+      if (familyId === 'dc') return calcDC(mc, opt);
       if (familyId === 'gg_ng') {
         if (opt === 'GG' || opt === 'Goal-Goal') return mc.gg || 0;
         if (opt === 'NG' || opt === 'No Goal')   return mc.ng || 0;
@@ -227,18 +211,14 @@
         if (opt === 'Under 3.5') return mc.under35 || 0;
         if (opt === 'Under 4.5') return mc.under45 || 0;
       }
-      if (familyId === 'multigol') {
-        return calcolaMultigol(mc, opt);
-      }
+      if (familyId === 'multigol') return calcolaMultigol(mc, opt);
       if (familyId === 'dc_over') {
         const parts = opt.split('+');
         if (parts.length === 2) {
           const dcCode = parts[0];
           const oPart = parts[1].replace('O', '').replace(',', '.');
           const soglia = parseFloat(oPart);
-          if (!isNaN(soglia)) {
-            return calcolaCombinata(mc, dcCode, 'over', soglia);
-          }
+          if (!isNaN(soglia)) return calcolaCombinata(mc, dcCode, 'over', soglia);
         }
       }
       if (familyId === 'dc_under') {
@@ -247,9 +227,7 @@
           const dcCode = parts[0];
           const uPart = parts[1].replace('U', '').replace(',', '.');
           const soglia = parseFloat(uPart);
-          if (!isNaN(soglia)) {
-            return calcolaCombinata(mc, dcCode, 'under', soglia);
-          }
+          if (!isNaN(soglia)) return calcolaCombinata(mc, dcCode, 'under', soglia);
         }
       }
       if (familyId === 'dc_multigol') {
@@ -260,12 +238,9 @@
           return calcolaCombinataDCMultigol(mc, dcCode, mgLabel);
         }
       }
-      if (familyId === 'mg_casa_ospite') {
-        return calcolaCombinataMGCasaOspite(mc, opt);
-      }
+      if (familyId === 'mg_casa_ospite') return calcolaCombinataMGCasaOspite(mc, opt);
     }
 
-    // ⭐ Fallback / Tutte le Giocate: SOLO getGiocataPct
     if (typeof window.getGiocataPct === 'function' && stats) {
       return window.getGiocataPct(opt, stats, stats.homeMG, stats.awayMG, stats.mgTot) || 0;
     }
@@ -274,7 +249,7 @@
   };
 
   // ============================================================
-  // SIMULAZIONE MONTE CARLO (solo Riepilogo AI)
+  // MONTE CARLO
   // ============================================================
   const getTeamPoissonParams = (teamName, allMatches) => {
     const matches = allMatches.filter(m =>
@@ -385,7 +360,7 @@
   };
 
   // ============================================================
-  // AI ANALYSIS (Riepilogo AI - MANTIENE il Monte Carlo)
+  // AI ANALYSIS
   // ============================================================
   const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
     const getChampColor = window.getChampColor;
@@ -452,7 +427,7 @@
     if (!mc) {
       return (
         <div className="card">
-          <p style={{ color: 'var(--text-muted)', marginBottom: '8px' }}>⏳ Caricamento...</p>
+          <p style={{ color: 'var(--text-dim)', marginBottom: '8px' }}>⏳ Caricamento...</p>
           <button className="btn" onClick={() => runSimulation(match.casa, match.ospiti)}>📊 Avvia Simulazione</button>
         </div>
       );
@@ -487,32 +462,32 @@
             📊 Simulazione Poisson + Monte Carlo
           </h3>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>🔢 {mc.numSimulations} simulazioni</span>
-            <button onClick={refresh} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '13px' }}>🔄 Rigenera</button>
+            <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>🔢 {mc.numSimulations} simulazioni</span>
+            <button onClick={refresh} style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '13px' }}>🔄 Rigenera</button>
           </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', background: 'var(--card)', padding: '12px', borderRadius: '8px', border: '2px solid var(--accent)' }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>1 - X - 2</div>
+            <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>1 - X - 2</div>
             <div style={{ fontSize: '18px', fontWeight: 'bold' }}>
-              <span style={{ color: mc.homeWins > mc.awayWins ? 'var(--win)' : 'var(--text)' }}>{mc.homeWins}%</span>
-              <span style={{ color: 'var(--draw)', margin: '0 4px' }}>|</span>
-              <span style={{ color: mc.draws > mc.homeWins && mc.draws > mc.awayWins ? 'var(--draw)' : 'var(--text)' }}>{mc.draws}%</span>
-              <span style={{ color: 'var(--draw)', margin: '0 4px' }}>|</span>
-              <span style={{ color: mc.awayWins > mc.homeWins ? 'var(--lose)' : 'var(--text)' }}>{mc.awayWins}%</span>
+              <span style={{ color: mc.homeWins > mc.awayWins ? 'var(--neon-green)' : 'var(--text)' }}>{mc.homeWins}%</span>
+              <span style={{ color: 'var(--neon-gold)', margin: '0 4px' }}>|</span>
+              <span style={{ color: mc.draws > mc.homeWins && mc.draws > mc.awayWins ? 'var(--neon-gold)' : 'var(--text)' }}>{mc.draws}%</span>
+              <span style={{ color: 'var(--neon-gold)', margin: '0 4px' }}>|</span>
+              <span style={{ color: mc.awayWins > mc.homeWins ? 'var(--neon-red)' : 'var(--text)' }}>{mc.awayWins}%</span>
             </div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>12 + Under 4.5</div>
+            <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>12 + Under 4.5</div>
             <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
               <span className={`giocata-pct ${getPercentualeClasse(mc.pct12Under45)}`}>{mc.pct12Under45}%</span>
             </div>
           </div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Risultato più probabile</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--accent)' }}>
-              {mc.maxResult} <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>({mc.maxResultPct}%)</span>
+            <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Risultato più probabile</div>
+            <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--neon-gold)' }}>
+              {mc.maxResult} <span style={{ fontSize: '12px', color: 'var(--text-dim)' }}>({mc.maxResultPct}%)</span>
             </div>
           </div>
         </div>
@@ -530,9 +505,9 @@
               <div key={idx} style={{
                 background: 'var(--card)', padding: '12px 16px', borderRadius: '8px',
                 textAlign: 'center',
-                border: isBomb ? '2px solid var(--accent)' : (isGGNG ? '2px solid #e74c3c' : '1px solid var(--border)')
+                border: isBomb ? '2px solid var(--neon-gold)' : (isGGNG ? '2px solid #e74c3c' : '1px solid var(--border)')
               }}>
-                <div style={{ fontSize: '11px', color: isGGNG ? '#e74c3c' : 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 'bold' }}>
+                <div style={{ fontSize: '11px', color: isGGNG ? '#e74c3c' : 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 'bold' }}>
                   {best.familyIcon} {best.familyLabel}
                 </div>
                 <div style={{ fontSize: '12px', color: 'var(--text)', marginTop: '2px', fontWeight: 'bold' }}>
@@ -552,7 +527,7 @@
   };
 
   // ============================================================
-  // MATCH DETAIL (SEMPLIFICATO)
+  // MATCH DETAIL
   // ============================================================
   const MatchDetail = ({ match, allMatches }) => {
     const calcFormAndStats = window.calcFormAndStats;
@@ -609,7 +584,7 @@
             <TeamLogo teamName={match.casa} championship={match.campionato} size={50} />
             <span style={{ marginTop: '8px', color: getChampColor(match.campionato) }}>{match.casa}</span>
           </div>
-          <span style={{ color: 'var(--text-muted)', fontSize: '20px' }}>VS</span>
+          <span style={{ color: 'var(--text-dim)', fontSize: '20px' }}>VS</span>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <TeamLogo teamName={match.ospiti} championship={match.campionato} size={50} />
             <span style={{ marginTop: '8px', color: getChampColor(match.campionato) }}>{match.ospiti}</span>
@@ -678,54 +653,30 @@
   };
 
   // ============================================================
-  // TUTTE LE FAMIGLIE (v6 - SENZA Monte Carlo)
+  // TUTTE LE FAMIGLIE
   // ============================================================
   const TutteLeFamigliePanel = ({ match, allMatches }) => {
-    const getChampColor = window.getChampColor;
     const getPercentualeClasse = window.getPercentualeClasse;
     const FAMIGLIE = window.FAMIGLIE_GIOCATE;
 
     const stats = window.computeMatchStats(match, allMatches);
-    // ⭐ v6: NIENTE Monte Carlo qui — solo getGiocataPct, per coerenza col Palinsesto
 
     if (stats.error) return null;
 
-    // ⭐ ORDINE: FISSE → DC → GG/NG → OVER → UNDER → Multigol → resto
     const ORDINE = ['fisse', 'dc', 'gg_ng', 'over', 'under', 'multigol', 'dc_over', 'dc_under', 'mg_casa_ospite', 'dc_multigol'];
 
     const hasQM = !!(window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function');
-    const qmStatus = (() => {
-      if (!hasQM) return '❌ QuoteManager non disponibile';
-      try {
-        const meta = window.PDFQuoteParser?.leggiMeta?.();
-        if (!meta || !meta.numPartite) return '⚠️ PDF non caricato (0 partite)';
-        return `✅ PDF caricato (${meta.numPartite} partite)`;
-      } catch (e) {
-        return '⚠️ Impossibile leggere meta PDF';
-      }
-    })();
-
-    useEffect(() => {
-      console.log('🔍 TutteLeFamigliePanel — Stato QuoteManager:', qmStatus);
-      if (hasQM) {
-        const sampleQ = window.QuoteManager.analizzaGiocata(match, 'fisse', '1', 50);
-        console.log('🔍 Test analizzaGiocata (fisse/1):', sampleQ);
-      }
-    }, [match.id]);
 
     const sezioni = ORDINE
       .filter(familyId => FAMIGLIE[familyId])
       .map(familyId => {
         const family = FAMIGLIE[familyId];
         const opzioni = family.options.map(opt => {
-          // ⭐ v6: passiamo `null` come `mc` → usa SOLO getGiocataPct
           const pct = calcolaPctGiocata(familyId, opt, null, stats);
 
-          // QUOTA
           let quota = null;
           let edge = null;
           let isValue = false;
-          let fonte = 'N/D';
 
           if (hasQM) {
             try {
@@ -734,14 +685,11 @@
                 quota = q.quotaBook;
                 edge = q.edge;
                 isValue = q.isValue;
-                fonte = 'PDF';
               }
-            } catch (e) {
-              console.warn(`⚠️ Errore quota ${familyId}/${opt}:`, e.message);
-            }
+            } catch (e) {}
           }
 
-          return { opt, pct, quota, edge, isValue, fonte };
+          return { opt, pct, quota, edge, isValue };
         });
 
         return { familyId, family, opzioni };
@@ -749,29 +697,9 @@
 
     return (
       <div className="card" style={{ marginTop: '20px' }}>
-        <h3 style={{ color: 'var(--accent)', marginBottom: '8px' }}>
+        <h3 style={{ color: 'var(--neon-cyan)', marginBottom: '8px' }}>
           📊 Tutte le Giocate — {match.casa} vs {match.ospiti}
         </h3>
-
-        {/* Status QuoteManager */}
-        <div style={{
-          marginBottom: '12px', padding: '6px 12px', borderRadius: '6px',
-          background: 'var(--surface)', border: '1px solid var(--border)',
-          fontSize: '11px', color: 'var(--text-muted)',
-          display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px'
-        }}>
-          <span>💰 <b>Stato Quote PDF:</b> {qmStatus}</span>
-          {hasQM && (
-            <button
-              onClick={() => { if (window.QuoteManager.scaricaEAggiorna) window.QuoteManager.scaricaEAggiorna(true); }}
-              style={{
-                background: 'transparent', border: 'none', color: 'var(--accent)',
-                cursor: 'pointer', fontSize: '11px', fontWeight: 'bold', textDecoration: 'underline'
-              }}>
-              🔄 Ricarica PDF
-            </button>
-          )}
-        </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
           {sezioni.map(({ familyId, family, opzioni }) => (
@@ -781,19 +709,18 @@
               padding: '12px',
             }}>
               <h4 style={{
-                color: familyId === 'gg_ng' ? '#e74c3c' : 'var(--accent)',
+                color: familyId === 'gg_ng' ? '#e74c3c' : 'var(--neon-cyan)',
                 marginBottom: '8px', fontSize: '14px',
               }}>
                 {family.icon} {family.label}
               </h4>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                {opzioni.map(({ opt, pct, quota, edge, isValue, fonte }) => (
+                {opzioni.map(({ opt, pct, quota, isValue }) => (
                   <div key={opt} style={{
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     padding: '6px 8px', borderRadius: '6px',
-                    background: 'var(--card)',
-                    fontSize: '12px',
+                    background: 'var(--card)', fontSize: '12px',
                   }}>
                     <span style={{ fontWeight: 'bold', color: 'var(--text)', flex: 1 }}>
                       {formatGiocataLabel(familyId, opt)}
@@ -803,28 +730,14 @@
                         style={{ fontSize: '11px', padding: '2px 8px' }}>
                         {pct}%
                       </span>
-                      {/* QUOTA con fallback visibile */}
-                      <span
-                        title={quota ? (isValue ? `VALUE BET! Edge: +${edge}%` : `Quota Marathonbet`) : 'Quota non disponibile'}
-                        style={{
+                      {quota && (
+                        <span style={{
                           fontSize: '11px', padding: '2px 6px', borderRadius: '4px',
-                          background: quota
-                            ? (isValue ? 'rgba(111, 207, 151, 0.2)' : 'rgba(243, 156, 18, 0.15)')
-                            : 'rgba(139, 148, 158, 0.1)',
-                          color: quota
-                            ? (isValue ? 'var(--win)' : 'var(--accent)')
-                            : 'var(--text-muted)',
+                          background: isValue ? 'rgba(0, 255, 136, 0.2)' : 'rgba(255, 215, 0, 0.15)',
+                          color: isValue ? 'var(--neon-green)' : 'var(--neon-gold)',
                           fontWeight: 'bold',
-                          border: quota && isValue ? '1px solid var(--win)' : '1px solid transparent',
-                          minWidth: '52px',
-                          textAlign: 'center',
-                        }}>
-                        {quota ? (
-                        <>💰 {quota.toFixed(2)}</>
-                        ) : (
-                        <>📊 N/D</>
-                       )}
-                      </span>
+                        }}>💰 {quota.toFixed(2)}</span>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -832,21 +745,18 @@
             </div>
           ))}
         </div>
-
-        <div style={{ marginTop: '12px', fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center' }}>
-          💰 = Quota Marathonbet (PDF) • 📊 N/D = Quota non disponibile
-        </div>
       </div>
     );
   };
 
   // ============================================================
-  // STANDINGS
+  // STANDINGS (FIX: forma ultimi 5 + fascia gol)
   // ============================================================
   const Standings = ({ matches, filterChampionship, highlightTeams = [] }) => {
     const [view, setView] = useState('generale');
     const TeamLogo = window.TeamLogo;
     const getMultigolRange = window.getMultigolRange;
+    const calcFormAndStats = window.calcFormAndStats;
 
     let allMatchesInChamp = matches;
     if (filterChampionship && filterChampionship !== 'Tutti') {
@@ -893,10 +803,40 @@
         if (b[1].dr !== a[1].dr) return b[1].dr - a[1].dr;
         return b[1].gf - a[1].gf;
       })
-      .map(([name, stats], index) => ({ pos: index + 1, name, ...stats }));
+      .map(([name, stats], index) => {
+        const formData = calcFormAndStats(matches, name);
+        const multigol = getMultigolRange(name, matches);
+        return {
+          pos: index + 1,
+          name,
+          ...stats,
+          form: formData.form,
+          multigolLabel: multigol.label,
+          multigolPct: multigol.pct,
+          multigolRange: multigol.range,
+        };
+      });
 
-    const getMultigolForTeam = (teamName) => getMultigolRange(teamName, matches);
     const champToShow = filterChampionship && filterChampionship !== 'Tutti' ? filterChampionship : null;
+
+    const renderFormSquares = (formStr) => {
+      if (!formStr) return <span>N/D</span>;
+      return (
+        <div style={{ display: 'flex', gap: '2px', justifyContent: 'center' }}>
+          {[...formStr].map((letter, idx) => (
+            <span key={idx} style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              width: '18px', height: '18px', borderRadius: '4px',
+              background: letter === 'V' ? 'var(--neon-green)' :
+                         letter === 'P' ? 'var(--neon-gold)' :
+                         letter === 'S' ? 'var(--neon-red)' : 'var(--text-dim)',
+              color: '#000', fontWeight: 900, fontSize: '11px',
+              fontFamily: 'Orbitron, sans-serif',
+            }}>{letter}</span>
+          ))}
+        </div>
+      );
+    };
 
     return (
       <div>
@@ -920,6 +860,7 @@
                 <th className="num">GF</th>
                 <th className="num">GS</th>
                 <th className="num">DR</th>
+                <th className="num">Forma</th>
                 <th className="num">Fascia Gol</th>
                 <th className="num">%</th>
               </tr>
@@ -927,7 +868,6 @@
             <tbody>
               {sorted.map(row => {
                 const isHighlighted = highlightTeams.includes(row.name);
-                const multigol = getMultigolForTeam(row.name);
                 const hasPlayed = row.pg > 0;
                 return (
                   <tr key={row.name} className={isHighlighted ? 'highlighted' : ''} style={{ opacity: hasPlayed ? 1 : 0.5 }}>
@@ -945,13 +885,20 @@
                     <td className="num">{row.s}</td>
                     <td className="num">{row.gf}</td>
                     <td className="num">{row.gs}</td>
-                    <td className="num" style={{ color: row.dr > 0 ? 'var(--win)' : (row.dr < 0 ? 'var(--lose)' : 'var(--text-muted)') }}>
+                    <td className="num" style={{ color: row.dr > 0 ? 'var(--neon-green)' : (row.dr < 0 ? 'var(--neon-red)' : 'var(--text-dim)') }}>
                       {row.dr > 0 ? '+' : ''}{row.dr}
                     </td>
                     <td className="num">
-                      {hasPlayed ? <span className={`multigol-badge range-${multigol.range}`}>{multigol.label}</span> : <span>—</span>}
+                      {hasPlayed ? renderFormSquares(row.form) : <span>—</span>}
                     </td>
-                    <td className="num">{hasPlayed ? multigol.pct + '%' : '—'}</td>
+                    <td className="num">
+                      {hasPlayed ? (
+                        <span className={`multigol-badge range-${row.multigolRange}`}>
+                          {row.multigolLabel}
+                        </span>
+                      ) : <span>—</span>}
+                    </td>
+                    <td className="num">{hasPlayed ? row.multigolPct + '%' : '—'}</td>
                   </tr>
                 );
               })}
@@ -991,18 +938,18 @@
       return (
         <div className="card" style={{ height: '100%', minHeight: '200px' }}>
           <h4>📊 Risultati Frequenti - {teamName}</h4>
-          <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>Nessuna partita</div>
+          <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-dim)' }}>Nessuna partita</div>
         </div>
       );
     }
 
     const totalMatches = data.reduce((sum, d) => sum + d.count, 0);
-    const getResultColor = (tipo) => tipo === 'V' ? 'var(--win)' : (tipo === 'P' ? 'var(--draw)' : 'var(--lose)');
+    const getResultColor = (tipo) => tipo === 'V' ? 'var(--neon-green)' : (tipo === 'P' ? 'var(--neon-gold)' : 'var(--neon-red)');
 
     return (
       <div className="card" style={{ height: '100%', minHeight: '280px', overflow: 'hidden' }}>
         <h4 style={{ fontSize: '14px', marginBottom: '4px' }}>📊 Risultati Frequenti - {teamName}</h4>
-        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '6px' }}>📅 {totalMatches} partite giocate</div>
+        <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '6px' }}>📅 {totalMatches} partite giocate</div>
         <div className="freq-table-wrap">
           <table className="freq-table">
             <thead><tr><th>#</th><th>Risultato</th><th>Freq.</th><th>%</th></tr></thead>
@@ -1012,7 +959,7 @@
                 const color = getResultColor(d.tipo);
                 return (
                   <tr key={idx}>
-                    <td style={{ fontWeight: 'bold', color: 'var(--accent)' }}>#{idx + 1}</td>
+                    <td style={{ fontWeight: 'bold', color: 'var(--neon-gold)' }}>#{idx + 1}</td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
                         <span style={{ display: 'inline-block', width: '24px', height: '24px', borderRadius: '4px', backgroundColor: color, border: '1px solid var(--border)' }} />
@@ -1042,14 +989,13 @@
   // FREQUENZA GOL
   // ============================================================
   const FrequenzaGol = ({ teamName, allMatches }) => {
-    const getChampColor = window.getChampColor;
     const teamMatches = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName));
 
     if (teamMatches.length === 0) {
       return (
         <div className="card" style={{ padding: '12px', height: '100%', minHeight: '150px' }}>
           <h4 style={{ fontSize: '13px', marginBottom: '6px' }}>⚽ Frequenza Gol - {teamName}</h4>
-          <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '12px 0' }}>Nessuna partita</div>
+          <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '12px 0' }}>Nessuna partita</div>
         </div>
       );
     }
@@ -1067,27 +1013,24 @@
       else if (g === 4) freq[4]++;
       else freq['5+']++;
     });
-    const colorMap = { 0: 'var(--lose)', 1: 'var(--draw)', 2: 'var(--win)', 3: 'var(--win)', 4: 'var(--accent)', '5+': 'var(--accent2)' };
+    const colorMap = { 0: 'var(--neon-red)', 1: 'var(--neon-gold)', 2: 'var(--neon-green)', 3: 'var(--neon-green)', 4: 'var(--neon-cyan)', '5+': 'var(--neon-magenta)' };
 
     return (
       <div className="card" style={{ padding: '12px', height: '100%', minHeight: '150px' }}>
-        <h4 style={{ fontSize: '13px', marginBottom: '6px', color: getChampColor(teamName) }}>⚽ Frequenza Gol - {teamName}</h4>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', fontSize: '13px', color: 'var(--accent)', fontWeight: 'bold' }}>
+        <h4 style={{ fontSize: '13px', marginBottom: '6px' }}>⚽ Frequenza Gol - {teamName}</h4>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', fontSize: '13px', color: 'var(--neon-cyan)', fontWeight: 'bold' }}>
           <span>📊 {total} partite</span>
-          <span>🎯 Media: <span style={{ fontSize: '18px', color: '#ffff00' }}>{mediaGol}</span> gol/partita</span>
+          <span>🎯 Media: <span style={{ fontSize: '18px', color: 'var(--neon-gold)' }}>{mediaGol}</span> gol/partita</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '4px', marginTop: '4px' }}>
           {Object.entries(freq).map(([key, count]) => {
             const pct = Math.round((count / total) * 100);
-            const color = colorMap[key] || 'var(--text-muted)';
+            const color = colorMap[key] || 'var(--text-dim)';
             return (
               <div key={key} style={{ textAlign: 'center', background: 'var(--surface)', padding: '4px 2px', borderRadius: '4px', border: '1px solid var(--border)' }}>
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{key}</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>{key}</div>
                 <div style={{ fontSize: '16px', fontWeight: 'bold', color: color }}>{pct}%</div>
-                <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>({count})</div>
-                <div className="form-bar" style={{ height: '3px', marginTop: '2px' }}>
-                  <div className="form-bar-fill" style={{ width: `${Math.min(pct, 100)}%`, background: color }} />
-                </div>
+                <div style={{ fontSize: '10px', color: 'var(--text-dim)' }}>({count})</div>
               </div>
             );
           })}
@@ -1097,7 +1040,7 @@
   };
 
   // ============================================================
-  // INDICE AFFIDABILITA
+  // INDICE AFFIDABILITÀ
   // ============================================================
   const IndiceAffidabilita = ({ teamName, allMatches }) => {
     const teamMatches = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName));
@@ -1119,23 +1062,23 @@
         <h4>🎯 Indice di Affidabilità - {teamName}</h4>
         <div className="affidabilita-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
           <div>
-            <div style={{ fontSize: '28px', fontWeight: 'bold', color: affidabilita > 70 ? 'var(--win)' : 'var(--draw)' }}>
+            <div style={{ fontSize: '28px', fontWeight: 'bold', color: affidabilita > 70 ? 'var(--neon-green)' : 'var(--neon-gold)' }}>
               {Math.round(affidabilita)}%
             </div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Affidabilità</div>
-            <div className="form-bar"><div className="form-bar-fill" style={{ width: `${affidabilita}%`, background: affidabilita > 70 ? 'var(--win)' : 'var(--draw)' }}></div></div>
+            <div style={{ fontSize: '12px', color: 'var(--text-dim)' }}>Affidabilità</div>
+            <div className="form-bar"><div className="form-bar-fill" style={{ width: `${affidabilita}%` }}></div></div>
           </div>
           <div>
-            <div style={{ fontSize: '28px', fontWeight: 'bold', color: stabilita > 60 ? 'var(--win)' : 'var(--draw)' }}>
+            <div style={{ fontSize: '28px', fontWeight: 'bold', color: stabilita > 60 ? 'var(--neon-green)' : 'var(--neon-gold)' }}>
               {Math.round(stabilita)}%
             </div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Stabilità</div>
-            <div className="form-bar"><div className="form-bar-fill" style={{ width: `${stabilita}%`, background: stabilita > 60 ? 'var(--win)' : 'var(--draw)' }}></div></div>
+            <div style={{ fontSize: '12px', color: 'var(--text-dim)' }}>Stabilità</div>
+            <div className="form-bar"><div className="form-bar-fill" style={{ width: `${stabilita}%` }}></div></div>
           </div>
           <div>
-            <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--accent)' }}>{count}</div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Partite analizzate</div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{count < 10 ? '⚠️ Poche partite' : '✅ Campione sufficiente'}</div>
+            <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--neon-cyan)' }}>{count}</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-dim)' }}>Partite analizzate</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>{count < 10 ? '⚠️ Poche partite' : '✅ Campione sufficiente'}</div>
           </div>
         </div>
       </div>
@@ -1160,7 +1103,7 @@
     if (teamMatches.length === 0) {
       return (
         <div className="card" style={{ padding: '12px', textAlign: 'center' }}>
-          <p style={{ color: 'var(--text-muted)' }}>Nessuna partita giocata per {teamName}.</p>
+          <p style={{ color: 'var(--text-dim)' }}>Nessuna partita giocata per {teamName}.</p>
         </div>
       );
     }
@@ -1175,14 +1118,14 @@
     };
 
     const getOpponent = (match, team) => match.casa === team ? match.ospiti : match.casa;
-    const getResultColor = (r) => r === 'win' ? 'var(--win)' : (r === 'draw' ? 'var(--draw)' : 'var(--lose)');
+    const getResultColor = (r) => r === 'win' ? 'var(--neon-green)' : (r === 'draw' ? 'var(--neon-gold)' : 'var(--neon-red)');
 
     return (
       <div className="card" style={{ padding: '12px' }}>
         <h4 style={{ color: getChampColor(teamName), marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <TeamLogo teamName={teamName} championship={championship} size={20} />
           {teamName}
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 'normal', marginLeft: 'auto' }}>
+          <span style={{ fontSize: '12px', color: 'var(--text-dim)', fontWeight: 'normal', marginLeft: 'auto' }}>
             {teamMatches.length} partite
           </span>
         </h4>
@@ -1205,23 +1148,23 @@
                 gap: '8px', flexWrap: 'wrap'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '1', minWidth: '180px' }}>
-                  <span style={{ fontSize: '11px', color: 'var(--text-muted)', minWidth: '70px' }}>{formatDateEU(m.data)}</span>
+                  <span style={{ fontSize: '11px', color: 'var(--text-dim)', minWidth: '70px' }}>{formatDateEU(m.data)}</span>
                   <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text)' }}>
                     {isHome ? (
                       <>
-                        <span style={{ color: 'var(--accent)' }}>{teamName}</span>
-                        <span style={{ color: 'var(--text-muted)', margin: '0 4px' }}>-</span>
+                        <span style={{ color: 'var(--neon-cyan)' }}>{teamName}</span>
+                        <span style={{ color: 'var(--text-dim)', margin: '0 4px' }}>-</span>
                         <span>{opponent}</span>
                       </>
                     ) : (
                       <>
                         <span>{opponent}</span>
-                        <span style={{ color: 'var(--text-muted)', margin: '0 4px' }}>-</span>
-                        <span style={{ color: 'var(--accent)' }}>{teamName}</span>
+                        <span style={{ color: 'var(--text-dim)', margin: '0 4px' }}>-</span>
+                        <span style={{ color: 'var(--neon-cyan)' }}>{teamName}</span>
                       </>
                     )}
                   </span>
-                  <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                  <span style={{ fontSize: '10px', color: 'var(--text-dim)' }}>
                     {isHome ? '🏠 Casa' : '✈️ Trasferta'}
                   </span>
                 </div>
@@ -1248,15 +1191,14 @@
   };
 
   // ============================================================
-  // WEATHER PROFESSIONALE
+  // WEATHER
   // ============================================================
   const WeatherProfessionale = ({ weatherData, city, matchDate }) => {
     if (!weatherData) {
       return (
-        <div className="weather-professionale" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+        <div className="weather-professionale" style={{ textAlign: 'center', color: 'var(--text-dim)' }}>
           <div style={{ fontSize: '48px', marginBottom: '8px' }}>🌤️</div>
           <p>Dati meteo non disponibili per {city || 'questa località'}</p>
-          <p style={{ fontSize: '12px' }}>Open-Meteo è gratuito e non richiede chiave API</p>
         </div>
       );
     }
@@ -1285,11 +1227,10 @@
       else if (weather.wind_speed > 5) risk += 1;
       if (weather.temp < -5 || weather.temp > 35) risk += 2;
       else if (weather.temp < 0 || weather.temp > 30) risk += 1;
-      if (weather.weather && (weather.weather.includes('Temporale') || weather.weather.includes('temporale'))) risk += 3;
-      if (risk >= 6) return { level: 'high', label: '🔴 ALTO - Rischio di rinvio o condizioni proibitive' };
-      if (risk >= 4) return { level: 'medium', label: '🟡 MEDIO - Possibili difficoltà per i giocatori' };
+      if (risk >= 6) return { level: 'high', label: '🔴 ALTO - Rischio di rinvio' };
+      if (risk >= 4) return { level: 'medium', label: '🟡 MEDIO - Possibili difficoltà' };
       if (risk >= 2) return { level: 'low', label: '🟢 BASSO - Condizioni accettabili' };
-      return { level: 'low', label: '🟢 OTTIMALE - Condizioni perfette per il calcio' };
+      return { level: 'low', label: '🟢 OTTIMALE - Condizioni perfette' };
     };
 
     const risk = getRiskLevel(weatherData);
@@ -1302,33 +1243,18 @@
           <div className="weather-info-main">
             <div className="weather-temp-main">{Math.round(weatherData.temp)}°C</div>
             <div className="weather-desc-main">{weatherData.weather || 'N/A'}</div>
-            <div className="weather-city-main">📍 {city || 'Località non specificata'} • 📅 {weatherData.forecast_date || matchDate || 'N/A'}</div>
+            <div className="weather-city-main">📍 {city || 'N/D'} • 📅 {weatherData.forecast_date || matchDate || 'N/A'}</div>
           </div>
           <div style={{ textAlign: 'right', minWidth: '100px' }}>
-            <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Temp. min / max</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--accent)' }}>
+            <div style={{ fontSize: '14px', color: 'var(--text-dim)' }}>Temp. min / max</div>
+            <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--neon-cyan)' }}>
               {Math.round(weatherData.temp_min)}° / {Math.round(weatherData.temp_max)}°
             </div>
           </div>
         </div>
-
-        <div className="weather-details-grid">
-          <div className="weather-detail-item">
-            <div className="wd-icon">💨</div>
-            <div className="wd-value">{Math.round(weatherData.wind_speed)} m/s</div>
-            <div className="wd-label">Vento</div>
-          </div>
-          <div className="weather-detail-item">
-            <div className="wd-icon">🌧️</div>
-            <div className="wd-value">{weatherData.rain > 0 ? weatherData.rain + ' mm' : '0 mm'}</div>
-            <div className="wd-label">Precipitazioni</div>
-          </div>
-        </div>
-
         <div className="weather-risk">
           <span className="risk-icon">⚠️</span>
           <span className="risk-text"><b>Valutazione meteo:</b> {risk.label}</span>
-          <span className={`risk-badge ${risk.level}`}>{risk.level.toUpperCase()}</span>
         </div>
       </div>
     );
@@ -1357,11 +1283,11 @@
           display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
           padding: '10px 14px', marginBottom: '14px',
           background: 'var(--surface)', borderRadius: '8px',
-          border: '1px solid var(--border)', fontSize: '12px', color: 'var(--text-muted)'
+          border: '1px solid var(--border)', fontSize: '12px', color: 'var(--text-dim)'
         }}>
-          <span>🏆 <b style={{ color: 'var(--accent)' }}>{campionatiAttivi.length}</b> campionati attivi</span>
+          <span>🏆 <b style={{ color: 'var(--neon-cyan)' }}>{campionatiAttivi.length}</b> campionati attivi</span>
           <span>•</span>
-          <span>📊 <b style={{ color: 'var(--accent)' }}>{matchesFiltrati.length}</b> partite totali</span>
+          <span>📊 <b style={{ color: 'var(--neon-cyan)' }}>{matchesFiltrati.length}</b> partite totali</span>
           <span style={{ marginLeft: 'auto', fontStyle: 'italic' }}>
             Modifica i filtri nel <b>Palinsesto</b> 📅
           </span>
@@ -1401,7 +1327,6 @@
               </div>
             </div>
 
-            {/* VISTA TUTTE LE FAMIGLIE */}
             {selectedMatch && (
               <TutteLeFamigliePanel match={selectedMatch} allMatches={matchesFiltrati} />
             )}
@@ -1461,7 +1386,7 @@
                   const currentRound = selectedMatch.round;
                   const prevRound = parseInt(currentRound) > 0 ? parseInt(currentRound) - 1 : null;
                   if (prevRound === null || isNaN(prevRound)) {
-                    return <p style={{ color: 'var(--text-muted)' }}>Giornata non numerica.</p>;
+                    return <p style={{ color: 'var(--text-dim)' }}>Giornata non numerica.</p>;
                   }
                   const prevMatches = matchesFiltrati.filter(m =>
                     m.campionato === selectedMatch.campionato &&
@@ -1471,7 +1396,7 @@
                   if (prevMatches.length === 0) {
                     return (
                       <div className="card">
-                        <p style={{ color: 'var(--text-muted)' }}>⚠️ Nessuna partita per la giornata {prevRound}.</p>
+                        <p style={{ color: 'var(--text-dim)' }}>⚠️ Nessuna partita per la giornata {prevRound}.</p>
                       </div>
                     );
                   }
@@ -1483,7 +1408,7 @@
                       </h3>
                       <div className="matches-grid">
                         {sortedPrev.map(m => (
-                          <div key={m.id} className="match-tab-history" style={{ borderLeftColor: getChampColor(m.campionato) }}>
+                          <div key={m.id} className="match-tab" style={{ borderLeftColor: getChampColor(m.campionato) }}>
                             <div className="tab-header" style={{ background: getChampColor(m.campionato) }}>{m.campionato}</div>
                             <div className="match-info">{m.casa} vs {m.ospiti}</div>
                             <div className="match-info">📅 {window.formatDateEU(m.data)}</div>
@@ -1492,7 +1417,10 @@
                                 <window.TeamLogo teamName={m.casa} championship={m.campionato} size={40} />
                                 <div className="team-name" style={{ fontSize: '14px' }}>{m.casa}</div>
                               </div>
-                              <div className="score" style={{ color: m.golCasa > m.golOspite ? 'var(--win)' : (m.golCasa === m.golOspite ? 'var(--draw)' : 'var(--lose)') }}>
+                              <div className="score" style={{
+                                fontSize: '24px', fontWeight: 'bold', padding: '0 12px',
+                                color: m.golCasa > m.golOspite ? 'var(--neon-green)' : (m.golCasa === m.golOspite ? 'var(--neon-gold)' : 'var(--neon-red)')
+                              }}>
                                 {m.golCasa} - {m.golOspite}
                               </div>
                               <div className="team">
@@ -1516,9 +1444,6 @@
     );
   }
 
-  // ============================================================
-  // ESPOSIZIONE GLOBALE
-  // ============================================================
   window.StatisticheComponent = StatisticheComponent;
   window.AIAnalysis = AIAnalysis;
   window.WeatherProfessionale = WeatherProfessionale;
@@ -1529,6 +1454,6 @@
   window.TeamMatchesHistory = TeamMatchesHistory;
   window.TutteLeFamigliePanel = TutteLeFamigliePanel;
 
-  console.log('✅ Modulo Statistiche v6 caricato - Tutte le Giocate SENZA Monte Carlo (allineato al Palinsesto)');
+  console.log('✅ Modulo Statistiche v7 - Classifica con forma + fascia gol');
 
 })();
