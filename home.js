@@ -1,9 +1,8 @@
 // ============================================================
-// home.js - Modulo Home v11 (FUTURISTIC + MOBILE FIX)
-// ✅ Click campionato → giornata corrente only
-// ✅ Mobile: pulsante indietro overlay
-// ✅ PC: 3 card per fila
-// ✅ Numero giornata sotto nome campionato
+// home.js - Modulo Home v12 (SIDEBAR 2 COLONNE)
+// ✅ Sidebar campionati a 2 colonne per nazione
+// ✅ Vista giornata corrente only
+// ✅ Pulsante indietro su mobile
 // ============================================================
 
 (function () {
@@ -57,7 +56,6 @@
     const todayStr = window.getTodayStr();
     const normalizeDate = window.normalizeDate;
 
-    // 1) Cerca partite di oggi → prendi il round più frequente
     const oggi = matchesCampionato.filter(m => normalizeDate(m.data) === todayStr);
     if (oggi.length > 0) {
       const roundCount = {};
@@ -72,13 +70,11 @@
       return best;
     }
 
-    // 2) Prossima partita futura
     const future = matchesCampionato
       .filter(m => m.stato === 'Futura' && m.data)
       .sort((a, b) => window.parseDate(a.data, a.ora) - window.parseDate(b.data, b.ora));
     if (future.length > 0) return future[0].round || null;
 
-    // 3) Ultima partita giocata
     const played = matchesCampionato
       .filter(m => m.stato === 'Giocata' && m.data)
       .sort((a, b) => window.parseDate(b.data, b.ora) - window.parseDate(a.data, a.ora));
@@ -93,7 +89,6 @@
   const GiornataCampionato = ({ campionato, matches, onSelectMatch, selectedFamiglie, onBack }) => {
     const getChampColor = window.getChampColor;
     const normalizeDate = window.normalizeDate;
-    const formatDateEU = window.formatDateEU;
     const isMobile = useIsMobile();
 
     if (!campionato) {
@@ -104,7 +99,7 @@
             Seleziona un campionato
           </h3>
           <p style={{ color: 'var(--text-dim)' }}>
-            Clicca su un campionato nella sidebar per vedere la giornata corrente
+            Clicca su un campionato nella sidebar
           </p>
         </div>
       );
@@ -115,7 +110,6 @@
       const color = getChampColor(campionato);
       const giornataCorrente = getGiornataCorrente(partiteCampionato);
 
-      // ⭐ FILTRA SOLO LA GIORNATA CORRENTE
       const partiteGiornata = giornataCorrente
         ? partiteCampionato
             .filter(m => String(m.round) === String(giornataCorrente))
@@ -137,7 +131,6 @@
 
       return (
         <div style={{ position: 'relative' }}>
-          {/* ⭐ PULSANTE INDIETRO (mobile only) */}
           {isMobile && onBack && (
             <button
               onClick={onBack}
@@ -222,11 +215,8 @@
       return (
         <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
           <div style={{ fontSize: '48px', marginBottom: '12px' }}>⚠️</div>
-          <div style={{ color: 'var(--neon-red)', fontWeight: 700, marginBottom: '8px' }}>
+          <div style={{ color: 'var(--neon-red)', fontWeight: 700 }}>
             Errore nel rendering
-          </div>
-          <div style={{ color: 'var(--text-dim)', fontSize: '12px', fontFamily: 'monospace' }}>
-            {e.message}
           </div>
         </div>
       );
@@ -234,21 +224,36 @@
   };
 
   // ============================================================
-  // SIDEBAR CAMPIONATI HOME
+  // SIDEBAR CAMPIONATI HOME - 2 COLONNE PER NAZIONE
   // ============================================================
   const SidebarCampionatiHome = ({ matches, onSelectChamp, champSelezionato }) => {
-    const CHAMPIONSHIP_LIST = window.CHAMPIONSHIP_LIST;
     const normalizeDate = window.normalizeDate;
     const getTodayStr = window.getTodayStr;
     const addDaysToDateStr = window.addDaysToDateStr;
     const ChampLogo = window.ChampLogo;
+
+    // Usa la stessa mappa del palinsesto
+    const NAZIONE_CAMPIONATI = window.__NAZIONE_CAMPIONATI || {
+      'Italia': ['Serie A', 'Serie B', 'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C'],
+      'Inghilterra': ['Premier League', 'EFL Championship'],
+      'Spagna': ['La Liga', 'Segunda División'],
+      'Germania': ['Bundesliga', '2. Bundesliga'],
+      'Francia': ['Ligue 1', 'Ligue 2'],
+      'Olanda': ['Eredivisie', 'Eerste Divisie'],
+      'Portogallo': ['Primeira Liga'],
+      'Belgio': ['Jupiler Pro League'],
+      'Turchia': ['Süper Lig'],
+      'Scozia': ['Scottish Premiership'],
+      'Giappone': ['J1 League'],
+      'Corea': ['K League 1'],
+    };
 
     const todayStr = getTodayStr();
     const tomorrowStr = addDaysToDateStr(todayStr, 1);
 
     const statsCampionati = useMemo(() => {
       const stats = {};
-      CHAMPIONSHIP_LIST.forEach(champ => {
+      Object.values(NAZIONE_CAMPIONATI).flat().forEach(champ => {
         stats[champ] = { oggi: 0, domani: 0, totali: 0 };
       });
       matches.forEach(m => {
@@ -260,12 +265,14 @@
         else if (d === tomorrowStr) stats[m.campionato].domani++;
       });
       return stats;
-    }, [matches, todayStr, tomorrowStr, CHAMPIONSHIP_LIST]);
+    }, [matches, todayStr, tomorrowStr]);
 
-    const campionatiConPartite = CHAMPIONSHIP_LIST.filter(champ => {
-      const st = statsCampionati[champ];
-      return st && st.totali > 0;
-    });
+    const nazioniDaMostrare = Object.entries(NAZIONE_CAMPIONATI)
+      .map(([nazione, campionati]) => ({
+        nazione,
+        campionati: campionati.filter(c => statsCampionati[c] && statsCampionati[c].totali > 0),
+      }))
+      .filter(n => n.campionati.length > 0);
 
     return (
       <div style={{
@@ -283,63 +290,120 @@
           }}>🏆 Campionati</span>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {campionatiConPartite.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-dim)', fontSize: '12px' }}>
-              Nessuna partita
-            </div>
-          ) : (
-            campionatiConPartite.map(champ => {
-              const color = window.getChampColor(champ);
-              const st = statsCampionati[champ] || { oggi: 0, domani: 0, totali: 0 };
-              const hasToday = st.oggi > 0;
-              const isSelected = champSelezionato === champ;
+        {nazioniDaMostrare.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-dim)', fontSize: '12px' }}>
+            Nessuna partita disponibile
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {nazioniDaMostrare.map(({ nazione, campionati }) => (
+              <div key={nazione}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  marginBottom: '6px', paddingBottom: '4px',
+                  borderBottom: '1px dashed var(--border)',
+                }}>
+                  <span style={{
+                    fontSize: '10px', fontWeight: 700,
+                    color: 'var(--neon-cyan)', textTransform: 'uppercase',
+                    letterSpacing: '1.5px', fontFamily: 'Orbitron, sans-serif',
+                  }}>
+                    🌍 {nazione}
+                  </span>
+                  <span style={{
+                    fontSize: '9px', color: 'var(--text-dim)',
+                    background: 'var(--bg-elevated)',
+                    padding: '1px 6px', borderRadius: '8px',
+                  }}>
+                    {campionati.length}
+                  </span>
+                </div>
 
-              return (
-                <button
-                  key={champ}
-                  onClick={() => onSelectChamp(champ)}
-                  style={{
-                    position: 'relative',
-                    display: 'flex', alignItems: 'center', gap: '10px',
-                    padding: '8px 10px', borderRadius: '10px',
-                    border: isSelected ? `2px solid ${color}` : '1px solid var(--border)',
-                    background: isSelected
-                      ? `linear-gradient(135deg, ${color}33, ${color}11)`
-                      : 'var(--bg-elevated)',
-                    cursor: 'pointer', textAlign: 'left',
-                    transition: 'all 0.25s ease',
-                    boxShadow: isSelected ? `0 0 20px ${color}66` : 'none',
-                  }}
-                >
-                  {ChampLogo && <ChampLogo campionato={champ} size={26} />}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{
-                      fontSize: '11px', fontWeight: 700,
-                      color: isSelected ? 'var(--text)' : 'var(--text-dim)',
-                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    }}>{champ}</div>
-                    <div style={{ fontSize: '9px', color: 'var(--text-dim)', display: 'flex', gap: '8px' }}>
-                      <span>📊 {st.totali}</span>
-                      {hasToday && <span style={{ color: 'var(--neon-red)', fontWeight: 700 }}>🔴 {st.oggi} oggi</span>}
-                      {!hasToday && st.domani > 0 && <span style={{ color: 'var(--neon-gold)' }}>🟡 {st.domani} domani</span>}
-                    </div>
-                  </div>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '6px',
+                }}>
+                  {campionati.map(champ => {
+                    const color = window.getChampColor(champ);
+                    const st = statsCampionati[champ] || { oggi: 0, domani: 0, totali: 0 };
+                    const hasToday = st.oggi > 0;
+                    const isSelected = champSelezionato === champ;
 
-                  {hasToday && (
-                    <div className="champ-notification-badge">{st.oggi}</div>
-                  )}
-                </button>
-              );
-            })
-          )}
-        </div>
+                    return (
+                      <button
+                        key={champ}
+                        onClick={() => onSelectChamp(champ)}
+                        style={{
+                          position: 'relative',
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
+                          padding: '6px 4px', borderRadius: '8px',
+                          border: isSelected ? `2px solid ${color}` : '1px solid var(--border)',
+                          background: isSelected
+                            ? `linear-gradient(135deg, ${color}33, ${color}11)`
+                            : 'var(--bg-elevated)',
+                          cursor: 'pointer', textAlign: 'center',
+                          transition: 'all 0.25s ease',
+                          boxShadow: isSelected ? `0 0 12px ${color}66` : 'none',
+                          minHeight: '58px',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {ChampLogo && <ChampLogo campionato={champ} size={22} />}
+                        <div style={{
+                          fontSize: '9px', fontWeight: 700,
+                          color: isSelected ? 'var(--text)' : 'var(--text-dim)',
+                          lineHeight: '1.1', maxWidth: '100%',
+                          overflow: 'hidden', textOverflow: 'ellipsis',
+                          display: '-webkit-box', WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                        }}>
+                          {champ
+                            .replace(' - Girone A', '/A')
+                            .replace(' - Girone B', '/B')
+                            .replace(' - Girone C', '/C')
+                            .replace('Jupiler Pro League', 'Jupiler')
+                            .replace('EFL Championship', 'Championship')
+                            .replace('Scottish Premiership', 'Scottish')
+                            .replace('Segunda División', 'Segunda')
+                            .replace('2. Bundesliga', '2. Bundes')
+                            .replace('Eerste Divisie', 'Eerste')
+                            .replace('Primeira Liga', 'Primeira')
+                          }
+                        </div>
+
+                        <div style={{
+                          fontSize: '8px', color: 'var(--text-dim)',
+                          display: 'flex', gap: '4px', flexWrap: 'wrap',
+                          justifyContent: 'center',
+                        }}>
+                          <span>📊{st.totali}</span>
+                          {hasToday && <span style={{ color: 'var(--neon-red)', fontWeight: 700 }}>🔴{st.oggi}</span>}
+                          {!hasToday && st.domani > 0 && <span style={{ color: 'var(--neon-gold)' }}>🟡{st.domani}</span>}
+                        </div>
+
+                        {hasToday && (
+                          <div className="champ-notification-badge" style={{
+                            position: 'absolute', top: '-4px', right: '-4px',
+                            width: '16px', height: '16px', fontSize: '9px',
+                          }}>
+                            {st.oggi}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   };
 
   // ============================================================
-  // COMPONENTE PRINCIPALE
+  // COMPONENTE PRINCIPALE: HOME
   // ============================================================
   function HomeComponent({ matches, championships, onSelectMatch, setTab, selectedFamiglie, weatherCache }) {
     const [homeTab, setHomeTab] = useState('Giornata');
@@ -354,7 +418,6 @@
       return window.FiltriCampionati.filtraPartitePerCampionato(normalizzati);
     }, [matches, filtroCampionati]);
 
-    // Auto-selezione primo campionato (solo PC)
     useEffect(() => {
       if (!isMobile && !champSelezionato && matchesPuliti.length > 0) {
         const primoCampionato = window.CHAMPIONSHIP_LIST.find(champ =>
@@ -393,9 +456,7 @@
         );
       }
 
-      // VISTA GIORNATA - Layout diverso per mobile/PC
       if (isMobile) {
-        // MOBILE: mostra solo sidebar O giornata
         return (
           <div>
             {!champSelezionato ? (
@@ -417,7 +478,6 @@
         );
       }
 
-      // PC: sidebar + giornata affiancati
       return (
         <div style={{
           display: 'grid',
@@ -498,6 +558,6 @@
     CHINESE_TEAMS,
   };
 
-  console.log('✅ Modulo Home v11 - MOBILE FIX + GIORNATA CORRENTE');
+  console.log('✅ Modulo Home v12 caricato - Sidebar 2 colonne per nazione');
 
 })();
