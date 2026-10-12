@@ -1,7 +1,7 @@
 // ============================================================
-// palinsesto.js - Modulo Palinsesto (FUTURISTIC + CHAMP BAR + MOBILE)
-// ✅ PC: Sidebar orizzontale campionati in alto + giornata odierna
-// ✅ PC: Bottone "Tutti i Campionati" in cima
+// palinsesto.js - Modulo Palinsesto (FUTURISTIC + CHAMP BAR 2 FILE + MOBILE)
+// ✅ PC: Sidebar a 2 file (maggiori + minori) con "Tutti i Campionati" span 2 righe
+// ✅ PC: Mostra TUTTI i campionati presenti nei dati (non solo quelli con partite oggi)
 // ✅ Mobile: lista campionati scrollabile → click → giornata
 // ============================================================
 
@@ -62,6 +62,22 @@
     }, []);
     return isMobile;
   };
+
+  // ============================================================
+  // ORDINE CAMPIONATI: MAGGIORI (prima fila) + MINORI (seconda fila)
+  // ============================================================
+  const CAMPIONATI_MAGGIORI = [
+    'Premier League', 'La Liga', 'Serie A', 'Bundesliga', 'Ligue 1',
+    'Eredivisie', 'Primeira Liga', 'Jupiler Pro League',
+    'EFL Championship', 'Süper Lig', 'Scottish Premiership',
+    'K League 1', 'J1 League'
+  ];
+
+  const CAMPIONATI_MINORI = [
+    'Serie B', 'Segunda División', '2. Bundesliga', 'Ligue 2',
+    'Eerste Divisie',
+    'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C'
+  ];
 
   // ============================================================
   // CHAMP LOGO
@@ -294,73 +310,153 @@
   };
 
   // ============================================================
-  // CHAMP BAR ORIZZONTALE (PC)
+  // CHAMP BAR A 2 FILE (PC) — MAGGIORI + MINORI
+  // "Tutti i Campionati" occupa 2 righe (colonna 1)
   // ============================================================
   const ChampBar = ({ matches, champFocus, onSelect }) => {
     const normalizeDate = window.normalizeDate;
     const todayStr = window.getTodayStr();
 
-    const campionatiDisponibili = useMemo(() => {
+    // ⭐ Tutti i campionati presenti nei dati (dalla lista globale)
+    const tuttiCampionati = useMemo(() => {
       return window.CHAMPIONSHIP_LIST.filter(c =>
-        matches.some(m => m.campionato === c && m.stato === 'Futura' && normalizeDate(m.data) === todayStr)
+        matches.some(m => m.campionato === c)
       );
-    }, [matches, todayStr]);
+    }, [matches]);
+
+    // Dividi in maggiori / minori / altri
+    const maggiori = CAMPIONATI_MAGGIORI.filter(c => tuttiCampionati.includes(c));
+    const minori = CAMPIONATI_MINORI.filter(c => tuttiCampionati.includes(c));
+    const altri = tuttiCampionati.filter(c =>
+      !CAMPIONATI_MAGGIORI.includes(c) && !CAMPIONATI_MINORI.includes(c)
+    );
+
+    // Prima fila: maggiori + altri; Seconda fila: minori
+    const primaFila = [...maggiori, ...altri];
+    const secondaFila = minori;
 
     const totaleOggi = useMemo(() => {
       return matches.filter(m => m.stato === 'Futura' && normalizeDate(m.data) === todayStr).length;
     }, [matches, todayStr]);
 
-    return (
-      <div className="champ-bar">
-        {/* Bottone "Tutti i Campionati" */}
-        <button
-          onClick={() => onSelect('__TUTTI__')}
-          className={`champ-bar-item ${champFocus === '__TUTTI__' ? 'active' : ''}`}
-          style={{
-            borderColor: champFocus === '__TUTTI__' ? 'var(--neon-magenta)' : 'var(--neon-cyan)',
-            background: champFocus === '__TUTTI__'
-              ? 'linear-gradient(135deg, var(--neon-magenta), var(--neon-purple))'
-              : 'linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(0, 245, 255, 0.05))',
-            color: '#000',
-          }}
-        >
-          <span style={{ fontSize: '16px' }}>🌍</span>
-          <span className="champ-bar-name">Tutti i Campionati</span>
-          {totaleOggi > 0 && <span className="champ-bar-badge">{totaleOggi}</span>}
-        </button>
+    const countOggi = (camp) => matches.filter(m =>
+      m.campionato === camp && m.stato === 'Futura' && normalizeDate(m.data) === todayStr
+    ).length;
 
-        {campionatiDisponibili.map(camp => {
+    const abbreviate = (camp) => camp
+      .replace(' - Girone A', '/A')
+      .replace(' - Girone B', '/B')
+      .replace(' - Girone C', '/C')
+      .replace('Jupiler Pro League', 'Jupiler')
+      .replace('EFL Championship', 'Championship')
+      .replace('Scottish Premiership', 'Scottish')
+      .replace('Segunda División', 'Segunda')
+      .replace('2. Bundesliga', '2. Bundes')
+      .replace('Eerste Divisie', 'Eerste');
+
+    const renderRow = (lista, gridRow) => (
+      <div
+        style={{
+          gridRow: gridRow,
+          gridColumn: '2',
+          display: 'flex',
+          gap: '6px',
+          overflowX: 'auto',
+          paddingBottom: '2px',
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'var(--neon-cyan) transparent',
+        }}
+        className="champ-bar-row"
+      >
+        {lista.length === 0 ? (
+          <span style={{
+            fontSize: '10px',
+            color: 'var(--text-dim)',
+            fontStyle: 'italic',
+            padding: '8px 12px',
+            opacity: 0.6,
+          }}>
+            —
+          </span>
+        ) : lista.map(camp => {
           const color = window.getChampColor(camp);
           const isActive = champFocus === camp;
-          const nOggi = matches.filter(m =>
-            m.campionato === camp && m.stato === 'Futura' && normalizeDate(m.data) === todayStr
-          ).length;
-
+          const nOggi = countOggi(camp);
           return (
             <button
               key={camp}
               onClick={() => onSelect(camp)}
               className={`champ-bar-item ${isActive ? 'active' : ''}`}
-              style={{ borderColor: isActive ? 'var(--neon-cyan)' : `${color}66` }}
+              style={{
+                borderColor: isActive ? 'var(--neon-cyan)' : `${color}66`,
+                flexShrink: 0,
+              }}
             >
-              <ChampLogo campionato={camp} size={22} />
-              <span className="champ-bar-name">
-                {camp
-                  .replace(' - Girone A', '/A')
-                  .replace(' - Girone B', '/B')
-                  .replace(' - Girone C', '/C')
-                  .replace('Jupiler Pro League', 'Jupiler')
-                  .replace('EFL Championship', 'Championship')
-                  .replace('Scottish Premiership', 'Scottish')
-                  .replace('Segunda División', 'Segunda')
-                  .replace('2. Bundesliga', '2. Bundes')
-                  .replace('Eerste Divisie', 'Eerste')
-                }
-              </span>
+              <ChampLogo campionato={camp} size={20} />
+              <span className="champ-bar-name">{abbreviate(camp)}</span>
               {nOggi > 0 && <span className="champ-bar-badge">{nOggi}</span>}
             </button>
           );
         })}
+      </div>
+    );
+
+    return (
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'auto 1fr',
+          gridTemplateRows: '1fr 1fr',
+          gap: '6px',
+          marginBottom: '16px',
+          padding: '10px 12px',
+          background: 'linear-gradient(135deg, rgba(30, 40, 66, 0.7), rgba(20, 27, 46, 0.9))',
+          border: '1px solid var(--border)',
+          borderRadius: '14px',
+          alignItems: 'stretch',
+        }}
+        className="champ-bar-2rows"
+      >
+        {/* ⭐ "Tutti i Campionati" occupa 2 righe */}
+        <button
+          onClick={() => onSelect('__TUTTI__')}
+          className={`champ-bar-item ${champFocus === '__TUTTI__' ? 'active' : ''}`}
+          style={{
+            gridRow: '1 / span 2',
+            gridColumn: '1',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '4px',
+            padding: '8px 18px',
+            borderColor: champFocus === '__TUTTI__' ? 'var(--neon-magenta)' : 'var(--neon-cyan)',
+            background: champFocus === '__TUTTI__'
+              ? 'linear-gradient(135deg, var(--neon-magenta), var(--neon-purple))'
+              : 'linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(0, 245, 255, 0.05))',
+            color: '#000',
+            minWidth: '110px',
+            whiteSpace: 'normal',
+            textAlign: 'center',
+            lineHeight: '1.1',
+          }}
+        >
+          <span style={{ fontSize: '18px' }}>🌍</span>
+          <span className="champ-bar-name" style={{ fontSize: '10px' }}>
+            Tutti i Campionati
+          </span>
+          {totaleOggi > 0 && (
+            <span className="champ-bar-badge" style={{ position: 'static', marginTop: '2px' }}>
+              {totaleOggi}
+            </span>
+          )}
+        </button>
+
+        {/* Prima fila: campionati maggiori */}
+        {renderRow(primaFila, '1')}
+
+        {/* Seconda fila: campionati minori */}
+        {renderRow(secondaFila, '2')}
       </div>
     );
   };
@@ -626,7 +722,7 @@
           selectedFamiglie={selectedFamiglie}
         />
 
-        {/* ⭐ SIDEBAR ORIZZONTALE CAMPIONATI */}
+        {/* ⭐ SIDEBAR A 2 FILE: MAGGIORI + MINORI */}
         <ChampBar
           matches={matches}
           champFocus={champFocus}
@@ -676,6 +772,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto FUTURISTIC caricato');
+  console.log('✅ Modulo Palinsesto FUTURISTIC caricato — ChampBar a 2 file');
 
 })();
