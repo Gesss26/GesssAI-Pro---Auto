@@ -1,7 +1,8 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v7)
-// ✅ Classifica con FORMA ultimi 5 + FASCIA GOL con %
+// statistiche.js - Modulo Statistiche (v8)
 // ✅ Ultimi avversari sotto la squadra giusta
+// ✅ Classifica a griglia con colonne separate
+// ✅ PC: 2 colonne - Mobile: 1 colonna
 // ============================================================
 
 (function () {
@@ -14,22 +15,17 @@
   // ============================================================
   const formatGiocataLabel = (familyId, label) => {
     if (!label) return '—';
-
     if (label.startsWith('Over '))  return label;
     if (label.startsWith('Under ')) return label;
-
     if (familyId === 'multigol') return label;
-
     if (familyId === 'mg_casa_ospite') {
       const parts = label.split('+');
       if (parts.length === 2) return `MG ${parts[0]} Casa + MG ${parts[1]} Ospite`;
     }
-
     if (familyId === 'dc_multigol') {
       const parts = label.split('+');
       if (parts.length === 2) return `${parts[0]} + ${parts[1]}`;
     }
-
     if (familyId === 'dc_under') {
       const parts = label.split('+');
       if (parts.length === 2) {
@@ -37,7 +33,6 @@
         return `${parts[0]} + ${uLabel}`;
       }
     }
-
     if (familyId === 'dc_over') {
       const parts = label.split('+');
       if (parts.length === 2) {
@@ -45,12 +40,10 @@
         return `${parts[0]} + ${oLabel}`;
       }
     }
-
     if (familyId === 'gg_ng') {
       if (label === 'Goal-Goal' || label === 'GG') return 'GG';
       if (label === 'No Goal' || label === 'NG') return 'NG';
     }
-
     return label;
   };
 
@@ -62,14 +55,12 @@
     const hw = mc.homeWins || 0;
     const d  = mc.draws || 0;
     const aw = mc.awayWins || 0;
-
     const total = hw + d + aw;
     if (total === 0) return 0;
     const norm = 100 / total;
     const hwN = hw * norm;
     const dN  = d  * norm;
     const awN = aw * norm;
-
     if (dcCode === '1X') return Math.round(hwN + dN);
     if (dcCode === '12') return Math.round(hwN + awN);
     if (dcCode === 'X2') return Math.round(dN + awN);
@@ -80,23 +71,19 @@
     if (!mc || !mc.risultati) return 0;
     const totalSim = mc.numSimulations || 10000;
     if (totalSim === 0) return 0;
-
     let count = 0;
     for (const [key, c] of Object.entries(mc.risultati)) {
       const [gC, gO] = key.split('-').map(Number);
       const totale = gC + gO;
-
       let dcOk = false;
       if (dcCode === '1X') dcOk = gC >= gO;
       else if (dcCode === '12') dcOk = gC !== gO;
       else if (dcCode === 'X2') dcOk = gO >= gC;
       if (!dcOk) continue;
-
       let ouOk = false;
       if (tipo === 'over')  ouOk = totale > soglia;
       else if (tipo === 'under') ouOk = totale < soglia;
       if (!ouOk) continue;
-
       count += c;
     }
     return Math.round((count / totalSim) * 100);
@@ -106,30 +93,25 @@
     if (!mc || !mc.risultati) return 0;
     const totalSim = mc.numSimulations || 10000;
     if (totalSim === 0) return 0;
-
     const mgMatch = mgLabel.match(/MG\s+(Casa|Ospite|Tot)\s+(\d+)-(\d+)/);
     if (!mgMatch) return 0;
     const [, target, minStr, maxStr] = mgMatch;
     const minV = parseInt(minStr, 10);
     const maxV = parseInt(maxStr, 10);
-
     let count = 0;
     for (const [key, c] of Object.entries(mc.risultati)) {
       const [gC, gO] = key.split('-').map(Number);
       const totale = gC + gO;
-
       let dcOk = false;
       if (dcCode === '1X') dcOk = gC >= gO;
       else if (dcCode === '12') dcOk = gC !== gO;
       else if (dcCode === 'X2') dcOk = gO >= gC;
       if (!dcOk) continue;
-
       let mgOk = false;
       if (target === 'Casa')        mgOk = gC >= minV && gC <= maxV;
       else if (target === 'Ospite') mgOk = gO >= minV && gO <= maxV;
       else if (target === 'Tot')    mgOk = totale >= minV && totale <= maxV;
       if (!mgOk) continue;
-
       count += c;
     }
     return Math.round((count / totalSim) * 100);
@@ -139,20 +121,16 @@
     if (!mc || !mc.risultati) return 0;
     const totalSim = mc.numSimulations || 10000;
     if (totalSim === 0) return 0;
-
     const parts = label.split('+');
     if (parts.length !== 2) return 0;
-
     const parseRange = (s) => {
       const m = s.match(/(\d+)-(\d+)/);
       if (!m) return null;
       return { min: parseInt(m[1], 10), max: parseInt(m[2], 10) };
     };
-
     const r1 = parseRange(parts[0]);
     const r2 = parseRange(parts[1]);
     if (!r1 || !r2) return 0;
-
     let count = 0;
     for (const [key, c] of Object.entries(mc.risultati)) {
       const [gC, gO] = key.split('-').map(Number);
@@ -167,13 +145,11 @@
     if (!mc || !mc.risultati) return 0;
     const totalSim = mc.numSimulations || 10000;
     if (totalSim === 0) return 0;
-
     const mgMatch = label.match(/MG\s+(Casa|Ospite|Tot)\s+(\d+)-(\d+)/);
     if (!mgMatch) return 0;
     const [, target, minStr, maxStr] = mgMatch;
     const minV = parseInt(minStr, 10);
     const maxV = parseInt(maxStr, 10);
-
     let count = 0;
     for (const [key, c] of Object.entries(mc.risultati)) {
       const [gC, gO] = key.split('-').map(Number);
@@ -240,11 +216,9 @@
       }
       if (familyId === 'mg_casa_ospite') return calcolaCombinataMGCasaOspite(mc, opt);
     }
-
     if (typeof window.getGiocataPct === 'function' && stats) {
       return window.getGiocataPct(opt, stats, stats.homeMG, stats.awayMG, stats.mgTot) || 0;
     }
-
     return 0;
   };
 
@@ -256,7 +230,6 @@
       m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName)
     );
     if (matches.length < 3) return { attacco: 1.2, difesa: 1.2, partite: matches.length };
-
     let golFatti = 0, golSubiti = 0;
     matches.forEach(m => {
       const isHome = m.casa === teamName;
@@ -311,18 +284,14 @@
     for (let i = 0; i < numSimulations; i++) {
       const r = simulatePoissonMatch(lambdaCasa, lambdaOspite);
       const gC = r.golCasa, gO = r.golOspite, total = gC + gO;
-
       if (gC > gO) homeWins++;
       else if (gC === gO) draws++;
       else awayWins++;
-
       if (total > 1.5) over15++; else under15++;
       if (total > 2.5) over25++; else under25++;
       if (total > 3.5) over35++; else under35++;
       if (total > 4.5) over45++; else under45++;
-
       if (gC > 0 && gO > 0) gg++; else ng++;
-
       const key = `${gC}-${gO}`;
       if (!risultati[key]) risultati[key] = 0;
       risultati[key]++;
@@ -376,9 +345,7 @@
         const result = simulateMatches(homeTeam, awayTeam, allMatches, 10000);
         setMc(result);
         localStorage.setItem(`ft_mc_${match.id}`, JSON.stringify(result));
-      } catch (e) {
-        console.warn('Errore MC:', e);
-      }
+      } catch (e) { console.warn('Errore MC:', e); }
       setLoading(false);
     };
 
@@ -467,7 +434,7 @@
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', background: 'var(--card)', padding: '12px', borderRadius: '8px', border: '2px solid var(--accent)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', background: 'var(--card)', padding: '12px', borderRadius: '8px', border: '2px solid var(--neon-cyan)' }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>1 - X - 2</div>
             <div style={{ fontSize: '18px', fontWeight: 'bold' }}>
@@ -560,8 +527,9 @@
         .slice(0, 5);
     };
 
-    const last5Home = getLast5Games(match.casa);
-    const last5Away = getLast5Games(match.ospiti);
+    // ⭐ FIX: le due liste sono separate e usano il teamName corretto
+    const last5Home = getLast5Games(match.casa);   // partite di match.casa
+    const last5Away = getLast5Games(match.ospiti); // partite di match.ospiti
 
     const renderXgValue = (value) => {
       const num = parseFloat(value);
@@ -591,8 +559,8 @@
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', margin: '8px 0' }}>
-          <div style={{ flex: 1, minWidth: '200px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', margin: '8px 0' }}>
+          <div>
             <h4 style={{ color: getChampColor(match.campionato) }}>{match.casa}</h4>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span>Forma:</span>
@@ -600,7 +568,7 @@
             </div>
             <div>xG: {renderXgValue(homeForm.mediaGolFatti || 0)}</div>
           </div>
-          <div style={{ flex: 1, minWidth: '200px' }}>
+          <div>
             <h4 style={{ color: getChampColor(match.campionato) }}>{match.ospiti}</h4>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span>Forma:</span>
@@ -610,6 +578,7 @@
           </div>
         </div>
 
+        {/* ⭐ ULTIMI AVVERSARI: 2 colonne separate, ognuna con la propria squadra */}
         <div className="opponents-row">
           <div className="opponents-col">
             <b>Ultimi avversari ({match.casa})</b>
@@ -658,13 +627,10 @@
   const TutteLeFamigliePanel = ({ match, allMatches }) => {
     const getPercentualeClasse = window.getPercentualeClasse;
     const FAMIGLIE = window.FAMIGLIE_GIOCATE;
-
     const stats = window.computeMatchStats(match, allMatches);
-
     if (stats.error) return null;
 
     const ORDINE = ['fisse', 'dc', 'gg_ng', 'over', 'under', 'multigol', 'dc_over', 'dc_under', 'mg_casa_ospite', 'dc_multigol'];
-
     const hasQM = !!(window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function');
 
     const sezioni = ORDINE
@@ -673,25 +639,15 @@
         const family = FAMIGLIE[familyId];
         const opzioni = family.options.map(opt => {
           const pct = calcolaPctGiocata(familyId, opt, null, stats);
-
-          let quota = null;
-          let edge = null;
-          let isValue = false;
-
+          let quota = null, isValue = false;
           if (hasQM) {
             try {
               const q = window.QuoteManager.analizzaGiocata(match, familyId, opt, pct);
-              if (q && q.quotaBook) {
-                quota = q.quotaBook;
-                edge = q.edge;
-                isValue = q.isValue;
-              }
+              if (q && q.quotaBook) { quota = q.quotaBook; isValue = q.isValue; }
             } catch (e) {}
           }
-
-          return { opt, pct, quota, edge, isValue };
+          return { opt, pct, quota, isValue };
         });
-
         return { familyId, family, opzioni };
       });
 
@@ -700,7 +656,6 @@
         <h3 style={{ color: 'var(--neon-cyan)', marginBottom: '8px' }}>
           📊 Tutte le Giocate — {match.casa} vs {match.ospiti}
         </h3>
-
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
           {sezioni.map(({ familyId, family, opzioni }) => (
             <div key={familyId} style={{
@@ -714,7 +669,6 @@
               }}>
                 {family.icon} {family.label}
               </h4>
-
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {opzioni.map(({ opt, pct, quota, isValue }) => (
                   <div key={opt} style={{
@@ -750,7 +704,7 @@
   };
 
   // ============================================================
-  // STANDINGS (FIX: forma ultimi 5 + fascia gol)
+  // STANDINGS — griglia con colonne separate + riga evidenziata
   // ============================================================
   const Standings = ({ matches, filterChampionship, highlightTeams = [] }) => {
     const [view, setView] = useState('generale');
@@ -822,16 +776,19 @@
     const renderFormSquares = (formStr) => {
       if (!formStr) return <span>N/D</span>;
       return (
-        <div style={{ display: 'flex', gap: '2px', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', gap: '3px', justifyContent: 'center' }}>
           {[...formStr].map((letter, idx) => (
             <span key={idx} style={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              width: '18px', height: '18px', borderRadius: '4px',
+              width: '20px', height: '20px', borderRadius: '4px',
               background: letter === 'V' ? 'var(--neon-green)' :
                          letter === 'P' ? 'var(--neon-gold)' :
                          letter === 'S' ? 'var(--neon-red)' : 'var(--text-dim)',
               color: '#000', fontWeight: 900, fontSize: '11px',
               fontFamily: 'Orbitron, sans-serif',
+              boxShadow: letter === 'V' ? '0 0 8px var(--neon-green)' :
+                         letter === 'P' ? '0 0 8px var(--neon-gold)' :
+                         letter === 'S' ? '0 0 8px var(--neon-red)' : 'none',
             }}>{letter}</span>
           ))}
         </div>
@@ -850,19 +807,19 @@
           <table className="standings-table">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Squadra</th>
-                <th className="num">PG</th>
-                <th className="num">Punti</th>
-                <th className="num">V</th>
-                <th className="num">P</th>
-                <th className="num">S</th>
-                <th className="num">GF</th>
-                <th className="num">GS</th>
-                <th className="num">DR</th>
-                <th className="num">Forma</th>
-                <th className="num">Fascia Gol</th>
-                <th className="num">%</th>
+                <th className="col-pos">#</th>
+                <th className="col-team">Squadra</th>
+                <th className="col-num">PG</th>
+                <th className="col-num">Punti</th>
+                <th className="col-num">V</th>
+                <th className="col-num">P</th>
+                <th className="col-num">S</th>
+                <th className="col-num">GF</th>
+                <th className="col-num">GS</th>
+                <th className="col-num">DR</th>
+                <th className="col-form">Forma</th>
+                <th className="col-mg">Fascia Gol</th>
+                <th className="col-pct">%</th>
               </tr>
             </thead>
             <tbody>
@@ -870,11 +827,15 @@
                 const isHighlighted = highlightTeams.includes(row.name);
                 const hasPlayed = row.pg > 0;
                 return (
-                  <tr key={row.name} className={isHighlighted ? 'highlighted' : ''} style={{ opacity: hasPlayed ? 1 : 0.5 }}>
+                  <tr
+                    key={row.name}
+                    className={isHighlighted ? 'highlighted-row' : ''}
+                    style={{ opacity: hasPlayed ? 1 : 0.5 }}
+                  >
                     <td className="pos">{row.pos}</td>
-                    <td>
+                    <td className="team-cell">
                       <div className="team-name-cell">
-                        <TeamLogo teamName={row.name} championship={champToShow || 'Tutti'} size={18} />
+                        <TeamLogo teamName={row.name} championship={champToShow || 'Tutti'} size={20} />
                         <span className="team-name">{row.name}</span>
                       </div>
                     </td>
@@ -885,20 +846,20 @@
                     <td className="num">{row.s}</td>
                     <td className="num">{row.gf}</td>
                     <td className="num">{row.gs}</td>
-                    <td className="num" style={{ color: row.dr > 0 ? 'var(--neon-green)' : (row.dr < 0 ? 'var(--neon-red)' : 'var(--text-dim)') }}>
+                    <td className="num dr-cell" style={{ color: row.dr > 0 ? 'var(--neon-green)' : (row.dr < 0 ? 'var(--neon-red)' : 'var(--text-dim)') }}>
                       {row.dr > 0 ? '+' : ''}{row.dr}
                     </td>
-                    <td className="num">
+                    <td className="num form-cell">
                       {hasPlayed ? renderFormSquares(row.form) : <span>—</span>}
                     </td>
-                    <td className="num">
+                    <td className="num mg-cell">
                       {hasPlayed ? (
                         <span className={`multigol-badge range-${row.multigolRange}`}>
                           {row.multigolLabel}
                         </span>
                       ) : <span>—</span>}
                     </td>
-                    <td className="num">{hasPlayed ? row.multigolPct + '%' : '—'}</td>
+                    <td className="num pct-cell">{hasPlayed ? row.multigolPct + '%' : '—'}</td>
                   </tr>
                 );
               })}
@@ -962,7 +923,7 @@
                     <td style={{ fontWeight: 'bold', color: 'var(--neon-gold)' }}>#{idx + 1}</td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
-                        <span style={{ display: 'inline-block', width: '24px', height: '24px', borderRadius: '4px', backgroundColor: color, border: '1px solid var(--border)' }} />
+                        <span style={{ display: 'inline-block', width: '24px', height: '24px', borderRadius: '4px', backgroundColor: color }} />
                         <span style={{ fontSize: '16px', fontWeight: 'bold', color: color }}>{d.risultato}</span>
                       </div>
                     </td>
@@ -1060,25 +1021,22 @@
     return (
       <div className="card">
         <h4>🎯 Indice di Affidabilità - {teamName}</h4>
-        <div className="affidabilita-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
           <div>
             <div style={{ fontSize: '28px', fontWeight: 'bold', color: affidabilita > 70 ? 'var(--neon-green)' : 'var(--neon-gold)' }}>
               {Math.round(affidabilita)}%
             </div>
             <div style={{ fontSize: '12px', color: 'var(--text-dim)' }}>Affidabilità</div>
-            <div className="form-bar"><div className="form-bar-fill" style={{ width: `${affidabilita}%` }}></div></div>
           </div>
           <div>
             <div style={{ fontSize: '28px', fontWeight: 'bold', color: stabilita > 60 ? 'var(--neon-green)' : 'var(--neon-gold)' }}>
               {Math.round(stabilita)}%
             </div>
             <div style={{ fontSize: '12px', color: 'var(--text-dim)' }}>Stabilità</div>
-            <div className="form-bar"><div className="form-bar-fill" style={{ width: `${stabilita}%` }}></div></div>
           </div>
           <div>
             <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--neon-cyan)' }}>{count}</div>
-            <div style={{ fontSize: '12px', color: 'var(--text-dim)' }}>Partite analizzate</div>
-            <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>{count < 10 ? '⚠️ Poche partite' : '✅ Campione sufficiente'}</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-dim)' }}>Partite</div>
           </div>
         </div>
       </div>
@@ -1135,10 +1093,7 @@
             const opponent = getOpponent(m, teamName);
             const rc = getResultColor(result);
             const isHome = m.casa === teamName;
-            let emoji = '', rl = '';
-            if (result === 'win') { emoji = '✅'; rl = 'V'; }
-            else if (result === 'draw') { emoji = '➖'; rl = 'P'; }
-            else { emoji = '❌'; rl = 'S'; }
+            let rl = result === 'win' ? 'V' : (result === 'draw' ? 'P' : 'S');
 
             return (
               <div key={m.id} style={{
@@ -1164,15 +1119,12 @@
                       </>
                     )}
                   </span>
-                  <span style={{ fontSize: '10px', color: 'var(--text-dim)' }}>
-                    {isHome ? '🏠 Casa' : '✈️ Trasferta'}
-                  </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                   <span style={{
                     display: 'inline-block', backgroundColor: rc, color: '#000', fontWeight: 'bold',
                     padding: '2px 14px', borderRadius: '6px', minWidth: '50px', textAlign: 'center',
-                    fontSize: '16px', border: `1px solid ${rc}`
+                    fontSize: '16px'
                   }}>
                     {m.golCasa} - {m.golOspite}
                   </span>
@@ -1180,7 +1132,6 @@
                     fontSize: '14px', fontWeight: 'bold', padding: '2px 8px', borderRadius: '4px',
                     background: rc, color: '#000', minWidth: '24px', textAlign: 'center'
                   }}>{rl}</span>
-                  <span style={{ fontSize: '16px' }}>{emoji}</span>
                 </div>
               </div>
             );
@@ -1225,12 +1176,10 @@
       if (weather.wind_speed > 15) risk += 3;
       else if (weather.wind_speed > 10) risk += 2;
       else if (weather.wind_speed > 5) risk += 1;
-      if (weather.temp < -5 || weather.temp > 35) risk += 2;
-      else if (weather.temp < 0 || weather.temp > 30) risk += 1;
-      if (risk >= 6) return { level: 'high', label: '🔴 ALTO - Rischio di rinvio' };
-      if (risk >= 4) return { level: 'medium', label: '🟡 MEDIO - Possibili difficoltà' };
-      if (risk >= 2) return { level: 'low', label: '🟢 BASSO - Condizioni accettabili' };
-      return { level: 'low', label: '🟢 OTTIMALE - Condizioni perfette' };
+      if (risk >= 6) return { level: 'high', label: '🔴 ALTO' };
+      if (risk >= 4) return { level: 'medium', label: '🟡 MEDIO' };
+      if (risk >= 2) return { level: 'low', label: '🟢 BASSO' };
+      return { level: 'low', label: '🟢 OTTIMALE' };
     };
 
     const risk = getRiskLevel(weatherData);
@@ -1245,16 +1194,6 @@
             <div className="weather-desc-main">{weatherData.weather || 'N/A'}</div>
             <div className="weather-city-main">📍 {city || 'N/D'} • 📅 {weatherData.forecast_date || matchDate || 'N/A'}</div>
           </div>
-          <div style={{ textAlign: 'right', minWidth: '100px' }}>
-            <div style={{ fontSize: '14px', color: 'var(--text-dim)' }}>Temp. min / max</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--neon-cyan)' }}>
-              {Math.round(weatherData.temp_min)}° / {Math.round(weatherData.temp_max)}°
-            </div>
-          </div>
-        </div>
-        <div className="weather-risk">
-          <span className="risk-icon">⚠️</span>
-          <span className="risk-text"><b>Valutazione meteo:</b> {risk.label}</span>
         </div>
       </div>
     );
@@ -1288,9 +1227,6 @@
           <span>🏆 <b style={{ color: 'var(--neon-cyan)' }}>{campionatiAttivi.length}</b> campionati attivi</span>
           <span>•</span>
           <span>📊 <b style={{ color: 'var(--neon-cyan)' }}>{matchesFiltrati.length}</b> partite totali</span>
-          <span style={{ marginLeft: 'auto', fontStyle: 'italic' }}>
-            Modifica i filtri nel <b>Palinsesto</b> 📅
-          </span>
         </div>
 
         <div className="sub-tabs">
@@ -1454,6 +1390,6 @@
   window.TeamMatchesHistory = TeamMatchesHistory;
   window.TutteLeFamigliePanel = TutteLeFamigliePanel;
 
-  console.log('✅ Modulo Statistiche v7 - Classifica con forma + fascia gol');
+  console.log('✅ Modulo Statistiche v8 - Classifica griglia + avversari fix');
 
 })();

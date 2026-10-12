@@ -1,6 +1,7 @@
 /* ============================================================
    GesssAI-Pro v4.0 - FUTURISTIC UI (COMPLETO)
    Palette neon + Glassmorphism + MatchTab + ChampBar + Mobile
+   + Classifica a griglia + Responsive PC/Mobile
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
@@ -32,6 +33,11 @@
   --accent2: var(--neon-magenta);
   --border: rgba(0, 245, 255, 0.15);
   --border-strong: rgba(0, 245, 255, 0.4);
+
+  /* Legacy compatibility */
+  --win: var(--neon-green);
+  --draw: var(--neon-gold);
+  --lose: var(--neon-red);
 }
 
 * {
@@ -60,6 +66,7 @@ body {
   background: linear-gradient(180deg, var(--neon-cyan), var(--neon-magenta));
   border-radius: 4px;
 }
+::-webkit-scrollbar-thumb:hover { background: var(--neon-cyan); }
 
 /* ============================================================
    SPLASHSCREEN
@@ -71,8 +78,8 @@ body {
   z-index: 99999; transition: opacity 0.8s ease, transform 0.8s ease; padding: 20px;
 }
 #splashscreen.hidden { opacity: 0; transform: scale(1.05); pointer-events: none; }
-#splashscreen .splash-content { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-#splashscreen .splash-logo { max-width: 80vw; max-height: 55vh; margin-bottom: 40px; filter: drop-shadow(0 0 40px var(--neon-cyan)); }
+#splashscreen .splash-content { display: flex; flex-direction: column; align-items: center; justify-content: center; max-width: 90vw; max-height: 90vh; text-align: center; }
+#splashscreen .splash-logo { max-width: 80vw; max-height: 60vh; width: auto; height: auto; object-fit: contain; border: none !important; border-radius: 0 !important; box-shadow: none !important; outline: none !important; margin-bottom: 40px; background: transparent; filter: drop-shadow(0 0 40px var(--neon-cyan)); }
 #splashscreen .splash-btn {
   padding: 18px 56px;
   background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue), var(--neon-magenta));
@@ -83,7 +90,7 @@ body {
   font-family: 'Orbitron', sans-serif;
 }
 #splashscreen .splash-btn:hover { transform: scale(1.05); box-shadow: 0 0 60px var(--neon-cyan); }
-#splashscreen .splash-sub { margin-top: 20px; color: var(--text-dim); font-size: 12px; letter-spacing: 4px; font-family: 'Orbitron', sans-serif; }
+#splashscreen .splash-sub { margin-top: 20px; color: var(--text-dim); font-size: 12px; letter-spacing: 4px; font-family: 'Orbitron', sans-serif; text-transform: uppercase; }
 #splashscreen .loader { margin-top: 25px; display: flex; gap: 8px; }
 #splashscreen .loader .dot {
   width: 10px; height: 10px; border-radius: 50%;
@@ -96,8 +103,27 @@ body {
 /* ============================================================
    ROOT & LAYOUT
    ============================================================ */
-#root { display: none; min-height: 100vh; }
+#root { display: none; min-height: 100vh; background: var(--bg-deep); }
 #root.visible { display: block !important; }
+
+#error-container {
+  display: none;
+  min-height: 100vh;
+  background: var(--bg-deep);
+  color: var(--text);
+  padding: 40px 20px;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+#error-container.visible { display: flex !important; }
+#error-container h2 { color: var(--neon-gold); margin-bottom: 16px; }
+#error-container .error-icon { font-size: 64px; margin-bottom: 20px; }
+#error-container .error-msg { color: var(--text-dim); max-width: 600px; margin: 0 auto 20px; line-height: 1.6; }
+#error-container .error-details { background: var(--bg-elevated); padding: 16px 20px; border-radius: 8px; border: 1px solid var(--border); max-width: 700px; margin: 0 auto 20px; text-align: left; font-size: 13px; color: var(--text-dim); overflow: auto; max-height: 300px; }
+#error-container .error-details code { color: var(--text); font-family: monospace; font-size: 12px; word-break: break-all; }
+#error-container .btn-retry { padding: 12px 30px; background: var(--neon-cyan); color: #000; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
 
 .app-shell {
   display: flex;
@@ -119,6 +145,7 @@ body {
   overflow: visible;
 }
 .header .header-center { text-align: center; flex: 1; min-width: 0; }
+.header .header-left { width: 200px; }
 .header .app-name {
   font-family: 'Orbitron', sans-serif;
   font-size: 26px; font-weight: 900; letter-spacing: 3px;
@@ -421,6 +448,16 @@ body {
 }
 .form-xg .xg-home, .form-xg .xg-away { color: var(--neon-cyan); font-weight: 700; }
 
+/* Form bar (legacy) */
+.form-bar { height: 6px; background: var(--card); border-radius: 3px; overflow: hidden; margin-top: 4px; }
+.form-bar-fill { height: 100%; background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan)); }
+
+/* xG-value */
+.xg-value { display: inline-block; padding: 2px 10px; border-radius: 6px; font-weight: bold; font-size: 13px; color: #000 !important; }
+.xg-value.xg-red { background: var(--neon-red); }
+.xg-value.xg-white { background: var(--text-dim); }
+.xg-value.xg-blue { background: var(--neon-cyan); }
+
 /* ============================================================
    BET ITEM VERTICAL
    ============================================================ */
@@ -585,7 +622,6 @@ button.btn-danger { background: var(--neon-red); color: #fff; }
 .alert-warning { background: var(--neon-gold); color: #000; }
 
 .empty-state { text-align: center; padding: 40px; color: var(--text-dim); }
-
 input, select, textarea {
   width: 100%; padding: 10px 12px;
   background: var(--bg-elevated);
@@ -595,13 +631,6 @@ input, select, textarea {
   font-size: 14px;
 }
 input:focus, select:focus { outline: none; border-color: var(--neon-cyan); }
-
-/* ============================================================
-   TAB HEADER legacy (per tabelle)
-   ============================================================ */
-.tab-header {
-  display: inline-flex;
-}
 
 /* ============================================================
    CHAMP BAR — SIDEBAR ORIZZONTALE (PC)
@@ -669,7 +698,7 @@ input:focus, select:focus { outline: none; border-color: var(--neon-cyan); }
 }
 
 /* ============================================================
-   ACCORDION NAZIONI (sidebar verticale — usata in alcuni layout)
+   ACCORDION NAZIONI
    ============================================================ */
 .nazione-block {
   border-radius: 10px;
@@ -722,7 +751,6 @@ input:focus, select:focus { outline: none; border-color: var(--neon-cyan); }
   background: linear-gradient(180deg, var(--neon-cyan), var(--neon-magenta));
   border-radius: 3px;
 }
-
 .mobile-main-scroll {
   max-height: calc(100vh - 200px);
   overflow-y: auto;
@@ -852,6 +880,246 @@ input:focus, select:focus { outline: none; border-color: var(--neon-cyan); }
 }
 
 /* ============================================================
+   STANDINGS TABLE - GRIGLIA CON COLONNE SEPARATE
+   ============================================================ */
+.standings-table-wrap {
+  overflow-x: auto;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px;
+}
+.standings-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 4px;
+  font-size: 12px;
+  min-width: 850px;
+}
+.standings-table th {
+  background: var(--bg-deep);
+  color: var(--neon-cyan);
+  padding: 8px 6px;
+  text-align: center;
+  border-radius: 6px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  font-family: 'Orbitron', sans-serif;
+  white-space: nowrap;
+}
+.standings-table th.col-team { text-align: left; padding-left: 12px; }
+.standings-table td {
+  padding: 6px 6px;
+  background: var(--card);
+  border-radius: 6px;
+  vertical-align: middle;
+  color: var(--text);
+}
+.standings-table td.team-cell { text-align: left; }
+.standings-table td.num { text-align: center; }
+.standings-table td.pos {
+  font-weight: 900;
+  color: var(--neon-gold);
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+  background: transparent;
+}
+.standings-table td.points {
+  font-weight: 900;
+  color: var(--neon-cyan);
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+}
+.standings-table tr.highlighted-row td {
+  background: linear-gradient(135deg, rgba(0, 245, 255, 0.25), rgba(255, 0, 229, 0.15)) !important;
+  border: 1px solid var(--neon-cyan);
+  box-shadow: 0 0 12px rgba(0, 245, 255, 0.3);
+}
+.standings-table tr.highlighted-row td.pos,
+.standings-table tr.highlighted-row td.points {
+  background: var(--neon-cyan) !important;
+  color: #000 !important;
+}
+.standings-table .team-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.standings-table .team-name {
+  font-weight: 700;
+  color: var(--text);
+}
+.standings-table td.form-cell,
+.standings-table td.mg-cell,
+.standings-table td.pct-cell,
+.standings-table td.dr-cell {
+  font-weight: 700;
+}
+.standings-table td.mg-cell .multigol-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 900;
+  color: #000;
+}
+.standings-table td.pct-cell {
+  color: var(--neon-gold);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px;
+}
+
+/* ============================================================
+   STATS TWO COL — PC 2 colonne / Mobile 1 colonna
+   ============================================================ */
+.stats-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.analisi-compact {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .stats-two-col {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .analisi-compact {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+/* ============================================================
+   MULTIGOL BADGE — colori per range
+   ============================================================ */
+.multigol-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #000;
+  margin: 0 2px;
+}
+.multigol-badge.range-01 { background: var(--text-dim); color: #000; }
+.multigol-badge.range-02 { background: var(--neon-gold); color: #000; }
+.multigol-badge.range-13 { background: var(--neon-green); color: #000; }
+.multigol-badge.range-24 { background: var(--neon-cyan); color: #000; }
+.multigol-badge.range-25 { background: var(--neon-orange); color: #000; }
+.multigol-badge.range-36 { background: var(--neon-red); color: #fff; }
+.multigol-badge.range-default { background: var(--text-dim); color: #000; }
+
+/* ============================================================
+   MATCH TAB HISTORY (per storico/ultima giornata)
+   ============================================================ */
+.match-tab-history {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-left-width: 6px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+  flex: 1;
+  min-width: 300px;
+  max-width: 420px;
+  cursor: pointer;
+}
+.match-tab-history .score { font-size: 24px; font-weight: bold; padding: 0 12px; }
+
+/* ============================================================
+   OPPONENTS ROW (ultimi avversari)
+   ============================================================ */
+.opponents-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 8px 0;
+}
+.opponents-col {
+  background: var(--surface);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.opponents-col .opp-item {
+  font-size: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.opponents-col .opp-item:last-of-type { border-bottom: none; }
+.opp-result-indicator { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-right: 4px; }
+.opp-result-indicator.win { background: var(--neon-green); }
+.opp-result-indicator.draw { background: var(--neon-gold); }
+.opp-result-indicator.loss { background: var(--neon-red); }
+.opp-form-pct { font-size: 24px; font-weight: bold; color: var(--neon-cyan); text-align: center; margin-top: 8px; font-family: 'Orbitron', sans-serif; }
+.opp-form-bar { height: 8px; background: var(--card); border-radius: 4px; overflow: hidden; margin-top: 4px; }
+.opp-form-bar-fill { height: 100%; background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan)); }
+
+@media (max-width: 768px) {
+  .opponents-row { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   FREQ TABLE
+   ============================================================ */
+.freq-table-wrap { overflow-x: auto; }
+.freq-table { width: 100%; min-width: 400px; border-collapse: collapse; font-size: 14px; }
+.freq-table th {
+  background: var(--surface);
+  color: var(--neon-cyan);
+  padding: 10px 12px;
+  text-align: center;
+  border-bottom: 2px solid var(--border);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+.freq-table td { padding: 8px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+
+/* ============================================================
+   STATS PLACEHOLDER
+   ============================================================ */
+.stats-placeholder { text-align: center; padding: 40px; color: var(--text-dim); font-size: 16px; }
+
+/* ============================================================
+   WEATHER
+   ============================================================ */
+.weather-professionale {
+  background: linear-gradient(135deg, var(--card), var(--surface));
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  border: 2px solid var(--border);
+}
+.weather-professionale .weather-header {
+  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+}
+.weather-professionale .weather-icon-main { font-size: 80px; line-height: 1; }
+.weather-professionale .weather-info-main { flex: 1; min-width: 150px; }
+.weather-professionale .weather-temp-main { font-size: 48px; font-weight: bold; color: var(--neon-cyan); }
+.weather-professionale .weather-desc-main { font-size: 18px; color: var(--text); font-weight: 600; }
+.weather-professionale .weather-city-main { font-size: 14px; color: var(--text-dim); margin-top: 4px; }
+.weather-professionale .weather-details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.weather-professionale .weather-detail-item { text-align: center; background: var(--surface); padding: 10px; border-radius: 10px; border: 1px solid var(--border); }
+.weather-professionale .weather-risk { margin-top: 14px; padding: 12px 16px; border-radius: 10px; background: var(--surface); border-left: 4px solid var(--neon-cyan); font-size: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.risk-badge.low { background: var(--neon-green); color: #000; padding: 4px 14px; border-radius: 20px; font-weight: bold; font-size: 12px; }
+.risk-badge.medium { background: var(--neon-gold); color: #000; padding: 4px 14px; border-radius: 20px; font-weight: bold; font-size: 12px; }
+.risk-badge.high { background: var(--neon-red); color: #fff; padding: 4px 14px; border-radius: 20px; font-weight: bold; font-size: 12px; }
+
+/* ============================================================
    DISCLAIMER
    ============================================================ */
 .disclaimer-footer {
@@ -884,6 +1152,115 @@ input:focus, select:focus { outline: none; border-color: var(--neon-cyan); }
 .home-btn-overlay:hover { transform: scale(1.1); box-shadow: 0 0 40px var(--neon-cyan); }
 
 /* ============================================================
+   PHONE SIMULATOR
+   ============================================================ */
+.phone-simulator { background: #1a1a2e; border-radius: 40px; padding: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8); max-width: 420px; margin: 0 auto; position: relative; }
+.phone-simulator .phone-notch { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); width: 120px; height: 24px; background: #1a1a2e; border-radius: 0 0 12px 12px; z-index: 10; }
+.phone-simulator .phone-screen { background: var(--bg); border-radius: 28px; overflow: hidden; height: 780px; max-height: 80vh; position: relative; }
+.phone-simulator .phone-screen .phone-scroll { height: 100%; overflow-y: auto; padding: 0 4px; }
+.phone-simulator .phone-home-indicator { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 120px; height: 4px; background: rgba(255, 255, 255, 0.3); border-radius: 2px; }
+
+/* ============================================================
+   FILE DROP AREA
+   ============================================================ */
+.file-drop-area { border: 2px dashed var(--border); border-radius: 12px; padding: 30px 20px; text-align: center; cursor: pointer; background: var(--surface); margin-bottom: 16px; }
+.file-drop-area:hover { border-color: var(--neon-cyan); }
+.file-drop-area.dragging { border-color: var(--neon-cyan); background: rgba(0, 245, 255, 0.1); }
+
+/* ============================================================
+   GIOCATE SELECTOR
+   ============================================================ */
+.giocate-selector-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+@media (max-width: 1024px) { .giocate-selector-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .giocate-selector-grid { grid-template-columns: 1fr; } }
+.giocate-category { background: var(--surface); border-radius: 10px; padding: 12px 14px; border: 2px solid var(--border); cursor: pointer; }
+.giocate-category.active { border-color: var(--neon-cyan); background: rgba(0, 245, 255, 0.1); box-shadow: 0 0 20px rgba(0, 245, 255, 0.15); }
+.giocate-category .category-title { font-size: 13px; font-weight: bold; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.giocate-category .category-title .icon { font-size: 18px; }
+.giocate-category .category-title .badge { font-size: 10px; background: var(--card); padding: 1px 8px; border-radius: 10px; color: var(--text-dim); margin-left: auto; }
+
+/* ============================================================
+   GIORNI FILTERS
+   ============================================================ */
+.giorni-filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.giorno-btn {
+  padding: 8px 18px; border-radius: 8px;
+  border: 2px solid var(--border);
+  background: var(--surface); color: var(--text);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; min-height: 38px;
+  display: flex; align-items: center; justify-content: center;
+}
+.giorno-btn.active { background: var(--neon-cyan); color: #000; border-color: var(--neon-cyan); }
+
+/* ============================================================
+   CHAMP FILTERS (griglia)
+   ============================================================ */
+.champ-filters-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; width: 100%; }
+.champ-filters-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; }
+.champ-filter-btn {
+  padding: 6px 8px; border-radius: 6px;
+  border: 2px solid var(--border);
+  background: var(--surface); color: var(--text-muted);
+  font-size: 11px; font-weight: 600;
+  cursor: pointer; min-height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.champ-filter-btn.active { border-color: var(--neon-cyan); color: #000; }
+.champ-filter-btn .champ-color-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; flex-shrink: 0; }
+.champ-filter-btn .champ-name { font-size: 10px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; }
+
+@media (max-width: 1024px) { .champ-filters-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 768px) {
+  .champ-filters-grid { grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  .champ-filter-btn { padding: 4px 6px; font-size: 10px; min-height: 30px; }
+  .champ-filter-btn .champ-name { font-size: 9px; }
+}
+@media (max-width: 480px) {
+  .champ-filters-grid { grid-template-columns: repeat(2, 1fr); gap: 4px; }
+  .champ-filter-btn { padding: 3px 6px; font-size: 9px; min-height: 26px; }
+  .champ-filter-btn .champ-name { font-size: 8px; }
+}
+
+/* ============================================================
+   THEME GRID
+   ============================================================ */
+.theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.theme-card { padding: 16px; border-radius: 10px; cursor: pointer; text-align: center; border: 2px solid var(--border); }
+.theme-card.active { border-color: var(--neon-cyan); box-shadow: 0 0 12px var(--neon-cyan); }
+.theme-name { font-weight: bold; margin-bottom: 6px; }
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.heatmap-detail-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 20px;
+}
+.heatmap-detail-modal {
+  background: var(--card);
+  border: 2px solid var(--neon-cyan);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 700px; width: 100%;
+  max-height: 80vh; overflow-y: auto;
+  position: relative;
+}
+.heatmap-detail-modal .close-btn {
+  position: absolute; top: 12px; right: 16px;
+  background: none; border: none; color: var(--text);
+  font-size: 24px; cursor: pointer;
+}
+
+/* ============================================================
+   FLAG ICON
+   ============================================================ */
+.flag-icon { display: inline-block; vertical-align: middle; margin-right: 6px; width: 20px; height: 15px; border-radius: 2px; }
+
+/* ============================================================
    ANIMAZIONI
    ============================================================ */
 @keyframes fadeInUp {
@@ -901,6 +1278,7 @@ input:focus, select:focus { outline: none; border-color: var(--neon-cyan); }
 
 @media (max-width: 768px) {
   .header { padding: 10px 12px; flex-direction: column; gap: 8px; }
+  .header .header-left { width: auto; }
   .header .app-name { font-size: 20px; letter-spacing: 2px; }
   .header .subtitle { font-size: 10px; }
   .clock { position: static; min-width: auto; width: 100%; text-align: center; padding: 6px; }
