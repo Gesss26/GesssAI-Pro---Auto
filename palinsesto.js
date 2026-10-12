@@ -1,8 +1,8 @@
 // ============================================================
-// palinsesto.js - Modulo Palinsesto con quote visibili (v8)
-// ✅ FIX v8: RIMOSSA normalizzazione p1/pX/p2 (causava disallineamento
-//            con Statistiche → Tutte le Giocate).
-//            Le % sono ora identiche a getGiocataPct senza modifiche.
+// palinsesto.js - Modulo Palinsesto v9 (FUTURISTIC)
+// ✅ Sidebar campionati con loghi e bollini notifica
+// ✅ Bottom panel "Partite di Oggi"
+// ✅ Design futuristico con glassmorphism
 // ============================================================
 
 (function () {
@@ -11,30 +11,56 @@
   const { useState, useMemo, useEffect } = React;
 
   // ============================================================
-  // FORMATTAZIONE ETICHETTE GIOCATE
+  // CHAMP LOGO (path relativi)
+  // ============================================================
+  const ChampLogo = ({ campionato, size = 24 }) => {
+    const [hasError, setHasError] = useState(false);
+    const logoPath = window.getChampLogo ? window.getChampLogo(campionato) : null;
+
+    if (!logoPath || hasError) {
+      const color = window.getChampColor ? window.getChampColor(campionato) : '#00f5ff';
+      return (
+        <div style={{
+          width: size, height: size, borderRadius: '50%',
+          background: `linear-gradient(135deg, ${color}, ${color}99)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontWeight: 'bold', color: '#000', fontSize: size * 0.38, flexShrink: 0,
+          boxShadow: `0 0 10px ${color}`,
+        }}>
+          {campionato.substring(0, 2).toUpperCase()}
+        </div>
+      );
+    }
+
+    return (
+      <img
+        src={logoPath}
+        alt={campionato}
+        onError={() => setHasError(true)}
+        style={{
+          width: size, height: size, objectFit: 'contain', flexShrink: 0,
+          filter: 'drop-shadow(0 0 6px rgba(0, 245, 255, 0.5))',
+        }}
+      />
+    );
+  };
+
+  // ============================================================
+  // FORMATTAZIONE ETICHETTE
   // ============================================================
   const formatGiocataLabel = (familyId, label) => {
     if (!label) return '—';
-
     if (label.startsWith('Over '))  return label;
     if (label.startsWith('Under ')) return label.replace('.', ',');
-
-    if (familyId === 'multigol') {
-      return label;
-    }
-
+    if (familyId === 'multigol') return label;
     if (familyId === 'mg_casa_ospite') {
       const parts = label.split('+');
-      if (parts.length === 2) {
-        return `MG ${parts[0]} Casa + MG ${parts[1]} Ospite`;
-      }
+      if (parts.length === 2) return `MG ${parts[0]} Casa + MG ${parts[1]} Ospite`;
     }
-
     if (familyId === 'dc_multigol') {
       const parts = label.split('+');
       if (parts.length === 2) return `${parts[0]} + ${parts[1]}`;
     }
-
     if (familyId === 'dc_under') {
       const parts = label.split('+');
       if (parts.length === 2) {
@@ -42,7 +68,6 @@
         return `${parts[0]} + ${uLabel}`;
       }
     }
-
     if (familyId === 'dc_over') {
       const parts = label.split('+');
       if (parts.length === 2) {
@@ -50,81 +75,54 @@
         return `${parts[0]} + ${oLabel}`;
       }
     }
-
     if (familyId === 'gg_ng') {
       if (label === 'Goal-Goal') return 'GG';
       if (label === 'No Goal') return 'NG';
     }
-
     return label;
   };
 
   // ============================================================
-  // UTILITY: CERCA QUOTA PDF PER GIOCATA
-  // ============================================================
-  const getQuotaInfo = (match, familyId, giocata, pctTua) => {
-    if (!window.QuoteManager || typeof window.QuoteManager.analizzaGiocata !== 'function') {
-      return null;
-    }
-    try {
-      return window.QuoteManager.analizzaGiocata(match, familyId, giocata, pctTua);
-    } catch (e) {
-      return null;
-    }
-  };
-
-  // ============================================================
-  // COMPONENTE: BOX QUOTA
+  // QUOTA BOX
   // ============================================================
   const QuotaBox = ({ match, familyId, giocata, pctTua }) => {
     const [quotaInfo, setQuotaInfo] = useState(null);
-
-    const { numPartite, dataMaxPDF } = window.QuoteManager ? window.QuoteManager.useQuote() : { numPartite: 0, dataMaxPDF: null };
+    const { numPartite, dataMaxPDF } = window.QuoteManager ? window.QuoteManager.useQuote() : { numPartite: 0 };
 
     useEffect(() => {
-      const info = getQuotaInfo(match, familyId, giocata, pctTua);
+      const info = (() => {
+        if (!window.QuoteManager || typeof window.QuoteManager.analizzaGiocata !== 'function') return null;
+        try { return window.QuoteManager.analizzaGiocata(match, familyId, giocata, pctTua); }
+        catch (e) { return null; }
+      })();
       setQuotaInfo(info);
     }, [match.id, familyId, giocata, pctTua, numPartite, dataMaxPDF]);
 
-    if (!quotaInfo || !quotaInfo.quotaBook) {
-      return null;
-    }
-
+    if (!quotaInfo || !quotaInfo.quotaBook) return null;
     const { quotaBook, edge, isValue } = quotaInfo;
-
-    const bgColor = isValue
-      ? 'rgba(111, 207, 151, 0.15)'
-      : 'rgba(255, 255, 255, 0.05)';
-    const borderColor = isValue ? 'var(--win)' : 'var(--border)';
-    const textColor = isValue ? 'var(--win)' : 'var(--text)';
 
     return (
       <div style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '4px',
-        padding: '2px 6px',
-        marginLeft: '6px',
-        borderRadius: '4px',
-        background: bgColor,
-        border: `1px solid ${borderColor}`,
-        fontSize: '11px',
-        fontWeight: 'bold',
-        color: textColor,
+        display: 'inline-flex', alignItems: 'center', gap: '4px',
+        padding: '2px 8px', marginLeft: '6px',
+        borderRadius: '6px',
+        background: isValue ? 'rgba(0, 255, 136, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+        border: `1px solid ${isValue ? 'var(--neon-green)' : 'var(--border)'}`,
+        fontSize: '11px', fontWeight: 'bold',
+        color: isValue ? 'var(--neon-green)' : 'var(--text)',
+        boxShadow: isValue ? '0 0 10px rgba(0, 255, 136, 0.3)' : 'none',
         whiteSpace: 'nowrap',
       }}
         title={isValue ? `VALUE BET! Edge: +${edge}%` : `Quota Marathonbet`}
       >
-        <span>💰</span>
-        <span>{quotaBook.toFixed(2)}</span>
+        <span>💰</span><span>{quotaBook.toFixed(2)}</span>
       </div>
     );
   };
 
   // ============================================================
-  // MATCH TAB (card partita con giocate)
+  // MATCH TAB
   // ============================================================
-
   const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie, weatherCache }) => {
     const computeMatchStats = window.computeMatchStats;
     const calcFormAndStats = window.calcFormAndStats;
@@ -133,7 +131,6 @@
     const TeamLogo = window.TeamLogo;
     const FAMIGLIE_GIOCATE = window.FAMIGLIE_GIOCATE;
     const getGiocataPct = window.getGiocataPct;
-    const getMultigolRange = window.getMultigolRange;
     const getPercentualeClasse = window.getPercentualeClasse;
     const calcolaGG_NG = window.calcolaGG_NG;
 
@@ -144,16 +141,11 @@
     const homeForm = calcFormAndStats(allMatches, match.casa);
     const awayForm = calcFormAndStats(allMatches, match.ospiti);
     const champColor = getChampColor(match.campionato);
-    const diff = Math.abs(homeForm.pct - awayForm.pct);
     const stats = computeMatchStats(match, allMatches);
 
     stats._allMatches = allMatches;
     stats._homeTeam = match.casa;
     stats._awayTeam = match.ospiti;
-
-    // ⭐ v8: NESSUNA NORMALIZZAZIONE — i valori di p1/pX/p2 vengono
-    //    usati così come calcolati da computeMatchStats, esattamente
-    //    come fa getGiocataPct in "Tutte le Giocate".
 
     const renderFormSquares = (formStr) => {
       if (!formStr) return <span>N/D</span>;
@@ -162,43 +154,15 @@
       ));
     };
 
-    const renderXgValue = (value) => {
-      const num = parseFloat(value);
-      if (isNaN(num)) return <span className="xg-value xg-white">N/A</span>;
-      let cls = 'xg-white';
-      if (num >= 2) cls = 'xg-blue';
-      else if (num < 1) cls = 'xg-red';
-      return <span className={`xg-value ${cls}`}>{num.toFixed(1)}</span>;
-    };
-
     const getColorForPct = (valore) => {
-      if (valore >= 90) return '#f39c12';
-      if (valore >= 66.67) return '#6fcf97';
-      if (valore >= 33.34) return '#8b949e';
-      return '#eb5757';
+      if (valore >= 90) return 'var(--neon-gold)';
+      if (valore >= 66.67) return 'var(--neon-green)';
+      if (valore >= 33.34) return 'var(--text-dim)';
+      return 'var(--neon-red)';
     };
 
-    const getBadgeBackground = (valore) => {
-      if (valore >= 90) return 'rgba(243, 156, 18, 0.2)';
-      if (valore >= 66.67) return 'rgba(111, 207, 151, 0.2)';
-      if (valore >= 33.34) return 'rgba(139, 148, 158, 0.2)';
-      return 'rgba(235, 87, 87, 0.2)';
-    };
-
-    const getBadgeBorder = (valore) => {
-      if (valore >= 90) return '2px solid #f39c12';
-      if (valore >= 66.67) return '1px solid #6fcf97';
-      if (valore >= 33.34) return '1px solid #8b949e';
-      return '1px solid #eb5757';
-    };
-
-    // ============================================================
-    // ⭐ v8: calcola la giocata migliore per ogni famiglia
-    //    usando getGiocataPct DIRETTAMENTE (come fa Tutte le Giocate)
-    // ============================================================
     const getGiocateDaMostrare = () => {
       if (stats.error) return [];
-
       const homeMG = stats.homeMG || {};
       const awayMG = stats.awayMG || {};
       const mgTot = stats.mgTot || {};
@@ -211,9 +175,7 @@
         famiglieDaAnalizzare = selectedFamiglie || [];
       }
 
-      famiglieDaAnalizzare = [...new Set(famiglieDaAnalizzare)].filter(
-        id => FAMIGLIE_GIOCATE[id]
-      );
+      famiglieDaAnalizzare = [...new Set(famiglieDaAnalizzare)].filter(id => FAMIGLIE_GIOCATE[id]);
 
       famiglieDaAnalizzare.forEach(familyId => {
         const family = FAMIGLIE_GIOCATE[familyId];
@@ -224,35 +186,18 @@
         if (familyId === 'gg_ng') {
           const ggNgResult = calcolaGG_NG ? calcolaGG_NG(stats) : null;
           if (ggNgResult) {
-            best = {
-              label: ggNgResult.giocata,
-              giocata: ggNgResult.giocata,
-              pct: ggNgResult.pct,
-            };
+            best = { label: ggNgResult.giocata, giocata: ggNgResult.giocata, pct: ggNgResult.pct };
           }
         } else {
           let bestPct = -1;
           let bestOpt = null;
           family.options.forEach(opt => {
             let pct = 0;
-            try {
-              pct = getGiocataPct(opt, stats, homeMG, awayMG, mgTot) || 0;
-            } catch (e) {
-              console.warn(`Errore getGiocataPct ${familyId}/${opt}:`, e.message);
-              pct = 0;
-            }
-            if (pct > bestPct) {
-              bestPct = pct;
-              bestOpt = opt;
-            }
+            try { pct = getGiocataPct(opt, stats, homeMG, awayMG, mgTot) || 0; }
+            catch (e) { pct = 0; }
+            if (pct > bestPct) { bestPct = pct; bestOpt = opt; }
           });
-          if (bestOpt && bestPct > 0) {
-            best = {
-              label: bestOpt,
-              giocata: bestOpt,
-              pct: bestPct,
-            };
-          }
+          if (bestOpt && bestPct > 0) best = { label: bestOpt, giocata: bestOpt, pct: bestPct };
         }
 
         if (best && best.pct > 0) {
@@ -262,7 +207,6 @@
             familyIcon: family.icon,
             label: best.label,
             displayLabel: formatGiocataLabel(familyId, best.label),
-            familyName: family.label,
             pct: best.pct,
             isBomb: best.pct >= 90,
             giocata: best.giocata,
@@ -296,11 +240,13 @@
         </div>
 
         <div className="tab-header" style={{ background: champColor }}>
+          <ChampLogo campionato={match.campionato} size={16} />
           <span>{match.campionato || 'N/D'}</span>
         </div>
 
-        <div className="match-info">{match.campionato} - Giornata: {match.round || 'N/A'}</div>
-        <div className="match-info">📅 {formattedDate} - ⏰ {match.ora || 'TBD'}</div>
+        <div style={{ color: 'var(--text-dim)', fontSize: '11px', marginBottom: '6px', textAlign: 'center' }}>
+          📅 {formattedDate} • ⏰ {match.ora || 'TBD'}
+        </div>
 
         <div className="teams-row">
           <div className="team">
@@ -319,70 +265,39 @@
             <div className="form-label">Forma</div>
             <div className="form-squares">{renderFormSquares(homeForm.form)}</div>
             <div className="form-pct-compact">{homeForm.pct || 0}%</div>
-            <div className="form-bar"><div className="form-bar-fill" style={{ width: (homeForm.pct || 0) + '%' }}></div></div>
           </div>
           <div className="form-block-compact">
             <div className="form-label">Forma</div>
             <div className="form-squares">{renderFormSquares(awayForm.form)}</div>
             <div className="form-pct-compact">{awayForm.pct || 0}%</div>
-            <div className="form-bar"><div className="form-bar-fill" style={{ width: (awayForm.pct || 0) + '%' }}></div></div>
           </div>
-        </div>
-
-        <div className="form-diff">
-          📊 Differenza forma:{' '}
-          <span className={diff >= 20 ? 'diff-alta' : 'diff-bassa'}>
-            {isNaN(diff) ? 0 : diff}%
-          </span>
-        </div>
-
-        <div className="form-xg">
-          <span className="xg-home">⚽ xG {match.casa}: {renderXgValue(homeForm.mediaGolFatti || 0)}</span>
-          <span className="xg-away">⚽ xG {match.ospiti}: {renderXgValue(awayForm.mediaGolFatti || 0)}</span>
         </div>
 
         <div className="bet-row-vertical">
           {giocateDaMostrare.length > 0 ? (
             giocateDaMostrare.map((g, idx) => {
               const pctColor = getColorForPct(g.pct);
-              const bgColor = getBadgeBackground(g.pct);
-              const borderStyle = getBadgeBorder(g.pct);
               const isBomb = g.pct >= 90;
 
               return (
                 <div key={idx}
                   className={`bet-item-vertical ${isBomb ? 'bomb' : ''}`}
-                  style={{
-                    borderColor: pctColor,
-                    background: isBomb ? 'var(--accent)' : bgColor,
-                    border: isBomb ? '2px solid var(--accent)' : borderStyle,
-                    animation: isBomb ? 'bomb-glow 1s infinite alternate' : 'none'
-                  }}>
-                  <span className="bet-label" style={{ color: isBomb ? '#000' : pctColor }}>
+                  style={{ borderColor: pctColor }}>
+                  <span className="bet-label" style={{ color: isBomb ? '#000' : pctColor, fontWeight: 700 }}>
                     {isBomb && '💣 '}
-                    <span style={{ fontWeight: 'bold', fontSize: '13px', color: isBomb ? '#000' : pctColor }}>
-                      {g.displayLabel || g.label}
-                    </span>
+                    {g.displayLabel || g.label}
                   </span>
                   <span className="bet-value">
                     <span className={`giocata-pct ${getPercentualeClasse(g.pct)}`}>
-                      {g.pct}% {isBomb && <span className="bomb-icon">💣</span>}
+                      {g.pct}%
                     </span>
-                    <QuotaBox
-                      match={match}
-                      familyId={g.familyId}
-                      giocata={g.giocata}
-                      pctTua={g.pct}
-                    />
-                    <div className="combinata-detail" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-                      {g.familyIcon} {g.familyName}
-                    </div>
+                    <QuotaBox match={match} familyId={g.familyId} giocata={g.giocata} pctTua={g.pct} />
                   </span>
                 </div>
               );
             })
           ) : (
-            <div className="bet-item-vertical" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+            <div className="bet-item-vertical" style={{ textAlign: 'center', color: 'var(--text-dim)' }}>
               <span>Nessuna giocata disponibile</span>
             </div>
           )}
@@ -392,125 +307,261 @@
   };
 
   // ============================================================
-  // FILTRI
+  // SIDEBAR CAMPIONATI
   // ============================================================
-
-  const GiorniFilters = ({ selected, onChange }) => {
-    const options = [1, 2, 3, 4, 5, 6, 7];
-    return (
-      <div className="giorni-filters">
-        {options.map(g => (
-          <button key={g}
-            className={`giorno-btn ${selected === g ? 'active' : 'inactive'}`}
-            onClick={() => onChange(g)}>
-            📅 {g} {g === 1 ? 'Giorno' : 'Giorni'}
-          </button>
-        ))}
-      </div>
-    );
-  };
-
-  const ChampFilters = ({ selectedChamps, onToggle, onSelectAll, onClearAll }) => {
+  const SidebarCampionati = ({ matches, selectedChamps, onToggle, onSelectAll, onClearAll, onSelectChamp }) => {
     const CHAMPIONSHIP_LIST = window.CHAMPIONSHIP_LIST;
-    const getChampColor = window.getChampColor;
+    const normalizeDate = window.normalizeDate;
+    const getTodayStr = window.getTodayStr;
+    const addDaysToDateStr = window.addDaysToDateStr;
+
+    const todayStr = getTodayStr();
+    const tomorrowStr = addDaysToDateStr(todayStr, 1);
+    const next2Str = addDaysToDateStr(todayStr, 2);
+
+    const statsCampionati = useMemo(() => {
+      const stats = {};
+      CHAMPIONSHIP_LIST.forEach(champ => {
+        stats[champ] = { oggi: 0, domani: 0, prossimi: 0, totali: 0 };
+      });
+
+      matches.forEach(m => {
+        if (m.stato !== 'Futura') return;
+        if (!stats[m.campionato]) stats[m.campionato] = { oggi: 0, domani: 0, prossimi: 0, totali: 0 };
+        const d = normalizeDate(m.data);
+        stats[m.campionato].totali++;
+        if (d === todayStr) stats[m.campionato].oggi++;
+        else if (d === tomorrowStr) stats[m.campionato].domani++;
+        else if (d <= next2Str) stats[m.campionato].prossimi++;
+      });
+
+      return stats;
+    }, [matches, todayStr, tomorrowStr, next2Str, CHAMPIONSHIP_LIST]);
+
     const activeCount = Object.values(selectedChamps).filter(v => v).length;
     const total = Object.keys(selectedChamps).length;
 
     return (
-      <div className="champ-filters-container">
-        <div className="champ-filters-grid">
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(30, 40, 66, 0.7), rgba(20, 27, 46, 0.9))',
+        border: '1px solid var(--border)',
+        borderRadius: '16px',
+        padding: '14px',
+        backdropFilter: 'blur(12px)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+      }}>
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          marginBottom: '12px', paddingBottom: '8px',
+          borderBottom: '1px solid var(--border)',
+        }}>
+          <span style={{
+            fontFamily: 'Orbitron, sans-serif',
+            fontSize: '12px', fontWeight: 700,
+            color: 'var(--neon-cyan)',
+            letterSpacing: '2px',
+            textTransform: 'uppercase',
+          }}>
+            🏆 Campionati
+          </span>
+          <span style={{
+            fontSize: '11px', color: 'var(--text-dim)',
+            background: 'var(--bg-elevated)',
+            padding: '2px 10px', borderRadius: '10px',
+            border: '1px solid var(--border)',
+          }}>
+            {activeCount}/{total}
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', gap: '6px', marginBottom: '12px' }}>
+          <button onClick={onSelectAll} style={{
+            flex: 1, padding: '6px 10px', fontSize: '10px',
+            background: 'var(--bg-elevated)', color: 'var(--text)',
+            border: '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer',
+            fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px',
+          }}>✅ Tutti</button>
+          <button onClick={onClearAll} style={{
+            flex: 1, padding: '6px 10px', fontSize: '10px',
+            background: 'var(--bg-elevated)', color: 'var(--text)',
+            border: '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer',
+            fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px',
+          }}>❌ Nessuno</button>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '60vh', overflowY: 'auto' }}>
           {CHAMPIONSHIP_LIST.map(champ => {
             const isActive = selectedChamps[champ] !== false;
-            const color = getChampColor(champ);
+            const color = window.getChampColor(champ);
+            const st = statsCampionati[champ] || { oggi: 0, domani: 0, prossimi: 0, totali: 0 };
+            const hasToday = st.oggi > 0;
+            const hasSoon = st.domani > 0 || st.prossimi > 0;
+
             return (
-              <button key={champ}
-                className={`champ-filter-btn ${isActive ? 'active' : 'inactive'}`}
+              <button
+                key={champ}
+                onClick={() => { onToggle(champ); if (onSelectChamp) onSelectChamp(champ); }}
                 style={{
-                  borderColor: isActive ? color : 'var(--border)',
-                  background: isActive ? color : 'var(--surface)',
-                  color: isActive ? '#000' : 'var(--text-muted)',
+                  position: 'relative',
+                  display: 'flex', alignItems: 'center', gap: '10px',
+                  padding: '8px 10px',
+                  borderRadius: '10px',
+                  border: isActive ? `1px solid ${color}` : '1px solid var(--border)',
+                  background: isActive
+                    ? `linear-gradient(135deg, ${color}22, ${color}11)`
+                    : 'var(--bg-elevated)',
+                  cursor: 'pointer', textAlign: 'left',
+                  transition: 'all 0.25s ease',
+                  boxShadow: isActive ? `0 0 15px ${color}33` : 'none',
                 }}
-                onClick={() => onToggle(champ)}
-                title={champ}>
-                <span className="champ-color-dot" style={{ background: color }} />
-                <span className="champ-name">{champ.length > 20 ? champ.substring(0, 18) + '…' : champ}</span>
+              >
+                <ChampLogo campionato={champ} size={26} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontSize: '11px', fontWeight: 700,
+                    color: isActive ? 'var(--text)' : 'var(--text-dim)',
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>
+                    {champ}
+                  </div>
+                  <div style={{ fontSize: '9px', color: 'var(--text-dim)', display: 'flex', gap: '8px' }}>
+                    <span>📊 {st.totali}</span>
+                    {hasToday && <span style={{ color: 'var(--neon-red)', fontWeight: 700 }}>🔴 {st.oggi} oggi</span>}
+                    {!hasToday && hasSoon && <span style={{ color: 'var(--neon-gold)' }}>🟡 {st.domani + st.prossimi}</span>}
+                  </div>
+                </div>
+
+                {hasToday && (
+                  <div className="champ-notification-badge" title={`${st.oggi} partite oggi`}>
+                    {st.oggi}
+                  </div>
+                )}
+                {!hasToday && hasSoon && (
+                  <div className="champ-notification-badge soon" title={`${st.domani + st.prossimi} in arrivo`}>
+                    {st.domani + st.prossimi}
+                  </div>
+                )}
               </button>
             );
           })}
-        </div>
-        <div className="champ-actions">
-          <button className="btn-sm btn-select-all" onClick={onSelectAll}>✅ Seleziona Tutti</button>
-          <button className="btn-sm btn-clear-all" onClick={onClearAll}>❌ Svuota Selezione</button>
-          <span className="champ-count-badge">{activeCount} / {total}</span>
         </div>
       </div>
     );
   };
 
+  // ============================================================
+  // BOTTOM PANEL - PARTITE DI OGGI
+  // ============================================================
+  const BottomPanelPartiteOggi = ({ matches }) => {
+    const [collapsed, setCollapsed] = useState(true);
+    const normalizeDate = window.normalizeDate;
+    const getTodayStr = window.getTodayStr;
+
+    const todayStr = getTodayStr();
+
+    const partiteOggi = useMemo(() => {
+      return matches
+        .filter(m => normalizeDate(m.data) === todayStr)
+        .sort((a, b) => (a.ora || '99:99').localeCompare(b.ora || '99:99'));
+    }, [matches, todayStr]);
+
+    const partiteFuture = partiteOggi.filter(m => m.stato === 'Futura').length;
+
+    return (
+      <div className={`bottom-panel ${collapsed ? 'collapsed' : ''}`}>
+        <div className="bottom-panel-header" onClick={() => setCollapsed(!collapsed)}>
+          <div className="bottom-panel-title">
+            <span style={{ fontSize: '18px' }}>📅</span>
+            <span>Partite di Oggi</span>
+            <span style={{
+              background: partiteOggi.length > 0 ? 'var(--neon-cyan)' : 'var(--text-dim)',
+              color: '#000', padding: '2px 10px', borderRadius: '10px',
+              fontSize: '11px', fontWeight: 900,
+            }}>{partiteOggi.length}</span>
+            {partiteFuture > 0 && (
+              <span style={{
+                background: 'var(--neon-gold)', color: '#000',
+                padding: '2px 10px', borderRadius: '10px',
+                fontSize: '10px', fontWeight: 900,
+              }}>⏰ {partiteFuture} in arrivo</span>
+            )}
+          </div>
+          <button className="bottom-panel-toggle">
+            {collapsed ? '▲ Apri' : '▼ Chiudi'}
+          </button>
+        </div>
+
+        {!collapsed && (
+          <div className="bottom-panel-content">
+            {partiteOggi.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-dim)' }}>
+                <div style={{ fontSize: '32px', marginBottom: '8px' }}>😴</div>
+                <div>Nessuna partita oggi</div>
+              </div>
+            ) : (
+              partiteOggi.map(m => (
+                <div key={m.id} className="bottom-panel-match">
+                  <span className="bp-time">{m.ora || '--:--'}</span>
+                  <ChampLogo campionato={m.campionato} size={20} />
+                  <span className="bp-champ">{m.campionato}</span>
+                  <span className="bp-teams">{m.casa} - {m.ospiti}</span>
+                  {m.stato === 'Giocata' ? (
+                    <span className="bp-score">{m.golCasa} - {m.golOspite}</span>
+                  ) : (
+                    <span style={{
+                      fontSize: '10px', color: 'var(--neon-gold)',
+                      border: '1px solid var(--neon-gold)',
+                      padding: '1px 8px', borderRadius: '8px',
+                    }}>⏰ {m.ora || 'TBD'}</span>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ============================================================
+  // VISUALIZZA GIOCATE SWITCH
+  // ============================================================
   const VisualizzaGiocateSwitch = ({ mode, setMode, selectedFamiglie }) => {
     const countScelte = (selectedFamiglie || []).length;
     const totalFamiglie = Object.keys(window.FAMIGLIE_GIOCATE || {}).length;
 
     return (
       <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        flexWrap: 'wrap',
-        marginTop: '12px',
-        padding: '10px 14px',
-        background: 'var(--surface)',
-        borderRadius: '8px',
-        border: '2px solid var(--border)',
+        display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
+        marginTop: '12px', padding: '10px 14px',
+        background: 'var(--bg-elevated)', borderRadius: '12px',
+        border: '1px solid var(--border)',
       }}>
-        <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text)' }}>
-          🎯 Giocate da mostrare:
+        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neon-cyan)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+          🎯 Giocate
         </span>
-        <div style={{
-          display: 'flex',
-          background: 'var(--card)',
-          borderRadius: '8px',
-          padding: '3px',
-          border: '1px solid var(--border)',
-        }}>
+        <div style={{ display: 'flex', background: 'var(--bg-deep)', borderRadius: '8px', padding: '3px', border: '1px solid var(--border)' }}>
           <button
             onClick={() => setMode('scelte')}
             style={{
-              padding: '6px 16px',
-              fontSize: '12px',
-              fontWeight: mode === 'scelte' ? 'bold' : 'normal',
-              borderRadius: '6px',
-              border: 'none',
-              cursor: 'pointer',
-              background: mode === 'scelte' ? 'var(--accent)' : 'transparent',
-              color: mode === 'scelte' ? '#000' : 'var(--text-muted)',
-              transition: 'all 0.2s',
+              padding: '6px 16px', fontSize: '11px', fontWeight: 700,
+              borderRadius: '6px', border: 'none', cursor: 'pointer',
+              background: mode === 'scelte' ? 'var(--neon-cyan)' : 'transparent',
+              color: mode === 'scelte' ? '#000' : 'var(--text-dim)',
+              transition: 'all 0.2s', textTransform: 'uppercase', letterSpacing: '1px',
             }}
-          >
-            ⭐ Scelte ({countScelte})
-          </button>
+          >⭐ Scelte ({countScelte})</button>
           <button
             onClick={() => setMode('tutte')}
             style={{
-              padding: '6px 16px',
-              fontSize: '12px',
-              fontWeight: mode === 'tutte' ? 'bold' : 'normal',
-              borderRadius: '6px',
-              border: 'none',
-              cursor: 'pointer',
-              background: mode === 'tutte' ? 'var(--accent)' : 'transparent',
-              color: mode === 'tutte' ? '#000' : 'var(--text-muted)',
-              transition: 'all 0.2s',
+              padding: '6px 16px', fontSize: '11px', fontWeight: 700,
+              borderRadius: '6px', border: 'none', cursor: 'pointer',
+              background: mode === 'tutte' ? 'var(--neon-magenta)' : 'transparent',
+              color: mode === 'tutte' ? '#000' : 'var(--text-dim)',
+              transition: 'all 0.2s', textTransform: 'uppercase', letterSpacing: '1px',
             }}
-          >
-            🌐 Tutte ({totalFamiglie})
-          </button>
+          >🌐 Tutte ({totalFamiglie})</button>
         </div>
-        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-          {mode === 'scelte'
-            ? 'Mostra le 3 migliori giocate tra le famiglie scelte in Impostazioni'
-            : 'Mostra le 3 migliori giocate tra tutte le famiglie disponibili (incluso GG/NG)'}
-        </span>
       </div>
     );
   };
@@ -518,7 +569,6 @@
   // ============================================================
   // COMPONENTE PRINCIPALE
   // ============================================================
-
   function PalinsestoComponent({ matches, selectedFamiglie, onSelectMatch, weatherCache }) {
     const normalizeDate = window.normalizeDate;
     const getTodayStr = window.getTodayStr;
@@ -537,6 +587,8 @@
     const { mode: visualizzaMode, setMode: setVisualizzaMode } =
       window.FiltriCampionati.useVisualizzaGiocateMode();
 
+    const [champFocus, setChampFocus] = useState(null);
+
     const getActiveChamps = () => Object.keys(selectedChamps).filter(c => selectedChamps[c]);
 
     const futureMatches = useMemo(() => {
@@ -548,6 +600,8 @@
         let list = matches.filter(m => m.stato === 'Futura');
         if (activeChamps.length > 0) {
           list = list.filter(m => activeChamps.includes(m.campionato));
+        } else {
+          list = [];
         }
         list = list.filter(m => {
           if (!m.data) return false;
@@ -559,7 +613,8 @@
           const da = normalizeDate(a.data);
           const db = normalizeDate(b.data);
           if (!da || !db) return 0;
-          return da.localeCompare(db);
+          if (da !== db) return da.localeCompare(db);
+          return (a.ora || '').localeCompare(b.ora || '');
         });
         return list;
       } catch (e) {
@@ -568,38 +623,103 @@
       }
     }, [matches, selectedGiorni, selectedChamps]);
 
+    const partiteFiltrate = useMemo(() => {
+      if (!champFocus) return futureMatches;
+      return futureMatches.filter(m => m.campionato === champFocus);
+    }, [futureMatches, champFocus]);
+
     return (
-      <div>
-        <div style={{ marginBottom: '12px' }}>
-          <GiorniFilters selected={selectedGiorni} onChange={setSelectedGiorni} />
-          <ChampFilters
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'minmax(240px, 280px) 1fr',
+        gap: '20px',
+        alignItems: 'start',
+      }}>
+        {/* SIDEBAR */}
+        <div style={{ position: 'sticky', top: '90px' }}>
+          <SidebarCampionati
+            matches={matches}
             selectedChamps={selectedChamps}
             onToggle={toggleChamp}
             onSelectAll={selectAllChamps}
             onClearAll={clearAllChamps}
-          />
-
-          <VisualizzaGiocateSwitch
-            mode={visualizzaMode}
-            setMode={setVisualizzaMode}
-            selectedFamiglie={selectedFamiglie}
+            onSelectChamp={setChampFocus}
           />
         </div>
 
-        <h2 style={{ marginBottom: '14px' }}>
-          📅 Palinsesto - Prossimi {selectedGiorni} {selectedGiorni > 1 ? 'Giorni' : 'Giorno'}
-        </h2>
+        {/* MAIN */}
+        <div>
+          <div style={{ marginBottom: '16px' }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
+              padding: '12px 16px',
+              background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 229, 0.05))',
+              borderRadius: '14px',
+              border: '1px solid var(--border)',
+            }}>
+              <span style={{
+                fontFamily: 'Orbitron, sans-serif',
+                fontSize: '16px', fontWeight: 900,
+                color: 'var(--neon-cyan)',
+                letterSpacing: '2px', textTransform: 'uppercase',
+                textShadow: '0 0 12px var(--neon-cyan)',
+              }}>
+                📅 Palinsesto
+              </span>
+              <span style={{ color: 'var(--text-dim)', fontSize: '12px' }}>
+                Prossimi <b style={{ color: 'var(--neon-cyan)' }}>{selectedGiorni}</b> {selectedGiorni > 1 ? 'giorni' : 'giorno'}
+              </span>
 
-        {futureMatches.length === 0 ? (
-          <div className="empty-state">
-            Nessuna partita disponibile nelle prossime {selectedGiorni} giornate.
+              {champFocus && (
+                <button
+                  onClick={() => setChampFocus(null)}
+                  style={{
+                    padding: '4px 12px', fontSize: '11px', fontWeight: 700,
+                    background: 'var(--neon-magenta)', color: '#000',
+                    border: 'none', borderRadius: '10px', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                  }}
+                >
+                  ✖ {champFocus}
+                </button>
+              )}
+
+              <div style={{ marginLeft: 'auto', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                {[1, 2, 3, 5, 7].map(g => (
+                  <button
+                    key={g}
+                    onClick={() => setSelectedGiorni(g)}
+                    style={{
+                      padding: '6px 14px', fontSize: '11px', fontWeight: 700,
+                      borderRadius: '8px', border: '1px solid',
+                      borderColor: selectedGiorni === g ? 'var(--neon-cyan)' : 'var(--border)',
+                      background: selectedGiorni === g ? 'var(--neon-cyan)' : 'var(--bg-elevated)',
+                      color: selectedGiorni === g ? '#000' : 'var(--text-dim)',
+                      cursor: 'pointer', transition: 'all 0.2s',
+                      textTransform: 'uppercase', letterSpacing: '1px',
+                    }}
+                  >{g}g</button>
+                ))}
+              </div>
+            </div>
+
+            <VisualizzaGiocateSwitch
+              mode={visualizzaMode}
+              setMode={setVisualizzaMode}
+              selectedFamiglie={selectedFamiglie}
+            />
           </div>
-        ) : (
-          <div className="matches-grid">
-            {futureMatches.map(m => {
-              const weatherKey = `${m.campionato}_${m.data}`;
-              const weather = weatherCache[weatherKey] || null;
-              return (
+
+          {partiteFiltrate.length === 0 ? (
+            <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔍</div>
+              <div style={{ color: 'var(--text-dim)', fontSize: '14px' }}>
+                Nessuna partita disponibile nelle prossime {selectedGiorni} giornate.
+              </div>
+            </div>
+          ) : (
+            <div className="matches-grid">
+              {partiteFiltrate.map(m => (
                 <MatchTab
                   key={m.id}
                   match={m}
@@ -608,15 +728,21 @@
                   selectedFamiglie={selectedFamiglie}
                   weatherCache={weatherCache}
                 />
-              );
-            })}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* BOTTOM PANEL */}
+        <BottomPanelPartiteOggi matches={matches} />
       </div>
     );
   }
 
   window.PalinsestoComponent = PalinsestoComponent;
-  console.log('✅ Modulo Palinsesto v8 caricato - RIMOSSA normalizzazione p1/pX/p2 (allineato a Tutte le Giocate)');
+  window.ChampLogo = ChampLogo;
+  window.SidebarCampionati = SidebarCampionati;
+  window.BottomPanelPartiteOggi = BottomPanelPartiteOggi;
+  console.log('✅ Modulo Palinsesto v9 FUTURISTIC caricato');
 
 })();

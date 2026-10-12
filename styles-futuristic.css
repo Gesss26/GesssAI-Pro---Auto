@@ -1,0 +1,668 @@
+/* ============================================================
+   GesssAI-Pro v4.0 - FUTURISTIC UI
+   Palette neon + Glassmorphism + Micro-animazioni
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Palette futuristica */
+  --bg-deep: #05070f;
+  --bg: #0a0e1a;
+  --bg-elevated: #101627;
+  --surface: #141b2e;
+  --surface-2: #1a2340;
+  --card: #1e2842;
+  --card-hover: #263357;
+  --banner: #2a3a5c;
+  
+  --text: #e8f0ff;
+  --text-dim: #8fa3c7;
+  --text-muted: #d4af37; /* oro per label importanti */
+  
+  /* Neon accents */
+  --neon-cyan: #00f5ff;
+  --neon-blue: #4d7cff;
+  --neon-magenta: #ff00e5;
+  --neon-purple: #a855f7;
+  --neon-gold: #ffd700;
+  --neon-orange: #ff9500;
+  --neon-green: #00ff88;
+  --neon-red: #ff3366;
+  
+  /* Semantic */
+  --accent: var(--neon-cyan);
+  --accent-2: var(--neon-magenta);
+  --accent-3: var(--neon-gold);
+  --border: rgba(0, 245, 255, 0.15);
+  --border-strong: rgba(0, 245, 255, 0.4);
+  
+  /* Glow effects */
+  --glow-cyan: 0 0 20px rgba(0, 245, 255, 0.5), 0 0 40px rgba(0, 245, 255, 0.2);
+  --glow-gold: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3);
+  --glow-magenta: 0 0 20px rgba(255, 0, 229, 0.5), 0 0 40px rgba(255, 0, 229, 0.2);
+  --glow-green: 0 0 20px rgba(0, 255, 136, 0.5);
+  
+  /* Percentuali */
+  --pct-bomb: var(--neon-gold);
+  --pct-green: var(--neon-green);
+  --pct-white: #8fa3c7;
+  --pct-red: var(--neon-red);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Rajdhani', 'Inter', 'Segoe UI', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--bg-deep);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(ellipse at top left, rgba(77, 124, 255, 0.15), transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(255, 0, 229, 0.1), transparent 50%),
+    radial-gradient(ellipse at center, rgba(0, 245, 255, 0.05), transparent 70%);
+  background-attachment: fixed;
+}
+
+/* Scrollbar futuristica */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--neon-cyan), var(--neon-magenta));
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--neon-cyan); }
+
+/* ============================================================
+   SPLASHSCREEN
+   ============================================================ */
+#splashscreen {
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at center, #0a0e1a 0%, #05070f 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 99999; transition: opacity 0.8s ease, transform 0.8s ease; padding: 20px;
+}
+#splashscreen.hidden { opacity: 0; transform: scale(1.05); pointer-events: none; }
+#splashscreen .splash-logo { max-width: 80vw; max-height: 55vh; margin-bottom: 40px; filter: drop-shadow(0 0 40px var(--neon-cyan)); }
+#splashscreen .splash-btn {
+  padding: 18px 56px;
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue), var(--neon-magenta));
+  color: #000; font-weight: 900; font-size: 18px; border: none; border-radius: 50px;
+  cursor: pointer; transition: all 0.3s ease;
+  box-shadow: var(--glow-cyan);
+  letter-spacing: 3px; text-transform: uppercase;
+  font-family: 'Orbitron', sans-serif;
+}
+#splashscreen .splash-btn:hover { transform: scale(1.05); box-shadow: 0 0 60px var(--neon-cyan); }
+#splashscreen .splash-sub { margin-top: 20px; color: var(--text-dim); font-size: 12px; letter-spacing: 4px; font-family: 'Orbitron', sans-serif; }
+#splashscreen .loader { margin-top: 25px; display: flex; gap: 8px; }
+#splashscreen .loader .dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--neon-cyan); box-shadow: var(--glow-cyan);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+#splashscreen .loader .dot:nth-child(2) { animation-delay: 0.2s; background: var(--neon-magenta); box-shadow: var(--glow-magenta); }
+#splashscreen .loader .dot:nth-child(3) { animation-delay: 0.4s; background: var(--neon-gold); box-shadow: var(--glow-gold); }
+@keyframes pulse { 0%, 80%, 100% { transform: scale(0.4); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }
+
+/* ============================================================
+   ROOT & LAYOUT
+   ============================================================ */
+#root { display: none; min-height: 100vh; }
+#root.visible { display: block !important; }
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   HEADER FUTURISTICO
+   ============================================================ */
+.header {
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
+  padding: 14px 24px;
+  border-bottom: 2px solid var(--neon-cyan);
+  box-shadow: 0 4px 30px rgba(0, 245, 255, 0.15), inset 0 -2px 0 rgba(0, 245, 255, 0.3);
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(10px);
+}
+.header .header-center { text-align: center; flex: 1; }
+.header .app-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 26px; font-weight: 900; letter-spacing: 3px;
+  text-shadow: 0 0 20px var(--neon-cyan);
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta), var(--neon-gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: hue-shift 8s linear infinite;
+}
+@keyframes hue-shift {
+  0%, 100% { filter: hue-rotate(0deg); }
+  50% { filter: hue-rotate(30deg); }
+}
+.header .subtitle {
+  font-size: 11px; color: var(--text-dim); letter-spacing: 2px;
+  font-family: 'Orbitron', sans-serif; text-transform: uppercase;
+}
+.clock {
+  background: var(--bg-elevated);
+  padding: 8px 16px; border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  font-family: 'Orbitron', monospace;
+  font-size: 13px; font-weight: 700;
+  color: var(--neon-cyan);
+  min-width: 200px; text-align: right;
+  box-shadow: inset 0 0 20px rgba(0, 245, 255, 0.1);
+}
+.clock-date { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
+.clock-time { font-size: 18px; text-shadow: 0 0 10px var(--neon-cyan); }
+
+/* ============================================================
+   TABS NAVIGAZIONE FUTURISTICA
+   ============================================================ */
+.tabs-nav {
+  display: flex;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs-nav::-webkit-scrollbar { display: none; }
+.tabs-nav button {
+  flex: 1; min-width: 110px;
+  padding: 14px 12px;
+  background: transparent; color: var(--text-dim);
+  border: none; cursor: pointer;
+  font-size: 13px; font-weight: 700;
+  font-family: 'Rajdhani', sans-serif;
+  text-transform: uppercase; letter-spacing: 1px;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  transition: all 0.25s ease;
+  position: relative;
+}
+.tabs-nav button:hover { color: var(--neon-cyan); background: rgba(0, 245, 255, 0.05); }
+.tabs-nav button.active {
+  color: var(--neon-cyan);
+  border-bottom-color: var(--neon-cyan);
+  background: linear-gradient(180deg, transparent, rgba(0, 245, 255, 0.1));
+  text-shadow: 0 0 10px var(--neon-cyan);
+}
+.tabs-nav button.active::after {
+  content: '';
+  position: absolute; bottom: -3px; left: 20%; right: 20%; height: 3px;
+  background: var(--neon-cyan);
+  box-shadow: var(--glow-cyan);
+}
+
+/* ============================================================
+   CONTAINER
+   ============================================================ */
+.container { padding: 20px; max-width: 1600px; margin: 0 auto; }
+
+/* ============================================================
+   CARD GLASSMORPHISM
+   ============================================================ */
+.card {
+  background: linear-gradient(135deg, rgba(30, 40, 66, 0.7), rgba(20, 27, 46, 0.9));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+}
+.card:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 8px 32px rgba(0, 245, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* ============================================================
+   MATCH TAB (Card partita) - FUTURISTICA
+   ============================================================ */
+.matches-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+@media (max-width: 1200px) { .matches-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) { .matches-grid { grid-template-columns: 1fr; } }
+
+.match-tab {
+  background: linear-gradient(135deg, rgba(30, 40, 66, 0.8), rgba(20, 27, 46, 0.95));
+  border-radius: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-left-width: 6px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+.match-tab:hover {
+  transform: translateY(-4px);
+  border-color: var(--neon-cyan);
+  box-shadow: 0 12px 40px rgba(0, 245, 255, 0.25);
+}
+.match-tab::before {
+  content: '';
+  position: absolute; inset: 0; border-radius: 14px;
+  background: linear-gradient(135deg, rgba(0, 245, 255, 0.05), transparent 40%);
+  pointer-events: none;
+}
+
+.match-tab .score-badge {
+  position: absolute; top: 10px; right: 12px;
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+  color: #000; font-weight: 900; font-size: 16px;
+  padding: 3px 12px; border-radius: 20px;
+  border: 2px solid var(--neon-cyan);
+  box-shadow: var(--glow-cyan);
+  display: flex; align-items: center; gap: 6px;
+  z-index: 10;
+  font-family: 'Orbitron', sans-serif;
+}
+.match-tab .score-badge .bomb-inline {
+  font-size: 20px;
+  animation: bomb-bounce 1s infinite ease-in-out;
+  display: inline-block;
+}
+
+/* ============================================================
+   TAB HEADER CAMPIONATO CON LOGO
+   ============================================================ */
+.tab-header {
+  padding: 6px 14px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  text-align: center;
+  color: #000;
+  font-weight: 800;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Rajdhani', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================================
+   FORM SQUARES
+   ============================================================ */
+.form-square {
+  width: 22px; height: 22px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 12px; color: #000;
+  font-family: 'Orbitron', sans-serif;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+.form-square-V { background: var(--neon-green); box-shadow: 0 0 8px var(--neon-green); }
+.form-square-P { background: var(--neon-gold); box-shadow: 0 0 8px var(--neon-gold); }
+.form-square-S { background: var(--neon-red); box-shadow: 0 0 8px var(--neon-red); }
+
+/* ============================================================
+   GIOCATA BADGE - FUTURISTICA
+   ============================================================ */
+.giocata-pct {
+  display: inline-block;
+  font-weight: 900;
+  font-size: 13px;
+  padding: 2px 10px;
+  border-radius: 6px;
+  color: #000 !important;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 0.5px;
+}
+.giocata-pct.flag-red { background: var(--neon-red); box-shadow: 0 0 10px rgba(255, 51, 102, 0.5); }
+.giocata-pct.flag-white { background: var(--text-dim); }
+.giocata-pct.flag-green { background: var(--neon-green); box-shadow: 0 0 10px rgba(0, 255, 136, 0.5); }
+.giocata-pct.flag-bomb {
+  background: linear-gradient(135deg, var(--neon-gold), var(--neon-orange));
+  animation: bomb-glow 1.2s infinite alternate;
+  color: #000 !important;
+}
+@keyframes bomb-glow {
+  0% { box-shadow: 0 0 12px rgba(255, 215, 0, 0.6), 0 0 24px rgba(255, 215, 0, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.9), 0 0 60px rgba(255, 215, 0, 0.5); transform: scale(1.06); }
+  100% { box-shadow: 0 0 12px rgba(255, 215, 0, 0.6), 0 0 24px rgba(255, 215, 0, 0.3); }
+}
+
+.bomb-icon {
+  display: inline-block; font-size: 16px; margin-left: 4px;
+  animation: bomb-bounce 0.8s infinite ease-in-out;
+  filter: drop-shadow(0 0 6px var(--neon-gold));
+}
+@keyframes bomb-bounce {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.3) rotate(10deg); }
+}
+
+/* ============================================================
+   BET ITEM VERTICAL
+   ============================================================ */
+.bet-item-vertical {
+  background: rgba(10, 14, 26, 0.6);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+.bet-item-vertical:hover {
+  background: rgba(0, 245, 255, 0.05);
+  border-color: var(--border-strong);
+}
+.bet-item-vertical.bomb {
+  border-color: var(--neon-gold);
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 149, 0, 0.1));
+  animation: bomb-glow 1.2s infinite alternate;
+}
+
+/* ============================================================
+   BOTTONI FUTURISTICI
+   ============================================================ */
+button.btn {
+  padding: 10px 20px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+  color: #000;
+  font-size: 13px;
+  font-family: 'Rajdhani', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 15px rgba(0, 245, 255, 0.3);
+}
+button.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 245, 255, 0.5);
+}
+button.btn-secondary {
+  background: var(--bg-elevated); color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+button.btn-secondary:hover { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+button.btn-danger { background: var(--neon-red); color: #fff; }
+
+/* ============================================================
+   FILTRI GIORNI
+   ============================================================ */
+.giorni-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.giorno-btn {
+  padding: 8px 18px; border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated); color: var(--text-dim);
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  min-height: 40px; display: flex; align-items: center; justify-content: center;
+  transition: all 0.25s ease;
+  font-family: 'Rajdhani', sans-serif;
+}
+.giorno-btn:hover { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+.giorno-btn.active {
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+  color: #000; border-color: var(--neon-cyan);
+  box-shadow: var(--glow-cyan);
+}
+
+/* ============================================================
+   CHAMP FILTERS CON LOGHI
+   ============================================================ */
+.champ-filters-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.champ-filters-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.champ-filter-btn {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-dim);
+  font-size: 11px; font-weight: 700;
+  cursor: pointer;
+  min-height: 44px;
+  display: flex; align-items: center; gap: 8px;
+  transition: all 0.25s ease;
+  font-family: 'Rajdhani', sans-serif;
+  overflow: hidden;
+}
+.champ-filter-btn:hover {
+  border-color: var(--neon-cyan);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 245, 255, 0.2);
+}
+.champ-filter-btn.active {
+  border-color: var(--neon-cyan);
+  background: linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(77, 124, 255, 0.1));
+  color: var(--text);
+  box-shadow: inset 0 0 20px rgba(0, 245, 255, 0.15);
+}
+.champ-filter-btn .champ-logo {
+  width: 24px; height: 24px; object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 4px rgba(0, 245, 255, 0.4));
+}
+.champ-filter-btn .champ-name {
+  font-size: 10px; line-height: 1.2;
+  overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.champ-filter-btn .champ-name.full { white-space: normal; font-size: 9px; }
+.champ-filter-btn .champ-color-dot {
+  display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+  flex-shrink: 0; box-shadow: 0 0 8px currentColor;
+}
+
+/* ============================================================
+   BOLLINO NOTIFICA CAMPIONATO
+   ============================================================ */
+.champ-notification-badge {
+  position: absolute; top: -6px; right: -6px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--neon-red);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 900; color: #fff;
+  box-shadow: 0 0 12px var(--neon-red);
+  animation: notif-pulse 1.5s infinite;
+  border: 2px solid var(--bg-deep);
+}
+@keyframes notif-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 12px var(--neon-red); }
+  50% { transform: scale(1.15); box-shadow: 0 0 20px var(--neon-red); }
+}
+.champ-notification-badge.soon { background: var(--neon-gold); box-shadow: 0 0 12px var(--neon-gold); }
+
+/* ============================================================
+   BOTTOM PANEL - PARTITE DI OGGI
+   ============================================================ */
+.bottom-panel {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: linear-gradient(180deg, rgba(16, 22, 39, 0.95), rgba(5, 7, 15, 0.98));
+  border-top: 2px solid var(--neon-cyan);
+  box-shadow: 0 -8px 40px rgba(0, 245, 255, 0.2);
+  backdrop-filter: blur(16px);
+  z-index: 200;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 60vh;
+}
+.bottom-panel.collapsed { transform: translateY(calc(100% - 48px)); }
+.bottom-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px; cursor: pointer;
+  border-bottom: 1px solid var(--border);
+}
+.bottom-panel-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: var(--neon-cyan);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: flex; align-items: center; gap: 10px;
+}
+.bottom-panel-toggle {
+  background: transparent; border: 1px solid var(--border-strong);
+  color: var(--neon-cyan); border-radius: 8px;
+  padding: 4px 12px; cursor: pointer;
+  font-size: 12px; font-weight: 700;
+  transition: all 0.2s ease;
+}
+.bottom-panel-toggle:hover { background: rgba(0, 245, 255, 0.1); }
+.bottom-panel-content {
+  padding: 12px 20px 20px;
+  overflow-y: auto;
+  max-height: calc(60vh - 48px);
+}
+.bottom-panel-match {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 12px; margin-bottom: 6px;
+  background: rgba(30, 40, 66, 0.5);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+.bottom-panel-match:hover {
+  background: rgba(0, 245, 255, 0.08);
+  border-color: var(--border-strong);
+}
+.bottom-panel-match .bp-time {
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  color: var(--neon-cyan);
+  min-width: 50px;
+  text-shadow: 0 0 8px var(--neon-cyan);
+}
+.bottom-panel-match .bp-champ {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  min-width: 100px;
+}
+.bottom-panel-match .bp-teams {
+  font-weight: 700;
+  color: var(--text);
+  flex: 1;
+}
+.bottom-panel-match .bp-score {
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  color: var(--neon-gold);
+  text-shadow: 0 0 8px var(--neon-gold);
+}
+
+/* Body padding per bottom panel */
+.app-shell { padding-bottom: 60px; }
+
+/* ============================================================
+   RESPONSIVE TABLET & MOBILE
+   ============================================================ */
+@media (max-width: 1024px) {
+  .champ-filters-grid { grid-template-columns: repeat(4, 1fr); }
+  .container { padding: 16px; }
+}
+
+@media (max-width: 768px) {
+  .header { padding: 10px 12px; flex-direction: column; gap: 8px; }
+  .header .app-name { font-size: 20px; letter-spacing: 2px; }
+  .clock { position: static; min-width: auto; width: 100%; text-align: center; padding: 6px; }
+  .champ-filters-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .champ-filter-btn { padding: 6px 8px; min-height: 40px; }
+  .champ-filter-btn .champ-logo { width: 20px; height: 20px; }
+  .champ-filter-btn .champ-name { font-size: 9px; }
+  .container { padding: 12px; }
+  .card { padding: 14px; border-radius: 12px; }
+  .match-tab { padding: 12px; }
+  .tabs-nav button { padding: 12px 8px; font-size: 11px; min-width: 90px; }
+  .bottom-panel-match { flex-wrap: wrap; gap: 6px; }
+  .bottom-panel-match .bp-champ { min-width: auto; }
+}
+
+@media (max-width: 480px) {
+  .champ-filters-grid { grid-template-columns: repeat(2, 1fr); }
+  .champ-filter-btn { padding: 5px 6px; min-height: 36px; }
+  .champ-filter-btn .champ-logo { width: 18px; height: 18px; }
+  .champ-filter-btn .champ-name { font-size: 8px; }
+  .header .app-name { font-size: 16px; }
+  .header .subtitle { font-size: 9px; }
+  .tabs-nav button { min-width: 80px; font-size: 10px; padding: 10px 6px; }
+}
+
+/* ============================================================
+   ANIMAZIONI EXTRA
+   ============================================================ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.card, .match-tab { animation: fadeInUp 0.4s ease-out; }
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+.loading-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.1), transparent);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Glow pulsante per bombe */
+@keyframes goldPulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(255, 215, 0, 0.6), 0 0 24px rgba(255, 215, 0, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(255, 215, 0, 1), 0 0 60px rgba(255, 215, 0, 0.5); }
+}
+
+/* ============================================================
+   DISCLAIMER
+   ============================================================ */
+.disclaimer-footer {
+  margin-top: 30px; padding: 16px 20px;
+  background: var(--bg-elevated);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  font-size: 11px; color: var(--text-dim);
+  line-height: 1.6;
+}
+.disclaimer-footer strong { color: var(--text); }
+.disclaimer-footer .highlight { color: var(--neon-gold); font-weight: 700; }
+
+/* ============================================================
+   HOME BTN OVERLAY
+   ============================================================ */
+.home-btn-overlay {
+  position: fixed; bottom: 80px; right: 20px;
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue)) !important;
+  border: none !important;
+  width: 50px; height: 50px; border-radius: 50%;
+  font-size: 22px !important;
+  cursor: pointer !important;
+  z-index: 150 !important;
+  color: #000 !important;
+  box-shadow: var(--glow-cyan);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.25s ease;
+}
+.home-btn-overlay:hover { transform: scale(1.1); box-shadow: 0 0 40px var(--neon-cyan); }
