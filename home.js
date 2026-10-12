@@ -1,6 +1,6 @@
 // ============================================================
-// home.js - Modulo Home (FUTURISTIC + MOBILE FIX + SWITCH CALCOLATE/SCELTE)
-// ✅ v3: le "Scelte" leggono le famiglie configurate in Impostazioni → Giocate
+// home.js - Modulo Home (FUTURISTIC + MOBILE FIX + SWITCH CALCOLATE/SCELTE + CALCOLATRICE)
+// ✅ v4: aggiunto tab "🧮 Calcolatrice" con analisi probabilità e copertura schedina
 // ============================================================
 
 (function () {
@@ -60,6 +60,55 @@
       @media (max-width: 480px) {
         .nazioni-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
         .nazione-btn { min-height: 72px !important; padding: 8px 4px !important; }
+      }
+      .calc-select {
+        width: 100%; padding: 10px 12px;
+        background: var(--bg-elevated);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 13px;
+        font-family: 'Rajdhani', sans-serif;
+        cursor: pointer;
+        outline: none;
+      }
+      .calc-select:focus { border-color: var(--neon-cyan); }
+      .calc-select:disabled { opacity: 0.4; cursor: not-allowed; }
+      .calc-input {
+        width: 100%; padding: 10px 12px;
+        background: var(--bg-elevated);
+        color: var(--text);
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 700;
+        font-family: 'Orbitron', monospace;
+        outline: none;
+        text-align: right;
+      }
+      .calc-input:focus { border-color: var(--neon-cyan); }
+      .calc-result-row {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 10px 14px; border-radius: 8px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        margin-bottom: 6px;
+      }
+      .calc-result-label { font-size: 13px; color: var(--text-dim); }
+      .calc-result-value {
+        font-family: 'Orbitron', monospace;
+        font-size: 18px; font-weight: 900;
+      }
+      .calc-result-value.positive { color: var(--neon-green); }
+      .calc-result-value.negative { color: var(--neon-red); }
+      .calc-result-value.neutral { color: var(--neon-cyan); }
+      .calc-prob-bar {
+        height: 10px; background: var(--bg-deep); border-radius: 5px;
+        overflow: hidden; margin-top: 4px;
+      }
+      .calc-prob-fill {
+        height: 100%; border-radius: 5px;
+        transition: width 0.4s ease;
       }
     `;
     document.head.appendChild(style);
@@ -229,7 +278,6 @@
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (e) {}
-    // Fallback: le famiglie di default
     return window.DEFAULT_FAMIGLIE || ['dc_under', 'mg_casa_ospite', 'over'];
   };
 
@@ -251,9 +299,6 @@
     const homeRange = window.getMultigolRange(match.casa, allMatches);
     const awayRange = window.getMultigolRange(match.ospiti, allMatches);
 
-    // ============================================================
-    // TOP 3 CALCOLATE (tutte le famiglie, top % più alte)
-    // ============================================================
     if (tipoGiocate === 'calcolate') {
       const tutte = [];
       Object.keys(window.FAMIGLIE_GIOCATE).forEach(familyId => {
@@ -283,9 +328,6 @@
       return tutte.slice(0, 3);
     }
 
-    // ============================================================
-    // TOP 3 SCELTE (dalle famiglie configurate in Impostazioni)
-    // ============================================================
     const famiglieScelte = leggiFamiglieSelezionate();
     if (!famiglieScelte || famiglieScelte.length === 0) return [];
 
@@ -428,9 +470,6 @@
     );
   };
 
-  // ============================================================
-  // RIGA PARTITA — con refreshKey per aggiornamento live
-  // ============================================================
   const RigaPartita = ({ match, allMatches, tipoGiocate, refreshKey }) => {
     const top3 = useMemo(() => {
       const res = calcolaTop3Giocate(match, allMatches, tipoGiocate);
@@ -475,9 +514,6 @@
     );
   };
 
-  // ============================================================
-  // SEZIONE CAMPIONATO CON SWITCH
-  // ============================================================
   const SezioneCampionato = ({ campionato, matches, allMatches, hideHeader = false, tipoGiocate = 'calcolate', refreshKey }) => {
     const partiteCampionato = matches
       .filter(m => m.campionato === campionato)
@@ -555,9 +591,6 @@
     );
   };
 
-  // ============================================================
-  // VISTA NAZIONE CON SWITCH
-  // ============================================================
   const VistaNazione = ({ nazione, matches, onBack, tipoGiocate, refreshKey }) => {
     const info = NAZIONI[nazione];
     if (!info) return null;
@@ -621,9 +654,6 @@
     );
   };
 
-  // ============================================================
-  // MOBILE
-  // ============================================================
   const MobileCampScelta = ({ campionati, onSelect }) => (
     <div className="card" style={{ padding: '14px' }}>
       <div style={{
@@ -725,9 +755,6 @@
     );
   };
 
-  // ============================================================
-  // GRIGLIA NAZIONI
-  // ============================================================
   const GrigliaNazioni = ({ matches, onSelectNazione }) => {
     const nazioniOrdinate = useMemo(() => Object.keys(NAZIONI).sort((a, b) => a.localeCompare(b)), []);
 
@@ -813,6 +840,646 @@
   };
 
   // ============================================================
+  // 🧮 CALCOLATRICE COPERTURA SCHEDINA
+  // ============================================================
+  const CalcolatriceComponent = ({ matches }) => {
+    const [campionatoSel, setCampionatoSel] = useState('');
+    const [partitaSel, setPartitaSel] = useState('');
+    const [giocataSel, setGiocataSel] = useState('');
+    const [giocataCustom, setGiocataCustom] = useState('');
+
+    const [vincita, setVincita] = useState('');
+    const [quota, setQuota] = useState('');
+    const [profittoMinimo, setProfittoMinimo] = useState('');
+
+    const [quotaLive, setQuotaLive] = useState('');
+    const [pdfData, setPdfData] = useState(null);
+    const [pdfQuota, setPdfQuota] = useState(null);
+
+    // Carica info PDF (se disponibile)
+    useEffect(() => {
+      if (!window.QuoteManager) return;
+      try {
+        if (window.QuoteManager.useQuote) {
+          const hook = window.QuoteManager.useQuote();
+          setPdfData(hook.dataMaxPDF || null);
+        }
+      } catch (e) {}
+    }, []);
+
+    // Partite future raggruppate per campionato
+    const campionatiConPartite = useMemo(() => {
+      const oggi = window.getTodayStr();
+      const futuri = (matches || []).filter(m => m.stato === 'Futura' && window.normalizeDate(m.data) >= oggi);
+      const set = new Set(futuri.map(m => m.campionato));
+      return Array.from(set).sort();
+    }, [matches]);
+
+    const partiteFiltrate = useMemo(() => {
+      if (!campionatoSel) return [];
+      const oggi = window.getTodayStr();
+      return (matches || [])
+        .filter(m => m.campionato === campionatoSel && m.stato === 'Futura' && window.normalizeDate(m.data) >= oggi)
+        .sort((a, b) => window.parseDate(a.data, a.ora) - window.parseDate(b.data, b.ora));
+    }, [matches, campionatoSel]);
+
+    const partita = useMemo(() => {
+      if (!partitaSel) return null;
+      return (matches || []).find(m => m.id === partitaSel) || null;
+    }, [matches, partitaSel]);
+
+    // ============================================================
+    // LOGICA COPERTURA AUTOMATICA
+    // ============================================================
+    const calcolaCopertura = (giocata) => {
+      // Restituisce: { copre: ['X2'], tipo: 'singolo'|'dc'|'custom' }
+      const g = (giocata || '').toUpperCase().trim();
+      const map = {
+        '1':    { copre: ['X2'], tipo: 'dc', desc: 'Doppia Chance X2' },
+        'X':    { copre: ['12'], tipo: 'dc', desc: 'Doppia Chance 12' },
+        '2':    { copre: ['1X'], tipo: 'dc', desc: 'Doppia Chance 1X' },
+        '1X':   { copre: ['2'],  tipo: 'singolo', desc: 'Vittoria Ospite (2)' },
+        '12':   { copre: ['X'],  tipo: 'singolo', desc: 'Pareggio (X)' },
+        'X2':   { copre: ['1'],  tipo: 'singolo', desc: 'Vittoria Casa (1)' },
+        'GG':   { copre: ['NG'], tipo: 'singolo', desc: 'No Goal (NG)' },
+        'NG':   { copre: ['GG'], tipo: 'singolo', desc: 'Goal (GG)' },
+        'OVER 1.5':  { copre: ['UNDER 1.5'], tipo: 'singolo', desc: 'Under 1.5' },
+        'OVER 2.5':  { copre: ['UNDER 2.5'], tipo: 'singolo', desc: 'Under 2.5' },
+        'OVER 3.5':  { copre: ['UNDER 3.5'], tipo: 'singolo', desc: 'Under 3.5' },
+        'OVER 4.5':  { copre: ['UNDER 4.5'], tipo: 'singolo', desc: 'Under 4.5' },
+        'UNDER 1.5': { copre: ['OVER 1.5'], tipo: 'singolo', desc: 'Over 1.5' },
+        'UNDER 2.5': { copre: ['OVER 2.5'], tipo: 'singolo', desc: 'Over 2.5' },
+        'UNDER 3.5': { copre: ['OVER 3.5'], tipo: 'singolo', desc: 'Over 3.5' },
+        'UNDER 4.5': { copre: ['OVER 4.5'], tipo: 'singolo', desc: 'Over 4.5' },
+      };
+      return map[g] || { copre: [], tipo: 'custom', desc: 'Copertura manuale' };
+    };
+
+    const coperturaInfo = useMemo(() => {
+      const g = giocataCustom.trim() || giocataSel;
+      if (!g) return null;
+      return calcolaCopertura(g);
+    }, [giocataSel, giocataCustom]);
+
+    // ============================================================
+    // ANALISI PROBABILITÀ
+    // ============================================================
+    const analisiProbabilita = useMemo(() => {
+      if (!partita || !coperturaInfo || !coperturaInfo.copre.length) return null;
+
+      const stats = window.computeMatchStats(partita, matches || []);
+      if (stats.error) return null;
+
+      const segnoCopertura = coperturaInfo.copre[0]; // es. 'X2', '1', 'NG'
+
+      // 1. STORICA
+      let pctStorica = 0;
+      try {
+        pctStorica = window.getGiocataPct(segnoCopertura, stats, stats.homeMG, stats.awayMG, stats.mgTot) || 0;
+        if (segnoCopertura === 'GG') pctStorica = window.calcolaGG_NG(stats)?.gg || pctStorica;
+        else if (segnoCopertura === 'NG') pctStorica = window.calcolaGG_NG(stats)?.ng || pctStorica;
+      } catch (e) { pctStorica = 0; }
+
+      // 2. MONTE CARLO (se disponibile in localStorage)
+      let pctMC = null;
+      try {
+        const savedMC = localStorage.getItem(`ft_mc_${partita.id}`);
+        if (savedMC) {
+          const mc = JSON.parse(savedMC);
+          if (segnoCopertura === '1') pctMC = mc.homeWins;
+          else if (segnoCopertura === 'X') pctMC = mc.draws;
+          else if (segnoCopertura === '2') pctMC = mc.awayWins;
+          else if (segnoCopertura === '1X') pctMC = (mc.homeWins || 0) + (mc.draws || 0);
+          else if (segnoCopertura === 'X2') pctMC = (mc.awayWins || 0) + (mc.draws || 0);
+          else if (segnoCopertura === '12') pctMC = (mc.homeWins || 0) + (mc.awayWins || 0);
+          else if (segnoCopertura === 'GG') pctMC = mc.gg;
+          else if (segnoCopertura === 'NG') pctMC = mc.ng;
+          else if (segnoCopertura.startsWith('Over')) {
+            const soglia = segnoCopertura.replace('Over ', '').replace('.', '');
+            if (soglia === '15') pctMC = mc.over15;
+            else if (soglia === '25') pctMC = mc.over25;
+            else if (soglia === '35') pctMC = mc.over35;
+            else if (soglia === '45') pctMC = mc.over45;
+          } else if (segnoCopertura.startsWith('Under')) {
+            const soglia = segnoCopertura.replace('Under ', '').replace('.', '');
+            if (soglia === '15') pctMC = mc.under15;
+            else if (soglia === '25') pctMC = mc.under25;
+            else if (soglia === '35') pctMC = mc.under35;
+            else if (soglia === '45') pctMC = mc.under45;
+          }
+        }
+      } catch (e) {}
+
+      // 3. PDF (se disponibile)
+      let pctPDF = null;
+      let quotaPDF = null;
+      try {
+        if (window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function') {
+          // Provo a mappare segno copertura su familyId + giocata
+          let familyId = null, giocata = segnoCopertura;
+          if (['1', 'X', '2'].includes(segnoCopertura)) familyId = 'fisse';
+          else if (['1X', '12', 'X2'].includes(segnoCopertura)) familyId = 'dc';
+          else if (['GG', 'NG'].includes(segnoCopertura)) familyId = 'gg_ng';
+          else if (segnoCopertura.startsWith('Over')) familyId = 'over';
+          else if (segnoCopertura.startsWith('Under')) familyId = 'under';
+
+          if (familyId) {
+            const info = window.QuoteManager.analizzaGiocata(partita, familyId, giocata, pctStorica);
+            if (info && info.quotaBook) {
+              quotaPDF = info.quotaBook;
+              pctPDF = Math.round((1 / quotaPDF) * 100);
+            }
+          }
+        }
+      } catch (e) {}
+
+      // 4. QUOTA LIVE (se inserita)
+      let pctLive = null;
+      if (quotaLive && parseFloat(quotaLive) > 1) {
+        pctLive = Math.round((1 / parseFloat(quotaLive)) * 100);
+      }
+
+      // MEDIA
+      const fonti = [pctStorica, pctMC, pctPDF, pctLive].filter(v => v != null && v > 0);
+      const media = fonti.length > 0 ? Math.round(fonti.reduce((a, b) => a + b, 0) / fonti.length) : 0;
+
+      // CONSIGLIO
+      let consiglio = { livello: 'info', testo: '', modalita: 'esatta' };
+      if (media < 25) {
+        consiglio = { livello: 'ok', testo: '❌ Non coprire — schedina già sicura', modalita: 'esatta', colore: 'var(--neon-green)' };
+      } else if (media < 35) {
+        consiglio = { livello: 'warn', testo: '🤔 Copertura opzionale', modalita: 'esatta', colore: 'var(--neon-gold)' };
+      } else if (media < 50) {
+        consiglio = { livello: 'danger', testo: '✅ Copertura consigliata (con profitto)', modalita: 'profitto', colore: 'var(--neon-orange)' };
+      } else {
+        consiglio = { livello: 'danger', testo: '🚨 Copertura FORTE (no-loss)', modalita: 'noloss', colore: 'var(--neon-red)' };
+      }
+
+      return {
+        segnoCopertura,
+        tipoCopertura: coperturaInfo.tipo,
+        descrizione: coperturaInfo.desc,
+        pctStorica, pctMC, pctPDF, pctLive,
+        quotaPDF, media, consiglio,
+      };
+    }, [partita, coperturaInfo, quotaLive, matches]);
+
+    // ============================================================
+    // CALCOLI FINALI
+    // ============================================================
+    const calcoli = useMemo(() => {
+      const v = parseFloat(vincita) || 0;
+      const q = parseFloat(quota) || 0;
+      const p = parseFloat(profittoMinimo) || 0;
+
+      if (v <= 0 || q <= 1) return null;
+
+      let importo = 0;
+      let modalita = 'esatta';
+
+      if (p > 0) {
+        // Copertura con profitto garantito
+        importo = (v - p) / q;
+        modalita = 'profitto';
+      } else {
+        // Copertura esatta
+        importo = v / q;
+      }
+
+      const nettoCoperto = (importo * q) - importo;
+      const nettoSchedina = v - importo;
+      const totaleInvestito = importo;
+      const roiCopertura = importo > 0 ? ((nettoCoperto / importo) * 100) : 0;
+
+      return {
+        importo: Math.max(0, importo),
+        nettoCoperto,
+        nettoSchedina,
+        totaleInvestito,
+        roiCopertura,
+        modalita,
+      };
+    }, [vincita, quota, profittoMinimo]);
+
+    // ============================================================
+    // SUGGERIMENTO PROFITTO (placeholder)
+    // ============================================================
+    const profittoSuggerito = useMemo(() => {
+      if (!analisiProbabilita || !vincita) return null;
+      const v = parseFloat(vincita) || 0;
+      const prob = analisiProbabilita.media / 100;
+      const suggerito = Math.round(v * prob * 0.3);
+      return suggerito > 0 ? suggerito : null;
+    }, [analisiProbabilita, vincita]);
+
+    // ============================================================
+    // HANDLER RESET
+    // ============================================================
+    const resetAll = () => {
+      setCampionatoSel('');
+      setPartitaSel('');
+      setGiocataSel('');
+      setGiocataCustom('');
+      setVincita('');
+      setQuota('');
+      setProfittoMinimo('');
+      setQuotaLive('');
+    };
+
+    // ============================================================
+    // OPZIONI GIOCATE DISPONIBILI
+    // ============================================================
+    const giocateDisponibili = [
+      { value: '1', label: '1 (Vittoria Casa)' },
+      { value: 'X', label: 'X (Pareggio)' },
+      { value: '2', label: '2 (Vittoria Ospite)' },
+      { value: '1X', label: '1X (Doppia Chance Casa/Pareggio)' },
+      { value: '12', label: '12 (Doppia Chance No Pareggio)' },
+      { value: 'X2', label: 'X2 (Doppia Chance Pareggio/Ospite)' },
+      { value: 'GG', label: 'GG (Goal-Goal)' },
+      { value: 'NG', label: 'NG (No Goal)' },
+      { value: 'Over 1.5', label: 'Over 1.5' },
+      { value: 'Over 2.5', label: 'Over 2.5' },
+      { value: 'Over 3.5', label: 'Over 3.5' },
+      { value: 'Over 4.5', label: 'Over 4.5' },
+      { value: 'Under 1.5', label: 'Under 1.5' },
+      { value: 'Under 2.5', label: 'Under 2.5' },
+      { value: 'Under 3.5', label: 'Under 3.5' },
+      { value: 'Under 4.5', label: 'Under 4.5' },
+      { value: 'custom', label: '✏️ Altra giocata (personalizzata)' },
+    ];
+
+    return (
+      <div>
+        {/* SEZIONE 1: SELEZIONE PARTITA */}
+        <div className="card" style={{ marginBottom: '16px' }}>
+          <h3 style={{ color: 'var(--neon-cyan)', marginBottom: '16px', fontFamily: 'Orbitron, sans-serif', fontSize: '16px' }}>
+            🎯 Seleziona la partita da coprire
+          </h3>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+            {/* Campionato */}
+            <div>
+              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                🏆 Campionato
+              </label>
+              <select
+                className="calc-select"
+                value={campionatoSel}
+                onChange={(e) => {
+                  setCampionatoSel(e.target.value);
+                  setPartitaSel('');
+                  setGiocataSel('');
+                }}
+              >
+                <option value="">— Seleziona campionato —</option>
+                {campionatiConPartite.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Partita */}
+            <div>
+              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                ⚽ Partita
+              </label>
+              <select
+                className="calc-select"
+                value={partitaSel}
+                onChange={(e) => {
+                  setPartitaSel(e.target.value);
+                  setGiocataSel('');
+                }}
+                disabled={!campionatoSel}
+              >
+                <option value="">— Seleziona partita —</option>
+                {partiteFiltrate.map(m => (
+                  <option key={m.id} value={m.id}>
+                    {m.casa} vs {m.ospiti} ({window.formatDateEU(m.data)} {m.ora || ''})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Giocata */}
+            <div>
+              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                💡 Cosa hai giocato
+              </label>
+              <select
+                className="calc-select"
+                value={giocataSel}
+                onChange={(e) => {
+                  setGiocataSel(e.target.value);
+                  if (e.target.value !== 'custom') setGiocataCustom('');
+                }}
+                disabled={!partitaSel}
+              >
+                <option value="">— Seleziona giocata —</option>
+                {giocateDisponibili.map(g => (
+                  <option key={g.value} value={g.value}>{g.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Campo custom */}
+          {giocataSel === 'custom' && (
+            <div style={{ marginTop: '12px' }}>
+              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                ✏️ Inserisci manualmente (es. "1X+O2.5")
+              </label>
+              <input
+                className="calc-input"
+                style={{ textAlign: 'left', fontFamily: 'Rajdhani, sans-serif', fontWeight: 600 }}
+                type="text"
+                value={giocataCustom}
+                onChange={(e) => setGiocataCustom(e.target.value)}
+                placeholder="Es: 1X+O2.5"
+              />
+            </div>
+          )}
+
+          {/* Info copertura */}
+          {coperturaInfo && coperturaInfo.copre.length > 0 && (
+            <div style={{
+              marginTop: '14px', padding: '12px 14px',
+              background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(255, 0, 229, 0.05))',
+              borderRadius: '10px', border: '1px solid var(--border-strong)',
+            }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginBottom: '4px' }}>
+                🎯 Per coprire devi giocare:
+              </div>
+              <div style={{ fontSize: '18px', fontWeight: 900, color: 'var(--neon-cyan)', fontFamily: 'Orbitron, sans-serif' }}>
+                {coperturaInfo.copre.join(' + ')}
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>
+                {coperturaInfo.desc}
+              </div>
+            </div>
+          )}
+
+          {coperturaInfo && coperturaInfo.copre.length === 0 && giocataCustom && (
+            <div style={{ marginTop: '12px', padding: '10px 14px', background: 'rgba(255, 51, 102, 0.1)', borderRadius: '8px', border: '1px solid var(--neon-red)' }}>
+              <div style={{ fontSize: '12px', color: 'var(--neon-red)' }}>
+                ⚠️ Giocata personalizzata: specifica manualmente il segno di copertura nei campi sotto.
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* SEZIONE 2: ANALISI PROBABILITÀ */}
+        {analisiProbabilita && (
+          <div className="card" style={{ marginBottom: '16px' }}>
+            <h3 style={{ color: 'var(--neon-cyan)', marginBottom: '14px', fontFamily: 'Orbitron, sans-serif', fontSize: '16px' }}>
+              📊 Analisi Probabilità — "{analisiProbabilita.segnoCopertura}"
+            </h3>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', marginBottom: '14px' }}>
+              <ProbCard
+                label="📈 Storica"
+                value={analisiProbabilita.pctStorica}
+                color="var(--neon-cyan)"
+              />
+              <ProbCard
+                label="🎲 Monte Carlo"
+                value={analisiProbabilita.pctMC}
+                color="var(--neon-magenta)"
+              />
+              <ProbCard
+                label="📄 PDF"
+                value={analisiProbabilita.pctPDF}
+                color="var(--neon-gold)"
+                subtitle={analisiProbabilita.quotaPDF ? `Quota ${analisiProbabilita.quotaPDF.toFixed(2)}` : null}
+              />
+              <ProbCard
+                label="🔴 Live"
+                value={analisiProbabilita.pctLive}
+                color="var(--neon-green)"
+              />
+            </div>
+
+            {/* Quota live input */}
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                🔴 Quota aggiornata (opzionale — se la sai)
+              </label>
+              <input
+                className="calc-input"
+                type="number"
+                step="0.01"
+                min="1.01"
+                value={quotaLive}
+                onChange={(e) => {
+                  setQuotaLive(e.target.value);
+                  if (e.target.value) setQuota(e.target.value);
+                }}
+                placeholder="Es: 2.53"
+              />
+              <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '2px', fontStyle: 'italic' }}>
+                Se la inserisci, aggiorno la probabilità implicita e la uso per il calcolo
+              </div>
+            </div>
+
+            {/* Media finale */}
+            <div style={{
+              padding: '14px', borderRadius: '10px',
+              background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 229, 0.05))',
+              border: `2px solid ${analisiProbabilita.consiglio.colore}`,
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 700 }}>
+                  👉 PROBABILITÀ MEDIA
+                </span>
+                <span style={{ fontSize: '28px', fontWeight: 900, color: analisiProbabilita.consiglio.colore, fontFamily: 'Orbitron, sans-serif' }}>
+                  {analisiProbabilita.media}%
+                </span>
+              </div>
+              <div className="calc-prob-bar">
+                <div
+                  className="calc-prob-fill"
+                  style={{
+                    width: `${Math.min(analisiProbabilita.media, 100)}%`,
+                    background: analisiProbabilita.consiglio.colore,
+                  }}
+                />
+              </div>
+              <div style={{
+                marginTop: '12px', padding: '10px 12px',
+                borderRadius: '8px',
+                background: 'rgba(0,0,0,0.3)',
+                border: `1px solid ${analisiProbabilita.consiglio.colore}`,
+              }}>
+                <div style={{ fontSize: '14px', fontWeight: 900, color: analisiProbabilita.consiglio.colore, textAlign: 'center' }}>
+                  {analisiProbabilita.consiglio.testo}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SEZIONE 3: CALCOLO COPERTURA */}
+        <div className="card">
+          <h3 style={{ color: 'var(--neon-cyan)', marginBottom: '14px', fontFamily: 'Orbitron, sans-serif', fontSize: '16px' }}>
+            🧮 Calcolo Copertura
+          </h3>
+
+          <div style={{ display: 'grid', gap: '12px', marginBottom: '16px' }}>
+            <div>
+              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                💰 Vincita attesa schedina (€)
+              </label>
+              <input
+                className="calc-input"
+                type="number"
+                step="0.01"
+                value={vincita}
+                onChange={(e) => setVincita(e.target.value)}
+                placeholder="0.00"
+              />
+            </div>
+
+            <div>
+              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                📊 Quota copertura {analisiProbabilita && `(${analisiProbabilita.segnoCopertura})`}
+              </label>
+              <input
+                className="calc-input"
+                type="number"
+                step="0.01"
+                min="1.01"
+                value={quota}
+                onChange={(e) => setQuota(e.target.value)}
+                placeholder="0.00"
+              />
+            </div>
+
+            <div>
+              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
+                🎯 Profitto minimo desiderato (€) — opzionale
+              </label>
+              <input
+                className="calc-input"
+                type="number"
+                step="0.01"
+                min="0"
+                value={profittoMinimo}
+                onChange={(e) => setProfittoMinimo(e.target.value)}
+                placeholder={profittoSuggerito ? `Suggerito: ${profittoSuggerito}` : 'Vuoto = copertura esatta'}
+              />
+              <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '2px', fontStyle: 'italic' }}>
+                {profittoSuggerito
+                  ? `💡 Suggerito: ${profittoSuggerito}€ (clicca sul campo e inseriscilo)`
+                  : 'Lascia vuoto per copertura esatta (pareggio sul segno coperto)'}
+              </div>
+            </div>
+          </div>
+
+          {/* RISULTATI */}
+          {calcoli && (
+            <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '2px solid var(--neon-cyan)' }}>
+              <div className="calc-result-row" style={{ background: 'rgba(0, 245, 255, 0.08)' }}>
+                <span className="calc-result-label">💵 Devi giocare</span>
+                <span className="calc-result-value neutral">
+                  {calcoli.importo.toFixed(2)} €
+                </span>
+              </div>
+
+              <div className="calc-result-row">
+                <span className="calc-result-label">✅ Se esce "{analisiProbabilita?.segnoCopertura || 'copertura'}"</span>
+                <span className={`calc-result-value ${calcoli.nettoCoperto >= 0 ? 'positive' : 'negative'}`}>
+                  {calcoli.nettoCoperto >= 0 ? '+' : ''}{calcoli.nettoCoperto.toFixed(2)} €
+                </span>
+              </div>
+
+              <div className="calc-result-row">
+                <span className="calc-result-label">🎯 Se esce la schedina</span>
+                <span className={`calc-result-value ${calcoli.nettoSchedina >= 0 ? 'positive' : 'negative'}`}>
+                  {calcoli.nettoSchedina >= 0 ? '+' : ''}{calcoli.nettoSchedina.toFixed(2)} €
+                </span>
+              </div>
+
+              <div className="calc-result-row">
+                <span className="calc-result-label">⚠️ Totale investito</span>
+                <span className="calc-result-value" style={{ color: 'var(--text)' }}>
+                  {calcoli.totaleInvestito.toFixed(2)} €
+                </span>
+              </div>
+
+              <div className="calc-result-row">
+                <span className="calc-result-label">📈 ROI copertura</span>
+                <span className={`calc-result-value ${calcoli.roiCopertura >= 0 ? 'positive' : 'negative'}`}>
+                  {calcoli.roiCopertura >= 0 ? '+' : ''}{calcoli.roiCopertura.toFixed(2)}%
+                </span>
+              </div>
+            </div>
+          )}
+
+          {!calcoli && vincita && quota && (
+            <div style={{ marginTop: '12px', padding: '10px', textAlign: 'center', color: 'var(--text-dim)', fontSize: '12px' }}>
+              Inserisci vincita e quota per vedere i calcoli
+            </div>
+          )}
+
+          {/* PULSANTI */}
+          <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
+            <button
+              className="btn btn-secondary"
+              onClick={resetAll}
+              style={{ flex: 1, minWidth: '100px' }}
+            >
+              🔄 Reset
+            </button>
+            {calcoli && (
+              <button
+                className="btn"
+                onClick={() => {
+                  const testo = `🧮 COPERTURA SCHEDINA\n` +
+                    `⚽ ${partita?.casa || ''} vs ${partita?.ospiti || ''}\n` +
+                    `🎯 Hai giocato: ${giocataCustom || giocataSel}\n` +
+                    `🛡️ Copri con: ${analisiProbabilita?.segnoCopertura || '—'}\n` +
+                    `💰 Vincita attesa: ${vincita}€\n` +
+                    `📊 Quota: ${quota}\n` +
+                    `💵 Gioca: ${calcoli.importo.toFixed(2)}€\n` +
+                    `✅ Netto se copre: ${calcoli.nettoCoperto.toFixed(2)}€\n` +
+                    `🎯 Netto se schedina: ${calcoli.nettoSchedina.toFixed(2)}€`;
+                  navigator.clipboard?.writeText?.(testo);
+                  if (window.showAlert) window.showAlert('success', '📋 Copiato negli appunti!');
+                }}
+                style={{ flex: 1, minWidth: '100px' }}
+              >
+                📋 Copia
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Helper componente probabilità
+  const ProbCard = ({ label, value, color, subtitle }) => (
+    <div style={{
+      padding: '10px 12px', borderRadius: '8px',
+      background: 'var(--card)', border: `1px solid ${value != null && value > 0 ? color : 'var(--border)'}`,
+      textAlign: 'center',
+    }}>
+      <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
+        {label}
+      </div>
+      <div style={{ fontSize: '22px', fontWeight: 900, color: value != null && value > 0 ? color : 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+        {value != null && value > 0 ? `${value}%` : '—'}
+      </div>
+      {subtitle && (
+        <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '2px' }}>
+          {subtitle}
+        </div>
+      )}
+    </div>
+  );
+
+  // ============================================================
   // COMPONENTE PRINCIPALE
   // ============================================================
   function HomeComponent({ matches, championships, onSelectMatch, setTab, selectedFamiglie, weatherCache }) {
@@ -831,11 +1498,8 @@
       return window.FiltriCampionati.filtraPartitePerCampionato(normalizzati);
     }, [matches, filtroCampionati]);
 
-    // ⭐ Ascolta cambiamenti delle famiglie selezionate in Impostazioni → Giocate
     useEffect(() => {
-      const handler = () => {
-        setRefreshKey(t => t + 1);
-      };
+      const handler = () => setRefreshKey(t => t + 1);
       window.addEventListener('giocate-selezionate-updated', handler);
       window.addEventListener('schedina-updated', handler);
       window.addEventListener('storage', handler);
@@ -875,7 +1539,10 @@
         );
       }
 
-      // MOBILE
+      if (homeTab === 'Calcolatrice') {
+        return <CalcolatriceComponent matches={matchesPuliti} />;
+      }
+
       if (isMobile) {
         if (campionatoMobile) {
           return (
@@ -952,7 +1619,6 @@
         );
       }
 
-      // PC
       if (nazioneSelezionata) {
         return (
           <VistaNazione
@@ -979,7 +1645,7 @@
           <window.QuoteManager.BannerScadenzaQuote />
         )}
 
-        {homeTab !== 'GestioneConto' && (
+        {homeTab !== 'GestioneConto' && homeTab !== 'Calcolatrice' && (
           <div style={{
             display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
             padding: '10px 14px', marginBottom: '14px',
@@ -1014,41 +1680,33 @@
           >
             📈 Performance
           </button>
+          <button
+            className={homeTab === 'Calcolatrice' ? 'active' : ''}
+            onClick={() => { setHomeTab('Calcolatrice'); setNazioneSelezionata(null); setCampionatoMobile(null); }}
+          >
+            🧮 Calcolatrice
+          </button>
         </div>
 
-        {/* ⭐ SWITCH CALCOLATE / SCELTE */}
         {homeTab === 'Nazioni' && (
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            marginBottom: '14px',
-            padding: '8px 14px',
-            background: 'var(--bg-elevated)',
-            borderRadius: '10px',
-            border: '1px solid var(--border)',
-            flexWrap: 'wrap',
+            display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px',
+            padding: '8px 14px', background: 'var(--bg-elevated)', borderRadius: '10px',
+            border: '1px solid var(--border)', flexWrap: 'wrap',
           }}>
             <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neon-cyan)', textTransform: 'uppercase' }}>
               🎯 Giocate
             </span>
             <div style={{
-              display: 'flex',
-              background: 'var(--bg-deep)',
-              borderRadius: '8px',
-              padding: '3px',
-              border: '1px solid var(--border)',
+              display: 'flex', background: 'var(--bg-deep)', borderRadius: '8px',
+              padding: '3px', border: '1px solid var(--border)',
             }}>
               <button
                 onClick={() => setTipoGiocate('calcolate')}
                 title="Mostra le 3 giocate con % più alta"
                 style={{
-                  padding: '6px 16px',
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  borderRadius: '6px',
-                  border: 'none',
-                  cursor: 'pointer',
+                  padding: '6px 16px', fontSize: '11px', fontWeight: 700,
+                  borderRadius: '6px', border: 'none', cursor: 'pointer',
                   background: tipoGiocate === 'calcolate' ? 'var(--neon-cyan)' : 'transparent',
                   color: tipoGiocate === 'calcolate' ? '#000' : 'var(--text-dim)',
                   transition: 'all 0.2s',
@@ -1060,12 +1718,8 @@
                 onClick={() => setTipoGiocate('scelte')}
                 title="Mostra le famiglie configurate in Impostazioni → Giocate"
                 style={{
-                  padding: '6px 16px',
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  borderRadius: '6px',
-                  border: 'none',
-                  cursor: 'pointer',
+                  padding: '6px 16px', fontSize: '11px', fontWeight: 700,
+                  borderRadius: '6px', border: 'none', cursor: 'pointer',
                   background: tipoGiocate === 'scelte' ? 'var(--neon-green)' : 'transparent',
                   color: tipoGiocate === 'scelte' ? '#000' : 'var(--text-dim)',
                   transition: 'all 0.2s',
@@ -1096,6 +1750,6 @@
     leggiFamiglieSelezionate, GIOCATE_SELEZIONATE_KEY, FAMIGLIE_SELEZIONATE_KEY,
   };
 
-  console.log('✅ Modulo Home FUTURISTIC v3 caricato (Scelte = famiglie da Impostazioni)');
+  console.log('✅ Modulo Home FUTURISTIC v4 caricato (aggiunto tab 🧮 Calcolatrice)');
 
 })();

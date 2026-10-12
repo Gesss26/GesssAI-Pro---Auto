@@ -10,6 +10,9 @@
 //             - Salvataggio su localStorage (ft_giocate_selezionate)
 //             - Evento custom 'giocate-selezionate-updated'
 //             - Caricamento all'avvio
+// ✅ FIX v11: Lista campionati con LOGHI + NOME (come Palinsesto mobile)
+//             - Rimossi colori pieni, sostituiti con card + logo
+//             - Griglia responsive auto-fill
 // ============================================================
 
 // ============================================================
@@ -1080,7 +1083,7 @@ const SchedinaComponent = ({
           </span>
         </h3>
 
-        {/* SEZIONE 1: CAMPIONATI */}
+        {/* SEZIONE 1: CAMPIONATI — LISTA CON LOGHI (come Palinsesto mobile) */}
         <div style={{
           marginBottom: '20px',
           padding: '14px 16px',
@@ -1093,9 +1096,11 @@ const SchedinaComponent = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: '10px',
+            marginBottom: '12px',
             borderBottom: '1px solid var(--border)',
-            paddingBottom: '8px'
+            paddingBottom: '8px',
+            flexWrap: 'wrap',
+            gap: '8px'
           }}>
             <span style={{fontSize: '15px', fontWeight: 'bold', color: 'var(--text)'}}>
               🏆 Campionati Attivi
@@ -1103,7 +1108,7 @@ const SchedinaComponent = ({
                 (sincronizzato con Palinsesto)
               </span>
             </span>
-            <div style={{display: 'flex', gap: '6px'}}>
+            <div style={{display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap'}}>
               <button
                 className="btn"
                 onClick={selezionaTuttiCampionati}
@@ -1140,10 +1145,10 @@ const SchedinaComponent = ({
             </div>
           </div>
 
-          <div className="champ-filters-grid" style={{
+          <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(5, 1fr)',
-            gap: '6px',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+            gap: '10px',
             width: '100%'
           }}>
             {championships.map(c => {
@@ -1153,51 +1158,74 @@ const SchedinaComponent = ({
                 <button
                   key={c.name}
                   onClick={() => toggleCampionato(c.name)}
-                  className={`champ-filter-btn ${isSelected ? 'active' : 'inactive'}`}
+                  title={c.name}
                   style={{
-                    padding: '6px 8px',
-                    borderRadius: '6px',
-                    border: isSelected ? `2px solid ${color}` : '2px solid var(--border)',
-                    background: isSelected ? color : 'var(--surface)',
-                    color: isSelected ? '#000' : 'var(--text-muted)',
-                    cursor: 'pointer',
-                    fontSize: '11px',
-                    fontWeight: isSelected ? 'bold' : '600',
-                    transition: 'all 0.2s',
-                    minHeight: '34px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '100%',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
+                    gap: '12px',
+                    padding: '12px 14px',
+                    borderRadius: '12px',
+                    border: isSelected ? `2px solid ${color}` : '2px solid var(--border)',
+                    background: isSelected
+                      ? `linear-gradient(135deg, ${color}22, ${color}11)`
+                      : 'var(--bg-elevated)',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    boxShadow: isSelected ? `0 4px 16px ${color}33` : 'none',
+                    transition: 'all 0.2s',
+                    minHeight: '64px'
                   }}
-                  title={c.name}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.borderColor = color;
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.borderColor = 'var(--border)';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }
+                  }}
                 >
-                  <span className="champ-color-dot" style={{
-                    display: 'inline-block',
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '50%',
-                    marginRight: '6px',
-                    flexShrink: 0,
-                    background: color
-                  }} />
-                  <span className="champ-name" style={{
-                    fontSize: '10px',
-                    lineHeight: '1.2',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis'
-                  }}>
-                    {c.name.length > 20 ? c.name.substring(0, 18) + '…' : c.name}
-                  </span>
+                  {window.ChampLogo ? (
+                    <window.ChampLogo campionato={c.name} size={32} />
+                  ) : (
+                    <div style={{
+                      width: 32, height: 32, borderRadius: '50%',
+                      background: color, flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontWeight: 'bold', color: '#000', fontSize: '12px'
+                    }}>
+                      {c.name.substring(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      color: isSelected ? 'var(--text)' : 'var(--text-muted)',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {c.name}
+                    </div>
+                  </div>
+                  {isSelected && (
+                    <span style={{
+                      fontSize: '14px',
+                      color: color,
+                      fontWeight: 'bold',
+                      flexShrink: 0
+                    }}>✓</span>
+                  )}
                 </button>
               );
             })}
           </div>
 
-          <div style={{fontSize: '10px', color: 'var(--text-muted)', marginTop: '6px', fontStyle: 'italic'}}>
+          <div style={{fontSize: '10px', color: 'var(--text-muted)', marginTop: '10px', fontStyle: 'italic'}}>
             🔄 Modifica la selezione nel <b>Palinsesto</b> per sincronizzarla con tutti i tab
           </div>
         </div>
@@ -2037,4 +2065,4 @@ const SchedinaComponent = ({
 
 window.SchedinaComponent = SchedinaComponent;
 window.GIOCATE_SELEZIONATE_KEY = GIOCATE_SELEZIONATE_KEY;
-console.log('✅ SchedinaComponent v10 caricato - Sincronizzazione giocate con Home.js attiva');
+console.log('✅ SchedinaComponent v11 caricato - Lista campionati con loghi + sync Home');
