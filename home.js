@@ -1,10 +1,8 @@
 // ============================================================
-// home.js - Modulo Home v9 (FUTURISTIC)
-// ✅ Vista "Giornata" con sidebar campionati + partite
+// home.js - Modulo Home v10 (FUTURISTIC)
+// ✅ Vista "Giornata" con sidebar larga senza scrollbar
 // ✅ Bollini notifica campionati
 // ✅ Loghi campionati nei bottoni
-// ✅ Bottom panel partite di oggi
-// ✅ FIX: useFiltroCampionati (plurale)
 // ============================================================
 
 (function () {
@@ -62,126 +60,143 @@
       );
     }
 
-    const partiteCampionato = matches
-      .filter(m => m.campionato === campionato)
-      .sort((a, b) => {
-        const da = normalizeDate(a.data);
-        const db = normalizeDate(b.data);
-        if (da !== db) return (da || '').localeCompare(db || '');
-        return (a.ora || '').localeCompare(b.ora || '');
+    try {
+      const partiteCampionato = matches
+        .filter(m => m.campionato === campionato)
+        .sort((a, b) => {
+          const da = normalizeDate(a.data);
+          const db = normalizeDate(b.data);
+          if (da !== db) return (da || '').localeCompare(db || '');
+          return (a.ora || '').localeCompare(b.ora || '');
+        });
+
+      const color = getChampColor(campionato);
+      const todayStr = getTodayStr();
+
+      const partitePerData = {};
+      partiteCampionato.forEach(m => {
+        const d = normalizeDate(m.data) || 'N/D';
+        if (!partitePerData[d]) partitePerData[d] = [];
+        partitePerData[d].push(m);
       });
 
-    const color = getChampColor(campionato);
-    const todayStr = getTodayStr();
+      const dateOrdinate = Object.keys(partitePerData).sort();
+      const ChampLogo = window.ChampLogo;
+      const MatchTabComp = window.__MatchTabComponent;
 
-    // Raggruppa per data
-    const partitePerData = {};
-    partiteCampionato.forEach(m => {
-      const d = normalizeDate(m.data) || 'N/D';
-      if (!partitePerData[d]) partitePerData[d] = [];
-      partitePerData[d].push(m);
-    });
-
-    const dateOrdinate = Object.keys(partitePerData).sort();
-    const ChampLogo = window.ChampLogo;
-
-    return (
-      <div>
-        <div style={{
-          background: `linear-gradient(135deg, ${color}, ${color}99)`,
-          borderRadius: '14px', padding: '16px 20px', marginBottom: '16px',
-          display: 'flex', alignItems: 'center', gap: '14px',
-          boxShadow: `0 8px 32px ${color}55`,
-          border: `1px solid ${color}`,
-        }}>
-          {ChampLogo && <ChampLogo campionato={campionato} size={40} />}
-          <div style={{ flex: 1 }}>
-            <div style={{
-              fontFamily: 'Orbitron, sans-serif', fontSize: '18px', fontWeight: 900,
-              color: '#000', letterSpacing: '2px', textTransform: 'uppercase',
-            }}>{campionato}</div>
-            <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.7)', fontWeight: 700 }}>
-              {partiteCampionato.length} partite totali • {dateOrdinate.length} giornate
+      return (
+        <div>
+          <div style={{
+            background: `linear-gradient(135deg, ${color}, ${color}99)`,
+            borderRadius: '14px', padding: '16px 20px', marginBottom: '16px',
+            display: 'flex', alignItems: 'center', gap: '14px',
+            boxShadow: `0 8px 32px ${color}55`,
+            border: `1px solid ${color}`,
+          }}>
+            {ChampLogo && <ChampLogo campionato={campionato} size={40} />}
+            <div style={{ flex: 1 }}>
+              <div style={{
+                fontFamily: 'Orbitron, sans-serif', fontSize: '18px', fontWeight: 900,
+                color: '#000', letterSpacing: '2px', textTransform: 'uppercase',
+              }}>{campionato}</div>
+              <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.7)', fontWeight: 700 }}>
+                {partiteCampionato.length} partite totali • {dateOrdinate.length} giornate
+              </div>
             </div>
           </div>
-        </div>
 
-        {dateOrdinate.map(data => {
-          const partite = partitePerData[data];
-          const oggi = data === todayStr;
-          return (
-            <div key={data} style={{ marginBottom: '20px' }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '10px',
-                marginBottom: '10px', paddingBottom: '6px',
-                borderBottom: '1px dashed var(--border)',
-              }}>
-                <span style={{
-                  fontFamily: 'Orbitron, sans-serif', fontSize: '12px', fontWeight: 700,
-                  color: oggi ? 'var(--neon-red)' : 'var(--neon-cyan)',
-                  letterSpacing: '2px', textTransform: 'uppercase',
-                  textShadow: oggi ? '0 0 10px var(--neon-red)' : '0 0 10px var(--neon-cyan)',
-                }}>
-                  {oggi ? '🔴 OGGI' : `📅 ${formatDateEU(data)}`}
-                </span>
-                <span style={{
-                  fontSize: '10px', color: 'var(--text-dim)',
-                  background: 'var(--bg-elevated)', padding: '2px 8px', borderRadius: '8px',
-                }}>{partite.length} partite</span>
-              </div>
-
-              <div className="matches-grid">
-                {partite.map(m => {
-                  const MT = window.__MatchTabComponent;
-                  if (MT) {
-                    return (
-                      <MT
-                        key={m.id}
-                        match={m}
-                        allMatches={matches}
-                        onSelect={onSelectMatch}
-                        selectedFamiglie={selectedFamiglie}
-                        weatherCache={{}}
-                      />
-                    );
-                  }
-                  // Fallback: card semplice
-                  return (
-                    <div key={m.id} className="match-tab" style={{ borderLeftColor: color }}>
-                      <div className="tab-header" style={{ background: color }}>
-                        {ChampLogo && <ChampLogo campionato={m.campionato} size={16} />}
-                        <span>{m.campionato}</span>
-                      </div>
-                      <div style={{ textAlign: 'center', fontSize: '11px', color: 'var(--text-dim)', marginBottom: '6px' }}>
-                        📅 {formatDateEU(m.data)} • ⏰ {m.ora || 'TBD'}
-                      </div>
-                      <div className="teams-row">
-                        <div className="team">
-                          <TeamLogo teamName={m.casa} championship={m.campionato} size={50} />
-                          <div className="team-name">{m.casa}</div>
-                        </div>
-                        <div className="vs">VS</div>
-                        <div className="team">
-                          <TeamLogo teamName={m.ospiti} championship={m.campionato} size={50} />
-                          <div className="team-name">{m.ospiti}</div>
-                        </div>
-                      </div>
-                      <div style={{ textAlign: 'center', marginTop: '10px', fontSize: '12px', color: 'var(--text-dim)' }}>
-                        Clicca per statistiche →
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+          {dateOrdinate.length === 0 ? (
+            <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '12px' }}>📭</div>
+              <div style={{ color: 'var(--text-dim)' }}>Nessuna partita in questo campionato</div>
             </div>
-          );
-        })}
-      </div>
-    );
+          ) : (
+            dateOrdinate.map(data => {
+              const partite = partitePerData[data];
+              const oggi = data === todayStr;
+              return (
+                <div key={data} style={{ marginBottom: '20px' }}>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: '10px',
+                    marginBottom: '10px', paddingBottom: '6px',
+                    borderBottom: '1px dashed var(--border)',
+                  }}>
+                    <span style={{
+                      fontFamily: 'Orbitron, sans-serif', fontSize: '12px', fontWeight: 700,
+                      color: oggi ? 'var(--neon-red)' : 'var(--neon-cyan)',
+                      letterSpacing: '2px', textTransform: 'uppercase',
+                      textShadow: oggi ? '0 0 10px var(--neon-red)' : '0 0 10px var(--neon-cyan)',
+                    }}>
+                      {oggi ? '🔴 OGGI' : `📅 ${formatDateEU(data)}`}
+                    </span>
+                    <span style={{
+                      fontSize: '10px', color: 'var(--text-dim)',
+                      background: 'var(--bg-elevated)', padding: '2px 8px', borderRadius: '8px',
+                    }}>{partite.length} partite</span>
+                  </div>
+
+                  <div className="matches-grid">
+                    {partite.map(m => {
+                      if (MatchTabComp) {
+                        return (
+                          <MatchTabComp
+                            key={m.id}
+                            match={m}
+                            allMatches={matches}
+                            onSelect={onSelectMatch}
+                            selectedFamiglie={selectedFamiglie}
+                            weatherCache={{}}
+                          />
+                        );
+                      }
+                      return (
+                        <div key={m.id} className="match-tab" style={{ borderLeftColor: color }}>
+                          <div className="tab-header" style={{ background: color }}>
+                            {ChampLogo && <ChampLogo campionato={m.campionato} size={16} />}
+                            <span>{m.campionato}</span>
+                          </div>
+                          <div style={{ textAlign: 'center', fontSize: '11px', color: 'var(--text-dim)', marginBottom: '6px' }}>
+                            📅 {formatDateEU(m.data)} • ⏰ {m.ora || 'TBD'}
+                          </div>
+                          <div className="teams-row">
+                            <div className="team">
+                              <TeamLogo teamName={m.casa} championship={m.campionato} size={50} />
+                              <div className="team-name">{m.casa}</div>
+                            </div>
+                            <div className="vs">VS</div>
+                            <div className="team">
+                              <TeamLogo teamName={m.ospiti} championship={m.campionato} size={50} />
+                              <div className="team-name">{m.ospiti}</div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      );
+    } catch (e) {
+      console.error('❌ Errore in GiornataCampionato:', e);
+      return (
+        <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
+          <div style={{ fontSize: '48px', marginBottom: '12px' }}>⚠️</div>
+          <div style={{ color: 'var(--neon-red)', fontWeight: 700, marginBottom: '8px' }}>
+            Errore nel rendering della giornata
+          </div>
+          <div style={{ color: 'var(--text-dim)', fontSize: '12px', fontFamily: 'monospace' }}>
+            {e.message}
+          </div>
+        </div>
+      );
+    }
   };
 
   // ============================================================
-  // SIDEBAR CAMPIONATI HOME
+  // SIDEBAR CAMPIONATI HOME (senza scrollbar interna)
   // ============================================================
   const SidebarCampionatiHome = ({ matches, onSelectChamp, champSelezionato }) => {
     const CHAMPIONSHIP_LIST = window.CHAMPIONSHIP_LIST;
@@ -230,7 +245,8 @@
           }}>🏆 Campionati</span>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '60vh', overflowY: 'auto' }}>
+        {/* ⭐ NIENTE maxHeight, NIENTE overflowY */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {campionatiConPartite.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-dim)', fontSize: '12px' }}>
               Nessuna partita disponibile
@@ -292,7 +308,6 @@
     const [homeTab, setHomeTab] = useState('Giornata');
     const [champSelezionato, setChampSelezionato] = useState(null);
 
-    // ✅ FIX: useFiltroCampionati (plurale, non singolare)
     const { filtro: filtroCampionati, campionatiAttivi } =
       window.FiltriCampionati.useFiltroCampionati();
 
@@ -344,9 +359,10 @@
       return (
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'minmax(220px, 260px) 1fr',
+          gridTemplateColumns: 'minmax(340px, 380px) 1fr',
           gap: '20px',
           alignItems: 'start',
+          width: '100%',
         }}>
           <div style={{ position: 'sticky', top: '90px' }}>
             <SidebarCampionatiHome
@@ -403,7 +419,7 @@
   }
 
   // ============================================================
-  // HELPER FUNCTIONS (compatibilità)
+  // HELPER FUNCTIONS
   // ============================================================
   function formatGiocataLabel(familyId, label) {
     if (!label) return '—';
@@ -442,6 +458,6 @@
     CHINESE_TEAMS,
   };
 
-  console.log('✅ Modulo Home v9 FUTURISTIC caricato - FIX useFiltroCampionati');
+  console.log('✅ Modulo Home v10 FUTURISTIC caricato');
 
 })();

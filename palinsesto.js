@@ -1,9 +1,9 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto v10 (FUTURISTIC)
-// ✅ Sidebar campionati con loghi e bollini notifica
-// ✅ Bottom panel "Partite di Oggi"
+// ✅ Sidebar larga senza scrollbar interna
 // ✅ MatchTab con forma + % + differenza forma
-// ✅ Design futuristico con glassmorphism
+// ✅ Bottom panel "Partite di Oggi"
+// ✅ Badge colorati + bombe oro
 // ============================================================
 
 (function () {
@@ -12,7 +12,7 @@
   const { useState, useMemo, useEffect } = React;
 
   // ============================================================
-  // CHAMP LOGO (path relativi)
+  // CHAMP LOGO
   // ============================================================
   const ChampLogo = ({ campionato, size = 24 }) => {
     const [hasError, setHasError] = useState(false);
@@ -139,7 +139,6 @@
 
     if (!match) return null;
 
-    // ⭐ FORMA + STATISTICHE
     const homeForm = calcFormAndStats(allMatches, match.casa);
     const awayForm = calcFormAndStats(allMatches, match.ospiti);
     const champColor = getChampColor(match.campionato);
@@ -251,7 +250,6 @@
           📅 {formattedDate} • ⏰ {match.ora || 'TBD'}
         </div>
 
-        {/* TEAMS */}
         <div className="teams-row">
           <div className="team">
             <TeamLogo teamName={match.casa} championship={match.campionato} size={50} />
@@ -264,7 +262,6 @@
           </div>
         </div>
 
-        {/* ⭐ FORMA + PERCENTUALE */}
         <div className="form-row-compact">
           <div className="form-block-compact">
             <div className="form-label">Forma</div>
@@ -278,7 +275,6 @@
           </div>
         </div>
 
-        {/* ⭐ DIFFERENZA FORMA */}
         <div className="form-diff">
           📊 Differenza forma:{' '}
           <span className={diff >= 20 ? 'diff-alta' : 'diff-bassa'}>
@@ -286,7 +282,6 @@
           </span>
         </div>
 
-        {/* TOP 3 GIOCATE */}
         <div className="bet-row-vertical">
           {giocateDaMostrare.length > 0 ? (
             giocateDaMostrare.map((g, idx) => {
@@ -297,7 +292,7 @@
                 <div key={idx}
                   className={`bet-item-vertical ${isBomb ? 'bomb' : ''}`}
                   style={{ borderColor: pctColor }}>
-                  <span className="bet-label" style={{ color: isBomb ? '#000' : pctColor, fontWeight: 700 }}>
+                  <span className="bet-label" style={{ color: isBomb ? 'var(--neon-gold)' : pctColor, fontWeight: 700 }}>
                     {isBomb && '💣 '}
                     {g.displayLabel || g.label}
                   </span>
@@ -321,7 +316,7 @@
   };
 
   // ============================================================
-  // SIDEBAR CAMPIONATI
+  // SIDEBAR CAMPIONATI (senza scrollbar interna)
   // ============================================================
   const SidebarCampionati = ({ matches, selectedChamps, onToggle, onSelectAll, onClearAll, onSelectChamp }) => {
     const CHAMPIONSHIP_LIST = window.CHAMPIONSHIP_LIST;
@@ -403,7 +398,8 @@
           }}>❌ Nessuno</button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '60vh', overflowY: 'auto' }}>
+        {/* ⭐ NIENTE maxHeight, NIENTE overflowY: la pagina scrolla normalmente */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {CHAMPIONSHIP_LIST.map(champ => {
             const isActive = selectedChamps[champ] !== false;
             const color = window.getChampColor(champ);
@@ -645,11 +641,11 @@
     return (
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'minmax(280px, 320px) 1fr',
+        gridTemplateColumns: 'minmax(340px, 380px) 1fr',
         gap: '20px',
         alignItems: 'start',
+        width: '100%',
       }}>
-        {/* SIDEBAR */}
         <div style={{ position: 'sticky', top: '90px' }}>
           <SidebarCampionati
             matches={matches}
@@ -661,7 +657,6 @@
           />
         </div>
 
-        {/* MAIN */}
         <div>
           <div style={{ marginBottom: '16px' }}>
             <div style={{
@@ -747,7 +742,6 @@
           )}
         </div>
 
-        {/* BOTTOM PANEL */}
         <BottomPanelPartiteOggi matches={matches} />
       </div>
     );
@@ -758,6 +752,6 @@
   window.SidebarCampionati = SidebarCampionati;
   window.BottomPanelPartiteOggi = BottomPanelPartiteOggi;
   window.__MatchTabComponent = MatchTab;
-  console.log('✅ Modulo Palinsesto v10 FUTURISTIC caricato - MatchTab con forma + % + differenza');
+  console.log('✅ Modulo Palinsesto v10 FUTURISTIC caricato');
 
 })();

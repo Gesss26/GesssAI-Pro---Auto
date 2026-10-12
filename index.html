@@ -7,11 +7,12 @@
 <meta name="theme-color" content="#00f5ff" />
 <meta name="description" content="GesssAI-Pro - Analisi statistica scommesse calcio" />
 
-<!-- Font Google (preconnect per performance) -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<!-- ⭐ CONFIGURAZIONE CAMPIONATI (PRIMO DI TUTTI) -->
+<!-- CONFIGURAZIONE CAMPIONATI (PRIMO DI TUTTI) -->
 <script src="campionati-config.js"></script>
 
 <!-- Librerie CDN -->
@@ -20,7 +21,7 @@
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-<!-- PDF.js per leggere il PDF Marathonbet -->
+<!-- PDF.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
   if (typeof pdfjsLib !== 'undefined') {
@@ -28,10 +29,10 @@
   }
 </script>
 
-<!-- Parser PDF (DEVE essere caricato PRIMA di quote-manager) -->
+<!-- Parser PDF -->
 <script src="pdf-quote-parser.js"></script>
 
-<!-- Moduli esterni (path relativi per GitHub Pages) -->
+<!-- Moduli esterni (path relativi) -->
 <script type="text/javascript" src="meteo.js"></script>
 <script src="filtri-campionati.js"></script>
 <script type="text/babel" src="performance-db.js"></script>
@@ -46,12 +47,12 @@
 <script type="text/babel" src="statistiche.js"></script>
 <script type="text/babel" src="storico.js"></script>
 
-<!-- ⭐ CSS FUTURISTICO -->
+<!-- CSS Futuristico -->
 <link rel="stylesheet" href="styles-futuristic.css">
 </head>
 <body>
 
-  <!-- ⭐ SPLASHSCREEN -->
+  <!-- SPLASHSCREEN -->
   <div id="splashscreen">
     <div class="splash-content">
       <img src="Splashscreen.png" alt="GesssAI-Pro" class="splash-logo" />
@@ -65,8 +66,8 @@
     </div>
   </div>
 
-  <!-- ⭐ ERROR CONTAINER -->
-  <div id="error-container">
+  <!-- ERROR CONTAINER (nascosto di default) -->
+  <div id="error-container" style="display: none !important;">
     <div class="error-icon">⚠️</div>
     <h2>Errore di caricamento</h2>
     <div class="error-msg">
@@ -87,6 +88,13 @@
       var root = document.getElementById('root');
       var btn = document.getElementById('splashBtn');
 
+      // ⭐ FORZA NASCOSTO L'ERROR CONTAINER
+      var err = document.getElementById('error-container');
+      if (err) {
+        err.classList.remove('visible');
+        err.style.display = 'none';
+      }
+
       if (splash && btn && root) {
         btn.addEventListener('click', function() {
           splash.classList.add('hidden');
@@ -99,36 +107,15 @@
       }
     });
 
+    // ⭐ Disabilita la visualizzazione dell'error container da errori non critici
     window.addEventListener('error', function(e) {
       console.error('Errore globale:', e);
-      var errorContainer = document.getElementById('error-container');
-      var errorMsg = document.getElementById('error-message-text');
-      var errorStack = document.getElementById('error-stack-text');
-      var root = document.getElementById('root');
-      var splash = document.getElementById('splashscreen');
-      if (errorContainer) {
-        errorContainer.classList.add('visible');
-        if (errorMsg) errorMsg.textContent = e.message || 'Errore sconosciuto.';
-        if (errorStack) errorStack.textContent = e.stack || e.message || 'Nessun dettaglio.';
-        if (splash) splash.style.display = 'none';
-        if (root) root.style.display = 'none';
-      }
+      // NON mostriamo l'error container — React gestisce già i propri errori
     });
 
     window.addEventListener('unhandledrejection', function(e) {
       console.error('Promise rejection:', e);
-      var errorContainer = document.getElementById('error-container');
-      var errorMsg = document.getElementById('error-message-text');
-      var errorStack = document.getElementById('error-stack-text');
-      var root = document.getElementById('root');
-      var splash = document.getElementById('splashscreen');
-      if (errorContainer) {
-        errorContainer.classList.add('visible');
-        if (errorMsg) errorMsg.textContent = e.reason?.message || 'Errore durante il caricamento.';
-        if (errorStack) errorStack.textContent = e.reason?.stack || e.reason?.message || 'Nessun dettaglio.';
-        if (splash) splash.style.display = 'none';
-        if (root) root.style.display = 'none';
-      }
+      // NON mostriamo l'error container
     });
   </script>
 
@@ -136,9 +123,8 @@
     const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
     // ============================================================
-    // CAMPIONATI ESCLUSI (filtro globale)
+    // CAMPIONATI ESCLUSI
     // ============================================================
-
     const CAMPIONATI_ESCLUSI = new Set([
       'Liga Profesional Argentina',
       'Brasileirão Serie A',
@@ -153,9 +139,8 @@
     };
 
     // ============================================================
-    // CARICAMENTO DATI (Excel / JSON) - PATH RELATIVI
+    // CARICAMENTO DATI
     // ============================================================
-
     let dataLoaded = false;
 
     async function loadScrapedData(forceReload = false) {
@@ -166,7 +151,6 @@
           localStorage.removeItem('ft_champs');
         }
 
-        // ⭐ PATH RELATIVI (funzionano su GitHub Pages e in locale)
         const paths = [
           'excel/GesssAI_Input.xlsx',
           'data/GesssAI_Input.xlsx',
@@ -335,7 +319,6 @@
     // ============================================================
     // COSTANTI
     // ============================================================
-
     const THEMES = {
       'Scuro Blu Notte': { bg: '#05070f', surface: '#141b2e', card: '#1e2842', banner: '#2a3a5c', text: '#e8f0ff', textMuted: '#d4af37', accent: '#00f5ff', accent2: '#ff00e5', border: 'rgba(0,245,255,0.15)', tabActive: '#00f5ff' },
       'Chiaro': { bg: '#f5f7fa', surface: '#ffffff', card: '#ffffff', banner: '#e8ecf1', text: '#1a2028', textMuted: '#000000', accent: '#1976d2', accent2: '#0d47a1', border: '#cfd8dc', tabActive: '#1976d2' },
@@ -368,7 +351,6 @@
     // ============================================================
     // FUNZIONI UTILITÀ
     // ============================================================
-
     const getChampColor = (champName) => {
       if (!champName) return '#95a5a6';
       for (const [key, color] of Object.entries(CHAMPIONSHIP_COLORS)) {
@@ -469,9 +451,8 @@
     };
 
     // ============================================================
-    // TEAM LOGO (PATH RELATIVI)
+    // TEAM LOGO
     // ============================================================
-
     const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
       const [hasError, setHasError] = useState(false);
       const [tryUnderscore, setTryUnderscore] = useState(false);
@@ -516,7 +497,6 @@
       }
 
       const leagueFolder = getLeagueFolder(championship);
-      // ⭐ PATH RELATIVO per GitHub Pages
       const logoPath = `logos/${leagueFolder}/${tryUnderscore ? teamName.replace(/\s+/g, '_') + '.png' : teamName + '.png'}`;
 
       return (
@@ -541,32 +521,28 @@
     // ============================================================
     // FAMIGLIE GIOCATE
     // ============================================================
-
     const FAMIGLIE_GIOCATE = {
       gg_ng: {
-        id: 'gg_ng',
-        label: 'GG - NG',
-        icon: '⚽',
-        desc: 'Goal-Goal / No Goal: entrambe segnano oppure no',
+        id: 'gg_ng', label: 'GG - NG', icon: '⚽',
+        desc: 'Goal-Goal / No Goal',
         options: ['GG', 'NG']
       },
-      fisse: { id: 'fisse', label: 'FISSE', icon: '🎯', desc: 'Sceglie la migliore tra 1, X, 2', options: ['1', 'X', '2'] },
-      dc: { id: 'dc', label: 'DOPPIA CHANCE', icon: '🛡️', desc: 'Sceglie la migliore tra 1X, 12, X2', options: ['1X', '12', 'X2'] },
-      over: { id: 'over', label: 'OVER', icon: '⬆️', desc: 'Sceglie la migliore tra Over 1.5, 2.5, 3.5, 4.5', options: ['Over 1.5', 'Over 2.5', 'Over 3.5', 'Over 4.5'] },
-      under: { id: 'under', label: 'UNDER', icon: '⬇️', desc: 'Sceglie la migliore tra Under 1.5, 2.5, 3.5, 4.5', options: ['Under 1.5', 'Under 2.5', 'Under 3.5', 'Under 4.5'] },
-      multigol: { id: 'multigol', label: 'MULTIGOL', icon: '📊', desc: 'Sceglie la migliore tra 0-2, 1-3, 1-4, 2-5', options: ['0-2', '1-3', '1-4', '2-5'] },
-      dc_over: { id: 'dc_over', label: 'DC + OVER', icon: '🔗', desc: 'Sceglie la migliore tra tutte le 12 combinazioni DC+Over', options: ['1X+O1.5', '12+O1.5', 'X2+O1.5', '1X+O2.5', '12+O2.5', 'X2+O2.5', '1X+O3.5', '12+O3.5', 'X2+O3.5', '1X+O4.5', '12+O4.5', 'X2+O4.5'] },
-      dc_under: { id: 'dc_under', label: 'DC + UNDER', icon: '🔗', desc: 'Sceglie la migliore tra tutte le 12 combinazioni DC+Under', options: ['1X+U1.5', '12+U1.5', 'X2+U1.5', '1X+U2.5', '12+U2.5', 'X2+U2.5', '1X+U3.5', '12+U3.5', 'X2+U3.5', '1X+U4.5', '12+U4.5', 'X2+U4.5'] },
-      mg_casa_ospite: { id: 'mg_casa_ospite', label: 'MG CASA + OSPITE', icon: '⚔️', desc: 'Sceglie la migliore tra tutte le 16 combinazioni', options: ['0-1+0-1', '0-1+0-2', '0-1+1-3', '0-1+2-5', '0-2+0-1', '0-2+0-2', '0-2+1-3', '0-2+2-5', '1-3+0-1', '1-3+0-2', '1-3+1-3', '1-3+2-5', '2-5+0-1', '2-5+0-2', '2-5+1-3', '2-5+2-5'] },
-      dc_multigol: { id: 'dc_multigol', label: 'DC + MULTIGOL', icon: '🔗', desc: 'Sceglie la migliore tra tutte le 12 combinazioni DC+MG', options: ['1X+0-2', '12+0-2', 'X2+0-2', '1X+1-3', '12+1-3', 'X2+1-3', '1X+1-4', '12+1-4', 'X2+1-4', '1X+2-5', '12+2-5', 'X2+2-5'] }
+      fisse: { id: 'fisse', label: 'FISSE', icon: '🎯', desc: '1, X, 2', options: ['1', 'X', '2'] },
+      dc: { id: 'dc', label: 'DOPPIA CHANCE', icon: '🛡️', desc: '1X, 12, X2', options: ['1X', '12', 'X2'] },
+      over: { id: 'over', label: 'OVER', icon: '⬆️', desc: 'Over 1.5-4.5', options: ['Over 1.5', 'Over 2.5', 'Over 3.5', 'Over 4.5'] },
+      under: { id: 'under', label: 'UNDER', icon: '⬇️', desc: 'Under 1.5-4.5', options: ['Under 1.5', 'Under 2.5', 'Under 3.5', 'Under 4.5'] },
+      multigol: { id: 'multigol', label: 'MULTIGOL', icon: '📊', desc: 'Multigol', options: ['0-2', '1-3', '1-4', '2-5'] },
+      dc_over: { id: 'dc_over', label: 'DC + OVER', icon: '🔗', desc: 'DC+Over', options: ['1X+O1.5', '12+O1.5', 'X2+O1.5', '1X+O2.5', '12+O2.5', 'X2+O2.5', '1X+O3.5', '12+O3.5', 'X2+O3.5', '1X+O4.5', '12+O4.5', 'X2+O4.5'] },
+      dc_under: { id: 'dc_under', label: 'DC + UNDER', icon: '🔗', desc: 'DC+Under', options: ['1X+U1.5', '12+U1.5', 'X2+U1.5', '1X+U2.5', '12+U2.5', 'X2+U2.5', '1X+U3.5', '12+U3.5', 'X2+U3.5', '1X+U4.5', '12+U4.5', 'X2+U4.5'] },
+      mg_casa_ospite: { id: 'mg_casa_ospite', label: 'MG CASA + OSPITE', icon: '⚔️', desc: 'MG Casa+Ospite', options: ['0-1+0-1', '0-1+0-2', '0-1+1-3', '0-1+2-5', '0-2+0-1', '0-2+0-2', '0-2+1-3', '0-2+2-5', '1-3+0-1', '1-3+0-2', '1-3+1-3', '1-3+2-5', '2-5+0-1', '2-5+0-2', '2-5+1-3', '2-5+2-5'] },
+      dc_multigol: { id: 'dc_multigol', label: 'DC + MULTIGOL', icon: '🔗', desc: 'DC+MG', options: ['1X+0-2', '12+0-2', 'X2+0-2', '1X+1-3', '12+1-3', 'X2+1-3', '1X+1-4', '12+1-4', 'X2+1-4', '1X+2-5', '12+2-5', 'X2+2-5'] }
     };
 
     const DEFAULT_FAMIGLIE = ['dc_under', 'mg_casa_ospite', 'over'];
 
     // ============================================================
-    // CALCOLI - LOGICA CORRETTA v9
+    // CALCOLI
     // ============================================================
-
     const calcolaStatsSquadra = (games, team, isHomeTeam) => {
       const total = games.length;
 
@@ -623,10 +599,7 @@
         else if (isPareggio) pareggi++;
         else sconfitte++;
 
-        const o15 = tot > 1.5;
-        const o25 = tot > 2.5;
-        const o35 = tot > 3.5;
-        const o45 = tot > 4.5;
+        const o15 = tot > 1.5, o25 = tot > 2.5, o35 = tot > 3.5, o45 = tot > 4.5;
         if (o15) over15++;
         if (o25) over25++;
         if (o35) over35++;
@@ -653,7 +626,6 @@
         }
 
         const is12 = isVittoria || isSconfitta;
-
         if (is1X) cnt1X++;
         if (isX2) cntX2++;
         if (is12) cntNoPareggio++;
@@ -699,118 +671,49 @@
       const pct = (n) => (n / total) * 100;
 
       return {
-        partite: total,
-        vittorie, pareggi, sconfitte,
-        pctVittorie: pct(vittorie),
-        pctPareggi: pct(pareggi),
-        pctSconfitte: pct(sconfitte),
-        pctNoPareggio: pct(cntNoPareggio),
-        pct1X: pct(cnt1X),
-        pctX2: pct(cntX2),
-        pctOver15: pct(over15),
-        pctOver25: pct(over25),
-        pctOver35: pct(over35),
-        pctOver45: pct(over45),
-        pctUnder15: 100 - pct(over15),
-        pctUnder25: 100 - pct(over25),
-        pctUnder35: 100 - pct(over35),
-        pctUnder45: 100 - pct(over45),
-        pctGG: pct(gg),
-        pctNG: 100 - pct(gg),
-        pctMG01: pct(mg01),
-        pctMG02: pct(mg02),
-        pctMG13: pct(mg13),
-        pctMG25: pct(mg25),
-        pctMG14_Tot: pct(mg14_tot),
-        pctMG25_Tot: pct(mg25_tot),
-        combo1X_over15: pct(combo1X_over15),
-        combo1X_over25: pct(combo1X_over25),
-        combo1X_over35: pct(combo1X_over35),
-        combo1X_over45: pct(combo1X_over45),
-        combo1X_under15: pct(combo1X_under15),
-        combo1X_under25: pct(combo1X_under25),
-        combo1X_under35: pct(combo1X_under35),
-        combo1X_under45: pct(combo1X_under45),
-        combo12_over15: pct(combo12_over15),
-        combo12_over25: pct(combo12_over25),
-        combo12_over35: pct(combo12_over35),
-        combo12_over45: pct(combo12_over45),
-        combo12_under15: pct(combo12_under15),
-        combo12_under25: pct(combo12_under25),
-        combo12_under35: pct(combo12_under35),
-        combo12_under45: pct(combo12_under45),
-        comboX2_over15: pct(comboX2_over15),
-        comboX2_over25: pct(comboX2_over25),
-        comboX2_over35: pct(comboX2_over35),
-        comboX2_over45: pct(comboX2_over45),
-        comboX2_under15: pct(comboX2_under15),
-        comboX2_under25: pct(comboX2_under25),
-        comboX2_under35: pct(comboX2_under35),
-        comboX2_under45: pct(comboX2_under45),
-        combo1X_mg14: pct(combo1X_mg14),
-        combo1X_mg25: pct(combo1X_mg25),
-        combo12_mg14: pct(combo12_mg14),
-        combo12_mg25: pct(combo12_mg25),
-        comboX2_mg14: pct(comboX2_mg14),
-        comboX2_mg25: pct(comboX2_mg25),
+        partite: total, vittorie, pareggi, sconfitte,
+        pctVittorie: pct(vittorie), pctPareggi: pct(pareggi), pctSconfitte: pct(sconfitte),
+        pctNoPareggio: pct(cntNoPareggio), pct1X: pct(cnt1X), pctX2: pct(cntX2),
+        pctOver15: pct(over15), pctOver25: pct(over25), pctOver35: pct(over35), pctOver45: pct(over45),
+        pctUnder15: 100 - pct(over15), pctUnder25: 100 - pct(over25), pctUnder35: 100 - pct(over35), pctUnder45: 100 - pct(over45),
+        pctGG: pct(gg), pctNG: 100 - pct(gg),
+        pctMG01: pct(mg01), pctMG02: pct(mg02), pctMG13: pct(mg13), pctMG25: pct(mg25),
+        pctMG14_Tot: pct(mg14_tot), pctMG25_Tot: pct(mg25_tot),
+        combo1X_over15: pct(combo1X_over15), combo1X_over25: pct(combo1X_over25), combo1X_over35: pct(combo1X_over35), combo1X_over45: pct(combo1X_over45),
+        combo1X_under15: pct(combo1X_under15), combo1X_under25: pct(combo1X_under25), combo1X_under35: pct(combo1X_under35), combo1X_under45: pct(combo1X_under45),
+        combo12_over15: pct(combo12_over15), combo12_over25: pct(combo12_over25), combo12_over35: pct(combo12_over35), combo12_over45: pct(combo12_over45),
+        combo12_under15: pct(combo12_under15), combo12_under25: pct(combo12_under25), combo12_under35: pct(combo12_under35), combo12_under45: pct(combo12_under45),
+        comboX2_over15: pct(comboX2_over15), comboX2_over25: pct(comboX2_over25), comboX2_over35: pct(comboX2_over35), comboX2_over45: pct(comboX2_over45),
+        comboX2_under15: pct(comboX2_under15), comboX2_under25: pct(comboX2_under25), comboX2_under35: pct(comboX2_under35), comboX2_under45: pct(comboX2_under45),
+        combo1X_mg14: pct(combo1X_mg14), combo1X_mg25: pct(combo1X_mg25),
+        combo12_mg14: pct(combo12_mg14), combo12_mg25: pct(combo12_mg25),
+        comboX2_mg14: pct(comboX2_mg14), comboX2_mg25: pct(comboX2_mg25),
       };
     };
 
     const computeMatchStats = (match, allMatches) => {
       if (!match || !allMatches) return { error: 'Dati mancanti.' };
-
       const homeTeam = match.casa;
       const awayTeam = match.ospiti;
-
-      const homeGames = allMatches.filter(m =>
-        m.stato === 'Giocata' && (m.casa === homeTeam || m.ospiti === homeTeam)
-      );
-      const awayGames = allMatches.filter(m =>
-        m.stato === 'Giocata' && (m.casa === awayTeam || m.ospiti === awayTeam)
-      );
-
-      if (homeGames.length === 0 || awayGames.length === 0) {
-        return { error: 'Dati insufficienti.' };
-      }
+      const homeGames = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === homeTeam || m.ospiti === homeTeam));
+      const awayGames = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === awayTeam || m.ospiti === awayTeam));
+      if (homeGames.length === 0 || awayGames.length === 0) return { error: 'Dati insufficienti.' };
 
       const homeStats = calcolaStatsSquadra(homeGames, homeTeam, true);
       const awayStats = calcolaStatsSquadra(awayGames, awayTeam, false);
-
       const media = (a, b) => (a + b) / 2;
 
       return {
-        p1: homeStats.pctVittorie,
-        pX: media(homeStats.pctPareggi, awayStats.pctPareggi),
-        p2: awayStats.pctVittorie,
-        p1X: homeStats.pct1X,
-        pX2: awayStats.pctX2,
-        p12: media(homeStats.pctNoPareggio, awayStats.pctNoPareggio),
-        pOver15: media(homeStats.pctOver15, awayStats.pctOver15),
-        pOver25: media(homeStats.pctOver25, awayStats.pctOver25),
-        pOver35: media(homeStats.pctOver35, awayStats.pctOver35),
-        pOver45: media(homeStats.pctOver45, awayStats.pctOver45),
-        pUnder15: media(homeStats.pctUnder15, awayStats.pctUnder15),
-        pUnder25: media(homeStats.pctUnder25, awayStats.pctUnder25),
-        pUnder35: media(homeStats.pctUnder35, awayStats.pctUnder35),
-        pUnder45: media(homeStats.pctUnder45, awayStats.pctUnder45),
-        pGG: media(homeStats.pctGG, awayStats.pctGG),
-        pNG: media(homeStats.pctNG, awayStats.pctNG),
-        homeMG: {
-          '0-1': homeStats.pctMG01,
-          '0-2': homeStats.pctMG02,
-          '1-3': homeStats.pctMG13,
-          '2-5': homeStats.pctMG25,
-        },
-        awayMG: {
-          '0-1': awayStats.pctMG01,
-          '0-2': awayStats.pctMG02,
-          '1-3': awayStats.pctMG13,
-          '2-5': awayStats.pctMG25,
-        },
-        mgTot: {
-          '1-4': media(homeStats.pctMG14_Tot, awayStats.pctMG14_Tot),
-          '2-5': media(homeStats.pctMG25_Tot, awayStats.pctMG25_Tot),
-        },
+        p1: homeStats.pctVittorie, pX: media(homeStats.pctPareggi, awayStats.pctPareggi), p2: awayStats.pctVittorie,
+        p1X: homeStats.pct1X, pX2: awayStats.pctX2, p12: media(homeStats.pctNoPareggio, awayStats.pctNoPareggio),
+        pOver15: media(homeStats.pctOver15, awayStats.pctOver15), pOver25: media(homeStats.pctOver25, awayStats.pctOver25),
+        pOver35: media(homeStats.pctOver35, awayStats.pctOver35), pOver45: media(homeStats.pctOver45, awayStats.pctOver45),
+        pUnder15: media(homeStats.pctUnder15, awayStats.pctUnder15), pUnder25: media(homeStats.pctUnder25, awayStats.pctUnder25),
+        pUnder35: media(homeStats.pctUnder35, awayStats.pctUnder35), pUnder45: media(homeStats.pctUnder45, awayStats.pctUnder45),
+        pGG: media(homeStats.pctGG, awayStats.pctGG), pNG: media(homeStats.pctNG, awayStats.pctNG),
+        homeMG: { '0-1': homeStats.pctMG01, '0-2': homeStats.pctMG02, '1-3': homeStats.pctMG13, '2-5': homeStats.pctMG25 },
+        awayMG: { '0-1': awayStats.pctMG01, '0-2': awayStats.pctMG02, '1-3': awayStats.pctMG13, '2-5': awayStats.pctMG25 },
+        mgTot: { '1-4': media(homeStats.pctMG14_Tot, awayStats.pctMG14_Tot), '2-5': media(homeStats.pctMG25_Tot, awayStats.pctMG25_Tot) },
         homeStats, awayStats, homeGames, awayGames, homeTeam, awayTeam,
       };
     };
@@ -897,7 +800,6 @@
           return Math.round((pctCasa + pctOspite) / 2);
         }
       }
-
       return 0;
     };
 
@@ -909,11 +811,7 @@
       let best = null, bestPct = -1, bestLabel = '';
       family.options.forEach(opt => {
         let pct = getGiocataPct(opt, stats, homeMG, awayMG, mgTot);
-        if (pct > bestPct) {
-          bestPct = pct;
-          best = opt;
-          bestLabel = opt;
-        }
+        if (pct > bestPct) { bestPct = pct; best = opt; bestLabel = opt; }
       });
 
       if (best && bestPct > 0) {
@@ -933,22 +831,15 @@
       const pctMigliore = Math.max(pctGG, pctNG);
 
       return {
-        giocata: migliore,
-        label: migliore === 'GG' ? 'Goal-Goal' : 'No Goal',
-        pct: pctMigliore,
-        isBomb: pctMigliore >= 90,
-        familyId: 'gg_ng',
-        familyLabel: 'GG - NG',
-        familyIcon: '⚽',
-        gg: pctGG,
-        ng: pctNG,
+        giocata: migliore, label: migliore === 'GG' ? 'Goal-Goal' : 'No Goal',
+        pct: pctMigliore, isBomb: pctMigliore >= 90,
+        familyId: 'gg_ng', familyLabel: 'GG - NG', familyIcon: '⚽',
+        gg: pctGG, ng: pctNG,
       };
     };
 
     const getMultigolRange = (teamName, allMatches) => {
-      const matches = allMatches.filter(m =>
-        m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName)
-      );
+      const matches = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName));
       if (matches.length === 0) return { label: 'N/A', pct: 0, range: 'default', details: [] };
 
       const goals = matches.map(m => (m.casa === teamName) ? m.golCasa : m.golOspite);
@@ -971,20 +862,14 @@
       ];
       const best = ranges.reduce((a, b) => a.pct > b.pct ? a : b);
       return {
-        label: best.label,
-        pct: Math.round(best.pct),
-        range: best.range,
+        label: best.label, pct: Math.round(best.pct), range: best.range,
         details: ranges.map(r => ({ ...r, pct: Math.round(r.pct) }))
       };
     };
 
     const get12Under45 = (allMatches, homeTeam, awayTeam) => {
-      const homeGames = allMatches.filter(m =>
-        m.stato === 'Giocata' && (m.casa === homeTeam || m.ospiti === homeTeam)
-      );
-      const awayGames = allMatches.filter(m =>
-        m.stato === 'Giocata' && (m.casa === awayTeam || m.ospiti === awayTeam)
-      );
+      const homeGames = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === homeTeam || m.ospiti === homeTeam));
+      const awayGames = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === awayTeam || m.ospiti === awayTeam));
 
       const calcPct = (games, team) => {
         if (games.length === 0) return 0;
@@ -994,16 +879,12 @@
           const tg = isHome ? g.golCasa : g.golOspite;
           const og = isHome ? g.golOspite : g.golCasa;
           const tot = g.golCasa + g.golOspite;
-          const is12 = tg !== og;
-          const isUnder45 = tot < 4.5;
-          if (is12 && isUnder45) count++;
+          if (tg !== og && tot < 4.5) count++;
         });
         return (count / games.length) * 100;
       };
 
-      const pctHome = calcPct(homeGames, homeTeam);
-      const pctAway = calcPct(awayGames, awayTeam);
-      return (pctHome + pctAway) / 2;
+      return (calcPct(homeGames, homeTeam) + calcPct(awayGames, awayTeam)) / 2;
     };
 
     const calcFormAndStats = (matches, teamName) => {
@@ -1068,7 +949,6 @@
     // ============================================================
     // ESPOSIZIONE GLOBALE
     // ============================================================
-
     window.computeMatchStats = computeMatchStats;
     window.getGiocataPct = getGiocataPct;
     window.getBestBetForFamily = getBestBetForFamily;
@@ -1095,12 +975,11 @@
     window.calcolaGG_NG = calcolaGG_NG;
     window.get12Under45 = get12Under45;
 
-    console.log('✅ Funzioni globali esposte v9 - LOGICA CORRETTA');
+    console.log('✅ Funzioni globali esposte v9');
 
     // ============================================================
     // LOAD/SAVE STATE
     // ============================================================
-
     const loadState = () => {
       try {
         const localData = {
@@ -1141,7 +1020,6 @@
     // ============================================================
     // CLOCK
     // ============================================================
-
     const Clock = () => {
       const [now, setNow] = useState(new Date());
       useEffect(() => {
@@ -1165,10 +1043,7 @@
     // ============================================================
     // APP COMPONENT
     // ============================================================
-
     function App() {
-      const [hasError, setHasError] = useState(false);
-      const [errorMessage, setErrorMessage] = useState('');
       const initial = loadState();
       const [tab, setTab] = useState('Home');
       const [championships, setChampionships] = useState(initial.championships);
@@ -1205,8 +1080,6 @@
           loadData();
         } catch (e) {
           console.error('Errore caricamento:', e);
-          setHasError(true);
-          setErrorMessage(e.message);
         }
       }, []);
 
@@ -1216,17 +1089,12 @@
         if (!selectedMatch) return;
 
         const weatherKey = `${selectedMatch.campionato}_${selectedMatch.data}`;
-
         if (weatherCache[weatherKey]) return;
 
         if (typeof window.fetchWeatherForMatch === 'function') {
           window.fetchWeatherForMatch(selectedMatch).then(weather => {
-            if (weather) {
-              setWeatherCache(prev => ({ ...prev, [weatherKey]: weather }));
-            }
-          }).catch(e => {
-            console.warn('❌ Errore meteo:', e);
-          });
+            if (weather) setWeatherCache(prev => ({ ...prev, [weatherKey]: weather }));
+          }).catch(e => console.warn('❌ Errore meteo:', e));
         }
       }, [selectedMatchId, matches]);
 
@@ -1315,7 +1183,7 @@
                     weatherCache={weatherCache}
                   />
                 ) : (
-                  <div className="alert alert-info">⏳ Caricamento Home... (home.js)</div>
+                  <div className="alert alert-info">⏳ Caricamento Home...</div>
                 )}
               </div>
             )}
@@ -1330,7 +1198,7 @@
                     weatherCache={weatherCache}
                   />
                 ) : (
-                  <div className="alert alert-info">⏳ Caricamento Palinsesto... (palinsesto.js)</div>
+                  <div className="alert alert-info">⏳ Caricamento Palinsesto...</div>
                 )}
               </div>
             )}
@@ -1345,7 +1213,7 @@
                     weatherCache={weatherCache}
                   />
                 ) : (
-                  <div className="alert alert-info">⏳ Caricamento Statistiche... (statistiche.js)</div>
+                  <div className="alert alert-info">⏳ Caricamento Statistiche...</div>
                 )}
               </div>
             )}
@@ -1359,7 +1227,7 @@
                     onSelectMatch={selectMatch}
                   />
                 ) : (
-                  <div className="alert alert-info">⏳ Caricamento Storico... (storico.js)</div>
+                  <div className="alert alert-info">⏳ Caricamento Storico...</div>
                 )}
               </div>
             )}
@@ -1375,7 +1243,7 @@
                     showAlert={showAlert}
                   />
                 ) : (
-                  <div className="alert alert-info">⏳ Caricamento Schedina... (schedina.js)</div>
+                  <div className="alert alert-info">⏳ Caricamento Schedina...</div>
                 )}
               </div>
             )}
@@ -1403,7 +1271,7 @@
                     setSelectedFamiglie={setSelectedFamiglie}
                   />
                 ) : (
-                  <div className="alert alert-info">⏳ Caricamento Impostazioni... (impostazioni.js)</div>
+                  <div className="alert alert-info">⏳ Caricamento Impostazioni...</div>
                 )}
               </div>
             )}
@@ -1446,10 +1314,7 @@
             padding: '20px', minHeight: '100vh', background: '#05070f'
           }}>
             <div className="phone-simulator">
-              <div className="phone-notch">
-                <div className="notch-speaker"></div>
-                <div className="notch-camera"></div>
-              </div>
+              <div className="phone-notch"></div>
               <div className="phone-screen">
                 <div className="phone-scroll" style={{ paddingTop: '32px' }}>
                   {renderAppContent()}
@@ -1467,7 +1332,6 @@
     // ============================================================
     // BOOT
     // ============================================================
-
     console.log('🚀 Avvio GesssAI-Pro v4.0 FUTURISTIC');
 
     localStorage.removeItem('ft_matches');
@@ -1487,18 +1351,6 @@
       }
     } catch (e) {
       console.error('Errore durante il rendering React:', e);
-      const errorContainer = document.getElementById('error-container');
-      const errorMsg = document.getElementById('error-message-text');
-      const errorStack = document.getElementById('error-stack-text');
-      const splash = document.getElementById('splashscreen');
-      const root = document.getElementById('root');
-      if (errorContainer) {
-        errorContainer.classList.add('visible');
-        if (errorMsg) errorMsg.textContent = e.message || 'Errore durante il rendering.';
-        if (errorStack) errorStack.textContent = e.stack || 'Nessun dettaglio disponibile.';
-      }
-      if (splash) splash.style.display = 'none';
-      if (root) root.style.display = 'none';
     }
   </script>
 </body>
