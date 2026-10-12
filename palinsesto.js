@@ -1,9 +1,8 @@
 // ============================================================
-// palinsesto.js - Modulo Palinsesto v14 (SCROLL PRIORITARIO)
-// ✅ Sidebar 2 colonne per nazione + bollini
-// ✅ MatchTab con forma + % + differenza + giornata
-// ✅ Scroll prioritario: sidebar → main dopo click
-// ✅ Bottom panel "Partite di Oggi"
+// palinsesto.js - Modulo Palinsesto (FUTURISTIC + CHAMP BAR + MOBILE)
+// ✅ PC: Sidebar orizzontale campionati in alto + giornata odierna
+// ✅ PC: Bottone "Tutti i Campionati" in cima
+// ✅ Mobile: lista campionati scrollabile → click → giornata
 // ============================================================
 
 (function () {
@@ -11,62 +10,6 @@
 
   const { useState, useMemo, useEffect } = React;
 
-  // ============================================================
-  // MAPPA NAZIONE → CAMPIONATI
-  // ============================================================
-  const NAZIONE_CAMPIONATI = {
-    'Italia': ['Serie A', 'Serie B', 'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C'],
-    'Inghilterra': ['Premier League', 'EFL Championship'],
-    'Spagna': ['La Liga', 'Segunda División'],
-    'Germania': ['Bundesliga', '2. Bundesliga'],
-    'Francia': ['Ligue 1', 'Ligue 2'],
-    'Olanda': ['Eredivisie', 'Eerste Divisie'],
-    'Portogallo': ['Primeira Liga'],
-    'Belgio': ['Jupiler Pro League'],
-    'Turchia': ['Süper Lig'],
-    'Scozia': ['Scottish Premiership'],
-    'Giappone': ['J1 League'],
-    'Corea': ['K League 1'],
-  };
-
-  // ============================================================
-  // CHAMP LOGO
-  // ============================================================
-  const ChampLogo = ({ campionato, size = 24 }) => {
-    const [hasError, setHasError] = useState(false);
-    const logoPath = window.getChampLogo ? window.getChampLogo(campionato) : null;
-
-    if (!logoPath || hasError) {
-      const color = window.getChampColor ? window.getChampColor(campionato) : '#00f5ff';
-      return (
-        <div style={{
-          width: size, height: size, borderRadius: '50%',
-          background: `linear-gradient(135deg, ${color}, ${color}99)`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontWeight: 'bold', color: '#000', fontSize: size * 0.38, flexShrink: 0,
-          boxShadow: `0 0 10px ${color}`,
-        }}>
-          {campionato.substring(0, 2).toUpperCase()}
-        </div>
-      );
-    }
-
-    return (
-      <img
-        src={logoPath}
-        alt={campionato}
-        onError={() => setHasError(true)}
-        style={{
-          width: size, height: size, objectFit: 'contain', flexShrink: 0,
-          filter: 'drop-shadow(0 0 6px rgba(0, 245, 255, 0.5))',
-        }}
-      />
-    );
-  };
-
-  // ============================================================
-  // FORMATTAZIONE ETICHETTE
-  // ============================================================
   const formatGiocataLabel = (familyId, label) => {
     if (!label) return '—';
     if (label.startsWith('Over '))  return label;
@@ -101,6 +44,50 @@
     return label;
   };
 
+  const getQuotaInfo = (match, familyId, giocata, pctTua) => {
+    if (!window.QuoteManager || typeof window.QuoteManager.analizzaGiocata !== 'function') return null;
+    try { return window.QuoteManager.analizzaGiocata(match, familyId, giocata, pctTua); }
+    catch (e) { return null; }
+  };
+
+  // ============================================================
+  // DETECT MOBILE
+  // ============================================================
+  const useIsMobile = () => {
+    const [isMobile, setIsMobile] = useState(() => window.innerWidth < 900);
+    useEffect(() => {
+      const handler = () => setIsMobile(window.innerWidth < 900);
+      window.addEventListener('resize', handler);
+      return () => window.removeEventListener('resize', handler);
+    }, []);
+    return isMobile;
+  };
+
+  // ============================================================
+  // CHAMP LOGO
+  // ============================================================
+  const ChampLogo = ({ campionato, size = 24 }) => {
+    const [hasError, setHasError] = useState(false);
+    const logoPath = window.getChampLogo ? window.getChampLogo(campionato) : null;
+    if (!logoPath || hasError) {
+      const color = window.getChampColor(campionato);
+      return (
+        <div style={{
+          width: size, height: size, borderRadius: '50%',
+          background: `linear-gradient(135deg, ${color}, ${color}99)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontWeight: 'bold', color: '#000', fontSize: size * 0.38, flexShrink: 0,
+        }}>
+          {campionato.substring(0, 2).toUpperCase()}
+        </div>
+      );
+    }
+    return (
+      <img src={logoPath} alt={campionato} onError={() => setHasError(true)}
+        style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />
+    );
+  };
+
   // ============================================================
   // QUOTA BOX
   // ============================================================
@@ -109,11 +96,7 @@
     const { numPartite, dataMaxPDF } = window.QuoteManager ? window.QuoteManager.useQuote() : { numPartite: 0 };
 
     useEffect(() => {
-      const info = (() => {
-        if (!window.QuoteManager || typeof window.QuoteManager.analizzaGiocata !== 'function') return null;
-        try { return window.QuoteManager.analizzaGiocata(match, familyId, giocata, pctTua); }
-        catch (e) { return null; }
-      })();
+      const info = getQuotaInfo(match, familyId, giocata, pctTua);
       setQuotaInfo(info);
     }, [match.id, familyId, giocata, pctTua, numPartite, dataMaxPDF]);
 
@@ -123,26 +106,22 @@
     return (
       <div style={{
         display: 'inline-flex', alignItems: 'center', gap: '4px',
-        padding: '2px 8px', marginLeft: '6px',
-        borderRadius: '6px',
+        padding: '2px 6px', marginLeft: '6px', borderRadius: '4px',
         background: isValue ? 'rgba(0, 255, 136, 0.15)' : 'rgba(255, 255, 255, 0.05)',
         border: `1px solid ${isValue ? 'var(--neon-green)' : 'var(--border)'}`,
         fontSize: '11px', fontWeight: 'bold',
         color: isValue ? 'var(--neon-green)' : 'var(--text)',
-        boxShadow: isValue ? '0 0 10px rgba(0, 255, 136, 0.3)' : 'none',
         whiteSpace: 'nowrap',
-      }}
-        title={isValue ? `VALUE BET! Edge: +${edge}%` : `Quota Marathonbet`}
-      >
+      }} title={isValue ? `VALUE BET! Edge: +${edge}%` : `Quota Marathonbet`}>
         <span>💰</span><span>{quotaBook.toFixed(2)}</span>
       </div>
     );
   };
 
   // ============================================================
-  // MATCH TAB
+  // MATCH TAB (card partita)
   // ============================================================
-  const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie, weatherCache }) => {
+  const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie }) => {
     const computeMatchStats = window.computeMatchStats;
     const calcFormAndStats = window.calcFormAndStats;
     const getChampColor = window.getChampColor;
@@ -161,7 +140,6 @@
     const awayForm = calcFormAndStats(allMatches, match.ospiti);
     const champColor = getChampColor(match.campionato);
     const diff = Math.abs(homeForm.pct - awayForm.pct);
-
     const stats = computeMatchStats(match, allMatches);
     stats._allMatches = allMatches;
     stats._homeTeam = match.casa;
@@ -200,36 +178,24 @@
       famiglieDaAnalizzare.forEach(familyId => {
         const family = FAMIGLIE_GIOCATE[familyId];
         if (!family) return;
-
         let best = null;
-
         if (familyId === 'gg_ng') {
-          const ggNgResult = calcolaGG_NG ? calcolaGG_NG(stats) : null;
-          if (ggNgResult) {
-            best = { label: ggNgResult.giocata, giocata: ggNgResult.giocata, pct: ggNgResult.pct };
-          }
+          const r = calcolaGG_NG ? calcolaGG_NG(stats) : null;
+          if (r) best = { label: r.giocata, giocata: r.giocata, pct: r.pct };
         } else {
-          let bestPct = -1;
-          let bestOpt = null;
+          let bestPct = -1, bestOpt = null;
           family.options.forEach(opt => {
             let pct = 0;
-            try { pct = getGiocataPct(opt, stats, homeMG, awayMG, mgTot) || 0; }
-            catch (e) { pct = 0; }
+            try { pct = getGiocataPct(opt, stats, homeMG, awayMG, mgTot) || 0; } catch (e) { pct = 0; }
             if (pct > bestPct) { bestPct = pct; bestOpt = opt; }
           });
           if (bestOpt && bestPct > 0) best = { label: bestOpt, giocata: bestOpt, pct: bestPct };
         }
-
         if (best && best.pct > 0) {
           giocateDaMostrare.push({
-            familyId,
-            familyLabel: family.label,
-            familyIcon: family.icon,
-            label: best.label,
-            displayLabel: formatGiocataLabel(familyId, best.label),
-            pct: best.pct,
-            isBomb: best.pct >= 90,
-            giocata: best.giocata,
+            familyId, familyLabel: family.label, familyIcon: family.icon,
+            label: best.label, displayLabel: formatGiocataLabel(familyId, best.label),
+            familyName: family.label, pct: best.pct, isBomb: best.pct >= 90, giocata: best.giocata,
           });
         }
       });
@@ -239,15 +205,10 @@
 
     const giocateDaMostrare = getGiocateDaMostrare();
     const score = giocateDaMostrare.length > 0
-      ? Math.round(giocateDaMostrare.reduce((s, g) => s + g.pct, 0) / giocateDaMostrare.length)
-      : 0;
+      ? Math.round(giocateDaMostrare.reduce((s, g) => s + g.pct, 0) / giocateDaMostrare.length) : 0;
     const hasBomb = giocateDaMostrare.some(g => g.isBomb);
 
-    const handleClick = (e) => {
-      e.stopPropagation();
-      onSelect(match.id);
-    };
-
+    const handleClick = (e) => { e.stopPropagation(); onSelect(match.id); };
     const formattedDate = match.data ? formatDateEU(match.data) : 'N/D';
 
     return (
@@ -259,25 +220,16 @@
           {hasBomb && <span className="bomb-inline">💣</span>}
         </div>
 
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: '8px',
-          marginBottom: '8px', flexWrap: 'wrap',
-        }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
           <div className="tab-header" style={{ background: champColor, marginBottom: 0 }}>
             <ChampLogo campionato={match.campionato} size={16} />
             <span>{match.campionato || 'N/D'}</span>
           </div>
           <span style={{
-            fontSize: '10px', fontWeight: 700,
-            color: 'var(--neon-cyan)',
-            background: 'var(--bg-elevated)',
-            padding: '3px 8px', borderRadius: '6px',
+            fontSize: '10px', fontWeight: 700, color: 'var(--neon-cyan)',
+            background: 'var(--bg-elevated)', padding: '3px 8px', borderRadius: '6px',
             border: '1px solid var(--border)',
-            fontFamily: 'Orbitron, sans-serif',
-            letterSpacing: '0.5px', whiteSpace: 'nowrap',
-          }}>
-            G.{match.round || 'N/A'}
-          </span>
+          }}>G.{match.round || 'N/A'}</span>
         </div>
 
         <div style={{ color: 'var(--text-dim)', fontSize: '11px', marginBottom: '6px', textAlign: 'center' }}>
@@ -311,9 +263,7 @@
 
         <div className="form-diff">
           📊 Differenza forma:{' '}
-          <span className={diff >= 20 ? 'diff-alta' : 'diff-bassa'}>
-            {isNaN(diff) ? 0 : diff}%
-          </span>
+          <span className={diff >= 20 ? 'diff-alta' : 'diff-bassa'}>{isNaN(diff) ? 0 : diff}%</span>
         </div>
 
         <div className="bet-row-vertical">
@@ -321,19 +271,13 @@
             giocateDaMostrare.map((g, idx) => {
               const pctColor = getColorForPct(g.pct);
               const isBomb = g.pct >= 90;
-
               return (
-                <div key={idx}
-                  className={`bet-item-vertical ${isBomb ? 'bomb' : ''}`}
-                  style={{ borderColor: pctColor }}>
+                <div key={idx} className={`bet-item-vertical ${isBomb ? 'bomb' : ''}`} style={{ borderColor: pctColor }}>
                   <span className="bet-label" style={{ color: isBomb ? 'var(--neon-gold)' : pctColor, fontWeight: 700 }}>
-                    {isBomb && '💣 '}
-                    {g.displayLabel || g.label}
+                    {isBomb && '💣 '}{g.displayLabel || g.label}
                   </span>
                   <span className="bet-value">
-                    <span className={`giocata-pct ${getPercentualeClasse(g.pct)}`}>
-                      {g.pct}%
-                    </span>
+                    <span className={`giocata-pct ${getPercentualeClasse(g.pct)}`}>{g.pct}%</span>
                     <QuotaBox match={match} familyId={g.familyId} giocata={g.giocata} pctTua={g.pct} />
                   </span>
                 </div>
@@ -341,7 +285,7 @@
             })
           ) : (
             <div className="bet-item-vertical" style={{ textAlign: 'center', color: 'var(--text-dim)' }}>
-              <span>Nessuna giocata disponibile</span>
+              <span>Nessuna giocata</span>
             </div>
           )}
         </div>
@@ -350,283 +294,79 @@
   };
 
   // ============================================================
-  // SIDEBAR CAMPIONATI
+  // CHAMP BAR ORIZZONTALE (PC)
   // ============================================================
-  const SidebarCampionati = ({ matches, selectedChamps, onToggle, onSelectAll, onClearAll, onSelectChamp }) => {
+  const ChampBar = ({ matches, champFocus, onSelect }) => {
     const normalizeDate = window.normalizeDate;
-    const getTodayStr = window.getTodayStr;
+    const todayStr = window.getTodayStr();
 
-    const todayStr = getTodayStr();
-
-    const [nazioniAperte, setNazioniAperte] = useState(() => {
-      const aperte = {};
-      Object.entries(NAZIONE_CAMPIONATI).forEach(([nazione, camps]) => {
-        const hasToday = camps.some(c =>
-          matches.some(m => m.campionato === c && m.stato === 'Futura' && normalizeDate(m.data) === todayStr)
-        );
-        aperte[nazione] = hasToday;
-      });
-      return aperte;
-    });
-
-    const toggleNazione = (nazione) => {
-      setNazioniAperte(prev => ({ ...prev, [nazione]: !prev[nazione] }));
-    };
-
-    const statsCampionati = useMemo(() => {
-      const stats = {};
-      Object.values(NAZIONE_CAMPIONATI).flat().forEach(champ => {
-        stats[champ] = { oggi: 0, totali: 0 };
-      });
-      matches.forEach(m => {
-        if (m.stato !== 'Futura') return;
-        if (!stats[m.campionato]) stats[m.campionato] = { oggi: 0, totali: 0 };
-        const d = normalizeDate(m.data);
-        stats[m.campionato].totali++;
-        if (d === todayStr) stats[m.campionato].oggi++;
-      });
-      return stats;
+    const campionatiDisponibili = useMemo(() => {
+      return window.CHAMPIONSHIP_LIST.filter(c =>
+        matches.some(m => m.campionato === c && m.stato === 'Futura' && normalizeDate(m.data) === todayStr)
+      );
     }, [matches, todayStr]);
 
-    const activeCount = Object.values(selectedChamps).filter(v => v).length;
-    const total = Object.keys(selectedChamps).length;
-
-    const nazioniDaMostrare = Object.entries(NAZIONE_CAMPIONATI)
-      .map(([nazione, campionati]) => ({
-        nazione,
-        campionati: campionati.filter(c => statsCampionati[c] && statsCampionati[c].totali > 0),
-      }))
-      .filter(n => n.campionati.length > 0);
+    const totaleOggi = useMemo(() => {
+      return matches.filter(m => m.stato === 'Futura' && normalizeDate(m.data) === todayStr).length;
+    }, [matches, todayStr]);
 
     return (
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(30, 40, 66, 0.7), rgba(20, 27, 46, 0.9))',
-        border: '1px solid var(--border)',
-        borderRadius: '16px',
-        padding: '14px',
-        backdropFilter: 'blur(12px)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
-      }}>
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          marginBottom: '12px', paddingBottom: '8px',
-          borderBottom: '1px solid var(--border)',
-        }}>
-          <span style={{
-            fontFamily: 'Orbitron, sans-serif',
-            fontSize: '12px', fontWeight: 700,
-            color: 'var(--neon-cyan)',
-            letterSpacing: '2px',
-            textTransform: 'uppercase',
-          }}>
-            🏆 Campionati
-          </span>
-          <span style={{
-            fontSize: '11px', color: 'var(--text-dim)',
-            background: 'var(--bg-elevated)',
-            padding: '2px 10px', borderRadius: '10px',
-            border: '1px solid var(--border)',
-          }}>
-            {activeCount}/{total}
-          </span>
-        </div>
+      <div className="champ-bar">
+        {/* Bottone "Tutti i Campionati" */}
+        <button
+          onClick={() => onSelect('__TUTTI__')}
+          className={`champ-bar-item ${champFocus === '__TUTTI__' ? 'active' : ''}`}
+          style={{
+            borderColor: champFocus === '__TUTTI__' ? 'var(--neon-magenta)' : 'var(--neon-cyan)',
+            background: champFocus === '__TUTTI__'
+              ? 'linear-gradient(135deg, var(--neon-magenta), var(--neon-purple))'
+              : 'linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(0, 245, 255, 0.05))',
+            color: '#000',
+          }}
+        >
+          <span style={{ fontSize: '16px' }}>🌍</span>
+          <span className="champ-bar-name">Tutti i Campionati</span>
+          {totaleOggi > 0 && <span className="champ-bar-badge">{totaleOggi}</span>}
+        </button>
 
-        <div style={{ display: 'flex', gap: '6px', marginBottom: '12px' }}>
-          <button onClick={onSelectAll} style={{
-            flex: 1, padding: '6px 10px', fontSize: '10px',
-            background: 'var(--bg-elevated)', color: 'var(--text)',
-            border: '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer',
-            fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px',
-          }}>✅ Tutti</button>
-          <button onClick={onClearAll} style={{
-            flex: 1, padding: '6px 10px', fontSize: '10px',
-            background: 'var(--bg-elevated)', color: 'var(--text)',
-            border: '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer',
-            fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px',
-          }}>❌ Nessuno</button>
-        </div>
+        {campionatiDisponibili.map(camp => {
+          const color = window.getChampColor(camp);
+          const isActive = champFocus === camp;
+          const nOggi = matches.filter(m =>
+            m.campionato === camp && m.stato === 'Futura' && normalizeDate(m.data) === todayStr
+          ).length;
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {nazioniDaMostrare.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-dim)', fontSize: '12px' }}>
-              Nessuna partita disponibile
-            </div>
-          ) : (
-            nazioniDaMostrare.map(({ nazione, campionati }) => {
-              const aperta = nazioniAperte[nazione];
-              const hasToday = campionati.some(c => statsCampionati[c] && statsCampionati[c].oggi > 0);
-              const totalPartite = campionati.reduce((s, c) => s + (statsCampionati[c]?.totali || 0), 0);
-
-              return (
-                <div key={nazione} className={`nazione-block ${aperta ? 'open' : ''}`}>
-                  <div className="nazione-header" onClick={() => toggleNazione(nazione)}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
-                      <span className="nazione-arrow">▶</span>
-                      <span style={{
-                        fontSize: '11px', fontWeight: 700,
-                        color: 'var(--neon-cyan)',
-                        textTransform: 'uppercase',
-                        letterSpacing: '1px',
-                        fontFamily: 'Orbitron, sans-serif',
-                        whiteSpace: 'nowrap',
-                      }}>
-                        🌍 {nazione}
-                      </span>
-                      {hasToday && (
-                        <span style={{
-                          width: '8px', height: '8px', borderRadius: '50%',
-                          background: 'var(--neon-red)',
-                          boxShadow: '0 0 8px var(--neon-red)',
-                          animation: 'notif-pulse 1.5s infinite',
-                          flexShrink: 0,
-                        }} />
-                      )}
-                    </div>
-                    <span style={{
-                      fontSize: '9px',
-                      color: 'var(--text-dim)',
-                      background: 'var(--bg-elevated)',
-                      padding: '2px 6px',
-                      borderRadius: '8px',
-                      flexShrink: 0,
-                    }}>
-                      {campionati.length} • {totalPartite}
-                    </span>
-                  </div>
-
-                  {aperta && (
-                    <div className="nazione-camps">
-                      {campionati.map(champ => {
-                        const isActive = selectedChamps[champ] !== false;
-                        const color = window.getChampColor(champ);
-                        const st = statsCampionati[champ] || { oggi: 0, totali: 0 };
-                        const hasTodayChamp = st.oggi > 0;
-
-                        return (
-                          <button
-                            key={champ}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onToggle(champ);
-                              if (onSelectChamp) onSelectChamp(champ);
-                            }}
-                            style={{
-                              position: 'relative',
-                              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
-                              padding: '6px 4px', borderRadius: '8px',
-                              border: isActive ? `1px solid ${color}` : '1px solid var(--border)',
-                              background: isActive
-                                ? `linear-gradient(135deg, ${color}22, ${color}11)`
-                                : 'var(--bg-elevated)',
-                              cursor: 'pointer', textAlign: 'center',
-                              transition: 'all 0.25s ease',
-                              boxShadow: isActive ? `0 0 12px ${color}33` : 'none',
-                              minHeight: '58px',
-                              overflow: 'hidden',
-                            }}
-                          >
-                            <ChampLogo campionato={champ} size={22} />
-                            <div style={{
-                              fontSize: '9px', fontWeight: 700,
-                              color: isActive ? 'var(--text)' : 'var(--text-dim)',
-                              lineHeight: '1.1', maxWidth: '100%',
-                              overflow: 'hidden', textOverflow: 'ellipsis',
-                              display: '-webkit-box', WebkitLineClamp: 2,
-                              WebkitBoxOrient: 'vertical',
-                            }}>
-                              {champ
-                                .replace(' - Girone A', '/A')
-                                .replace(' - Girone B', '/B')
-                                .replace(' - Girone C', '/C')
-                                .replace('Jupiler Pro League', 'Jupiler')
-                                .replace('EFL Championship', 'Championship')
-                                .replace('Scottish Premiership', 'Scottish')
-                                .replace('Segunda División', 'Segunda')
-                                .replace('2. Bundesliga', '2. Bundes')
-                                .replace('Eerste Divisie', 'Eerste')
-                              }
-                            </div>
-                            <div style={{
-                              fontSize: '8px', color: 'var(--text-dim)',
-                              display: 'flex', gap: '4px', flexWrap: 'wrap',
-                              justifyContent: 'center',
-                            }}>
-                              <span>📊{st.totali}</span>
-                              {hasTodayChamp && <span style={{ color: 'var(--neon-red)', fontWeight: 700 }}>🔴{st.oggi}</span>}
-                            </div>
-                            {hasTodayChamp && (
-                              <div className="champ-notification-badge" style={{
-                                position: 'absolute', top: '-4px', right: '-4px',
-                                width: '16px', height: '16px', fontSize: '9px',
-                              }}>
-                                {st.oggi}
-                              </div>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })
-          )}
-        </div>
+          return (
+            <button
+              key={camp}
+              onClick={() => onSelect(camp)}
+              className={`champ-bar-item ${isActive ? 'active' : ''}`}
+              style={{ borderColor: isActive ? 'var(--neon-cyan)' : `${color}66` }}
+            >
+              <ChampLogo campionato={camp} size={22} />
+              <span className="champ-bar-name">
+                {camp
+                  .replace(' - Girone A', '/A')
+                  .replace(' - Girone B', '/B')
+                  .replace(' - Girone C', '/C')
+                  .replace('Jupiler Pro League', 'Jupiler')
+                  .replace('EFL Championship', 'Championship')
+                  .replace('Scottish Premiership', 'Scottish')
+                  .replace('Segunda División', 'Segunda')
+                  .replace('2. Bundesliga', '2. Bundes')
+                  .replace('Eerste Divisie', 'Eerste')
+                }
+              </span>
+              {nOggi > 0 && <span className="champ-bar-badge">{nOggi}</span>}
+            </button>
+          );
+        })}
       </div>
     );
   };
 
   // ============================================================
-  // BOTTOM PANEL
-  // ============================================================
-  const BottomPanelPartiteOggi = ({ matches }) => {
-    const [collapsed, setCollapsed] = useState(true);
-    const normalizeDate = window.normalizeDate;
-    const getTodayStr = window.getTodayStr;
-
-    const todayStr = getTodayStr();
-
-    const partiteOggi = useMemo(() => {
-      return matches
-        .filter(m => normalizeDate(m.data) === todayStr)
-        .sort((a, b) => (a.ora || '99:99').localeCompare(b.ora || '99:99'));
-    }, [matches, todayStr]);
-
-    return (
-      <div className={`bottom-panel ${collapsed ? 'collapsed' : ''}`}>
-        <div className="bottom-panel-header" onClick={() => setCollapsed(!collapsed)}>
-          <div className="bottom-panel-title">
-            <span style={{ fontSize: '18px' }}>📅</span>
-            <span>Partite di Oggi</span>
-            <span style={{
-              background: partiteOggi.length > 0 ? 'var(--neon-cyan)' : 'var(--text-dim)',
-              color: '#000', padding: '2px 10px', borderRadius: '10px',
-              fontSize: '11px', fontWeight: 900,
-            }}>{partiteOggi.length}</span>
-          </div>
-          <button className="bottom-panel-toggle">
-            {collapsed ? '▲ Apri' : '▼ Chiudi'}
-          </button>
-        </div>
-
-        {!collapsed && (
-          <div className="bottom-panel-content">
-            {partiteOggi.map(m => (
-              <div key={m.id} className="bottom-panel-match">
-                <span className="bp-time">{m.ora || '--:--'}</span>
-                <ChampLogo campionato={m.campionato} size={20} />
-                <span className="bp-champ">{m.campionato}</span>
-                <span className="bp-teams">{m.casa} - {m.ospiti}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // ============================================================
-  // VISUALIZZA GIOCATE SWITCH
+  // SELEZIONE VISUALIZZAZIONE GIOCATE
   // ============================================================
   const VisualizzaGiocateSwitch = ({ mode, setMode, selectedFamiglie }) => {
     const countScelte = (selectedFamiglie || []).length;
@@ -635,34 +375,121 @@
     return (
       <div style={{
         display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
-        marginTop: '12px', padding: '10px 14px',
+        marginBottom: '14px', padding: '10px 14px',
         background: 'var(--bg-elevated)', borderRadius: '12px',
         border: '1px solid var(--border)',
       }}>
-        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neon-cyan)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neon-cyan)', textTransform: 'uppercase' }}>
           🎯 Giocate
         </span>
         <div style={{ display: 'flex', background: 'var(--bg-deep)', borderRadius: '8px', padding: '3px', border: '1px solid var(--border)' }}>
+          <button onClick={() => setMode('scelte')} style={{
+            padding: '6px 16px', fontSize: '11px', fontWeight: 700,
+            borderRadius: '6px', border: 'none', cursor: 'pointer',
+            background: mode === 'scelte' ? 'var(--neon-cyan)' : 'transparent',
+            color: mode === 'scelte' ? '#000' : 'var(--text-dim)',
+          }}>⭐ Scelte ({countScelte})</button>
+          <button onClick={() => setMode('tutte')} style={{
+            padding: '6px 16px', fontSize: '11px', fontWeight: 700,
+            borderRadius: '6px', border: 'none', cursor: 'pointer',
+            background: mode === 'tutte' ? 'var(--neon-magenta)' : 'transparent',
+            color: mode === 'tutte' ? '#000' : 'var(--text-dim)',
+          }}>🌐 Tutte ({totalFamiglie})</button>
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================================
+  // MOBILE: LISTA CAMPIONATI (scrollabile)
+  // ============================================================
+  const MobileListaCampionati = ({ matches, onSelect }) => {
+    const normalizeDate = window.normalizeDate;
+    const todayStr = window.getTodayStr();
+
+    const campionatiDisponibili = useMemo(() => {
+      return window.CHAMPIONSHIP_LIST
+        .filter(c => matches.some(m => m.campionato === c))
+        .map(c => ({
+          nome: c,
+          totali: matches.filter(m => m.campionato === c).length,
+          oggi: matches.filter(m => m.campionato === c && m.stato === 'Futura' && normalizeDate(m.data) === todayStr).length,
+        }))
+        .filter(c => c.totali > 0);
+    }, [matches, todayStr]);
+
+    const totaleOggi = matches.filter(m => m.stato === 'Futura' && normalizeDate(m.data) === todayStr).length;
+
+    return (
+      <div className="mobile-sidebar-scroll">
+        <div className="card" style={{ padding: '14px' }}>
+          <div style={{
+            fontFamily: 'Orbitron, sans-serif', fontSize: '13px', fontWeight: 700,
+            color: 'var(--neon-cyan)', textTransform: 'uppercase', letterSpacing: '2px',
+            marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid var(--border)',
+          }}>
+            🏆 Campionati
+          </div>
+
+          {/* Tutti i Campionati */}
           <button
-            onClick={() => setMode('scelte')}
+            onClick={() => onSelect('__TUTTI__')}
             style={{
-              padding: '6px 16px', fontSize: '11px', fontWeight: 700,
-              borderRadius: '6px', border: 'none', cursor: 'pointer',
-              background: mode === 'scelte' ? 'var(--neon-cyan)' : 'transparent',
-              color: mode === 'scelte' ? '#000' : 'var(--text-dim)',
-              transition: 'all 0.2s', textTransform: 'uppercase', letterSpacing: '1px',
+              width: '100%', marginBottom: '10px',
+              padding: '14px 16px', borderRadius: '12px',
+              border: '2px solid var(--neon-magenta)',
+              background: 'linear-gradient(135deg, var(--neon-magenta), var(--neon-purple))',
+              color: '#000', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              boxShadow: '0 0 25px rgba(255, 0, 229, 0.6)',
             }}
-          >⭐ Scelte ({countScelte})</button>
-          <button
-            onClick={() => setMode('tutte')}
-            style={{
-              padding: '6px 16px', fontSize: '11px', fontWeight: 700,
-              borderRadius: '6px', border: 'none', cursor: 'pointer',
-              background: mode === 'tutte' ? 'var(--neon-magenta)' : 'transparent',
-              color: mode === 'tutte' ? '#000' : 'var(--text-dim)',
-              transition: 'all 0.2s', textTransform: 'uppercase', letterSpacing: '1px',
-            }}
-          >🌐 Tutte ({totalFamiglie})</button>
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '20px' }}>🌍</span>
+              <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '13px', fontWeight: 900 }}>
+                TUTTI I CAMPIONATI
+              </span>
+            </div>
+            <span style={{ fontSize: '12px', fontWeight: 900, background: 'rgba(0,0,0,0.25)', padding: '3px 10px', borderRadius: '10px' }}>
+              {totaleOggi}
+            </span>
+          </button>
+
+          {/* Lista campionati */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {campionatiDisponibili.map(camp => {
+              const color = window.getChampColor(camp.nome);
+              const hasToday = camp.oggi > 0;
+              return (
+                <button
+                  key={camp.nome}
+                  onClick={() => onSelect(camp.nome)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '12px',
+                    padding: '12px 14px', borderRadius: '12px',
+                    border: `2px solid ${hasToday ? 'var(--neon-red)' : color}`,
+                    background: hasToday
+                      ? `linear-gradient(135deg, ${color}33, ${color}11)`
+                      : 'var(--bg-elevated)',
+                    cursor: 'pointer', textAlign: 'left',
+                    boxShadow: hasToday ? `0 0 20px ${color}55` : 'none',
+                  }}
+                >
+                  <ChampLogo campionato={camp.nome} size={30} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text)' }}>
+                      {camp.nome}
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-dim)', display: 'flex', gap: '8px' }}>
+                      <span>📊 {camp.totali}</span>
+                      {hasToday && <span style={{ color: 'var(--neon-red)', fontWeight: 700 }}>🔴 {camp.oggi} oggi</span>}
+                    </div>
+                  </div>
+                  <span style={{ fontSize: '18px', color: 'var(--neon-cyan)' }}>→</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     );
@@ -674,154 +501,181 @@
   function PalinsestoComponent({ matches, selectedFamiglie, onSelectMatch, weatherCache }) {
     const normalizeDate = window.normalizeDate;
     const getTodayStr = window.getTodayStr;
-
-    const {
-      filtro: selectedChamps,
-      toggleCampionato: toggleChamp,
-      selezionaTutti: selectAllChamps,
-      deselezionaTutti: clearAllChamps,
-    } = window.FiltriCampionati.useFiltroCampionati();
+    const isMobile = useIsMobile();
 
     const { mode: visualizzaMode, setMode: setVisualizzaMode } =
       window.FiltriCampionati.useVisualizzaGiocateMode();
 
-    const [champFocus, setChampFocus] = useState(null);
+    const [champFocus, setChampFocus] = useState('__TUTTI__');
 
-    // ⭐ Blocca scroll body su PC per gestire scroll prioritario
-    useEffect(() => {
-      if (window.innerWidth >= 900) {
-        document.body.classList.add('scroll-locked');
-        return () => document.body.classList.remove('scroll-locked');
-      }
-    }, []);
-
-    // ⭐ Partite di OGGI (filtrate per campionato se selezionato)
-    const partiteFiltrate = useMemo(() => {
+    // Partite di OGGI (filtrate per campionato se selezionato)
+    const partiteOggi = useMemo(() => {
       const todayStr = getTodayStr();
-      let list = matches.filter(m =>
-        m.stato === 'Futura' && normalizeDate(m.data) === todayStr
-      );
-      if (champFocus) {
+      let list = matches.filter(m => m.stato === 'Futura' && normalizeDate(m.data) === todayStr);
+      if (champFocus && champFocus !== '__TUTTI__') {
         list = list.filter(m => m.campionato === champFocus);
       }
       return list.sort((a, b) => (a.ora || '99:99').localeCompare(b.ora || '99:99'));
     }, [matches, champFocus]);
 
-    const sidebarLocked = !!champFocus;
+    const isTuttiMode = champFocus === '__TUTTI__';
 
-    return (
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'minmax(340px, 380px) 1fr',
-        gap: '20px',
-        alignItems: 'start',
-        width: '100%',
-      }}>
-        {/* ⭐ SIDEBAR (scrollabile finché non selezioni un campionato) */}
-        <div className={`sidebar-scroll ${sidebarLocked ? 'locked' : ''}`}>
-          <SidebarCampionati
-            matches={matches}
-            selectedChamps={selectedChamps}
-            onToggle={toggleChamp}
-            onSelectAll={selectAllChamps}
-            onClearAll={clearAllChamps}
-            onSelectChamp={setChampFocus}
-          />
-        </div>
-
-        {/* ⭐ MAIN (scrollabile quando selezioni un campionato) */}
-        <div className={`main-scroll ${!sidebarLocked ? 'locked' : ''}`} style={{ position: 'relative' }}>
-          {champFocus && (
-            <button
-              className="cambia-campionato-btn"
-              onClick={() => setChampFocus(null)}
-              title="Torna alla lista campionati"
-            >
-              ✖ Cambia campionato
+    // ⭐ MOBILE
+    if (isMobile) {
+      // Se campionato selezionato → vista partite
+      if (champFocus) {
+        const color = isTuttiMode ? 'var(--neon-cyan)' : window.getChampColor(champFocus);
+        return (
+          <div>
+            <button className="mobile-back-btn" onClick={() => setChampFocus(null)}>
+              ← Cambia Campionato
             </button>
-          )}
 
-          {!champFocus ? (
-            <div className="card" style={{
-              textAlign: 'center', padding: '80px 20px',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              minHeight: '400px',
-            }}>
-              <div style={{ fontSize: '80px', marginBottom: '20px' }}>👈</div>
-              <h3 style={{
-                color: 'var(--neon-cyan)', marginBottom: '12px',
-                fontFamily: 'Orbitron, sans-serif', fontSize: '18px',
-              }}>
-                Seleziona un campionato
-              </h3>
-              <p style={{ color: 'var(--text-dim)', fontSize: '14px' }}>
-                Clicca su un campionato nella lista a sinistra
-              </p>
-            </div>
-          ) : (
-            <div>
-              {/* HEADER CAMPIONATO */}
+            <div style={{ marginTop: '55px', marginBottom: '14px' }}>
               <div style={{
-                background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 229, 0.05))',
-                borderRadius: '14px',
-                border: '1px solid var(--border)',
-                padding: '12px 16px',
-                marginBottom: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                flexWrap: 'wrap',
-                marginTop: '50px',
+                background: isTuttiMode
+                  ? 'linear-gradient(135deg, var(--neon-cyan), var(--neon-blue))'
+                  : `linear-gradient(135deg, ${color}, ${color}cc)`,
+                borderRadius: '12px', padding: '14px 16px',
+                display: 'flex', alignItems: 'center', gap: '12px',
+                boxShadow: `0 6px 24px ${isTuttiMode ? 'rgba(0,245,255,0.4)' : color + '55'}`,
               }}>
-                <span style={{
-                  fontFamily: 'Orbitron, sans-serif',
-                  fontSize: '14px', fontWeight: 900,
-                  color: 'var(--neon-cyan)',
-                  letterSpacing: '2px', textTransform: 'uppercase',
-                }}>
-                  📅 {champFocus}
-                </span>
-                <span style={{ color: 'var(--text-dim)', fontSize: '12px' }}>
-                  Giornata odierna • {partiteFiltrate.length} partite
-                </span>
-              </div>
-
-              {partiteFiltrate.length === 0 ? (
-                <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
-                  <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔍</div>
-                  <div style={{ color: 'var(--text-dim)', fontSize: '14px' }}>
-                    Nessuna partita oggi per {champFocus}
+                {isTuttiMode
+                  ? <span style={{ fontSize: '32px' }}>🌍</span>
+                  : <ChampLogo campionato={champFocus} size={36} />
+                }
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontFamily: 'Orbitron, sans-serif', fontSize: '14px', fontWeight: 900,
+                    color: '#000', textTransform: 'uppercase',
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>
+                    {isTuttiMode ? 'TUTTI I CAMPIONATI' : champFocus}
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.7)', fontWeight: 700 }}>
+                    {partiteOggi.length} partite oggi
                   </div>
                 </div>
-              ) : (
-                <div className="matches-grid">
-                  {partiteFiltrate.map(m => (
-                    <MatchTab
-                      key={m.id}
-                      match={m}
-                      allMatches={matches}
-                      onSelect={onSelectMatch}
-                      selectedFamiglie={selectedFamiglie}
-                      weatherCache={weatherCache}
-                    />
-                  ))}
-                </div>
-              )}
+              </div>
+
+              <VisualizzaGiocateSwitch
+                mode={visualizzaMode}
+                setMode={setVisualizzaMode}
+                selectedFamiglie={selectedFamiglie}
+              />
             </div>
-          )}
+
+            {partiteOggi.length === 0 ? (
+              <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
+                <div style={{ fontSize: '48px', marginBottom: '12px' }}>😴</div>
+                <div style={{ color: 'var(--text-dim)' }}>Nessuna partita oggi</div>
+              </div>
+            ) : (
+              <div className="matches-grid">
+                {partiteOggi.map(m => (
+                  <MatchTab key={m.id} match={m} allMatches={matches}
+                    onSelect={onSelectMatch} selectedFamiglie={selectedFamiglie} />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      // Altrimenti → lista campionati
+      return (
+        <div>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '12px',
+            padding: '12px 16px', marginBottom: '12px',
+            background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 229, 0.05))',
+            borderRadius: '14px', border: '1px solid var(--border)',
+          }}>
+            <span style={{
+              fontFamily: 'Orbitron, sans-serif', fontSize: '14px', fontWeight: 900,
+              color: 'var(--neon-cyan)', letterSpacing: '2px', textTransform: 'uppercase',
+            }}>📅 Palinsesto Oggi</span>
+          </div>
+          <MobileListaCampionati matches={matches} onSelect={(c) => setChampFocus(c)} />
+        </div>
+      );
+    }
+
+    // ⭐ PC
+    return (
+      <div>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
+          padding: '10px 16px', marginBottom: '12px',
+          background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 229, 0.05))',
+          borderRadius: '14px', border: '1px solid var(--border)',
+        }}>
+          <span style={{
+            fontFamily: 'Orbitron, sans-serif', fontSize: '16px', fontWeight: 900,
+            color: 'var(--neon-cyan)', letterSpacing: '2px', textTransform: 'uppercase',
+            textShadow: '0 0 12px var(--neon-cyan)',
+          }}>📅 Palinsesto Oggi</span>
+          <span style={{ color: 'var(--text-dim)', fontSize: '12px' }}>
+            {isTuttiMode ? 'Tutti i campionati' : champFocus} • {partiteOggi.length} partite
+          </span>
         </div>
 
-        <BottomPanelPartiteOggi matches={matches} />
+        <VisualizzaGiocateSwitch
+          mode={visualizzaMode}
+          setMode={setVisualizzaMode}
+          selectedFamiglie={selectedFamiglie}
+        />
+
+        {/* ⭐ SIDEBAR ORIZZONTALE CAMPIONATI */}
+        <ChampBar
+          matches={matches}
+          champFocus={champFocus}
+          onSelect={(c) => setChampFocus(c)}
+        />
+
+        {/* Header campionato selezionato */}
+        {!isTuttiMode && (
+          <div style={{
+            background: `linear-gradient(135deg, ${window.getChampColor(champFocus)}, ${window.getChampColor(champFocus)}99)`,
+            borderRadius: '12px', padding: '12px 16px', marginBottom: '14px',
+            display: 'flex', alignItems: 'center', gap: '12px',
+          }}>
+            <ChampLogo campionato={champFocus} size={32} />
+            <div>
+              <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '15px', fontWeight: 900, color: '#000' }}>
+                {champFocus}
+              </div>
+              <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.7)', fontWeight: 700 }}>
+                {partiteOggi.length} partite oggi
+              </div>
+            </div>
+          </div>
+        )}
+
+        {partiteOggi.length === 0 ? (
+          <div className="card" style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <div style={{ fontSize: '64px', marginBottom: '16px' }}>😴</div>
+            <h3 style={{ color: 'var(--neon-cyan)' }}>
+              Nessuna partita oggi
+            </h3>
+            <p style={{ color: 'var(--text-dim)' }}>
+              {isTuttiMode ? 'Non ci sono partite in programma oggi' : `Nessuna partita di ${champFocus} oggi`}
+            </p>
+          </div>
+        ) : (
+          <div className="matches-grid">
+            {partiteOggi.map(m => (
+              <MatchTab key={m.id} match={m} allMatches={matches}
+                onSelect={onSelectMatch} selectedFamiglie={selectedFamiglie} />
+            ))}
+          </div>
+        )}
       </div>
     );
   }
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  window.SidebarCampionati = SidebarCampionati;
-  window.BottomPanelPartiteOggi = BottomPanelPartiteOggi;
-  window.__MatchTabComponent = MatchTab;
-  window.__NAZIONE_CAMPIONATI = NAZIONE_CAMPIONATI;
-  console.log('✅ Modulo Palinsesto v14 - Scroll prioritario');
+  console.log('✅ Modulo Palinsesto FUTURISTIC caricato');
 
 })();
