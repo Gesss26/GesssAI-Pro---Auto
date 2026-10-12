@@ -1,9 +1,11 @@
 // ============================================================
 // schedina.js - Modulo Schedina con quote PDF visibili
 // Quote mostrate accanto a ogni giocata (con value bet evidenziato)
-// ✅ FIX v8: Selezione giocate singole raggruppate per famiglia (max 3)
-//            + 2 switch: ordinamento (data/pct) e tipo giocate (calcolate/scelte)
-//            Score card adattivo allo switch attivo
+// ✅ FIX v9: Logica colori corretta per GiocataBadge
+//            - Bomba (>=90%) → ORO (anche se selezionata)
+//            - GG/NG → ROSSO
+//            - Altre → in base alla percentuale (verde/grigio/rosso)
+//            - Selezione → bordo verde spesso + spunta, senza sovrascrivere il colore
 // ============================================================
 
 const formatGiocataLabel = (familyId, label) => {
@@ -311,7 +313,7 @@ const SchedinaComponent = ({
   const [numeroPartiteDaSelezionare, setNumeroPartiteDaSelezionare] = useState(5);
   const [filtroOrario, setFiltroOrario] = useState('dopo_ora');
 
-  // ⭐ NUOVI STATI: switch ordinamento e tipo giocate
+  // ⭐ STATI: switch ordinamento e tipo giocate
   const [ordinamento, setOrdinamento] = useState('data_pct'); // 'data_pct' | 'pct_data'
   const [tipoGiocate, setTipoGiocate] = useState('calcolate'); // 'calcolate' | 'scelte'
 
@@ -431,7 +433,6 @@ const SchedinaComponent = ({
 
   // ============================================================
   // CALCOLO GIOCATE PER PARTITA
-  // Restituisce ENTRAMBE le liste: calcolate + scelte
   // ============================================================
   const calcolaTop3GiocatePerPartita = (match) => {
     const stats = computeMatchStats(match, matches);
@@ -455,9 +456,7 @@ const SchedinaComponent = ({
     const homeRange = getMultigolRange(match.casa, matches);
     const awayRange = getMultigolRange(match.ospiti, matches);
 
-    // ============================================================
-    // 1. TOP 3 CALCOLATE (tutte le famiglie, migliori per pct)
-    // ============================================================
+    // TOP 3 CALCOLATE
     const tutteCalcolate = [];
 
     Object.keys(window.FAMIGLIE_GIOCATE || {}).forEach(familyId => {
@@ -500,9 +499,7 @@ const SchedinaComponent = ({
       ? Math.round(top3Calcolate.reduce((s, g) => s + g.pct, 0) / top3Calcolate.length)
       : 0;
 
-    // ============================================================
-    // 2. TOP SCELTE (solo le giocate selezionate dall'utente)
-    // ============================================================
+    // TOP SCELTE
     const top3Scelte = [];
     const isTutteMode = giocateSelezionate.includes('tutte') || giocateSelezionate.length === 0;
 
@@ -555,7 +552,7 @@ const SchedinaComponent = ({
   };
 
   // ============================================================
-  // LISTA PARTITE ORDINATA IN BASE ALLO SWITCH
+  // LISTA PARTITE ORDINATA
   // ============================================================
   const partiteDisponibili = useMemo(() => {
     const partite = getPartiteDisponibili();
@@ -571,7 +568,6 @@ const SchedinaComponent = ({
       };
     });
 
-    // ⭐ Ordinamento in base allo switch
     return partiteConDettagli.sort((a, b) => {
       const dateA = normalizeDate(a.data);
       const dateB = normalizeDate(b.data);
@@ -580,7 +576,6 @@ const SchedinaComponent = ({
       const scoreB = tipoGiocate === 'scelte' ? (b.scoreScelte || 0) : (b.scoreCalcolate || 0);
 
       if (ordinamento === 'data_pct') {
-        // Data crescente → score decrescente
         if (dateA && dateB && dateA !== dateB) {
           return dateA.localeCompare(dateB);
         }
@@ -591,7 +586,6 @@ const SchedinaComponent = ({
         const oraB = b.ora || '00:00';
         return oraA.localeCompare(oraB);
       } else {
-        // Score decrescente → data crescente
         if (scoreA !== scoreB) {
           return scoreB - scoreA;
         }
@@ -614,7 +608,6 @@ const SchedinaComponent = ({
     const numeroDaPrendere = Math.min(n, partiteDisponibili.length, 10);
     let messaggioExtra = '';
 
-    // ⭐ Ordina per score decrescente per prendere le migliori
     const ordinatePerScore = [...partiteDisponibili].sort((a, b) => {
       const scoreA = tipoGiocate === 'scelte' ? (a.scoreScelte || 0) : (a.scoreCalcolate || 0);
       const scoreB = tipoGiocate === 'scelte' ? (b.scoreScelte || 0) : (b.scoreCalcolate || 0);
@@ -652,7 +645,6 @@ const SchedinaComponent = ({
       return;
     }
 
-    // ⭐ Raggruppa per score (coerente con switch tipoGiocate)
     const partitePerScore = {};
     partiteDisponibili.forEach(m => {
       const score = tipoGiocate === 'scelte' ? (m.scoreScelte || 0) : (m.scoreCalcolate || 0);
@@ -819,10 +811,7 @@ const SchedinaComponent = ({
 
   const toggleGiocata = (familyId, giocata) => {
     setGiocateSelezionate(prev => {
-      // Se è "tutte", la prima selezione specifica sostituisce "tutte"
       if (prev.includes('tutte')) {
-        // ⭐ Se eravamo in modalità "scelte" e ora selezioniamo una giocata, resta "scelte"
-        // Se eravamo in "calcolate" e selezioniamo, passiamo a "scelte" automaticamente? No, l'utente decide.
         return [{ familyId, giocata }];
       }
 
@@ -848,7 +837,6 @@ const SchedinaComponent = ({
 
   const selezionaTutteGiocate = () => {
     setGiocateSelezionate(['tutte']);
-    // ⭐ Se era attivo "scelte", torna a "calcolate" perché non ci sono più giocate specifiche
     if (tipoGiocate === 'scelte') {
       setTipoGiocate('calcolate');
     }
@@ -866,7 +854,6 @@ const SchedinaComponent = ({
     return giocateSelezionate.filter(s => typeof s === 'object').length;
   };
 
-  // ⭐ HANDLER SWITCH TIPO GIOCATE
   const handleTipoGiocateChange = (nuovoTipo) => {
     if (nuovoTipo === 'scelte' && giocateSelezionate.includes('tutte')) {
       showAlert('info', 'ℹ️ Nessuna giocata scelta. Seleziona almeno una giocata specifica o usa "⭐ Tutte".');
@@ -2016,4 +2003,4 @@ const SchedinaComponent = ({
 };
 
 window.SchedinaComponent = SchedinaComponent;
-console.log('✅ SchedinaComponent v8 caricato - 2 switch (ordinamento + tipo giocate) + score adattivo');
+console.log('✅ SchedinaComponent v9 caricato - Logica colori corretta (bomba=oro, GG/NG=rosso, selezione=bordo verde)');
