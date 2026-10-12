@@ -1,9 +1,9 @@
 // ============================================================
-// palinsesto.js - Modulo Palinsesto v10 (FUTURISTIC)
+// palinsesto.js - Modulo Palinsesto v11 (FUTURISTIC)
 // ✅ Sidebar larga senza scrollbar interna
 // ✅ MatchTab con forma + % + differenza forma
+// ✅ Numero giornata accanto al nome campionato
 // ✅ Bottom panel "Partite di Oggi"
-// ✅ Badge colorati + bombe oro
 // ============================================================
 
 (function () {
@@ -122,7 +122,7 @@
   };
 
   // ============================================================
-  // MATCH TAB (con forma + % + differenza forma)
+  // MATCH TAB (con forma + % + differenza forma + giornata)
   // ============================================================
   const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie, weatherCache }) => {
     const computeMatchStats = window.computeMatchStats;
@@ -241,9 +241,32 @@
           {hasBomb && <span className="bomb-inline">💣</span>}
         </div>
 
-        <div className="tab-header" style={{ background: champColor }}>
-          <ChampLogo campionato={match.campionato} size={16} />
-          <span>{match.campionato || 'N/D'}</span>
+        {/* ⭐ HEADER CON CAMPIONATO + GIORNATA */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          marginBottom: '8px',
+          flexWrap: 'wrap',
+        }}>
+          <div className="tab-header" style={{ background: champColor, marginBottom: 0 }}>
+            <ChampLogo campionato={match.campionato} size={16} />
+            <span>{match.campionato || 'N/D'}</span>
+          </div>
+          <span style={{
+            fontSize: '10px',
+            fontWeight: 700,
+            color: 'var(--neon-cyan)',
+            background: 'var(--bg-elevated)',
+            padding: '3px 8px',
+            borderRadius: '6px',
+            border: '1px solid var(--border)',
+            fontFamily: 'Orbitron, sans-serif',
+            letterSpacing: '0.5px',
+            whiteSpace: 'nowrap',
+          }}>
+            G.{match.round || 'N/A'}
+          </span>
         </div>
 
         <div style={{ color: 'var(--text-dim)', fontSize: '11px', marginBottom: '6px', textAlign: 'center' }}>
@@ -316,7 +339,7 @@
   };
 
   // ============================================================
-  // SIDEBAR CAMPIONATI (senza scrollbar interna)
+  // SIDEBAR CAMPIONATI
   // ============================================================
   const SidebarCampionati = ({ matches, selectedChamps, onToggle, onSelectAll, onClearAll, onSelectChamp }) => {
     const CHAMPIONSHIP_LIST = window.CHAMPIONSHIP_LIST;
@@ -398,7 +421,6 @@
           }}>❌ Nessuno</button>
         </div>
 
-        {/* ⭐ NIENTE maxHeight, NIENTE overflowY: la pagina scrolla normalmente */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {CHAMPIONSHIP_LIST.map(champ => {
             const isActive = selectedChamps[champ] !== false;
@@ -752,6 +774,6 @@
   window.SidebarCampionati = SidebarCampionati;
   window.BottomPanelPartiteOggi = BottomPanelPartiteOggi;
   window.__MatchTabComponent = MatchTab;
-  console.log('✅ Modulo Palinsesto v10 FUTURISTIC caricato');
+  console.log('✅ Modulo Palinsesto v11 caricato - Badge giornata "G.X"');
 
 })();

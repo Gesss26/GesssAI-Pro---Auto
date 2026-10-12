@@ -1,8 +1,9 @@
 // ============================================================
-// home.js - Modulo Home v10 (FUTURISTIC)
-// ✅ Vista "Giornata" con sidebar larga senza scrollbar
-// ✅ Bollini notifica campionati
-// ✅ Loghi campionati nei bottoni
+// home.js - Modulo Home v11 (FUTURISTIC + MOBILE FIX)
+// ✅ Click campionato → giornata corrente only
+// ✅ Mobile: pulsante indietro overlay
+// ✅ PC: 3 card per fila
+// ✅ Numero giornata sotto nome campionato
 // ============================================================
 
 (function () {
@@ -11,7 +12,7 @@
   const { useState, useEffect, useMemo } = React;
 
   // ============================================================
-  // FIX: Chinese Super League erroneamente etichettata
+  // FIX Chinese Super League
   // ============================================================
   const CHINESE_TEAMS = new Set([
     'Chengdu Better City', 'Sichuan Jiuniu', 'Tianjin Teda', 'Shandong Luneng',
@@ -24,7 +25,6 @@
     const camp = (match.campionato || '').trim();
     const casa = (match.casa || '').trim();
     const ospiti = (match.ospiti || '').trim();
-
     if (camp === 'Super League Grecia' && (CHINESE_TEAMS.has(casa) || CHINESE_TEAMS.has(ospiti))) {
       return { ...match, campionato: 'Chinese Super League' };
     }
@@ -37,14 +37,64 @@
   };
 
   // ============================================================
+  // DETECT MOBILE
+  // ============================================================
+  const useIsMobile = () => {
+    const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+    useEffect(() => {
+      const handler = () => setIsMobile(window.innerWidth < 768);
+      window.addEventListener('resize', handler);
+      return () => window.removeEventListener('resize', handler);
+    }, []);
+    return isMobile;
+  };
+
+  // ============================================================
+  // TROVA GIORNATA CORRENTE
+  // ============================================================
+  const getGiornataCorrente = (matchesCampionato) => {
+    if (!matchesCampionato || matchesCampionato.length === 0) return null;
+    const todayStr = window.getTodayStr();
+    const normalizeDate = window.normalizeDate;
+
+    // 1) Cerca partite di oggi → prendi il round più frequente
+    const oggi = matchesCampionato.filter(m => normalizeDate(m.data) === todayStr);
+    if (oggi.length > 0) {
+      const roundCount = {};
+      oggi.forEach(m => {
+        const r = m.round || 'N/A';
+        roundCount[r] = (roundCount[r] || 0) + 1;
+      });
+      let best = null, bestCount = 0;
+      for (const [r, c] of Object.entries(roundCount)) {
+        if (c > bestCount) { best = r; bestCount = c; }
+      }
+      return best;
+    }
+
+    // 2) Prossima partita futura
+    const future = matchesCampionato
+      .filter(m => m.stato === 'Futura' && m.data)
+      .sort((a, b) => window.parseDate(a.data, a.ora) - window.parseDate(b.data, b.ora));
+    if (future.length > 0) return future[0].round || null;
+
+    // 3) Ultima partita giocata
+    const played = matchesCampionato
+      .filter(m => m.stato === 'Giocata' && m.data)
+      .sort((a, b) => window.parseDate(b.data, b.ora) - window.parseDate(a.data, a.ora));
+    if (played.length > 0) return played[0].round || null;
+
+    return null;
+  };
+
+  // ============================================================
   // SEZIONE GIORNATA CAMPIONATO
   // ============================================================
-  const GiornataCampionato = ({ campionato, matches, onSelectMatch, selectedFamiglie }) => {
+  const GiornataCampionato = ({ campionato, matches, onSelectMatch, selectedFamiglie, onBack }) => {
     const getChampColor = window.getChampColor;
-    const TeamLogo = window.TeamLogo;
     const normalizeDate = window.normalizeDate;
     const formatDateEU = window.formatDateEU;
-    const getTodayStr = window.getTodayStr;
+    const isMobile = useIsMobile();
 
     if (!campionato) {
       return (
@@ -54,128 +104,116 @@
             Seleziona un campionato
           </h3>
           <p style={{ color: 'var(--text-dim)' }}>
-            Clicca su un campionato nella sidebar per vedere la giornata completa
+            Clicca su un campionato nella sidebar per vedere la giornata corrente
           </p>
         </div>
       );
     }
 
     try {
-      const partiteCampionato = matches
-        .filter(m => m.campionato === campionato)
-        .sort((a, b) => {
-          const da = normalizeDate(a.data);
-          const db = normalizeDate(b.data);
-          if (da !== db) return (da || '').localeCompare(db || '');
-          return (a.ora || '').localeCompare(b.ora || '');
-        });
-
+      const partiteCampionato = matches.filter(m => m.campionato === campionato);
       const color = getChampColor(campionato);
-      const todayStr = getTodayStr();
+      const giornataCorrente = getGiornataCorrente(partiteCampionato);
 
-      const partitePerData = {};
-      partiteCampionato.forEach(m => {
-        const d = normalizeDate(m.data) || 'N/D';
-        if (!partitePerData[d]) partitePerData[d] = [];
-        partitePerData[d].push(m);
-      });
+      // ⭐ FILTRA SOLO LA GIORNATA CORRENTE
+      const partiteGiornata = giornataCorrente
+        ? partiteCampionato
+            .filter(m => String(m.round) === String(giornataCorrente))
+            .sort((a, b) => {
+              const da = normalizeDate(a.data);
+              const db = normalizeDate(b.data);
+              if (da !== db) return (da || '').localeCompare(db || '');
+              return (a.ora || '').localeCompare(b.ora || '');
+            })
+        : partiteCampionato.sort((a, b) => {
+            const da = normalizeDate(a.data);
+            const db = normalizeDate(b.data);
+            if (da !== db) return (da || '').localeCompare(db || '');
+            return (a.ora || '').localeCompare(b.ora || '');
+          });
 
-      const dateOrdinate = Object.keys(partitePerData).sort();
       const ChampLogo = window.ChampLogo;
       const MatchTabComp = window.__MatchTabComponent;
 
       return (
-        <div>
+        <div style={{ position: 'relative' }}>
+          {/* ⭐ PULSANTE INDIETRO (mobile only) */}
+          {isMobile && onBack && (
+            <button
+              onClick={onBack}
+              style={{
+                position: 'fixed',
+                top: '80px',
+                left: '12px',
+                zIndex: 300,
+                background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-blue))',
+                color: '#000',
+                border: '2px solid var(--neon-cyan)',
+                borderRadius: '50px',
+                padding: '10px 18px',
+                fontSize: '13px',
+                fontWeight: 900,
+                fontFamily: 'Orbitron, sans-serif',
+                cursor: 'pointer',
+                boxShadow: '0 0 20px rgba(0, 245, 255, 0.6)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+              }}
+            >
+              ← Indietro
+            </button>
+          )}
+
           <div style={{
             background: `linear-gradient(135deg, ${color}, ${color}99)`,
             borderRadius: '14px', padding: '16px 20px', marginBottom: '16px',
             display: 'flex', alignItems: 'center', gap: '14px',
             boxShadow: `0 8px 32px ${color}55`,
             border: `1px solid ${color}`,
+            marginTop: isMobile ? '50px' : '0',
           }}>
-            {ChampLogo && <ChampLogo campionato={campionato} size={40} />}
-            <div style={{ flex: 1 }}>
+            {ChampLogo && <ChampLogo campionato={campionato} size={isMobile ? 36 : 40} />}
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{
-                fontFamily: 'Orbitron, sans-serif', fontSize: '18px', fontWeight: 900,
-                color: '#000', letterSpacing: '2px', textTransform: 'uppercase',
+                fontFamily: 'Orbitron, sans-serif',
+                fontSize: isMobile ? '14px' : '18px',
+                fontWeight: 900,
+                color: '#000', letterSpacing: isMobile ? '1px' : '2px',
+                textTransform: 'uppercase',
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
               }}>{campionato}</div>
               <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.7)', fontWeight: 700 }}>
-                {partiteCampionato.length} partite totali • {dateOrdinate.length} giornate
+                {giornataCorrente ? `Giornata ${giornataCorrente}` : 'Giornata N/D'} • {partiteGiornata.length} partite
               </div>
             </div>
           </div>
 
-          {dateOrdinate.length === 0 ? (
+          {partiteGiornata.length === 0 ? (
             <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
               <div style={{ fontSize: '48px', marginBottom: '12px' }}>📭</div>
-              <div style={{ color: 'var(--text-dim)' }}>Nessuna partita in questo campionato</div>
+              <div style={{ color: 'var(--text-dim)' }}>Nessuna partita in questa giornata</div>
             </div>
           ) : (
-            dateOrdinate.map(data => {
-              const partite = partitePerData[data];
-              const oggi = data === todayStr;
-              return (
-                <div key={data} style={{ marginBottom: '20px' }}>
-                  <div style={{
-                    display: 'flex', alignItems: 'center', gap: '10px',
-                    marginBottom: '10px', paddingBottom: '6px',
-                    borderBottom: '1px dashed var(--border)',
-                  }}>
-                    <span style={{
-                      fontFamily: 'Orbitron, sans-serif', fontSize: '12px', fontWeight: 700,
-                      color: oggi ? 'var(--neon-red)' : 'var(--neon-cyan)',
-                      letterSpacing: '2px', textTransform: 'uppercase',
-                      textShadow: oggi ? '0 0 10px var(--neon-red)' : '0 0 10px var(--neon-cyan)',
-                    }}>
-                      {oggi ? '🔴 OGGI' : `📅 ${formatDateEU(data)}`}
-                    </span>
-                    <span style={{
-                      fontSize: '10px', color: 'var(--text-dim)',
-                      background: 'var(--bg-elevated)', padding: '2px 8px', borderRadius: '8px',
-                    }}>{partite.length} partite</span>
-                  </div>
-
-                  <div className="matches-grid">
-                    {partite.map(m => {
-                      if (MatchTabComp) {
-                        return (
-                          <MatchTabComp
-                            key={m.id}
-                            match={m}
-                            allMatches={matches}
-                            onSelect={onSelectMatch}
-                            selectedFamiglie={selectedFamiglie}
-                            weatherCache={{}}
-                          />
-                        );
-                      }
-                      return (
-                        <div key={m.id} className="match-tab" style={{ borderLeftColor: color }}>
-                          <div className="tab-header" style={{ background: color }}>
-                            {ChampLogo && <ChampLogo campionato={m.campionato} size={16} />}
-                            <span>{m.campionato}</span>
-                          </div>
-                          <div style={{ textAlign: 'center', fontSize: '11px', color: 'var(--text-dim)', marginBottom: '6px' }}>
-                            📅 {formatDateEU(m.data)} • ⏰ {m.ora || 'TBD'}
-                          </div>
-                          <div className="teams-row">
-                            <div className="team">
-                              <TeamLogo teamName={m.casa} championship={m.campionato} size={50} />
-                              <div className="team-name">{m.casa}</div>
-                            </div>
-                            <div className="vs">VS</div>
-                            <div className="team">
-                              <TeamLogo teamName={m.ospiti} championship={m.campionato} size={50} />
-                              <div className="team-name">{m.ospiti}</div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })
+            <div className="matches-grid">
+              {partiteGiornata.map(m => {
+                if (MatchTabComp) {
+                  return (
+                    <MatchTabComp
+                      key={m.id}
+                      match={m}
+                      allMatches={matches}
+                      onSelect={onSelectMatch}
+                      selectedFamiglie={selectedFamiglie}
+                      weatherCache={{}}
+                    />
+                  );
+                }
+                return null;
+              })}
+            </div>
           )}
         </div>
       );
@@ -185,7 +223,7 @@
         <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
           <div style={{ fontSize: '48px', marginBottom: '12px' }}>⚠️</div>
           <div style={{ color: 'var(--neon-red)', fontWeight: 700, marginBottom: '8px' }}>
-            Errore nel rendering della giornata
+            Errore nel rendering
           </div>
           <div style={{ color: 'var(--text-dim)', fontSize: '12px', fontFamily: 'monospace' }}>
             {e.message}
@@ -196,7 +234,7 @@
   };
 
   // ============================================================
-  // SIDEBAR CAMPIONATI HOME (senza scrollbar interna)
+  // SIDEBAR CAMPIONATI HOME
   // ============================================================
   const SidebarCampionatiHome = ({ matches, onSelectChamp, champSelezionato }) => {
     const CHAMPIONSHIP_LIST = window.CHAMPIONSHIP_LIST;
@@ -245,11 +283,10 @@
           }}>🏆 Campionati</span>
         </div>
 
-        {/* ⭐ NIENTE maxHeight, NIENTE overflowY */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {campionatiConPartite.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-dim)', fontSize: '12px' }}>
-              Nessuna partita disponibile
+              Nessuna partita
             </div>
           ) : (
             campionatiConPartite.map(champ => {
@@ -302,13 +339,14 @@
   };
 
   // ============================================================
-  // COMPONENTE PRINCIPALE: HOME
+  // COMPONENTE PRINCIPALE
   // ============================================================
   function HomeComponent({ matches, championships, onSelectMatch, setTab, selectedFamiglie, weatherCache }) {
     const [homeTab, setHomeTab] = useState('Giornata');
     const [champSelezionato, setChampSelezionato] = useState(null);
+    const isMobile = useIsMobile();
 
-    const { filtro: filtroCampionati, campionatiAttivi } =
+    const { filtro: filtroCampionati } =
       window.FiltriCampionati.useFiltroCampionati();
 
     const matchesPuliti = useMemo(() => {
@@ -316,23 +354,23 @@
       return window.FiltriCampionati.filtraPartitePerCampionato(normalizzati);
     }, [matches, filtroCampionati]);
 
-    // Auto-selezione primo campionato con partite
+    // Auto-selezione primo campionato (solo PC)
     useEffect(() => {
-      if (!champSelezionato && matchesPuliti.length > 0) {
+      if (!isMobile && !champSelezionato && matchesPuliti.length > 0) {
         const primoCampionato = window.CHAMPIONSHIP_LIST.find(champ =>
           matchesPuliti.some(m => m.campionato === champ)
         );
         if (primoCampionato) setChampSelezionato(primoCampionato);
       }
-    }, [matchesPuliti, champSelezionato]);
+    }, [matchesPuliti, champSelezionato, isMobile]);
 
     if (!matches || matches.length === 0) {
       return (
         <div className="empty-state" style={{ padding: '60px 20px', textAlign: 'center' }}>
           <div style={{ fontSize: '64px', marginBottom: '16px' }}>🌍</div>
-          <h3 style={{ color: 'var(--neon-cyan)', marginBottom: '8px' }}>Nessuna partita disponibile</h3>
+          <h3 style={{ color: 'var(--neon-cyan)', marginBottom: '8px' }}>Nessuna partita</h3>
           <p style={{ color: 'var(--text-dim)' }}>
-            Importa un campionato da <b>Impostazioni → Importa Campionato</b>
+            Importa un campionato da <b>Impostazioni</b>
           </p>
         </div>
       );
@@ -343,7 +381,7 @@
         return window.GestioneContoComponent ? (
           <window.GestioneContoComponent />
         ) : (
-          <div className="alert alert-info">⏳ Caricamento Gestione Conto...</div>
+          <div className="alert alert-info">⏳ Caricamento...</div>
         );
       }
 
@@ -351,11 +389,35 @@
         return window.PerformanceComponent ? (
           <window.PerformanceComponent matches={matches} championships={championships} onSelectMatch={onSelectMatch} />
         ) : (
-          <div className="alert alert-info">⏳ Caricamento Performance...</div>
+          <div className="alert alert-info">⏳ Caricamento...</div>
         );
       }
 
-      // VISTA GIORNATA
+      // VISTA GIORNATA - Layout diverso per mobile/PC
+      if (isMobile) {
+        // MOBILE: mostra solo sidebar O giornata
+        return (
+          <div>
+            {!champSelezionato ? (
+              <SidebarCampionatiHome
+                matches={matchesPuliti}
+                onSelectChamp={(champ) => setChampSelezionato(champ)}
+                champSelezionato={champSelezionato}
+              />
+            ) : (
+              <GiornataCampionato
+                campionato={champSelezionato}
+                matches={matchesPuliti}
+                onSelectMatch={onSelectMatch}
+                selectedFamiglie={selectedFamiglie}
+                onBack={() => setChampSelezionato(null)}
+              />
+            )}
+          </div>
+        );
+      }
+
+      // PC: sidebar + giornata affiancati
       return (
         <div style={{
           display: 'grid',
@@ -419,7 +481,7 @@
   }
 
   // ============================================================
-  // HELPER FUNCTIONS
+  // HELPER
   // ============================================================
   function formatGiocataLabel(familyId, label) {
     if (!label) return '—';
@@ -428,36 +490,14 @@
     return label;
   }
 
-  function calcolaTop3Giocate() { return []; }
-
-  function leggiSelezioniSchedina() {
-    try { return JSON.parse(localStorage.getItem('ft_schedina_selezioni') || '[]'); }
-    catch (e) { return []; }
-  }
-
-  function scriviSelezioniSchedina(arr) {
-    try { localStorage.setItem('ft_schedina_selezioni', JSON.stringify(arr)); }
-    catch (e) {}
-  }
-
-  function toggleSelezioneSchedina() { return false; }
-
-  // ============================================================
-  // ESPOSIZIONE GLOBALE
-  // ============================================================
   window.HomeComponent = HomeComponent;
-
   window.HomeUtils = {
     formatGiocataLabel,
-    calcolaTop3Giocate,
-    leggiSelezioniSchedina,
-    scriviSelezioniSchedina,
-    toggleSelezioneSchedina,
     normalizeMatches,
     normalizeCampionato,
     CHINESE_TEAMS,
   };
 
-  console.log('✅ Modulo Home v10 FUTURISTIC caricato');
+  console.log('✅ Modulo Home v11 - MOBILE FIX + GIORNATA CORRENTE');
 
 })();
