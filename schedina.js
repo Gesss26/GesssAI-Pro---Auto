@@ -6,7 +6,16 @@
 //            - GG/NG → ROSSO
 //            - Altre → in base alla percentuale (verde/grigio/rosso)
 //            - Selezione → bordo verde spesso + spunta, senza sovrascrivere il colore
+// ✅ FIX v10: Sincronizzazione giocate selezionate con Home.js
+//             - Salvataggio su localStorage (ft_giocate_selezionate)
+//             - Evento custom 'giocate-selezionate-updated'
+//             - Caricamento all'avvio
 // ============================================================
+
+// ============================================================
+// CHIAVE LOCALSTORAGE PER SINCRONIZZAZIONE CON HOME.JS
+// ============================================================
+const GIOCATE_SELEZIONATE_KEY = 'ft_giocate_selezionate';
 
 const formatGiocataLabel = (familyId, label) => {
   if (!label) return '—';
@@ -272,7 +281,7 @@ const SchedinaComponent = ({
   renderChampFilters,
   CHAMPIONSHIP_LIST
 }) => {
-  const { useState, useMemo, useCallback } = React;
+  const { useState, useMemo, useCallback, useEffect } = React;
 
   const getChampColor = window.getChampColor || (() => '#95a5a6');
   const computeMatchStats = window.computeMatchStats;
@@ -302,7 +311,21 @@ const SchedinaComponent = ({
   const [partiteSelezionate, setPartiteSelezionate] = useState([]);
   const [schedinaCreata, setSchedinaCreata] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [giocateSelezionate, setGiocateSelezionate] = useState(['tutte']);
+  const [giocateSelezionate, setGiocateSelezionate] = useState(() => {
+    // ⭐ Carica da localStorage all'avvio
+    try {
+      const saved = localStorage.getItem(GIOCATE_SELEZIONATE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('⚠️ Errore caricamento giocate selezionate:', e);
+    }
+    return ['tutte'];
+  });
   const [showSchedinaModal, setShowSchedinaModal] = useState(false);
   const [casualitaLevel, setCasualitaLevel] = useState(30);
   const [schedineSalvate, setSchedineSalvate] = useState(() => {
@@ -318,6 +341,16 @@ const SchedinaComponent = ({
   const [tipoGiocate, setTipoGiocate] = useState('calcolate'); // 'calcolate' | 'scelte'
 
   const MAX_GIOCATE = 3;
+
+  // ⭐ Sincronizza le giocate selezionate con Home.js
+  useEffect(() => {
+    try {
+      localStorage.setItem(GIOCATE_SELEZIONATE_KEY, JSON.stringify(giocateSelezionate));
+      window.dispatchEvent(new CustomEvent('giocate-selezionate-updated', { detail: giocateSelezionate }));
+    } catch (e) {
+      console.warn('⚠️ Errore salvataggio giocate selezionate:', e);
+    }
+  }, [giocateSelezionate]);
 
   const shuffleArray = (array) => {
     const shuffled = [...array];
@@ -2003,4 +2036,5 @@ const SchedinaComponent = ({
 };
 
 window.SchedinaComponent = SchedinaComponent;
-console.log('✅ SchedinaComponent v9 caricato - Logica colori corretta (bomba=oro, GG/NG=rosso, selezione=bordo verde)');
+window.GIOCATE_SELEZIONATE_KEY = GIOCATE_SELEZIONATE_KEY;
+console.log('✅ SchedinaComponent v10 caricato - Sincronizzazione giocate con Home.js attiva');

@@ -7,21 +7,229 @@
 
   const { useState, useEffect, useMemo } = React;
 
-  // ... [CHINESE_TEAMS, normalizeCampionato, normalizeMatches, useIsMobile, injectNazioniStyles rimangono invariati] ...
+  const CHINESE_TEAMS = new Set([
+    'Chengdu Better City', 'Sichuan Jiuniu', 'Tianjin Teda', 'Shandong Luneng',
+    'Shanghai Shenhua', 'Dalian Zhixing', 'SHANGHAI SIPG', 'Henan Jianye',
+    'Yunnan Yukun', 'Qingdao Jonoon', 'Hangzhou Greentown', 'Qingdao Youth Island',
+    'Wuhan Three Towns', 'Beijing Guoan', 'Shenyang Urban', 'Chongqing Tongliang Long',
+  ]);
+
+  const normalizeCampionato = (match) => {
+    const camp = (match.campionato || '').trim();
+    const casa = (match.casa || '').trim();
+    const ospiti = (match.ospiti || '').trim();
+    if (camp === 'Super League Grecia' && (CHINESE_TEAMS.has(casa) || CHINESE_TEAMS.has(ospiti))) {
+      return { ...match, campionato: 'Chinese Super League' };
+    }
+    return match;
+  };
+
+  const normalizeMatches = (matches) => {
+    if (!Array.isArray(matches)) return [];
+    return matches.map(normalizeCampionato);
+  };
+
+  const useIsMobile = () => {
+    const [isMobile, setIsMobile] = useState(() => window.innerWidth < 900);
+    useEffect(() => {
+      const handler = () => setIsMobile(window.innerWidth < 900);
+      window.addEventListener('resize', handler);
+      return () => window.removeEventListener('resize', handler);
+    }, []);
+    return isMobile;
+  };
+
+  (function injectNazioniStyles() {
+    if (document.getElementById('home-nazioni-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'home-nazioni-styles';
+    style.textContent = `
+      .nazioni-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+      @media (max-width: 1024px) {
+        .nazioni-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      }
+      @media (max-width: 768px) {
+        .nazioni-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .nazione-btn { min-height: 80px !important; padding: 10px 4px !important; }
+      }
+      @media (max-width: 480px) {
+        .nazioni-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .nazione-btn { min-height: 72px !important; padding: 8px 4px !important; }
+      }
+    `;
+    document.head.appendChild(style);
+  })();
+
+  const NAZIONI = {
+    'Belgio':      { file: 'belgio.png',      campionati: ['Jupiler Pro League'] },
+    'Corea':       { file: 'corea.png',       campionati: ['K League 1'] },
+    'Francia':     { file: 'francia.png',     campionati: ['Ligue 1', 'Ligue 2'] },
+    'Germania':    { file: 'germania.png',    campionati: ['Bundesliga', '2. Bundesliga'] },
+    'Giappone':    { file: 'giappone.png',    campionati: ['J1 League'] },
+    'Inghilterra': { file: 'inghilterra.png', campionati: ['Premier League', 'EFL Championship'] },
+    'Italia':      { file: 'italia.png',      campionati: ['Serie A', 'Serie B', 'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C'] },
+    'Olanda':      { file: 'olanda.png',      campionati: ['Eredivisie', 'Eerste Divisie'] },
+    'Portogallo':  { file: 'portogallo.png',  campionati: ['Primeira Liga'] },
+    'Scozia':      { file: 'scozia.png',      campionati: ['Scottish Premiership'] },
+    'Spagna':      { file: 'spagna.png',      campionati: ['La Liga', 'Segunda División'] },
+    'Turchia':     { file: 'turchia.png',     campionati: ['Süper Lig'] },
+  };
+
+  const NAZIONI_BASE_PATH = 'logos/Nazioni/';
+  const SCHEDINA_STORAGE_KEY = 'ft_schedina_selezioni';
+  const GIOCATE_SELEZIONATE_KEY = 'ft_giocate_selezionate';
 
   // ============================================================
-  // CALCOLO TOP3 GIOCATE CON SUPPORTO SCELTE
+  // QUOTA INLINE
   // ============================================================
-  
-  // ⭐ NUOVO: legge le giocate selezionate dal localStorage (stessa chiave di schedina.js)
+  const QuotaInline = ({ match, familyId, giocata, pctTua, size = 'sm' }) => {
+    const [quotaInfo, setQuotaInfo] = useState(null);
+    const quoteHook = window.QuoteManager ? window.QuoteManager.useQuote() : { numPartite: 0 };
+    const numPartite = quoteHook.numPartite;
+
+    useEffect(() => {
+      if (!window.QuoteManager || typeof window.QuoteManager.analizzaGiocata !== 'function') return;
+      try {
+        const info = window.QuoteManager.analizzaGiocata(match, familyId, giocata, pctTua);
+        setQuotaInfo(info);
+      } catch (e) { setQuotaInfo(null); }
+    }, [match.id, familyId, giocata, pctTua, numPartite]);
+
+    if (!quotaInfo || !quotaInfo.quotaBook) return null;
+    const { quotaBook, edge, isValue } = quotaInfo;
+    const padding = size === 'lg' ? '3px 8px' : '1px 6px';
+    const fontSize = size === 'lg' ? '12px' : '10px';
+
+    return (
+      <span
+        title={isValue ? `VALUE BET! Edge: +${edge}%` : `Quota Marathonbet`}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: '3px',
+          padding, marginTop: '2px', borderRadius: '4px',
+          background: isValue ? 'rgba(0, 255, 136, 0.15)' : 'rgba(255, 255, 255, 0.08)',
+          border: `1px solid ${isValue ? 'var(--neon-green)' : 'var(--border)'}`,
+          fontSize, fontWeight: 'bold',
+          color: isValue ? 'var(--neon-green)' : 'var(--text)',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        💰{quotaBook.toFixed(2)}
+      </span>
+    );
+  };
+
+  const NazioneBandiera = ({ nazione, size = 40 }) => {
+    const [hasError, setHasError] = useState(false);
+    const info = NAZIONI[nazione];
+
+    if (!info || hasError) {
+      const initials = nazione.substring(0, 3).toUpperCase();
+      return (
+        <div style={{
+          width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'var(--surface)', border: '2px solid var(--border)', borderRadius: '50%',
+          fontWeight: 'bold', color: 'var(--neon-cyan)', fontSize: Math.max(size * 0.3, 9), flexShrink: 0,
+        }}>
+          {initials}
+        </div>
+      );
+    }
+
+    return (
+      <img
+        src={NAZIONI_BASE_PATH + info.file}
+        alt={nazione}
+        width={size}
+        height={size}
+        onError={() => setHasError(true)}
+        style={{ width: size, height: size, objectFit: 'contain', display: 'block', flexShrink: 0 }}
+      />
+    );
+  };
+
+  const formatGiocataLabel = (familyId, label) => {
+    if (!label) return '—';
+    if (label.startsWith('Over '))  return label;
+    if (label.startsWith('Under ')) return label.replace('.', ',');
+    if (familyId === 'multigol') return label;
+    if (familyId === 'mg_casa_ospite') {
+      const parts = label.split('+');
+      if (parts.length === 2) return `MG ${parts[0]} Casa + MG ${parts[1]} Ospite`;
+    }
+    if (familyId === 'dc_multigol') {
+      const parts = label.split('+');
+      if (parts.length === 2) return `${parts[0]} + ${parts[1]}`;
+    }
+    if (familyId === 'dc_under') {
+      const parts = label.split('+');
+      if (parts.length === 2) {
+        const uLabel = parts[1].replace('U', 'Under ').replace('.', ',');
+        return `${parts[0]} + ${uLabel}`;
+      }
+    }
+    if (familyId === 'dc_over') {
+      const parts = label.split('+');
+      if (parts.length === 2) {
+        const oLabel = parts[1].replace('O', 'Over ').replace('.', ',');
+        return `${parts[0]} + ${oLabel}`;
+      }
+    }
+    if (familyId === 'gg_ng') {
+      if (label === 'Goal-Goal') return 'GG';
+      if (label === 'No Goal') return 'NG';
+    }
+    return label;
+  };
+
+  const getGiornataCorrente = (matchesDelCampionato) => {
+    if (!matchesDelCampionato || matchesDelCampionato.length === 0) return null;
+    const todayStr = window.getTodayStr();
+
+    const oggi = matchesDelCampionato.filter(m => window.normalizeDate(m.data) === todayStr);
+    if (oggi.length > 0) {
+      const roundCount = {};
+      oggi.forEach(m => {
+        const r = m.round || 'N/A';
+        roundCount[r] = (roundCount[r] || 0) + 1;
+      });
+      let best = null, bestCount = 0;
+      for (const [r, c] of Object.entries(roundCount)) {
+        if (c > bestCount) { best = r; bestCount = c; }
+      }
+      return best;
+    }
+
+    const future = matchesDelCampionato
+      .filter(m => m.stato === 'Futura' && m.data)
+      .sort((a, b) => window.parseDate(a.data, a.ora) - window.parseDate(b.data, b.ora));
+    if (future.length > 0) return future[0].round || null;
+
+    const played = matchesDelCampionato
+      .filter(m => m.stato === 'Giocata' && m.data)
+      .sort((a, b) => window.parseDate(b.data, b.ora) - window.parseDate(a.data, a.ora));
+    if (played.length > 0) return played[0].round || null;
+
+    return null;
+  };
+
+  // ============================================================
+  // LETTURA GIOCATE SELEZIONATE (sincronizzata con schedina.js)
+  // ============================================================
   const leggiGiocateSelezionate = () => {
     try {
-      return JSON.parse(localStorage.getItem('ft_giocate_selezionate') || '["tutte"]');
+      return JSON.parse(localStorage.getItem(GIOCATE_SELEZIONATE_KEY) || '["tutte"]');
     } catch (e) {
       return ['tutte'];
     }
   };
 
+  // ============================================================
+  // CALCOLO TOP3 GIOCATE CON SUPPORTO SCELTE
+  // ============================================================
   const calcolaTop3Giocate = (match, allMatches, tipoGiocate = 'calcolate') => {
     if (!match) return [];
     const stats = window.computeMatchStats(match, allMatches);
@@ -42,7 +250,6 @@
     // ============================================================
     if (tipoGiocate === 'calcolate') {
       const tutte = [];
-
       Object.keys(window.FAMIGLIE_GIOCATE).forEach(familyId => {
         const family = window.FAMIGLIE_GIOCATE[familyId];
         if (!family) return;
@@ -76,9 +283,8 @@
     const giocateSelezionate = leggiGiocateSelezionate();
     const isTutteMode = giocateSelezionate.includes('tutte') || giocateSelezionate.length === 0;
 
+    // Se in schedina è attivo "tutte" non ci sono giocate specifiche → mostriamo le calcolate
     if (isTutteMode) {
-      // Se in schedina è attivo "tutte", mostriamo le calcolate
-      // (non ci sono giocate specifiche da mostrare)
       const tutte = [];
       Object.keys(window.FAMIGLIE_GIOCATE).forEach(familyId => {
         const family = window.FAMIGLIE_GIOCATE[familyId];
@@ -105,7 +311,6 @@
 
     // Modalità "Scelte": mostra solo le giocate specifiche selezionate
     const top3Scelte = [];
-
     giocateSelezionate.forEach(sel => {
       if (typeof sel !== 'object' || !sel.familyId || !sel.giocata) return;
 
@@ -114,7 +319,6 @@
       if (!family) return;
 
       let pct = 0;
-
       if (familyId === 'gg_ng') {
         const ggNg = window.calcolaGG_NG ? window.calcolaGG_NG(stats) : null;
         if (ggNg) {
@@ -141,7 +345,111 @@
     return top3Scelte.slice(0, 3);
   };
 
-  // ... [NazioneBandiera, formatGiocataLabel, getGiornataCorrente rimangono invariati] ...
+  const leggiSelezioniSchedina = () => {
+    try { return JSON.parse(localStorage.getItem(SCHEDINA_STORAGE_KEY) || '[]'); }
+    catch (e) { return []; }
+  };
+
+  const scriviSelezioniSchedina = (arr) => {
+    try {
+      localStorage.setItem(SCHEDINA_STORAGE_KEY, JSON.stringify(arr));
+      window.dispatchEvent(new CustomEvent('schedina-updated', { detail: arr }));
+    } catch (e) {}
+  };
+
+  const chiaveSelezione = (matchId, familyId, giocata) => `${matchId}::${familyId}::${giocata}`;
+
+  const isGiocataSelezionata = (matchId, familyId, giocata) => {
+    const arr = leggiSelezioniSchedina();
+    const key = chiaveSelezione(matchId, familyId, giocata);
+    return arr.some(s => chiaveSelezione(s.matchId, s.familyId, s.giocata) === key);
+  };
+
+  const toggleSelezioneSchedina = (match, giocataObj) => {
+    const arr = leggiSelezioniSchedina();
+    const key = chiaveSelezione(match.id, giocataObj.familyId, giocataObj.giocata);
+    const idx = arr.findIndex(s => chiaveSelezione(s.matchId, s.familyId, s.giocata) === key);
+
+    if (idx >= 0) {
+      arr.splice(idx, 1);
+      scriviSelezioniSchedina(arr);
+      return false;
+    } else {
+      arr.push({
+        matchId: match.id, campionato: match.campionato, casa: match.casa, ospiti: match.ospiti,
+        data: match.data, ora: match.ora, giocata: giocataObj.giocata,
+        familyId: giocataObj.familyId, familyLabel: giocataObj.familyLabel,
+        pct: giocataObj.pct, aggiuntoIl: new Date().toISOString(),
+      });
+      scriviSelezioniSchedina(arr);
+      return true;
+    }
+  };
+
+  const GiocataBadge = ({ match, giocataObj, onToggle }) => {
+    const [selected, setSelected] = useState(() =>
+      isGiocataSelezionata(match.id, giocataObj.familyId, giocataObj.giocata)
+    );
+
+    const pct = giocataObj.pct;
+    const cls = window.getPercentualeClasse(pct);
+    const isBomb = pct >= 90;
+    const isGGNG = giocataObj.familyId === 'gg_ng';
+
+    const handleClick = (e) => {
+      e.stopPropagation();
+      const nowSelected = toggleSelezioneSchedina(match, giocataObj);
+      setSelected(nowSelected);
+      if (onToggle) onToggle(nowSelected);
+    };
+
+    return (
+      <button
+        onClick={handleClick}
+        title={`Clicca per ${selected ? 'rimuovere' : 'aggiungere'} alla schedina`}
+        style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          gap: '2px', padding: '6px 8px', borderRadius: '6px',
+          border: selected
+            ? '2px solid var(--neon-green)'
+            : isBomb
+              ? '2px solid var(--neon-gold)'
+              : (isGGNG ? '2px solid #e74c3c' : '1px solid var(--border)'),
+          background: selected
+            ? 'rgba(0, 255, 136, 0.12)'
+            : isBomb
+              ? 'rgba(255, 215, 0, 0.10)'
+              : (isGGNG ? 'rgba(231, 76, 60, 0.06)' : 'var(--surface)'),
+          cursor: 'pointer', transition: 'all 0.15s', width: '100%', textAlign: 'center',
+          minHeight: '58px', position: 'relative',
+        }}
+      >
+        {selected && (
+          <span style={{
+            position: 'absolute', top: '-6px', right: '-6px', background: 'var(--neon-green)', color: '#000',
+            borderRadius: '50%', width: '18px', height: '18px', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', fontSize: '11px', fontWeight: 'bold', boxShadow: '0 1px 4px rgba(0,0,0,0.4)',
+          }}>✓</span>
+        )}
+        <span style={{
+          fontSize: '11px', fontWeight: 'bold', color: isGGNG ? '#e74c3c' : 'var(--text)', lineHeight: '1.2',
+          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%',
+        }}>
+          {giocataObj.label}
+        </span>
+        <span className={`giocata-pct ${cls}`} style={{ fontSize: '13px' }}>
+          {pct}% {isBomb && <span className="bomb-icon" style={{ fontSize: '12px' }}>💣</span>}
+        </span>
+        <QuotaInline match={match} familyId={giocataObj.familyId} giocata={giocataObj.giocata} pctTua={pct} size="sm" />
+        <span style={{
+          fontSize: '9px', color: 'var(--text-dim)', lineHeight: '1',
+          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%',
+        }}>
+          {giocataObj.familyIcon} {giocataObj.familyLabel}
+        </span>
+      </button>
+    );
+  };
 
   // ============================================================
   // RIGA PARTITA CON SWITCH CALCOLATE/SCELTE
@@ -339,8 +647,54 @@
   };
 
   // ============================================================
-  // MOBILE: VISTA GIORNATA CON SWITCH
+  // MOBILE: SELEZIONE CAMPIONATO → VISTA GIORNATA
   // ============================================================
+  const MobileCampScelta = ({ campionati, onSelect }) => (
+    <div className="card" style={{ padding: '14px' }}>
+      <div style={{
+        fontFamily: 'Orbitron, sans-serif', fontSize: '13px', fontWeight: 700,
+        color: 'var(--neon-cyan)', textTransform: 'uppercase', letterSpacing: '2px',
+        marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid var(--border)',
+      }}>
+        🏆 Seleziona Campionato
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {campionati.map(camp => {
+          const nome = camp.nome || camp;
+          const nPartite = camp.nPartite || 0;
+          const color = window.getChampColor(nome);
+          return (
+            <button
+              key={nome}
+              onClick={() => onSelect(nome)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '12px',
+                padding: '12px 14px', borderRadius: '12px',
+                border: `2px solid ${color}`,
+                background: `linear-gradient(135deg, ${color}22, ${color}11)`,
+                cursor: 'pointer', textAlign: 'left',
+                boxShadow: `0 4px 16px ${color}33`,
+              }}
+            >
+              {window.ChampLogo && <window.ChampLogo campionato={nome} size={32} />}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text)' }}>
+                  {nome}
+                </div>
+                {nPartite > 0 && (
+                  <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
+                    {nPartite} partite
+                  </div>
+                )}
+              </div>
+              <span style={{ fontSize: '18px', color: 'var(--neon-cyan)' }}>→</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
   const MobileVistaGiornata = ({ campionato, matches, onBack, tipoGiocate }) => {
     const color = window.getChampColor(campionato);
     const partiteCampionato = matches
@@ -397,6 +751,93 @@
   };
 
   // ============================================================
+  // GRIGLIA NAZIONI
+  // ============================================================
+  const GrigliaNazioni = ({ matches, onSelectNazione }) => {
+    const nazioniOrdinate = useMemo(() => Object.keys(NAZIONI).sort((a, b) => a.localeCompare(b)), []);
+
+    const conteggi = useMemo(() => {
+      const c = {};
+      nazioniOrdinate.forEach(naz => {
+        const camps = NAZIONI[naz].campionati;
+        c[naz] = matches.filter(m => camps.includes(m.campionato)).length;
+      });
+      return c;
+    }, [matches, nazioniOrdinate]);
+
+    const [schedinaCount, setSchedinaCount] = useState(() => leggiSelezioniSchedina().length);
+
+    useEffect(() => {
+      const handler = (e) => setSchedinaCount((e.detail || []).length);
+      window.addEventListener('schedina-updated', handler);
+      return () => window.removeEventListener('schedina-updated', handler);
+    }, []);
+
+    return (
+      <div>
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          marginBottom: '16px', flexWrap: 'wrap', gap: '10px',
+        }}>
+          <h2 style={{ margin: 0, color: 'var(--neon-cyan)' }}>🌍 Seleziona una Nazione</h2>
+          {schedinaCount > 0 && (
+            <span style={{
+              background: 'var(--neon-green)', color: '#000', padding: '4px 14px',
+              borderRadius: '12px', fontSize: '13px', fontWeight: 'bold',
+            }}>
+              🎯 {schedinaCount} giocate in schedina
+            </span>
+          )}
+        </div>
+
+        <div className="nazioni-grid">
+          {nazioniOrdinate.map(naz => {
+            const disabled = conteggi[naz] === 0;
+            return (
+              <button
+                key={naz}
+                onClick={() => !disabled && onSelectNazione(naz)}
+                disabled={disabled}
+                title={disabled ? `${naz} - nessuna partita` : naz}
+                className="nazione-btn"
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  gap: '6px', padding: '12px 6px', borderRadius: '10px',
+                  border: '2px solid var(--border)',
+                  background: disabled ? 'var(--bg-elevated)' : 'var(--card)',
+                  cursor: disabled ? 'not-allowed' : 'pointer',
+                  opacity: disabled ? 0.4 : 1,
+                  transition: 'all 0.15s', minHeight: '90px', position: 'relative',
+                }}
+                onMouseEnter={(e) => {
+                  if (!disabled) {
+                    e.currentTarget.style.borderColor = 'var(--neon-cyan)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <NazioneBandiera nazione={naz} size={36} />
+                <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text)', textAlign: 'center' }}>
+                  {naz}
+                </span>
+                {!disabled && (
+                  <span style={{ fontSize: '9px', color: 'var(--text-dim)' }}>
+                    {conteggi[naz]} partite
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================================
   // COMPONENTE PRINCIPALE CON SWITCH
   // ============================================================
   function HomeComponent({ matches, championships, onSelectMatch, setTab, selectedFamiglie, weatherCache }) {
@@ -411,14 +852,15 @@
 
     const matchesPuliti = useMemo(() => {
       const normalizzati = normalizeMatches(matches);
-      return window.FiltriCampionati.filtraPartitePerCampionato(normalizzati);
+      return window.FiltriCampionati.filtaPartitePerCampionato(normalizzati);
     }, [matches, filtroCampionati]);
 
-    // ⭐ Ascolta i cambiamenti delle giocate selezionate in schedina.js
+    // ⭐ Ascolta cambiamenti delle giocate selezionate in schedina.js
+    //    e forza un re-render quando lo switch è su "scelte"
+    const [refreshTick, setRefreshTick] = useState(0);
     useEffect(() => {
       const handler = () => {
-        // Forza re-render quando cambiano le giocate selezionate
-        setTipoGiocate(prev => prev); // trigger re-render
+        if (tipoGiocate === 'scelte') setRefreshTick(t => t + 1);
       };
       window.addEventListener('giocate-selezionate-updated', handler);
       window.addEventListener('storage', handler);
@@ -426,7 +868,7 @@
         window.removeEventListener('giocate-selezionate-updated', handler);
         window.removeEventListener('storage', handler);
       };
-    }, []);
+    }, [tipoGiocate]);
 
     if (!matches || matches.length === 0) {
       return (
@@ -673,6 +1115,7 @@
     formatGiocataLabel, getGiornataCorrente, calcolaTop3Giocate,
     leggiSelezioniSchedina, scriviSelezioniSchedina, toggleSelezioneSchedina,
     normalizeMatches, normalizeCampionato, CHINESE_TEAMS,
+    leggiGiocateSelezionate, GIOCATE_SELEZIONATE_KEY,
   };
 
   console.log('✅ Modulo Home FUTURISTIC caricato (FIX MOBILE + SWITCH CALCOLATE/SCELTE)');
