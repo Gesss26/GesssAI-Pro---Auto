@@ -1,8 +1,8 @@
 // ============================================================
-// home.js - Modulo Home v13 (DUAL-SCROLL)
-// ✅ Sidebar scrollabile finché non selezioni campionato
-// ✅ Poi main scrollabile, sidebar locked
-// ✅ Sidebar a 2 colonne per nazione
+// home.js - Modulo Home v14 (SCROLL PRIORITARIO)
+// ✅ Sidebar 2 colonne per nazione
+// ✅ Scroll prioritario: sidebar → main dopo click
+// ✅ Vista giornata corrente only
 // ============================================================
 
 (function () {
@@ -223,7 +223,7 @@
     const [nazioniAperte, setNazioniAperte] = useState(() => {
       const aperte = {};
       Object.entries(NAZIONE_CAMPIONATI).forEach(([nazione, camps]) => {
-        const hasToday = camps.some(c => 
+        const hasToday = camps.some(c =>
           matches.some(m => m.campionato === c && m.stato === 'Futura' && normalizeDate(m.data) === todayStr)
         );
         aperte[nazione] = hasToday;
@@ -432,7 +432,7 @@
       }
     }, [matchesPuliti, champSelezionato, isMobile, homeTab]);
 
-    // ⭐ Blocca scroll body su PC quando siamo in dual-scroll
+    // ⭐ Blocca scroll body su PC in modalità giornata
     useEffect(() => {
       if (!isMobile && homeTab === 'Giornata') {
         document.body.classList.add('scroll-locked');
@@ -492,13 +492,19 @@
         );
       }
 
-      // ⭐ PC: DUAL-SCROLL
+      // ⭐ PC: SCROLL PRIORITARIO
       const sidebarLocked = !!champSelezionato;
 
       return (
-        <div className="dual-scroll-layout">
-          {/* SIDEBAR */}
-          <div className={`dual-scroll-sidebar ${sidebarLocked ? 'locked' : ''}`}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(340px, 380px) 1fr',
+          gap: '20px',
+          alignItems: 'start',
+          width: '100%',
+        }}>
+          {/* SIDEBAR (scrollabile finché non selezioni) */}
+          <div className={`sidebar-scroll ${sidebarLocked ? 'locked' : ''}`}>
             <SidebarCampionatiHome
               matches={matchesPuliti}
               onSelectChamp={(champ) => setChampSelezionato(champ)}
@@ -506,8 +512,8 @@
             />
           </div>
 
-          {/* MAIN */}
-          <div className={`dual-scroll-main ${!champSelezionato ? 'locked' : ''}`} style={{ position: 'relative' }}>
+          {/* MAIN (scrollabile dopo click) */}
+          <div className={`main-scroll ${!champSelezionato ? 'locked' : ''}`} style={{ position: 'relative' }}>
             {champSelezionato && (
               <button
                 className="cambia-campionato-btn"
@@ -599,6 +605,6 @@
     CHINESE_TEAMS,
   };
 
-  console.log('✅ Modulo Home v13 - DUAL-SCROLL');
+  console.log('✅ Modulo Home v14 - Scroll prioritario');
 
 })();
