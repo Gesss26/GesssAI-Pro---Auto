@@ -1,8 +1,8 @@
 // ============================================================
-// home.js - Modulo Home v14 (SCROLL PRIORITARIO)
-// ✅ Sidebar 2 colonne per nazione
-// ✅ Scroll prioritario: sidebar → main dopo click
-// ✅ Vista giornata corrente only
+// home.js - Modulo Home v15 (SCROLL PRIORITARIO COME PALINSESTO)
+// ✅ Nessuna auto-selezione campionato
+// ✅ Sidebar scrollabile finché non clicchi
+// ✅ Poi main scrollabile + pulsante "Cambia campionato"
 // ============================================================
 
 (function () {
@@ -113,28 +113,19 @@
       const MatchTabComp = window.__MatchTabComponent;
 
       return (
-        <div style={{ position: 'relative' }}>
+        <div>
           {isMobile && onBack && (
             <button
               onClick={onBack}
               style={{
-                position: 'fixed',
-                top: '80px',
-                left: '12px',
-                zIndex: 300,
+                position: 'fixed', top: '80px', left: '12px', zIndex: 300,
                 background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-blue))',
-                color: '#000',
-                border: '2px solid var(--neon-cyan)',
-                borderRadius: '50px',
-                padding: '10px 18px',
-                fontSize: '13px',
-                fontWeight: 900,
-                fontFamily: 'Orbitron, sans-serif',
-                cursor: 'pointer',
+                color: '#000', border: '2px solid var(--neon-cyan)',
+                borderRadius: '50px', padding: '10px 18px',
+                fontSize: '13px', fontWeight: 900,
+                fontFamily: 'Orbitron, sans-serif', cursor: 'pointer',
                 boxShadow: '0 0 20px rgba(0, 245, 255, 0.6)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
+                display: 'flex', alignItems: 'center', gap: '6px',
                 textTransform: 'uppercase',
               }}
             >
@@ -422,16 +413,6 @@
       return window.FiltriCampionati.filtraPartitePerCampionato(normalizzati);
     }, [matches, filtroCampionati]);
 
-    // Auto-selezione primo campionato (solo PC)
-    useEffect(() => {
-      if (!isMobile && !champSelezionato && matchesPuliti.length > 0 && homeTab === 'Giornata') {
-        const primoCampionato = window.CHAMPIONSHIP_LIST.find(champ =>
-          matchesPuliti.some(m => m.campionato === champ)
-        );
-        if (primoCampionato) setChampSelezionato(primoCampionato);
-      }
-    }, [matchesPuliti, champSelezionato, isMobile, homeTab]);
-
     // ⭐ Blocca scroll body su PC in modalità giornata
     useEffect(() => {
       if (!isMobile && homeTab === 'Giornata') {
@@ -469,7 +450,7 @@
         );
       }
 
-      // MOBILE
+      // ⭐ MOBILE: layout semplice
       if (isMobile) {
         return (
           <div>
@@ -492,7 +473,7 @@
         );
       }
 
-      // ⭐ PC: SCROLL PRIORITARIO
+      // ⭐ PC: DUAL-SCROLL CON SCROLL PRIORITARIO
       const sidebarLocked = !!champSelezionato;
 
       return (
@@ -605,6 +586,6 @@
     CHINESE_TEAMS,
   };
 
-  console.log('✅ Modulo Home v14 - Scroll prioritario');
+  console.log('✅ Modulo Home v15 - Scroll prioritario come Palinsesto');
 
 })();
