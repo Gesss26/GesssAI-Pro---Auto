@@ -1,7 +1,8 @@
 // ============================================================
-// palinsesto.js - Modulo Palinsesto v9 (FUTURISTIC)
+// palinsesto.js - Modulo Palinsesto v10 (FUTURISTIC)
 // ✅ Sidebar campionati con loghi e bollini notifica
 // ✅ Bottom panel "Partite di Oggi"
+// ✅ MatchTab con forma + % + differenza forma
 // ✅ Design futuristico con glassmorphism
 // ============================================================
 
@@ -121,7 +122,7 @@
   };
 
   // ============================================================
-  // MATCH TAB
+  // MATCH TAB (con forma + % + differenza forma)
   // ============================================================
   const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie, weatherCache }) => {
     const computeMatchStats = window.computeMatchStats;
@@ -138,11 +139,13 @@
 
     if (!match) return null;
 
+    // ⭐ FORMA + STATISTICHE
     const homeForm = calcFormAndStats(allMatches, match.casa);
     const awayForm = calcFormAndStats(allMatches, match.ospiti);
     const champColor = getChampColor(match.campionato);
-    const stats = computeMatchStats(match, allMatches);
+    const diff = Math.abs(homeForm.pct - awayForm.pct);
 
+    const stats = computeMatchStats(match, allMatches);
     stats._allMatches = allMatches;
     stats._homeTeam = match.casa;
     stats._awayTeam = match.ospiti;
@@ -248,6 +251,7 @@
           📅 {formattedDate} • ⏰ {match.ora || 'TBD'}
         </div>
 
+        {/* TEAMS */}
         <div className="teams-row">
           <div className="team">
             <TeamLogo teamName={match.casa} championship={match.campionato} size={50} />
@@ -260,6 +264,7 @@
           </div>
         </div>
 
+        {/* ⭐ FORMA + PERCENTUALE */}
         <div className="form-row-compact">
           <div className="form-block-compact">
             <div className="form-label">Forma</div>
@@ -273,6 +278,15 @@
           </div>
         </div>
 
+        {/* ⭐ DIFFERENZA FORMA */}
+        <div className="form-diff">
+          📊 Differenza forma:{' '}
+          <span className={diff >= 20 ? 'diff-alta' : 'diff-bassa'}>
+            {isNaN(diff) ? 0 : diff}%
+          </span>
+        </div>
+
+        {/* TOP 3 GIOCATE */}
         <div className="bet-row-vertical">
           {giocateDaMostrare.length > 0 ? (
             giocateDaMostrare.map((g, idx) => {
@@ -631,7 +645,7 @@
     return (
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'minmax(240px, 280px) 1fr',
+        gridTemplateColumns: 'minmax(280px, 320px) 1fr',
         gap: '20px',
         alignItems: 'start',
       }}>
@@ -743,6 +757,7 @@
   window.ChampLogo = ChampLogo;
   window.SidebarCampionati = SidebarCampionati;
   window.BottomPanelPartiteOggi = BottomPanelPartiteOggi;
-  console.log('✅ Modulo Palinsesto v9 FUTURISTIC caricato');
+  window.__MatchTabComponent = MatchTab;
+  console.log('✅ Modulo Palinsesto v10 FUTURISTIC caricato - MatchTab con forma + % + differenza');
 
 })();
