@@ -1,7 +1,8 @@
 // ============================================================
-// palinsesto.js - Modulo Palinsesto (FUTURISTIC + CHAMP BAR 2 FILE + MOBILE)
-// ✅ PC: Sidebar a 2 file (maggiori + minori) con "Tutti i Campionati" span 2 righe
-// ✅ PC: Mostra TUTTI i campionati presenti nei dati (non solo quelli con partite oggi)
+// palinsesto.js - Modulo Palinsesto (FUTURISTIC + CHAMP BAR GRIGLIA 3 RIGHE)
+// ✅ PC: Griglia a colonne per nazione — 3 righe: maggiori / minori / extra
+// ✅ PC: Tutte le colonne della stessa larghezza (no sfasamenti)
+// ✅ PC: "Tutti i Campionati" a sinistra, span verticale su 3 righe
 // ✅ Mobile: lista campionati scrollabile → click → giornata
 // ============================================================
 
@@ -64,19 +65,82 @@
   };
 
   // ============================================================
-  // ORDINE CAMPIONATI: MAGGIORI (prima fila) + MINORI (seconda fila)
+  // STRUTTURA NAZIONI → CAMPIONATI (3 righe per nazione)
+  // Riga 1: maggiore | Riga 2: minore | Riga 3: extra
   // ============================================================
-  const CAMPIONATI_MAGGIORI = [
-    'Premier League', 'La Liga', 'Serie A', 'Bundesliga', 'Ligue 1',
-    'Eredivisie', 'Primeira Liga', 'Jupiler Pro League',
-    'EFL Championship', 'Süper Lig', 'Scottish Premiership',
-    'K League 1', 'J1 League'
-  ];
-
-  const CAMPIONATI_MINORI = [
-    'Serie B', 'Segunda División', '2. Bundesliga', 'Ligue 2',
-    'Eerste Divisie',
-    'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C'
+  const NAZIONI_CAMPIONATI = [
+    {
+      nazione: 'ITALIA',
+      maggiore: 'Serie A',
+      minore: 'Serie B',
+      extra: ['Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C'],
+    },
+    {
+      nazione: 'FRANCIA',
+      maggiore: 'Ligue 1',
+      minore: 'Ligue 2',
+      extra: [],
+    },
+    {
+      nazione: 'SPAGNA',
+      maggiore: 'La Liga',
+      minore: 'Segunda División',
+      extra: [],
+    },
+    {
+      nazione: 'INGHILTERRA',
+      maggiore: 'Premier League',
+      minore: 'EFL Championship',
+      extra: [],
+    },
+    {
+      nazione: 'GERMANIA',
+      maggiore: 'Bundesliga',
+      minore: '2. Bundesliga',
+      extra: [],
+    },
+    {
+      nazione: 'OLANDA',
+      maggiore: 'Eredivisie',
+      minore: 'Eerste Divisie',
+      extra: [],
+    },
+    {
+      nazione: 'PORTOGALLO',
+      maggiore: 'Primeira Liga',
+      minore: '',
+      extra: [],
+    },
+    {
+      nazione: 'BELGIO',
+      maggiore: 'Jupiler Pro League',
+      minore: '',
+      extra: [],
+    },
+    {
+      nazione: 'SCOZIA',
+      maggiore: '',
+      minore: '',
+      extra: ['Scottish Premiership'],
+    },
+    {
+      nazione: 'TURCHIA',
+      maggiore: '',
+      minore: '',
+      extra: ['Süper Lig'],
+    },
+    {
+      nazione: 'COREA',
+      maggiore: '',
+      minore: '',
+      extra: ['K League 1'],
+    },
+    {
+      nazione: 'GIAPPONE',
+      maggiore: '',
+      minore: '',
+      extra: ['J1 League'],
+    },
   ];
 
   // ============================================================
@@ -310,30 +374,27 @@
   };
 
   // ============================================================
-  // CHAMP BAR A 2 FILE (PC) — MAGGIORI + MINORI
-  // "Tutti i Campionati" occupa 2 righe (colonna 1)
+  // CHAMP BAR A GRIGLIA — 3 righe per nazione
+  // Riga 1: maggiore | Riga 2: minore | Riga 3: extra
+  // "Tutti i Campionati" a sinistra, span verticale su 3 righe
   // ============================================================
   const ChampBar = ({ matches, champFocus, onSelect }) => {
     const normalizeDate = window.normalizeDate;
     const todayStr = window.getTodayStr();
 
-    // ⭐ Tutti i campionati presenti nei dati (dalla lista globale)
-    const tuttiCampionati = useMemo(() => {
-      return window.CHAMPIONSHIP_LIST.filter(c =>
-        matches.some(m => m.campionato === c)
-      );
+    // Filtra solo le nazioni che hanno almeno un campionato presente nei dati
+    const nazioniAttive = useMemo(() => {
+      return NAZIONI_CAMPIONATI.filter(n => {
+        if (n.maggiore && matches.some(m => m.campionato === n.maggiore)) return true;
+        if (n.minore && matches.some(m => m.campionato === n.minore)) return true;
+        return n.extra.some(c => matches.some(m => m.campionato === c));
+      }).map(n => ({
+        ...n,
+        maggiorePresente: n.maggiore && matches.some(m => m.campionato === n.maggiore),
+        minorePresente: n.minore && matches.some(m => m.campionato === n.minore),
+        extraPresenti: n.extra.filter(c => matches.some(m => m.campionato === c)),
+      }));
     }, [matches]);
-
-    // Dividi in maggiori / minori / altri
-    const maggiori = CAMPIONATI_MAGGIORI.filter(c => tuttiCampionati.includes(c));
-    const minori = CAMPIONATI_MINORI.filter(c => tuttiCampionati.includes(c));
-    const altri = tuttiCampionati.filter(c =>
-      !CAMPIONATI_MAGGIORI.includes(c) && !CAMPIONATI_MINORI.includes(c)
-    );
-
-    // Prima fila: maggiori + altri; Seconda fila: minori
-    const primaFila = [...maggiori, ...altri];
-    const secondaFila = minori;
 
     const totaleOggi = useMemo(() => {
       return matches.filter(m => m.stato === 'Futura' && normalizeDate(m.data) === todayStr).length;
@@ -354,88 +415,94 @@
       .replace('2. Bundesliga', '2. Bundes')
       .replace('Eerste Divisie', 'Eerste');
 
-    const renderRow = (lista, gridRow) => (
-      <div
-        style={{
-          gridRow: gridRow,
-          gridColumn: '2',
-          display: 'flex',
-          gap: '6px',
-          overflowX: 'auto',
-          paddingBottom: '2px',
-          scrollbarWidth: 'thin',
-          scrollbarColor: 'var(--neon-cyan) transparent',
-        }}
-        className="champ-bar-row"
-      >
-        {lista.length === 0 ? (
-          <span style={{
-            fontSize: '10px',
-            color: 'var(--text-dim)',
-            fontStyle: 'italic',
-            padding: '8px 12px',
-            opacity: 0.6,
+    // Calcola il numero massimo di righe totali (3: maggiore + minore + extra)
+    // Ma per l'Italia, gli "extra" sono 3 (Serie C A/B/C) → potrebbero servire più righe
+    const maxExtraRows = Math.max(1, ...nazioniAttive.map(n => n.extraPresenti.length));
+    const totalRows = 2 + maxExtraRows; // 2 (maggiore + minore) + extra
+
+    const renderCell = (camp, tier) => {
+      if (!camp) {
+        return (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '6px 4px', fontSize: '10px', color: 'var(--text-dim)',
+            opacity: 0.35, fontStyle: 'italic',
           }}>
             —
+          </div>
+        );
+      }
+      const color = window.getChampColor(camp);
+      const isActive = champFocus === camp;
+      const nOggi = countOggi(camp);
+      // tier: 1 = maggiore, 2 = minore, 3+ = extra
+      const borderWidth = tier === 1 ? '2px' : '1px';
+      const opacity = tier === 1 ? 1 : (tier === 2 ? 0.9 : 0.8);
+      return (
+        <button
+          onClick={() => onSelect(camp)}
+          className={`champ-bar-item ${isActive ? 'active' : ''}`}
+          style={{
+            borderColor: isActive ? 'var(--neon-cyan)' : `${color}66`,
+            width: '100%',
+            justifyContent: 'center',
+            padding: '5px 6px',
+            minHeight: '32px',
+            borderWidth,
+            opacity,
+          }}
+          title={camp}
+        >
+          <ChampLogo campionato={camp} size={14} />
+          <span className="champ-bar-name" style={{
+            fontSize: '10px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            maxWidth: '80px',
+          }}>
+            {abbreviate(camp)}
           </span>
-        ) : lista.map(camp => {
-          const color = window.getChampColor(camp);
-          const isActive = champFocus === camp;
-          const nOggi = countOggi(camp);
-          return (
-            <button
-              key={camp}
-              onClick={() => onSelect(camp)}
-              className={`champ-bar-item ${isActive ? 'active' : ''}`}
-              style={{
-                borderColor: isActive ? 'var(--neon-cyan)' : `${color}66`,
-                flexShrink: 0,
-              }}
-            >
-              <ChampLogo campionato={camp} size={20} />
-              <span className="champ-bar-name">{abbreviate(camp)}</span>
-              {nOggi > 0 && <span className="champ-bar-badge">{nOggi}</span>}
-            </button>
-          );
-        })}
-      </div>
-    );
+          {nOggi > 0 && <span className="champ-bar-badge">{nOggi}</span>}
+        </button>
+      );
+    };
 
     return (
       <div
+        className="champ-bar-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'auto 1fr',
-          gridTemplateRows: '1fr 1fr',
-          gap: '6px',
+          gridTemplateColumns: `auto repeat(${nazioniAttive.length}, minmax(0, 1fr))`,
+          gridTemplateRows: `repeat(${totalRows}, auto)`,
+          gap: '4px',
           marginBottom: '16px',
           padding: '10px 12px',
           background: 'linear-gradient(135deg, rgba(30, 40, 66, 0.7), rgba(20, 27, 46, 0.9))',
           border: '1px solid var(--border)',
           borderRadius: '14px',
-          alignItems: 'stretch',
+          overflowX: 'auto',
         }}
-        className="champ-bar-2rows"
       >
-        {/* ⭐ "Tutti i Campionati" occupa 2 righe */}
+        {/* ⭐ "Tutti i Campionati" a sinistra, span verticale su tutte le righe */}
         <button
           onClick={() => onSelect('__TUTTI__')}
           className={`champ-bar-item ${champFocus === '__TUTTI__' ? 'active' : ''}`}
           style={{
-            gridRow: '1 / span 2',
             gridColumn: '1',
+            gridRow: `1 / span ${totalRows}`,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '4px',
-            padding: '8px 18px',
+            padding: '8px 14px',
             borderColor: champFocus === '__TUTTI__' ? 'var(--neon-magenta)' : 'var(--neon-cyan)',
             background: champFocus === '__TUTTI__'
               ? 'linear-gradient(135deg, var(--neon-magenta), var(--neon-purple))'
               : 'linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(0, 245, 255, 0.05))',
             color: '#000',
-            minWidth: '110px',
+            minWidth: '100px',
             whiteSpace: 'normal',
             textAlign: 'center',
             lineHeight: '1.1',
@@ -452,11 +519,45 @@
           )}
         </button>
 
-        {/* Prima fila: campionati maggiori */}
-        {renderRow(primaFila, '1')}
+        {/* ⭐ Una colonna per nazione: 3 righe (maggiore / minore / extra) */}
+        {nazioniAttive.map((naz, colIdx) => {
+          const gridCol = colIdx + 2; // +2 perché la colonna 1 è "Tutti"
+          const cells = [];
 
-        {/* Seconda fila: campionati minori */}
-        {renderRow(secondaFila, '2')}
+          // Riga 1: campionato maggiore
+          cells.push(
+            <div key={`${naz.nazione}-mag-${colIdx}`} style={{ gridColumn: gridCol, gridRow: 1 }}>
+              {renderCell(naz.maggiorePresente ? naz.maggiore : null, 1)}
+            </div>
+          );
+
+          // Riga 2: campionato minore
+          cells.push(
+            <div key={`${naz.nazione}-min-${colIdx}`} style={{ gridColumn: gridCol, gridRow: 2 }}>
+              {renderCell(naz.minorePresente ? naz.minore : null, 2)}
+            </div>
+          );
+
+          // Righe 3+: campionati extra (uno per riga)
+          naz.extraPresenti.forEach((camp, i) => {
+            cells.push(
+              <div key={`${naz.nazione}-extra-${i}`} style={{ gridColumn: gridCol, gridRow: i + 3 }}>
+                {renderCell(camp, 3)}
+              </div>
+            );
+          });
+
+          // Riempi le righe extra vuote per allineare tutte le colonne
+          for (let r = naz.extraPresenti.length + 3; r <= totalRows; r++) {
+            cells.push(
+              <div key={`${naz.nazione}-empty-${r}`} style={{ gridColumn: gridCol, gridRow: r }}>
+                {renderCell(null, 3)}
+              </div>
+            );
+          }
+
+          return cells;
+        })}
       </div>
     );
   };
@@ -722,7 +823,7 @@
           selectedFamiglie={selectedFamiglie}
         />
 
-        {/* ⭐ SIDEBAR A 2 FILE: MAGGIORI + MINORI */}
+        {/* ⭐ SIDEBAR A GRIGLIA 3 RIGHE: MAGGIORI / MINORI / EXTRA */}
         <ChampBar
           matches={matches}
           champFocus={champFocus}
@@ -772,6 +873,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto FUTURISTIC caricato — ChampBar a 2 file');
+  console.log('✅ Modulo Palinsesto FUTURISTIC caricato — ChampBar griglia 3 righe');
 
 })();
