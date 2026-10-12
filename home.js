@@ -1,5 +1,6 @@
 // ============================================================
 // home.js - Modulo Home (FUTURISTIC + MOBILE FIX + SWITCH CALCOLATE/SCELTE)
+// ✅ v2: refreshTick propagato a RigaPartita per aggiornamento live
 // ============================================================
 
 (function () {
@@ -246,7 +247,7 @@
     const awayRange = window.getMultigolRange(match.ospiti, allMatches);
 
     // ============================================================
-    // TOP 3 CALCOLATE (comportamento originale)
+    // TOP 3 CALCOLATE
     // ============================================================
     if (tipoGiocate === 'calcolate') {
       const tutte = [];
@@ -283,8 +284,8 @@
     const giocateSelezionate = leggiGiocateSelezionate();
     const isTutteMode = giocateSelezionate.includes('tutte') || giocateSelezionate.length === 0;
 
-    // Se in schedina è attivo "tutte" non ci sono giocate specifiche → mostriamo le calcolate
     if (isTutteMode) {
+      // In modalità "tutte" non ci sono giocate specifiche → fallback alle calcolate
       const tutte = [];
       Object.keys(window.FAMIGLIE_GIOCATE).forEach(familyId => {
         const family = window.FAMIGLIE_GIOCATE[familyId];
@@ -452,16 +453,14 @@
   };
 
   // ============================================================
-  // RIGA PARTITA CON SWITCH CALCOLATE/SCELTE
+  // RIGA PARTITA — con refreshKey per aggiornamento live
   // ============================================================
-  const RigaPartita = ({ match, allMatches, tipoGiocate }) => {
-    const [top3, setTop3] = useState([]);
-
-    useEffect(() => {
+  const RigaPartita = ({ match, allMatches, tipoGiocate, refreshKey }) => {
+    // ⭐ useMemo ricalcola quando cambiano match.id, tipoGiocate o refreshKey
+    const top3 = useMemo(() => {
       const res = calcolaTop3Giocate(match, allMatches, tipoGiocate);
-      const formatted = res.map(g => ({ ...g, label: formatGiocataLabel(g.familyId, g.label) }));
-      setTop3(formatted);
-    }, [match.id, tipoGiocate]);
+      return res.map(g => ({ ...g, label: formatGiocataLabel(g.familyId, g.label) }));
+    }, [match.id, tipoGiocate, refreshKey]);
 
     const dataEU = match.data ? window.formatDateEU(match.data) : 'N/D';
     const ora = match.ora || 'TBD';
@@ -504,7 +503,7 @@
   // ============================================================
   // SEZIONE CAMPIONATO CON SWITCH
   // ============================================================
-  const SezioneCampionato = ({ campionato, matches, allMatches, hideHeader = false, tipoGiocate = 'calcolate' }) => {
+  const SezioneCampionato = ({ campionato, matches, allMatches, hideHeader = false, tipoGiocate = 'calcolate', refreshKey }) => {
     const partiteCampionato = matches
       .filter(m => m.campionato === campionato)
       .sort((a, b) => window.parseDate(a.data, a.ora) - window.parseDate(b.data, b.ora));
@@ -572,7 +571,7 @@
             </thead>
             <tbody>
               {partiteDaMostrare.map(m => (
-                <RigaPartita key={m.id} match={m} allMatches={allMatches} tipoGiocate={tipoGiocate} />
+                <RigaPartita key={m.id} match={m} allMatches={allMatches} tipoGiocate={tipoGiocate} refreshKey={refreshKey} />
               ))}
             </tbody>
           </table>
@@ -584,7 +583,7 @@
   // ============================================================
   // VISTA NAZIONE CON SWITCH
   // ============================================================
-  const VistaNazione = ({ nazione, matches, onBack, tipoGiocate }) => {
+  const VistaNazione = ({ nazione, matches, onBack, tipoGiocate, refreshKey }) => {
     const info = NAZIONI[nazione];
     if (!info) return null;
 
@@ -639,6 +638,7 @@
               matches={matches}
               allMatches={matches}
               tipoGiocate={tipoGiocate}
+              refreshKey={refreshKey}
             />
           ))
         )}
@@ -647,7 +647,7 @@
   };
 
   // ============================================================
-  // MOBILE: SELEZIONE CAMPIONATO → VISTA GIORNATA
+  // MOBILE
   // ============================================================
   const MobileCampScelta = ({ campionati, onSelect }) => (
     <div className="card" style={{ padding: '14px' }}>
@@ -695,7 +695,7 @@
     </div>
   );
 
-  const MobileVistaGiornata = ({ campionato, matches, onBack, tipoGiocate }) => {
+  const MobileVistaGiornata = ({ campionato, matches, onBack, tipoGiocate, refreshKey }) => {
     const color = window.getChampColor(campionato);
     const partiteCampionato = matches
       .filter(m => m.campionato === campionato)
@@ -741,7 +741,7 @@
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <tbody>
               {partiteDaMostrare.map(m => (
-                <RigaPartita key={m.id} match={m} allMatches={matches} tipoGiocate={tipoGiocate} />
+                <RigaPartita key={m.id} match={m} allMatches={matches} tipoGiocate={tipoGiocate} refreshKey={refreshKey} />
               ))}
             </tbody>
           </table>
@@ -838,13 +838,14 @@
   };
 
   // ============================================================
-  // COMPONENTE PRINCIPALE CON SWITCH
+  // COMPONENTE PRINCIPALE
   // ============================================================
   function HomeComponent({ matches, championships, onSelectMatch, setTab, selectedFamiglie, weatherCache }) {
     const [homeTab, setHomeTab] = useState('Nazioni');
     const [nazioneSelezionata, setNazioneSelezionata] = useState(null);
     const [campionatoMobile, setCampionatoMobile] = useState(null);
-    const [tipoGiocate, setTipoGiocate] = useState('calcolate'); // ⭐ NUOVO
+    const [tipoGiocate, setTipoGiocate] = useState('calcolate');
+    const [refreshKey, setRefreshKey] = useState(0); // ⭐ forza re-render di RigaPartita
     const isMobile = useIsMobile();
 
     const { filtro: filtroCampionati, campionatiAttivi } =
@@ -852,23 +853,23 @@
 
     const matchesPuliti = useMemo(() => {
       const normalizzati = normalizeMatches(matches);
-      return window.FiltriCampionati.filtraPartitePerCampionato(normalizzati);
+      return window.FiltriCampionati.filtraPartitePerCampionato(normalizzati); // ✅ fix typo
     }, [matches, filtroCampionati]);
 
-    // ⭐ Ascolta cambiamenti delle giocate selezionate in schedina.js
-    //    e forza un re-render quando lo switch è su "scelte"
-    const [refreshTick, setRefreshTick] = useState(0);
+    // ⭐ Ascolta cambiamenti giocate selezionate → forza refresh
     useEffect(() => {
       const handler = () => {
-        if (tipoGiocate === 'scelte') setRefreshTick(t => t + 1);
+        setRefreshKey(t => t + 1);
       };
       window.addEventListener('giocate-selezionate-updated', handler);
+      window.addEventListener('schedina-updated', handler);
       window.addEventListener('storage', handler);
       return () => {
         window.removeEventListener('giocate-selezionate-updated', handler);
+        window.removeEventListener('schedina-updated', handler);
         window.removeEventListener('storage', handler);
       };
-    }, [tipoGiocate]);
+    }, []);
 
     if (!matches || matches.length === 0) {
       return (
@@ -908,6 +909,7 @@
               matches={matchesPuliti}
               onBack={() => setCampionatoMobile(null)}
               tipoGiocate={tipoGiocate}
+              refreshKey={refreshKey}
             />
           );
         }
@@ -983,6 +985,7 @@
             matches={matchesPuliti}
             onBack={() => setNazioneSelezionata(null)}
             tipoGiocate={tipoGiocate}
+            refreshKey={refreshKey}
           />
         );
       }
@@ -1038,7 +1041,7 @@
           </button>
         </div>
 
-        {/* ⭐ SWITCH CALCOLATE / SCELTE (solo per tab Nazioni) */}
+        {/* ⭐ SWITCH CALCOLATE / SCELTE */}
         {homeTab === 'Nazioni' && (
           <div style={{
             display: 'flex',
@@ -1118,6 +1121,6 @@
     leggiGiocateSelezionate, GIOCATE_SELEZIONATE_KEY,
   };
 
-  console.log('✅ Modulo Home FUTURISTIC caricato (FIX MOBILE + SWITCH CALCOLATE/SCELTE)');
+  console.log('✅ Modulo Home FUTURISTIC v2 caricato (refreshKey propagato + fix typo)');
 
 })();
