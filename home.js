@@ -294,7 +294,7 @@
     const [champSelezionato, setChampSelezionato] = useState(null);
 
     const { filtro: filtroCampionati, campionatiAttivi } =
-      window.FiltriCampionati.useFiltroCampionato();
+      window.FiltriCampionati.useFiltroCampionati();
 
     const matchesPuliti = useMemo(() => {
       const normalizzati = normalizeMatches(matches);
