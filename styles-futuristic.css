@@ -2,6 +2,7 @@
    GesssAI-Pro v4.0 - FUTURISTIC UI (COMPLETO)
    Palette neon + Glassmorphism + MatchTab + ChampBar + Mobile
    + Classifica a griglia + Responsive PC/Mobile
+   + Tema AI-Neon adattivo (scuro/chiaro)
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
@@ -53,11 +54,35 @@ body {
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
+  /* ⭐ SFONDO AI-NEON (funziona su scuro e chiaro) */
   background-image:
-    radial-gradient(ellipse at top left, rgba(77, 124, 255, 0.15), transparent 50%),
-    radial-gradient(ellipse at bottom right, rgba(255, 0, 229, 0.1), transparent 50%),
-    radial-gradient(ellipse at center, rgba(0, 245, 255, 0.05), transparent 70%);
+    radial-gradient(
+      ellipse 80% 50% at 50% 0%,
+      rgba(0, 200, 255, 0.10) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 60% 40% at 90% 100%,
+      rgba(200, 0, 255, 0.08) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 60% 40% at 10% 90%,
+      rgba(0, 255, 180, 0.06) 0%,
+      transparent 60%
+    ),
+    linear-gradient(rgba(0, 200, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 200, 255, 0.04) 1px, transparent 1px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    50px 50px,
+    50px 50px,
+    10px 10px;
   background-attachment: fixed;
+  background-position: center;
 }
 
 ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -103,7 +128,7 @@ body {
 /* ============================================================
    ROOT & LAYOUT
    ============================================================ */
-#root { display: none; min-height: 100vh; background: var(--bg-deep); }
+#root { display: none; min-height: 100vh; background: transparent; }
 #root.visible { display: block !important; }
 
 #error-container {
@@ -1295,4 +1320,104 @@ input:focus, select:focus { outline: none; border-color: var(--neon-cyan); }
   .header .app-name { font-size: 16px; }
   .header .subtitle { font-size: 9px; }
   .tabs-nav button { min-width: 80px; font-size: 10px; padding: 10px 6px; }
+}
+
+/* ============================================================
+   TEMA AI-NEON — OVERRIDE E ADATTAMENTO CHIARO/SCURO
+   ============================================================ */
+
+/* ⭐ Scanline olografica sottile */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(255, 255, 255, 0.012) 3px,
+    transparent 4px
+  );
+  opacity: 0.6;
+}
+
+/* ⭐ Globo AI fluttuante */
+body::after {
+  content: '';
+  position: fixed;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 200, 255, 0.15) 0%, transparent 70%);
+  top: 15%;
+  left: 8%;
+  pointer-events: none;
+  z-index: 0;
+  animation: aiFloat 12s ease-in-out infinite;
+}
+
+@keyframes aiFloat {
+  0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.3; }
+  50% { transform: translateY(-30px) translateX(20px) scale(1.15); opacity: 0.5; }
+}
+
+/* ⭐ Contenuto sopra gli effetti */
+#root, .app-shell, .container {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+
+/* ⭐ Adattamento per tema CHIARO */
+html[data-theme="light"] body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0, 100, 200, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(150, 0, 200, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 10% 90%, rgba(0, 150, 120, 0.04) 0%, transparent 60%),
+    linear-gradient(rgba(0, 100, 200, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 100, 200, 0.03) 1px, transparent 1px),
+    radial-gradient(circle, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+}
+
+html[data-theme="light"] body::before {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.008) 3px,
+    transparent 4px
+  );
+}
+
+html[data-theme="light"] body::after {
+  background: radial-gradient(circle, rgba(0, 100, 200, 0.10) 0%, transparent 70%);
+}
+
+/* ⭐ Card e tab adattive al tema chiaro */
+html[data-theme="light"] .card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(240, 245, 255, 0.95));
+  border-color: var(--border);
+}
+
+html[data-theme="light"] .match-tab {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(245, 250, 255, 0.95));
+}
+
+html[data-theme="light"] .champ-bar {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(240, 245, 255, 0.95));
+}
+
+html[data-theme="light"] .header {
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
+}
+
+html[data-theme="light"] .tabs-nav {
+  background: var(--bg-elevated);
+}
+
+html[data-theme="light"] .standings-table th {
+  background: var(--bg-deep);
 }

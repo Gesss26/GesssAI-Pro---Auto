@@ -491,24 +491,38 @@
         ];
       };
 
-      const getLeagueFolder = (champ) => {
-        if (!champ) return '';
-        const map = {
-          'Jupiler Pro League': 'Jupiler_Pro_League',
-          'Premier League': 'Premier_League', 'Championship': 'Championship',
-          'Ligue 1': 'Ligue_1', 'Ligue 2': 'Ligue_2', 'Bundesliga': 'Bundesliga', '2. Bundesliga': '2. Bundesliga',
-          'Serie A': 'Serie_A', 'Serie B': 'Serie_B', 'Serie C': 'Serie_C',
-          'J1 League': 'J1_League', 'Eredivisie': 'Eredivisie', 'Eerste Divisie': 'Eerste_Divisie',
-          'Primeira Liga': 'Primeira_Liga', 'Scottish Premiership': 'Scottish_Premiership',
-          'K League 1': 'K_League_1', 'La Liga': 'La_Liga', 'Segunda División': 'Segunda_Division',
-          'Süper Lig': 'Super_Lig',
-          'UEFA Champions League': 'UEFA_Champions_League',
-          'UEFA Europa League': 'UEFA_Europa_League',
-          'UEFA Europa Conference': 'UEFA_Europa_Conference',
-          'UEFA Nations League': 'UEFA_Nations_League',
-        };
-        return map[champ] || champ.replace(/ /g, '_');
-      };
+    const getLeagueFolder = (champ) => {
+  if (!champ) return '';
+  const map = {
+    'Jupiler Pro League': 'Jupiler_Pro_League',
+    'Premier League': 'Premier_League',
+    'EFL Championship': 'Championship',
+    'Ligue 1': 'Ligue_1',
+    'Ligue 2': 'Ligue_2',
+    'Bundesliga': 'Bundesliga',
+    '2. Bundesliga': '2. Bundesliga',
+    'Serie A': 'Serie_A',
+    'Serie B': 'Serie_B',
+    'Serie C - Girone A': 'Serie_C_Girone_A',      // ⭐ cartella reale
+    'Serie C - Girone B': 'Serie_C_Girone_B',      // ⭐ cartella reale
+    'Serie C - Girone C': 'Serie_C_Girone_C',      // ⭐ cartella reale
+    'J1 League': 'J1_League',
+    'Eredivisie': 'Eredivisie',
+    'Eerste Divisie': 'Eerste_Divisie',
+    'Primeira Liga': 'Primeira_Liga',
+    'Scottish Premiership': 'Scottish_Premiership',
+    'K League 1': 'K_League_1',
+    'La Liga': 'La_Liga',
+    'Segunda División': 'Segunda_Division',
+    'Süper Lig': 'Super_Lig',
+    // ⭐ COPPE UEFA → TUTTE puntano a Champions_League
+    'UEFA Champions League': 'Champions_League',
+    'UEFA Europa League': 'Champions_League',      // fallback
+    'UEFA Europa Conference': 'Champions_League',  // fallback
+    'UEFA Nations League': 'Champions_League',     // fallback
+  };
+  return map[champ] || champ.replace(/ /g, '_');
+};
 
       const getTeamPaths = (teamName, champ) => {
         const leagueFolder = getLeagueFolder(champ);
