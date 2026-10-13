@@ -29662,7 +29662,7 @@
     "gol_casa": "0",
     "gol_ospite": "1",
     "citta": "Liege",
-    "stadio": "Maurice Dufrasnestadion",
+    "stadio": "Maurice Dufrasne",
     "stato": "Giocata"
   },
   {
@@ -29704,7 +29704,7 @@
     "gol_casa": "4",
     "gol_ospite": "3",
     "citta": "Mechelen",
-    "stadio": "Achter de Kazerne",
+    "stadio": "Veoliastadion Achter De Kazerne",
     "stato": "Giocata"
   },
   {
@@ -36816,7 +36816,7 @@
     "gol_casa": "3",
     "gol_ospite": "2",
     "citta": "San Sebastian",
-    "stadio": "Anoeta Stadium",
+    "stadio": "Anoeta",
     "stato": "Giocata"
   },
   {
@@ -36829,8 +36829,8 @@
     "risultato": "5–2",
     "gol_casa": "5",
     "gol_ospite": "2",
-    "citta": "Seville",
-    "stadio": "Estadio de la Cartuja",
+    "citta": "Sevilla",
+    "stadio": "Estadio de La Cartuja",
     "stato": "Giocata"
   },
   {
@@ -36844,7 +36844,7 @@
     "gol_casa": "2",
     "gol_ospite": "2",
     "citta": "Santander",
-    "stadio": "El Sardinero",
+    "stadio": "Estadio El Sardinero",
     "stato": "Giocata"
   },
   {
@@ -91010,7 +91010,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Giugliano",
-    "stadio": "Stadio Alberto De Cristofaro",
+    "stadio": "SC Alberto De Cristofaro",
     "stato": "Futura"
   },
   {
@@ -95896,7 +95896,7 @@
     "gol_casa": "0",
     "gol_ospite": "3",
     "citta": "Samsun",
-    "stadio": "Samsun Yeni 19 Mayıs Stadyumu",
+    "stadio": "Samsun 19 Mayis Stadyumu",
     "stato": "Giocata"
   },
   {
@@ -95924,7 +95924,7 @@
     "gol_casa": "0",
     "gol_ospite": "0",
     "citta": "Konya",
-    "stadio": "Konya Buyuksehir Belediye Stadium",
+    "stadio": "Medas Konya Büyüksehir Belediyesi Stadium",
     "stato": "Giocata"
   },
   {
@@ -95952,7 +95952,7 @@
     "gol_casa": "2",
     "gol_ospite": "1",
     "citta": "Istanbul",
-    "stadio": "Tupras Stadium",
+    "stadio": "Tüpraş Stadyumu",
     "stato": "Giocata"
   },
   {
@@ -95965,7 +95965,7 @@
     "risultato": "0–4",
     "gol_casa": "0",
     "gol_ospite": "4",
-    "citta": "Istanbul",
+    "citta": "Esenyurt",
     "stadio": "Esenyurt Necmi Kadioglu Stadi",
     "stato": "Giocata"
   },
@@ -109154,7 +109154,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Lyon",
-    "stadio": "Parc Olympique Lyonnais",
+    "stadio": "Groupama Stadium",
     "stato": "Futura"
   },
   {
@@ -109168,7 +109168,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Alkmaar",
-    "stadio": "AFAS Stadion",
+    "stadio": "AFAS Stadion（Alkmaar）",
     "stato": "Futura"
   },
   {
@@ -109182,7 +109182,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Poznan",
-    "stadio": "Stadion Poznan",
+    "stadio": "Stadion Miejski",
     "stato": "Futura"
   },
   {
@@ -109210,7 +109210,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Prague",
-    "stadio": "epet ARENA",
+    "stadio": "Stadion Letná",
     "stato": "Futura"
   },
   {
@@ -109223,8 +109223,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Heverlee",
-    "stadio": "Den Dreef",
+    "citta": "Heverley",
+    "stadio": "Den Dreef Stadium",
     "stato": "Futura"
   },
   {
@@ -109238,7 +109238,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Celje",
-    "stadio": "",
+    "stadio": "Stadion Z’dežele",
     "stato": "Futura"
   },
   {
@@ -109251,8 +109251,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Faro",
-    "stadio": "Estadio Algarve",
+    "citta": "Leiria",
+    "stadio": "Estádio Dr. Magalhães Pessoa",
     "stato": "Futura"
   },
   {
@@ -109280,7 +109280,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Marseille",
-    "stadio": "",
+    "stadio": "Orange Vélodrome",
     "stato": "Futura"
   },
   {
@@ -109308,7 +109308,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Sinsheim",
-    "stadio": "SNP Arena",
+    "stadio": "Prezero Arena",
     "stato": "Futura"
   },
   {
@@ -109322,7 +109322,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Lisbon",
-    "stadio": "",
+    "stadio": "Estádio da Luz",
     "stato": "Futura"
   },
   {
@@ -109336,7 +109336,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Bialystok",
-    "stadio": "Chorten Arena",
+    "stadio": "Stadion Miejski w Białymstoku",
     "stato": "Futura"
   },
   {
@@ -109350,7 +109350,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Nijmegen",
-    "stadio": "Goffertstadion",
+    "stadio": "Stadion de Goffert",
     "stato": "Futura"
   },
   {
@@ -109364,7 +109364,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Vigo",
-    "stadio": "",
+    "stadio": "Municipal de Balaídos",
     "stato": "Futura"
   },
   {
@@ -109392,7 +109392,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Budapest",
-    "stadio": "Groupama Arena",
+    "stadio": "Groupama Aréna",
     "stato": "Futura"
   },
   {
