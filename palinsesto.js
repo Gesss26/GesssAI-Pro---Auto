@@ -1,5 +1,5 @@
 // ============================================================
-// palinsesto.js - Modulo Palinsesto (FUTURISTIC + CHAMP BAR GRIGLIA 5x5)
+// palinsesto.js - Modulo Palinsesto (FUTURISTIC + CHAMP BAR GRIGLIA 5x5 stile Schedina)
 // ============================================================
 
 (function () {
@@ -336,7 +336,7 @@
   };
 
   // ============================================================
-  // CHAMP BAR — GRIGLIA 5 COLONNE × 5 RIGHE
+  // CHAMP BAR — GRIGLIA 5×5 STILE SCHEDINA
   // ============================================================
   const ChampBar = ({ matches, champFocus, onSelect }) => {
     const normalizeDate = window.normalizeDate;
@@ -361,12 +361,9 @@
     const campionatiOrdinati = useMemo(() => getCampionatiOrdinati(), []);
 
     const renderCella = (campionato, idx) => {
-      const gridCol = (idx % 5) + 2;
-      const gridRow = Math.floor(idx / 5) + 1;
-
       if (!campionato || !isPresente(campionato)) {
         return (
-          <div key={`empty-${idx}`} style={{ gridColumn: gridCol, gridRow }}>
+          <div key={`empty-${idx}`}>
             <div style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               padding: '6px 4px', fontSize: '10px', color: 'var(--text-dim)',
@@ -382,87 +379,126 @@
       const label = campionato.length > 16 ? campionato.substring(0, 14) + '…' : campionato;
 
       return (
-        <div key={`${campionato}-${idx}`} style={{ gridColumn: gridCol, gridRow }}>
-          <button
-            onClick={() => onSelect(campionato)}
-            className={`champ-bar-item ${isActive ? 'active' : ''}`}
-            style={{
-              borderColor: isActive ? 'var(--neon-cyan)' : `${color}66`,
-              width: '100%',
-              justifyContent: 'center',
-              padding: '5px 6px',
-              minHeight: '36px',
-              borderWidth: '1px',
-            }}
-            title={campionato}
-          >
-            <ChampLogo campionato={campionato} size={14} />
-            <span className="champ-bar-name" style={{
-              fontSize: '10px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              maxWidth: '75px',
+        <button
+          key={`${campionato}-${idx}`}
+          onClick={() => onSelect(campionato)}
+          className={`champ-bar-item ${isActive ? 'active' : ''}`}
+          style={{
+            borderColor: isActive ? 'var(--neon-cyan)' : `${color}66`,
+            background: isActive
+              ? 'linear-gradient(135deg, var(--neon-cyan), var(--neon-blue))'
+              : 'var(--bg-elevated)',
+            color: isActive ? '#000' : 'var(--text-dim)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '4px',
+            padding: '5px 6px',
+            minHeight: '36px',
+            borderWidth: isActive ? '2px' : '1px',
+            borderRadius: '10px',
+            fontSize: '10px',
+            fontWeight: isActive ? 'bold' : '700',
+            width: '100%',
+            transition: 'all 0.2s',
+            overflow: 'hidden',
+            boxShadow: isActive ? '0 0 20px rgba(0, 245, 255, 0.5)' : 'none',
+          }}
+          title={campionato}
+        >
+          <ChampLogo campionato={campionato} size={14} />
+          <span style={{
+            fontSize: '10px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            maxWidth: '75px',
+          }}>
+            {label}
+          </span>
+          {nOggi > 0 && (
+            <span style={{
+              background: isActive ? 'rgba(0,0,0,0.25)' : 'var(--neon-red)',
+              color: isActive ? '#000' : '#fff',
+              fontSize: '9px',
+              fontWeight: 900,
+              padding: '1px 6px',
+              borderRadius: '10px',
+              flexShrink: 0,
             }}>
-              {label}
+              {nOggi}
             </span>
-            {nOggi > 0 && <span className="champ-bar-badge">{nOggi}</span>}
-          </button>
-        </div>
+          )}
+        </button>
       );
     };
 
     return (
-      <div
-        className="champ-bar-grid"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: `auto repeat(5, minmax(0, 1fr))`,
-          gridTemplateRows: 'repeat(5, auto)',
-          gap: '4px',
-          marginBottom: '16px',
-          padding: '10px 12px',
-          background: 'linear-gradient(135deg, rgba(30, 40, 66, 0.7), rgba(20, 27, 46, 0.9))',
-          border: '1px solid var(--border)',
-          borderRadius: '14px',
-          overflowX: 'auto',
-        }}
-      >
+      <div style={{
+        marginBottom: '16px',
+        padding: '10px 12px',
+        background: 'linear-gradient(135deg, rgba(30, 40, 66, 0.7), rgba(20, 27, 46, 0.9))',
+        border: '1px solid var(--border)',
+        borderRadius: '14px',
+      }}>
+        {/* Bottone "Tutti i Campionati" separato sopra la griglia */}
         <button
           onClick={() => onSelect('__TUTTI__')}
           className={`champ-bar-item ${champFocus === '__TUTTI__' ? 'active' : ''}`}
           style={{
-            gridColumn: '1',
-            gridRow: '1 / span 5',
+            width: '100%',
+            marginBottom: '8px',
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '4px',
-            padding: '8px 14px',
-            borderColor: champFocus === '__TUTTI__' ? 'var(--neon-magenta)' : 'var(--neon-cyan)',
+            gap: '8px',
+            padding: '10px 16px',
+            borderRadius: '10px',
+            border: champFocus === '__TUTTI__'
+              ? '2px solid var(--neon-magenta)'
+              : '2px solid var(--neon-cyan)',
             background: champFocus === '__TUTTI__'
               ? 'linear-gradient(135deg, var(--neon-magenta), var(--neon-purple))'
               : 'linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(0, 245, 255, 0.05))',
-            color: '#000',
-            minWidth: '100px',
-            whiteSpace: 'normal',
-            textAlign: 'center',
-            lineHeight: '1.1',
+            color: champFocus === '__TUTTI__' ? '#000' : 'var(--neon-cyan)',
+            cursor: 'pointer',
+            fontWeight: 900,
+            fontSize: '13px',
+            fontFamily: 'Orbitron, sans-serif',
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+            transition: 'all 0.2s',
+            boxShadow: champFocus === '__TUTTI__'
+              ? '0 0 25px rgba(255, 0, 229, 0.6)'
+              : '0 0 15px rgba(0, 245, 255, 0.2)',
           }}
         >
-          <span style={{ fontSize: '18px' }}>🌍</span>
-          <span className="champ-bar-name" style={{ fontSize: '10px' }}>
-            Tutti i Campionati
-          </span>
+          <span style={{ fontSize: '20px' }}>🌍</span>
+          <span>Tutti i Campionati</span>
           {totaleOggi > 0 && (
-            <span className="champ-bar-badge" style={{ position: 'static', marginTop: '2px' }}>
+            <span style={{
+              background: champFocus === '__TUTTI__' ? 'rgba(0,0,0,0.3)' : 'var(--neon-red)',
+              color: champFocus === '__TUTTI__' ? '#000' : '#fff',
+              fontSize: '11px',
+              fontWeight: 900,
+              padding: '3px 10px',
+              borderRadius: '12px',
+            }}>
               {totaleOggi}
             </span>
           )}
         </button>
 
-        {campionatiOrdinati.map((campionato, idx) => renderCella(campionato, idx))}
+        {/* Griglia 5×5 stile Schedina */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+          gap: '4px',
+          width: '100%',
+        }}>
+          {campionatiOrdinati.map((campionato, idx) => renderCella(campionato, idx))}
+        </div>
       </div>
     );
   };
@@ -759,6 +795,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto FUTURISTIC caricato — ChampBar griglia 5×5 + accenti fix');
+  console.log('✅ Modulo Palinsesto FUTURISTIC caricato — ChampBar griglia 5×5 stile Schedina');
 
 })();
