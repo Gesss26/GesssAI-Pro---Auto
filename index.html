@@ -1180,13 +1180,37 @@
         };
       }, [championships, matches, theme, customTheme, selectedFamiglie]);
 
-      useEffect(() => {
-        const t = theme === 'Custom' ? customTheme : THEMES[theme] || THEMES['Scuro Blu Notte'];
-        const root = document.documentElement;
-        Object.entries(t).forEach(([k, v]) => {
-          root.style.setProperty(`--${k.replace(/([A-Z])/g, '-$1').toLowerCase()}`, v);
-        });
-      }, [theme, customTheme]);
+ useEffect(() => {
+  const t = theme === 'Custom' ? customTheme : THEMES[theme] || THEMES['Scuro Blu Notte'];
+  const root = document.documentElement;
+  Object.entries(t).forEach(([k, v]) => {
+    root.style.setProperty(`--${k.replace(/([A-Z])/g, '-$1').toLowerCase()}`, v);
+  });
+
+  // ⭐ FORZA background su body/html/app-shell/container
+  // (sovrascrive il CSS hardcoded di styles-futuristic.css)
+  document.body.style.background = t.bg;
+  document.body.style.backgroundColor = t.bg;
+  document.body.style.color = t.text;
+
+  document.documentElement.style.background = t.bg;
+  document.documentElement.style.backgroundColor = t.bg;
+  document.documentElement.style.color = t.text;
+
+  // Forza anche gli elementi principali
+  const selettori = ['.app-shell', '.container', '#root', '.header', '.tabs-nav', '.schedina-container'];
+  selettori.forEach(sel => {
+    document.querySelectorAll(sel).forEach(el => {
+      el.style.background = t.bg;
+      el.style.backgroundColor = t.bg;
+      el.style.color = t.text;
+    });
+  });
+
+  // ⭐ Salva anche in localStorage per il prossimo reload
+  localStorage.setItem('ft_theme', JSON.stringify(theme));
+  localStorage.setItem('ft_custom_theme', JSON.stringify(customTheme));
+}, [theme, customTheme]);
 
       useEffect(() => {
         document.documentElement.style.fontSize = (fontSize / 100 * 16) + 'px';
