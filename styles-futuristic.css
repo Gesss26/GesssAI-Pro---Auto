@@ -4,6 +4,7 @@
    + Classifica a griglia + Responsive PC/Mobile
    + Tema AI-Neon adattivo (scuro/chiaro)
    + Sub-tabs bottoni uguali/centrati/fissi + Container full-width
+   + Matches grid: 4 colonne fisse su desktop
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
@@ -55,23 +56,10 @@ body {
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
-  /* ⭐ SFONDO AI-NEON (funziona su scuro e chiaro) */
   background-image:
-    radial-gradient(
-      ellipse 80% 50% at 50% 0%,
-      rgba(0, 200, 255, 0.10) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse 60% 40% at 90% 100%,
-      rgba(200, 0, 255, 0.08) 0%,
-      transparent 60%
-    ),
-    radial-gradient(
-      ellipse 60% 40% at 10% 90%,
-      rgba(0, 255, 180, 0.06) 0%,
-      transparent 60%
-    ),
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0, 200, 255, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(200, 0, 255, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 10% 90%, rgba(0, 255, 180, 0.06) 0%, transparent 60%),
     linear-gradient(rgba(0, 200, 255, 0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 200, 255, 0.04) 1px, transparent 1px),
     radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
@@ -300,37 +288,44 @@ body {
 }
 
 /* ============================================================
-   MATCHES GRID — adattivo a tutta la larghezza
+   MATCHES GRID — 4 COLONNE FISSE su desktop
    ============================================================ */
 .matches-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
   width: 100%;
 }
 
-/* Su schermi ultra-wide, 4 colonne */
-@media (min-width: 1900px) {
+/* Schermi molto larghi (4K+): restano 4 colonne ma con gap maggiore */
+@media (min-width: 2200px) {
   .matches-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
   }
 }
-/* PC standard 3 colonne */
-@media (max-width: 1899px) and (min-width: 1300px) {
+
+/* PC medio: 3 colonne */
+@media (max-width: 1500px) and (min-width: 1150px) {
   .matches-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
   }
 }
-/* PC piccoli 2 colonne */
-@media (max-width: 1299px) and (min-width: 900px) {
+
+/* PC piccolo: 2 colonne */
+@media (max-width: 1149px) and (min-width: 900px) {
   .matches-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
   }
 }
-/* Tablet/mobile 1 colonna */
+
+/* Tablet/mobile: 1 colonna */
 @media (max-width: 899px) {
   .matches-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 }
 
