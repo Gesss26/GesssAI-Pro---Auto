@@ -1,15 +1,22 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto (FUTURISTIC + CHAMP BAR GRIGLIA 5x5)
-// ✅ PC: Griglia 5 colonne × 5 righe = 25 campionati (da CHAMPIONSHIP_LIST)
-// ✅ PC: Ordinamento alfabetico
-// ✅ PC: "Tutti i Campionati" a sinistra, span verticale su 5 righe
-// ✅ Mobile: lista campionati scrollabile → click → giornata
 // ============================================================
 
 (function () {
   'use strict';
 
   const { useState, useMemo, useEffect } = React;
+
+  // ⭐ Normalizza accenti per kebab-case
+  const normalizzaAccenti = (str) => {
+    if (!str) return '';
+    return str
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/ß/g, 'ss')
+      .replace(/ø/g, 'o')
+      .replace(/æ/g, 'ae');
+  };
 
   const formatGiocataLabel = (familyId, label) => {
     if (!label) return '—';
@@ -51,9 +58,6 @@
     catch (e) { return null; }
   };
 
-  // ============================================================
-  // DETECT MOBILE
-  // ============================================================
   const useIsMobile = () => {
     const [isMobile, setIsMobile] = useState(() => window.innerWidth < 900);
     useEffect(() => {
@@ -65,44 +69,38 @@
   };
 
   // ============================================================
-  // ⭐ LISTA CAMPIONATI ORDINATA ALFABETICAMENTE
-  // Usa window.CHAMPIONSHIP_LIST (25 campionati) se disponibile,
-  // altrimenti fallback a lista interna.
+  // LISTA CAMPIONATI ORDINATA ALFABETICAMENTE
   // ============================================================
   const getCampionatiOrdinati = () => {
     const list = (window.CHAMPIONSHIP_LIST && window.CHAMPIONSHIP_LIST.length > 0)
       ? window.CHAMPIONSHIP_LIST
-      : [
-          'UEFA Champions League', 'UEFA Europa League', 'UEFA Europa Conference', 'UEFA Nations League',
-          'Jupiler Pro League', 'Premier League', 'EFL Championship',
-          'Ligue 1', 'Ligue 2', 'Bundesliga', '2. Bundesliga',
-          'Serie A', 'Serie B',
-          'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C',
-          'J1 League', 'Eerste Divisie', 'Eredivisie',
-          'Primeira Liga', 'Scottish Premiership',
-          'K League 1', 'La Liga', 'Segunda División', 'Süper Lig'
-        ];
+      : [];
     return [...list].sort((a, b) =>
       (a || '').localeCompare(b || '', 'it', { sensitivity: 'base' })
     );
   };
 
   // ============================================================
-  // CHAMP LOGO
+  // CHAMP LOGO (con normalizzazione accenti)
   // ============================================================
   const ChampLogo = ({ campionato, size = 24 }) => {
     const [hasError, setHasError] = useState(false);
     const [pathIndex, setPathIndex] = useState(0);
 
-    // Genera i path possibili per il logo del campionato
     const getPaths = (champ) => {
       if (!champ) return [];
-      const kebab = champ.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
-      const snake = champ.toLowerCase().replace(/\s+/g, '_');
+      const normalized = normalizzaAccenti(champ);
+      const kebab = normalized
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/[\s-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      const snake = normalized.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
       return [
-        `logos/campionati/${kebab}.png`,      // uefa-champions-league.png ✅
-        `logos/campionati/${snake}.png`,      // uefa_champions_league.png
-        `logos/campionati/${champ}.png`,      // UEFA Champions League.png
+        `logos/campionati/${kebab}.png`,
+        `logos/campionati/${snake}.png`,
+        `logos/campionati/${champ}.png`,
         `logos/campionati/${kebab}.jpg`,
         `logos/campionati/${snake}.jpg`,
       ];
@@ -138,9 +136,6 @@
     );
   };
 
-  // ============================================================
-  // QUOTA BOX
-  // ============================================================
   const QuotaBox = ({ match, familyId, giocata, pctTua }) => {
     const [quotaInfo, setQuotaInfo] = useState(null);
     const { numPartite, dataMaxPDF } = window.QuoteManager ? window.QuoteManager.useQuote() : { numPartite: 0 };
@@ -162,15 +157,12 @@
         fontSize: '11px', fontWeight: 'bold',
         color: isValue ? 'var(--neon-green)' : 'var(--text)',
         whiteSpace: 'nowrap',
-      }} title={isValue ? `VALUE BET! Edge: +${edge}%` : `Quota Marathonbet`}>
+      }}>
         <span>💰</span><span>{quotaBook.toFixed(2)}</span>
       </div>
     );
   };
 
-  // ============================================================
-  // MATCH TAB (card partita)
-  // ============================================================
   const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie }) => {
     const computeMatchStats = window.computeMatchStats;
     const calcFormAndStats = window.calcFormAndStats;
@@ -344,9 +336,7 @@
   };
 
   // ============================================================
-  // ⭐ CHAMP BAR — GRIGLIA 5 COLONNE × 5 RIGHE = 25 CELLE
-  // "Tutti i Campionati" a sinistra, span verticale su 5 righe
-  // Campionati ordinati alfabeticamente da CHAMPIONSHIP_LIST
+  // CHAMP BAR — GRIGLIA 5 COLONNE × 5 RIGHE
   // ============================================================
   const ChampBar = ({ matches, champFocus, onSelect }) => {
     const normalizeDate = window.normalizeDate;
@@ -368,14 +358,12 @@
       return matches.some(m => m.campionato === camp);
     };
 
-    // ⭐ Lista campionati ordinata alfabeticamente
     const campionatiOrdinati = useMemo(() => getCampionatiOrdinati(), []);
 
     const renderCella = (campionato, idx) => {
-      const gridCol = (idx % 5) + 2;   // +2 perché colonna 1 = "Tutti"
+      const gridCol = (idx % 5) + 2;
       const gridRow = Math.floor(idx / 5) + 1;
 
-      // Cella vuota (campionato non presente nei dati)
       if (!campionato || !isPresente(campionato)) {
         return (
           <div key={`empty-${idx}`} style={{ gridColumn: gridCol, gridRow }}>
@@ -391,8 +379,6 @@
       const color = window.getChampColor(campionato);
       const isActive = champFocus === campionato;
       const nOggi = countOggi(campionato);
-
-      // Label abbreviata per il pulsante
       const label = campionato.length > 16 ? campionato.substring(0, 14) + '…' : campionato;
 
       return (
@@ -442,7 +428,6 @@
           overflowX: 'auto',
         }}
       >
-        {/* ⭐ "Tutti i Campionati" a sinistra, span verticale su 5 righe */}
         <button
           onClick={() => onSelect('__TUTTI__')}
           className={`champ-bar-item ${champFocus === '__TUTTI__' ? 'active' : ''}`}
@@ -477,15 +462,11 @@
           )}
         </button>
 
-        {/* ⭐ 25 celle (5×5) */}
         {campionatiOrdinati.map((campionato, idx) => renderCella(campionato, idx))}
       </div>
     );
   };
 
-  // ============================================================
-  // SELEZIONE VISUALIZZAZIONE GIOCATE
-  // ============================================================
   const VisualizzaGiocateSwitch = ({ mode, setMode, selectedFamiglie }) => {
     const countScelte = (selectedFamiglie || []).length;
     const totalFamiglie = Object.keys(window.FAMIGLIE_GIOCATE || {}).length;
@@ -518,9 +499,6 @@
     );
   };
 
-  // ============================================================
-  // MOBILE: LISTA CAMPIONATI (scrollabile, ordinata alfabeticamente)
-  // ============================================================
   const MobileListaCampionati = ({ matches, onSelect }) => {
     const normalizeDate = window.normalizeDate;
     const todayStr = window.getTodayStr();
@@ -550,7 +528,6 @@
             🏆 Campionati
           </div>
 
-          {/* Tutti i Campionati */}
           <button
             onClick={() => onSelect('__TUTTI__')}
             style={{
@@ -574,7 +551,6 @@
             </span>
           </button>
 
-          {/* Lista campionati */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {campionatiDisponibili.map(camp => {
               const color = window.getChampColor(camp.nome);
@@ -614,9 +590,6 @@
     );
   };
 
-  // ============================================================
-  // COMPONENTE PRINCIPALE
-  // ============================================================
   function PalinsestoComponent({ matches, selectedFamiglie, onSelectMatch, weatherCache }) {
     const normalizeDate = window.normalizeDate;
     const getTodayStr = window.getTodayStr;
@@ -627,7 +600,6 @@
 
     const [champFocus, setChampFocus] = useState('__TUTTI__');
 
-    // Partite di OGGI (filtrate per campionato se selezionato)
     const partiteOggi = useMemo(() => {
       const todayStr = getTodayStr();
       let list = matches.filter(m => m.stato === 'Futura' && normalizeDate(m.data) === todayStr);
@@ -639,7 +611,6 @@
 
     const isTuttiMode = champFocus === '__TUTTI__';
 
-    // ⭐ MOBILE
     if (isMobile) {
       if (champFocus) {
         const color = isTuttiMode ? 'var(--neon-cyan)' : window.getChampColor(champFocus);
@@ -718,7 +689,6 @@
       );
     }
 
-    // ⭐ PC
     return (
       <div>
         <div style={{
@@ -743,14 +713,12 @@
           selectedFamiglie={selectedFamiglie}
         />
 
-        {/* ⭐ SIDEBAR A GRIGLIA 5×5 */}
         <ChampBar
           matches={matches}
           champFocus={champFocus}
           onSelect={(c) => setChampFocus(c)}
         />
 
-        {/* Header campionato selezionato */}
         {!isTuttiMode && (
           <div style={{
             background: `linear-gradient(135deg, ${window.getChampColor(champFocus)}, ${window.getChampColor(champFocus)}99)`,
@@ -772,9 +740,7 @@
         {partiteOggi.length === 0 ? (
           <div className="card" style={{ textAlign: 'center', padding: '60px 20px' }}>
             <div style={{ fontSize: '64px', marginBottom: '16px' }}>😴</div>
-            <h3 style={{ color: 'var(--neon-cyan)' }}>
-              Nessuna partita oggi
-            </h3>
+            <h3 style={{ color: 'var(--neon-cyan)' }}>Nessuna partita oggi</h3>
             <p style={{ color: 'var(--text-dim)' }}>
               {isTuttiMode ? 'Non ci sono partite in programma oggi' : `Nessuna partita di ${champFocus} oggi`}
             </p>
@@ -793,6 +759,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto FUTURISTIC caricato — ChampBar griglia 5×5 alfabetica');
+  console.log('✅ Modulo Palinsesto FUTURISTIC caricato — ChampBar griglia 5×5 + accenti fix');
 
 })();

@@ -40,10 +40,11 @@
 <script type="text/babel" src="quote-importer.jsx"></script>
 <script type="text/babel" src="performance.js"></script>
 <script type="text/babel" src="quote-manager.js"></script>
-<script type="text/babel" src="schedina.js"></script>
 <script type="text/babel" src="palinsesto.js"></script>
+<script type="text/babel" src="schedina.js"></script>
 <script type="text/babel" src="home.js"></script>
-<script type="text/babel" src="impostazioni.js"></script><script type="text/babel" src="statistiche.js"></script>
+<script type="text/babel" src="impostazioni.js"></script>
+<script type="text/babel" src="statistiche.js"></script>
 <script type="text/babel" src="storico.js"></script>
 
 <!-- CSS Futuristico -->
@@ -128,24 +129,34 @@
     };
 
     // ============================================================
+    // NORMALIZZA ACCENTI (per kebab-case loghi)
+    // ============================================================
+    const normalizzaAccenti = (str) => {
+      if (!str) return '';
+      return str
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/ß/g, 'ss')
+        .replace(/ø/g, 'o')
+        .replace(/æ/g, 'ae');
+    };
+
+    // ============================================================
     // CARICAMENTO DATI
     // ============================================================
     let dataLoaded = false;
 
     async function loadScrapedData(forceReload = false) {
-      console.log('📂 Caricamento dati da Excel...');
+      console.log('📂 Caricamento dati...');
       try {
         if (forceReload) {
           localStorage.removeItem('ft_matches');
           localStorage.removeItem('ft_champs');
         }
 
-        const paths = [
-          'excel/GesssAI_Input.xlsx',
-          'data/GesssAI_Input.xlsx',
-        ];
-
+        const paths = ['excel/GesssAI_Input.xlsx', 'data/GesssAI_Input.xlsx'];
         let excelData = null;
+
         for (const path of paths) {
           try {
             console.log('📂 Tentativo:', path);
@@ -164,10 +175,7 @@
         if (excelData) return excelData;
 
         console.log('📂 Fallback JSON...');
-        const jsonPaths = [
-          'data/matches.json',
-          'matches.json',
-        ];
+        const jsonPaths = ['data/matches.json', 'matches.json'];
         for (const path of jsonPaths) {
           try {
             const response = await fetch(path);
@@ -177,12 +185,6 @@
               if (data.matches) {
                 const filteredMatches = filtraCampionatiEsclusi(data.matches);
                 const filteredChamps = (data.championships || []).filter(c => !CAMPIONATI_ESCLUSI.has(c.name));
-                try {
-                  localStorage.setItem('ft_matches', JSON.stringify(filteredMatches));
-                  localStorage.setItem('ft_champs', JSON.stringify(filteredChamps));
-                } catch (e) {
-                  console.warn('⚠️ localStorage pieno (JSON fallback), salto salvataggio:', e.message);
-                }
                 dataLoaded = true;
                 return { matches: filteredMatches, championships: filteredChamps };
               }
@@ -298,19 +300,7 @@
 
         console.log(`✅ ${matchesFiltrati.length} partite caricate (${championshipsFiltrati.length} campionati)`);
 
-        // ⭐ FIX: try/catch per localStorage pieno
-        try {
-          localStorage.setItem('ft_matches', JSON.stringify(matchesFiltrati));
-          localStorage.setItem('ft_champs', JSON.stringify(championshipsFiltrati));
-        } catch (e) {
-          console.warn('⚠️ localStorage pieno, salto salvataggio matches/champs:', e.message);
-          try {
-            localStorage.removeItem('ft_matches');
-            localStorage.removeItem('ft_champs');
-          } catch (e2) {}
-        }
         dataLoaded = true;
-
         return { matches: matchesFiltrati, championships: championshipsFiltrati };
       } catch (error) {
         console.error('❌ Errore Excel:', error.message);
@@ -338,32 +328,21 @@
       'UEFA Europa Conference':  '#00b894',
       'UEFA Nations League':     '#003399',
       'Jupiler Pro League': '#e74c3c',
-      'Premier League': '#3498db', 'EFL Championship': '#6c3483',
+      'Premier League': '#3498db', 'Championship': '#6c3483',
       'Ligue 1': '#9b59b6', 'Ligue 2': '#8e44ad', 'Bundesliga': '#f39c12', '2. Bundesliga': '#e67e22',
-      'Serie A': '#2ecc71', 'Serie B': '#e67e22', 'Serie C - Girone A': '#2980b9', 'Serie C - Girone B': '#27ae60',
-      'Serie C - Girone C': '#c0392b', 'J1 League': '#e74c3c', 'Eerste Divisie': '#e67e22', 'Eredivisie': '#e74c3c',
+      'Serie A': '#2ecc71', 'Serie B': '#e67e22', 'Serie C': '#2980b9',
+      'J1 League': '#e74c3c', 'Eerste Divisie': '#e67e22', 'Eredivisie': '#e74c3c',
       'Primeira Liga': '#34495e', 'Scottish Premiership': '#2ecc71', 'K League 1': '#3498db', 'La Liga': '#e74c3c',
       'Segunda División': '#e67e22', 'Süper Lig': '#e67e22'
     };
 
-    const CHAMPIONSHIP_LIST = [
-      'UEFA Champions League',
-      'UEFA Europa League',
-      'UEFA Europa Conference',
-      'UEFA Nations League',
-      'Jupiler Pro League',
-      'Premier League', 'EFL Championship',
-      'Ligue 1', 'Ligue 2',
-      'Bundesliga', '2. Bundesliga',
-      'Serie A', 'Serie B',
-      'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C',
-      'J1 League',
-      'Eerste Divisie', 'Eredivisie',
-      'Primeira Liga',
-      'Scottish Premiership',
-      'K League 1',
-      'La Liga', 'Segunda División',
-      'Süper Lig',
+    const CHAMPIONSHIP_LIST = window.CHAMPIONSHIP_LIST || [
+      'UEFA Champions League', 'UEFA Europa League', 'UEFA Europa Conference', 'UEFA Nations League',
+      'Jupiler Pro League', 'Premier League', 'Championship',
+      'Ligue 1', 'Ligue 2', 'Bundesliga', '2. Bundesliga',
+      'Serie A', 'Serie B', 'Serie C',
+      'J1 League', 'Eerste Divisie', 'Eredivisie', 'Primeira Liga',
+      'Scottish Premiership', 'K League 1', 'La Liga', 'Segunda División', 'Süper Lig',
     ];
 
     // ============================================================
@@ -469,27 +448,38 @@
     };
 
     // ============================================================
-    // TEAM LOGO (⭐ AGGIORNATO con supporto campionati/ + kebab-case)
+    // TEAM LOGO
+    // ⭐ Con sfondo chiaro per campionati (coppe UEFA scure)
     // ============================================================
     const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
       const [hasError, setHasError] = useState(false);
       const [pathIndex, setPathIndex] = useState(0);
 
-      // Rileva se stiamo chiedendo il logo di una COMPETIZIONE
       const isCompetition = (name, champ) => {
         if (!name || !champ) return false;
         return name.trim().toLowerCase() === champ.trim().toLowerCase();
       };
 
-      // Percorsi per il logo della COMPETIZIONE
-      // File reali: logos/campionati/uefa-champions-league.png (kebab-case)
+      // ⭐ Campionati con loghi scuri → sfondo chiaro per farli vedere
+      const isCampionatoScuro = (champ) => {
+        if (!champ) return false;
+        const c = champ.toLowerCase();
+        // Coppe UEFA (loghi blu/verde/arancio scuri)
+        if (c.includes('uefa') || c.includes('champions') || c.includes('europa') || c.includes('conference') || c.includes('nations')) return true;
+        // Campionati con loghi scuri
+        if (c === 'championship' || c.includes('eredivisie') || c.includes('primeira')) return true;
+        return false;
+      };
+
       const getCompetitionPaths = (champ) => {
-        const kebab = champ
+        const normalized = normalizzaAccenti(champ);
+        const kebab = normalized
           .toLowerCase()
           .replace(/[^a-z0-9\s-]/g, '')
           .trim()
-          .replace(/\s+/g, '-');
-        const snake = champ.toLowerCase().replace(/\s+/g, '_');
+          .replace(/[\s-]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+        const snake = normalized.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
         const original = champ;
 
         return [
@@ -501,15 +491,13 @@
         ];
       };
 
-      // Percorsi per il logo della SQUADRA
       const getLeagueFolder = (champ) => {
         if (!champ) return '';
         const map = {
           'Jupiler Pro League': 'Jupiler_Pro_League',
-          'Premier League': 'Premier_League', 'EFL Championship': 'Championship',
+          'Premier League': 'Premier_League', 'Championship': 'Championship',
           'Ligue 1': 'Ligue_1', 'Ligue 2': 'Ligue_2', 'Bundesliga': 'Bundesliga', '2. Bundesliga': '2. Bundesliga',
-          'Serie A': 'Serie_A', 'Serie B': 'Serie_B',
-          'Serie C - Girone A': 'Serie_C_Girone_A', 'Serie C - Girone B': 'Serie_C_Girone_B', 'Serie C - Girone C': 'Serie_C_Girone_C',
+          'Serie A': 'Serie_A', 'Serie B': 'Serie_B', 'Serie C': 'Serie_C',
           'J1 League': 'J1_League', 'Eredivisie': 'Eredivisie', 'Eerste Divisie': 'Eerste_Divisie',
           'Primeira Liga': 'Primeira_Liga', 'Scottish Premiership': 'Scottish_Premiership',
           'K League 1': 'K_League_1', 'La Liga': 'La_Liga', 'Segunda División': 'Segunda_Division',
@@ -572,6 +560,9 @@
 
       const currentSrc = paths[pathIndex];
 
+      // ⭐ Applica sfondo chiaro se il campionato ha loghi scuri
+      const needsLightBg = isCampionatoScuro(championship);
+
       return (
         <img
           key={currentSrc}
@@ -584,6 +575,10 @@
             maxWidth: size + 'px', maxHeight: size + 'px',
             objectFit: 'contain', display: 'block',
             borderRadius: '4px', flexShrink: 0,
+            // ⭐ Sfondo chiaro per loghi scuri (coppe UEFA, ecc.)
+            backgroundColor: needsLightBg ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
+            padding: needsLightBg ? '2px' : '0',
+            boxSizing: 'border-box',
           }}
           className={`team-logo ${className}`}
           onError={() => {
@@ -620,11 +615,10 @@
     const DEFAULT_FAMIGLIE = ['dc_under', 'mg_casa_ospite', 'over'];
 
     // ============================================================
-    // CALCOLI
+    // CALCOLI (identici a prima)
     // ============================================================
     const calcolaStatsSquadra = (games, team, isHomeTeam) => {
       const total = games.length;
-
       if (total === 0) {
         return {
           partite: 0, vittorie: 0, pareggi: 0, sconfitte: 0,
@@ -653,7 +647,6 @@
       let mg01 = 0, mg02 = 0, mg13 = 0, mg25 = 0;
       let mg14_tot = 0, mg25_tot = 0;
       let cnt1X = 0, cntX2 = 0, cntNoPareggio = 0;
-
       let combo1X_over15 = 0, combo1X_over25 = 0, combo1X_over35 = 0, combo1X_over45 = 0;
       let combo1X_under15 = 0, combo1X_under25 = 0, combo1X_under35 = 0, combo1X_under45 = 0;
       let combo12_over15 = 0, combo12_over25 = 0, combo12_over35 = 0, combo12_over45 = 0;
@@ -691,7 +684,6 @@
         if (tg <= 2) mg02++;
         if (tg >= 1 && tg <= 3) mg13++;
         if (tg >= 2 && tg <= 5) mg25++;
-
         if (tot >= 1 && tot <= 4) mg14_tot++;
         if (tot >= 2 && tot <= 5) mg25_tot++;
 
@@ -703,7 +695,6 @@
           is1X = isSconfitta || isPareggio;
           isX2 = isVittoria || isPareggio;
         }
-
         const is12 = isVittoria || isSconfitta;
         if (is1X) cnt1X++;
         if (isX2) cntX2++;
@@ -720,7 +711,6 @@
         if (is1X && !o25) combo1X_under25++;
         if (is1X && !o35) combo1X_under35++;
         if (is1X && !o45) combo1X_under45++;
-
         if (is12 && o15) combo12_over15++;
         if (is12 && o25) combo12_over25++;
         if (is12 && o35) combo12_over35++;
@@ -729,7 +719,6 @@
         if (is12 && !o25) combo12_under25++;
         if (is12 && !o35) combo12_under35++;
         if (is12 && !o45) combo12_under45++;
-
         if (isX2 && o15) comboX2_over15++;
         if (isX2 && o25) comboX2_over25++;
         if (isX2 && o35) comboX2_over35++;
@@ -738,7 +727,6 @@
         if (isX2 && !o25) comboX2_under25++;
         if (isX2 && !o35) comboX2_under35++;
         if (isX2 && !o45) comboX2_under45++;
-
         if (is1X && isMG14) combo1X_mg14++;
         if (is1X && isMG25) combo1X_mg25++;
         if (is12 && isMG14) combo12_mg14++;
@@ -748,7 +736,6 @@
       });
 
       const pct = (n) => (n / total) * 100;
-
       return {
         partite: total, vittorie, pareggi, sconfitte,
         pctVittorie: pct(vittorie), pctPareggi: pct(pareggi), pctSconfitte: pct(sconfitte),
@@ -850,16 +837,10 @@
       if (giocata === '12+U3.5') return Math.round(media(homeStats.combo12_under35, awayStats.combo12_under35));
       if (giocata === '12+U4.5') return Math.round(media(homeStats.combo12_under45, awayStats.combo12_under45));
 
-      if (giocata === '1X+0-2') return Math.round(homeStats.combo1X_mg02 || 0);
-      if (giocata === '1X+1-3') return Math.round(homeStats.combo1X_mg13 || 0);
       if (giocata === '1X+1-4') return Math.round(homeStats.combo1X_mg14);
       if (giocata === '1X+2-5') return Math.round(homeStats.combo1X_mg25);
-      if (giocata === 'X2+0-2') return Math.round(awayStats.comboX2_mg02 || 0);
-      if (giocata === 'X2+1-3') return Math.round(awayStats.comboX2_mg13 || 0);
       if (giocata === 'X2+1-4') return Math.round(awayStats.comboX2_mg14);
       if (giocata === 'X2+2-5') return Math.round(awayStats.comboX2_mg25);
-      if (giocata === '12+0-2') return Math.round(media(homeStats.combo12_mg02 || 0, awayStats.combo12_mg02 || 0));
-      if (giocata === '12+1-3') return Math.round(media(homeStats.combo12_mg13 || 0, awayStats.combo12_mg13 || 0));
       if (giocata === '12+1-4') return Math.round(media(homeStats.combo12_mg14, awayStats.combo12_mg14));
       if (giocata === '12+2-5') return Math.round(media(homeStats.combo12_mg25, awayStats.combo12_mg25));
 
@@ -886,13 +867,11 @@
       if (!stats || stats.error) return null;
       const family = FAMIGLIE_GIOCATE[familyId];
       if (!family) return null;
-
       let best = null, bestPct = -1, bestLabel = '';
       family.options.forEach(opt => {
         let pct = getGiocataPct(opt, stats, homeMG, awayMG, mgTot);
         if (pct > bestPct) { bestPct = pct; best = opt; bestLabel = opt; }
       });
-
       if (best && bestPct > 0) {
         return { giocata: best, label: bestLabel, pct: bestPct, isBomb: bestPct >= 90 };
       }
@@ -903,12 +882,10 @@
       if (!stats || stats.error) return null;
       const { homeStats, awayStats } = stats;
       if (!homeStats || !awayStats) return null;
-
       const pctGG = Math.round((homeStats.pctGG + awayStats.pctGG) / 2);
       const pctNG = Math.round((homeStats.pctNG + awayStats.pctNG) / 2);
       const migliore = pctGG > pctNG ? 'GG' : 'NG';
       const pctMigliore = Math.max(pctGG, pctNG);
-
       return {
         giocata: migliore, label: migliore === 'GG' ? 'Goal-Goal' : 'No Goal',
         pct: pctMigliore, isBomb: pctMigliore >= 90,
@@ -920,17 +897,14 @@
     const getMultigolRange = (teamName, allMatches) => {
       const matches = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName));
       if (matches.length === 0) return { label: 'N/A', pct: 0, range: 'default', details: [] };
-
       const goals = matches.map(m => (m.casa === teamName) ? m.golCasa : m.golOspite);
       const total = goals.length;
-
       const r01 = goals.filter(g => g <= 1).length / total * 100;
       const r02 = goals.filter(g => g <= 2).length / total * 100;
       const r13 = goals.filter(g => g >= 1 && g <= 3).length / total * 100;
       const r24 = goals.filter(g => g >= 2 && g <= 4).length / total * 100;
       const r25 = goals.filter(g => g >= 2 && g <= 5).length / total * 100;
       const r36 = goals.filter(g => g >= 3 && g <= 6).length / total * 100;
-
       const ranges = [
         { label: '0-1', pct: r01, range: '01' },
         { label: '0-2', pct: r02, range: '02' },
@@ -949,7 +923,6 @@
     const get12Under45 = (allMatches, homeTeam, awayTeam) => {
       const homeGames = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === homeTeam || m.ospiti === homeTeam));
       const awayGames = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === awayTeam || m.ospiti === awayTeam));
-
       const calcPct = (games, team) => {
         if (games.length === 0) return 0;
         let count = 0;
@@ -962,7 +935,6 @@
         });
         return (count / games.length) * 100;
       };
-
       return (calcPct(homeGames, homeTeam) + calcPct(awayGames, awayTeam)) / 2;
     };
 
@@ -1053,11 +1025,13 @@
     window.filtraCampionatiEsclusi = filtraCampionatiEsclusi;
     window.calcolaGG_NG = calcolaGG_NG;
     window.get12Under45 = get12Under45;
+    window.normalizzaAccenti = normalizzaAccenti;
 
-    console.log('✅ Funzioni globali esposte v11 - TeamLogo kebab-case + fix localStorage - ' + CHAMPIONSHIP_LIST.length + ' campionati configurati');
+    console.log('✅ Funzioni globali esposte v13 - ' + CHAMPIONSHIP_LIST.length + ' campionati, logo con sfondo chiaro');
 
     // ============================================================
     // LOAD/SAVE STATE
+    // ⭐ saveState salva SOLO partite future (evita localStorage pieno)
     // ============================================================
     const loadState = () => {
       try {
@@ -1070,14 +1044,6 @@
         };
         localData.matches = filtraCampionatiEsclusi(localData.matches);
         localData.championships = localData.championships.filter(c => !CAMPIONATI_ESCLUSI.has(c.name));
-
-        if (localData.matches.length === 0) {
-          loadScrapedData().then(data => {
-            if (data && data.matches && data.matches.length > 0 && window.updateAppData) {
-              window.updateAppData(data);
-            }
-          });
-        }
         return localData;
       } catch (e) {
         return {
@@ -1089,16 +1055,22 @@
     };
 
     const saveState = (data) => {
+      // Campionati: salva tutti
+      try { localStorage.setItem('ft_champs', JSON.stringify(data.championships)); } catch (e) { console.warn('⚠️ localStorage pieno (champs)'); }
+
+      // ⭐ Partite: salva SOLO le future (per evitare localStorage pieno)
       try {
-        localStorage.setItem('ft_champs', JSON.stringify(data.championships));
-      } catch (e) {
-        console.warn('⚠️ localStorage pieno (champs), salto');
-      }
-      try {
-        localStorage.setItem('ft_matches', JSON.stringify(data.matches));
+        const oggi = getTodayStr();
+        const partiteFuture = (data.matches || []).filter(m => {
+          const norm = normalizeDate(m.data);
+          return norm && norm >= oggi;
+        });
+        localStorage.setItem('ft_matches', JSON.stringify(partiteFuture));
+        console.log(`💾 Salvate ${partiteFuture.length} partite future (su ${(data.matches || []).length} totali)`);
       } catch (e) {
         console.warn('⚠️ localStorage pieno (matches), salto');
       }
+
       try { localStorage.setItem('ft_theme', JSON.stringify(data.theme)); } catch (e) {}
       try { localStorage.setItem('ft_custom_theme', JSON.stringify(data.customTheme)); } catch (e) {}
       try { localStorage.setItem('ft_selected_famiglie', JSON.stringify(data.selectedFamiglie || ['dc_under', 'mg_casa_ospite', 'over'])); } catch (e) {}
@@ -1148,36 +1120,48 @@
         return saved ? parseInt(saved) : 100;
       });
 
+      // ⭐ FIX LOOP: refs per evitare ricariche/salvataggi infiniti
+      const hasLoadedRef = useRef(false);
+      const saveTimeoutRef = useRef(null);
+
       useEffect(() => {
         if (window.QuoteManager && typeof window.QuoteManager.initAutoDownload === 'function') {
           window.QuoteManager.initAutoDownload();
         }
       }, []);
 
+      // ⭐ FIX LOOP: carica dati UNA SOLA VOLTA al mount
       useEffect(() => {
-        try {
-          const loadData = async () => {
+        if (hasLoadedRef.current) return;
+        hasLoadedRef.current = true;
+
+        if (matches && matches.length > 0) {
+          console.log(`✅ Dati già in memoria: ${matches.length} partite`);
+          return;
+        }
+
+        console.log('📂 Prima esecuzione, carico dati...');
+        const loadData = async () => {
+          try {
             const data = await loadScrapedData();
             if (data && data.matches && data.matches.length > 0) {
               setMatches(data.matches);
               setChampionships(data.championships || []);
               console.log(`✅ ${data.matches.length} partite caricate!`);
             }
-          };
-          loadData();
-        } catch (e) {
-          console.error('Errore caricamento:', e);
-        }
+          } catch (e) {
+            console.error('Errore caricamento:', e);
+          }
+        };
+        loadData();
       }, []);
 
       useEffect(() => {
         if (!selectedMatchId) return;
         const selectedMatch = matches.find(m => m.id === selectedMatchId);
         if (!selectedMatch) return;
-
         const weatherKey = `${selectedMatch.campionato}_${selectedMatch.data}`;
         if (weatherCache[weatherKey]) return;
-
         if (typeof window.fetchWeatherForMatch === 'function') {
           window.fetchWeatherForMatch(selectedMatch).then(weather => {
             if (weather) setWeatherCache(prev => ({ ...prev, [weatherKey]: weather }));
@@ -1185,21 +1169,15 @@
         }
       }, [selectedMatchId, matches]);
 
-      const updateDataFromScraper = (data) => {
-        if (data && data.matches && data.matches.length > 0) {
-          const filteredMatches = filtraCampionatiEsclusi(data.matches);
-          const filteredChamps = (data.championships || []).filter(c => !CAMPIONATI_ESCLUSI.has(c.name));
-          setMatches(filteredMatches);
-          setChampionships(filteredChamps);
-          saveState({ championships: filteredChamps, matches: filteredMatches, theme, customTheme, selectedFamiglie });
-          showAlert('success', `✅ Aggiornato con ${filteredMatches.length} partite!`);
-        }
-      };
-
-      window.updateAppData = updateDataFromScraper;
-
+      // ⭐ FIX LOOP: salva con debounce 5s
       useEffect(() => {
-        saveState({ championships, matches, theme, customTheme, selectedFamiglie });
+        if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = setTimeout(() => {
+          saveState({ championships, matches, theme, customTheme, selectedFamiglie });
+        }, 5000);
+        return () => {
+          if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+        };
       }, [championships, matches, theme, customTheme, selectedFamiglie]);
 
       useEffect(() => {
@@ -1258,109 +1236,73 @@
             {message && <div className={`alert alert-${message.type}`}>{message.text}</div>}
             {loading && <div className="alert alert-info">⏳ Elaborazione in corso...</div>}
 
-            {tab === 'Home' && (
-              <div>
-                {window.HomeComponent ? (
-                  <window.HomeComponent
-                    matches={matches}
-                    championships={championships}
-                    onSelectMatch={selectMatch}
-                    setTab={setTab}
-                    selectedFamiglie={selectedFamiglie}
-                    weatherCache={weatherCache}
-                  />
-                ) : (
-                  <div className="alert alert-info">⏳ Caricamento Home...</div>
-                )}
-              </div>
+            {tab === 'Home' && window.HomeComponent && (
+              <window.HomeComponent
+                matches={matches}
+                championships={championships}
+                onSelectMatch={selectMatch}
+                setTab={setTab}
+                selectedFamiglie={selectedFamiglie}
+                weatherCache={weatherCache}
+              />
             )}
 
-            {tab === 'Palinsesto' && (
-              <div>
-                {window.PalinsestoComponent ? (
-                  <window.PalinsestoComponent
-                    matches={matches}
-                    selectedFamiglie={selectedFamiglie}
-                    onSelectMatch={selectMatch}
-                    weatherCache={weatherCache}
-                  />
-                ) : (
-                  <div className="alert alert-info">⏳ Caricamento Palinsesto...</div>
-                )}
-              </div>
+            {tab === 'Palinsesto' && window.PalinsestoComponent && (
+              <window.PalinsestoComponent
+                matches={matches}
+                selectedFamiglie={selectedFamiglie}
+                onSelectMatch={selectMatch}
+                weatherCache={weatherCache}
+              />
             )}
 
-            {tab === 'Statistiche' && (
-              <div>
-                {window.StatisticheComponent ? (
-                  <window.StatisticheComponent
-                    matches={matches}
-                    selectedMatchId={selectedMatchId}
-                    selectedFamiglie={selectedFamiglie}
-                    weatherCache={weatherCache}
-                  />
-                ) : (
-                  <div className="alert alert-info">⏳ Caricamento Statistiche...</div>
-                )}
-              </div>
+            {tab === 'Statistiche' && window.StatisticheComponent && (
+              <window.StatisticheComponent
+                matches={matches}
+                selectedMatchId={selectedMatchId}
+                selectedFamiglie={selectedFamiglie}
+                weatherCache={weatherCache}
+              />
             )}
 
-            {tab === 'Storico' && (
-              <div>
-                {window.StoricoComponent ? (
-                  <window.StoricoComponent
-                    matches={matches}
-                    championships={championships}
-                    onSelectMatch={selectMatch}
-                  />
-                ) : (
-                  <div className="alert alert-info">⏳ Caricamento Storico...</div>
-                )}
-              </div>
+            {tab === 'Storico' && window.StoricoComponent && (
+              <window.StoricoComponent
+                matches={matches}
+                championships={championships}
+                onSelectMatch={selectMatch}
+              />
             )}
 
-            {tab === 'Schedina' && (
-              <div>
-                {window.SchedinaComponent ? (
-                  <window.SchedinaComponent
-                    matches={matches}
-                    championships={championships}
-                    selectedFamiglie={selectedFamiglie}
-                    onSelectMatch={selectMatch}
-                    showAlert={showAlert}
-                  />
-                ) : (
-                  <div className="alert alert-info">⏳ Caricamento Schedina...</div>
-                )}
-              </div>
+            {tab === 'Schedina' && window.SchedinaComponent && (
+              <window.SchedinaComponent
+                matches={matches}
+                championships={championships}
+                selectedFamiglie={selectedFamiglie}
+                onSelectMatch={selectMatch}
+                showAlert={showAlert}
+              />
             )}
 
-            {tab === 'Impostazioni' && (
-              <div>
-                {window.ImpostazioniComponent ? (
-                  <window.ImpostazioniComponent
-                    matches={matches}
-                    setMatches={setMatches}
-                    championships={championships}
-                    setChampionships={setChampionships}
-                    theme={theme}
-                    setTheme={setTheme}
-                    customTheme={customTheme}
-                    setCustomTheme={setCustomTheme}
-                    loading={loading}
-                    setLoading={setLoading}
-                    showAlert={showAlert}
-                    viewMode={viewMode}
-                    setViewMode={setViewMode}
-                    fontSize={fontSize}
-                    setFontSize={setFontSize}
-                    selectedFamiglie={selectedFamiglie}
-                    setSelectedFamiglie={setSelectedFamiglie}
-                  />
-                ) : (
-                  <div className="alert alert-info">⏳ Caricamento Impostazioni...</div>
-                )}
-              </div>
+            {tab === 'Impostazioni' && window.ImpostazioniComponent && (
+              <window.ImpostazioniComponent
+                matches={matches}
+                setMatches={setMatches}
+                championships={championships}
+                setChampionships={setChampionships}
+                theme={theme}
+                setTheme={setTheme}
+                customTheme={customTheme}
+                setCustomTheme={setCustomTheme}
+                loading={loading}
+                setLoading={setLoading}
+                showAlert={showAlert}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+                fontSize={fontSize}
+                setFontSize={setFontSize}
+                selectedFamiglie={selectedFamiglie}
+                setSelectedFamiglie={setSelectedFamiglie}
+              />
             )}
           </div>
 
@@ -1372,13 +1314,10 @@
                   <strong>⚠️ Disclaimer - Utilizzo in Centro Scommesse</strong>
                 </p>
                 <p style={{ margin: '0 0 4px 0' }}>
-                  Questa applicazione fornisce analisi statistiche a <strong>solo scopo informativo</strong>. I dati provengono da <strong>file caricati dall'utente</strong> (XLSX/CSV). Le percentuali e i pronostici sono <strong>elaborazioni matematiche non vincolanti</strong>.
+                  Questa applicazione fornisce analisi statistiche a <strong>solo scopo informativo</strong>.
                 </p>
                 <p style={{ margin: '0 0 4px 0' }}>
                   <span className="highlight">⚠️ Le scommesse comportano rischi finanziari. Gioca responsabilmente.</span>
-                </p>
-                <p style={{ margin: '0', fontSize: '10px', color: 'var(--text-dim)' }}>
-                  I loghi e i nomi delle squadre sono di proprietà dei rispettivi titolari.
                 </p>
               </div>
             </div>
@@ -1418,13 +1357,11 @@
 
     // ============================================================
     // BOOT
+    // ⭐ NIENTE removeItem, NIENTE loadScrapedData(true)
     // ============================================================
-    console.log('🚀 Avvio GesssAI-Pro v5.0 FUTURISTIC');
+    console.log('🚀 Avvio GesssAI-Pro v5.0');
 
-    localStorage.removeItem('ft_matches');
-    localStorage.removeItem('ft_champs');
-
-    loadScrapedData(true).then(data => {
+    loadScrapedData().then(data => {
       if (data && data.matches && data.matches.length > 0) {
         console.log(`✅ ${data.matches.length} partite caricate all'avvio!`);
         if (window.updateAppData) window.updateAppData(data);
