@@ -118,32 +118,30 @@
   // ============================================================
   // ⭐ NAZIONI — allineate ai nomi esatti del database
   // ============================================================
-  const NAZIONI = {
-    'Coppe UEFA': { file: 'uefa.png', campionati: [
-      'UEFA Champions League',
-      'UEFA Europa League',
-      'UEFA Europa Conference',
-      'UEFA Europa Conference League',   // ⭐ fallback nome lungo
-      'UEFA Nations League',
-    ]},
-    'Belgio':      { file: 'belgio.png',      campionati: ['Jupiler Pro League'] },
-    'Corea':       { file: 'corea.png',       campionati: ['K League 1'] },
-    'Francia':     { file: 'francia.png',     campionati: ['Ligue 1', 'Ligue 2'] },
-    'Germania':    { file: 'germania.png',    campionati: ['Bundesliga', '2. Bundesliga'] },
-    'Giappone':    { file: 'giappone.png',    campionati: ['J1 League'] },
-    'Inghilterra': { file: 'inghilterra.png', campionati: ['Premier League', 'Championship'] },  // ⭐ Championship
-    'Italia':      { file: 'italia.png',      campionati: [
-      'Serie A',
-      'Serie B',
-      'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C',      // ⭐ con trattino
-      'Serie C Girone A',   'Serie C Girone B',   'Serie C Girone C',        // ⭐ fallback senza trattino
-    ]},
-    'Olanda':      { file: 'olanda.png',      campionati: ['Eredivisie', 'Eerste Divisie'] },
-    'Portogallo':  { file: 'portogallo.png',  campionati: ['Primeira Liga'] },
-    'Scozia':      { file: 'scozia.png',      campionati: ['Scottish Premiership'] },
-    'Spagna':      { file: 'spagna.png',      campionati: ['La Liga', 'Segunda División', 'Segunda Division'] },  // ⭐ fallback
-    'Turchia':     { file: 'turchia.png',     campionati: ['Süper Lig', 'Super Lig'] },  // ⭐ fallback
-  };
+const NAZIONI = {
+  'Coppe UEFA': { file: 'uefa.png', campionati: [
+    'UEFA Champions League',
+    'UEFA Europa League',
+    'UEFA Europa Conference',
+    'UEFA Nations League',
+  ]},
+  'Belgio':      { file: 'belgio.png',      campionati: ['Jupiler Pro League'] },
+  'Corea':       { file: 'corea.png',       campionati: ['K League 1'] },
+  'Francia':     { file: 'francia.png',     campionati: ['Ligue 1', 'Ligue 2'] },
+  'Germania':    { file: 'germania.png',    campionati: ['Bundesliga', '2. Bundesliga'] },
+  'Giappone':    { file: 'giappone.png',    campionati: ['J1 League'] },
+  'Inghilterra': { file: 'inghilterra.png', campionati: ['Premier League', 'EFL Championship'] },  // ⭐ nome ESATTO
+  'Italia':      { file: 'italia.png',      campionati: [
+    'Serie A',
+    'Serie B',
+    'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C',   // ⭐ con trattino
+  ]},
+  'Olanda':      { file: 'olanda.png',      campionati: ['Eredivisie', 'Eerste Divisie'] },
+  'Portogallo':  { file: 'portogallo.png',  campionati: ['Primeira Liga'] },
+  'Scozia':      { file: 'scozia.png',      campionati: ['Scottish Premiership'] },
+  'Spagna':      { file: 'spagna.png',      campionati: ['La Liga', 'Segunda División'] },
+  'Turchia':     { file: 'turchia.png',     campionati: ['Süper Lig'] },
+};
 
   const NAZIONI_BASE_PATH = 'logos/Nazioni/';
   const SCHEDINA_STORAGE_KEY = 'ft_schedina_selezioni';
