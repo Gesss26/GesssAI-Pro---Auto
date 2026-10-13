@@ -1,7 +1,7 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto
 // v4: filtro giorni (1-7) PRIMA dello switch Scelte/Tutte
-//     + bordi card matches in neon colorato
+//     + bordi neon colorati sulle card match
 // ============================================================
 
 (function () {
@@ -129,7 +129,7 @@
   };
 
   // ============================================================
-  // MATCH TAB — v4 con bordo neon colorato
+  // MATCH TAB — con bordo neon colorato
   // ============================================================
   const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie }) => {
     const computeMatchStats = window.computeMatchStats;
@@ -405,7 +405,8 @@
         padding: '10px 14px',
         background: 'var(--bg-elevated)',
         borderRadius: '12px',
-        border: '1px solid var(--border)'
+        border: '1px solid var(--border)',
+        justifyContent: 'center'
       }}>
         {/* ⭐ RANGE GIORNI — PRIMA dello switch */}
         <span style={{

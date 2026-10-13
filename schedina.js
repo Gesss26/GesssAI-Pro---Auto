@@ -1,6 +1,7 @@
 // ============================================================
 // schedina.js - Modulo Schedina con quote PDF visibili
-// v9.6: griglia 5x5 con badge oggi/2 giorni + tutti i campionati
+// v9.7: griglia 5x5 con badge oggi/2 giorni + tutti i campionati
+//       + sub-tabs uniformi (CSS gestisce larghezza/altezza fisse)
 // ============================================================
 
 const formatGiocataLabel = (familyId, label) => {
@@ -919,9 +920,6 @@ const SchedinaComponent = ({
     return partite;
   }, [matches, campionatiSelezionati, giorniRange, filtroOrario, normalizeDate, getTodayStr, addDaysToDateStr]);
 
-  // ============================================================
-  // CALCOLA TOP 3 GIOCATE PER PARTITA (per la lista partite classica)
-  // ============================================================
   const calcolaTop3GiocatePerPartita = useCallback((match) => {
     const computeMatchStats = window.computeMatchStats;
     const getGiocataPct = window.getGiocataPct;
@@ -1072,6 +1070,7 @@ const SchedinaComponent = ({
         <window.QuoteManager.BannerScadenzaQuote />
       )}
 
+      {/* ⭐ Sub-tabs con bottoni uniformi (CSS gestisce larghezza/altezza fisse) */}
       <div className="sub-tabs" style={{ marginBottom: '16px' }}>
         <button className={sottoTab === 'classica' ? 'active' : ''} onClick={() => setSottoTab('classica')}>
           📋 Schedina Classica
@@ -1141,7 +1140,6 @@ const SchedinaComponent = ({
                 </div>
               </div>
 
-              {/* Griglia 5×5 con badge oggi (rosso) / 2 giorni (giallo) */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
@@ -1154,7 +1152,6 @@ const SchedinaComponent = ({
                   const label = c.name.length > 16 ? c.name.substring(0, 14) + '…' : c.name;
                   const hasPartite = matches.some(m => m.campionato === c.name);
 
-                  // Badge: rosso se oggi, giallo se entro 2 giorni
                   const todayStr = getTodayStr();
                   const maxDateStr = addDaysToDateStr(todayStr, 2);
                   const nOggi = matches.filter(m => m.campionato === c.name && m.stato === 'Futura' && normalizeDate(m.data) === todayStr).length;
@@ -1438,4 +1435,4 @@ const SchedinaComponent = ({
 };
 
 window.SchedinaComponent = SchedinaComponent;
-console.log('✅ SchedinaComponent v9.6 caricato - griglia 5x5 con badge oggi/2 giorni');
+console.log('✅ SchedinaComponent v9.7 caricato - griglia 5x5 + sub-tabs uniformi');

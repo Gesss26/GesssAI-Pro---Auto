@@ -1,8 +1,9 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v8)
+// statistiche.js - Modulo Statistiche (v9)
 // ✅ Ultimi avversari sotto la squadra giusta
 // ✅ Classifica a griglia con colonne separate
 // ✅ PC: 2 colonne - Mobile: 1 colonna
+// ✅ Sub-tabs uniformi (CSS gestisce larghezza/altezza fisse)
 // ============================================================
 
 (function () {
@@ -527,9 +528,8 @@
         .slice(0, 5);
     };
 
-    // ⭐ FIX: le due liste sono separate e usano il teamName corretto
-    const last5Home = getLast5Games(match.casa);   // partite di match.casa
-    const last5Away = getLast5Games(match.ospiti); // partite di match.ospiti
+    const last5Home = getLast5Games(match.casa);
+    const last5Away = getLast5Games(match.ospiti);
 
     const renderXgValue = (value) => {
       const num = parseFloat(value);
@@ -578,7 +578,6 @@
           </div>
         </div>
 
-        {/* ⭐ ULTIMI AVVERSARI: 2 colonne separate, ognuna con la propria squadra */}
         <div className="opponents-row">
           <div className="opponents-col">
             <b>Ultimi avversari ({match.casa})</b>
@@ -704,7 +703,7 @@
   };
 
   // ============================================================
-  // STANDINGS — griglia con colonne separate + riga evidenziata
+  // STANDINGS
   // ============================================================
   const Standings = ({ matches, filterChampionship, highlightTeams = [] }) => {
     const [view, setView] = useState('generale');
@@ -1229,6 +1228,7 @@
           <span>📊 <b style={{ color: 'var(--neon-cyan)' }}>{matchesFiltrati.length}</b> partite totali</span>
         </div>
 
+        {/* ⭐ Sub-tabs con bottoni uniformi (CSS gestisce larghezza/altezza fisse) */}
         <div className="sub-tabs">
           <button className={statsSubTab === 'Classifica' ? 'active' : ''} onClick={() => setStatsSubTab('Classifica')}>📊 Classifica</button>
           <button className={statsSubTab === 'Scontri' ? 'active' : ''} onClick={() => setStatsSubTab('Scontri')}>⚔️ Scontri</button>
@@ -1390,6 +1390,6 @@
   window.TeamMatchesHistory = TeamMatchesHistory;
   window.TutteLeFamigliePanel = TutteLeFamigliePanel;
 
-  console.log('✅ Modulo Statistiche v8 - Classifica griglia + avversari fix');
+  console.log('✅ Modulo Statistiche v9 - Sub-tabs uniformi + classifica griglia');
 
 })();
