@@ -1,6 +1,6 @@
 // ============================================================
 // home.js - Modulo Home (FUTURISTIC + MOBILE FIX + SWITCH CALCOLATE/SCELTE + CALCOLATRICE)
-// ✅ v4: aggiunto tab "🧮 Calcolatrice" con analisi probabilità e copertura schedina
+// v5: aggiunta riga "Coppe UEFA" con griglia 4×1 sopra la griglia nazioni 4×4
 // ============================================================
 
 (function () {
@@ -115,6 +115,15 @@
   })();
 
   const NAZIONI = {
+    // ⭐ RIGA SPECIALE COPPE UEFA (griglia 4×1 dedicata)
+    'Coppe UEFA': { file: 'uefa.png', campionati: [
+      'UEFA Champions League',
+      'UEFA Europa League',
+      'UEFA Europa Conference',
+      'UEFA Nations League',
+    ]},
+
+    // Nazioni normali (griglia 4×4)
     'Belgio':      { file: 'belgio.png',      campionati: ['Jupiler Pro League'] },
     'Corea':       { file: 'corea.png',       campionati: ['K League 1'] },
     'Francia':     { file: 'francia.png',     campionati: ['Ligue 1', 'Ligue 2'] },
@@ -267,9 +276,6 @@
     return null;
   };
 
-  // ============================================================
-  // LETTURA FAMIGLIE SELEZIONATE (da Impostazioni → Giocate)
-  // ============================================================
   const leggiFamiglieSelezionate = () => {
     try {
       const saved = localStorage.getItem(FAMIGLIE_SELEZIONATE_KEY);
@@ -281,9 +287,6 @@
     return window.DEFAULT_FAMIGLIE || ['dc_under', 'mg_casa_ospite', 'over'];
   };
 
-  // ============================================================
-  // CALCOLO TOP3 GIOCATE CON SUPPORTO SCELTE
-  // ============================================================
   const calcolaTop3Giocate = (match, allMatches, tipoGiocate = 'calcolate') => {
     if (!match) return [];
     const stats = window.computeMatchStats(match, allMatches);
@@ -591,7 +594,40 @@
     );
   };
 
+  // ============================================================
+  // VISTA NAZIONE (con gestione speciale coppe UEFA)
+  // ============================================================
   const VistaNazione = ({ nazione, matches, onBack, tipoGiocate, refreshKey }) => {
+    // ⭐ CASO SPECIALE: coppa UEFA singola
+    if (nazione && typeof nazione === 'object' && nazione.__special === 'UEFA') {
+      const camp = nazione.campionato;
+      return (
+        <div>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px',
+            padding: '12px 16px', background: 'var(--card)', borderRadius: '10px',
+            border: '1px solid var(--border)', flexWrap: 'wrap',
+          }}>
+            <button onClick={onBack} style={{
+              background: 'var(--bg-elevated)', color: 'var(--text)',
+              border: '1px solid var(--border)', borderRadius: '8px',
+              padding: '8px 16px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px',
+            }}>← Indietro</button>
+            {window.ChampLogo && <window.ChampLogo campionato={camp} size={44} />}
+            <h2 style={{ margin: 0, flex: 1, color: 'var(--neon-cyan)' }}>{camp}</h2>
+          </div>
+          <SezioneCampionato
+            campionato={camp}
+            matches={matches}
+            allMatches={matches}
+            tipoGiocate={tipoGiocate}
+            refreshKey={refreshKey}
+          />
+        </div>
+      );
+    }
+
+    // Caso normale: nazione stringa
     const info = NAZIONI[nazione];
     if (!info) return null;
 
@@ -755,6 +791,9 @@
     );
   };
 
+  // ============================================================
+  // GRIGLIA NAZIONI (con riga Coppe UEFA 4×1 sopra)
+  // ============================================================
   const GrigliaNazioni = ({ matches, onSelectNazione }) => {
     const nazioniOrdinate = useMemo(() => Object.keys(NAZIONI).sort((a, b) => a.localeCompare(b)), []);
 
@@ -775,6 +814,18 @@
       return () => window.removeEventListener('schedina-updated', handler);
     }, []);
 
+    // ⭐ Conteggi per singolo campionato UEFA
+    const conteggiUEFA = useMemo(() => {
+      const c = {};
+      (NAZIONI['Coppe UEFA']?.campionati || []).forEach(camp => {
+        c[camp] = matches.filter(m => m.campionato === camp).length;
+      });
+      return c;
+    }, [matches]);
+
+    const uefaCampionati = NAZIONI['Coppe UEFA']?.campionati || [];
+    const nazioniSenzaUEFA = nazioniOrdinate.filter(n => n !== 'Coppe UEFA');
+
     return (
       <div>
         <div style={{
@@ -792,8 +843,76 @@
           )}
         </div>
 
+        {/* ⭐ RIGA SPECIALE: COPPE UEFA (griglia 4×1) */}
+        <div style={{
+          marginBottom: '20px',
+          padding: '12px 14px',
+          background: 'linear-gradient(135deg, rgba(26, 26, 255, 0.08), rgba(255, 102, 0, 0.05))',
+          borderRadius: '14px',
+          border: '2px solid var(--border-strong)',
+        }}>
+          <div style={{
+            fontSize: '13px', fontWeight: 700, color: 'var(--neon-cyan)',
+            textTransform: 'uppercase', letterSpacing: '2px',
+            marginBottom: '12px', paddingBottom: '8px',
+            borderBottom: '1px solid var(--border)',
+            display: 'flex', alignItems: 'center', gap: '10px',
+          }}>
+            <span style={{ fontSize: '20px' }}>🏆</span>
+            <span>COPPE UEFA</span>
+          </div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+            gap: '10px',
+          }}>
+            {uefaCampionati.map(camp => {
+              const disabled = conteggiUEFA[camp] === 0;
+              const color = window.getChampColor(camp);
+              return (
+                <button
+                  key={camp}
+                  onClick={() => !disabled && onSelectNazione('UEFA:' + camp)}
+                  disabled={disabled}
+                  title={disabled ? `${camp} - nessuna partita` : camp}
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    gap: '6px', padding: '12px 6px', borderRadius: '10px',
+                    border: `2px solid ${disabled ? 'var(--border)' : color}`,
+                    background: disabled ? 'var(--bg-elevated)' : `linear-gradient(135deg, ${color}22, ${color}11)`,
+                    cursor: disabled ? 'not-allowed' : 'pointer',
+                    opacity: disabled ? 0.4 : 1,
+                    transition: 'all 0.15s', minHeight: '90px', position: 'relative',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!disabled) {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = `0 6px 20px ${color}55`;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  {window.ChampLogo && <window.ChampLogo campionato={camp} size={36} />}
+                  <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text)', textAlign: 'center' }}>
+                    {window.getChampShortName ? window.getChampShortName(camp) : camp}
+                  </span>
+                  {!disabled && (
+                    <span style={{ fontSize: '9px', color: 'var(--text-dim)' }}>
+                      {conteggiUEFA[camp]} partite
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ⭐ GRIGLIA 4×4 NAZIONI */}
         <div className="nazioni-grid">
-          {nazioniOrdinate.map(naz => {
+          {nazioniSenzaUEFA.map(naz => {
             const disabled = conteggi[naz] === 0;
             return (
               <button
@@ -856,7 +975,6 @@
     const [pdfData, setPdfData] = useState(null);
     const [pdfQuota, setPdfQuota] = useState(null);
 
-    // Carica info PDF (se disponibile)
     useEffect(() => {
       if (!window.QuoteManager) return;
       try {
@@ -867,7 +985,6 @@
       } catch (e) {}
     }, []);
 
-    // Partite future raggruppate per campionato
     const campionatiConPartite = useMemo(() => {
       const oggi = window.getTodayStr();
       const futuri = (matches || []).filter(m => m.stato === 'Futura' && window.normalizeDate(m.data) >= oggi);
@@ -888,11 +1005,7 @@
       return (matches || []).find(m => m.id === partitaSel) || null;
     }, [matches, partitaSel]);
 
-    // ============================================================
-    // LOGICA COPERTURA AUTOMATICA
-    // ============================================================
     const calcolaCopertura = (giocata) => {
-      // Restituisce: { copre: ['X2'], tipo: 'singolo'|'dc'|'custom' }
       const g = (giocata || '').toUpperCase().trim();
       const map = {
         '1':    { copre: ['X2'], tipo: 'dc', desc: 'Doppia Chance X2' },
@@ -921,18 +1034,14 @@
       return calcolaCopertura(g);
     }, [giocataSel, giocataCustom]);
 
-    // ============================================================
-    // ANALISI PROBABILITÀ
-    // ============================================================
     const analisiProbabilita = useMemo(() => {
       if (!partita || !coperturaInfo || !coperturaInfo.copre.length) return null;
 
       const stats = window.computeMatchStats(partita, matches || []);
       if (stats.error) return null;
 
-      const segnoCopertura = coperturaInfo.copre[0]; // es. 'X2', '1', 'NG'
+      const segnoCopertura = coperturaInfo.copre[0];
 
-      // 1. STORICA
       let pctStorica = 0;
       try {
         pctStorica = window.getGiocataPct(segnoCopertura, stats, stats.homeMG, stats.awayMG, stats.mgTot) || 0;
@@ -940,7 +1049,6 @@
         else if (segnoCopertura === 'NG') pctStorica = window.calcolaGG_NG(stats)?.ng || pctStorica;
       } catch (e) { pctStorica = 0; }
 
-      // 2. MONTE CARLO (se disponibile in localStorage)
       let pctMC = null;
       try {
         const savedMC = localStorage.getItem(`ft_mc_${partita.id}`);
@@ -970,12 +1078,10 @@
         }
       } catch (e) {}
 
-      // 3. PDF (se disponibile)
       let pctPDF = null;
       let quotaPDF = null;
       try {
         if (window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function') {
-          // Provo a mappare segno copertura su familyId + giocata
           let familyId = null, giocata = segnoCopertura;
           if (['1', 'X', '2'].includes(segnoCopertura)) familyId = 'fisse';
           else if (['1X', '12', 'X2'].includes(segnoCopertura)) familyId = 'dc';
@@ -993,17 +1099,14 @@
         }
       } catch (e) {}
 
-      // 4. QUOTA LIVE (se inserita)
       let pctLive = null;
       if (quotaLive && parseFloat(quotaLive) > 1) {
         pctLive = Math.round((1 / parseFloat(quotaLive)) * 100);
       }
 
-      // MEDIA
       const fonti = [pctStorica, pctMC, pctPDF, pctLive].filter(v => v != null && v > 0);
       const media = fonti.length > 0 ? Math.round(fonti.reduce((a, b) => a + b, 0) / fonti.length) : 0;
 
-      // CONSIGLIO
       let consiglio = { livello: 'info', testo: '', modalita: 'esatta' };
       if (media < 25) {
         consiglio = { livello: 'ok', testo: '❌ Non coprire — schedina già sicura', modalita: 'esatta', colore: 'var(--neon-green)' };
@@ -1024,9 +1127,6 @@
       };
     }, [partita, coperturaInfo, quotaLive, matches]);
 
-    // ============================================================
-    // CALCOLI FINALI
-    // ============================================================
     const calcoli = useMemo(() => {
       const v = parseFloat(vincita) || 0;
       const q = parseFloat(quota) || 0;
@@ -1038,11 +1138,9 @@
       let modalita = 'esatta';
 
       if (p > 0) {
-        // Copertura con profitto garantito
         importo = (v - p) / q;
         modalita = 'profitto';
       } else {
-        // Copertura esatta
         importo = v / q;
       }
 
@@ -1061,9 +1159,6 @@
       };
     }, [vincita, quota, profittoMinimo]);
 
-    // ============================================================
-    // SUGGERIMENTO PROFITTO (placeholder)
-    // ============================================================
     const profittoSuggerito = useMemo(() => {
       if (!analisiProbabilita || !vincita) return null;
       const v = parseFloat(vincita) || 0;
@@ -1072,9 +1167,6 @@
       return suggerito > 0 ? suggerito : null;
     }, [analisiProbabilita, vincita]);
 
-    // ============================================================
-    // HANDLER RESET
-    // ============================================================
     const resetAll = () => {
       setCampionatoSel('');
       setPartitaSel('');
@@ -1086,9 +1178,6 @@
       setQuotaLive('');
     };
 
-    // ============================================================
-    // OPZIONI GIOCATE DISPONIBILI
-    // ============================================================
     const giocateDisponibili = [
       { value: '1', label: '1 (Vittoria Casa)' },
       { value: 'X', label: 'X (Pareggio)' },
@@ -1111,14 +1200,12 @@
 
     return (
       <div>
-        {/* SEZIONE 1: SELEZIONE PARTITA */}
         <div className="card" style={{ marginBottom: '16px' }}>
           <h3 style={{ color: 'var(--neon-cyan)', marginBottom: '16px', fontFamily: 'Orbitron, sans-serif', fontSize: '16px' }}>
             🎯 Seleziona la partita da coprire
           </h3>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
-            {/* Campionato */}
             <div>
               <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
                 🏆 Campionato
@@ -1139,7 +1226,6 @@
               </select>
             </div>
 
-            {/* Partita */}
             <div>
               <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
                 ⚽ Partita
@@ -1162,7 +1248,6 @@
               </select>
             </div>
 
-            {/* Giocata */}
             <div>
               <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
                 💡 Cosa hai giocato
@@ -1184,7 +1269,6 @@
             </div>
           </div>
 
-          {/* Campo custom */}
           {giocataSel === 'custom' && (
             <div style={{ marginTop: '12px' }}>
               <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
@@ -1201,7 +1285,6 @@
             </div>
           )}
 
-          {/* Info copertura */}
           {coperturaInfo && coperturaInfo.copre.length > 0 && (
             <div style={{
               marginTop: '14px', padding: '12px 14px',
@@ -1229,7 +1312,6 @@
           )}
         </div>
 
-        {/* SEZIONE 2: ANALISI PROBABILITÀ */}
         {analisiProbabilita && (
           <div className="card" style={{ marginBottom: '16px' }}>
             <h3 style={{ color: 'var(--neon-cyan)', marginBottom: '14px', fontFamily: 'Orbitron, sans-serif', fontSize: '16px' }}>
@@ -1260,7 +1342,6 @@
               />
             </div>
 
-            {/* Quota live input */}
             <div style={{ marginBottom: '14px' }}>
               <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
                 🔴 Quota aggiornata (opzionale — se la sai)
@@ -1282,7 +1363,6 @@
               </div>
             </div>
 
-            {/* Media finale */}
             <div style={{
               padding: '14px', borderRadius: '10px',
               background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 229, 0.05))',
@@ -1319,7 +1399,6 @@
           </div>
         )}
 
-        {/* SEZIONE 3: CALCOLO COPERTURA */}
         <div className="card">
           <h3 style={{ color: 'var(--neon-cyan)', marginBottom: '14px', fontFamily: 'Orbitron, sans-serif', fontSize: '16px' }}>
             🧮 Calcolo Copertura
@@ -1376,7 +1455,6 @@
             </div>
           </div>
 
-          {/* RISULTATI */}
           {calcoli && (
             <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '2px solid var(--neon-cyan)' }}>
               <div className="calc-result-row" style={{ background: 'rgba(0, 245, 255, 0.08)' }}>
@@ -1422,7 +1500,6 @@
             </div>
           )}
 
-          {/* PULSANTI */}
           <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
             <button
               className="btn btn-secondary"
@@ -1458,7 +1535,6 @@
     );
   };
 
-  // Helper componente probabilità
   const ProbCard = ({ label, value, color, subtitle }) => (
     <div style={{
       padding: '10px 12px', borderRadius: '8px',
@@ -1509,6 +1585,24 @@
         window.removeEventListener('storage', handler);
       };
     }, []);
+
+    // ⭐ Gestione selezione nazione (con caso speciale UEFA:)
+    const handleSelectNazione = useCallback((naz) => {
+      if (typeof naz === 'string' && naz.startsWith('UEFA:')) {
+        const camp = naz.replace('UEFA:', '');
+        if (isMobile) {
+          setCampionatoMobile(camp);
+        } else {
+          setNazioneSelezionata({ __special: 'UEFA', campionato: camp });
+        }
+      } else {
+        if (isMobile) {
+          setNazioneSelezionata(naz);
+        } else {
+          setNazioneSelezionata(naz);
+        }
+      }
+    }, [isMobile]);
 
     if (!matches || matches.length === 0) {
       return (
@@ -1614,7 +1708,7 @@
         return (
           <GrigliaNazioni
             matches={matchesPuliti}
-            onSelectNazione={setNazioneSelezionata}
+            onSelectNazione={handleSelectNazione}
           />
         );
       }
@@ -1634,7 +1728,7 @@
       return (
         <GrigliaNazioni
           matches={matchesPuliti}
-          onSelectNazione={setNazioneSelezionata}
+          onSelectNazione={handleSelectNazione}
         />
       );
     };
@@ -1750,6 +1844,6 @@
     leggiFamiglieSelezionate, GIOCATE_SELEZIONATE_KEY, FAMIGLIE_SELEZIONATE_KEY,
   };
 
-  console.log('✅ Modulo Home FUTURISTIC v4 caricato (aggiunto tab 🧮 Calcolatrice)');
+  console.log('✅ Modulo Home FUTURISTIC v5 caricato (riga Coppe UEFA 4×1 + griglia nazioni 4×4)');
 
 })();

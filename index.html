@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8" />
-<title>GesssAI-Pro v4.0 - Football Trader</title>
+<title>GesssAI-Pro v5.0 - Football Trader</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <meta name="theme-color" content="#00f5ff" />
 <meta name="description" content="GesssAI-Pro - Analisi statistica scommesse calcio" />
@@ -57,7 +57,7 @@
     <div class="splash-content">
       <img src="Splashscreen.png" alt="GesssAI-Pro" class="splash-logo" />
       <button class="splash-btn" id="splashBtn">✨ Clicca per continuare</button>
-      <div class="splash-sub">v4.0 - Football Trader</div>
+      <div class="splash-sub">v5.0 - Football Trader</div>
       <div class="loader">
         <div class="dot"></div>
         <div class="dot"></div>
@@ -88,7 +88,6 @@
       var root = document.getElementById('root');
       var btn = document.getElementById('splashBtn');
 
-      // ⭐ FORZA NASCOSTO L'ERROR CONTAINER
       var err = document.getElementById('error-container');
       if (err) {
         err.classList.remove('visible');
@@ -107,15 +106,12 @@
       }
     });
 
-    // ⭐ Disabilita la visualizzazione dell'error container da errori non critici
     window.addEventListener('error', function(e) {
       console.error('Errore globale:', e);
-      // NON mostriamo l'error container — React gestisce già i propri errori
     });
 
     window.addEventListener('unhandledrejection', function(e) {
       console.error('Promise rejection:', e);
-      // NON mostriamo l'error container
     });
   </script>
 
@@ -125,13 +121,11 @@
     // ============================================================
     // CAMPIONATI ESCLUSI
     // ============================================================
-    const CAMPIONATI_ESCLUSI = new Set([
-      'Liga Profesional Argentina',
-      'Brasileirão Serie A',
-      'Chinese Super League',
-      'Super League Grecia',
-      'Major League Soccer',
-    ]);
+    // ⭐ v5: Nessun campionato escluso.
+    // I 4 campionati ex-esclusi (Liga Profesional Argentina, Brasileirão Serie A,
+    // Chinese Super League, Major League Soccer) NON sono più presenti
+    // perché rimossi dal nuovo scarica.py.
+    const CAMPIONATI_ESCLUSI = new Set([]);
 
     const filtraCampionatiEsclusi = (arr) => {
       if (!Array.isArray(arr)) return [];
@@ -330,7 +324,19 @@
 
     const MAIN_TABS = ['Home', 'Palinsesto', 'Statistiche', 'Storico', 'Schedina', 'Impostazioni'];
 
+    // ⭐ CHAMPIONSHIP_COLORS - 25 campionati (4 UEFA + 21 nazionali)
     const CHAMPIONSHIP_COLORS = {
+      // ============================================================
+      // COPPE UEFA (4)
+      // ============================================================
+      'UEFA Champions League':   '#1a1aff',
+      'UEFA Europa League':      '#ff6600',
+      'UEFA Europa Conference':  '#00b894',
+      'UEFA Nations League':     '#003399',
+
+      // ============================================================
+      // CAMPIONATI NAZIONALI (21)
+      // ============================================================
       'Jupiler Pro League': '#e74c3c',
       'Premier League': '#3498db', 'EFL Championship': '#6c3483',
       'Ligue 1': '#9b59b6', 'Ligue 2': '#8e44ad', 'Bundesliga': '#f39c12', '2. Bundesliga': '#e67e22',
@@ -340,12 +346,28 @@
       'Segunda División': '#e67e22', 'Süper Lig': '#e67e22'
     };
 
+    // ⭐ CHAMPIONSHIP_LIST - 25 campionati
     const CHAMPIONSHIP_LIST = [
+      // COPPE UEFA
+      'UEFA Champions League',
+      'UEFA Europa League',
+      'UEFA Europa Conference',
+      'UEFA Nations League',
+
+      // Campionati nazionali
       'Jupiler Pro League',
-      'Premier League', 'EFL Championship', 'Ligue 1', 'Ligue 2', 'Bundesliga', '2. Bundesliga', 'Serie A',
-      'Serie B', 'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C', 'J1 League',
-      'Eerste Divisie', 'Eredivisie', 'Primeira Liga', 'Scottish Premiership', 'K League 1', 'La Liga',
-      'Segunda División', 'Süper Lig'
+      'Premier League', 'EFL Championship',
+      'Ligue 1', 'Ligue 2',
+      'Bundesliga', '2. Bundesliga',
+      'Serie A', 'Serie B',
+      'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C',
+      'J1 League',
+      'Eerste Divisie', 'Eredivisie',
+      'Primeira Liga',
+      'Scottish Premiership',
+      'K League 1',
+      'La Liga', 'Segunda División',
+      'Süper Lig',
     ];
 
     // ============================================================
@@ -975,7 +997,7 @@
     window.calcolaGG_NG = calcolaGG_NG;
     window.get12Under45 = get12Under45;
 
-    console.log('✅ Funzioni globali esposte v9');
+    console.log('✅ Funzioni globali esposte v10 - ' + CHAMPIONSHIP_LIST.length + ' campionati configurati');
 
     // ============================================================
     // LOAD/SAVE STATE
@@ -1144,7 +1166,7 @@
             <div className="header-left"></div>
             <div className="header-center">
               <div className="app-name">GesssAI-Pro</div>
-              <div className="subtitle">v4.0 • Football Trader • 2026</div>
+              <div className="subtitle">v5.0 • Football Trader • 2026</div>
             </div>
             <Clock />
           </div>
@@ -1332,7 +1354,7 @@
     // ============================================================
     // BOOT
     // ============================================================
-    console.log('🚀 Avvio GesssAI-Pro v4.0 FUTURISTIC');
+    console.log('🚀 Avvio GesssAI-Pro v5.0 FUTURISTIC');
 
     localStorage.removeItem('ft_matches');
     localStorage.removeItem('ft_champs');
