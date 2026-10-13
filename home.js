@@ -1,6 +1,6 @@
 // ============================================================
-// home.js - Modulo Home (FUTURISTIC + MOBILE FIX + SWITCH CALCOLATE/SCELTE + CALCOLATRICE)
-// v6: bottoni nazioni + Coppe UEFA stile Schedina (cyan pieno, bordo 2px, logo 18px)
+// home.js - Modulo Home (FUTURISTIC + bottoni cyan pieni + Tutti/Deseleziona)
+// v7: bottoni nazioni sempre cyan, rimosso switch Calcolate/Scelte
 // ============================================================
 
 (function () {
@@ -121,7 +121,6 @@
       'UEFA Europa Conference',
       'UEFA Nations League',
     ]},
-
     'Belgio':      { file: 'belgio.png',      campionati: ['Jupiler Pro League'] },
     'Corea':       { file: 'corea.png',       campionati: ['K League 1'] },
     'Francia':     { file: 'francia.png',     campionati: ['Ligue 1', 'Ligue 2'] },
@@ -782,10 +781,10 @@
   };
 
   // ============================================================
-  // GRIGLIA NAZIONI — STILE SCHEDINA (Opzione B)
-  // Bottoni con sfondo cyan pieno quando hover/attivo, bordo 2px, logo 18px
+  // GRIGLIA NAZIONI — v7: bottoni sempre cyan pieni (Opzione 1A)
+  // + header con "Seleziona Tutti / Deseleziona Tutti" (Opzione 2A)
   // ============================================================
-  const GrigliaNazioni = ({ matches, onSelectNazione }) => {
+  const GrigliaNazioni = ({ matches, onSelectNazione, tipoGiocate, setTipoGiocate }) => {
     const nazioniOrdinate = useMemo(() => Object.keys(NAZIONI).sort((a, b) => a.localeCompare(b)), []);
 
     const conteggi = useMemo(() => {
@@ -816,8 +815,34 @@
     const uefaCampionati = NAZIONI['Coppe UEFA']?.campionati || [];
     const nazioniSenzaUEFA = nazioniOrdinate.filter(n => n !== 'Coppe UEFA');
 
-    // Stile bottone base (identico a Schedina)
-    const bottoneBaseStyle = {
+    // ⭐ Stile bottone SEMPRE cyan pieno (Opzione 1A)
+    const bottoneSempreCyanStyle = {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '4px',
+      padding: '8px 6px',
+      minHeight: '90px',
+      borderRadius: '10px',
+      borderWidth: '2px',
+      borderStyle: 'solid',
+      fontSize: '11px',
+      fontWeight: 700,
+      cursor: 'pointer',
+      transition: 'all 0.2s',
+      overflow: 'hidden',
+      width: '100%',
+      fontFamily: 'Rajdhani, sans-serif',
+      textTransform: 'uppercase',
+      letterSpacing: '0.5px',
+      background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-blue))',
+      color: '#000',
+      borderColor: 'var(--neon-cyan)',
+      boxShadow: '0 0 20px rgba(0, 245, 255, 0.4)',
+    };
+
+    const bottoneSempreCyanSmallStyle = {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -836,7 +861,15 @@
       fontFamily: 'Rajdhani, sans-serif',
       textTransform: 'uppercase',
       letterSpacing: '0.5px',
+      background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-blue))',
+      color: '#000',
+      borderColor: 'var(--neon-cyan)',
+      boxShadow: '0 0 20px rgba(0, 245, 255, 0.4)',
     };
+
+    // ⭐ Stato "Tutti selezionati" per header
+    const tutteNazioniAttive = nazioniSenzaUEFA.length > 0;
+    const [tutteAttive, setTutteAttive] = useState(true);
 
     return (
       <div>
@@ -845,17 +878,38 @@
           marginBottom: '16px', flexWrap: 'wrap', gap: '10px',
         }}>
           <h2 style={{ margin: 0, color: 'var(--neon-cyan)' }}>🌍 Seleziona una Nazione</h2>
-          {schedinaCount > 0 && (
-            <span style={{
-              background: 'var(--neon-green)', color: '#000', padding: '4px 14px',
-              borderRadius: '12px', fontSize: '13px', fontWeight: 'bold',
-            }}>
-              🎯 {schedinaCount} giocate in schedina
-            </span>
-          )}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setTutteAttive(true)}
+              style={{
+                fontSize: '11px', padding: '6px 14px',
+                background: tutteAttive ? 'var(--accent)' : 'var(--surface)',
+                color: tutteAttive ? '#000' : 'var(--text)',
+                border: '1px solid var(--border)', borderRadius: '6px',
+                cursor: 'pointer', fontWeight: 'bold',
+              }}
+            >✅ Seleziona Tutti</button>
+            <button
+              onClick={() => setTutteAttive(false)}
+              style={{
+                fontSize: '11px', padding: '6px 14px',
+                background: 'var(--surface)', color: 'var(--text)',
+                border: '1px solid var(--border)', borderRadius: '6px',
+                cursor: 'pointer',
+              }}
+            >❌ Deseleziona Tutti</button>
+            {schedinaCount > 0 && (
+              <span style={{
+                background: 'var(--neon-green)', color: '#000', padding: '4px 14px',
+                borderRadius: '12px', fontSize: '13px', fontWeight: 'bold',
+              }}>
+                🎯 {schedinaCount} giocate in schedina
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* ⭐ RIGA SPECIALE: COPPE UEFA — stile Schedina (griglia 4 colonne) */}
+        {/* ⭐ RIGA SPECIALE: COPPE UEFA — bottoni sempre cyan */}
         <div style={{
           marginBottom: '20px',
           padding: '12px 14px',
@@ -880,7 +934,6 @@
           }}>
             {uefaCampionati.map(camp => {
               const disabled = conteggiUEFA[camp] === 0;
-              const color = window.getChampColor(camp);
               const shortName = window.getChampShortName ? window.getChampShortName(camp) : camp;
               return (
                 <button
@@ -889,28 +942,10 @@
                   disabled={disabled}
                   title={disabled ? `${camp} - nessuna partita` : camp}
                   style={{
-                    ...bottoneBaseStyle,
-                    borderColor: disabled ? 'var(--border)' : `${color}66`,
-                    background: disabled ? 'var(--bg-elevated)' : 'var(--bg-elevated)',
-                    color: disabled ? 'var(--text-dim)' : 'var(--text)',
+                    ...bottoneSempreCyanSmallStyle,
                     opacity: disabled ? 0.4 : 1,
                     cursor: disabled ? 'not-allowed' : 'pointer',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!disabled) {
-                      e.currentTarget.style.background = 'linear-gradient(135deg, var(--neon-cyan), var(--neon-blue))';
-                      e.currentTarget.style.color = '#000';
-                      e.currentTarget.style.borderColor = 'var(--neon-cyan)';
-                      e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 245, 255, 0.5)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!disabled) {
-                      e.currentTarget.style.background = 'var(--bg-elevated)';
-                      e.currentTarget.style.color = 'var(--text)';
-                      e.currentTarget.style.borderColor = `${color}66`;
-                      e.currentTarget.style.boxShadow = 'none';
-                    }
+                    filter: disabled ? 'grayscale(0.7)' : 'none',
                   }}
                 >
                   {window.ChampLogo && <window.ChampLogo campionato={camp} size={18} />}
@@ -925,8 +960,8 @@
                   </span>
                   {!disabled && (
                     <span style={{
-                      background: 'var(--neon-red)',
-                      color: '#fff',
+                      background: 'rgba(0,0,0,0.3)',
+                      color: '#000',
                       fontSize: '9px',
                       fontWeight: 900,
                       padding: '1px 6px',
@@ -942,11 +977,10 @@
           </div>
         </div>
 
-        {/* ⭐ GRIGLIA NAZIONI — stile Schedina */}
+        {/* ⭐ GRIGLIA NAZIONI — bottoni sempre cyan (Opzione 1A) */}
         <div className="nazioni-grid" style={{ gap: '8px' }}>
           {nazioniSenzaUEFA.map(naz => {
-            const disabled = conteggi[naz] === 0;
-            const color = window.getChampColor(naz);
+            const disabled = conteggi[naz] === 0 || !tutteAttive;
             return (
               <button
                 key={naz}
@@ -955,33 +989,10 @@
                 title={disabled ? `${naz} - nessuna partita` : naz}
                 className="nazione-btn"
                 style={{
-                  ...bottoneBaseStyle,
-                  flexDirection: 'column',
-                  gap: '4px',
-                  minHeight: '90px',
-                  borderColor: disabled ? 'var(--border)' : `${color}66`,
-                  background: disabled ? 'var(--bg-elevated)' : 'var(--bg-elevated)',
-                  color: disabled ? 'var(--text-dim)' : 'var(--text)',
+                  ...bottoneSempreCyanStyle,
                   opacity: disabled ? 0.4 : 1,
                   cursor: disabled ? 'not-allowed' : 'pointer',
-                }}
-                onMouseEnter={(e) => {
-                  if (!disabled) {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, var(--neon-cyan), var(--neon-blue))';
-                    e.currentTarget.style.color = '#000';
-                    e.currentTarget.style.borderColor = 'var(--neon-cyan)';
-                    e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 245, 255, 0.5)';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!disabled) {
-                    e.currentTarget.style.background = 'var(--bg-elevated)';
-                    e.currentTarget.style.color = 'var(--text)';
-                    e.currentTarget.style.borderColor = `${color}66`;
-                    e.currentTarget.style.boxShadow = 'none';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }
+                  filter: disabled ? 'grayscale(0.7)' : 'none',
                 }}
               >
                 <NazioneBandiera nazione={naz} size={32} />
@@ -990,8 +1001,8 @@
                 </span>
                 {!disabled && (
                   <span style={{
-                    background: 'var(--neon-red)',
-                    color: '#fff',
+                    background: 'rgba(0,0,0,0.3)',
+                    color: '#000',
                     fontSize: '9px',
                     fontWeight: 900,
                     padding: '1px 6px',
@@ -1016,11 +1027,9 @@
     const [partitaSel, setPartitaSel] = useState('');
     const [giocataSel, setGiocataSel] = useState('');
     const [giocataCustom, setGiocataCustom] = useState('');
-
     const [vincita, setVincita] = useState('');
     const [quota, setQuota] = useState('');
     const [profittoMinimo, setProfittoMinimo] = useState('');
-
     const [quotaLive, setQuotaLive] = useState('');
     const [pdfData, setPdfData] = useState(null);
     const [pdfQuota, setPdfQuota] = useState(null);
@@ -1086,10 +1095,8 @@
 
     const analisiProbabilita = useMemo(() => {
       if (!partita || !coperturaInfo || !coperturaInfo.copre.length) return null;
-
       const stats = window.computeMatchStats(partita, matches || []);
       if (stats.error) return null;
-
       const segnoCopertura = coperturaInfo.copre[0];
 
       let pctStorica = 0;
@@ -1128,8 +1135,7 @@
         }
       } catch (e) {}
 
-      let pctPDF = null;
-      let quotaPDF = null;
+      let pctPDF = null, quotaPDF = null;
       try {
         if (window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function') {
           let familyId = null, giocata = segnoCopertura;
@@ -1138,7 +1144,6 @@
           else if (['GG', 'NG'].includes(segnoCopertura)) familyId = 'gg_ng';
           else if (segnoCopertura.startsWith('Over')) familyId = 'over';
           else if (segnoCopertura.startsWith('Under')) familyId = 'under';
-
           if (familyId) {
             const info = window.QuoteManager.analizzaGiocata(partita, familyId, giocata, pctStorica);
             if (info && info.quotaBook) {
@@ -1158,22 +1163,14 @@
       const media = fonti.length > 0 ? Math.round(fonti.reduce((a, b) => a + b, 0) / fonti.length) : 0;
 
       let consiglio = { livello: 'info', testo: '', modalita: 'esatta' };
-      if (media < 25) {
-        consiglio = { livello: 'ok', testo: '❌ Non coprire — schedina già sicura', modalita: 'esatta', colore: 'var(--neon-green)' };
-      } else if (media < 35) {
-        consiglio = { livello: 'warn', testo: '🤔 Copertura opzionale', modalita: 'esatta', colore: 'var(--neon-gold)' };
-      } else if (media < 50) {
-        consiglio = { livello: 'danger', testo: '✅ Copertura consigliata (con profitto)', modalita: 'profitto', colore: 'var(--neon-orange)' };
-      } else {
-        consiglio = { livello: 'danger', testo: '🚨 Copertura FORTE (no-loss)', modalita: 'noloss', colore: 'var(--neon-red)' };
-      }
+      if (media < 25) consiglio = { livello: 'ok', testo: '❌ Non coprire — schedina già sicura', modalita: 'esatta', colore: 'var(--neon-green)' };
+      else if (media < 35) consiglio = { livello: 'warn', testo: '🤔 Copertura opzionale', modalita: 'esatta', colore: 'var(--neon-gold)' };
+      else if (media < 50) consiglio = { livello: 'danger', testo: '✅ Copertura consigliata (con profitto)', modalita: 'profitto', colore: 'var(--neon-orange)' };
+      else consiglio = { livello: 'danger', testo: '🚨 Copertura FORTE (no-loss)', modalita: 'noloss', colore: 'var(--neon-red)' };
 
       return {
-        segnoCopertura,
-        tipoCopertura: coperturaInfo.tipo,
-        descrizione: coperturaInfo.desc,
-        pctStorica, pctMC, pctPDF, pctLive,
-        quotaPDF, media, consiglio,
+        segnoCopertura, tipoCopertura: coperturaInfo.tipo, descrizione: coperturaInfo.desc,
+        pctStorica, pctMC, pctPDF, pctLive, quotaPDF, media, consiglio,
       };
     }, [partita, coperturaInfo, quotaLive, matches]);
 
@@ -1181,32 +1178,15 @@
       const v = parseFloat(vincita) || 0;
       const q = parseFloat(quota) || 0;
       const p = parseFloat(profittoMinimo) || 0;
-
       if (v <= 0 || q <= 1) return null;
-
-      let importo = 0;
-      let modalita = 'esatta';
-
-      if (p > 0) {
-        importo = (v - p) / q;
-        modalita = 'profitto';
-      } else {
-        importo = v / q;
-      }
-
+      let importo = 0, modalita = 'esatta';
+      if (p > 0) { importo = (v - p) / q; modalita = 'profitto'; }
+      else { importo = v / q; }
       const nettoCoperto = (importo * q) - importo;
       const nettoSchedina = v - importo;
       const totaleInvestito = importo;
       const roiCopertura = importo > 0 ? ((nettoCoperto / importo) * 100) : 0;
-
-      return {
-        importo: Math.max(0, importo),
-        nettoCoperto,
-        nettoSchedina,
-        totaleInvestito,
-        roiCopertura,
-        modalita,
-      };
+      return { importo: Math.max(0, importo), nettoCoperto, nettoSchedina, totaleInvestito, roiCopertura, modalita };
     }, [vincita, quota, profittoMinimo]);
 
     const profittoSuggerito = useMemo(() => {
@@ -1218,14 +1198,8 @@
     }, [analisiProbabilita, vincita]);
 
     const resetAll = () => {
-      setCampionatoSel('');
-      setPartitaSel('');
-      setGiocataSel('');
-      setGiocataCustom('');
-      setVincita('');
-      setQuota('');
-      setProfittoMinimo('');
-      setQuotaLive('');
+      setCampionatoSel(''); setPartitaSel(''); setGiocataSel(''); setGiocataCustom('');
+      setVincita(''); setQuota(''); setProfittoMinimo(''); setQuotaLive('');
     };
 
     const giocateDisponibili = [
@@ -1254,17 +1228,11 @@
         background: 'var(--card)', border: `1px solid ${value != null && value > 0 ? color : 'var(--border)'}`,
         textAlign: 'center',
       }}>
-        <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
-          {label}
-        </div>
+        <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>{label}</div>
         <div style={{ fontSize: '22px', fontWeight: 900, color: value != null && value > 0 ? color : 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
           {value != null && value > 0 ? `${value}%` : '—'}
         </div>
-        {subtitle && (
-          <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '2px' }}>
-            {subtitle}
-          </div>
-        )}
+        {subtitle && <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '2px' }}>{subtitle}</div>}
       </div>
     );
 
@@ -1274,110 +1242,45 @@
           <h3 style={{ color: 'var(--neon-cyan)', marginBottom: '16px', fontFamily: 'Orbitron, sans-serif', fontSize: '16px' }}>
             🎯 Seleziona la partita da coprire
           </h3>
-
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
             <div>
-              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
-                🏆 Campionato
-              </label>
-              <select
-                className="calc-select"
-                value={campionatoSel}
-                onChange={(e) => {
-                  setCampionatoSel(e.target.value);
-                  setPartitaSel('');
-                  setGiocataSel('');
-                }}
-              >
+              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>🏆 Campionato</label>
+              <select className="calc-select" value={campionatoSel} onChange={(e) => { setCampionatoSel(e.target.value); setPartitaSel(''); setGiocataSel(''); }}>
                 <option value="">— Seleziona campionato —</option>
-                {campionatiConPartite.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
+                {campionatiConPartite.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
-
             <div>
-              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
-                ⚽ Partita
-              </label>
-              <select
-                className="calc-select"
-                value={partitaSel}
-                onChange={(e) => {
-                  setPartitaSel(e.target.value);
-                  setGiocataSel('');
-                }}
-                disabled={!campionatoSel}
-              >
+              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>⚽ Partita</label>
+              <select className="calc-select" value={partitaSel} onChange={(e) => { setPartitaSel(e.target.value); setGiocataSel(''); }} disabled={!campionatoSel}>
                 <option value="">— Seleziona partita —</option>
-                {partiteFiltrate.map(m => (
-                  <option key={m.id} value={m.id}>
-                    {m.casa} vs {m.ospiti} ({window.formatDateEU(m.data)} {m.ora || ''})
-                  </option>
-                ))}
+                {partiteFiltrate.map(m => <option key={m.id} value={m.id}>{m.casa} vs {m.ospiti} ({window.formatDateEU(m.data)} {m.ora || ''})</option>)}
               </select>
             </div>
-
             <div>
-              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
-                💡 Cosa hai giocato
-              </label>
-              <select
-                className="calc-select"
-                value={giocataSel}
-                onChange={(e) => {
-                  setGiocataSel(e.target.value);
-                  if (e.target.value !== 'custom') setGiocataCustom('');
-                }}
-                disabled={!partitaSel}
-              >
+              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>💡 Cosa hai giocato</label>
+              <select className="calc-select" value={giocataSel} onChange={(e) => { setGiocataSel(e.target.value); if (e.target.value !== 'custom') setGiocataCustom(''); }} disabled={!partitaSel}>
                 <option value="">— Seleziona giocata —</option>
-                {giocateDisponibili.map(g => (
-                  <option key={g.value} value={g.value}>{g.label}</option>
-                ))}
+                {giocateDisponibili.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
               </select>
             </div>
           </div>
-
           {giocataSel === 'custom' && (
             <div style={{ marginTop: '12px' }}>
-              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
-                ✏️ Inserisci manualmente (es. "1X+O2.5")
-              </label>
-              <input
-                className="calc-input"
-                style={{ textAlign: 'left', fontFamily: 'Rajdhani, sans-serif', fontWeight: 600 }}
-                type="text"
-                value={giocataCustom}
-                onChange={(e) => setGiocataCustom(e.target.value)}
-                placeholder="Es: 1X+O2.5"
-              />
+              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>✏️ Inserisci manualmente (es. "1X+O2.5")</label>
+              <input className="calc-input" style={{ textAlign: 'left', fontFamily: 'Rajdhani, sans-serif', fontWeight: 600 }} type="text" value={giocataCustom} onChange={(e) => setGiocataCustom(e.target.value)} placeholder="Es: 1X+O2.5" />
             </div>
           )}
-
           {coperturaInfo && coperturaInfo.copre.length > 0 && (
-            <div style={{
-              marginTop: '14px', padding: '12px 14px',
-              background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(255, 0, 229, 0.05))',
-              borderRadius: '10px', border: '1px solid var(--border-strong)',
-            }}>
-              <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginBottom: '4px' }}>
-                🎯 Per coprire devi giocare:
-              </div>
-              <div style={{ fontSize: '18px', fontWeight: 900, color: 'var(--neon-cyan)', fontFamily: 'Orbitron, sans-serif' }}>
-                {coperturaInfo.copre.join(' + ')}
-              </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>
-                {coperturaInfo.desc}
-              </div>
+            <div style={{ marginTop: '14px', padding: '12px 14px', background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(255, 0, 229, 0.05))', borderRadius: '10px', border: '1px solid var(--border-strong)' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginBottom: '4px' }}>🎯 Per coprire devi giocare:</div>
+              <div style={{ fontSize: '18px', fontWeight: 900, color: 'var(--neon-cyan)', fontFamily: 'Orbitron, sans-serif' }}>{coperturaInfo.copre.join(' + ')}</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>{coperturaInfo.desc}</div>
             </div>
           )}
-
           {coperturaInfo && coperturaInfo.copre.length === 0 && giocataCustom && (
             <div style={{ marginTop: '12px', padding: '10px 14px', background: 'rgba(255, 51, 102, 0.1)', borderRadius: '8px', border: '1px solid var(--neon-red)' }}>
-              <div style={{ fontSize: '12px', color: 'var(--neon-red)' }}>
-                ⚠️ Giocata personalizzata: specifica manualmente il segno di copertura nei campi sotto.
-              </div>
+              <div style={{ fontSize: '12px', color: 'var(--neon-red)' }}>⚠️ Giocata personalizzata: specifica manualmente il segno di copertura nei campi sotto.</div>
             </div>
           )}
         </div>
@@ -1387,200 +1290,86 @@
             <h3 style={{ color: 'var(--neon-cyan)', marginBottom: '14px', fontFamily: 'Orbitron, sans-serif', fontSize: '16px' }}>
               📊 Analisi Probabilità — "{analisiProbabilita.segnoCopertura}"
             </h3>
-
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', marginBottom: '14px' }}>
               <ProbCard label="📈 Storica" value={analisiProbabilita.pctStorica} color="var(--neon-cyan)" />
               <ProbCard label="🎲 Monte Carlo" value={analisiProbabilita.pctMC} color="var(--neon-magenta)" />
               <ProbCard label="📄 PDF" value={analisiProbabilita.pctPDF} color="var(--neon-gold)" subtitle={analisiProbabilita.quotaPDF ? `Quota ${analisiProbabilita.quotaPDF.toFixed(2)}` : null} />
               <ProbCard label="🔴 Live" value={analisiProbabilita.pctLive} color="var(--neon-green)" />
             </div>
-
             <div style={{ marginBottom: '14px' }}>
-              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
-                🔴 Quota aggiornata (opzionale — se la sai)
-              </label>
-              <input
-                className="calc-input"
-                type="number"
-                step="0.01"
-                min="1.01"
-                value={quotaLive}
-                onChange={(e) => {
-                  setQuotaLive(e.target.value);
-                  if (e.target.value) setQuota(e.target.value);
-                }}
-                placeholder="Es: 2.53"
-              />
-              <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '2px', fontStyle: 'italic' }}>
-                Se la inserisci, aggiorno la probabilità implicita e la uso per il calcolo
-              </div>
+              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>🔴 Quota aggiornata (opzionale — se la sai)</label>
+              <input className="calc-input" type="number" step="0.01" min="1.01" value={quotaLive} onChange={(e) => { setQuotaLive(e.target.value); if (e.target.value) setQuota(e.target.value); }} placeholder="Es: 2.53" />
+              <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '2px', fontStyle: 'italic' }}>Se la inserisci, aggiorno la probabilità implicita e la uso per il calcolo</div>
             </div>
-
-            <div style={{
-              padding: '14px', borderRadius: '10px',
-              background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 229, 0.05))',
-              border: `2px solid ${analisiProbabilita.consiglio.colore}`,
-            }}>
+            <div style={{ padding: '14px', borderRadius: '10px', background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 229, 0.05))', border: `2px solid ${analisiProbabilita.consiglio.colore}` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 700 }}>
-                  👉 PROBABILITÀ MEDIA
-                </span>
-                <span style={{ fontSize: '28px', fontWeight: 900, color: analisiProbabilita.consiglio.colore, fontFamily: 'Orbitron, sans-serif' }}>
-                  {analisiProbabilita.media}%
-                </span>
+                <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 700 }}>👉 PROBABILITÀ MEDIA</span>
+                <span style={{ fontSize: '28px', fontWeight: 900, color: analisiProbabilita.consiglio.colore, fontFamily: 'Orbitron, sans-serif' }}>{analisiProbabilita.media}%</span>
               </div>
               <div className="calc-prob-bar">
-                <div
-                  className="calc-prob-fill"
-                  style={{
-                    width: `${Math.min(analisiProbabilita.media, 100)}%`,
-                    background: analisiProbabilita.consiglio.colore,
-                  }}
-                />
+                <div className="calc-prob-fill" style={{ width: `${Math.min(analisiProbabilita.media, 100)}%`, background: analisiProbabilita.consiglio.colore }} />
               </div>
-              <div style={{
-                marginTop: '12px', padding: '10px 12px',
-                borderRadius: '8px',
-                background: 'rgba(0,0,0,0.3)',
-                border: `1px solid ${analisiProbabilita.consiglio.colore}`,
-              }}>
-                <div style={{ fontSize: '14px', fontWeight: 900, color: analisiProbabilita.consiglio.colore, textAlign: 'center' }}>
-                  {analisiProbabilita.consiglio.testo}
-                </div>
+              <div style={{ marginTop: '12px', padding: '10px 12px', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: `1px solid ${analisiProbabilita.consiglio.colore}` }}>
+                <div style={{ fontSize: '14px', fontWeight: 900, color: analisiProbabilita.consiglio.colore, textAlign: 'center' }}>{analisiProbabilita.consiglio.testo}</div>
               </div>
             </div>
           </div>
         )}
 
         <div className="card">
-          <h3 style={{ color: 'var(--neon-cyan)', marginBottom: '14px', fontFamily: 'Orbitron, sans-serif', fontSize: '16px' }}>
-            🧮 Calcolo Copertura
-          </h3>
-
+          <h3 style={{ color: 'var(--neon-cyan)', marginBottom: '14px', fontFamily: 'Orbitron, sans-serif', fontSize: '16px' }}>🧮 Calcolo Copertura</h3>
           <div style={{ display: 'grid', gap: '12px', marginBottom: '16px' }}>
             <div>
-              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
-                💰 Vincita attesa schedina (€)
-              </label>
-              <input
-                className="calc-input"
-                type="number"
-                step="0.01"
-                value={vincita}
-                onChange={(e) => setVincita(e.target.value)}
-                placeholder="0.00"
-              />
+              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>💰 Vincita attesa schedina (€)</label>
+              <input className="calc-input" type="number" step="0.01" value={vincita} onChange={(e) => setVincita(e.target.value)} placeholder="0.00" />
             </div>
-
             <div>
-              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
-                📊 Quota copertura {analisiProbabilita && `(${analisiProbabilita.segnoCopertura})`}
-              </label>
-              <input
-                className="calc-input"
-                type="number"
-                step="0.01"
-                min="1.01"
-                value={quota}
-                onChange={(e) => setQuota(e.target.value)}
-                placeholder="0.00"
-              />
+              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>📊 Quota copertura {analisiProbabilita && `(${analisiProbabilita.segnoCopertura})`}</label>
+              <input className="calc-input" type="number" step="0.01" min="1.01" value={quota} onChange={(e) => setQuota(e.target.value)} placeholder="0.00" />
             </div>
-
             <div>
-              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>
-                🎯 Profitto minimo desiderato (€) — opzionale
-              </label>
-              <input
-                className="calc-input"
-                type="number"
-                step="0.01"
-                min="0"
-                value={profittoMinimo}
-                onChange={(e) => setProfittoMinimo(e.target.value)}
-                placeholder={profittoSuggerito ? `Suggerito: ${profittoSuggerito}` : 'Vuoto = copertura esatta'}
-              />
+              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>🎯 Profitto minimo desiderato (€) — opzionale</label>
+              <input className="calc-input" type="number" step="0.01" min="0" value={profittoMinimo} onChange={(e) => setProfittoMinimo(e.target.value)} placeholder={profittoSuggerito ? `Suggerito: ${profittoSuggerito}` : 'Vuoto = copertura esatta'} />
               <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '2px', fontStyle: 'italic' }}>
-                {profittoSuggerito
-                  ? `💡 Suggerito: ${profittoSuggerito}€ (clicca sul campo e inseriscilo)`
-                  : 'Lascia vuoto per copertura esatta (pareggio sul segno coperto)'}
+                {profittoSuggerito ? `💡 Suggerito: ${profittoSuggerito}€ (clicca sul campo e inseriscilo)` : 'Lascia vuoto per copertura esatta (pareggio sul segno coperto)'}
               </div>
             </div>
           </div>
-
           {calcoli && (
             <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '2px solid var(--neon-cyan)' }}>
               <div className="calc-result-row" style={{ background: 'rgba(0, 245, 255, 0.08)' }}>
                 <span className="calc-result-label">💵 Devi giocare</span>
-                <span className="calc-result-value neutral">
-                  {calcoli.importo.toFixed(2)} €
-                </span>
+                <span className="calc-result-value neutral">{calcoli.importo.toFixed(2)} €</span>
               </div>
-
               <div className="calc-result-row">
                 <span className="calc-result-label">✅ Se esce "{analisiProbabilita?.segnoCopertura || 'copertura'}"</span>
-                <span className={`calc-result-value ${calcoli.nettoCoperto >= 0 ? 'positive' : 'negative'}`}>
-                  {calcoli.nettoCoperto >= 0 ? '+' : ''}{calcoli.nettoCoperto.toFixed(2)} €
-                </span>
+                <span className={`calc-result-value ${calcoli.nettoCoperto >= 0 ? 'positive' : 'negative'}`}>{calcoli.nettoCoperto >= 0 ? '+' : ''}{calcoli.nettoCoperto.toFixed(2)} €</span>
               </div>
-
               <div className="calc-result-row">
                 <span className="calc-result-label">🎯 Se esce la schedina</span>
-                <span className={`calc-result-value ${calcoli.nettoSchedina >= 0 ? 'positive' : 'negative'}`}>
-                  {calcoli.nettoSchedina >= 0 ? '+' : ''}{calcoli.nettoSchedina.toFixed(2)} €
-                </span>
+                <span className={`calc-result-value ${calcoli.nettoSchedina >= 0 ? 'positive' : 'negative'}`}>{calcoli.nettoSchedina >= 0 ? '+' : ''}{calcoli.nettoSchedina.toFixed(2)} €</span>
               </div>
-
               <div className="calc-result-row">
                 <span className="calc-result-label">⚠️ Totale investito</span>
-                <span className="calc-result-value" style={{ color: 'var(--text)' }}>
-                  {calcoli.totaleInvestito.toFixed(2)} €
-                </span>
+                <span className="calc-result-value" style={{ color: 'var(--text)' }}>{calcoli.totaleInvestito.toFixed(2)} €</span>
               </div>
-
               <div className="calc-result-row">
                 <span className="calc-result-label">📈 ROI copertura</span>
-                <span className={`calc-result-value ${calcoli.roiCopertura >= 0 ? 'positive' : 'negative'}`}>
-                  {calcoli.roiCopertura >= 0 ? '+' : ''}{calcoli.roiCopertura.toFixed(2)}%
-                </span>
+                <span className={`calc-result-value ${calcoli.roiCopertura >= 0 ? 'positive' : 'negative'}`}>{calcoli.roiCopertura >= 0 ? '+' : ''}{calcoli.roiCopertura.toFixed(2)}%</span>
               </div>
             </div>
           )}
-
           {!calcoli && vincita && quota && (
-            <div style={{ marginTop: '12px', padding: '10px', textAlign: 'center', color: 'var(--text-dim)', fontSize: '12px' }}>
-              Inserisci vincita e quota per vedere i calcoli
-            </div>
+            <div style={{ marginTop: '12px', padding: '10px', textAlign: 'center', color: 'var(--text-dim)', fontSize: '12px' }}>Inserisci vincita e quota per vedere i calcoli</div>
           )}
-
           <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
-            <button
-              className="btn btn-secondary"
-              onClick={resetAll}
-              style={{ flex: 1, minWidth: '100px' }}
-            >
-              🔄 Reset
-            </button>
+            <button className="btn btn-secondary" onClick={resetAll} style={{ flex: 1, minWidth: '100px' }}>🔄 Reset</button>
             {calcoli && (
-              <button
-                className="btn"
-                onClick={() => {
-                  const testo = `🧮 COPERTURA SCHEDINA\n` +
-                    `⚽ ${partita?.casa || ''} vs ${partita?.ospiti || ''}\n` +
-                    `🎯 Hai giocato: ${giocataCustom || giocataSel}\n` +
-                    `🛡️ Copri con: ${analisiProbabilita?.segnoCopertura || '—'}\n` +
-                    `💰 Vincita attesa: ${vincita}€\n` +
-                    `📊 Quota: ${quota}\n` +
-                    `💵 Gioca: ${calcoli.importo.toFixed(2)}€\n` +
-                    `✅ Netto se copre: ${calcoli.nettoCoperto.toFixed(2)}€\n` +
-                    `🎯 Netto se schedina: ${calcoli.nettoSchedina.toFixed(2)}€`;
-                  navigator.clipboard?.writeText?.(testo);
-                  if (window.showAlert) window.showAlert('success', '📋 Copiato negli appunti!');
-                }}
-                style={{ flex: 1, minWidth: '100px' }}
-              >
-                📋 Copia
-              </button>
+              <button className="btn" onClick={() => {
+                const testo = `🧮 COPERTURA SCHEDINA\n⚽ ${partita?.casa || ''} vs ${partita?.ospiti || ''}\n🎯 Hai giocato: ${giocataCustom || giocataSel}\n🛡️ Copri con: ${analisiProbabilita?.segnoCopertura || '—'}\n💰 Vincita attesa: ${vincita}€\n📊 Quota: ${quota}\n💵 Gioca: ${calcoli.importo.toFixed(2)}€\n✅ Netto se copre: ${calcoli.nettoCoperto.toFixed(2)}€\n🎯 Netto se schedina: ${calcoli.nettoSchedina.toFixed(2)}€`;
+                navigator.clipboard?.writeText?.(testo);
+                if (window.showAlert) window.showAlert('success', '📋 Copiato negli appunti!');
+              }} style={{ flex: 1, minWidth: '100px' }}>📋 Copia</button>
             )}
           </div>
         </div>
@@ -1622,11 +1411,8 @@
     const handleSelectNazione = React.useCallback((naz) => {
       if (typeof naz === 'string' && naz.startsWith('UEFA:')) {
         const camp = naz.replace('UEFA:', '');
-        if (isMobile) {
-          setCampionatoMobile(camp);
-        } else {
-          setNazioneSelezionata({ __special: 'UEFA', campionato: camp });
-        }
+        if (isMobile) setCampionatoMobile(camp);
+        else setNazioneSelezionata({ __special: 'UEFA', campionato: camp });
       } else {
         setNazioneSelezionata(naz);
       }
@@ -1637,227 +1423,84 @@
         <div className="empty-state" style={{ padding: '60px 20px' }}>
           <div style={{ fontSize: '64px', marginBottom: '16px' }}>🌍</div>
           <h3 style={{ color: 'var(--neon-cyan)', marginBottom: '8px' }}>Nessuna partita disponibile</h3>
-          <p style={{ color: 'var(--text-dim)' }}>
-            Importa un campionato da <b>Impostazioni → Importa Campionato</b>
-          </p>
+          <p style={{ color: 'var(--text-dim)' }}>Importa un campionato da <b>Impostazioni → Importa Campionato</b></p>
         </div>
       );
     }
 
     const renderTabContent = () => {
       if (homeTab === 'GestioneConto') {
-        return window.GestioneContoComponent ? (
-          <window.GestioneContoComponent />
-        ) : (
-          <div className="alert alert-info">⏳ Caricamento Gestione Conto...</div>
-        );
+        return window.GestioneContoComponent ? <window.GestioneContoComponent /> : <div className="alert alert-info">⏳ Caricamento Gestione Conto...</div>;
       }
-
       if (homeTab === 'Performance') {
-        return window.PerformanceComponent ? (
-          <window.PerformanceComponent matches={matches} championships={championships} onSelectMatch={onSelectMatch} />
-        ) : (
-          <div className="alert alert-info">⏳ Caricamento Performance...</div>
-        );
+        return window.PerformanceComponent ? <window.PerformanceComponent matches={matches} championships={championships} onSelectMatch={onSelectMatch} /> : <div className="alert alert-info">⏳ Caricamento Performance...</div>;
       }
-
       if (homeTab === 'Calcolatrice') {
         return <CalcolatriceComponent matches={matchesPuliti} />;
       }
 
       if (isMobile) {
         if (campionatoMobile) {
-          return (
-            <MobileVistaGiornata
-              campionato={campionatoMobile}
-              matches={matchesPuliti}
-              onBack={() => setCampionatoMobile(null)}
-              tipoGiocate={tipoGiocate}
-              refreshKey={refreshKey}
-            />
-          );
+          return <MobileVistaGiornata campionato={campionatoMobile} matches={matchesPuliti} onBack={() => setCampionatoMobile(null)} tipoGiocate={tipoGiocate} refreshKey={refreshKey} />;
         }
-
         if (nazioneSelezionata) {
           const info = NAZIONI[nazioneSelezionata];
-
           if (!info) {
             return (
               <div className="card" style={{ textAlign: 'center', padding: '30px' }}>
-                <div style={{ color: 'var(--neon-red)', marginBottom: '12px' }}>
-                  Nazione non trovata
-                </div>
-                <button className="btn" onClick={() => setNazioneSelezionata(null)}>
-                  ← Torna alle nazioni
-                </button>
+                <div style={{ color: 'var(--neon-red)', marginBottom: '12px' }}>Nazione non trovata</div>
+                <button className="btn" onClick={() => setNazioneSelezionata(null)}>← Torna alle nazioni</button>
               </div>
             );
           }
-
           const campionatiNazione = info.campionati
             .filter(c => matchesPuliti.some(m => m.campionato === c))
-            .map(c => ({
-              nome: c,
-              nPartite: matchesPuliti.filter(m => m.campionato === c).length,
-            }));
-
+            .map(c => ({ nome: c, nPartite: matchesPuliti.filter(m => m.campionato === c).length }));
           return (
             <div>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px',
-                padding: '12px 14px', background: 'var(--card)', borderRadius: '12px',
-                border: '1px solid var(--border)',
-              }}>
-                <button onClick={() => setNazioneSelezionata(null)} style={{
-                  background: 'var(--bg-elevated)', color: 'var(--text)',
-                  border: '1px solid var(--border)', borderRadius: '8px',
-                  padding: '8px 14px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px',
-                }}>← Indietro</button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px', padding: '12px 14px', background: 'var(--card)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                <button onClick={() => setNazioneSelezionata(null)} style={{ background: 'var(--bg-elevated)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '8px', padding: '8px 14px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}>← Indietro</button>
                 <NazioneBandiera nazione={nazioneSelezionata} size={36} />
-                <h2 style={{ margin: 0, flex: 1, color: 'var(--neon-cyan)', fontSize: '18px' }}>
-                  {nazioneSelezionata}
-                </h2>
+                <h2 style={{ margin: 0, flex: 1, color: 'var(--neon-cyan)', fontSize: '18px' }}>{nazioneSelezionata}</h2>
               </div>
-
               {campionatiNazione.length === 0 ? (
-                <div className="card" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-dim)' }}>
-                  Nessun campionato disponibile per {nazioneSelezionata}
-                </div>
+                <div className="card" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-dim)' }}>Nessun campionato disponibile per {nazioneSelezionata}</div>
               ) : (
-                <MobileCampScelta
-                  campionati={campionatiNazione}
-                  onSelect={(camp) => setCampionatoMobile(camp)}
-                />
+                <MobileCampScelta campionati={campionatiNazione} onSelect={(camp) => setCampionatoMobile(camp)} />
               )}
             </div>
           );
         }
-
-        return (
-          <GrigliaNazioni
-            matches={matchesPuliti}
-            onSelectNazione={handleSelectNazione}
-          />
-        );
+        return <GrigliaNazioni matches={matchesPuliti} onSelectNazione={handleSelectNazione} tipoGiocate={tipoGiocate} setTipoGiocate={setTipoGiocate} />;
       }
 
       if (nazioneSelezionata) {
-        return (
-          <VistaNazione
-            nazione={nazioneSelezionata}
-            matches={matchesPuliti}
-            onBack={() => setNazioneSelezionata(null)}
-            tipoGiocate={tipoGiocate}
-            refreshKey={refreshKey}
-          />
-        );
+        return <VistaNazione nazione={nazioneSelezionata} matches={matchesPuliti} onBack={() => setNazioneSelezionata(null)} tipoGiocate={tipoGiocate} refreshKey={refreshKey} />;
       }
-
-      return (
-        <GrigliaNazioni
-          matches={matchesPuliti}
-          onSelectNazione={handleSelectNazione}
-        />
-      );
+      return <GrigliaNazioni matches={matchesPuliti} onSelectNazione={handleSelectNazione} tipoGiocate={tipoGiocate} setTipoGiocate={setTipoGiocate} />;
     };
 
     return (
       <div>
-        {window.QuoteManager?.BannerScadenzaQuote && (
-          <window.QuoteManager.BannerScadenzaQuote />
-        )}
+        {window.QuoteManager?.BannerScadenzaQuote && <window.QuoteManager.BannerScadenzaQuote />}
 
         {homeTab !== 'GestioneConto' && homeTab !== 'Calcolatrice' && (
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
-            padding: '10px 14px', marginBottom: '14px',
-            background: 'var(--bg-elevated)', borderRadius: '8px',
-            border: '1px solid var(--border)', fontSize: '12px', color: 'var(--text-dim)',
-          }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', padding: '10px 14px', marginBottom: '14px', background: 'var(--bg-elevated)', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '12px', color: 'var(--text-dim)' }}>
             <span>🏆 <b style={{ color: 'var(--neon-cyan)' }}>{campionatiAttivi.length}</b> campionati attivi</span>
             <span>•</span>
             <span>📊 <b style={{ color: 'var(--neon-cyan)' }}>{matchesPuliti.length}</b> partite totali</span>
-            <span style={{ marginLeft: 'auto', fontStyle: 'italic' }}>
-              Modifica i filtri nel <b>Palinsesto</b> 📅
-            </span>
+            <span style={{ marginLeft: 'auto', fontStyle: 'italic' }}>Modifica i filtri nel <b>Palinsesto</b> 📅</span>
           </div>
         )}
 
         <div className="sub-tabs" style={{ marginBottom: '16px', flexWrap: 'wrap' }}>
-          <button
-            className={homeTab === 'Nazioni' ? 'active' : ''}
-            onClick={() => { setHomeTab('Nazioni'); setNazioneSelezionata(null); setCampionatoMobile(null); }}
-          >
-            🌍 Seleziona una Nazione
-          </button>
-          <button
-            className={homeTab === 'GestioneConto' ? 'active' : ''}
-            onClick={() => { setHomeTab('GestioneConto'); setNazioneSelezionata(null); setCampionatoMobile(null); }}
-          >
-            💰 Gestione Conto
-          </button>
-          <button
-            className={homeTab === 'Performance' ? 'active' : ''}
-            onClick={() => setHomeTab('Performance')}
-          >
-            📈 Performance
-          </button>
-          <button
-            className={homeTab === 'Calcolatrice' ? 'active' : ''}
-            onClick={() => { setHomeTab('Calcolatrice'); setNazioneSelezionata(null); setCampionatoMobile(null); }}
-          >
-            🧮 Calcolatrice
-          </button>
+          <button className={homeTab === 'Nazioni' ? 'active' : ''} onClick={() => { setHomeTab('Nazioni'); setNazioneSelezionata(null); setCampionatoMobile(null); }}>🌍 Seleziona una Nazione</button>
+          <button className={homeTab === 'GestioneConto' ? 'active' : ''} onClick={() => { setHomeTab('GestioneConto'); setNazioneSelezionata(null); setCampionatoMobile(null); }}>💰 Gestione Conto</button>
+          <button className={homeTab === 'Performance' ? 'active' : ''} onClick={() => setHomeTab('Performance')}>📈 Performance</button>
+          <button className={homeTab === 'Calcolatrice' ? 'active' : ''} onClick={() => { setHomeTab('Calcolatrice'); setNazioneSelezionata(null); setCampionatoMobile(null); }}>🧮 Calcolatrice</button>
         </div>
 
-        {homeTab === 'Nazioni' && (
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px',
-            padding: '8px 14px', background: 'var(--bg-elevated)', borderRadius: '10px',
-            border: '1px solid var(--border)', flexWrap: 'wrap',
-          }}>
-            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neon-cyan)', textTransform: 'uppercase' }}>
-              🎯 Giocate
-            </span>
-            <div style={{
-              display: 'flex', background: 'var(--bg-deep)', borderRadius: '8px',
-              padding: '3px', border: '1px solid var(--border)',
-            }}>
-              <button
-                onClick={() => setTipoGiocate('calcolate')}
-                title="Mostra le 3 giocate con % più alta"
-                style={{
-                  padding: '6px 16px', fontSize: '11px', fontWeight: 700,
-                  borderRadius: '6px', border: 'none', cursor: 'pointer',
-                  background: tipoGiocate === 'calcolate' ? 'var(--neon-cyan)' : 'transparent',
-                  color: tipoGiocate === 'calcolate' ? '#000' : 'var(--text-dim)',
-                  transition: 'all 0.2s',
-                }}
-              >
-                🎯 Calcolate
-              </button>
-              <button
-                onClick={() => setTipoGiocate('scelte')}
-                title="Mostra le famiglie configurate in Impostazioni → Giocate"
-                style={{
-                  padding: '6px 16px', fontSize: '11px', fontWeight: 700,
-                  borderRadius: '6px', border: 'none', cursor: 'pointer',
-                  background: tipoGiocate === 'scelte' ? 'var(--neon-green)' : 'transparent',
-                  color: tipoGiocate === 'scelte' ? '#000' : 'var(--text-dim)',
-                  transition: 'all 0.2s',
-                }}
-              >
-                ✅ Scelte
-              </button>
-            </div>
-            <span style={{ fontSize: '10px', color: 'var(--text-dim)', fontStyle: 'italic' }}>
-              {tipoGiocate === 'calcolate'
-                ? '🎯 Top 3 per percentuale'
-                : '✅ Solo famiglie configurate in Impostazioni → Giocate'}
-            </span>
-          </div>
-        )}
-
+        {/* ⭐ Rimosso lo switch Calcolate/Scelte (Opzione 2A) */}
         {renderTabContent()}
       </div>
     );
@@ -1872,6 +1515,6 @@
     leggiFamiglieSelezionate, GIOCATE_SELEZIONATE_KEY, FAMIGLIE_SELEZIONATE_KEY,
   };
 
-  console.log('✅ Modulo Home FUTURISTIC v6 caricato (bottoni nazioni + Coppe UEFA stile Schedina)');
+  console.log('✅ Modulo Home FUTURISTIC v7 caricato (bottoni cyan pieni + Tutti/Deseleziona)');
 
 })();

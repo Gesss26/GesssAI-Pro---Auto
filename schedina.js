@@ -1,6 +1,6 @@
 // ============================================================
 // schedina.js - Modulo Schedina con quote PDF visibili
-// v9.5: Schedina Quota usa SOLO le giocate selezionate in Schedina Classica
+// v9.6: griglia 5x5 con badge oggi/2 giorni + tutti i campionati
 // ============================================================
 
 const formatGiocataLabel = (familyId, label) => {
@@ -325,21 +325,14 @@ const SchedinaQuotaPanel = ({
   const [generando, setGenerando] = useState(false);
   const [mostraCandidate, setMostraCandidate] = useState(false);
 
-  // ⭐ Funzioni globali
   const computeMatchStats = window.computeMatchStats;
   const getGiocataPct = window.getGiocataPct;
   const calcolaGG_NG = window.calcolaGG_NG;
 
-  // ============================================================
-  // DETERMINA LE GIOCATE DA USARE (Opzione A)
-  // ============================================================
-  // Se giocateSelezionate contiene 'tutte' → usa TUTTI i GRUPPI_GIOCATE
-  // Altrimenti usa SOLO le giocate selezionate nella Schedina Classica
   const giocateInUso = useMemo(() => {
     const isTutteMode = giocateSelezionate.includes('tutte') || giocateSelezionate.length === 0;
 
     if (isTutteMode) {
-      // Tutti i gruppi
       const out = [];
       GRUPPI_GIOCATE.forEach(gruppo => {
         gruppo.giocate.forEach(g => {
@@ -355,7 +348,6 @@ const SchedinaQuotaPanel = ({
       return out;
     }
 
-    // Solo le giocate selezionate
     const out = [];
     giocateSelezionate.forEach(sel => {
       if (typeof sel !== 'object' || !sel.familyId || !sel.giocata) return;
@@ -374,9 +366,6 @@ const SchedinaQuotaPanel = ({
 
   const isTutteMode = giocateSelezionate.includes('tutte') || giocateSelezionate.length === 0;
 
-  // ============================================================
-  // CANDIDATI: usa SOLO le giocate in uso
-  // ============================================================
   const candidati = useMemo(() => {
     if (!window.QuoteManager || typeof window.QuoteManager.analizzaGiocata !== 'function') {
       return [];
@@ -397,7 +386,6 @@ const SchedinaQuotaPanel = ({
       const awayMG = stats.awayMG || {};
       const mgTot = stats.mgTot || {};
 
-      // Per ogni giocata in uso, calcola la pct
       giocateInUso.forEach(g => {
         let pct = 0;
         try {
@@ -415,7 +403,6 @@ const SchedinaQuotaPanel = ({
 
         if (pct <= 0) return;
 
-        // Calcola la quota
         let quota = null;
         try {
           const q = window.QuoteManager.analizzaGiocata(match, g.familyId, g.giocata, Math.round(pct));
@@ -608,7 +595,6 @@ const SchedinaQuotaPanel = ({
                       statoSchedina === 'sotto' ? 'var(--neon-red)' :
                       'var(--text-muted)';
 
-  // Etichetta gruppi in uso per il banner
   const etichettaGiocateInUso = () => {
     if (isTutteMode) return `Tutti i gruppi Schedina (${GRUPPI_GIOCATE.length} gruppi)`;
     if (giocateInUso.length === 0) return 'Nessuna giocata selezionata';
@@ -953,7 +939,6 @@ const SchedinaComponent = ({
     const awayMG = stats.awayMG || {};
     const mgTot = stats.mgTot || {};
 
-    // Calcolate: top 3 tra TUTTI i GRUPPI_GIOCATE
     const tutteCalcolate = [];
     const viste = new Set();
 
@@ -994,7 +979,6 @@ const SchedinaComponent = ({
       ? Math.round(top3Calcolate.reduce((s, g) => s + g.pct, 0) / top3Calcolate.length)
       : 0;
 
-    // Scelte: solo le giocate selezionate nei GRUPPI_GIOCATE (dalla Schedina stessa)
     const top3Scelte = [];
     if (!giocateSelezionate.includes('tutte')) {
       giocateSelezionate.forEach(sel => {
@@ -1123,7 +1107,7 @@ const SchedinaComponent = ({
               </span>
             </h3>
 
-            {/* ⭐ GRIGLIA CAMPIONATI 5×5 - STILE PALINSESTO */}
+            {/* ⭐ GRIGLIA CAMPIONATI 5×5 - CON BADGE OGGI/2 GIORNI */}
             <div style={{
               marginBottom: '20px', padding: '10px 12px',
               background: 'linear-gradient(135deg, rgba(30, 40, 66, 0.7), rgba(20, 27, 46, 0.9))',
@@ -1157,7 +1141,7 @@ const SchedinaComponent = ({
                 </div>
               </div>
 
-              {/* Griglia 5×5 identica a Palinsesto */}
+              {/* Griglia 5×5 con badge oggi (rosso) / 2 giorni (giallo) */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
@@ -1168,6 +1152,25 @@ const SchedinaComponent = ({
                   const isSelected = campionatiSelezionati.includes(c.name);
                   const color = getChampColor(c.name);
                   const label = c.name.length > 16 ? c.name.substring(0, 14) + '…' : c.name;
+                  const hasPartite = matches.some(m => m.campionato === c.name);
+
+                  // Badge: rosso se oggi, giallo se entro 2 giorni
+                  const todayStr = getTodayStr();
+                  const maxDateStr = addDaysToDateStr(todayStr, 2);
+                  const nOggi = matches.filter(m => m.campionato === c.name && m.stato === 'Futura' && normalizeDate(m.data) === todayStr).length;
+                  const n2g = matches.filter(m => {
+                    if (m.campionato !== c.name || m.stato !== 'Futura') return false;
+                    const d = normalizeDate(m.data);
+                    return d > todayStr && d <= maxDateStr;
+                  }).length;
+
+                  let badge = null;
+                  if (nOggi > 0) {
+                    badge = <span style={{ background: isSelected ? 'rgba(0,0,0,0.3)' : 'var(--neon-red)', color: isSelected ? '#000' : '#fff', fontSize: '9px', fontWeight: 900, padding: '1px 6px', borderRadius: '10px', flexShrink: 0 }}>{nOggi}</span>;
+                  } else if (n2g > 0) {
+                    badge = <span style={{ background: isSelected ? 'rgba(0,0,0,0.3)' : 'var(--neon-gold)', color: isSelected ? '#000' : '#000', fontSize: '9px', fontWeight: 900, padding: '1px 6px', borderRadius: '10px', flexShrink: 0 }}>{n2g}</span>;
+                  }
+
                   return (
                     <button
                       key={c.name}
@@ -1194,6 +1197,7 @@ const SchedinaComponent = ({
                         transition: 'all 0.2s',
                         overflow: 'hidden',
                         boxShadow: isSelected ? '0 0 20px rgba(0, 245, 255, 0.5)' : 'none',
+                        opacity: hasPartite ? 1 : 0.4,
                       }}
                       title={c.name}
                     >
@@ -1207,6 +1211,7 @@ const SchedinaComponent = ({
                       }}>
                         {label}
                       </span>
+                      {badge}
                     </button>
                   );
                 })}
@@ -1433,4 +1438,4 @@ const SchedinaComponent = ({
 };
 
 window.SchedinaComponent = SchedinaComponent;
-console.log('✅ SchedinaComponent v9.5 caricato - Schedina Quota usa solo giocate selezionate');
+console.log('✅ SchedinaComponent v9.6 caricato - griglia 5x5 con badge oggi/2 giorni');

@@ -1,6 +1,6 @@
 // ============================================================
-// palinsesto.js - Modulo Palinsesto (FUTURISTIC + CHAMP BAR GRIGLIA 5x5)
-// v2: selezione MULTIPLA campionati + stile bottoni identico a Schedina
+// palinsesto.js - Modulo Palinsesto
+// v3: badge rosso (oggi) / giallo (prossimi 2 giorni) + tutti i campionati
 // ============================================================
 
 (function () {
@@ -8,7 +8,6 @@
 
   const { useState, useMemo, useEffect } = React;
 
-  // ⭐ Normalizza accenti per kebab-case
   const normalizzaAccenti = (str) => {
     if (!str) return '';
     return str
@@ -69,21 +68,11 @@
     return isMobile;
   };
 
-  // ============================================================
-  // LISTA CAMPIONATI ORDINATA ALFABETICAMENTE
-  // ============================================================
   const getCampionatiOrdinati = () => {
-    const list = (window.CHAMPIONSHIP_LIST && window.CHAMPIONSHIP_LIST.length > 0)
-      ? window.CHAMPIONSHIP_LIST
-      : [];
-    return [...list].sort((a, b) =>
-      (a || '').localeCompare(b || '', 'it', { sensitivity: 'base' })
-    );
+    const list = (window.CHAMPIONSHIP_LIST && window.CHAMPIONSHIP_LIST.length > 0) ? window.CHAMPIONSHIP_LIST : [];
+    return [...list].sort((a, b) => (a || '').localeCompare(b || '', 'it', { sensitivity: 'base' }));
   };
 
-  // ============================================================
-  // CHAMP LOGO (con normalizzazione accenti)
-  // ============================================================
   const ChampLogo = ({ campionato, size = 24 }) => {
     const [hasError, setHasError] = useState(false);
     const [pathIndex, setPathIndex] = useState(0);
@@ -91,12 +80,7 @@
     const getPaths = (champ) => {
       if (!champ) return [];
       const normalized = normalizzaAccenti(champ);
-      const kebab = normalized
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .trim()
-        .replace(/[\s-]+/g, '-')
-        .replace(/^-+|-+$/g, '');
+      const kebab = normalized.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/[\s-]+/g, '-').replace(/^-+|-+$/g, '');
       const snake = normalized.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
       return [
         `logos/campionati/${kebab}.png`,
@@ -108,32 +92,19 @@
     };
 
     const paths = getPaths(campionato);
-
     if (hasError || pathIndex >= paths.length || paths.length === 0) {
       const color = window.getChampColor(campionato);
       return (
-        <div style={{
-          width: size, height: size, borderRadius: '50%',
-          background: `linear-gradient(135deg, ${color}, ${color}99)`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontWeight: 'bold', color: '#000', fontSize: size * 0.38, flexShrink: 0,
-        }}>
+        <div style={{ width: size, height: size, borderRadius: '50%', background: `linear-gradient(135deg, ${color}, ${color}99)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#000', fontSize: size * 0.38, flexShrink: 0 }}>
           {campionato.substring(0, 2).toUpperCase()}
         </div>
       );
     }
 
     return (
-      <img
-        key={paths[pathIndex]}
-        src={paths[pathIndex]}
-        alt={campionato}
-        onError={() => {
-          if (pathIndex + 1 < paths.length) setPathIndex(pathIndex + 1);
-          else setHasError(true);
-        }}
-        style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }}
-      />
+      <img key={paths[pathIndex]} src={paths[pathIndex]} alt={campionato}
+        onError={() => { if (pathIndex + 1 < paths.length) setPathIndex(pathIndex + 1); else setHasError(true); }}
+        style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />
     );
   };
 
@@ -150,15 +121,7 @@
     const { quotaBook, edge, isValue } = quotaInfo;
 
     return (
-      <div style={{
-        display: 'inline-flex', alignItems: 'center', gap: '4px',
-        padding: '2px 6px', marginLeft: '6px', borderRadius: '4px',
-        background: isValue ? 'rgba(0, 255, 136, 0.15)' : 'rgba(255, 255, 255, 0.05)',
-        border: `1px solid ${isValue ? 'var(--neon-green)' : 'var(--border)'}`,
-        fontSize: '11px', fontWeight: 'bold',
-        color: isValue ? 'var(--neon-green)' : 'var(--text)',
-        whiteSpace: 'nowrap',
-      }}>
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 6px', marginLeft: '6px', borderRadius: '4px', background: isValue ? 'rgba(0, 255, 136, 0.15)' : 'rgba(255, 255, 255, 0.05)', border: `1px solid ${isValue ? 'var(--neon-green)' : 'var(--border)'}`, fontSize: '11px', fontWeight: 'bold', color: isValue ? 'var(--neon-green)' : 'var(--text)', whiteSpace: 'nowrap' }}>
         <span>💰</span><span>{quotaBook.toFixed(2)}</span>
       </div>
     );
@@ -174,7 +137,6 @@
     const getGiocataPct = window.getGiocataPct;
     const getPercentualeClasse = window.getPercentualeClasse;
     const calcolaGG_NG = window.calcolaGG_NG;
-
     const { mode: visualizzaMode } = window.FiltriCampionati.useVisualizzaGiocateMode();
 
     if (!match) return null;
@@ -190,9 +152,7 @@
 
     const renderFormSquares = (formStr) => {
       if (!formStr) return <span>N/D</span>;
-      return [...formStr].map((letter, idx) => (
-        <div key={idx} className={`form-square form-square-${letter}`}>{letter}</div>
-      ));
+      return [...formStr].map((letter, idx) => <div key={idx} className={`form-square form-square-${letter}`}>{letter}</div>);
     };
 
     const getColorForPct = (valore) => {
@@ -208,14 +168,9 @@
       const awayMG = stats.awayMG || {};
       const mgTot = stats.mgTot || {};
       const giocateDaMostrare = [];
-
       let famiglieDaAnalizzare;
-      if (visualizzaMode === 'tutte') {
-        famiglieDaAnalizzare = Object.keys(FAMIGLIE_GIOCATE);
-      } else {
-        famiglieDaAnalizzare = selectedFamiglie || [];
-      }
-
+      if (visualizzaMode === 'tutte') famiglieDaAnalizzare = Object.keys(FAMIGLIE_GIOCATE);
+      else famiglieDaAnalizzare = selectedFamiglie || [];
       famiglieDaAnalizzare = [...new Set(famiglieDaAnalizzare)].filter(id => FAMIGLIE_GIOCATE[id]);
 
       famiglieDaAnalizzare.forEach(familyId => {
@@ -247,89 +202,47 @@
     };
 
     const giocateDaMostrare = getGiocateDaMostrare();
-    const score = giocateDaMostrare.length > 0
-      ? Math.round(giocateDaMostrare.reduce((s, g) => s + g.pct, 0) / giocateDaMostrare.length) : 0;
+    const score = giocateDaMostrare.length > 0 ? Math.round(giocateDaMostrare.reduce((s, g) => s + g.pct, 0) / giocateDaMostrare.length) : 0;
     const hasBomb = giocateDaMostrare.some(g => g.isBomb);
-
     const handleClick = (e) => { e.stopPropagation(); onSelect(match.id); };
     const formattedDate = match.data ? formatDateEU(match.data) : 'N/D';
 
     return (
       <div className="match-tab" style={{ borderLeftColor: champColor }} onClick={handleClick}>
         <div className="score-badge">
-          <span className={`giocata-pct ${getPercentualeClasse(score)}`}>
-            {isNaN(score) ? 0 : score}%
-          </span>
+          <span className={`giocata-pct ${getPercentualeClasse(score)}`}>{isNaN(score) ? 0 : score}%</span>
           {hasBomb && <span className="bomb-inline">💣</span>}
         </div>
-
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
           <div className="tab-header" style={{ background: champColor, marginBottom: 0 }}>
             <ChampLogo campionato={match.campionato} size={16} />
             <span>{match.campionato || 'N/D'}</span>
           </div>
-          <span style={{
-            fontSize: '10px', fontWeight: 700, color: 'var(--neon-cyan)',
-            background: 'var(--bg-elevated)', padding: '3px 8px', borderRadius: '6px',
-            border: '1px solid var(--border)',
-          }}>G.{match.round || 'N/A'}</span>
+          <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--neon-cyan)', background: 'var(--bg-elevated)', padding: '3px 8px', borderRadius: '6px', border: '1px solid var(--border)' }}>G.{match.round || 'N/A'}</span>
         </div>
-
-        <div style={{ color: 'var(--text-dim)', fontSize: '11px', marginBottom: '6px', textAlign: 'center' }}>
-          📅 {formattedDate} • ⏰ {match.ora || 'TBD'}
-        </div>
-
+        <div style={{ color: 'var(--text-dim)', fontSize: '11px', marginBottom: '6px', textAlign: 'center' }}>📅 {formattedDate} • ⏰ {match.ora || 'TBD'}</div>
         <div className="teams-row">
-          <div className="team">
-            <TeamLogo teamName={match.casa} championship={match.campionato} size={50} />
-            <div className="team-name">{match.casa || 'Casa'}</div>
-          </div>
+          <div className="team"><TeamLogo teamName={match.casa} championship={match.campionato} size={50} /><div className="team-name">{match.casa || 'Casa'}</div></div>
           <div className="vs">VS</div>
-          <div className="team">
-            <TeamLogo teamName={match.ospiti} championship={match.campionato} size={50} />
-            <div className="team-name">{match.ospiti || 'Ospite'}</div>
-          </div>
+          <div className="team"><TeamLogo teamName={match.ospiti} championship={match.campionato} size={50} /><div className="team-name">{match.ospiti || 'Ospite'}</div></div>
         </div>
-
         <div className="form-row-compact">
-          <div className="form-block-compact">
-            <div className="form-label">Forma</div>
-            <div className="form-squares">{renderFormSquares(homeForm.form)}</div>
-            <div className="form-pct-compact">{homeForm.pct || 0}%</div>
-          </div>
-          <div className="form-block-compact">
-            <div className="form-label">Forma</div>
-            <div className="form-squares">{renderFormSquares(awayForm.form)}</div>
-            <div className="form-pct-compact">{awayForm.pct || 0}%</div>
-          </div>
+          <div className="form-block-compact"><div className="form-label">Forma</div><div className="form-squares">{renderFormSquares(homeForm.form)}</div><div className="form-pct-compact">{homeForm.pct || 0}%</div></div>
+          <div className="form-block-compact"><div className="form-label">Forma</div><div className="form-squares">{renderFormSquares(awayForm.form)}</div><div className="form-pct-compact">{awayForm.pct || 0}%</div></div>
         </div>
-
-        <div className="form-diff">
-          📊 Differenza forma:{' '}
-          <span className={diff >= 20 ? 'diff-alta' : 'diff-bassa'}>{isNaN(diff) ? 0 : diff}%</span>
-        </div>
-
+        <div className="form-diff">📊 Differenza forma: <span className={diff >= 20 ? 'diff-alta' : 'diff-bassa'}>{isNaN(diff) ? 0 : diff}%</span></div>
         <div className="bet-row-vertical">
-          {giocateDaMostrare.length > 0 ? (
-            giocateDaMostrare.map((g, idx) => {
-              const pctColor = getColorForPct(g.pct);
-              const isBomb = g.pct >= 90;
-              return (
-                <div key={idx} className={`bet-item-vertical ${isBomb ? 'bomb' : ''}`} style={{ borderColor: pctColor }}>
-                  <span className="bet-label" style={{ color: isBomb ? 'var(--neon-gold)' : pctColor, fontWeight: 700 }}>
-                    {isBomb && '💣 '}{g.displayLabel || g.label}
-                  </span>
-                  <span className="bet-value">
-                    <span className={`giocata-pct ${getPercentualeClasse(g.pct)}`}>{g.pct}%</span>
-                    <QuotaBox match={match} familyId={g.familyId} giocata={g.giocata} pctTua={g.pct} />
-                  </span>
-                </div>
-              );
-            })
-          ) : (
-            <div className="bet-item-vertical" style={{ textAlign: 'center', color: 'var(--text-dim)' }}>
-              <span>Nessuna giocata</span>
-            </div>
+          {giocateDaMostrare.length > 0 ? giocateDaMostrare.map((g, idx) => {
+            const pctColor = getColorForPct(g.pct);
+            const isBomb = g.pct >= 90;
+            return (
+              <div key={idx} className={`bet-item-vertical ${isBomb ? 'bomb' : ''}`} style={{ borderColor: pctColor }}>
+                <span className="bet-label" style={{ color: isBomb ? 'var(--neon-gold)' : pctColor, fontWeight: 700 }}>{isBomb && '💣 '}{g.displayLabel || g.label}</span>
+                <span className="bet-value"><span className={`giocata-pct ${getPercentualeClasse(g.pct)}`}>{g.pct}%</span><QuotaBox match={match} familyId={g.familyId} giocata={g.giocata} pctTua={g.pct} /></span>
+              </div>
+            );
+          }) : (
+            <div className="bet-item-vertical" style={{ textAlign: 'center', color: 'var(--text-dim)' }}><span>Nessuna giocata</span></div>
           )}
         </div>
       </div>
@@ -337,301 +250,137 @@
   };
 
   // ============================================================
-  // CHAMP BAR — GRIGLIA 5×5 CON SELEZIONE MULTIPLA (stile Schedina)
+  // CHAMP BAR — con badge oggi (rosso) / 2 giorni (giallo)
   // ============================================================
   const ChampBar = ({ matches, campionatiSelezionati, onToggle, onSelezionaTutti, onDeselezionaTutti, championships }) => {
     const normalizeDate = window.normalizeDate;
-    const todayStr = window.getTodayStr();
+    const getTodayStr = window.getTodayStr;
+    const addDaysToDateStr = window.addDaysToDateStr;
 
+    const todayStr = getTodayStr();
+    const maxDateStr = addDaysToDateStr(todayStr, 2);
+
+    // ⭐ Conteggio partite oggi
     const countOggi = (camp) => {
       if (!camp) return 0;
-      return matches.filter(m =>
-        m.campionato === camp && m.stato === 'Futura' && normalizeDate(m.data) === todayStr
-      ).length;
+      return matches.filter(m => m.campionato === camp && m.stato === 'Futura' && normalizeDate(m.data) === todayStr).length;
     };
 
-    const isPresente = (camp) => {
-      if (!camp) return false;
-      return matches.some(m => m.campionato === camp);
+    // ⭐ Conteggio partite entro 2 giorni (esclusi oggi)
+    const countEntro2Giorni = (camp) => {
+      if (!camp) return 0;
+      return matches.filter(m => {
+        if (m.campionato !== camp || m.stato !== 'Futura') return false;
+        const d = normalizeDate(m.data);
+        return d > todayStr && d <= maxDateStr;
+      }).length;
     };
 
     const campionatiOrdinati = useMemo(() => getCampionatiOrdinati(), []);
 
-    const totaleOggi = useMemo(() => {
-      let list = matches.filter(m => m.stato === 'Futura' && normalizeDate(m.data) === todayStr);
-      if (campionatiSelezionati.length > 0) {
-        list = list.filter(m => campionatiSelezionati.includes(m.campionato));
-      }
-      return list.length;
-    }, [matches, campionatiSelezionati, todayStr]);
-
     const isTuttiSelezionati = campionatiSelezionati.length === championships.length && championships.length > 0;
 
-    const renderCella = (campionato, idx) => {
-      if (!campionato || !isPresente(campionato)) {
+    // ⭐ Badge helper: rosso se oggi, giallo se entro 2 giorni
+    const renderBadge = (camp) => {
+      const nOggi = countOggi(camp);
+      const n2g = countEntro2Giorni(camp);
+      if (nOggi > 0) {
         return (
-          <div key={`empty-${idx}`}>
-            <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: '6px 4px', fontSize: '10px', color: 'var(--text-dim)',
-              opacity: 0.3, fontStyle: 'italic', minHeight: '36px',
-            }}>—</div>
-          </div>
+          <span style={{
+            background: 'var(--neon-red)',
+            color: '#fff',
+            fontSize: '9px',
+            fontWeight: 900,
+            padding: '1px 6px',
+            borderRadius: '10px',
+            flexShrink: 0,
+          }}>{nOggi}</span>
         );
       }
-
-      const color = window.getChampColor(campionato);
-      const isActive = campionatiSelezionati.includes(campionato);
-      const nOggi = countOggi(campionato);
-      const label = campionato.length > 16 ? campionato.substring(0, 14) + '…' : campionato;
-
-      return (
-        <button
-          key={`${campionato}-${idx}`}
-          onClick={() => onToggle(campionato)}
-          className={`champ-bar-item ${isActive ? 'active' : ''}`}
-          style={{
-            borderColor: isActive ? 'var(--neon-cyan)' : `${color}66`,
-            background: isActive
-              ? 'linear-gradient(135deg, var(--neon-cyan), var(--neon-blue))'
-              : 'var(--bg-elevated)',
-            color: isActive ? '#000' : 'var(--text-dim)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '4px',
-            padding: '5px 6px',
-            minHeight: '36px',
-            borderWidth: isActive ? '2px' : '1px',
-            borderRadius: '10px',
-            fontSize: '10px',
-            fontWeight: isActive ? 'bold' : '700',
-            width: '100%',
-            transition: 'all 0.2s',
-            overflow: 'hidden',
-            boxShadow: isActive ? '0 0 20px rgba(0, 245, 255, 0.5)' : 'none',
-          }}
-          title={campionato}
-        >
-          <ChampLogo campionato={campionato} size={14} />
+      if (n2g > 0) {
+        return (
           <span style={{
-            fontSize: '10px',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            maxWidth: '75px',
-          }}>
-            {label}
-          </span>
-          {nOggi > 0 && (
-            <span style={{
-              background: isActive ? 'rgba(0,0,0,0.25)' : 'var(--neon-red)',
-              color: isActive ? '#000' : '#fff',
-              fontSize: '9px',
-              fontWeight: 900,
-              padding: '1px 6px',
-              borderRadius: '10px',
-              flexShrink: 0,
-            }}>
-              {nOggi}
-            </span>
-          )}
-        </button>
-      );
+            background: 'var(--neon-gold)',
+            color: '#000',
+            fontSize: '9px',
+            fontWeight: 900,
+            padding: '1px 6px',
+            borderRadius: '10px',
+            flexShrink: 0,
+          }}>{n2g}</span>
+        );
+      }
+      return null;
     };
 
     return (
-      <div style={{
-        marginBottom: '16px',
-        padding: '10px 12px',
-        background: 'linear-gradient(135deg, rgba(30, 40, 66, 0.7), rgba(20, 27, 46, 0.9))',
-        border: '1px solid var(--border)',
-        borderRadius: '14px',
-      }}>
-        {/* Header con bottoni Tutti / Deseleziona */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '10px',
-          paddingBottom: '8px',
-          borderBottom: '1px solid var(--border)',
-          flexWrap: 'wrap',
-          gap: '8px',
-        }}>
-          <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text)' }}>
-            🏆 Campionati Attivi
-          </span>
+      <div style={{ marginBottom: '16px', padding: '10px 12px', background: 'linear-gradient(135deg, rgba(30, 40, 66, 0.7), rgba(20, 27, 46, 0.9))', border: '1px solid var(--border)', borderRadius: '14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px solid var(--border)', flexWrap: 'wrap', gap: '8px' }}>
+          <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text)' }}>🏆 Campionati Attivi</span>
           <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-            <button
-              onClick={onSelezionaTutti}
-              style={{
-                fontSize: '10px',
-                padding: '4px 14px',
-                background: isTuttiSelezionati ? 'var(--accent)' : 'var(--surface)',
-                color: isTuttiSelezionati ? '#000' : 'var(--text)',
-                border: '1px solid var(--border)',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-              }}
-            >✅ Tutti</button>
-            <button
-              onClick={onDeselezionaTutti}
-              style={{
-                fontSize: '10px',
-                padding: '4px 14px',
-                background: 'var(--surface)',
-                color: 'var(--text)',
-                border: '1px solid var(--border)',
-                borderRadius: '6px',
-                cursor: 'pointer',
-              }}
-            >❌ Deseleziona</button>
-            <span style={{
-              fontSize: '11px',
-              color: 'var(--text-muted)',
-              padding: '4px 10px',
-              background: 'var(--surface)',
-              borderRadius: '6px',
-            }}>
-              {campionatiSelezionati.length} / {championships.length}
-            </span>
+            <button onClick={onSelezionaTutti} style={{ fontSize: '10px', padding: '4px 14px', background: isTuttiSelezionati ? 'var(--accent)' : 'var(--surface)', color: isTuttiSelezionati ? '#000' : 'var(--text)', border: '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>✅ Tutti</button>
+            <button onClick={onDeselezionaTutti} style={{ fontSize: '10px', padding: '4px 14px', background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer' }}>❌ Deseleziona</button>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)', padding: '4px 10px', background: 'var(--surface)', borderRadius: '6px' }}>{campionatiSelezionati.length} / {championships.length}</span>
           </div>
         </div>
 
-        {/* Griglia 5×5 */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
-          gap: '4px',
-          width: '100%',
-        }}>
-          {campionatiOrdinati.map((campionato, idx) => renderCella(campionato, idx))}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: '4px', width: '100%' }}>
+          {campionatiOrdinati.map((campionato, idx) => {
+            const color = window.getChampColor(campionato);
+            const isActive = campionatiSelezionati.includes(campionato);
+            const label = campionato.length > 16 ? campionato.substring(0, 14) + '…' : campionato;
+            const hasPartite = matches.some(m => m.campionato === campionato);
+
+            return (
+              <button
+                key={`${campionato}-${idx}`}
+                onClick={() => onToggle(campionato)}
+                className={`champ-bar-item ${isActive ? 'active' : ''}`}
+                style={{
+                  borderColor: isActive ? 'var(--neon-cyan)' : `${color}66`,
+                  background: isActive ? 'linear-gradient(135deg, var(--neon-cyan), var(--neon-blue))' : 'var(--bg-elevated)',
+                  color: isActive ? '#000' : 'var(--text-dim)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '4px',
+                  padding: '5px 6px',
+                  minHeight: '36px',
+                  borderWidth: isActive ? '2px' : '1px',
+                  borderRadius: '10px',
+                  fontSize: '10px',
+                  fontWeight: isActive ? 'bold' : '700',
+                  width: '100%',
+                  transition: 'all 0.2s',
+                  overflow: 'hidden',
+                  boxShadow: isActive ? '0 0 20px rgba(0, 245, 255, 0.5)' : 'none',
+                  opacity: hasPartite ? 1 : 0.4,
+                }}
+                title={campionato}
+              >
+                <ChampLogo campionato={campionato} size={14} />
+                <span style={{ fontSize: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '75px' }}>{label}</span>
+                {renderBadge(campionato)}
+              </button>
+            );
+          })}
         </div>
       </div>
     );
   };
+
+  // ... resto invariato (VisualizzaGiocateSwitch, MobileListaCampionati, PalinsestoComponent)
 
   const VisualizzaGiocateSwitch = ({ mode, setMode, selectedFamiglie }) => {
     const countScelte = (selectedFamiglie || []).length;
     const totalFamiglie = Object.keys(window.FAMIGLIE_GIOCATE || {}).length;
-
     return (
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
-        marginBottom: '14px', padding: '10px 14px',
-        background: 'var(--bg-elevated)', borderRadius: '12px',
-        border: '1px solid var(--border)',
-      }}>
-        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neon-cyan)', textTransform: 'uppercase' }}>
-          🎯 Giocate
-        </span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '14px', padding: '10px 14px', background: 'var(--bg-elevated)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neon-cyan)', textTransform: 'uppercase' }}>🎯 Giocate</span>
         <div style={{ display: 'flex', background: 'var(--bg-deep)', borderRadius: '8px', padding: '3px', border: '1px solid var(--border)' }}>
-          <button onClick={() => setMode('scelte')} style={{
-            padding: '6px 16px', fontSize: '11px', fontWeight: 700,
-            borderRadius: '6px', border: 'none', cursor: 'pointer',
-            background: mode === 'scelte' ? 'var(--neon-cyan)' : 'transparent',
-            color: mode === 'scelte' ? '#000' : 'var(--text-dim)',
-          }}>⭐ Scelte ({countScelte})</button>
-          <button onClick={() => setMode('tutte')} style={{
-            padding: '6px 16px', fontSize: '11px', fontWeight: 700,
-            borderRadius: '6px', border: 'none', cursor: 'pointer',
-            background: mode === 'tutte' ? 'var(--neon-magenta)' : 'transparent',
-            color: mode === 'tutte' ? '#000' : 'var(--text-dim)',
-          }}>🌐 Tutte ({totalFamiglie})</button>
-        </div>
-      </div>
-    );
-  };
-
-  const MobileListaCampionati = ({ matches, onSelect }) => {
-    const normalizeDate = window.normalizeDate;
-    const todayStr = window.getTodayStr();
-
-    const campionatiDisponibili = useMemo(() => {
-      const lista = getCampionatiOrdinati();
-      return lista
-        .filter(c => matches.some(m => m.campionato === c))
-        .map(c => ({
-          nome: c,
-          totali: matches.filter(m => m.campionato === c).length,
-          oggi: matches.filter(m => m.campionato === c && m.stato === 'Futura' && normalizeDate(m.data) === todayStr).length,
-        }))
-        .filter(c => c.totali > 0);
-    }, [matches, todayStr]);
-
-    const totaleOggi = matches.filter(m => m.stato === 'Futura' && normalizeDate(m.data) === todayStr).length;
-
-    return (
-      <div className="mobile-sidebar-scroll">
-        <div className="card" style={{ padding: '14px' }}>
-          <div style={{
-            fontFamily: 'Orbitron, sans-serif', fontSize: '13px', fontWeight: 700,
-            color: 'var(--neon-cyan)', textTransform: 'uppercase', letterSpacing: '2px',
-            marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid var(--border)',
-          }}>
-            🏆 Campionati
-          </div>
-
-          <button
-            onClick={() => onSelect('__TUTTI__')}
-            style={{
-              width: '100%', marginBottom: '10px',
-              padding: '14px 16px', borderRadius: '12px',
-              border: '2px solid var(--neon-magenta)',
-              background: 'linear-gradient(135deg, var(--neon-magenta), var(--neon-purple))',
-              color: '#000', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              boxShadow: '0 0 25px rgba(255, 0, 229, 0.6)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '20px' }}>🌍</span>
-              <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '13px', fontWeight: 900 }}>
-                TUTTI I CAMPIONATI
-              </span>
-            </div>
-            <span style={{ fontSize: '12px', fontWeight: 900, background: 'rgba(0,0,0,0.25)', padding: '3px 10px', borderRadius: '10px' }}>
-              {totaleOggi}
-            </span>
-          </button>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {campionatiDisponibili.map(camp => {
-              const color = window.getChampColor(camp.nome);
-              const hasToday = camp.oggi > 0;
-              return (
-                <button
-                  key={camp.nome}
-                  onClick={() => onSelect(camp.nome)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '12px',
-                    padding: '12px 14px', borderRadius: '12px',
-                    border: `2px solid ${hasToday ? 'var(--neon-red)' : color}`,
-                    background: hasToday
-                      ? `linear-gradient(135deg, ${color}33, ${color}11)`
-                      : 'var(--bg-elevated)',
-                    cursor: 'pointer', textAlign: 'left',
-                    boxShadow: hasToday ? `0 0 20px ${color}55` : 'none',
-                  }}
-                >
-                  <ChampLogo campionato={camp.nome} size={30} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text)' }}>
-                      {camp.nome}
-                    </div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-dim)', display: 'flex', gap: '8px' }}>
-                      <span>📊 {camp.totali}</span>
-                      {hasToday && <span style={{ color: 'var(--neon-red)', fontWeight: 700 }}>🔴 {camp.oggi} oggi</span>}
-                    </div>
-                  </div>
-                  <span style={{ fontSize: '18px', color: 'var(--neon-cyan)' }}>→</span>
-                </button>
-              );
-            })}
-          </div>
+          <button onClick={() => setMode('scelte')} style={{ padding: '6px 16px', fontSize: '11px', fontWeight: 700, borderRadius: '6px', border: 'none', cursor: 'pointer', background: mode === 'scelte' ? 'var(--neon-cyan)' : 'transparent', color: mode === 'scelte' ? '#000' : 'var(--text-dim)' }}>⭐ Scelte ({countScelte})</button>
+          <button onClick={() => setMode('tutte')} style={{ padding: '6px 16px', fontSize: '11px', fontWeight: 700, borderRadius: '6px', border: 'none', cursor: 'pointer', background: mode === 'tutte' ? 'var(--neon-magenta)' : 'transparent', color: mode === 'tutte' ? '#000' : 'var(--text-dim)' }}>🌐 Tutte ({totalFamiglie})</button>
         </div>
       </div>
     );
@@ -641,35 +390,21 @@
     const normalizeDate = window.normalizeDate;
     const getTodayStr = window.getTodayStr;
     const isMobile = useIsMobile();
+    const { mode: visualizzaMode, setMode: setVisualizzaMode } = window.FiltriCampionati.useVisualizzaGiocateMode();
 
-    const { mode: visualizzaMode, setMode: setVisualizzaMode } =
-      window.FiltriCampionati.useVisualizzaGiocateMode();
+    const { campionatiAttivi, toggleCampionato, selezionaTutti, deselezionaTutti } = window.FiltriCampionati.useFiltroCampionati();
 
-    // ⭐ Selezione MULTIPLA campionati (come Schedina)
-    const {
-      campionatiAttivi,
-      toggleCampionato,
-      selezionaTutti,
-      deselezionaTutti,
-    } = window.FiltriCampionati.useFiltroCampionati();
-
-    // Lista di default per championships se non passato
     const championshipsList = useMemo(() => {
       if (championships && championships.length > 0) return championships;
-      if (window.CHAMPIONSHIP_LIST && window.CHAMPIONSHIP_LIST.length > 0) {
-        return window.CHAMPIONSHIP_LIST.map(name => ({ name }));
-      }
+      if (window.CHAMPIONSHIP_LIST && window.CHAMPIONSHIP_LIST.length > 0) return window.CHAMPIONSHIP_LIST.map(name => ({ name }));
       return [];
     }, [championships]);
 
     const partiteOggi = useMemo(() => {
       const todayStr = getTodayStr();
       let list = matches.filter(m => m.stato === 'Futura' && normalizeDate(m.data) === todayStr);
-      if (campionatiAttivi.length > 0) {
-        list = list.filter(m => campionatiAttivi.includes(m.campionato));
-      } else {
-        list = [];
-      }
+      if (campionatiAttivi.length > 0) list = list.filter(m => campionatiAttivi.includes(m.campionato));
+      else list = [];
       return list.sort((a, b) => (a.ora || '99:99').localeCompare(b.ora || '99:99'));
     }, [matches, campionatiAttivi]);
 
@@ -678,50 +413,16 @@
     if (isMobile) {
       return (
         <div>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '12px',
-            padding: '12px 16px', marginBottom: '12px',
-            background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 229, 0.05))',
-            borderRadius: '14px', border: '1px solid var(--border)',
-          }}>
-            <span style={{
-              fontFamily: 'Orbitron, sans-serif', fontSize: '14px', fontWeight: 900,
-              color: 'var(--neon-cyan)', letterSpacing: '2px', textTransform: 'uppercase',
-            }}>📅 Palinsesto Oggi</span>
-            <span style={{ color: 'var(--text-dim)', fontSize: '11px', marginLeft: 'auto' }}>
-              {partiteOggi.length} partite
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', marginBottom: '12px', background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 229, 0.05))', borderRadius: '14px', border: '1px solid var(--border)' }}>
+            <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '14px', fontWeight: 900, color: 'var(--neon-cyan)', letterSpacing: '2px', textTransform: 'uppercase' }}>📅 Palinsesto Oggi</span>
+            <span style={{ color: 'var(--text-dim)', fontSize: '11px', marginLeft: 'auto' }}>{partiteOggi.length} partite</span>
           </div>
-
-          <div style={{ marginBottom: '14px' }}>
-            <ChampBar
-              matches={matches}
-              championships={championshipsList}
-              campionatiSelezionati={campionatiAttivi}
-              onToggle={toggleCampionato}
-              onSelezionaTutti={selezionaTutti}
-              onDeselezionaTutti={deselezionaTutti}
-            />
-          </div>
-
-          <VisualizzaGiocateSwitch
-            mode={visualizzaMode}
-            setMode={setVisualizzaMode}
-            selectedFamiglie={selectedFamiglie}
-          />
-
+          <ChampBar matches={matches} championships={championshipsList} campionatiSelezionati={campionatiAttivi} onToggle={toggleCampionato} onSelezionaTutti={selezionaTutti} onDeselezionaTutti={deselezionaTutti} />
+          <VisualizzaGiocateSwitch mode={visualizzaMode} setMode={setVisualizzaMode} selectedFamiglie={selectedFamiglie} />
           {partiteOggi.length === 0 ? (
-            <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
-              <div style={{ fontSize: '48px', marginBottom: '12px' }}>😴</div>
-              <div style={{ color: 'var(--text-dim)' }}>Nessuna partita oggi</div>
-            </div>
+            <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}><div style={{ fontSize: '48px', marginBottom: '12px' }}>😴</div><div style={{ color: 'var(--text-dim)' }}>Nessuna partita oggi</div></div>
           ) : (
-            <div className="matches-grid">
-              {partiteOggi.map(m => (
-                <MatchTab key={m.id} match={m} allMatches={matches}
-                  onSelect={onSelectMatch} selectedFamiglie={selectedFamiglie} />
-              ))}
-            </div>
+            <div className="matches-grid">{partiteOggi.map(m => <MatchTab key={m.id} match={m} allMatches={matches} onSelect={onSelectMatch} selectedFamiglie={selectedFamiglie} />)}</div>
           )}
         </div>
       );
@@ -729,54 +430,20 @@
 
     return (
       <div>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
-          padding: '10px 16px', marginBottom: '12px',
-          background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 229, 0.05))',
-          borderRadius: '14px', border: '1px solid var(--border)',
-        }}>
-          <span style={{
-            fontFamily: 'Orbitron, sans-serif', fontSize: '16px', fontWeight: 900,
-            color: 'var(--neon-cyan)', letterSpacing: '2px', textTransform: 'uppercase',
-            textShadow: '0 0 12px var(--neon-cyan)',
-          }}>📅 Palinsesto Oggi</span>
-          <span style={{ color: 'var(--text-dim)', fontSize: '12px' }}>
-            {isTuttiMode ? 'Tutti i campionati' : `${campionatiAttivi.length} campionati`} • {partiteOggi.length} partite
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', padding: '10px 16px', marginBottom: '12px', background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 229, 0.05))', borderRadius: '14px', border: '1px solid var(--border)' }}>
+          <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '16px', fontWeight: 900, color: 'var(--neon-cyan)', letterSpacing: '2px', textTransform: 'uppercase', textShadow: '0 0 12px var(--neon-cyan)' }}>📅 Palinsesto Oggi</span>
+          <span style={{ color: 'var(--text-dim)', fontSize: '12px' }}>{isTuttiMode ? 'Tutti i campionati' : `${campionatiAttivi.length} campionati`} • {partiteOggi.length} partite</span>
         </div>
-
-        <VisualizzaGiocateSwitch
-          mode={visualizzaMode}
-          setMode={setVisualizzaMode}
-          selectedFamiglie={selectedFamiglie}
-        />
-
-        <ChampBar
-          matches={matches}
-          championships={championshipsList}
-          campionatiSelezionati={campionatiAttivi}
-          onToggle={toggleCampionato}
-          onSelezionaTutti={selezionaTutti}
-          onDeselezionaTutti={deselezionaTutti}
-        />
-
+        <VisualizzaGiocateSwitch mode={visualizzaMode} setMode={setVisualizzaMode} selectedFamiglie={selectedFamiglie} />
+        <ChampBar matches={matches} championships={championshipsList} campionatiSelezionati={campionatiAttivi} onToggle={toggleCampionato} onSelezionaTutti={selezionaTutti} onDeselezionaTutti={deselezionaTutti} />
         {partiteOggi.length === 0 ? (
           <div className="card" style={{ textAlign: 'center', padding: '60px 20px' }}>
             <div style={{ fontSize: '64px', marginBottom: '16px' }}>😴</div>
             <h3 style={{ color: 'var(--neon-cyan)' }}>Nessuna partita oggi</h3>
-            <p style={{ color: 'var(--text-dim)' }}>
-              {campionatiAttivi.length === 0
-                ? 'Seleziona almeno un campionato'
-                : 'Non ci sono partite in programma oggi nei campionati selezionati'}
-            </p>
+            <p style={{ color: 'var(--text-dim)' }}>{campionatiAttivi.length === 0 ? 'Seleziona almeno un campionato' : 'Non ci sono partite in programma oggi nei campionati selezionati'}</p>
           </div>
         ) : (
-          <div className="matches-grid">
-            {partiteOggi.map(m => (
-              <MatchTab key={m.id} match={m} allMatches={matches}
-                onSelect={onSelectMatch} selectedFamiglie={selectedFamiglie} />
-            ))}
-          </div>
+          <div className="matches-grid">{partiteOggi.map(m => <MatchTab key={m.id} match={m} allMatches={matches} onSelect={onSelectMatch} selectedFamiglie={selectedFamiglie} />)}</div>
         )}
       </div>
     );
@@ -784,6 +451,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto FUTURISTIC caricato — selezione MULTIPLA campionati');
+  console.log('✅ Modulo Palinsesto v3 caricato — badge oggi/2 giorni');
 
 })();
