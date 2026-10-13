@@ -1,6 +1,6 @@
 // ============================================================
 // home.js - Modulo Home (FUTURISTIC + MOBILE FIX + SWITCH CALCOLATE/SCELTE + CALCOLATRICE)
-// v5: aggiunta riga "Coppe UEFA" con griglia 4×1 sopra la griglia nazioni 4×4
+// v6: bottoni nazioni + Coppe UEFA stile Schedina (cyan pieno, bordo 2px, logo 18px)
 // ============================================================
 
 (function () {
@@ -115,7 +115,6 @@
   })();
 
   const NAZIONI = {
-    // ⭐ RIGA SPECIALE COPPE UEFA (griglia 4×1 dedicata)
     'Coppe UEFA': { file: 'uefa.png', campionati: [
       'UEFA Champions League',
       'UEFA Europa League',
@@ -123,7 +122,6 @@
       'UEFA Nations League',
     ]},
 
-    // Nazioni normali (griglia 4×4)
     'Belgio':      { file: 'belgio.png',      campionati: ['Jupiler Pro League'] },
     'Corea':       { file: 'corea.png',       campionati: ['K League 1'] },
     'Francia':     { file: 'francia.png',     campionati: ['Ligue 1', 'Ligue 2'] },
@@ -143,9 +141,6 @@
   const GIOCATE_SELEZIONATE_KEY = 'ft_giocate_selezionate';
   const FAMIGLIE_SELEZIONATE_KEY = 'ft_selected_famiglie';
 
-  // ============================================================
-  // QUOTA INLINE
-  // ============================================================
   const QuotaInline = ({ match, familyId, giocata, pctTua, size = 'sm' }) => {
     const [quotaInfo, setQuotaInfo] = useState(null);
     const quoteHook = window.QuoteManager ? window.QuoteManager.useQuote() : { numPartite: 0 };
@@ -594,11 +589,7 @@
     );
   };
 
-  // ============================================================
-  // VISTA NAZIONE (con gestione speciale coppe UEFA)
-  // ============================================================
   const VistaNazione = ({ nazione, matches, onBack, tipoGiocate, refreshKey }) => {
-    // ⭐ CASO SPECIALE: coppa UEFA singola
     if (nazione && typeof nazione === 'object' && nazione.__special === 'UEFA') {
       const camp = nazione.campionato;
       return (
@@ -627,7 +618,6 @@
       );
     }
 
-    // Caso normale: nazione stringa
     const info = NAZIONI[nazione];
     if (!info) return null;
 
@@ -792,7 +782,8 @@
   };
 
   // ============================================================
-  // GRIGLIA NAZIONI (con riga Coppe UEFA 4×1 sopra)
+  // GRIGLIA NAZIONI — STILE SCHEDINA (Opzione B)
+  // Bottoni con sfondo cyan pieno quando hover/attivo, bordo 2px, logo 18px
   // ============================================================
   const GrigliaNazioni = ({ matches, onSelectNazione }) => {
     const nazioniOrdinate = useMemo(() => Object.keys(NAZIONI).sort((a, b) => a.localeCompare(b)), []);
@@ -814,7 +805,6 @@
       return () => window.removeEventListener('schedina-updated', handler);
     }, []);
 
-    // ⭐ Conteggi per singolo campionato UEFA
     const conteggiUEFA = useMemo(() => {
       const c = {};
       (NAZIONI['Coppe UEFA']?.campionati || []).forEach(camp => {
@@ -825,6 +815,28 @@
 
     const uefaCampionati = NAZIONI['Coppe UEFA']?.campionati || [];
     const nazioniSenzaUEFA = nazioniOrdinate.filter(n => n !== 'Coppe UEFA');
+
+    // Stile bottone base (identico a Schedina)
+    const bottoneBaseStyle = {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '6px',
+      padding: '8px 10px',
+      minHeight: '44px',
+      borderRadius: '10px',
+      borderWidth: '2px',
+      borderStyle: 'solid',
+      fontSize: '11px',
+      fontWeight: 700,
+      cursor: 'pointer',
+      transition: 'all 0.2s',
+      overflow: 'hidden',
+      width: '100%',
+      fontFamily: 'Rajdhani, sans-serif',
+      textTransform: 'uppercase',
+      letterSpacing: '0.5px',
+    };
 
     return (
       <div>
@@ -843,7 +855,7 @@
           )}
         </div>
 
-        {/* ⭐ RIGA SPECIALE: COPPE UEFA (griglia 4×1) */}
+        {/* ⭐ RIGA SPECIALE: COPPE UEFA — stile Schedina (griglia 4 colonne) */}
         <div style={{
           marginBottom: '20px',
           padding: '12px 14px',
@@ -864,11 +876,12 @@
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-            gap: '10px',
+            gap: '8px',
           }}>
             {uefaCampionati.map(camp => {
               const disabled = conteggiUEFA[camp] === 0;
               const color = window.getChampColor(camp);
+              const shortName = window.getChampShortName ? window.getChampShortName(camp) : camp;
               return (
                 <button
                   key={camp}
@@ -876,32 +889,51 @@
                   disabled={disabled}
                   title={disabled ? `${camp} - nessuna partita` : camp}
                   style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    gap: '6px', padding: '12px 6px', borderRadius: '10px',
-                    border: `2px solid ${disabled ? 'var(--border)' : color}`,
-                    background: disabled ? 'var(--bg-elevated)' : `linear-gradient(135deg, ${color}22, ${color}11)`,
-                    cursor: disabled ? 'not-allowed' : 'pointer',
+                    ...bottoneBaseStyle,
+                    borderColor: disabled ? 'var(--border)' : `${color}66`,
+                    background: disabled ? 'var(--bg-elevated)' : 'var(--bg-elevated)',
+                    color: disabled ? 'var(--text-dim)' : 'var(--text)',
                     opacity: disabled ? 0.4 : 1,
-                    transition: 'all 0.15s', minHeight: '90px', position: 'relative',
+                    cursor: disabled ? 'not-allowed' : 'pointer',
                   }}
                   onMouseEnter={(e) => {
                     if (!disabled) {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = `0 6px 20px ${color}55`;
+                      e.currentTarget.style.background = 'linear-gradient(135deg, var(--neon-cyan), var(--neon-blue))';
+                      e.currentTarget.style.color = '#000';
+                      e.currentTarget.style.borderColor = 'var(--neon-cyan)';
+                      e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 245, 255, 0.5)';
                     }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'none';
+                    if (!disabled) {
+                      e.currentTarget.style.background = 'var(--bg-elevated)';
+                      e.currentTarget.style.color = 'var(--text)';
+                      e.currentTarget.style.borderColor = `${color}66`;
+                      e.currentTarget.style.boxShadow = 'none';
+                    }
                   }}
                 >
-                  {window.ChampLogo && <window.ChampLogo campionato={camp} size={36} />}
-                  <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text)', textAlign: 'center' }}>
-                    {window.getChampShortName ? window.getChampShortName(camp) : camp}
+                  {window.ChampLogo && <window.ChampLogo campionato={camp} size={18} />}
+                  <span style={{
+                    fontSize: '10px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '110px',
+                  }}>
+                    {shortName}
                   </span>
                   {!disabled && (
-                    <span style={{ fontSize: '9px', color: 'var(--text-dim)' }}>
-                      {conteggiUEFA[camp]} partite
+                    <span style={{
+                      background: 'var(--neon-red)',
+                      color: '#fff',
+                      fontSize: '9px',
+                      fontWeight: 900,
+                      padding: '1px 6px',
+                      borderRadius: '10px',
+                      flexShrink: 0,
+                    }}>
+                      {conteggiUEFA[camp]}
                     </span>
                   )}
                 </button>
@@ -910,10 +942,11 @@
           </div>
         </div>
 
-        {/* ⭐ GRIGLIA 4×4 NAZIONI */}
-        <div className="nazioni-grid">
+        {/* ⭐ GRIGLIA NAZIONI — stile Schedina */}
+        <div className="nazioni-grid" style={{ gap: '8px' }}>
           {nazioniSenzaUEFA.map(naz => {
             const disabled = conteggi[naz] === 0;
+            const color = window.getChampColor(naz);
             return (
               <button
                 key={naz}
@@ -922,32 +955,49 @@
                 title={disabled ? `${naz} - nessuna partita` : naz}
                 className="nazione-btn"
                 style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  gap: '6px', padding: '12px 6px', borderRadius: '10px',
-                  border: '2px solid var(--border)',
-                  background: disabled ? 'var(--bg-elevated)' : 'var(--card)',
-                  cursor: disabled ? 'not-allowed' : 'pointer',
+                  ...bottoneBaseStyle,
+                  flexDirection: 'column',
+                  gap: '4px',
+                  minHeight: '90px',
+                  borderColor: disabled ? 'var(--border)' : `${color}66`,
+                  background: disabled ? 'var(--bg-elevated)' : 'var(--bg-elevated)',
+                  color: disabled ? 'var(--text-dim)' : 'var(--text)',
                   opacity: disabled ? 0.4 : 1,
-                  transition: 'all 0.15s', minHeight: '90px', position: 'relative',
+                  cursor: disabled ? 'not-allowed' : 'pointer',
                 }}
                 onMouseEnter={(e) => {
                   if (!disabled) {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, var(--neon-cyan), var(--neon-blue))';
+                    e.currentTarget.style.color = '#000';
                     e.currentTarget.style.borderColor = 'var(--neon-cyan)';
+                    e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 245, 255, 0.5)';
                     e.currentTarget.style.transform = 'translateY(-2px)';
                   }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--border)';
-                  e.currentTarget.style.transform = 'translateY(0)';
+                  if (!disabled) {
+                    e.currentTarget.style.background = 'var(--bg-elevated)';
+                    e.currentTarget.style.color = 'var(--text)';
+                    e.currentTarget.style.borderColor = `${color}66`;
+                    e.currentTarget.style.boxShadow = 'none';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }
                 }}
               >
-                <NazioneBandiera nazione={naz} size={36} />
-                <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text)', textAlign: 'center' }}>
+                <NazioneBandiera nazione={naz} size={32} />
+                <span style={{ fontSize: '11px', fontWeight: 'bold', textAlign: 'center' }}>
                   {naz}
                 </span>
                 {!disabled && (
-                  <span style={{ fontSize: '9px', color: 'var(--text-dim)' }}>
-                    {conteggi[naz]} partite
+                  <span style={{
+                    background: 'var(--neon-red)',
+                    color: '#fff',
+                    fontSize: '9px',
+                    fontWeight: 900,
+                    padding: '1px 6px',
+                    borderRadius: '10px',
+                  }}>
+                    {conteggi[naz]}
                   </span>
                 )}
               </button>
@@ -959,7 +1009,7 @@
   };
 
   // ============================================================
-  // 🧮 CALCOLATRICE COPERTURA SCHEDINA
+  // CALCOLATRICE (invariata)
   // ============================================================
   const CalcolatriceComponent = ({ matches }) => {
     const [campionatoSel, setCampionatoSel] = useState('');
@@ -1198,6 +1248,26 @@
       { value: 'custom', label: '✏️ Altra giocata (personalizzata)' },
     ];
 
+    const ProbCard = ({ label, value, color, subtitle }) => (
+      <div style={{
+        padding: '10px 12px', borderRadius: '8px',
+        background: 'var(--card)', border: `1px solid ${value != null && value > 0 ? color : 'var(--border)'}`,
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
+          {label}
+        </div>
+        <div style={{ fontSize: '22px', fontWeight: 900, color: value != null && value > 0 ? color : 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+          {value != null && value > 0 ? `${value}%` : '—'}
+        </div>
+        {subtitle && (
+          <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '2px' }}>
+            {subtitle}
+          </div>
+        )}
+      </div>
+    );
+
     return (
       <div>
         <div className="card" style={{ marginBottom: '16px' }}>
@@ -1319,27 +1389,10 @@
             </h3>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', marginBottom: '14px' }}>
-              <ProbCard
-                label="📈 Storica"
-                value={analisiProbabilita.pctStorica}
-                color="var(--neon-cyan)"
-              />
-              <ProbCard
-                label="🎲 Monte Carlo"
-                value={analisiProbabilita.pctMC}
-                color="var(--neon-magenta)"
-              />
-              <ProbCard
-                label="📄 PDF"
-                value={analisiProbabilita.pctPDF}
-                color="var(--neon-gold)"
-                subtitle={analisiProbabilita.quotaPDF ? `Quota ${analisiProbabilita.quotaPDF.toFixed(2)}` : null}
-              />
-              <ProbCard
-                label="🔴 Live"
-                value={analisiProbabilita.pctLive}
-                color="var(--neon-green)"
-              />
+              <ProbCard label="📈 Storica" value={analisiProbabilita.pctStorica} color="var(--neon-cyan)" />
+              <ProbCard label="🎲 Monte Carlo" value={analisiProbabilita.pctMC} color="var(--neon-magenta)" />
+              <ProbCard label="📄 PDF" value={analisiProbabilita.pctPDF} color="var(--neon-gold)" subtitle={analisiProbabilita.quotaPDF ? `Quota ${analisiProbabilita.quotaPDF.toFixed(2)}` : null} />
+              <ProbCard label="🔴 Live" value={analisiProbabilita.pctLive} color="var(--neon-green)" />
             </div>
 
             <div style={{ marginBottom: '14px' }}>
@@ -1535,26 +1588,6 @@
     );
   };
 
-  const ProbCard = ({ label, value, color, subtitle }) => (
-    <div style={{
-      padding: '10px 12px', borderRadius: '8px',
-      background: 'var(--card)', border: `1px solid ${value != null && value > 0 ? color : 'var(--border)'}`,
-      textAlign: 'center',
-    }}>
-      <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>
-        {label}
-      </div>
-      <div style={{ fontSize: '22px', fontWeight: 900, color: value != null && value > 0 ? color : 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
-        {value != null && value > 0 ? `${value}%` : '—'}
-      </div>
-      {subtitle && (
-        <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '2px' }}>
-          {subtitle}
-        </div>
-      )}
-    </div>
-  );
-
   // ============================================================
   // COMPONENTE PRINCIPALE
   // ============================================================
@@ -1586,8 +1619,7 @@
       };
     }, []);
 
-    // ⭐ Gestione selezione nazione (con caso speciale UEFA:)
-    const handleSelectNazione = useCallback((naz) => {
+    const handleSelectNazione = React.useCallback((naz) => {
       if (typeof naz === 'string' && naz.startsWith('UEFA:')) {
         const camp = naz.replace('UEFA:', '');
         if (isMobile) {
@@ -1596,11 +1628,7 @@
           setNazioneSelezionata({ __special: 'UEFA', campionato: camp });
         }
       } else {
-        if (isMobile) {
-          setNazioneSelezionata(naz);
-        } else {
-          setNazioneSelezionata(naz);
-        }
+        setNazioneSelezionata(naz);
       }
     }, [isMobile]);
 
@@ -1844,6 +1872,6 @@
     leggiFamiglieSelezionate, GIOCATE_SELEZIONATE_KEY, FAMIGLIE_SELEZIONATE_KEY,
   };
 
-  console.log('✅ Modulo Home FUTURISTIC v5 caricato (riga Coppe UEFA 4×1 + griglia nazioni 4×4)');
+  console.log('✅ Modulo Home FUTURISTIC v6 caricato (bottoni nazioni + Coppe UEFA stile Schedina)');
 
 })();

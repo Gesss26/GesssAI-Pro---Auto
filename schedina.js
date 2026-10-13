@@ -1,6 +1,6 @@
 // ============================================================
 // schedina.js - Modulo Schedina con quote PDF visibili
-// v9.4: Schedina Quota usa GRUPPI_GIOCATE + griglia 5x5 come Palinsesto
+// v9.5: Schedina Quota usa SOLO le giocate selezionate in Schedina Classica
 // ============================================================
 
 const formatGiocataLabel = (familyId, label) => {
@@ -303,6 +303,7 @@ const SchedinaQuotaPanel = ({
   campionatiSelezionati,
   giorniRange,
   filtroOrario,
+  giocateSelezionate,
   getPartiteDisponibili,
   showAlert,
   ordinaPartitePerDataOra,
@@ -330,28 +331,60 @@ const SchedinaQuotaPanel = ({
   const calcolaGG_NG = window.calcolaGG_NG;
 
   // ============================================================
-  // CANDIDATI: usa GRUPPI_GIOCATE (NON Impostazioni)
+  // DETERMINA LE GIOCATE DA USARE (Opzione A)
+  // ============================================================
+  // Se giocateSelezionate contiene 'tutte' → usa TUTTI i GRUPPI_GIOCATE
+  // Altrimenti usa SOLO le giocate selezionate nella Schedina Classica
+  const giocateInUso = useMemo(() => {
+    const isTutteMode = giocateSelezionate.includes('tutte') || giocateSelezionate.length === 0;
+
+    if (isTutteMode) {
+      // Tutti i gruppi
+      const out = [];
+      GRUPPI_GIOCATE.forEach(gruppo => {
+        gruppo.giocate.forEach(g => {
+          out.push({
+            familyId: gruppo.familyId,
+            giocata: g.giocata,
+            label: g.label,
+            familyLabel: gruppo.label,
+            familyIcon: gruppo.icon,
+          });
+        });
+      });
+      return out;
+    }
+
+    // Solo le giocate selezionate
+    const out = [];
+    giocateSelezionate.forEach(sel => {
+      if (typeof sel !== 'object' || !sel.familyId || !sel.giocata) return;
+      const gruppo = GRUPPI_GIOCATE.find(gr => gr.familyId === sel.familyId);
+      const infoGiocata = gruppo?.giocate.find(g => g.giocata === sel.giocata);
+      out.push({
+        familyId: sel.familyId,
+        giocata: sel.giocata,
+        label: infoGiocata?.label || sel.giocata,
+        familyLabel: gruppo?.label || sel.familyId,
+        familyIcon: gruppo?.icon || '',
+      });
+    });
+    return out;
+  }, [giocateSelezionate]);
+
+  const isTutteMode = giocateSelezionate.includes('tutte') || giocateSelezionate.length === 0;
+
+  // ============================================================
+  // CANDIDATI: usa SOLO le giocate in uso
   // ============================================================
   const candidati = useMemo(() => {
     if (!window.QuoteManager || typeof window.QuoteManager.analizzaGiocata !== 'function') {
       return [];
     }
+    if (giocateInUso.length === 0) return [];
+
     const partite = getPartiteDisponibili();
     const out = [];
-
-    // Appiattisci tutti i GRUPPI_GIOCATE in una lista di giocate
-    const tutteLeGiocate = [];
-    GRUPPI_GIOCATE.forEach(gruppo => {
-      gruppo.giocate.forEach(g => {
-        tutteLeGiocate.push({
-          familyId: gruppo.familyId,
-          giocata: g.giocata,
-          label: g.label,
-          familyLabel: gruppo.label,
-          familyIcon: gruppo.icon,
-        });
-      });
-    });
 
     partite.forEach(match => {
       const stats = computeMatchStats(match, matches);
@@ -364,8 +397,8 @@ const SchedinaQuotaPanel = ({
       const awayMG = stats.awayMG || {};
       const mgTot = stats.mgTot || {};
 
-      // Per ogni giocata, calcola la pct
-      tutteLeGiocate.forEach(g => {
+      // Per ogni giocata in uso, calcola la pct
+      giocateInUso.forEach(g => {
         let pct = 0;
         try {
           if (g.familyId === 'gg_ng') {
@@ -411,7 +444,7 @@ const SchedinaQuotaPanel = ({
       if (b.pct !== a.pct) return b.pct - a.pct;
       return b.quota - a.quota;
     });
-  }, [getPartiteDisponibili, matches, computeMatchStats, getGiocataPct, calcolaGG_NG]);
+  }, [getPartiteDisponibili, matches, computeMatchStats, getGiocataPct, calcolaGG_NG, giocateInUso]);
 
   const eseguiAlgoritmo = useCallback((target) => {
     if (candidati.length === 0) {
@@ -575,6 +608,15 @@ const SchedinaQuotaPanel = ({
                       statoSchedina === 'sotto' ? 'var(--neon-red)' :
                       'var(--text-muted)';
 
+  // Etichetta gruppi in uso per il banner
+  const etichettaGiocateInUso = () => {
+    if (isTutteMode) return `Tutti i gruppi Schedina (${GRUPPI_GIOCATE.length} gruppi)`;
+    if (giocateInUso.length === 0) return 'Nessuna giocata selezionata';
+    return giocateInUso
+      .map(g => formatGiocataLabel(g.familyId, g.giocata))
+      .join(' • ');
+  };
+
   return (
     <div>
       <div className="card" style={{ marginBottom: '16px' }}>
@@ -589,13 +631,18 @@ const SchedinaQuotaPanel = ({
         }}>
           <span style={{ color: 'var(--text-muted)' }}>
             🎯 Giocate in uso:{' '}
-            <b style={{ color: 'var(--accent)' }}>
-              Tutti i gruppi Schedina ({GRUPPI_GIOCATE.length} gruppi)
+            <b style={{ color: isTutteMode ? 'var(--accent)' : 'var(--win)' }}>
+              {etichettaGiocateInUso()}
             </b>
             <span style={{ marginLeft: '10px', color: 'var(--text-dim)' }}>
               ({candidati.length} partite con quota)
             </span>
           </span>
+          {!isTutteMode && (
+            <div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--text-dim)', fontStyle: 'italic' }}>
+              💡 Modifica la selezione nella <b>Schedina Classica</b> per cambiare le giocate in uso
+            </div>
+          )}
         </div>
 
         <div style={{ marginBottom: '14px' }}>
@@ -1056,6 +1103,7 @@ const SchedinaComponent = ({
           campionatiSelezionati={campionatiSelezionati}
           giorniRange={giorniRange}
           filtroOrario={filtroOrario}
+          giocateSelezionate={giocateSelezionate}
           getPartiteDisponibili={getPartiteDisponibili}
           showAlert={showAlert}
           ordinaPartitePerDataOra={ordinaPartitePerDataOra}
@@ -1138,13 +1186,14 @@ const SchedinaComponent = ({
                         gap: '4px',
                         padding: '5px 6px',
                         minHeight: '36px',
-                        borderWidth: '1px',
+                        borderWidth: isSelected ? '2px' : '1px',
                         borderRadius: '10px',
                         fontSize: '10px',
                         fontWeight: isSelected ? 'bold' : '700',
                         width: '100%',
                         transition: 'all 0.2s',
                         overflow: 'hidden',
+                        boxShadow: isSelected ? '0 0 20px rgba(0, 245, 255, 0.5)' : 'none',
                       }}
                       title={c.name}
                     >
@@ -1384,4 +1433,4 @@ const SchedinaComponent = ({
 };
 
 window.SchedinaComponent = SchedinaComponent;
-console.log('✅ SchedinaComponent v9.4 caricato - Schedina Quota usa GRUPPI_GIOCATE + griglia 5×5');
+console.log('✅ SchedinaComponent v9.5 caricato - Schedina Quota usa solo giocate selezionate');

@@ -1,5 +1,6 @@
 // ============================================================
-// palinsesto.js - Modulo Palinsesto (FUTURISTIC + CHAMP BAR GRIGLIA 5x5 stile Schedina)
+// palinsesto.js - Modulo Palinsesto (FUTURISTIC + CHAMP BAR GRIGLIA 5x5)
+// v2: selezione MULTIPLA campionati + stile bottoni identico a Schedina
 // ============================================================
 
 (function () {
@@ -336,15 +337,11 @@
   };
 
   // ============================================================
-  // CHAMP BAR — GRIGLIA 5×5 STILE SCHEDINA
+  // CHAMP BAR — GRIGLIA 5×5 CON SELEZIONE MULTIPLA (stile Schedina)
   // ============================================================
-  const ChampBar = ({ matches, champFocus, onSelect }) => {
+  const ChampBar = ({ matches, campionatiSelezionati, onToggle, onSelezionaTutti, onDeselezionaTutti, championships }) => {
     const normalizeDate = window.normalizeDate;
     const todayStr = window.getTodayStr();
-
-    const totaleOggi = useMemo(() => {
-      return matches.filter(m => m.stato === 'Futura' && normalizeDate(m.data) === todayStr).length;
-    }, [matches, todayStr]);
 
     const countOggi = (camp) => {
       if (!camp) return 0;
@@ -360,6 +357,16 @@
 
     const campionatiOrdinati = useMemo(() => getCampionatiOrdinati(), []);
 
+    const totaleOggi = useMemo(() => {
+      let list = matches.filter(m => m.stato === 'Futura' && normalizeDate(m.data) === todayStr);
+      if (campionatiSelezionati.length > 0) {
+        list = list.filter(m => campionatiSelezionati.includes(m.campionato));
+      }
+      return list.length;
+    }, [matches, campionatiSelezionati, todayStr]);
+
+    const isTuttiSelezionati = campionatiSelezionati.length === championships.length && championships.length > 0;
+
     const renderCella = (campionato, idx) => {
       if (!campionato || !isPresente(campionato)) {
         return (
@@ -374,14 +381,14 @@
       }
 
       const color = window.getChampColor(campionato);
-      const isActive = champFocus === campionato;
+      const isActive = campionatiSelezionati.includes(campionato);
       const nOggi = countOggi(campionato);
       const label = campionato.length > 16 ? campionato.substring(0, 14) + '…' : campionato;
 
       return (
         <button
           key={`${campionato}-${idx}`}
-          onClick={() => onSelect(campionato)}
+          onClick={() => onToggle(campionato)}
           className={`champ-bar-item ${isActive ? 'active' : ''}`}
           style={{
             borderColor: isActive ? 'var(--neon-cyan)' : `${color}66`,
@@ -442,55 +449,59 @@
         border: '1px solid var(--border)',
         borderRadius: '14px',
       }}>
-        {/* Bottone "Tutti i Campionati" separato sopra la griglia */}
-        <button
-          onClick={() => onSelect('__TUTTI__')}
-          className={`champ-bar-item ${champFocus === '__TUTTI__' ? 'active' : ''}`}
-          style={{
-            width: '100%',
-            marginBottom: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            padding: '10px 16px',
-            borderRadius: '10px',
-            border: champFocus === '__TUTTI__'
-              ? '2px solid var(--neon-magenta)'
-              : '2px solid var(--neon-cyan)',
-            background: champFocus === '__TUTTI__'
-              ? 'linear-gradient(135deg, var(--neon-magenta), var(--neon-purple))'
-              : 'linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(0, 245, 255, 0.05))',
-            color: champFocus === '__TUTTI__' ? '#000' : 'var(--neon-cyan)',
-            cursor: 'pointer',
-            fontWeight: 900,
-            fontSize: '13px',
-            fontFamily: 'Orbitron, sans-serif',
-            textTransform: 'uppercase',
-            letterSpacing: '1px',
-            transition: 'all 0.2s',
-            boxShadow: champFocus === '__TUTTI__'
-              ? '0 0 25px rgba(255, 0, 229, 0.6)'
-              : '0 0 15px rgba(0, 245, 255, 0.2)',
-          }}
-        >
-          <span style={{ fontSize: '20px' }}>🌍</span>
-          <span>Tutti i Campionati</span>
-          {totaleOggi > 0 && (
+        {/* Header con bottoni Tutti / Deseleziona */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '10px',
+          paddingBottom: '8px',
+          borderBottom: '1px solid var(--border)',
+          flexWrap: 'wrap',
+          gap: '8px',
+        }}>
+          <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text)' }}>
+            🏆 Campionati Attivi
+          </span>
+          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+            <button
+              onClick={onSelezionaTutti}
+              style={{
+                fontSize: '10px',
+                padding: '4px 14px',
+                background: isTuttiSelezionati ? 'var(--accent)' : 'var(--surface)',
+                color: isTuttiSelezionati ? '#000' : 'var(--text)',
+                border: '1px solid var(--border)',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+              }}
+            >✅ Tutti</button>
+            <button
+              onClick={onDeselezionaTutti}
+              style={{
+                fontSize: '10px',
+                padding: '4px 14px',
+                background: 'var(--surface)',
+                color: 'var(--text)',
+                border: '1px solid var(--border)',
+                borderRadius: '6px',
+                cursor: 'pointer',
+              }}
+            >❌ Deseleziona</button>
             <span style={{
-              background: champFocus === '__TUTTI__' ? 'rgba(0,0,0,0.3)' : 'var(--neon-red)',
-              color: champFocus === '__TUTTI__' ? '#000' : '#fff',
               fontSize: '11px',
-              fontWeight: 900,
-              padding: '3px 10px',
-              borderRadius: '12px',
+              color: 'var(--text-muted)',
+              padding: '4px 10px',
+              background: 'var(--surface)',
+              borderRadius: '6px',
             }}>
-              {totaleOggi}
+              {campionatiSelezionati.length} / {championships.length}
             </span>
-          )}
-        </button>
+          </div>
+        </div>
 
-        {/* Griglia 5×5 stile Schedina */}
+        {/* Griglia 5×5 */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
@@ -626,7 +637,7 @@
     );
   };
 
-  function PalinsestoComponent({ matches, selectedFamiglie, onSelectMatch, weatherCache }) {
+  function PalinsestoComponent({ matches, selectedFamiglie, onSelectMatch, weatherCache, championships }) {
     const normalizeDate = window.normalizeDate;
     const getTodayStr = window.getTodayStr;
     const isMobile = useIsMobile();
@@ -634,79 +645,37 @@
     const { mode: visualizzaMode, setMode: setVisualizzaMode } =
       window.FiltriCampionati.useVisualizzaGiocateMode();
 
-    const [champFocus, setChampFocus] = useState('__TUTTI__');
+    // ⭐ Selezione MULTIPLA campionati (come Schedina)
+    const {
+      campionatiAttivi,
+      toggleCampionato,
+      selezionaTutti,
+      deselezionaTutti,
+    } = window.FiltriCampionati.useFiltroCampionati();
+
+    // Lista di default per championships se non passato
+    const championshipsList = useMemo(() => {
+      if (championships && championships.length > 0) return championships;
+      if (window.CHAMPIONSHIP_LIST && window.CHAMPIONSHIP_LIST.length > 0) {
+        return window.CHAMPIONSHIP_LIST.map(name => ({ name }));
+      }
+      return [];
+    }, [championships]);
 
     const partiteOggi = useMemo(() => {
       const todayStr = getTodayStr();
       let list = matches.filter(m => m.stato === 'Futura' && normalizeDate(m.data) === todayStr);
-      if (champFocus && champFocus !== '__TUTTI__') {
-        list = list.filter(m => m.campionato === champFocus);
+      if (campionatiAttivi.length > 0) {
+        list = list.filter(m => campionatiAttivi.includes(m.campionato));
+      } else {
+        list = [];
       }
       return list.sort((a, b) => (a.ora || '99:99').localeCompare(b.ora || '99:99'));
-    }, [matches, champFocus]);
+    }, [matches, campionatiAttivi]);
 
-    const isTuttiMode = champFocus === '__TUTTI__';
+    const isTuttiMode = campionatiAttivi.length === championshipsList.length && championshipsList.length > 0;
 
     if (isMobile) {
-      if (champFocus) {
-        const color = isTuttiMode ? 'var(--neon-cyan)' : window.getChampColor(champFocus);
-        return (
-          <div>
-            <button className="mobile-back-btn" onClick={() => setChampFocus(null)}>
-              ← Cambia Campionato
-            </button>
-
-            <div style={{ marginTop: '55px', marginBottom: '14px' }}>
-              <div style={{
-                background: isTuttiMode
-                  ? 'linear-gradient(135deg, var(--neon-cyan), var(--neon-blue))'
-                  : `linear-gradient(135deg, ${color}, ${color}cc)`,
-                borderRadius: '12px', padding: '14px 16px',
-                display: 'flex', alignItems: 'center', gap: '12px',
-                boxShadow: `0 6px 24px ${isTuttiMode ? 'rgba(0,245,255,0.4)' : color + '55'}`,
-              }}>
-                {isTuttiMode
-                  ? <span style={{ fontSize: '32px' }}>🌍</span>
-                  : <ChampLogo campionato={champFocus} size={36} />
-                }
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{
-                    fontFamily: 'Orbitron, sans-serif', fontSize: '14px', fontWeight: 900,
-                    color: '#000', textTransform: 'uppercase',
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                  }}>
-                    {isTuttiMode ? 'TUTTI I CAMPIONATI' : champFocus}
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.7)', fontWeight: 700 }}>
-                    {partiteOggi.length} partite oggi
-                  </div>
-                </div>
-              </div>
-
-              <VisualizzaGiocateSwitch
-                mode={visualizzaMode}
-                setMode={setVisualizzaMode}
-                selectedFamiglie={selectedFamiglie}
-              />
-            </div>
-
-            {partiteOggi.length === 0 ? (
-              <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
-                <div style={{ fontSize: '48px', marginBottom: '12px' }}>😴</div>
-                <div style={{ color: 'var(--text-dim)' }}>Nessuna partita oggi</div>
-              </div>
-            ) : (
-              <div className="matches-grid">
-                {partiteOggi.map(m => (
-                  <MatchTab key={m.id} match={m} allMatches={matches}
-                    onSelect={onSelectMatch} selectedFamiglie={selectedFamiglie} />
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      }
-
       return (
         <div>
           <div style={{
@@ -719,8 +688,41 @@
               fontFamily: 'Orbitron, sans-serif', fontSize: '14px', fontWeight: 900,
               color: 'var(--neon-cyan)', letterSpacing: '2px', textTransform: 'uppercase',
             }}>📅 Palinsesto Oggi</span>
+            <span style={{ color: 'var(--text-dim)', fontSize: '11px', marginLeft: 'auto' }}>
+              {partiteOggi.length} partite
+            </span>
           </div>
-          <MobileListaCampionati matches={matches} onSelect={(c) => setChampFocus(c)} />
+
+          <div style={{ marginBottom: '14px' }}>
+            <ChampBar
+              matches={matches}
+              championships={championshipsList}
+              campionatiSelezionati={campionatiAttivi}
+              onToggle={toggleCampionato}
+              onSelezionaTutti={selezionaTutti}
+              onDeselezionaTutti={deselezionaTutti}
+            />
+          </div>
+
+          <VisualizzaGiocateSwitch
+            mode={visualizzaMode}
+            setMode={setVisualizzaMode}
+            selectedFamiglie={selectedFamiglie}
+          />
+
+          {partiteOggi.length === 0 ? (
+            <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '12px' }}>😴</div>
+              <div style={{ color: 'var(--text-dim)' }}>Nessuna partita oggi</div>
+            </div>
+          ) : (
+            <div className="matches-grid">
+              {partiteOggi.map(m => (
+                <MatchTab key={m.id} match={m} allMatches={matches}
+                  onSelect={onSelectMatch} selectedFamiglie={selectedFamiglie} />
+              ))}
+            </div>
+          )}
         </div>
       );
     }
@@ -739,7 +741,7 @@
             textShadow: '0 0 12px var(--neon-cyan)',
           }}>📅 Palinsesto Oggi</span>
           <span style={{ color: 'var(--text-dim)', fontSize: '12px' }}>
-            {isTuttiMode ? 'Tutti i campionati' : champFocus} • {partiteOggi.length} partite
+            {isTuttiMode ? 'Tutti i campionati' : `${campionatiAttivi.length} campionati`} • {partiteOggi.length} partite
           </span>
         </div>
 
@@ -751,34 +753,21 @@
 
         <ChampBar
           matches={matches}
-          champFocus={champFocus}
-          onSelect={(c) => setChampFocus(c)}
+          championships={championshipsList}
+          campionatiSelezionati={campionatiAttivi}
+          onToggle={toggleCampionato}
+          onSelezionaTutti={selezionaTutti}
+          onDeselezionaTutti={deselezionaTutti}
         />
-
-        {!isTuttiMode && (
-          <div style={{
-            background: `linear-gradient(135deg, ${window.getChampColor(champFocus)}, ${window.getChampColor(champFocus)}99)`,
-            borderRadius: '12px', padding: '12px 16px', marginBottom: '14px',
-            display: 'flex', alignItems: 'center', gap: '12px',
-          }}>
-            <ChampLogo campionato={champFocus} size={32} />
-            <div>
-              <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '15px', fontWeight: 900, color: '#000' }}>
-                {champFocus}
-              </div>
-              <div style={{ fontSize: '11px', color: 'rgba(0,0,0,0.7)', fontWeight: 700 }}>
-                {partiteOggi.length} partite oggi
-              </div>
-            </div>
-          </div>
-        )}
 
         {partiteOggi.length === 0 ? (
           <div className="card" style={{ textAlign: 'center', padding: '60px 20px' }}>
             <div style={{ fontSize: '64px', marginBottom: '16px' }}>😴</div>
             <h3 style={{ color: 'var(--neon-cyan)' }}>Nessuna partita oggi</h3>
             <p style={{ color: 'var(--text-dim)' }}>
-              {isTuttiMode ? 'Non ci sono partite in programma oggi' : `Nessuna partita di ${champFocus} oggi`}
+              {campionatiAttivi.length === 0
+                ? 'Seleziona almeno un campionato'
+                : 'Non ci sono partite in programma oggi nei campionati selezionati'}
             </p>
           </div>
         ) : (
@@ -795,6 +784,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto FUTURISTIC caricato — ChampBar griglia 5×5 stile Schedina');
+  console.log('✅ Modulo Palinsesto FUTURISTIC caricato — selezione MULTIPLA campionati');
 
 })();
