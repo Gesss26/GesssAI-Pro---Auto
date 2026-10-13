@@ -121,10 +121,6 @@
     // ============================================================
     // CAMPIONATI ESCLUSI
     // ============================================================
-    // ⭐ v5: Nessun campionato escluso.
-    // I 4 campionati ex-esclusi (Liga Profesional Argentina, Brasileirão Serie A,
-    // Chinese Super League, Major League Soccer) NON sono più presenti
-    // perché rimossi dal nuovo scarica.py.
     const CAMPIONATI_ESCLUSI = new Set([]);
 
     const filtraCampionatiEsclusi = (arr) => {
@@ -182,8 +178,12 @@
               if (data.matches) {
                 const filteredMatches = filtraCampionatiEsclusi(data.matches);
                 const filteredChamps = (data.championships || []).filter(c => !CAMPIONATI_ESCLUSI.has(c.name));
-                localStorage.setItem('ft_matches', JSON.stringify(filteredMatches));
-                localStorage.setItem('ft_champs', JSON.stringify(filteredChamps));
+                try {
+                  localStorage.setItem('ft_matches', JSON.stringify(filteredMatches));
+                  localStorage.setItem('ft_champs', JSON.stringify(filteredChamps));
+                } catch (e) {
+                  console.warn('⚠️ localStorage pieno (JSON fallback), salto salvataggio:', e.message);
+                }
                 dataLoaded = true;
                 return { matches: filteredMatches, championships: filteredChamps };
               }
@@ -299,8 +299,17 @@
 
         console.log(`✅ ${matchesFiltrati.length} partite caricate (${championshipsFiltrati.length} campionati)`);
 
-        localStorage.setItem('ft_matches', JSON.stringify(matchesFiltrati));
-        localStorage.setItem('ft_champs', JSON.stringify(championshipsFiltrati));
+        // ⭐ FIX: try/catch per localStorage pieno
+        try {
+          localStorage.setItem('ft_matches', JSON.stringify(matchesFiltrati));
+          localStorage.setItem('ft_champs', JSON.stringify(championshipsFiltrati));
+        } catch (e) {
+          console.warn('⚠️ localStorage pieno, salto salvataggio matches/champs:', e.message);
+          try {
+            localStorage.removeItem('ft_matches');
+            localStorage.removeItem('ft_champs');
+          } catch (e2) {}
+        }
         dataLoaded = true;
 
         return { matches: matchesFiltrati, championships: championshipsFiltrati };
@@ -324,19 +333,11 @@
 
     const MAIN_TABS = ['Home', 'Palinsesto', 'Statistiche', 'Storico', 'Schedina', 'Impostazioni'];
 
-    // ⭐ CHAMPIONSHIP_COLORS - 25 campionati (4 UEFA + 21 nazionali)
     const CHAMPIONSHIP_COLORS = {
-      // ============================================================
-      // COPPE UEFA (4)
-      // ============================================================
       'UEFA Champions League':   '#1a1aff',
       'UEFA Europa League':      '#ff6600',
       'UEFA Europa Conference':  '#00b894',
       'UEFA Nations League':     '#003399',
-
-      // ============================================================
-      // CAMPIONATI NAZIONALI (21)
-      // ============================================================
       'Jupiler Pro League': '#e74c3c',
       'Premier League': '#3498db', 'EFL Championship': '#6c3483',
       'Ligue 1': '#9b59b6', 'Ligue 2': '#8e44ad', 'Bundesliga': '#f39c12', '2. Bundesliga': '#e67e22',
@@ -346,15 +347,11 @@
       'Segunda División': '#e67e22', 'Süper Lig': '#e67e22'
     };
 
-    // ⭐ CHAMPIONSHIP_LIST - 25 campionati
     const CHAMPIONSHIP_LIST = [
-      // COPPE UEFA
       'UEFA Champions League',
       'UEFA Europa League',
       'UEFA Europa Conference',
       'UEFA Nations League',
-
-      // Campionati nazionali
       'Jupiler Pro League',
       'Premier League', 'EFL Championship',
       'Ligue 1', 'Ligue 2',
@@ -473,12 +470,39 @@
     };
 
     // ============================================================
-    // TEAM LOGO
+    // TEAM LOGO (⭐ AGGIORNATO con supporto campionati/ + kebab-case)
     // ============================================================
     const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
       const [hasError, setHasError] = useState(false);
-      const [tryUnderscore, setTryUnderscore] = useState(false);
+      const [pathIndex, setPathIndex] = useState(0);
 
+      // Rileva se stiamo chiedendo il logo di una COMPETIZIONE
+      const isCompetition = (name, champ) => {
+        if (!name || !champ) return false;
+        return name.trim().toLowerCase() === champ.trim().toLowerCase();
+      };
+
+      // Percorsi per il logo della COMPETIZIONE
+      // File reali: logos/campionati/uefa-champions-league.png (kebab-case)
+      const getCompetitionPaths = (champ) => {
+        const kebab = champ
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .trim()
+          .replace(/\s+/g, '-');
+        const snake = champ.toLowerCase().replace(/\s+/g, '_');
+        const original = champ;
+
+        return [
+          `logos/campionati/${kebab}.png`,
+          `logos/campionati/${snake}.png`,
+          `logos/campionati/${original}.png`,
+          `logos/campionati/${kebab}.jpg`,
+          `logos/campionati/${snake}.jpg`,
+        ];
+      };
+
+      // Percorsi per il logo della SQUADRA
       const getLeagueFolder = (champ) => {
         if (!champ) return '';
         const map = {
@@ -490,9 +514,26 @@
           'J1 League': 'J1_League', 'Eredivisie': 'Eredivisie', 'Eerste Divisie': 'Eerste_Divisie',
           'Primeira Liga': 'Primeira_Liga', 'Scottish Premiership': 'Scottish_Premiership',
           'K League 1': 'K_League_1', 'La Liga': 'La_Liga', 'Segunda División': 'Segunda_Division',
-          'Süper Lig': 'Super_Lig'
+          'Süper Lig': 'Super_Lig',
+          'UEFA Champions League': 'UEFA_Champions_League',
+          'UEFA Europa League': 'UEFA_Europa_League',
+          'UEFA Europa Conference': 'UEFA_Europa_Conference',
+          'UEFA Nations League': 'UEFA_Nations_League',
         };
         return map[champ] || champ.replace(/ /g, '_');
+      };
+
+      const getTeamPaths = (teamName, champ) => {
+        const leagueFolder = getLeagueFolder(champ);
+        const withUnderscore = teamName.replace(/\s+/g, '_');
+        return [
+          `logos/${leagueFolder}/${teamName}.png`,
+          `logos/${leagueFolder}/${withUnderscore}.png`,
+          `logos/${leagueFolder}/${teamName}.jpg`,
+          `logos/${leagueFolder}/${withUnderscore}.jpg`,
+          `logos/${leagueFolder}/${teamName}.svg`,
+          `logos/${leagueFolder}/${withUnderscore}.svg`,
+        ];
       };
 
       const getInitials = (name) => {
@@ -503,7 +544,7 @@
         return words.map(w => w[0]).join('').substring(0, 3).toUpperCase();
       };
 
-      if (!championship || championship === 'Tutti' || hasError) {
+      const renderFallback = () => {
         const initials = getInitials(teamName);
         return (
           <div className={`team-logo-fallback ${className}`} style={{
@@ -516,25 +557,42 @@
             {initials}
           </div>
         );
+      };
+
+      if (!championship || championship === 'Tutti') {
+        return renderFallback();
       }
 
-      const leagueFolder = getLeagueFolder(championship);
-      const logoPath = `logos/${leagueFolder}/${tryUnderscore ? teamName.replace(/\s+/g, '_') + '.png' : teamName + '.png'}`;
+      const paths = isCompetition(teamName, championship)
+        ? getCompetitionPaths(championship)
+        : getTeamPaths(teamName, championship);
+
+      if (hasError || pathIndex >= paths.length) {
+        return renderFallback();
+      }
+
+      const currentSrc = paths[pathIndex];
 
       return (
         <img
-          src={logoPath}
+          key={currentSrc}
+          src={currentSrc}
           alt={teamName}
           width={size}
           height={size}
           style={{
-            width: size + 'px', height: size + 'px', maxWidth: size + 'px', maxHeight: size + 'px',
-            objectFit: 'contain', display: 'block', borderRadius: '4px', flexShrink: 0,
+            width: size + 'px', height: size + 'px',
+            maxWidth: size + 'px', maxHeight: size + 'px',
+            objectFit: 'contain', display: 'block',
+            borderRadius: '4px', flexShrink: 0,
           }}
           className={`team-logo ${className}`}
           onError={() => {
-            if (!tryUnderscore) setTryUnderscore(true);
-            else setHasError(true);
+            if (pathIndex + 1 < paths.length) {
+              setPathIndex(pathIndex + 1);
+            } else {
+              setHasError(true);
+            }
           }}
         />
       );
@@ -997,7 +1055,7 @@
     window.calcolaGG_NG = calcolaGG_NG;
     window.get12Under45 = get12Under45;
 
-    console.log('✅ Funzioni globali esposte v10 - ' + CHAMPIONSHIP_LIST.length + ' campionati configurati');
+    console.log('✅ Funzioni globali esposte v11 - TeamLogo kebab-case + fix localStorage - ' + CHAMPIONSHIP_LIST.length + ' campionati configurati');
 
     // ============================================================
     // LOAD/SAVE STATE
@@ -1032,11 +1090,19 @@
     };
 
     const saveState = (data) => {
-      localStorage.setItem('ft_champs', JSON.stringify(data.championships));
-      localStorage.setItem('ft_matches', JSON.stringify(data.matches));
-      localStorage.setItem('ft_theme', JSON.stringify(data.theme));
-      localStorage.setItem('ft_custom_theme', JSON.stringify(data.customTheme));
-      localStorage.setItem('ft_selected_famiglie', JSON.stringify(data.selectedFamiglie || ['dc_under', 'mg_casa_ospite', 'over']));
+      try {
+        localStorage.setItem('ft_champs', JSON.stringify(data.championships));
+      } catch (e) {
+        console.warn('⚠️ localStorage pieno (champs), salto');
+      }
+      try {
+        localStorage.setItem('ft_matches', JSON.stringify(data.matches));
+      } catch (e) {
+        console.warn('⚠️ localStorage pieno (matches), salto');
+      }
+      try { localStorage.setItem('ft_theme', JSON.stringify(data.theme)); } catch (e) {}
+      try { localStorage.setItem('ft_custom_theme', JSON.stringify(data.customTheme)); } catch (e) {}
+      try { localStorage.setItem('ft_selected_famiglie', JSON.stringify(data.selectedFamiglie || ['dc_under', 'mg_casa_ospite', 'over'])); } catch (e) {}
     };
 
     // ============================================================
