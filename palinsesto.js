@@ -1,8 +1,8 @@
 // ============================================================
-// palinsesto.js - Modulo Palinsesto (FUTURISTIC + CHAMP BAR GRIGLIA 7x3)
-// ✅ PC: Griglia fissa 7 colonne × 3 righe = 21 campionati
-// ✅ PC: Riga 1 = maggiori, Riga 2 = minori, Riga 3 = extra/Serie C
-// ✅ PC: "Tutti i Campionati" a sinistra, span verticale su 3 righe
+// palinsesto.js - Modulo Palinsesto (FUTURISTIC + CHAMP BAR GRIGLIA 5x5)
+// ✅ PC: Griglia 5 colonne × 5 righe = 25 campionati (da CHAMPIONSHIP_LIST)
+// ✅ PC: Ordinamento alfabetico
+// ✅ PC: "Tutti i Campionati" a sinistra, span verticale su 5 righe
 // ✅ Mobile: lista campionati scrollabile → click → giornata
 // ============================================================
 
@@ -65,45 +65,52 @@
   };
 
   // ============================================================
-  // GRIGLIA FISSA 7×3 = 21 CELLE
-  // Ordine di lettura: riga per riga (7 per riga)
+  // ⭐ LISTA CAMPIONATI ORDINATA ALFABETICAMENTE
+  // Usa window.CHAMPIONSHIP_LIST (25 campionati) se disponibile,
+  // altrimenti fallback a lista interna.
   // ============================================================
-  const GRIGLIA_CAMPIONATI = [
-    // ===== RIGA 1: CAMPIONATI MAGGIORI =====
-    { campionato: 'Serie A',            tier: 1, label: 'Serie A' },
-    { campionato: 'Ligue 1',            tier: 1, label: 'Ligue 1' },
-    { campionato: 'La Liga',            tier: 1, label: 'La Liga' },
-    { campionato: 'Premier League',     tier: 1, label: 'Premier' },
-    { campionato: 'Bundesliga',         tier: 1, label: 'Bundesliga' },
-    { campionato: 'Eredivisie',         tier: 1, label: 'Eredivisie' },
-    { campionato: 'Primeira Liga',      tier: 1, label: 'Primeira' },
-
-    // ===== RIGA 2: CAMPIONATI MINORI =====
-    { campionato: 'Serie B',            tier: 2, label: 'Serie B' },
-    { campionato: 'Ligue 2',            tier: 2, label: 'Ligue 2' },
-    { campionato: 'Segunda División',   tier: 2, label: 'Segunda' },
-    { campionato: 'EFL Championship',   tier: 2, label: 'Championsh' },
-    { campionato: '2. Bundesliga',      tier: 2, label: '2. Bundes' },
-    { campionato: 'Eerste Divisie',     tier: 2, label: 'Eerste' },
-    { campionato: 'Jupiler Pro League', tier: 2, label: 'Jupiler' },
-
-    // ===== RIGA 3: SERIE C + CAMPIONATI EXTRA =====
-    { campionato: 'Serie C - Girone A',   tier: 3, label: 'Serie C/A' },
-    { campionato: 'Serie C - Girone B',   tier: 3, label: 'Serie C/B' },
-    { campionato: 'Serie C - Girone C',   tier: 3, label: 'Serie C/C' },
-    { campionato: 'Scottish Premiership', tier: 3, label: 'Scottish' },
-    { campionato: 'Süper Lig',            tier: 3, label: 'Süper Lig' },
-    { campionato: 'K League 1',           tier: 3, label: 'K League 1' },
-    { campionato: 'J1 League',            tier: 3, label: 'J1 League' },
-  ];
+  const getCampionatiOrdinati = () => {
+    const list = (window.CHAMPIONSHIP_LIST && window.CHAMPIONSHIP_LIST.length > 0)
+      ? window.CHAMPIONSHIP_LIST
+      : [
+          'UEFA Champions League', 'UEFA Europa League', 'UEFA Europa Conference', 'UEFA Nations League',
+          'Jupiler Pro League', 'Premier League', 'EFL Championship',
+          'Ligue 1', 'Ligue 2', 'Bundesliga', '2. Bundesliga',
+          'Serie A', 'Serie B',
+          'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C',
+          'J1 League', 'Eerste Divisie', 'Eredivisie',
+          'Primeira Liga', 'Scottish Premiership',
+          'K League 1', 'La Liga', 'Segunda División', 'Süper Lig'
+        ];
+    return [...list].sort((a, b) =>
+      (a || '').localeCompare(b || '', 'it', { sensitivity: 'base' })
+    );
+  };
 
   // ============================================================
   // CHAMP LOGO
   // ============================================================
   const ChampLogo = ({ campionato, size = 24 }) => {
     const [hasError, setHasError] = useState(false);
-    const logoPath = window.getChampLogo ? window.getChampLogo(campionato) : null;
-    if (!logoPath || hasError) {
+    const [pathIndex, setPathIndex] = useState(0);
+
+    // Genera i path possibili per il logo del campionato
+    const getPaths = (champ) => {
+      if (!champ) return [];
+      const kebab = champ.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
+      const snake = champ.toLowerCase().replace(/\s+/g, '_');
+      return [
+        `logos/campionati/${kebab}.png`,      // uefa-champions-league.png ✅
+        `logos/campionati/${snake}.png`,      // uefa_champions_league.png
+        `logos/campionati/${champ}.png`,      // UEFA Champions League.png
+        `logos/campionati/${kebab}.jpg`,
+        `logos/campionati/${snake}.jpg`,
+      ];
+    };
+
+    const paths = getPaths(campionato);
+
+    if (hasError || pathIndex >= paths.length || paths.length === 0) {
       const color = window.getChampColor(campionato);
       return (
         <div style={{
@@ -116,9 +123,18 @@
         </div>
       );
     }
+
     return (
-      <img src={logoPath} alt={campionato} onError={() => setHasError(true)}
-        style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }} />
+      <img
+        key={paths[pathIndex]}
+        src={paths[pathIndex]}
+        alt={campionato}
+        onError={() => {
+          if (pathIndex + 1 < paths.length) setPathIndex(pathIndex + 1);
+          else setHasError(true);
+        }}
+        style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0 }}
+      />
     );
   };
 
@@ -328,8 +344,9 @@
   };
 
   // ============================================================
-  // CHAMP BAR — GRIGLIA FISSA 7 COLONNE × 3 RIGHE = 21 CELLE
-  // "Tutti i Campionati" a sinistra, span verticale su 3 righe
+  // ⭐ CHAMP BAR — GRIGLIA 5 COLONNE × 5 RIGHE = 25 CELLE
+  // "Tutti i Campionati" a sinistra, span verticale su 5 righe
+  // Campionati ordinati alfabeticamente da CHAMPIONSHIP_LIST
   // ============================================================
   const ChampBar = ({ matches, champFocus, onSelect }) => {
     const normalizeDate = window.normalizeDate;
@@ -351,11 +368,12 @@
       return matches.some(m => m.campionato === camp);
     };
 
-    const renderCella = (cell, idx) => {
-      const gridCol = (idx % 7) + 2;   // +2 perché colonna 1 = "Tutti"
-      const gridRow = Math.floor(idx / 7) + 1;
+    // ⭐ Lista campionati ordinata alfabeticamente
+    const campionatiOrdinati = useMemo(() => getCampionatiOrdinati(), []);
 
-      const { campionato, tier, label } = cell;
+    const renderCella = (campionato, idx) => {
+      const gridCol = (idx % 5) + 2;   // +2 perché colonna 1 = "Tutti"
+      const gridRow = Math.floor(idx / 5) + 1;
 
       // Cella vuota (campionato non presente nei dati)
       if (!campionato || !isPresente(campionato)) {
@@ -373,8 +391,9 @@
       const color = window.getChampColor(campionato);
       const isActive = champFocus === campionato;
       const nOggi = countOggi(campionato);
-      const borderWidth = tier === 1 ? '2px' : '1px';
-      const opacity = tier === 1 ? 1 : (tier === 2 ? 0.9 : 0.8);
+
+      // Label abbreviata per il pulsante
+      const label = campionato.length > 16 ? campionato.substring(0, 14) + '…' : campionato;
 
       return (
         <div key={`${campionato}-${idx}`} style={{ gridColumn: gridCol, gridRow }}>
@@ -387,8 +406,7 @@
               justifyContent: 'center',
               padding: '5px 6px',
               minHeight: '36px',
-              borderWidth,
-              opacity,
+              borderWidth: '1px',
             }}
             title={campionato}
           >
@@ -413,8 +431,8 @@
         className="champ-bar-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: `auto repeat(7, minmax(0, 1fr))`,
-          gridTemplateRows: 'repeat(3, auto)',
+          gridTemplateColumns: `auto repeat(5, minmax(0, 1fr))`,
+          gridTemplateRows: 'repeat(5, auto)',
           gap: '4px',
           marginBottom: '16px',
           padding: '10px 12px',
@@ -424,13 +442,13 @@
           overflowX: 'auto',
         }}
       >
-        {/* ⭐ "Tutti i Campionati" a sinistra, span verticale su 3 righe */}
+        {/* ⭐ "Tutti i Campionati" a sinistra, span verticale su 5 righe */}
         <button
           onClick={() => onSelect('__TUTTI__')}
           className={`champ-bar-item ${champFocus === '__TUTTI__' ? 'active' : ''}`}
           style={{
             gridColumn: '1',
-            gridRow: '1 / span 3',
+            gridRow: '1 / span 5',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -459,8 +477,8 @@
           )}
         </button>
 
-        {/* ⭐ 21 celle (7×3) */}
-        {GRIGLIA_CAMPIONATI.map((cell, idx) => renderCella(cell, idx))}
+        {/* ⭐ 25 celle (5×5) */}
+        {campionatiOrdinati.map((campionato, idx) => renderCella(campionato, idx))}
       </div>
     );
   };
@@ -501,14 +519,15 @@
   };
 
   // ============================================================
-  // MOBILE: LISTA CAMPIONATI (scrollabile)
+  // MOBILE: LISTA CAMPIONATI (scrollabile, ordinata alfabeticamente)
   // ============================================================
   const MobileListaCampionati = ({ matches, onSelect }) => {
     const normalizeDate = window.normalizeDate;
     const todayStr = window.getTodayStr();
 
     const campionatiDisponibili = useMemo(() => {
-      return window.CHAMPIONSHIP_LIST
+      const lista = getCampionatiOrdinati();
+      return lista
         .filter(c => matches.some(m => m.campionato === c))
         .map(c => ({
           nome: c,
@@ -724,7 +743,7 @@
           selectedFamiglie={selectedFamiglie}
         />
 
-        {/* ⭐ SIDEBAR A GRIGLIA 7×3 */}
+        {/* ⭐ SIDEBAR A GRIGLIA 5×5 */}
         <ChampBar
           matches={matches}
           champFocus={champFocus}
@@ -774,6 +793,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto FUTURISTIC caricato — ChampBar griglia 7×3');
+  console.log('✅ Modulo Palinsesto FUTURISTIC caricato — ChampBar griglia 5×5 alfabetica');
 
 })();
