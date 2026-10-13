@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<!-- CONFIGURAZIONE CAMPIONATI (PRIMO DI TUTTI) -->
+<!-- CONFIGURAZIONE CAMPIONATI -->
 <script src="campionati-config.js"></script>
 
 <!-- Librerie CDN -->
@@ -32,7 +32,7 @@
 <!-- Parser PDF -->
 <script src="pdf-quote-parser.js"></script>
 
-<!-- Moduli esterni (path relativi) -->
+<!-- Moduli esterni (ordine importante) -->
 <script type="text/javascript" src="meteo.js"></script>
 <script src="filtri-campionati.js"></script>
 <script type="text/babel" src="performance-db.js"></script>
@@ -47,7 +47,7 @@
 <script type="text/babel" src="statistiche.js"></script>
 <script type="text/babel" src="storico.js"></script>
 
-<!-- CSS Futuristico -->
+<!-- CSS -->
 <link rel="stylesheet" href="styles-futuristic.css">
 </head>
 <body>
@@ -144,16 +144,9 @@
     // ============================================================
     // CARICAMENTO DATI
     // ============================================================
-    let dataLoaded = false;
-
     async function loadScrapedData(forceReload = false) {
       console.log('📂 Caricamento dati...');
       try {
-        if (forceReload) {
-          localStorage.removeItem('ft_matches');
-          localStorage.removeItem('ft_champs');
-        }
-
         const paths = ['excel/GesssAI_Input.xlsx', 'data/GesssAI_Input.xlsx'];
         let excelData = null;
 
@@ -185,7 +178,6 @@
               if (data.matches) {
                 const filteredMatches = filtraCampionatiEsclusi(data.matches);
                 const filteredChamps = (data.championships || []).filter(c => !CAMPIONATI_ESCLUSI.has(c.name));
-                dataLoaded = true;
                 return { matches: filteredMatches, championships: filteredChamps };
               }
             }
@@ -300,7 +292,6 @@
 
         console.log(`✅ ${matchesFiltrati.length} partite caricate (${championshipsFiltrati.length} campionati)`);
 
-        dataLoaded = true;
         return { matches: matchesFiltrati, championships: championshipsFiltrati };
       } catch (error) {
         console.error('❌ Errore Excel:', error.message);
@@ -489,7 +480,6 @@
         ];
       };
 
-      // ⭐ Mappatura cartelle (con nomi reali del repo)
       const getLeagueFolder = (champ) => {
         if (!champ) return '';
         const map = {
@@ -514,7 +504,6 @@
           'La Liga': 'La_Liga',
           'Segunda División': 'Segunda_Division',
           'Süper Lig': 'Super_Lig',
-          // ⭐ Coppe UEFA → Champions_League (unica cartella)
           'UEFA Champions League': 'Champions_League',
           'UEFA Europa League': 'Champions_League',
           'UEFA Europa Conference': 'Champions_League',
@@ -523,7 +512,6 @@
         return map[champ] || champ.replace(/ /g, '_');
       };
 
-      // ⭐ Cartelle nazionali (per cercare squadre di coppe UEFA)
       const CARTELLE_NAZIONALI = [
         'Jupiler_Pro_League',
         'Premier_League',
@@ -558,7 +546,6 @@
         const withUnderscore = teamName.replace(/\s+/g, '_');
 
         if (isCoppaUEFA(champ)) {
-          // ⭐ Cerca in Champions_League PRIMA, poi nelle nazionali
           const paths = [
             `logos/Champions_League/${teamName}.png`,
             `logos/Champions_League/${withUnderscore}.png`,
@@ -1098,21 +1085,21 @@
     window.get12Under45 = get12Under45;
     window.normalizzaAccenti = normalizzaAccenti;
 
-    console.log('✅ Funzioni globali esposte v14 - ' + CHAMPIONSHIP_LIST.length + ' campionati');
+    console.log('✅ Funzioni globali esposte v15 - ' + CHAMPIONSHIP_LIST.length + ' campionati');
 
     // ============================================================
     // LOAD/SAVE STATE
+    // ⭐ NO MATCHES in localStorage: sempre ricaricati dal file Excel
     // ============================================================
     const loadState = () => {
       try {
         const localData = {
           championships: JSON.parse(localStorage.getItem('ft_champs') || '[]'),
-          matches: JSON.parse(localStorage.getItem('ft_matches') || '[]'),
+          matches: [],   // ⭐ SEMPRE VUOTO. Verrà popolato da loadScrapedData().
           theme: JSON.parse(localStorage.getItem('ft_theme') || '"Scuro Blu Notte"'),
           customTheme: JSON.parse(localStorage.getItem('ft_custom_theme') || 'null'),
           selectedFamiglie: JSON.parse(localStorage.getItem('ft_selected_famiglie') || '["dc_under","mg_casa_ospite","over"]'),
         };
-        localData.matches = filtraCampionatiEsclusi(localData.matches);
         localData.championships = localData.championships.filter(c => !CAMPIONATI_ESCLUSI.has(c.name));
         return localData;
       } catch (e) {
@@ -1127,17 +1114,8 @@
     const saveState = (data) => {
       try { localStorage.setItem('ft_champs', JSON.stringify(data.championships)); } catch (e) { console.warn('⚠️ localStorage pieno (champs)'); }
 
-      try {
-        const oggi = getTodayStr();
-        const partiteFuture = (data.matches || []).filter(m => {
-          const norm = normalizeDate(m.data);
-          return norm && norm >= oggi;
-        });
-        localStorage.setItem('ft_matches', JSON.stringify(partiteFuture));
-        console.log(`💾 Salvate ${partiteFuture.length} partite future (su ${(data.matches || []).length} totali)`);
-      } catch (e) {
-        console.warn('⚠️ localStorage pieno (matches), salto');
-      }
+      // ⭐ NON salviamo i matches in localStorage! Sono dati derivati dal file Excel.
+      // Vengono ricaricati ogni volta da loadScrapedData().
 
       try { localStorage.setItem('ft_theme', JSON.stringify(data.theme)); } catch (e) {}
       try { localStorage.setItem('ft_custom_theme', JSON.stringify(data.customTheme)); } catch (e) {}
@@ -1197,16 +1175,12 @@
         }
       }, []);
 
+      // ⭐ Carica dati UNA SOLA VOLTA al mount
       useEffect(() => {
         if (hasLoadedRef.current) return;
         hasLoadedRef.current = true;
 
-        if (matches && matches.length > 0) {
-          console.log(`✅ Dati già in memoria: ${matches.length} partite`);
-          return;
-        }
-
-        console.log('📂 Prima esecuzione, carico dati...');
+        console.log('📂 Carico dati al mount di App...');
         const loadData = async () => {
           try {
             const data = await loadScrapedData();
@@ -1235,6 +1209,7 @@
         }
       }, [selectedMatchId, matches]);
 
+      // ⭐ Salva con debounce 5s (solo championships, theme, customTheme, selectedFamiglie)
       useEffect(() => {
         if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
         saveTimeoutRef.current = setTimeout(() => {
@@ -1253,11 +1228,9 @@
           root.style.setProperty(`--${k.replace(/([A-Z])/g, '-$1').toLowerCase()}`, v);
         });
 
-        // ⭐ Imposta data-theme per il CSS AI-Neon
         const isLight = theme === 'Chiaro' || theme === 'Ghiaccio';
         document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
 
-        // ⭐ Forza background del body in base al tema
         document.body.style.background = t.bg;
         document.body.style.color = t.text;
         document.body.style.backgroundAttachment = 'fixed';
@@ -1434,13 +1407,6 @@
     // BOOT
     // ============================================================
     console.log('🚀 Avvio GesssAI-Pro v5.0');
-
-    loadScrapedData().then(data => {
-      if (data && data.matches && data.matches.length > 0) {
-        console.log(`✅ ${data.matches.length} partite caricate all'avvio!`);
-        if (window.updateAppData) window.updateAppData(data);
-      }
-    });
 
     try {
       const rootElement = document.getElementById('root');
