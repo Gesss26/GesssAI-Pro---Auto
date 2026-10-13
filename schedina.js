@@ -1,9 +1,6 @@
 // ============================================================
 // schedina.js - Modulo Schedina con quote PDF visibili
-// v9.2: Griglia campionati 5x5 (come Palinsesto) + ChampLogo
-//       - Sub-tab "Schedina Classica" + "Schedina Quota"
-//       - Campionati ordinati alfabeticamente
-//       - Schedina Quota con tolleranza ±0.10 fissa
+// v9.3: Fix "ordinamento is not defined" + griglia 5x5 + ChampLogo
 // ============================================================
 
 const formatGiocataLabel = (familyId, label) => {
@@ -60,7 +57,6 @@ const ChampLogoSchedina = ({ campionato, size = 24 }) => {
   const [hasError, setHasError] = React.useState(false);
   const [pathIndex, setPathIndex] = React.useState(0);
 
-  // ⭐ Mappatura nomi campionato → nome file logo
   const MAPPA_FILE_LOGHI = {
     'EFL Championship': 'championship',
     'Serie C - Girone A': 'serie-c',
@@ -68,7 +64,6 @@ const ChampLogoSchedina = ({ campionato, size = 24 }) => {
     'Serie C - Girone C': 'serie-c',
   };
 
-  // ⭐ Campionati con loghi scuri → sfondo chiaro
   const isCampionatoScuro = (champ) => {
     if (!champ) return false;
     const c = champ.toLowerCase();
@@ -79,7 +74,6 @@ const ChampLogoSchedina = ({ campionato, size = 24 }) => {
 
   const getPaths = (champ) => {
     if (!champ) return [];
-
     const override = MAPPA_FILE_LOGHI[champ];
     if (override) {
       return [
@@ -87,7 +81,6 @@ const ChampLogoSchedina = ({ campionato, size = 24 }) => {
         `logos/campionati/${override}.jpg`,
       ];
     }
-
     const normalized = normalizzaAccenti(champ);
     const kebab = normalized
       .toLowerCase()
@@ -276,7 +269,6 @@ const QuotaInline = ({ match, familyId, giocata, pctTua, size = 'sm' }) => {
   if (!quotaInfo || !quotaInfo.quotaBook) return null;
 
   const { quotaBook, edge, isValue } = quotaInfo;
-
   const padding = size === 'lg' ? '3px 8px' : '1px 6px';
   const fontSize = size === 'lg' ? '12px' : '10px';
 
@@ -946,9 +938,8 @@ const SchedinaComponent = ({
       const scoreB = tipoGiocate === 'scelte' ? (b.scoreScelte || 0) : (b.scoreCalcolate || 0);
       return scoreB - scoreA;
     });
-  }, [getPartiteDisponibili, calcolaTop3GiocatePerPartita, ordinamento, tipoGiocate, normalizeDate]);
+  }, [getPartiteDisponibili, calcolaTop3GiocatePerPartita, tipoGiocate, normalizeDate]);
 
-  // ⭐ CAMPIONATI ORDINATI ALFABETICAMENTE
   const championshipsOrdinati = useMemo(() => {
     return [...championships].sort((a, b) =>
       (a.name || '').localeCompare(b.name || '', 'it', { sensitivity: 'base' })
@@ -992,7 +983,6 @@ const SchedinaComponent = ({
         <window.QuoteManager.BannerScadenzaQuote />
       )}
 
-      {/* SUB-TAB */}
       <div className="sub-tabs" style={{ marginBottom: '16px' }}>
         <button className={sottoTab === 'classica' ? 'active' : ''} onClick={() => setSottoTab('classica')}>
           📋 Schedina Classica
@@ -1032,7 +1022,7 @@ const SchedinaComponent = ({
               </span>
             </h3>
 
-            {/* ⭐ GRIGLIA CAMPIONATI 5×5 (come Palinsesto) */}
+            {/* GRIGLIA CAMPIONATI 5×5 */}
             <div style={{
               marginBottom: '20px', padding: '14px 16px',
               background: 'var(--surface)', borderRadius: '10px',
@@ -1065,7 +1055,6 @@ const SchedinaComponent = ({
                 </div>
               </div>
 
-              {/* GRIGLIA 5×5 */}
               <div className="champ-filters-grid" style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
@@ -1356,4 +1345,4 @@ const SchedinaComponent = ({
 };
 
 window.SchedinaComponent = SchedinaComponent;
-console.log('✅ SchedinaComponent v9.2 caricato - griglia 5x5 campionati + ChampLogo + sub-tab Classica/Quota');
+console.log('✅ SchedinaComponent v9.3 caricato - fix "ordinamento is not defined"');
