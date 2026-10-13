@@ -66,7 +66,7 @@
     </div>
   </div>
 
-  <!-- ERROR CONTAINER (nascosto di default) -->
+  <!-- ERROR CONTAINER -->
   <div id="error-container" style="display: none !important;">
     <div class="error-icon">⚠️</div>
     <h2>Errore di caricamento</h2>
@@ -129,7 +129,7 @@
     };
 
     // ============================================================
-    // NORMALIZZA ACCENTI (per kebab-case loghi)
+    // NORMALIZZA ACCENTI
     // ============================================================
     const normalizzaAccenti = (str) => {
       if (!str) return '';
@@ -328,9 +328,10 @@
       'UEFA Europa Conference':  '#00b894',
       'UEFA Nations League':     '#003399',
       'Jupiler Pro League': '#e74c3c',
-      'Premier League': '#3498db', 'Championship': '#6c3483',
+      'Premier League': '#3498db', 'EFL Championship': '#6c3483',
       'Ligue 1': '#9b59b6', 'Ligue 2': '#8e44ad', 'Bundesliga': '#f39c12', '2. Bundesliga': '#e67e22',
-      'Serie A': '#2ecc71', 'Serie B': '#e67e22', 'Serie C': '#2980b9',
+      'Serie A': '#2ecc71', 'Serie B': '#e67e22',
+      'Serie C - Girone A': '#2980b9', 'Serie C - Girone B': '#27ae60', 'Serie C - Girone C': '#c0392b',
       'J1 League': '#e74c3c', 'Eerste Divisie': '#e67e22', 'Eredivisie': '#e74c3c',
       'Primeira Liga': '#34495e', 'Scottish Premiership': '#2ecc71', 'K League 1': '#3498db', 'La Liga': '#e74c3c',
       'Segunda División': '#e67e22', 'Süper Lig': '#e67e22'
@@ -338,9 +339,10 @@
 
     const CHAMPIONSHIP_LIST = window.CHAMPIONSHIP_LIST || [
       'UEFA Champions League', 'UEFA Europa League', 'UEFA Europa Conference', 'UEFA Nations League',
-      'Jupiler Pro League', 'Premier League', 'Championship',
+      'Jupiler Pro League', 'Premier League', 'EFL Championship',
       'Ligue 1', 'Ligue 2', 'Bundesliga', '2. Bundesliga',
-      'Serie A', 'Serie B', 'Serie C',
+      'Serie A', 'Serie B',
+      'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C',
       'J1 League', 'Eerste Divisie', 'Eredivisie', 'Primeira Liga',
       'Scottish Premiership', 'K League 1', 'La Liga', 'Segunda División', 'Süper Lig',
     ];
@@ -449,7 +451,6 @@
 
     // ============================================================
     // TEAM LOGO
-    // ⭐ Con sfondo chiaro per campionati (coppe UEFA scure)
     // ============================================================
     const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
       const [hasError, setHasError] = useState(false);
@@ -460,14 +461,11 @@
         return name.trim().toLowerCase() === champ.trim().toLowerCase();
       };
 
-      // ⭐ Campionati con loghi scuri → sfondo chiaro per farli vedere
       const isCampionatoScuro = (champ) => {
         if (!champ) return false;
         const c = champ.toLowerCase();
-        // Coppe UEFA (loghi blu/verde/arancio scuri)
         if (c.includes('uefa') || c.includes('champions') || c.includes('europa') || c.includes('conference') || c.includes('nations')) return true;
-        // Campionati con loghi scuri
-        if (c === 'championship' || c.includes('eredivisie') || c.includes('primeira')) return true;
+        if (c === 'efl championship' || c.includes('eredivisie') || c.includes('primeira')) return true;
         return false;
       };
 
@@ -491,42 +489,92 @@
         ];
       };
 
-    const getLeagueFolder = (champ) => {
-  if (!champ) return '';
-  const map = {
-    'Jupiler Pro League': 'Jupiler_Pro_League',
-    'Premier League': 'Premier_League',
-    'EFL Championship': 'Championship',
-    'Ligue 1': 'Ligue_1',
-    'Ligue 2': 'Ligue_2',
-    'Bundesliga': 'Bundesliga',
-    '2. Bundesliga': '2. Bundesliga',
-    'Serie A': 'Serie_A',
-    'Serie B': 'Serie_B',
-    'Serie C - Girone A': 'Serie_C_Girone_A',      // ⭐ cartella reale
-    'Serie C - Girone B': 'Serie_C_Girone_B',      // ⭐ cartella reale
-    'Serie C - Girone C': 'Serie_C_Girone_C',      // ⭐ cartella reale
-    'J1 League': 'J1_League',
-    'Eredivisie': 'Eredivisie',
-    'Eerste Divisie': 'Eerste_Divisie',
-    'Primeira Liga': 'Primeira_Liga',
-    'Scottish Premiership': 'Scottish_Premiership',
-    'K League 1': 'K_League_1',
-    'La Liga': 'La_Liga',
-    'Segunda División': 'Segunda_Division',
-    'Süper Lig': 'Super_Lig',
-    // ⭐ COPPE UEFA → TUTTE puntano a Champions_League
-    'UEFA Champions League': 'Champions_League',
-    'UEFA Europa League': 'Champions_League',      // fallback
-    'UEFA Europa Conference': 'Champions_League',  // fallback
-    'UEFA Nations League': 'Champions_League',     // fallback
-  };
-  return map[champ] || champ.replace(/ /g, '_');
-};
+      // ⭐ Mappatura cartelle (con nomi reali del repo)
+      const getLeagueFolder = (champ) => {
+        if (!champ) return '';
+        const map = {
+          'Jupiler Pro League': 'Jupiler_Pro_League',
+          'Premier League': 'Premier_League',
+          'EFL Championship': 'Championship',
+          'Ligue 1': 'Ligue_1',
+          'Ligue 2': 'Ligue_2',
+          'Bundesliga': 'Bundesliga',
+          '2. Bundesliga': '2. Bundesliga',
+          'Serie A': 'Serie_A',
+          'Serie B': 'Serie_B',
+          'Serie C - Girone A': 'Serie_C_Girone_A',
+          'Serie C - Girone B': 'Serie_C_Girone_B',
+          'Serie C - Girone C': 'Serie_C_Girone_C',
+          'J1 League': 'J1_League',
+          'Eredivisie': 'Eredivisie',
+          'Eerste Divisie': 'Eerste_Divisie',
+          'Primeira Liga': 'Primeira_Liga',
+          'Scottish Premiership': 'Scottish_Premiership',
+          'K League 1': 'K_League_1',
+          'La Liga': 'La_Liga',
+          'Segunda División': 'Segunda_Division',
+          'Süper Lig': 'Super_Lig',
+          // ⭐ Coppe UEFA → Champions_League (unica cartella)
+          'UEFA Champions League': 'Champions_League',
+          'UEFA Europa League': 'Champions_League',
+          'UEFA Europa Conference': 'Champions_League',
+          'UEFA Nations League': 'Champions_League',
+        };
+        return map[champ] || champ.replace(/ /g, '_');
+      };
+
+      // ⭐ Cartelle nazionali (per cercare squadre di coppe UEFA)
+      const CARTELLE_NAZIONALI = [
+        'Jupiler_Pro_League',
+        'Premier_League',
+        'Championship',
+        'Ligue_1',
+        'Ligue_2',
+        'Bundesliga',
+        '2. Bundesliga',
+        'Serie_A',
+        'Serie_B',
+        'Serie_C_Girone_A',
+        'Serie_C_Girone_B',
+        'Serie_C_Girone_C',
+        'J1_League',
+        'Eredivisie',
+        'Eerste_Divisie',
+        'Primeira_Liga',
+        'Scottish_Premiership',
+        'K_League_1',
+        'La_Liga',
+        'Segunda_Division',
+        'Super_Lig',
+      ];
+
+      const isCoppaUEFA = (champ) => {
+        if (!champ) return false;
+        const c = champ.toLowerCase();
+        return c.includes('uefa') || c.includes('champions') || c.includes('europa') || c.includes('conference') || c.includes('nations');
+      };
 
       const getTeamPaths = (teamName, champ) => {
-        const leagueFolder = getLeagueFolder(champ);
         const withUnderscore = teamName.replace(/\s+/g, '_');
+
+        if (isCoppaUEFA(champ)) {
+          // ⭐ Cerca in Champions_League PRIMA, poi nelle nazionali
+          const paths = [
+            `logos/Champions_League/${teamName}.png`,
+            `logos/Champions_League/${withUnderscore}.png`,
+            `logos/Champions_League/${teamName}.jpg`,
+            `logos/Champions_League/${withUnderscore}.jpg`,
+          ];
+          CARTELLE_NAZIONALI.forEach(folder => {
+            paths.push(`logos/${folder}/${teamName}.png`);
+            paths.push(`logos/${folder}/${withUnderscore}.png`);
+            paths.push(`logos/${folder}/${teamName}.jpg`);
+            paths.push(`logos/${folder}/${withUnderscore}.jpg`);
+          });
+          return paths;
+        }
+
+        const leagueFolder = getLeagueFolder(champ);
         return [
           `logos/${leagueFolder}/${teamName}.png`,
           `logos/${leagueFolder}/${withUnderscore}.png`,
@@ -573,36 +621,45 @@
       }
 
       const currentSrc = paths[pathIndex];
-
-      // ⭐ Applica sfondo chiaro se il campionato ha loghi scuri
       const needsLightBg = isCampionatoScuro(championship);
 
       return (
-        <img
-          key={currentSrc}
-          src={currentSrc}
-          alt={teamName}
-          width={size}
-          height={size}
-          style={{
-            width: size + 'px', height: size + 'px',
-            maxWidth: size + 'px', maxHeight: size + 'px',
-            objectFit: 'contain', display: 'block',
-            borderRadius: '4px', flexShrink: 0,
-            // ⭐ Sfondo chiaro per loghi scuri (coppe UEFA, ecc.)
-            backgroundColor: needsLightBg ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
-            padding: needsLightBg ? '2px' : '0',
-            boxSizing: 'border-box',
-          }}
-          className={`team-logo ${className}`}
-          onError={() => {
-            if (pathIndex + 1 < paths.length) {
-              setPathIndex(pathIndex + 1);
-            } else {
-              setHasError(true);
-            }
-          }}
-        />
+        <div style={{
+          width: size,
+          height: size,
+          maxWidth: size,
+          maxHeight: size,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          borderRadius: '4px',
+          backgroundColor: needsLightBg ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
+          padding: needsLightBg ? '2px' : '0',
+          boxSizing: 'border-box',
+        }}>
+          <img
+            key={currentSrc}
+            src={currentSrc}
+            alt={teamName}
+            width={size}
+            height={size}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              display: 'block',
+            }}
+            className={`team-logo ${className}`}
+            onError={() => {
+              if (pathIndex + 1 < paths.length) {
+                setPathIndex(pathIndex + 1);
+              } else {
+                setHasError(true);
+              }
+            }}
+          />
+        </div>
       );
     };
 
@@ -629,7 +686,7 @@
     const DEFAULT_FAMIGLIE = ['dc_under', 'mg_casa_ospite', 'over'];
 
     // ============================================================
-    // CALCOLI (identici a prima)
+    // CALCOLI (identici)
     // ============================================================
     const calcolaStatsSquadra = (games, team, isHomeTeam) => {
       const total = games.length;
@@ -1041,11 +1098,10 @@
     window.get12Under45 = get12Under45;
     window.normalizzaAccenti = normalizzaAccenti;
 
-    console.log('✅ Funzioni globali esposte v13 - ' + CHAMPIONSHIP_LIST.length + ' campionati, logo con sfondo chiaro');
+    console.log('✅ Funzioni globali esposte v14 - ' + CHAMPIONSHIP_LIST.length + ' campionati');
 
     // ============================================================
     // LOAD/SAVE STATE
-    // ⭐ saveState salva SOLO partite future (evita localStorage pieno)
     // ============================================================
     const loadState = () => {
       try {
@@ -1069,10 +1125,8 @@
     };
 
     const saveState = (data) => {
-      // Campionati: salva tutti
       try { localStorage.setItem('ft_champs', JSON.stringify(data.championships)); } catch (e) { console.warn('⚠️ localStorage pieno (champs)'); }
 
-      // ⭐ Partite: salva SOLO le future (per evitare localStorage pieno)
       try {
         const oggi = getTodayStr();
         const partiteFuture = (data.matches || []).filter(m => {
@@ -1134,7 +1188,6 @@
         return saved ? parseInt(saved) : 100;
       });
 
-      // ⭐ FIX LOOP: refs per evitare ricariche/salvataggi infiniti
       const hasLoadedRef = useRef(false);
       const saveTimeoutRef = useRef(null);
 
@@ -1144,7 +1197,6 @@
         }
       }, []);
 
-      // ⭐ FIX LOOP: carica dati UNA SOLA VOLTA al mount
       useEffect(() => {
         if (hasLoadedRef.current) return;
         hasLoadedRef.current = true;
@@ -1183,7 +1235,6 @@
         }
       }, [selectedMatchId, matches]);
 
-      // ⭐ FIX LOOP: salva con debounce 5s
       useEffect(() => {
         if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
         saveTimeoutRef.current = setTimeout(() => {
@@ -1194,37 +1245,23 @@
         };
       }, [championships, matches, theme, customTheme, selectedFamiglie]);
 
- useEffect(() => {
-  const t = theme === 'Custom' ? customTheme : THEMES[theme] || THEMES['Scuro Blu Notte'];
-  const root = document.documentElement;
-  Object.entries(t).forEach(([k, v]) => {
-    root.style.setProperty(`--${k.replace(/([A-Z])/g, '-$1').toLowerCase()}`, v);
-  });
+      // ⭐ TEMA: applica variabili + data-theme + forza background
+      useEffect(() => {
+        const t = theme === 'Custom' ? customTheme : THEMES[theme] || THEMES['Scuro Blu Notte'];
+        const root = document.documentElement;
+        Object.entries(t).forEach(([k, v]) => {
+          root.style.setProperty(`--${k.replace(/([A-Z])/g, '-$1').toLowerCase()}`, v);
+        });
 
-  // ⭐ FORZA background su body/html/app-shell/container
-  // (sovrascrive il CSS hardcoded di styles-futuristic.css)
-  document.body.style.background = t.bg;
-  document.body.style.backgroundColor = t.bg;
-  document.body.style.color = t.text;
+        // ⭐ Imposta data-theme per il CSS AI-Neon
+        const isLight = theme === 'Chiaro' || theme === 'Ghiaccio';
+        document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
 
-  document.documentElement.style.background = t.bg;
-  document.documentElement.style.backgroundColor = t.bg;
-  document.documentElement.style.color = t.text;
-
-  // Forza anche gli elementi principali
-  const selettori = ['.app-shell', '.container', '#root', '.header', '.tabs-nav', '.schedina-container'];
-  selettori.forEach(sel => {
-    document.querySelectorAll(sel).forEach(el => {
-      el.style.background = t.bg;
-      el.style.backgroundColor = t.bg;
-      el.style.color = t.text;
-    });
-  });
-
-  // ⭐ Salva anche in localStorage per il prossimo reload
-  localStorage.setItem('ft_theme', JSON.stringify(theme));
-  localStorage.setItem('ft_custom_theme', JSON.stringify(customTheme));
-}, [theme, customTheme]);
+        // ⭐ Forza background del body in base al tema
+        document.body.style.background = t.bg;
+        document.body.style.color = t.text;
+        document.body.style.backgroundAttachment = 'fixed';
+      }, [theme, customTheme]);
 
       useEffect(() => {
         document.documentElement.style.fontSize = (fontSize / 100 * 16) + 'px';
@@ -1395,7 +1432,6 @@
 
     // ============================================================
     // BOOT
-    // ⭐ NIENTE removeItem, NIENTE loadScrapedData(true)
     // ============================================================
     console.log('🚀 Avvio GesssAI-Pro v5.0');
 
