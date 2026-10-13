@@ -1,59 +1,46 @@
 // ============================================================
 // campionati-config.js
+// v2: allineato ai nomi esatti del database (Championship, Serie C)
 // ============================================================
 
-window.CHAMPIONSHIP_LIST = [
-  'UEFA Champions League',
-  'UEFA Europa League',
-  'UEFA Europa Conference',
-  'UEFA Nations League',
-  'Jupiler Pro League',
-  'Premier League',
-  'Championship',
-  'Ligue 1',
-  'Ligue 2',
-  'Bundesliga',
-  '2. Bundesliga',
-  'Serie A',
-  'Serie B',
-  'Serie C',
-  'J1 League',
-  'Eerste Divisie',
-  'Eredivisie',
-  'Primeira Liga',
-  'Scottish Premiership',
-  'K League 1',
-  'La Liga',
-  'Segunda División',
-  'Süper Lig',
-];
-
-window.CHAMPIONSHIP_COLORS = {
-  'UEFA Champions League':   '#1a1aff',
-  'UEFA Europa League':      '#ff6600',
-  'UEFA Europa Conference':  '#00b894',
-  'UEFA Nations League':     '#003399',
-  'Jupiler Pro League': '#e74c3c',
-  'Premier League': '#3498db',
-  'Championship': '#6c3483',
-  'Ligue 1': '#9b59b6',
-  'Ligue 2': '#8e44ad',
-  'Bundesliga': '#f39c12',
-  '2. Bundesliga': '#e67e22',
-  'Serie A': '#2ecc71',
-  'Serie B': '#e67e22',
-  'Serie C': '#2980b9',
-  'J1 League': '#e74c3c',
-  'Eerste Divisie': '#e67e22',
-  'Eredivisie': '#e74c3c',
-  'Primeira Liga': '#34495e',
-  'Scottish Premiership': '#2ecc71',
-  'K League 1': '#3498db',
-  'La Liga': '#e74c3c',
-  'Segunda División': '#e67e22',
-  'Süper Lig': '#e67e22',
+const getLeagueFolder = (champ) => {
+  if (!champ) return '';
+  const map = {
+    'Jupiler Pro League': 'Jupiler_Pro_League',
+    'Premier League': 'Premier_League',
+    'Championship': 'Championship',                    // ⭐ nome breve
+    'Ligue 1': 'Ligue_1',
+    'Ligue 2': 'Ligue_2',
+    'Bundesliga': 'Bundesliga',
+    '2. Bundesliga': '2. Bundesliga',
+    'Serie A': 'Serie_A',
+    'Serie B': 'Serie_B',
+    'Serie C - Girone A': 'Serie_C_Girone_A',
+    'Serie C - Girone B': 'Serie_C_Girone_B',
+    'Serie C - Girone C': 'Serie_C_Girone_C',
+    // Varianti senza trattino (fallback)
+    'Serie C Girone A': 'Serie_C_Girone_A',
+    'Serie C Girone B': 'Serie_C_Girone_B',
+    'Serie C Girone C': 'Serie_C_Girone_C',
+    'Serie C A': 'Serie_C_Girone_A',
+    'Serie C B': 'Serie_C_Girone_B',
+    'Serie C C': 'Serie_C_Girone_C',
+    'J1 League': 'J1_League',
+    'Eredivisie': 'Eredivisie',
+    'Eerste Divisie': 'Eerste_Divisie',
+    'Primeira Liga': 'Primeira_Liga',
+    'Scottish Premiership': 'Scottish_Premiership',
+    'K League 1': 'K_League_1',
+    'La Liga': 'La_Liga',
+    'Segunda División': 'Segunda_Division',
+    'Segunda Division': 'Segunda_Division',
+    'Süper Lig': 'Super_Lig',
+    'Super Lig': 'Super_Lig',
+    'UEFA Champions League': 'UEFA_Champions_League',
+    'UEFA Europa League': 'UEFA_Europa_League',
+    'UEFA Europa Conference': 'UEFA_Europa_Conference',
+    'UEFA Europa Conference League': 'UEFA_Europa_Conference',
+    'UEFA Nations League': 'UEFA_Nations_League',
+  };
+  return map[champ] || champ.replace(/ /g, '_');
 };
-
-window.CAMPIONATI_ESCLUSI = new Set([]);
-
-console.log('✅ campionati-config.js caricato - ' + window.CHAMPIONSHIP_LIST.length + ' campionati configurati');

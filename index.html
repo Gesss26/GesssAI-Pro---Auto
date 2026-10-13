@@ -313,29 +313,72 @@
 
     const MAIN_TABS = ['Home', 'Palinsesto', 'Statistiche', 'Storico', 'Schedina', 'Impostazioni'];
 
+    // ============================================================
+    // ⭐ CHAMPIONSHIP_COLORS — allineato ai nomi esatti del DB
+    // ============================================================
     const CHAMPIONSHIP_COLORS = {
       'UEFA Champions League':   '#1a1aff',
       'UEFA Europa League':      '#ff6600',
       'UEFA Europa Conference':  '#00b894',
+      'UEFA Europa Conference League': '#00b894',
       'UEFA Nations League':     '#003399',
-      'Jupiler Pro League': '#e74c3c',
-      'Premier League': '#3498db', 'EFL Championship': '#6c3483',
-      'Ligue 1': '#9b59b6', 'Ligue 2': '#8e44ad', 'Bundesliga': '#f39c12', '2. Bundesliga': '#e67e22',
-      'Serie A': '#2ecc71', 'Serie B': '#e67e22',
-      'Serie C - Girone A': '#2980b9', 'Serie C - Girone B': '#27ae60', 'Serie C - Girone C': '#c0392b',
-      'J1 League': '#e74c3c', 'Eerste Divisie': '#e67e22', 'Eredivisie': '#e74c3c',
-      'Primeira Liga': '#34495e', 'Scottish Premiership': '#2ecc71', 'K League 1': '#3498db', 'La Liga': '#e74c3c',
-      'Segunda División': '#e67e22', 'Süper Lig': '#e67e22'
+      'Jupiler Pro League':      '#e74c3c',
+      'Premier League':          '#3498db',
+      'Championship':            '#6c3483',        // ⭐ nome breve (era 'EFL Championship')
+      'Ligue 1':                 '#9b59b6',
+      'Ligue 2':                 '#8e44ad',
+      'Bundesliga':              '#f39c12',
+      '2. Bundesliga':           '#e67e22',
+      'Serie A':                 '#2ecc71',
+      'Serie B':                 '#e67e22',
+      'Serie C - Girone A':      '#2980b9',
+      'Serie C - Girone B':      '#27ae60',
+      'Serie C - Girone C':      '#c0392b',
+      'Serie C Girone A':        '#2980b9',        // ⭐ fallback senza trattino
+      'Serie C Girone B':        '#27ae60',
+      'Serie C Girone C':        '#c0392b',
+      'J1 League':               '#e74c3c',
+      'Eerste Divisie':          '#e67e22',
+      'Eredivisie':              '#e74c3c',
+      'Primeira Liga':           '#34495e',
+      'Scottish Premiership':    '#2ecc71',
+      'K League 1':              '#3498db',
+      'La Liga':                 '#e74c3c',
+      'Segunda División':        '#e67e22',
+      'Segunda Division':        '#e67e22',        // ⭐ fallback senza accento
+      'Süper Lig':               '#e67e22',
+      'Super Lig':               '#e67e22',        // ⭐ fallback senza umlaut
     };
 
+    // ============================================================
+    // ⭐ CHAMPIONSHIP_LIST — allineata al database
+    // ============================================================
     const CHAMPIONSHIP_LIST = window.CHAMPIONSHIP_LIST || [
-      'UEFA Champions League', 'UEFA Europa League', 'UEFA Europa Conference', 'UEFA Nations League',
-      'Jupiler Pro League', 'Premier League', 'EFL Championship',
-      'Ligue 1', 'Ligue 2', 'Bundesliga', '2. Bundesliga',
-      'Serie A', 'Serie B',
-      'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C',
-      'J1 League', 'Eerste Divisie', 'Eredivisie', 'Primeira Liga',
-      'Scottish Premiership', 'K League 1', 'La Liga', 'Segunda División', 'Süper Lig',
+      'UEFA Champions League',
+      'UEFA Europa League',
+      'UEFA Europa Conference',
+      'UEFA Nations League',
+      'Jupiler Pro League',
+      'Premier League',
+      'Championship',                            // ⭐ nome breve
+      'Ligue 1',
+      'Ligue 2',
+      'Bundesliga',
+      '2. Bundesliga',
+      'Serie A',
+      'Serie B',
+      'Serie C - Girone A',
+      'Serie C - Girone B',
+      'Serie C - Girone C',
+      'J1 League',
+      'Eerste Divisie',
+      'Eredivisie',
+      'Primeira Liga',
+      'Scottish Premiership',
+      'K League 1',
+      'La Liga',
+      'Segunda División',
+      'Süper Lig',
     ];
 
     // ============================================================
@@ -363,6 +406,16 @@
       if (dateStr.match(/^\d{4}-\d{2}-\d{2}/)) return dateStr;
       if (dateStr.match(/^\d{2}\/\d{2}\/\d{4}/)) {
         const parts = dateStr.split('/');
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+      }
+      // ⭐ Formato DD-MM-YYYY (con trattini)
+      if (dateStr.match(/^\d{2}-\d{2}-\d{4}/)) {
+        const parts = dateStr.split('-');
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+      }
+      // ⭐ Formato DD.MM.YYYY (con punti)
+      if (dateStr.match(/^\d{2}\.\d{2}\.\d{4}/)) {
+        const parts = dateStr.split('.');
         return `${parts[2]}-${parts[1]}-${parts[0]}`;
       }
       try {
@@ -456,7 +509,7 @@
         if (!champ) return false;
         const c = champ.toLowerCase();
         if (c.includes('uefa') || c.includes('champions') || c.includes('europa') || c.includes('conference') || c.includes('nations')) return true;
-        if (c === 'efl championship' || c.includes('eredivisie') || c.includes('primeira')) return true;
+        if (c === 'championship' || c.includes('eredivisie') || c.includes('primeira')) return true;
         return false;
       };
 
@@ -485,7 +538,7 @@
         const map = {
           'Jupiler Pro League': 'Jupiler_Pro_League',
           'Premier League': 'Premier_League',
-          'EFL Championship': 'Championship',
+          'Championship': 'Championship',
           'Ligue 1': 'Ligue_1',
           'Ligue 2': 'Ligue_2',
           'Bundesliga': 'Bundesliga',
@@ -495,6 +548,9 @@
           'Serie C - Girone A': 'Serie_C_Girone_A',
           'Serie C - Girone B': 'Serie_C_Girone_B',
           'Serie C - Girone C': 'Serie_C_Girone_C',
+          'Serie C Girone A': 'Serie_C_Girone_A',
+          'Serie C Girone B': 'Serie_C_Girone_B',
+          'Serie C Girone C': 'Serie_C_Girone_C',
           'J1 League': 'J1_League',
           'Eredivisie': 'Eredivisie',
           'Eerste Divisie': 'Eerste_Divisie',
@@ -503,10 +559,13 @@
           'K League 1': 'K_League_1',
           'La Liga': 'La_Liga',
           'Segunda División': 'Segunda_Division',
+          'Segunda Division': 'Segunda_Division',
           'Süper Lig': 'Super_Lig',
+          'Super Lig': 'Super_Lig',
           'UEFA Champions League': 'Champions_League',
           'UEFA Europa League': 'Champions_League',
           'UEFA Europa Conference': 'Champions_League',
+          'UEFA Europa Conference League': 'Champions_League',
           'UEFA Nations League': 'Champions_League',
         };
         return map[champ] || champ.replace(/ /g, '_');
@@ -673,7 +732,7 @@
     const DEFAULT_FAMIGLIE = ['dc_under', 'mg_casa_ospite', 'over'];
 
     // ============================================================
-    // CALCOLI (identici)
+    // CALCOLI
     // ============================================================
     const calcolaStatsSquadra = (games, team, isHomeTeam) => {
       const total = games.length;
@@ -1085,17 +1144,16 @@
     window.get12Under45 = get12Under45;
     window.normalizzaAccenti = normalizzaAccenti;
 
-    console.log('✅ Funzioni globali esposte v15 - ' + CHAMPIONSHIP_LIST.length + ' campionati');
+    console.log('✅ Funzioni globali esposte v16 - ' + CHAMPIONSHIP_LIST.length + ' campionati (Championship + Serie C allineati)');
 
     // ============================================================
     // LOAD/SAVE STATE
-    // ⭐ NO MATCHES in localStorage: sempre ricaricati dal file Excel
     // ============================================================
     const loadState = () => {
       try {
         const localData = {
           championships: JSON.parse(localStorage.getItem('ft_champs') || '[]'),
-          matches: [],   // ⭐ SEMPRE VUOTO. Verrà popolato da loadScrapedData().
+          matches: [],
           theme: JSON.parse(localStorage.getItem('ft_theme') || '"Scuro Blu Notte"'),
           customTheme: JSON.parse(localStorage.getItem('ft_custom_theme') || 'null'),
           selectedFamiglie: JSON.parse(localStorage.getItem('ft_selected_famiglie') || '["dc_under","mg_casa_ospite","over"]'),
@@ -1113,10 +1171,6 @@
 
     const saveState = (data) => {
       try { localStorage.setItem('ft_champs', JSON.stringify(data.championships)); } catch (e) { console.warn('⚠️ localStorage pieno (champs)'); }
-
-      // ⭐ NON salviamo i matches in localStorage! Sono dati derivati dal file Excel.
-      // Vengono ricaricati ogni volta da loadScrapedData().
-
       try { localStorage.setItem('ft_theme', JSON.stringify(data.theme)); } catch (e) {}
       try { localStorage.setItem('ft_custom_theme', JSON.stringify(data.customTheme)); } catch (e) {}
       try { localStorage.setItem('ft_selected_famiglie', JSON.stringify(data.selectedFamiglie || ['dc_under', 'mg_casa_ospite', 'over'])); } catch (e) {}
@@ -1169,13 +1223,21 @@
       const hasLoadedRef = useRef(false);
       const saveTimeoutRef = useRef(null);
 
+      // ⭐ ESPONE matches E championships GLOBALMENTE per debug
+      useEffect(() => {
+        window.matches = matches;
+        window.championships = championships;
+        if (matches.length > 0) {
+          console.log('🔍 Debug: window.matches esposti globalmente →', matches.length, 'partite');
+        }
+      }, [matches, championships]);
+
       useEffect(() => {
         if (window.QuoteManager && typeof window.QuoteManager.initAutoDownload === 'function') {
           window.QuoteManager.initAutoDownload();
         }
       }, []);
 
-      // ⭐ Carica dati UNA SOLA VOLTA al mount
       useEffect(() => {
         if (hasLoadedRef.current) return;
         hasLoadedRef.current = true;
@@ -1209,7 +1271,6 @@
         }
       }, [selectedMatchId, matches]);
 
-      // ⭐ Salva con debounce 5s (solo championships, theme, customTheme, selectedFamiglie)
       useEffect(() => {
         if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
         saveTimeoutRef.current = setTimeout(() => {
@@ -1220,7 +1281,6 @@
         };
       }, [championships, matches, theme, customTheme, selectedFamiglie]);
 
-      // ⭐ TEMA: applica variabili + data-theme + forza background
       useEffect(() => {
         const t = theme === 'Custom' ? customTheme : THEMES[theme] || THEMES['Scuro Blu Notte'];
         const root = document.documentElement;
@@ -1416,6 +1476,36 @@
     } catch (e) {
       console.error('Errore durante il rendering React:', e);
     }
+
+    // ============================================================
+    // ⭐ LOG DIAGNOSTICO AUTOMATICO
+    // Confronta i campionati del DB con la CHAMPIONSHIP_LIST
+    // ============================================================
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        if (!window.matches || !Array.isArray(window.matches) || window.matches.length === 0) {
+          console.warn('⚠️ Log diagnostico: window.matches non ancora disponibile (attendi il caricamento Excel)');
+          return;
+        }
+        const dbChamps = [...new Set(window.matches.map(m => m.campionato))].sort();
+        const listChamps = [...CHAMPIONSHIP_LIST].sort();
+        const mancanti = dbChamps.filter(c => !listChamps.includes(c));
+        const orfani = listChamps.filter(c => !dbChamps.includes(c));
+
+        console.log('%c📊 DIAGNOSTICA CAMPIONATI', 'color: #00f5ff; font-weight: bold; font-size: 14px;');
+        console.log('   Campionati nel DB (' + dbChamps.length + '):', dbChamps);
+        console.log('   Campionati nella LISTA (' + listChamps.length + '):', listChamps);
+        if (mancanti.length > 0) {
+          console.warn('❌ Nel DB ma NON nella lista (DA AGGIUNGERE a CHAMPIONSHIP_LIST):', mancanti);
+        } else {
+          console.log('%c✅ Tutti i campionati del DB sono presenti nella lista', 'color: #00ff88;');
+        }
+        if (orfani.length > 0) {
+          console.info('ℹ️ Nella lista ma NON nel DB (fallback, non problematico):', orfani);
+        }
+      }, 5000);
+    }, { once: true });
+
   </script>
 </body>
 </html>

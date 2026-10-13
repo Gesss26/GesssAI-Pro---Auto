@@ -1,6 +1,7 @@
 // ============================================================
 // home.js - Modulo Home (FUTURISTIC + bottoni cyan pieni + Tutti/Deseleziona)
-// v7: bottoni nazioni sempre cyan, rimosso switch Calcolate/Scelte
+// v8: Championship + Serie C allineati ai nomi esatti del DB
+//     + fallback per Süper Lig, Segunda, UEFA Conference
 // ============================================================
 
 (function () {
@@ -114,11 +115,15 @@
     document.head.appendChild(style);
   })();
 
+  // ============================================================
+  // ⭐ NAZIONI — allineate ai nomi esatti del database
+  // ============================================================
   const NAZIONI = {
     'Coppe UEFA': { file: 'uefa.png', campionati: [
       'UEFA Champions League',
       'UEFA Europa League',
       'UEFA Europa Conference',
+      'UEFA Europa Conference League',   // ⭐ fallback nome lungo
       'UEFA Nations League',
     ]},
     'Belgio':      { file: 'belgio.png',      campionati: ['Jupiler Pro League'] },
@@ -126,13 +131,18 @@
     'Francia':     { file: 'francia.png',     campionati: ['Ligue 1', 'Ligue 2'] },
     'Germania':    { file: 'germania.png',    campionati: ['Bundesliga', '2. Bundesliga'] },
     'Giappone':    { file: 'giappone.png',    campionati: ['J1 League'] },
-    'Inghilterra': { file: 'inghilterra.png', campionati: ['Premier League', 'EFL Championship'] },
-    'Italia':      { file: 'italia.png',      campionati: ['Serie A', 'Serie B', 'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C'] },
+    'Inghilterra': { file: 'inghilterra.png', campionati: ['Premier League', 'Championship'] },  // ⭐ Championship
+    'Italia':      { file: 'italia.png',      campionati: [
+      'Serie A',
+      'Serie B',
+      'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C',      // ⭐ con trattino
+      'Serie C Girone A',   'Serie C Girone B',   'Serie C Girone C',        // ⭐ fallback senza trattino
+    ]},
     'Olanda':      { file: 'olanda.png',      campionati: ['Eredivisie', 'Eerste Divisie'] },
     'Portogallo':  { file: 'portogallo.png',  campionati: ['Primeira Liga'] },
     'Scozia':      { file: 'scozia.png',      campionati: ['Scottish Premiership'] },
-    'Spagna':      { file: 'spagna.png',      campionati: ['La Liga', 'Segunda División'] },
-    'Turchia':     { file: 'turchia.png',     campionati: ['Süper Lig'] },
+    'Spagna':      { file: 'spagna.png',      campionati: ['La Liga', 'Segunda División', 'Segunda Division'] },  // ⭐ fallback
+    'Turchia':     { file: 'turchia.png',     campionati: ['Süper Lig', 'Super Lig'] },  // ⭐ fallback
   };
 
   const NAZIONI_BASE_PATH = 'logos/Nazioni/';
@@ -781,8 +791,7 @@
   };
 
   // ============================================================
-  // GRIGLIA NAZIONI — v7: bottoni sempre cyan pieni (Opzione 1A)
-  // + header con "Seleziona Tutti / Deseleziona Tutti" (Opzione 2A)
+  // GRIGLIA NAZIONI — bottoni sempre cyan pieni
   // ============================================================
   const GrigliaNazioni = ({ matches, onSelectNazione, tipoGiocate, setTipoGiocate }) => {
     const nazioniOrdinate = useMemo(() => Object.keys(NAZIONI).sort((a, b) => a.localeCompare(b)), []);
@@ -815,7 +824,6 @@
     const uefaCampionati = NAZIONI['Coppe UEFA']?.campionati || [];
     const nazioniSenzaUEFA = nazioniOrdinate.filter(n => n !== 'Coppe UEFA');
 
-    // ⭐ Stile bottone SEMPRE cyan pieno (Opzione 1A)
     const bottoneSempreCyanStyle = {
       display: 'flex',
       flexDirection: 'column',
@@ -867,8 +875,6 @@
       boxShadow: '0 0 20px rgba(0, 245, 255, 0.4)',
     };
 
-    // ⭐ Stato "Tutti selezionati" per header
-    const tutteNazioniAttive = nazioniSenzaUEFA.length > 0;
     const [tutteAttive, setTutteAttive] = useState(true);
 
     return (
@@ -909,7 +915,7 @@
           </div>
         </div>
 
-        {/* ⭐ RIGA SPECIALE: COPPE UEFA — bottoni sempre cyan */}
+        {/* RIGA SPECIALE: COPPE UEFA */}
         <div style={{
           marginBottom: '20px',
           padding: '12px 14px',
@@ -977,7 +983,7 @@
           </div>
         </div>
 
-        {/* ⭐ GRIGLIA NAZIONI — bottoni sempre cyan (Opzione 1A) */}
+        {/* GRIGLIA NAZIONI */}
         <div className="nazioni-grid" style={{ gap: '8px' }}>
           {nazioniSenzaUEFA.map(naz => {
             const disabled = conteggi[naz] === 0 || !tutteAttive;
@@ -1020,7 +1026,7 @@
   };
 
   // ============================================================
-  // CALCOLATRICE (invariata)
+  // CALCOLATRICE
   // ============================================================
   const CalcolatriceComponent = ({ matches }) => {
     const [campionatoSel, setCampionatoSel] = useState('');
@@ -1500,7 +1506,6 @@
           <button className={homeTab === 'Calcolatrice' ? 'active' : ''} onClick={() => { setHomeTab('Calcolatrice'); setNazioneSelezionata(null); setCampionatoMobile(null); }}>🧮 Calcolatrice</button>
         </div>
 
-        {/* ⭐ Rimosso lo switch Calcolate/Scelte (Opzione 2A) */}
         {renderTabContent()}
       </div>
     );
@@ -1515,6 +1520,6 @@
     leggiFamiglieSelezionate, GIOCATE_SELEZIONATE_KEY, FAMIGLIE_SELEZIONATE_KEY,
   };
 
-  console.log('✅ Modulo Home FUTURISTIC v7 caricato (bottoni cyan pieni + Tutti/Deseleziona)');
+  console.log('✅ Modulo Home FUTURISTIC v8 caricato - Championship + Serie C allineati');
 
 })();
