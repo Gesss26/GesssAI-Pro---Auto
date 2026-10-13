@@ -1,7 +1,7 @@
 // ============================================================
 // impostazioni.js
 // Tab: Temi | Giocate | Gestione Utenti | Grandezza Caratteri | Visuale
-// ✅ v2: sub-tab stilizzati + sync famiglie con Home.js
+// ✅ v3: aggiunto switch "Chiaro/Scuro" nella sezione Temi
 // ============================================================
 
 (function () {
@@ -14,6 +14,10 @@
   // ============================================================
   const GIOCATE_SELEZIONATE_KEY = 'ft_giocate_selezionate';
   const FAMIGLIE_SELEZIONATE_KEY = 'ft_selected_famiglie';
+
+  // ⭐ Temi scuri e chiari (per lo switch)
+  const TEMI_SCURI = ['Scuro Blu Notte', 'Tramonto', 'Neon', 'Calcio'];
+  const TEMI_CHIARI = ['Chiaro', 'Ghiaccio'];
 
   // ============================================================
   // SUB-TABS STILIZZATI (FUTURISTIC)
@@ -99,7 +103,6 @@
     const DEFAULT_FAMIGLIE = window.DEFAULT_FAMIGLIE;
     const [tempSelected, setTempSelected] = useState(selectedFamiglie);
 
-    // ⭐ Sincronizza tempSelected quando cambiano le famiglie dall'esterno
     useEffect(() => {
       setTempSelected(selectedFamiglie);
     }, [selectedFamiglie]);
@@ -117,38 +120,31 @@
 
     const isActive = (id) => tempSelected.includes(id);
 
-    // ⭐ Conferma E salva su localStorage + dispatch evento per Home.js
     const confirmFamiglie = () => {
       if (tempSelected.length === 0) {
         showAlert('error', '⚠️ Seleziona almeno una famiglia!');
         return;
       }
       setSelectedFamiglie(tempSelected);
-
-      // Salva in localStorage per Home.js
       try {
         localStorage.setItem(FAMIGLIE_SELEZIONATE_KEY, JSON.stringify(tempSelected));
         window.dispatchEvent(new CustomEvent('giocate-selezionate-updated', { detail: tempSelected }));
       } catch (e) {
         console.warn('⚠️ Errore salvataggio famiglie:', e);
       }
-
       const names = tempSelected.map(id => FAMIGLIE_GIOCATE[id].label);
       showAlert('success', `✅ Famiglie: ${names.join(', ')}`);
     };
 
-    // ⭐ Reset al default + salva su localStorage
     const resetToDefault = () => {
       setTempSelected(DEFAULT_FAMIGLIE);
       setSelectedFamiglie(DEFAULT_FAMIGLIE);
-
       try {
         localStorage.setItem(FAMIGLIE_SELEZIONATE_KEY, JSON.stringify(DEFAULT_FAMIGLIE));
         window.dispatchEvent(new CustomEvent('giocate-selezionate-updated', { detail: DEFAULT_FAMIGLIE }));
       } catch (e) {
         console.warn('⚠️ Errore salvataggio famiglie default:', e);
       }
-
       const names = DEFAULT_FAMIGLIE.map(id => FAMIGLIE_GIOCATE[id].label);
       showAlert('info', `🔄 Ripristinate: ${names.join(', ')}`);
     };
@@ -185,6 +181,94 @@
   };
 
   // ============================================================
+  // ⭐ SWITCH CHIARO/SCURO
+  // ============================================================
+  const SwitchChiaroScuro = ({ theme, setTheme }) => {
+    const isChiaro = TEMI_CHIARI.includes(theme);
+
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '14px',
+        marginBottom: '20px',
+        padding: '14px 18px',
+        background: 'linear-gradient(135deg, rgba(30, 40, 66, 0.7), rgba(20, 27, 46, 0.9))',
+        borderRadius: '14px',
+        border: '2px solid var(--border)',
+        flexWrap: 'wrap',
+      }}>
+        <span style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--text)' }}>
+          🌓 Modalità:
+        </span>
+
+        <div style={{
+          display: 'flex',
+          background: 'var(--bg-deep)',
+          borderRadius: '10px',
+          padding: '4px',
+          border: '1px solid var(--border)',
+          gap: '2px',
+        }}>
+          <button
+            onClick={() => setTheme('Scuro Blu Notte')}
+            style={{
+              padding: '8px 22px',
+              fontSize: '13px',
+              fontWeight: 700,
+              fontFamily: 'Rajdhani, sans-serif',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              borderRadius: '8px',
+              border: 'none',
+              cursor: 'pointer',
+              background: !isChiaro
+                ? 'linear-gradient(135deg, var(--neon-cyan), var(--neon-blue))'
+                : 'transparent',
+              color: !isChiaro ? '#000' : 'var(--text-dim)',
+              transition: 'all 0.2s',
+              boxShadow: !isChiaro ? '0 0 15px rgba(0, 245, 255, 0.5)' : 'none',
+            }}
+          >
+            🌙 Scuro
+          </button>
+          <button
+            onClick={() => setTheme('Chiaro')}
+            style={{
+              padding: '8px 22px',
+              fontSize: '13px',
+              fontWeight: 700,
+              fontFamily: 'Rajdhani, sans-serif',
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              borderRadius: '8px',
+              border: 'none',
+              cursor: 'pointer',
+              background: isChiaro
+                ? 'linear-gradient(135deg, #ffd54f, #ffb300)'
+                : 'transparent',
+              color: isChiaro ? '#000' : 'var(--text-dim)',
+              transition: 'all 0.2s',
+              boxShadow: isChiaro ? '0 0 15px rgba(255, 213, 79, 0.5)' : 'none',
+            }}
+          >
+            ☀️ Chiaro
+          </button>
+        </div>
+
+        <span style={{
+          fontSize: '12px',
+          color: 'var(--text-dim)',
+          fontStyle: 'italic',
+          marginLeft: 'auto',
+        }}>
+          {isChiaro ? '☀️ Tema chiaro attivo' : '🌙 Tema scuro attivo'}
+        </span>
+      </div>
+    );
+  };
+
+  // ============================================================
   // MAIN COMPONENT
   // ============================================================
   function ImpostazioniComponent(props) {
@@ -199,8 +283,6 @@
 
     const [settingsTab, setSettingsTab] = useState('Temi');
 
-    // ⭐ Salva le famiglie selezionate su localStorage ad ogni cambio
-    // (in modo che Home.js le trovi anche prima della conferma)
     useEffect(() => {
       if (!selectedFamiglie || selectedFamiglie.length === 0) return;
       try {
@@ -214,6 +296,9 @@
 
         {settingsTab === 'Temi' && (
           <div>
+            {/* ⭐ SWITCH CHIARO/SCURO */}
+            <SwitchChiaroScuro theme={theme} setTheme={setTheme} />
+
             <h3 style={{ marginBottom: '12px' }}>🎨 Scegli un Tema</h3>
             <div className="theme-grid">
               {Object.entries(THEMES).map(([name, t]) => (
@@ -308,6 +393,6 @@
   window.GIOCATE_SELEZIONATE_KEY = GIOCATE_SELEZIONATE_KEY;
   window.FAMIGLIE_SELEZIONATE_KEY = FAMIGLIE_SELEZIONATE_KEY;
 
-  console.log('✅ Modulo Impostazioni v2 caricato - sub-tab stilizzati + sync famiglie con Home');
+  console.log('✅ Modulo Impostazioni v3 caricato - switch Chiaro/Scuro + sync famiglie');
 
 })();
