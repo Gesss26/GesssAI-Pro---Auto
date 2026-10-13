@@ -1,6 +1,7 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto
-// v3: badge rosso (oggi) / giallo (prossimi 2 giorni) + tutti i campionati
+// v4: filtro giorni (1-7) PRIMA dello switch Scelte/Tutte
+//     + bordi card matches in neon colorato
 // ============================================================
 
 (function () {
@@ -127,6 +128,9 @@
     );
   };
 
+  // ============================================================
+  // MATCH TAB — v4 con bordo neon colorato
+  // ============================================================
   const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie }) => {
     const computeMatchStats = window.computeMatchStats;
     const calcFormAndStats = window.calcFormAndStats;
@@ -207,8 +211,22 @@
     const handleClick = (e) => { e.stopPropagation(); onSelect(match.id); };
     const formattedDate = match.data ? formatDateEU(match.data) : 'N/D';
 
+    // ⭐ Bordo neon colorato (usa colore campionato)
+    const neonBorderStyle = {
+      border: `2px solid ${champColor}`,
+      boxShadow: `0 0 12px ${champColor}88, 0 0 4px ${champColor}44, inset 0 0 8px ${champColor}11`,
+    };
+
     return (
-      <div className="match-tab" style={{ borderLeftColor: champColor }} onClick={handleClick}>
+      <div
+        className="match-tab"
+        style={{
+          ...neonBorderStyle,
+          borderLeftWidth: '6px',
+          borderLeftColor: champColor,
+        }}
+        onClick={handleClick}
+      >
         <div className="score-badge">
           <span className={`giocata-pct ${getPercentualeClasse(score)}`}>{isNaN(score) ? 0 : score}%</span>
           {hasBomb && <span className="bomb-inline">💣</span>}
@@ -260,13 +278,11 @@
     const todayStr = getTodayStr();
     const maxDateStr = addDaysToDateStr(todayStr, 2);
 
-    // ⭐ Conteggio partite oggi
     const countOggi = (camp) => {
       if (!camp) return 0;
       return matches.filter(m => m.campionato === camp && m.stato === 'Futura' && normalizeDate(m.data) === todayStr).length;
     };
 
-    // ⭐ Conteggio partite entro 2 giorni (esclusi oggi)
     const countEntro2Giorni = (camp) => {
       if (!camp) return 0;
       return matches.filter(m => {
@@ -280,7 +296,6 @@
 
     const isTuttiSelezionati = campionatiSelezionati.length === championships.length && championships.length > 0;
 
-    // ⭐ Badge helper: rosso se oggi, giallo se entro 2 giorni
     const renderBadge = (camp) => {
       const nOggi = countOggi(camp);
       const n2g = countEntro2Giorni(camp);
@@ -370,27 +385,139 @@
     );
   };
 
-  // ... resto invariato (VisualizzaGiocateSwitch, MobileListaCampionati, PalinsestoComponent)
-
+  // ============================================================
+  // VISUALIZZA GIOCATE SWITCH — v4 con filtro giorni
+  // ============================================================
   const VisualizzaGiocateSwitch = ({ mode, setMode, selectedFamiglie }) => {
     const countScelte = (selectedFamiglie || []).length;
     const totalFamiglie = Object.keys(window.FAMIGLIE_GIOCATE || {}).length;
+
+    // ⭐ Filtro giorni (sincronizzato con Schedina)
+    const { giorni, setGiorni } = window.FiltriCampionati.useGiorniRange();
+
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '14px', padding: '10px 14px', background: 'var(--bg-elevated)', borderRadius: '12px', border: '1px solid var(--border)' }}>
-        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neon-cyan)', textTransform: 'uppercase' }}>🎯 Giocate</span>
-        <div style={{ display: 'flex', background: 'var(--bg-deep)', borderRadius: '8px', padding: '3px', border: '1px solid var(--border)' }}>
-          <button onClick={() => setMode('scelte')} style={{ padding: '6px 16px', fontSize: '11px', fontWeight: 700, borderRadius: '6px', border: 'none', cursor: 'pointer', background: mode === 'scelte' ? 'var(--neon-cyan)' : 'transparent', color: mode === 'scelte' ? '#000' : 'var(--text-dim)' }}>⭐ Scelte ({countScelte})</button>
-          <button onClick={() => setMode('tutte')} style={{ padding: '6px 16px', fontSize: '11px', fontWeight: 700, borderRadius: '6px', border: 'none', cursor: 'pointer', background: mode === 'tutte' ? 'var(--neon-magenta)' : 'transparent', color: mode === 'tutte' ? '#000' : 'var(--text-dim)' }}>🌐 Tutte ({totalFamiglie})</button>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        flexWrap: 'wrap',
+        marginBottom: '14px',
+        padding: '10px 14px',
+        background: 'var(--bg-elevated)',
+        borderRadius: '12px',
+        border: '1px solid var(--border)'
+      }}>
+        {/* ⭐ RANGE GIORNI — PRIMA dello switch */}
+        <span style={{
+          fontSize: '12px',
+          fontWeight: 700,
+          color: 'var(--neon-cyan)',
+          textTransform: 'uppercase'
+        }}>
+          📅 Giorni
+        </span>
+        <div style={{
+          display: 'flex',
+          background: 'var(--bg-deep)',
+          borderRadius: '8px',
+          padding: '3px',
+          border: '1px solid var(--border)',
+          gap: '2px'
+        }}>
+          {[1, 2, 3, 4, 5, 6, 7].map(g => (
+            <button
+              key={g}
+              onClick={() => setGiorni(g)}
+              style={{
+                padding: '6px 10px',
+                fontSize: '11px',
+                fontWeight: 700,
+                borderRadius: '6px',
+                border: 'none',
+                cursor: 'pointer',
+                minWidth: '30px',
+                background: giorni === g ? 'var(--neon-cyan)' : 'transparent',
+                color: giorni === g ? '#000' : 'var(--text-dim)',
+                transition: 'all 0.15s'
+              }}
+              title={g === 1 ? 'Solo oggi' : `Prossimi ${g} giorni`}
+            >
+              {g}
+            </button>
+          ))}
+        </div>
+
+        {/* Separatore visivo */}
+        <span style={{
+          width: '1px',
+          height: '24px',
+          background: 'var(--border)',
+          margin: '0 4px'
+        }} />
+
+        {/* Switch Scelte/Tutte (esistente) */}
+        <span style={{
+          fontSize: '12px',
+          fontWeight: 700,
+          color: 'var(--neon-cyan)',
+          textTransform: 'uppercase'
+        }}>
+          🎯 Giocate
+        </span>
+        <div style={{
+          display: 'flex',
+          background: 'var(--bg-deep)',
+          borderRadius: '8px',
+          padding: '3px',
+          border: '1px solid var(--border)'
+        }}>
+          <button
+            onClick={() => setMode('scelte')}
+            style={{
+              padding: '6px 16px',
+              fontSize: '11px',
+              fontWeight: 700,
+              borderRadius: '6px',
+              border: 'none',
+              cursor: 'pointer',
+              background: mode === 'scelte' ? 'var(--neon-cyan)' : 'transparent',
+              color: mode === 'scelte' ? '#000' : 'var(--text-dim)'
+            }}
+          >
+            ⭐ Scelte ({countScelte})
+          </button>
+          <button
+            onClick={() => setMode('tutte')}
+            style={{
+              padding: '6px 16px',
+              fontSize: '11px',
+              fontWeight: 700,
+              borderRadius: '6px',
+              border: 'none',
+              cursor: 'pointer',
+              background: mode === 'tutte' ? 'var(--neon-magenta)' : 'transparent',
+              color: mode === 'tutte' ? '#000' : 'var(--text-dim)'
+            }}
+          >
+            🌐 Tutte ({totalFamiglie})
+          </button>
         </div>
       </div>
     );
   };
 
+  // ============================================================
+  // PALINSESTO COMPONENT — v4 con filtro giorni applicato
+  // ============================================================
   function PalinsestoComponent({ matches, selectedFamiglie, onSelectMatch, weatherCache, championships }) {
     const normalizeDate = window.normalizeDate;
     const getTodayStr = window.getTodayStr;
+    const addDaysToDateStr = window.addDaysToDateStr;
     const isMobile = useIsMobile();
     const { mode: visualizzaMode, setMode: setVisualizzaMode } = window.FiltriCampionati.useVisualizzaGiocateMode();
+
+    // ⭐ Filtro giorni condiviso
+    const { giorni } = window.FiltriCampionati.useGiorniRange();
 
     const { campionatiAttivi, toggleCampionato, selezionaTutti, deselezionaTutti } = window.FiltriCampionati.useFiltroCampionati();
 
@@ -400,29 +527,89 @@
       return [];
     }, [championships]);
 
+    // ⭐ Partite filtrate per giorni (da oggi a oggi+giorni)
     const partiteOggi = useMemo(() => {
       const todayStr = getTodayStr();
-      let list = matches.filter(m => m.stato === 'Futura' && normalizeDate(m.data) === todayStr);
-      if (campionatiAttivi.length > 0) list = list.filter(m => campionatiAttivi.includes(m.campionato));
-      else list = [];
-      return list.sort((a, b) => (a.ora || '99:99').localeCompare(b.ora || '99:99'));
-    }, [matches, campionatiAttivi]);
+      const maxDateStr = addDaysToDateStr(todayStr, giorni);
+
+      let list = matches.filter(m => {
+        if (m.stato !== 'Futura') return false;
+        const d = normalizeDate(m.data);
+        if (!d) return false;
+        return d >= todayStr && d <= maxDateStr;
+      });
+
+      if (campionatiAttivi.length > 0) {
+        list = list.filter(m => campionatiAttivi.includes(m.campionato));
+      } else {
+        list = [];
+      }
+
+      // Ordina per data + ora
+      return list.sort((a, b) => {
+        const dateA = normalizeDate(a.data);
+        const dateB = normalizeDate(b.data);
+        if (dateA && dateB && dateA !== dateB) return dateA.localeCompare(dateB);
+        return (a.ora || '99:99').localeCompare(b.ora || '99:99');
+      });
+    }, [matches, campionatiAttivi, giorni, normalizeDate, getTodayStr, addDaysToDateStr]);
 
     const isTuttiMode = campionatiAttivi.length === championshipsList.length && championshipsList.length > 0;
+
+    // Titolo dinamico in base ai giorni
+    const titoloGiorni = giorni === 1 ? 'Oggi' : `Prossimi ${giorni} giorni`;
 
     if (isMobile) {
       return (
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', marginBottom: '12px', background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 229, 0.05))', borderRadius: '14px', border: '1px solid var(--border)' }}>
-            <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '14px', fontWeight: 900, color: 'var(--neon-cyan)', letterSpacing: '2px', textTransform: 'uppercase' }}>📅 Palinsesto Oggi</span>
-            <span style={{ color: 'var(--text-dim)', fontSize: '11px', marginLeft: 'auto' }}>{partiteOggi.length} partite</span>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '12px',
+            padding: '12px 16px', marginBottom: '12px',
+            background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 229, 0.05))',
+            borderRadius: '14px', border: '1px solid var(--border)'
+          }}>
+            <span style={{
+              fontFamily: 'Orbitron, sans-serif', fontSize: '14px', fontWeight: 900,
+              color: 'var(--neon-cyan)', letterSpacing: '2px', textTransform: 'uppercase'
+            }}>
+              📅 {titoloGiorni}
+            </span>
+            <span style={{ color: 'var(--text-dim)', fontSize: '11px', marginLeft: 'auto' }}>
+              {partiteOggi.length} partite
+            </span>
           </div>
-          <ChampBar matches={matches} championships={championshipsList} campionatiSelezionati={campionatiAttivi} onToggle={toggleCampionato} onSelezionaTutti={selezionaTutti} onDeselezionaTutti={deselezionaTutti} />
-          <VisualizzaGiocateSwitch mode={visualizzaMode} setMode={setVisualizzaMode} selectedFamiglie={selectedFamiglie} />
+          <ChampBar
+            matches={matches}
+            championships={championshipsList}
+            campionatiSelezionati={campionatiAttivi}
+            onToggle={toggleCampionato}
+            onSelezionaTutti={selezionaTutti}
+            onDeselezionaTutti={deselezionaTutti}
+          />
+          <VisualizzaGiocateSwitch
+            mode={visualizzaMode}
+            setMode={setVisualizzaMode}
+            selectedFamiglie={selectedFamiglie}
+          />
           {partiteOggi.length === 0 ? (
-            <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}><div style={{ fontSize: '48px', marginBottom: '12px' }}>😴</div><div style={{ color: 'var(--text-dim)' }}>Nessuna partita oggi</div></div>
+            <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '12px' }}>😴</div>
+              <div style={{ color: 'var(--text-dim)' }}>
+                Nessuna partita nei prossimi {giorni} giorni
+              </div>
+            </div>
           ) : (
-            <div className="matches-grid">{partiteOggi.map(m => <MatchTab key={m.id} match={m} allMatches={matches} onSelect={onSelectMatch} selectedFamiglie={selectedFamiglie} />)}</div>
+            <div className="matches-grid">
+              {partiteOggi.map(m => (
+                <MatchTab
+                  key={m.id}
+                  match={m}
+                  allMatches={matches}
+                  onSelect={onSelectMatch}
+                  selectedFamiglie={selectedFamiglie}
+                />
+              ))}
+            </div>
           )}
         </div>
       );
@@ -430,20 +617,58 @@
 
     return (
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', padding: '10px 16px', marginBottom: '12px', background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 229, 0.05))', borderRadius: '14px', border: '1px solid var(--border)' }}>
-          <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '16px', fontWeight: 900, color: 'var(--neon-cyan)', letterSpacing: '2px', textTransform: 'uppercase', textShadow: '0 0 12px var(--neon-cyan)' }}>📅 Palinsesto Oggi</span>
-          <span style={{ color: 'var(--text-dim)', fontSize: '12px' }}>{isTuttiMode ? 'Tutti i campionati' : `${campionatiAttivi.length} campionati`} • {partiteOggi.length} partite</span>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
+          padding: '10px 16px', marginBottom: '12px',
+          background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 229, 0.05))',
+          borderRadius: '14px', border: '1px solid var(--border)'
+        }}>
+          <span style={{
+            fontFamily: 'Orbitron, sans-serif', fontSize: '16px', fontWeight: 900,
+            color: 'var(--neon-cyan)', letterSpacing: '2px', textTransform: 'uppercase',
+            textShadow: '0 0 12px var(--neon-cyan)'
+          }}>
+            📅 Palinsesto {titoloGiorni}
+          </span>
+          <span style={{ color: 'var(--text-dim)', fontSize: '12px' }}>
+            {isTuttiMode ? 'Tutti i campionati' : `${campionatiAttivi.length} campionati`} • {partiteOggi.length} partite
+          </span>
         </div>
-        <VisualizzaGiocateSwitch mode={visualizzaMode} setMode={setVisualizzaMode} selectedFamiglie={selectedFamiglie} />
-        <ChampBar matches={matches} championships={championshipsList} campionatiSelezionati={campionatiAttivi} onToggle={toggleCampionato} onSelezionaTutti={selezionaTutti} onDeselezionaTutti={deselezionaTutti} />
+        <VisualizzaGiocateSwitch
+          mode={visualizzaMode}
+          setMode={setVisualizzaMode}
+          selectedFamiglie={selectedFamiglie}
+        />
+        <ChampBar
+          matches={matches}
+          championships={championshipsList}
+          campionatiSelezionati={campionatiAttivi}
+          onToggle={toggleCampionato}
+          onSelezionaTutti={selezionaTutti}
+          onDeselezionaTutti={deselezionaTutti}
+        />
         {partiteOggi.length === 0 ? (
           <div className="card" style={{ textAlign: 'center', padding: '60px 20px' }}>
             <div style={{ fontSize: '64px', marginBottom: '16px' }}>😴</div>
-            <h3 style={{ color: 'var(--neon-cyan)' }}>Nessuna partita oggi</h3>
-            <p style={{ color: 'var(--text-dim)' }}>{campionatiAttivi.length === 0 ? 'Seleziona almeno un campionato' : 'Non ci sono partite in programma oggi nei campionati selezionati'}</p>
+            <h3 style={{ color: 'var(--neon-cyan)' }}>Nessuna partita nei prossimi {giorni} giorni</h3>
+            <p style={{ color: 'var(--text-dim)' }}>
+              {campionatiAttivi.length === 0
+                ? 'Seleziona almeno un campionato'
+                : `Non ci sono partite in programma nei prossimi ${giorni} giorni nei campionati selezionati`}
+            </p>
           </div>
         ) : (
-          <div className="matches-grid">{partiteOggi.map(m => <MatchTab key={m.id} match={m} allMatches={matches} onSelect={onSelectMatch} selectedFamiglie={selectedFamiglie} />)}</div>
+          <div className="matches-grid">
+            {partiteOggi.map(m => (
+              <MatchTab
+                key={m.id}
+                match={m}
+                allMatches={matches}
+                onSelect={onSelectMatch}
+                selectedFamiglie={selectedFamiglie}
+              />
+            ))}
+          </div>
         )}
       </div>
     );
@@ -451,6 +676,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto v3 caricato — badge oggi/2 giorni');
+  console.log('✅ Modulo Palinsesto v4 caricato — filtro giorni + bordi neon');
 
 })();
