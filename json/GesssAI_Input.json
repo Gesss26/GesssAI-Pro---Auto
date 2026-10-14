@@ -906,7 +906,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Cottbus",
-    "stadio": "LEAG Energie Stadion",
+    "stadio": "Stadion der Freundschaft",
     "stato": "Futura"
   },
   {
@@ -10072,12 +10072,12 @@
     "giornata": "10",
     "squadra_casa": "Wolves",
     "squadra_ospite": "Bolton",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–3",
+    "gol_casa": "1",
+    "gol_ospite": "3",
     "citta": "Wolverhampton",
     "stadio": "Molineux Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -10086,12 +10086,12 @@
     "giornata": "10",
     "squadra_casa": "Cardiff",
     "squadra_ospite": "Watford",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "5–1",
+    "gol_casa": "5",
+    "gol_ospite": "1",
     "citta": "Cardiff",
     "stadio": "Cardiff City Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -10100,12 +10100,12 @@
     "giornata": "10",
     "squadra_casa": "Burnley",
     "squadra_ospite": "Charlton",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Burnley",
     "stadio": "Turf Moor",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -10114,12 +10114,12 @@
     "giornata": "10",
     "squadra_casa": "Bristol City",
     "squadra_ospite": "Blackburn",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–1",
+    "gol_casa": "0",
+    "gol_ospite": "1",
     "citta": "Bristol",
     "stadio": "Ashton Gate Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -10128,12 +10128,12 @@
     "giornata": "10",
     "squadra_casa": "Millwall",
     "squadra_ospite": "Swansea",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–1",
+    "gol_casa": "0",
+    "gol_ospite": "1",
     "citta": "London",
     "stadio": "The Den",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -10142,12 +10142,12 @@
     "giornata": "10",
     "squadra_casa": "Wrexham",
     "squadra_ospite": "West Brom",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Wrexham",
     "stadio": "Racecourse Ground",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -10156,12 +10156,12 @@
     "giornata": "10",
     "squadra_casa": "Birmingham",
     "squadra_ospite": "Preston",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "4–0",
+    "gol_casa": "4",
+    "gol_ospite": "0",
     "citta": "Birmingham",
     "stadio": "St. Andrew's Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -10170,12 +10170,12 @@
     "giornata": "10",
     "squadra_casa": "Stoke City",
     "squadra_ospite": "Middlesbrough",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–3",
+    "gol_casa": "2",
+    "gol_ospite": "3",
     "citta": "Stoke-On-Trent",
     "stadio": "bet365 Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "EFL Championship",
@@ -17706,7 +17706,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Venlo",
-    "stadio": "Seacon - De Koel",
+    "stadio": "Seacon Stadion De Koel",
     "stato": "Futura"
   },
   {
@@ -17719,8 +17719,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "'s-Hertogenbosch",
-    "stadio": "De Vliert",
+    "citta": "'S-Hertogenbosch",
+    "stadio": "Stadion de Vliert",
     "stato": "Futura"
   },
   {
@@ -17748,7 +17748,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Helmond",
-    "stadio": "GS Staalwerken Stadion",
+    "stadio": "Lavans Stadion",
     "stato": "Futura"
   },
   {
@@ -29605,8 +29605,8 @@
     "risultato": "1–2",
     "gol_casa": "1",
     "gol_ospite": "2",
-    "citta": "Bruges",
-    "stadio": "Jan Breydel Stadium",
+    "citta": "Brugge",
+    "stadio": "Jan Breydel Stadion",
     "stato": "Giocata"
   },
   {
@@ -29662,7 +29662,7 @@
     "gol_casa": "0",
     "gol_ospite": "1",
     "citta": "Liege",
-    "stadio": "Maurice Dufrasne",
+    "stadio": "Maurice Dufrasnestadion",
     "stato": "Giocata"
   },
   {
@@ -29704,7 +29704,7 @@
     "gol_casa": "4",
     "gol_ospite": "3",
     "citta": "Mechelen",
-    "stadio": "Veoliastadion Achter De Kazerne",
+    "stadio": "Achter de Kazerne",
     "stato": "Giocata"
   },
   {
@@ -36732,7 +36732,7 @@
     "gol_casa": "1",
     "gol_ospite": "1",
     "citta": "Malaga",
-    "stadio": "La Rosaleda",
+    "stadio": "Estadio La Rosaleda",
     "stato": "Giocata"
   },
   {
@@ -36746,7 +36746,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Madrid",
-    "stadio": "Estadio de Vallecas",
+    "stadio": "Campo de Futbol de Vallecas",
     "stato": "Futura"
   },
   {
@@ -36759,8 +36759,8 @@
     "risultato": "1–2",
     "gol_casa": "1",
     "gol_ospite": "2",
-    "citta": "Victoria-Gasteiz",
-    "stadio": "Estadio de Mendizorroza",
+    "citta": "Vitoria-Gasteiz",
+    "stadio": "Estadio Mendizorrotza",
     "stato": "Giocata"
   },
   {
@@ -36774,7 +36774,7 @@
     "gol_casa": "3",
     "gol_ospite": "0",
     "citta": "Barcelona",
-    "stadio": "Spotify Camp Nou",
+    "stadio": "Camp Nou",
     "stato": "Giocata"
   },
   {
@@ -36885,7 +36885,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Cornella",
+    "citta": "Cornella de Llobregat",
     "stadio": "RCDE Stadium",
     "stato": "Futura"
   },
@@ -36900,7 +36900,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Villarreal",
-    "stadio": "Estadio de la Cerámica",
+    "stadio": "Estadio de la Ceramica",
     "stato": "Futura"
   },
   {
@@ -36927,7 +36927,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Valdivia",
+    "citta": "Valencia",
     "stadio": "Estadio de Mestalla",
     "stato": "Futura"
   },
@@ -36970,7 +36970,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Malaga",
-    "stadio": "La Rosaleda",
+    "stadio": "Estadio La Rosaleda",
     "stato": "Futura"
   },
   {
@@ -36998,7 +36998,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Getafe",
-    "stadio": "Coliseum Alfonso Pérez",
+    "stadio": "Coliseum",
     "stato": "Futura"
   },
   {
@@ -37025,8 +37025,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Victoria-Gasteiz",
-    "stadio": "Estadio de Mendizorroza",
+    "citta": "Vitoria-Gasteiz",
+    "stadio": "Estadio Mendizorrotza",
     "stato": "Futura"
   },
   {
@@ -37040,7 +37040,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Madrid",
-    "stadio": "Estadio de Vallecas",
+    "stadio": "Campo de Futbol de Vallecas",
     "stato": "Futura"
   },
   {
@@ -37054,7 +37054,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Santander",
-    "stadio": "El Sardinero",
+    "stadio": "Estadio El Sardinero",
     "stato": "Futura"
   },
   {
@@ -37067,7 +37067,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Valdivia",
+    "citta": "Valencia",
     "stadio": "Estadio de Mestalla",
     "stato": "Futura"
   },
@@ -37082,7 +37082,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Madrid",
-    "stadio": "Riyadh Air Metropolitano",
+    "stadio": "Metropolitano Stadium",
     "stato": "Futura"
   },
   {
@@ -37124,7 +37124,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "San Sebastian",
-    "stadio": "Anoeta Stadium",
+    "stadio": "Anoeta",
     "stato": "Futura"
   },
   {
@@ -37138,7 +37138,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Barcelona",
-    "stadio": "Spotify Camp Nou",
+    "stadio": "Camp Nou",
     "stato": "Futura"
   },
   {
@@ -37151,7 +37151,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Seville",
+    "citta": "Sevilla",
     "stadio": "Estadio Ramón Sánchez-Pizjuán",
     "stato": "Futura"
   },
@@ -37166,7 +37166,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Villarreal",
-    "stadio": "Estadio de la Cerámica",
+    "stadio": "Estadio de la Ceramica",
     "stato": "Futura"
   },
   {
@@ -37194,7 +37194,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Madrid",
-    "stadio": "Estadio de Vallecas",
+    "stadio": "Campo de Futbol de Vallecas",
     "stato": "Futura"
   },
   {
@@ -37222,7 +37222,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Barcelona",
-    "stadio": "Spotify Camp Nou",
+    "stadio": "Camp Nou",
     "stato": "Futura"
   },
   {
@@ -37236,7 +37236,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Getafe",
-    "stadio": "Coliseum Alfonso Pérez",
+    "stadio": "Coliseum",
     "stato": "Futura"
   },
   {
@@ -37250,7 +37250,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Santander",
-    "stadio": "El Sardinero",
+    "stadio": "Estadio El Sardinero",
     "stato": "Futura"
   },
   {
@@ -37297,22 +37297,64 @@
   },
   {
     "campionato": "La Liga",
-    "data": "08/11/2026",
-    "ora": "16:00",
+    "data": "06/11/2026",
+    "ora": "20:00",
     "giornata": "12",
-    "squadra_casa": "Atletico Madrid",
-    "squadra_ospite": "Barcelona",
+    "squadra_casa": "Sevilla",
+    "squadra_ospite": "Alaves",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Madrid",
-    "stadio": "Metropolitano Stadium",
+    "citta": "Sevilla",
+    "stadio": "",
     "stato": "Futura"
   },
   {
     "campionato": "La Liga",
-    "data": "08/11/2026",
-    "ora": "16:00",
+    "data": "07/11/2026",
+    "ora": "13:00",
+    "giornata": "12",
+    "squadra_casa": "Malaga",
+    "squadra_ospite": "Racing Santander",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Málaga",
+    "stadio": "Estadio La Rosaleda",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "La Liga",
+    "data": "07/11/2026",
+    "ora": "15:15",
+    "giornata": "12",
+    "squadra_casa": "Espanyol",
+    "squadra_ospite": "Deportivo La Coruna",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Cornella de Llobregat",
+    "stadio": "RCDE Stadium",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "La Liga",
+    "data": "07/11/2026",
+    "ora": "17:30",
+    "giornata": "12",
+    "squadra_casa": "Osasuna",
+    "squadra_ospite": "Athletic Club",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Pamplona",
+    "stadio": "Estadio El Sadar",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "La Liga",
+    "data": "07/11/2026",
+    "ora": "20:00",
     "giornata": "12",
     "squadra_casa": "Valencia",
     "squadra_ospite": "Real Madrid",
@@ -37326,77 +37368,21 @@
   {
     "campionato": "La Liga",
     "data": "08/11/2026",
-    "ora": "16:00",
+    "ora": "13:00",
     "giornata": "12",
-    "squadra_casa": "Villarreal",
-    "squadra_ospite": "Getafe",
+    "squadra_casa": "Elche",
+    "squadra_ospite": "Real Betis",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Villarreal",
-    "stadio": "Estadio de la Ceramica",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "La Liga",
-    "data": "08/11/2026",
-    "ora": "16:00",
-    "giornata": "12",
-    "squadra_casa": "Malaga",
-    "squadra_ospite": "Racing Santander",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Málaga",
-    "stadio": "Estadio La Rosaleda",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "La Liga",
-    "data": "08/11/2026",
-    "ora": "16:00",
-    "giornata": "12",
-    "squadra_casa": "Sevilla",
-    "squadra_ospite": "Alaves",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Sevilla",
+    "citta": "Elche",
     "stadio": "",
     "stato": "Futura"
   },
   {
     "campionato": "La Liga",
     "data": "08/11/2026",
-    "ora": "16:00",
-    "giornata": "12",
-    "squadra_casa": "Celta Vigo",
-    "squadra_ospite": "Levante",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Vigo",
-    "stadio": "",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "La Liga",
-    "data": "08/11/2026",
-    "ora": "16:00",
-    "giornata": "12",
-    "squadra_casa": "Espanyol",
-    "squadra_ospite": "Deportivo La Coruna",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Cornella de Llobregat",
-    "stadio": "RCDE Stadium",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "La Liga",
-    "data": "08/11/2026",
-    "ora": "16:00",
+    "ora": "15:15",
     "giornata": "12",
     "squadra_casa": "Real Sociedad",
     "squadra_ospite": "Rayo Vallecano",
@@ -37410,29 +37396,43 @@
   {
     "campionato": "La Liga",
     "data": "08/11/2026",
-    "ora": "16:00",
+    "ora": "17:30",
     "giornata": "12",
-    "squadra_casa": "Osasuna",
-    "squadra_ospite": "Athletic Club",
+    "squadra_casa": "Villarreal",
+    "squadra_ospite": "Getafe",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Pamplona",
-    "stadio": "Estadio El Sadar",
+    "citta": "Villarreal",
+    "stadio": "Estadio de la Ceramica",
     "stato": "Futura"
   },
   {
     "campionato": "La Liga",
     "data": "08/11/2026",
-    "ora": "16:00",
+    "ora": "17:30",
     "giornata": "12",
-    "squadra_casa": "Elche",
-    "squadra_ospite": "Real Betis",
+    "squadra_casa": "Celta Vigo",
+    "squadra_ospite": "Levante",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Elche",
+    "citta": "Vigo",
     "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "La Liga",
+    "data": "08/11/2026",
+    "ora": "20:00",
+    "giornata": "12",
+    "squadra_casa": "Atletico Madrid",
+    "squadra_ospite": "Barcelona",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Madrid",
+    "stadio": "Metropolitano Stadium",
     "stato": "Futura"
   },
   {
@@ -46420,7 +46420,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Laval",
-    "stadio": "Stade Francis Le Basser",
+    "stadio": "Stade Francis-Le Basser",
     "stato": "Futura"
   },
   {
@@ -46433,8 +46433,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Annecy",
-    "stadio": "Parc des Sports",
+    "citta": "Avignon",
+    "stadio": "Parc des Sports d’Annecy",
     "stato": "Futura"
   },
   {
@@ -63416,7 +63416,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Leganes",
-    "stadio": "Estadio Municipal de Butarque",
+    "stadio": "Municipal de Butarque",
     "stato": "Futura"
   },
   {
@@ -69338,7 +69338,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Frosinone",
-    "stadio": "Stadio Benito Stirpe",
+    "stadio": "PSC Arena",
     "stato": "Futura"
   },
   {
@@ -74658,7 +74658,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Verona",
-    "stadio": "",
+    "stadio": "Marc'Antonio Bentegodi",
     "stato": "Futura"
   },
   {
@@ -80380,12 +80380,12 @@
     "giornata": "8",
     "squadra_casa": "Juventus U23",
     "squadra_ospite": "Lumezzane",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Alessandria",
     "stadio": "Stadio Giuseppe Moccagatta",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -91006,12 +91006,12 @@
     "giornata": "7",
     "squadra_casa": "Giugliano",
     "squadra_ospite": "Inter U23",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–4",
+    "gol_casa": "0",
+    "gol_ospite": "4",
     "citta": "Giugliano",
-    "stadio": "SC Alberto De Cristofaro",
-    "stato": "Futura"
+    "stadio": "Stadio Alberto De Cristofaro",
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -100890,12 +100890,12 @@
     "giornata": "2",
     "squadra_casa": "Lens",
     "squadra_ospite": "Sporting CP",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–2",
+    "gol_casa": "0",
+    "gol_ospite": "2",
     "citta": "Lens",
     "stadio": "Stade Bollaert-Delelis",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Champions League",
@@ -100904,12 +100904,12 @@
     "giornata": "2",
     "squadra_casa": "Sabah FA",
     "squadra_ospite": "Slavia Praha",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Baku",
     "stadio": "Baku Olympic Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Champions League",
@@ -100918,12 +100918,12 @@
     "giornata": "2",
     "squadra_casa": "Arsenal",
     "squadra_ospite": "Lille",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–0",
+    "gol_casa": "3",
+    "gol_ospite": "0",
     "citta": "London",
     "stadio": "Emirates Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Champions League",
@@ -100932,12 +100932,12 @@
     "giornata": "2",
     "squadra_casa": "RB Leipzig",
     "squadra_ospite": "PSV Eindhoven",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Leipzig",
     "stadio": "Leipzig Red Bull Arena",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Champions League",
@@ -100946,12 +100946,12 @@
     "giornata": "2",
     "squadra_casa": "Inter",
     "squadra_ospite": "Club Brugge KV",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–4",
+    "gol_casa": "3",
+    "gol_ospite": "4",
     "citta": "Milan",
     "stadio": "San Siro/Giuseppe Meazza",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Champions League",
@@ -100960,12 +100960,12 @@
     "giornata": "2",
     "squadra_casa": "Atletico Madrid",
     "squadra_ospite": "Manchester United",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Madrid",
     "stadio": "Riyadh Air Metropolitano",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Champions League",
@@ -100974,12 +100974,12 @@
     "giornata": "2",
     "squadra_casa": "Villarreal",
     "squadra_ospite": "Napoli",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–1",
+    "gol_casa": "3",
+    "gol_ospite": "1",
     "citta": "Villarreal",
     "stadio": "Estadio de la Cerámica",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Champions League",
@@ -100988,12 +100988,12 @@
     "giornata": "2",
     "squadra_casa": "Galatasaray",
     "squadra_ospite": "Barcelona",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–4",
+    "gol_casa": "1",
+    "gol_ospite": "4",
     "citta": "Istanbul",
     "stadio": "Rams Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Champions League",
@@ -101002,12 +101002,12 @@
     "giornata": "2",
     "squadra_casa": "Viking",
     "squadra_ospite": "Bayern München",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–3",
+    "gol_casa": "3",
+    "gol_ospite": "3",
     "citta": "Stavanger",
     "stadio": "SR-Bank Arena",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Champions League",
