@@ -11,6 +11,7 @@
 // - ⭐ FIX: priorità a raw.githubusercontent (evita cache CDN)
 // - ⭐ NUOVO: campo role (admin/user) + auto-promozione ADMIN_USERNAMES
 // - ⭐ NUOVO: promuovi/rimuovi admin dal pannello (solo admin)
+// - ⭐ NUOVO v2: PRELIEVO/DEPOSITO (transazioni) NON contano come giocate
 // - Settimana: Giovedì → Mercoledì successivo
 // - Input data italiano GG/MM/AAAA
 // ============================================================
@@ -38,14 +39,11 @@
 
   // ============================================================
   // ⭐ PAT HARDCODATO (default per tutti i dispositivi)
-  // ⚠️ ATTENZIONE: se il repo è pubblico, GitHub potrebbe invalidare
-  //    automaticamente il token. Usa un repo PRIVATO o un token
-  //    con permessi limitati al solo repo.
   // ============================================================
 
   const DEFAULT_PAT = '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';
 
-  // ⭐ Admin hardcoded: questi username sono SEMPRE admin (match esatto, case-insensitive)
+  // ⭐ Admin hardcoded: questi username sono SEMPRE admin
   const ADMIN_USERNAMES = ['gesss'];
 
   const isHardcodedAdmin = (username) => {
@@ -181,7 +179,6 @@
       }
     });
 
-    // ⭐ AUTO-PROMOZIONE ADMIN: ad ogni merge, forza role=admin sugli hardcoded
     map.forEach((u, key) => {
       if (isHardcodedAdmin(u.username)) {
         u.role = 'admin';
@@ -533,6 +530,31 @@
   };
 
   // ============================================================
+  // ⭐ TRANSAZIONI (Prelievi/Depositi) - NON contano come giocate
+  // ============================================================
+
+  const calcolaTotaliTransazioni = (transazioni = []) => {
+    let totaleDepositi = 0;
+    let totalePrelievi = 0;
+    transazioni.forEach(t => {
+      const imp = parseFloat(t.importo) || 0;
+      if (t.tipo === 'deposito') totaleDepositi += imp;
+      else if (t.tipo === 'prelievo') totalePrelievi += imp;
+    });
+    return {
+      totaleDepositi,
+      totalePrelievi,
+      nettoTransazioni: totaleDepositi - totalePrelievi,
+    };
+  };
+
+  const calcolaSaldoDisponibile = (movimenti, saldoIniziale, transazioni = []) => {
+    const saldoGiocate = calcolaSaldoCorrente(movimenti, saldoIniziale);
+    const { nettoTransazioni } = calcolaTotaliTransazioni(transazioni);
+    return saldoGiocate + nettoTransazioni;
+  };
+
+  // ============================================================
   // PARSING EXCEL
   // ============================================================
 
@@ -542,7 +564,7 @@
       const wb = XLSX.read(arrayBuffer, { type: 'array' });
       const ws = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
-      if (!rows.length) return { movimenti: [], saldoIniziale: DEFAULT_SALDO_INIZIALE };
+      if (!rows.length) return { movimenti: [], transazioni: [], saldoIniziale: DEFAULT_SALDO_INIZIALE };
 
       const headers = Object.keys(rows[0]);
       const findCol = (keys) => {
@@ -559,10 +581,12 @@
       const colVincita = findCol(['importo vinto', 'vincita', 'vinto', 'ritorno']);
 
       const movimenti = [];
+      const transazioni = [];
       let saldoIniziale = DEFAULT_SALDO_INIZIALE;
       let saldoTrovato = false;
 
       rows.forEach((row, i) => {
+        // SALDO INIZIALE
         if (!saldoTrovato && colEsito && colVincita) {
           const esito = String(row[colEsito] || '').toUpperCase().trim();
           if (esito.includes('SALDO INIZIALE') || esito === 'SALDO') {
@@ -574,6 +598,36 @@
             }
             return;
           }
+        }
+
+        // ⭐ PRELIEVO / DEPOSITO
+        const esitoUpper = String(row[colEsito] || '').toUpperCase().trim();
+        if (esitoUpper === 'PRELIEVO' || esitoUpper === 'DEPOSITO') {
+          const importoT = parseFloat(row[colImporto]) || parseFloat(row[colVincita]) || 0;
+          if (importoT > 0) {
+            let dataStr;
+            const dataRaw = row[colData];
+            if (typeof dataRaw === 'number') {
+              const epoch = new Date(1899, 11, 30);
+              dataStr = toDateStr(new Date(epoch.getTime() + dataRaw * 86400000));
+            } else if (String(dataRaw).match(/^\d{4}-\d{2}-\d{2}/)) {
+              dataStr = String(dataRaw).slice(0, 10);
+            } else if (String(dataRaw).match(/^\d{2}\/\d{2}\/\d{4}/)) {
+              const p = String(dataRaw).split('/');
+              dataStr = `${p[2]}-${p[1]}-${p[0]}`;
+            } else {
+              const d = new Date(dataRaw);
+              dataStr = isNaN(d.getTime()) ? toDateStr(new Date()) : toDateStr(d);
+            }
+            transazioni.push({
+              id: 'tx_' + i + '_' + Date.now().toString(36),
+              data: dataStr,
+              tipo: esitoUpper === 'PRELIEVO' ? 'prelievo' : 'deposito',
+              importo: importoT,
+              note: String(row['note'] || row['descrizione'] || ''),
+            });
+          }
+          return;
         }
 
         const dataRaw = row[colData];
@@ -612,8 +666,12 @@
         });
       });
 
-      console.log('📊 Parsing completato:', { movimenti: movimenti.length, saldoIniziale });
-      return { movimenti, saldoIniziale };
+      console.log('📊 Parsing completato:', {
+        movimenti: movimenti.length,
+        transazioni: transazioni.length,
+        saldoIniziale
+      });
+      return { movimenti, transazioni, saldoIniziale };
     } catch (e) {
       console.error('Errore parsing gestione.xlsx:', e);
       return null;
@@ -636,19 +694,23 @@
           saved.saldoIniziale,
           saldoLocale !== null ? saldoLocale : DEFAULT_SALDO_INIZIALE
         );
-        return { movimenti: saved.movimenti, saldoIniziale: savedSaldo };
+        return {
+          movimenti: saved.movimenti,
+          transazioni: Array.isArray(saved.transazioni) ? saved.transazioni : [],
+          saldoIniziale: savedSaldo,
+        };
       }
 
       if (saldoLocale !== null) {
-        return { movimenti: [], saldoIniziale: saldoLocale };
+        return { movimenti: [], transazioni: [], saldoIniziale: saldoLocale };
       }
     } catch (e) {
       console.warn('Errore loadGestioneFromLocal:', e);
     }
-    return { movimenti: [], saldoIniziale: DEFAULT_SALDO_INIZIALE };
+    return { movimenti: [], transazioni: [], saldoIniziale: DEFAULT_SALDO_INIZIALE };
   };
 
-  const saveGestioneToLocal = (username, movimenti, saldoIniziale) => {
+  const saveGestioneToLocal = (username, movimenti, saldoIniziale, transazioni = []) => {
     try {
       const saldoDaSalvare = (saldoIniziale !== null && saldoIniziale !== undefined && !isNaN(saldoIniziale))
         ? saldoIniziale
@@ -658,6 +720,7 @@
         storageKeyConto(username),
         JSON.stringify({
           movimenti,
+          transazioni,
           saldoIniziale: saldoDaSalvare,
           updatedAt: new Date().toISOString(),
         })
@@ -672,7 +735,7 @@
   // GENERAZIONE WORKBOOK
   // ============================================================
 
-  const buildWorkbook = (username, movimenti, saldoIniziale) => {
+  const buildWorkbook = (username, movimenti, saldoIniziale, transazioni = []) => {
     const righe = movimenti
       .slice()
       .sort((a, b) => new Date(a.data) - new Date(b.data))
@@ -684,6 +747,21 @@
         'Profitto': m.esito === 'win' ? (m.importoVinto - m.importoGiocato) : m.esito === 'loss' ? -m.importoGiocato : 0,
         'Note': m.note || '',
       }));
+
+    // ⭐ Transazioni (Prelievo/Deposito)
+    transazioni
+      .slice()
+      .sort((a, b) => new Date(a.data) - new Date(b.data))
+      .forEach(t => {
+        righe.push({
+          'Data': t.data,
+          'Importo Giocato': t.tipo === 'prelievo' ? t.importo : '',
+          'Esito': t.tipo === 'prelievo' ? 'PRELIEVO' : 'DEPOSITO',
+          'Importo Vinto': t.tipo === 'deposito' ? t.importo : '',
+          'Profitto': '',
+          'Note': t.note || '',
+        });
+      });
 
     righe.unshift({
       'Data': '',
@@ -700,12 +778,12 @@
     return wb;
   };
 
-  const esportaExcel = (username, movimenti, saldoIniziale) => {
+  const esportaExcel = (username, movimenti, saldoIniziale, transazioni = []) => {
     if (typeof XLSX === 'undefined') {
       alert('Libreria XLSX non disponibile');
       return;
     }
-    const wb = buildWorkbook(username, movimenti, saldoIniziale);
+    const wb = buildWorkbook(username, movimenti, saldoIniziale, transazioni);
     XLSX.writeFile(wb, excelFilename(username));
   };
 
@@ -1288,7 +1366,234 @@
   };
 
   // ============================================================
-  // FORM INSERIMENTO
+  // ⭐ FORM TRANSAZIONE (Prelievo / Deposito)
+  // ============================================================
+
+  const FormTransazione = ({ onAdd, transazioni = [] }) => {
+    const [data, setData] = useState(() => toDateStr(new Date()));
+    const [tipo, setTipo] = useState('deposito');
+    const [importo, setImporto] = useState('');
+    const [note, setNote] = useState('');
+    const [msg, setMsg] = useState(null);
+
+    const { totaleDepositi, totalePrelievi, nettoTransazioni } = useMemo(
+      () => calcolaTotaliTransazioni(transazioni),
+      [transazioni]
+    );
+
+    const handleAdd = () => {
+      const imp = parseFloat(importo);
+      if (!data || isNaN(imp) || imp <= 0) {
+        setMsg({ type: 'error', text: '⚠️ Inserisci data e importo validi' });
+        setTimeout(() => setMsg(null), 3000);
+        return;
+      }
+      onAdd({
+        id: 'tx_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        data,
+        tipo,
+        importo: imp,
+        note: note.trim(),
+      });
+      setImporto('');
+      setNote('');
+      setMsg({
+        type: 'success',
+        text: tipo === 'deposito'
+          ? `✅ Deposito di €${imp.toFixed(2)} registrato`
+          : `✅ Prelievo di €${imp.toFixed(2)} registrato`,
+      });
+      setTimeout(() => setMsg(null), 2500);
+    };
+
+    return (
+      <div style={{
+        background: 'var(--card)', borderRadius: '12px', border: '1px solid var(--border)',
+        padding: '18px', marginBottom: '20px',
+      }}>
+        <h4 style={{ margin: '0 0 14px 0', color: 'var(--accent)', fontSize: '15px' }}>
+          🏦 Prelievo / Deposito
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginLeft: '8px', fontWeight: 'normal' }}>
+            (non contano come giocate)
+          </span>
+        </h4>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px', marginBottom: '12px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
+              📅 Data
+            </label>
+            <DataInputItaliano value={data} onChange={setData} />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
+              🔀 Tipo
+            </label>
+            <select
+              value={tipo}
+              onChange={(e) => setTipo(e.target.value)}
+              style={{
+                width: '100%', padding: '8px 10px', background: 'var(--surface)',
+                border: '1px solid var(--border)', color: 'var(--text)',
+                borderRadius: '6px', fontSize: '13px', cursor: 'pointer',
+              }}
+            >
+              <option value="deposito">💚 Deposito (aggiungo soldi)</option>
+              <option value="prelievo">❤️ Prelievo (tolgo soldi)</option>
+            </select>
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
+              💶 Importo (€)
+            </label>
+            <input
+              type="number" step="0.01" min="0" value={importo}
+              onChange={(e) => setImporto(e.target.value)}
+              placeholder="0.00"
+              style={{
+                width: '100%', padding: '8px 10px', background: 'var(--surface)',
+                border: '1px solid var(--border)', color: 'var(--text)',
+                borderRadius: '6px', fontSize: '13px',
+              }}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', fontWeight: 'bold' }}>
+              📝 Note (opz.)
+            </label>
+            <input
+              type="text" value={note}
+              onChange={(e) => setNote(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+              placeholder="Es. ricarica conto"
+              style={{
+                width: '100%', padding: '8px 10px', background: 'var(--surface)',
+                border: '1px solid var(--border)', color: 'var(--text)',
+                borderRadius: '6px', fontSize: '13px',
+              }}
+            />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <button
+            onClick={handleAdd}
+            style={{
+              flex: 1, minWidth: '160px', padding: '12px 20px',
+              background: tipo === 'deposito' ? 'var(--win)' : 'var(--lose)',
+              color: tipo === 'deposito' ? '#000' : '#fff',
+              border: 'none', borderRadius: '8px',
+              fontWeight: 'bold', fontSize: '14px', cursor: 'pointer',
+              transition: 'all 0.15s',
+            }}
+          >
+            {tipo === 'deposito' ? '💚 Registra Deposito' : '❤️ Registra Prelievo'}
+          </button>
+
+          <div style={{
+            display: 'flex', gap: '10px', flexWrap: 'wrap',
+            padding: '8px 14px', background: 'var(--surface)',
+            borderRadius: '8px', border: '1px solid var(--border)', fontSize: '12px',
+          }}>
+            <span style={{ color: 'var(--win)', fontWeight: 'bold' }}>
+              💚 Dep: €{totaleDepositi.toFixed(2)}
+            </span>
+            <span style={{ color: 'var(--lose)', fontWeight: 'bold' }}>
+              ❤️ Prel: €{totalePrelievi.toFixed(2)}
+            </span>
+            <span style={{ color: nettoTransazioni >= 0 ? 'var(--win)' : 'var(--lose)', fontWeight: 'bold' }}>
+              Netto: {nettoTransazioni >= 0 ? '+' : ''}€{nettoTransazioni.toFixed(2)}
+            </span>
+          </div>
+        </div>
+
+        {msg && (
+          <div style={{
+            marginTop: '12px', padding: '10px 14px', borderRadius: '6px',
+            background: msg.type === 'success' ? 'rgba(111, 207, 151, 0.15)' : 'rgba(235, 87, 87, 0.15)',
+            border: `1px solid ${msg.type === 'success' ? 'var(--win)' : 'var(--lose)'}`,
+            color: msg.type === 'success' ? 'var(--win)' : 'var(--lose)',
+            fontSize: '13px', fontWeight: 'bold',
+          }}>
+            {msg.text}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ============================================================
+  // ⭐ LISTA TRANSAZIONI
+  // ============================================================
+
+  const ListaTransazioni = ({ transazioni, onDelete }) => {
+    if (!transazioni || transazioni.length === 0) return null;
+
+    const ordinate = transazioni.slice().sort((a, b) => new Date(b.data) - new Date(a.data));
+
+    return (
+      <div style={{
+        background: 'var(--card)', borderRadius: '12px',
+        border: '1px solid var(--border)', padding: '14px',
+        marginBottom: '20px',
+      }}>
+        <h4 style={{ margin: '0 0 12px 0', color: 'var(--accent)', fontSize: '14px' }}>
+          📋 Storico Prelievi / Depositi ({ordinate.length})
+        </h4>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', minWidth: '450px' }}>
+            <thead>
+              <tr style={{ background: 'var(--surface)' }}>
+                <th style={{ padding: '8px', textAlign: 'left', fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', borderBottom: '2px solid var(--border)' }}>Data</th>
+                <th style={{ padding: '8px', textAlign: 'center', fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', borderBottom: '2px solid var(--border)' }}>Tipo</th>
+                <th style={{ padding: '8px', textAlign: 'right', fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', borderBottom: '2px solid var(--border)' }}>Importo</th>
+                <th style={{ padding: '8px', textAlign: 'left', fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', borderBottom: '2px solid var(--border)' }}>Note</th>
+                <th style={{ padding: '8px', textAlign: 'center', fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', borderBottom: '2px solid var(--border)' }}>Azioni</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ordinate.map(t => (
+                <tr key={t.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                  <td style={{ padding: '8px', fontWeight: 'bold' }}>{formatDateIT(t.data)}</td>
+                  <td style={{ padding: '8px', textAlign: 'center' }}>
+                    <span style={{
+                      padding: '3px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold',
+                      background: t.tipo === 'deposito' ? 'var(--win)' : 'var(--lose)',
+                      color: t.tipo === 'deposito' ? '#000' : '#fff',
+                    }}>
+                      {t.tipo === 'deposito' ? '💚 DEPOSITO' : '❤️ PRELIEVO'}
+                    </span>
+                  </td>
+                  <td style={{
+                    padding: '8px', textAlign: 'right', fontWeight: 'bold',
+                    color: t.tipo === 'deposito' ? 'var(--win)' : 'var(--lose)',
+                  }}>
+                    {t.tipo === 'deposito' ? '+' : '-'}€{t.importo.toFixed(2)}
+                  </td>
+                  <td style={{ padding: '8px', fontSize: '11px', color: 'var(--text-muted)' }}>
+                    {t.note || '—'}
+                  </td>
+                  <td style={{ padding: '8px', textAlign: 'center' }}>
+                    <button
+                      onClick={() => { if (window.confirm('Eliminare questa transazione?')) onDelete(t.id); }}
+                      style={{
+                        padding: '3px 8px', fontSize: '10px', background: 'transparent',
+                        color: 'var(--text-muted)', border: '1px solid var(--border)',
+                        borderRadius: '4px', cursor: 'pointer',
+                      }}
+                    >✕</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================================
+  // FORM INSERIMENTO GIOCATE
   // ============================================================
 
   const FormInserimento = ({ onAdd, movimenti, saldoIniziale }) => {
@@ -1769,6 +2074,7 @@
 
   function GestioneContoLoggato({ username, onCambiaUtente }) {
     const [movimenti, setMovimenti] = useState([]);
+    const [transazioni, setTransazioni] = useState([]);
     const [saldoIniziale, setSaldoIniziale] = useState(DEFAULT_SALDO_INIZIALE);
     const [loading, setLoading] = useState(true);
     const [periodoTipo, setPeriodoTipo] = useState('settimanale');
@@ -1783,12 +2089,14 @@
     useEffect(() => {
       const local = loadGestioneFromLocal(username);
       setMovimenti(local.movimenti);
+      setTransazioni(local.transazioni || []);
       setSaldoIniziale(local.saldoIniziale);
       setSaldoInput(String(local.saldoIniziale));
 
       console.log('🔵 Load da localStorage:', {
         saldo: local.saldoIniziale,
-        movimenti: local.movimenti.length
+        movimenti: local.movimenti.length,
+        transazioni: (local.transazioni || []).length
       });
 
       (async () => {
@@ -1801,6 +2109,7 @@
                 const buf = await resp.arrayBuffer();
                 const parsed = parseExcelGestione(buf);
                 if (parsed && parsed.movimenti) {
+                  // Merge movimenti
                   const localIds = new Set(local.movimenti.map(m => `${m.data}|${m.importoGiocato}|${m.esito}`));
                   const merge = [...local.movimenti];
                   parsed.movimenti.forEach(em => {
@@ -1808,6 +2117,17 @@
                     if (!localIds.has(key)) {
                       merge.push(em);
                       localIds.add(key);
+                    }
+                  });
+
+                  // ⭐ Merge transazioni
+                  const mergeTx = [...(local.transazioni || [])];
+                  const txKeys = new Set(mergeTx.map(t => `${t.data}|${t.tipo}|${t.importo}`));
+                  (parsed.transazioni || []).forEach(et => {
+                    const key = `${et.data}|${et.tipo}|${et.importo}`;
+                    if (!txKeys.has(key)) {
+                      mergeTx.push(et);
+                      txKeys.add(key);
                     }
                   });
 
@@ -1829,11 +2149,12 @@
                   }
 
                   setMovimenti(merge);
+                  setTransazioni(mergeTx);
                   setSaldoIniziale(saldoFinale);
                   setSaldoInput(String(saldoFinale));
-                  saveGestioneToLocal(username, merge, saldoFinale);
+                  saveGestioneToLocal(username, merge, saldoFinale, mergeTx);
                   setAutoSynced(true);
-                  console.log('✅ Gestione caricata da:', url.split('/').slice(0, 5).join('/'), '- saldo finale:', saldoFinale);
+                  console.log('✅ Gestione caricata da:', url.split('/').slice(0, 5).join('/'), '- saldo:', saldoFinale, '- tx:', mergeTx.length);
                 }
                 break;
               }
@@ -1856,12 +2177,31 @@
         console.log('🔒 Auto-save bloccato (in attesa di init)');
         return;
       }
-      saveGestioneToLocal(username, movimenti, saldoIniziale);
-    }, [movimenti, saldoIniziale, loading, username]);
+      saveGestioneToLocal(username, movimenti, saldoIniziale, transazioni);
+    }, [movimenti, saldoIniziale, transazioni, loading, username]);
 
     const stats = useMemo(() => calcolaStatistiche(movimenti, saldoIniziale), [movimenti, saldoIniziale]);
 
+    // ⭐ Saldo disponibile = saldoIniziale + profitto giocate + netto transazioni
+    const saldoDisponibile = useMemo(
+      () => calcolaSaldoDisponibile(movimenti, saldoIniziale, transazioni),
+      [movimenti, saldoIniziale, transazioni]
+    );
+
+    const totaliTransazioni = useMemo(
+      () => calcolaTotaliTransazioni(transazioni),
+      [transazioni]
+    );
+
     const handleAdd = useCallback((mov) => setMovimenti(prev => [...prev, mov]), []);
+
+    const handleAddTransazione = useCallback((tx) => {
+      setTransazioni(prev => [...prev, tx]);
+    }, []);
+
+    const handleDeleteTransazione = useCallback((id) => {
+      setTransazioni(prev => prev.filter(t => t.id !== id));
+    }, []);
 
     const handleUpdate = useCallback((id, patch) => {
       setMovimenti(prev => prev.map(m => {
@@ -1880,7 +2220,7 @@
     const handleDelete = useCallback((id) => setMovimenti(prev => prev.filter(m => m.id !== id)), []);
 
     const handleExportDownload = () => {
-      esportaExcel(username, movimenti, saldoIniziale);
+      esportaExcel(username, movimenti, saldoIniziale, transazioni);
       setMsg({ type: 'success', text: '📥 File ' + excelFilename(username) + ' scaricato!' });
       setTimeout(() => setMsg(null), 3000);
     };
@@ -1894,7 +2234,7 @@
 
       setUploadBusy(true);
       try {
-        const wb = buildWorkbook(username, movimenti, saldoIniziale);
+        const wb = buildWorkbook(username, movimenti, saldoIniziale, transazioni);
         const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
 
         const filepath = `${EXCEL_DIR}/${excelFilename(username)}`;
@@ -1923,7 +2263,7 @@
       if (!isNaN(v) && v >= 0) {
         setSaldoIniziale(v);
         setEditSaldo(false);
-        saveGestioneToLocal(username, movimenti, v);
+        saveGestioneToLocal(username, movimenti, v, transazioni);
         setMsg({ type: 'success', text: `✅ Saldo iniziale aggiornato a €${v.toFixed(2)}` });
         setTimeout(() => setMsg(null), 2500);
       } else {
@@ -1970,13 +2310,20 @@
           >🔄 Cambia utente</button>
         </div>
 
+        {/* ⭐ STAT CARDS con Saldo Corrente che include prelievi/depositi */}
         <div style={{
           display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px',
           marginBottom: '20px',
         }}>
-          <StatCard icon="💰" label="Saldo Corrente"
-            value={`€${stats.saldoCorrente.toFixed(2)}`}
-            color={stats.saldoCorrente >= saldoIniziale ? 'var(--win)' : 'var(--lose)'} />
+          <StatCard
+            icon="💰"
+            label="Saldo Corrente"
+            value={`€${saldoDisponibile.toFixed(2)}`}
+            sub={transazioni.length > 0
+              ? `giocate: €${stats.saldoCorrente.toFixed(2)}`
+              : undefined}
+            color={saldoDisponibile >= saldoIniziale ? 'var(--win)' : 'var(--lose)'}
+          />
           <StatCard icon="📊" label="Profitto"
             value={`${stats.profitto >= 0 ? '+' : ''}€${stats.profitto.toFixed(2)}`}
             color={stats.profitto >= 0 ? 'var(--win)' : 'var(--lose)'} />
@@ -1993,7 +2340,14 @@
             color="var(--accent)" />
         </div>
 
+        {/* ⭐ FORM PRELIEVO/DEPOSITO */}
+        <FormTransazione onAdd={handleAddTransazione} transazioni={transazioni} />
+
+        {/* FORM NUOVA GIOCATA */}
         <FormInserimento onAdd={handleAdd} movimenti={movimenti} saldoIniziale={saldoIniziale} />
+
+        {/* LISTA TRANSAZIONI */}
+        <ListaTransazioni transazioni={transazioni} onDelete={handleDeleteTransazione} />
 
         <div style={{
           display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center',
@@ -2105,6 +2459,13 @@
           <b style={{ color: 'var(--accent)' }}>💡 Info:</b> La settimana va da <b>Giovedì</b> a <b>Mercoledì</b> successivo.
           File sincronizzato da <code>excel/{excelFilename(username)}</code> (branch <code>master</code>).
           Usa <b>🚀 Salva su GitHub</b> per caricare automaticamente tramite PAT.
+          <br />
+          <b style={{ color: 'var(--accent)' }}>🏦 Prelievi/Depositi</b> non contano come giocate e non influenzano Profitto/ROI/WinRate, ma modificano il <b>Saldo Corrente</b>.
+          {totaliTransazioni.totaleDepositi > 0 || totaliTransazioni.totalePrelievi > 0 ? (
+            <span>
+              {' '}— Totale: 💚 €{totaliTransazioni.totaleDepositi.toFixed(2)} | ❤️ €{totaliTransazioni.totalePrelievi.toFixed(2)}
+            </span>
+          ) : null}
         </div>
       </div>
     );
@@ -2182,7 +2543,6 @@
 
   // ============================================================
   // PANNELLO GESTIONE UTENTI (per Impostazioni)
-  // ⭐ Con badge admin + pulsanti promuovi/rimuovi
   // ============================================================
 
   function GestioneUtentiPanel() {
@@ -2743,8 +3103,11 @@
     GITHUB_BRANCH,
     USERS_FILE,
     DEFAULT_PAT,
+    // ⭐ NUOVE
+    calcolaTotaliTransazioni,
+    calcolaSaldoDisponibile,
   };
 
-  console.log('✅ Modulo Gestione Conto caricato - PAT hardcodato + mascherato + merge intelligente + ruoli admin');
+  console.log('✅ Modulo Gestione Conto v2 caricato - PAT hardcodato + mascherato + merge intelligente + ruoli admin + PRELIEVO/DEPOSITO');
 
 })();
