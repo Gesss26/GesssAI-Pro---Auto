@@ -976,7 +976,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Dresden",
-    "stadio": "Rudolf-Harbig-Stadion",
+    "stadio": "Rudolf-Harbig Stadion",
     "stato": "Futura"
   },
   {
@@ -990,7 +990,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Bielefeld",
-    "stadio": "",
+    "stadio": "Schüco-Arena",
     "stato": "Futura"
   },
   {
@@ -5021,7 +5021,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Leverkusen",
+    "citta": "Bayer Leverkusen",
     "stadio": "BayArena",
     "stato": "Futura"
   },
@@ -5035,7 +5035,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Mönchengladbach",
+    "citta": "Monchengladbach",
     "stadio": "Borussia-Park",
     "stato": "Futura"
   },
@@ -22690,7 +22690,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Zwolle",
-    "stadio": "",
+    "stadio": "MAC³PARK Stadion",
     "stato": "Futura"
   },
   {
@@ -22718,7 +22718,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Groningen",
-    "stadio": "Euroborg",
+    "stadio": "Hitachi Capital Mobility Stadion",
     "stato": "Futura"
   },
   {
@@ -22732,7 +22732,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Nijmegen",
-    "stadio": "Goffertstadion",
+    "stadio": "Stadion de Goffert",
     "stato": "Futura"
   },
   {
@@ -35654,7 +35654,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Chuncheon",
-    "stadio": "Chuncheon Songam Stadium",
+    "stadio": "Chuncheon Songam Sports Town",
     "stato": "Futura"
   },
   {
@@ -36970,7 +36970,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Malaga",
-    "stadio": "Estadio La Rosaleda",
+    "stadio": "La Rosaleda",
     "stato": "Futura"
   },
   {
@@ -36984,7 +36984,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Madrid",
-    "stadio": "",
+    "stadio": "Santiago Bernabéu Stadium",
     "stato": "Futura"
   },
   {
@@ -41898,7 +41898,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Angers",
-    "stadio": "Stade Raymond-Kopa",
+    "stadio": "Stade Raymond Kopa",
     "stato": "Futura"
   },
   {
@@ -50577,8 +50577,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Brighton",
-    "stadio": "Amex Stadium",
+    "citta": "Falmer",
+    "stadio": "American Express Stadium",
     "stato": "Futura"
   },
   {
@@ -63500,7 +63500,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Granada",
-    "stadio": "",
+    "stadio": "Nuevo Los Cármenes",
     "stato": "Futura"
   },
   {
@@ -63514,7 +63514,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Girona",
-    "stadio": "Estadio Municipal de Montilivi",
+    "stadio": "Estadi Montilivi",
     "stato": "Futura"
   },
   {
@@ -63528,7 +63528,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Valladolid",
-    "stadio": "",
+    "stadio": "Estadio José Zorrilla",
     "stato": "Futura"
   },
   {
@@ -63542,7 +63542,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Burgos",
-    "stadio": "",
+    "stadio": "Municipal El Plantio",
     "stato": "Futura"
   },
   {
@@ -69394,7 +69394,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Udine",
-    "stadio": "Bluenergy Stadium - Stadio Friuli",
+    "stadio": "Bluenergy Stadium",
     "stato": "Futura"
   },
   {
@@ -69422,7 +69422,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Milan",
-    "stadio": "",
+    "stadio": "San Siro/Giuseppe Meazza",
     "stato": "Futura"
   },
   {
@@ -74770,7 +74770,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Cesena",
-    "stadio": "Stadio Dino Manuzzi",
+    "stadio": "Dino Manuzzi",
     "stato": "Futura"
   },
   {
@@ -74784,7 +74784,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Genoa",
-    "stadio": "Stadio Luigi Ferraris",
+    "stadio": "Luigi Ferraris",
     "stato": "Futura"
   },
   {
@@ -91135,8 +91135,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "",
-    "stadio": "",
+    "citta": "Barletta",
+    "stadio": "Stadio Comunale Cosimo Puttilli",
     "stato": "Futura"
   },
   {
@@ -106266,12 +106266,12 @@
     "giornata": "1",
     "squadra_casa": "FC Lugano",
     "squadra_ospite": "FK Crvena Zvezda",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–2",
+    "gol_casa": "3",
+    "gol_ospite": "2",
     "citta": "Lugano",
     "stadio": "AIL Arena",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa Conference",
@@ -106280,12 +106280,12 @@
     "giornata": "1",
     "squadra_casa": "HNK Hajduk Split",
     "squadra_ospite": "Ajax",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Split",
     "stadio": "Stadion Poljud",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa Conference",
@@ -106294,12 +106294,12 @@
     "giornata": "1",
     "squadra_casa": "Panathinaikos",
     "squadra_ospite": "Borac Banja Luka",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Athens",
-    "stadio": "Olympic Stadium of Athens",
-    "stato": "Futura"
+    "stadio": "Spiros Louis Olympic Stadium",
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa Conference",
@@ -106308,12 +106308,12 @@
     "giornata": "1",
     "squadra_casa": "Gent",
     "squadra_ospite": "Aarhus",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Gent",
     "stadio": "Planet Group Arena",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa Conference",
@@ -106322,12 +106322,12 @@
     "giornata": "1",
     "squadra_casa": "Universitatea Craiova",
     "squadra_ospite": "Getafe",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Craiova",
     "stadio": "Stadionul Ion Oblemenco",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa Conference",
@@ -106336,12 +106336,12 @@
     "giornata": "1",
     "squadra_casa": "CSKA Sofia",
     "squadra_ospite": "Monaco",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Sofia",
-    "stadio": "National Stadium Vasil Levski",
-    "stato": "Futura"
+    "stadio": "Vasil Levski National Sports Academy",
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa Conference",
@@ -106350,12 +106350,12 @@
     "giornata": "1",
     "squadra_casa": "KuPS",
     "squadra_ospite": "Trabzonspor",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–4",
+    "gol_casa": "2",
+    "gol_ospite": "4",
     "citta": "Tampere",
-    "stadio": "Tammelan Stadion",
-    "stato": "Futura"
+    "stadio": "Tammela Stadium",
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa Conference",
@@ -106364,12 +106364,12 @@
     "giornata": "1",
     "squadra_casa": "Mjallby AIF",
     "squadra_ospite": "Inter Club d'Escaldes",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Helsingborg",
     "stadio": "Olympia",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa Conference",
@@ -106378,12 +106378,12 @@
     "giornata": "1",
     "squadra_casa": "Egnatia Rrogozhinë",
     "squadra_ospite": "FC Midtjylland",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Tirana",
-    "stadio": "Arena Kombetare",
-    "stato": "Futura"
+    "stadio": "Air Albania",
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa Conference",
@@ -106392,12 +106392,12 @@
     "giornata": "1",
     "squadra_casa": "Riga",
     "squadra_ospite": "Kairat Almaty",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Riga",
-    "stadio": "Skonto stadions",
-    "stato": "Futura"
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
+    "citta": "Rīga",
+    "stadio": "Skonto",
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa Conference",
@@ -106406,12 +106406,12 @@
     "giornata": "1",
     "squadra_casa": "Brighton",
     "squadra_ospite": "Kauno Žalgiris",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Brighton",
-    "stadio": "Amex Stadium",
-    "stato": "Futura"
+    "risultato": "4–0",
+    "gol_casa": "4",
+    "gol_ospite": "0",
+    "citta": "Falmer",
+    "stadio": "American Express Stadium",
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa Conference",
@@ -106420,12 +106420,12 @@
     "giornata": "1",
     "squadra_casa": "SC Freiburg",
     "squadra_ospite": "FK Jablonec",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–2",
+    "gol_casa": "3",
+    "gol_ospite": "2",
     "citta": "Freiburg",
-    "stadio": "Europa-Park Stadion",
-    "stato": "Futura"
+    "stadio": "Europa-Park-Stadion",
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa Conference",
@@ -106434,12 +106434,12 @@
     "giornata": "1",
     "squadra_casa": "Heart Of Midlothian",
     "squadra_ospite": "FC Nordsjaelland",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Edinburgh",
     "stadio": "Tynecastle Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa Conference",
@@ -106448,12 +106448,12 @@
     "giornata": "1",
     "squadra_casa": "Brann",
     "squadra_ospite": "Lincoln Red Imps FC",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Bergen",
     "stadio": "Brann Stadion",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa Conference",
@@ -106462,12 +106462,12 @@
     "giornata": "1",
     "squadra_casa": "FC Copenhagen",
     "squadra_ospite": "SC Braga",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–0",
+    "gol_casa": "3",
+    "gol_ospite": "0",
     "citta": "Copenhagen",
-    "stadio": "Parken Stadium",
-    "stato": "Futura"
+    "stadio": "Parken",
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa Conference",
@@ -106476,12 +106476,12 @@
     "giornata": "1",
     "squadra_casa": "Twente",
     "squadra_ospite": "FC Thun",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Enschede",
     "stadio": "De Grolsch Veste",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa Conference",
@@ -106490,12 +106490,12 @@
     "giornata": "1",
     "squadra_casa": "Atalanta",
     "squadra_ospite": "Pafos",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–1",
+    "gol_casa": "3",
+    "gol_ospite": "1",
     "citta": "Bergamo",
     "stadio": "New Balance Arena",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa Conference",
@@ -106504,12 +106504,12 @@
     "giornata": "1",
     "squadra_casa": "St. Truiden",
     "squadra_ospite": "FC Iberia 1999",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Sint-Truiden",
-    "stadio": "Daio Wasabi Stayen",
-    "stato": "Futura"
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
+    "citta": "Sint- Truiden",
+    "stadio": "Stayen",
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa Conference",
@@ -109150,12 +109150,12 @@
     "giornata": "2",
     "squadra_casa": "Lyon",
     "squadra_ospite": "Crystal Palace",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–2",
+    "gol_casa": "3",
+    "gol_ospite": "2",
     "citta": "Lyon",
     "stadio": "Groupama Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa League",
@@ -109164,12 +109164,12 @@
     "giornata": "2",
     "squadra_casa": "AZ Alkmaar",
     "squadra_ospite": "Hapoel Beer Sheva",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Alkmaar",
     "stadio": "AFAS Stadion（Alkmaar）",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa League",
@@ -109178,12 +109178,12 @@
     "giornata": "2",
     "squadra_casa": "Lech Poznan",
     "squadra_ospite": "Bayer Leverkusen",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–4",
+    "gol_casa": "0",
+    "gol_ospite": "4",
     "citta": "Poznan",
     "stadio": "Stadion Miejski",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa League",
@@ -109192,12 +109192,12 @@
     "giornata": "2",
     "squadra_casa": "Red Bull Salzburg",
     "squadra_ospite": "AC Milan",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–4",
+    "gol_casa": "0",
+    "gol_ospite": "4",
     "citta": "Salzburg",
     "stadio": "Red Bull Arena",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa League",
@@ -109206,12 +109206,12 @@
     "giornata": "2",
     "squadra_casa": "Sparta Praha",
     "squadra_ospite": "Lillestrom",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Prague",
     "stadio": "Stadion Letná",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa League",
@@ -109220,12 +109220,12 @@
     "giornata": "2",
     "squadra_casa": "Union St. Gilloise",
     "squadra_ospite": "Real Sociedad",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Heverley",
     "stadio": "Den Dreef Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa League",
@@ -109234,12 +109234,12 @@
     "giornata": "2",
     "squadra_casa": "Celje",
     "squadra_ospite": "Omonia Nicosia",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–3",
+    "gol_casa": "0",
+    "gol_ospite": "3",
     "citta": "Celje",
     "stadio": "Stadion Z’dežele",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa League",
@@ -109248,12 +109248,12 @@
     "giornata": "2",
     "squadra_casa": "Torreense",
     "squadra_ospite": "Sunderland",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Leiria",
     "stadio": "Estádio Dr. Magalhães Pessoa",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa League",
@@ -109262,12 +109262,12 @@
     "giornata": "2",
     "squadra_casa": "Bournemouth",
     "squadra_ospite": "Sturm Graz",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–0",
+    "gol_casa": "3",
+    "gol_ospite": "0",
     "citta": "Bournemouth",
     "stadio": "Vitality Stadium",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa League",
@@ -109276,12 +109276,12 @@
     "giornata": "2",
     "squadra_casa": "Marseille",
     "squadra_ospite": "Olympiakos Piraeus",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–1",
+    "gol_casa": "0",
+    "gol_ospite": "1",
     "citta": "Marseille",
     "stadio": "Orange Vélodrome",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa League",
@@ -109290,12 +109290,12 @@
     "giornata": "2",
     "squadra_casa": "Rennes",
     "squadra_ospite": "OFI",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Rennes",
     "stadio": "Roazhon Park",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa League",
@@ -109304,12 +109304,12 @@
     "giornata": "2",
     "squadra_casa": "1899 Hoffenheim",
     "squadra_ospite": "Beşiktaş",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–3",
+    "gol_casa": "2",
+    "gol_ospite": "3",
     "citta": "Sinsheim",
     "stadio": "Prezero Arena",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa League",
@@ -109318,12 +109318,12 @@
     "giornata": "2",
     "squadra_casa": "Benfica",
     "squadra_ospite": "Celtic",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "4–1",
+    "gol_casa": "4",
+    "gol_ospite": "1",
     "citta": "Lisbon",
     "stadio": "Estádio da Luz",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa League",
@@ -109332,12 +109332,12 @@
     "giornata": "2",
     "squadra_casa": "Jagiellonia",
     "squadra_ospite": "Ararat-Armenia",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "3–1",
+    "gol_casa": "3",
+    "gol_ospite": "1",
     "citta": "Bialystok",
     "stadio": "Stadion Miejski w Białymstoku",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa League",
@@ -109346,12 +109346,12 @@
     "giornata": "2",
     "squadra_casa": "NEC Nijmegen",
     "squadra_ospite": "Levski Sofia",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Nijmegen",
     "stadio": "Stadion de Goffert",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa League",
@@ -109360,12 +109360,12 @@
     "giornata": "2",
     "squadra_casa": "Celta Vigo",
     "squadra_ospite": "Juventus",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Vigo",
     "stadio": "Municipal de Balaídos",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa League",
@@ -109374,12 +109374,12 @@
     "giornata": "2",
     "squadra_casa": "Dinamo Zagreb",
     "squadra_ospite": "Anderlecht",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–0",
+    "gol_casa": "1",
+    "gol_ospite": "0",
     "citta": "Zagreb",
     "stadio": "Stadion Maksimir",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa League",
@@ -109388,12 +109388,12 @@
     "giornata": "2",
     "squadra_casa": "Ferencvarosi TC",
     "squadra_ospite": "Plzen",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Budapest",
     "stadio": "Groupama Aréna",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "UEFA Europa League",
