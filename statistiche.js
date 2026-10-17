@@ -1,15 +1,31 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v9)
+// statistiche.js - Modulo Statistiche (v10)
+// ✅ Motore predittivo Dixon-Coles (no Monte Carlo rumoroso)
+// ✅ Parametri casa/trasferta separati
+// ✅ Decay temporale (half-life 365 giorni)
+// ✅ Media gol calcolata per campionato (no hardcode)
+// ✅ Correzione τ sui pareggi (0-0, 1-1, 0-1, 1-0)
+// ✅ Matrice esatta deterministica (10.000 "simulazioni" equivalenti)
 // ✅ Ultimi avversari sotto la squadra giusta
 // ✅ Classifica a griglia con colonne separate
 // ✅ PC: 2 colonne - Mobile: 1 colonna
-// ✅ Sub-tabs uniformi (CSS gestisce larghezza/altezza fisse)
 // ============================================================
 
 (function () {
   'use strict';
 
   const { useState, useEffect, useMemo } = React;
+
+  // ============================================================
+  // CACHE PER I PARAMETRI (evita ricalcoli inutili)
+  // ============================================================
+  const _paramCache = new Map();
+  const _cacheKey = (team, champ) => `${team}__${champ}`;
+  const _avgKey = (champ) => `__avg__${champ}`;
+
+  const clearStatsCache = () => {
+    _paramCache.clear();
+  };
 
   // ============================================================
   // FORMATTAZIONE ETICHETTE
@@ -49,7 +65,223 @@
   };
 
   // ============================================================
-  // CALCOLO DC
+  // MOTORE PREDITTIVO DIXON-COLES
+  // ============================================================
+
+  // Media gol per campionato (separata casa/trasferta)
+  const getLeagueAverages = (championship, allMatches) => {
+    const key = _avgKey(championship);
+    if (_paramCache.has(key)) return _paramCache.get(key);
+
+    const played = allMatches.filter(m =>
+      m.campionato === championship && m.stato === 'Giocata'
+    );
+
+    if (played.length === 0) {
+      const fallback = { avgHome: 1.4, avgAway: 1.1, n: 0 };
+      _paramCache.set(key, fallback);
+      return fallback;
+    }
+
+    let totHome = 0, totAway = 0;
+    played.forEach(m => {
+      totHome += m.golCasa;
+      totAway += m.golOspite;
+    });
+
+    const result = {
+      avgHome: totHome / played.length,
+      avgAway: totAway / played.length,
+      n: played.length,
+    };
+    _paramCache.set(key, result);
+    return result;
+  };
+
+  // Parametri squadra con decay temporale
+  // halfLifeDays: 365 => una partita di 1 anno fa pesa 50%
+  const getTeamParams = (teamName, championship, allMatches, halfLifeDays = 365) => {
+    const key = _cacheKey(teamName, championship);
+    if (_paramCache.has(key)) return _paramCache.get(key);
+
+    const played = allMatches.filter(m =>
+      m.campionato === championship &&
+      m.stato === 'Giocata' &&
+      (m.casa === teamName || m.ospiti === teamName)
+    );
+
+    if (played.length < 3) {
+      const weak = {
+        attackHome: 1, defenseHome: 1,
+        attackAway: 1, defenseAway: 1,
+        n: played.length, weak: true,
+      };
+      _paramCache.set(key, weak);
+      return weak;
+    }
+
+    const today = new Date();
+    const decay = (dateStr) => {
+      if (!dateStr) return 1;
+      const d = new Date(dateStr + 'T00:00:00');
+      if (isNaN(d.getTime())) return 1;
+      const days = Math.max(0, (today - d) / 86400000);
+      return Math.exp(-Math.log(2) * days / halfLifeDays);
+    };
+
+    let wHome = 0, gfHome = 0, gsHome = 0;
+    let wAway = 0, gfAway = 0, gsAway = 0;
+
+    played.forEach(m => {
+      const w = decay(m.data);
+      if (m.casa === teamName) {
+        wHome += w;
+        gfHome += w * m.golCasa;
+        gsHome += w * m.golOspite;
+      } else {
+        wAway += w;
+        gfAway += w * m.golOspite;
+        gsAway += w * m.golCasa;
+      }
+    });
+
+    const avg = getLeagueAverages(championship, allMatches);
+    const safe = (num, den, fallback = 1) => den > 0 ? num / den : fallback;
+
+    const result = {
+      attackHome:  safe(gfHome, wHome) / (avg.avgHome || 1),
+      defenseHome: safe(gsHome, wHome) / (avg.avgAway || 1),
+      attackAway:  safe(gfAway, wAway) / (avg.avgAway || 1),
+      defenseAway: safe(gsAway, wAway) / (avg.avgHome || 1),
+      n: played.length,
+      wHome, wAway,
+    };
+    _paramCache.set(key, result);
+    return result;
+  };
+
+  // Fattoriale piccolo (memoizzato)
+  const _factCache = [1, 1];
+  const factorial = (n) => {
+    if (n < 0) return 1;
+    if (_factCache[n] !== undefined) return _factCache[n];
+    let r = _factCache[_factCache.length - 1];
+    for (let i = _factCache.length; i <= n; i++) {
+      r *= i;
+      _factCache[i] = r;
+    }
+    return r;
+  };
+
+  const poissonPmf = (lambda, k) => {
+    if (lambda <= 0) return k === 0 ? 1 : 0;
+    return Math.exp(-lambda) * Math.pow(lambda, k) / factorial(k);
+  };
+
+  // Matrice punteggi esatti con correzione Dixon-Coles
+  // rho tipico stimato storicamente ≈ -0.10 (range -0.05 / -0.15)
+  const buildScoreMatrix = (lambdaHome, lambdaAway, rho = -0.10, maxGol = 8) => {
+    const matrix = {};
+    let sum = 0;
+
+    for (let i = 0; i <= maxGol; i++) {
+      for (let j = 0; j <= maxGol; j++) {
+        let p = poissonPmf(lambdaHome, i) * poissonPmf(lambdaAway, j);
+
+        // Correzione Dixon-Coles
+        if (i === 0 && j === 0) p *= (1 - lambdaHome * lambdaAway * rho);
+        else if (i === 0 && j === 1) p *= (1 + lambdaHome * rho);
+        else if (i === 1 && j === 0) p *= (1 + lambdaAway * rho);
+        else if (i === 1 && j === 1) p *= (1 - rho);
+
+        if (p < 0) p = 0;
+        matrix[`${i}-${j}`] = p;
+        sum += p;
+      }
+    }
+
+    // Normalizzazione (per sicurezza, la somma dovrebbe essere ~1)
+    if (sum > 0) {
+      Object.keys(matrix).forEach(k => { matrix[k] /= sum; });
+    }
+
+    return matrix;
+  };
+
+  // Funzione principale: sostituisce il vecchio simulateMatches
+  const simulateMatches = (homeTeam, awayTeam, championship, allMatches) => {
+    // Pulisci la cache per assicurarti di usare i dati aggiornati
+    clearStatsCache();
+
+    const hp = getTeamParams(homeTeam, championship, allMatches);
+    const ap = getTeamParams(awayTeam, championship, allMatches);
+    const avg = getLeagueAverages(championship, allMatches);
+
+    // λ Dixon-Coles classica
+    const lambdaHome = hp.attackHome * ap.defenseAway * (avg.avgHome || 1.4);
+    const lambdaAway = ap.attackAway * hp.defenseHome * (avg.avgAway || 1.1);
+
+    // Matrice esatta (no Monte Carlo)
+    const matrix = buildScoreMatrix(lambdaHome, lambdaAway);
+
+    // Statistiche derivate
+    let hw = 0, dr = 0, aw = 0;
+    let o15 = 0, o25 = 0, o35 = 0, o45 = 0;
+    let gg = 0, c12u45 = 0;
+    let maxKey = '0-0', maxP = 0;
+
+    Object.entries(matrix).forEach(([k, p]) => {
+      const [gc, go] = k.split('-').map(Number);
+      const tot = gc + go;
+
+      if (gc > go) hw += p;
+      else if (gc === go) dr += p;
+      else aw += p;
+
+      if (tot > 1.5) o15 += p;
+      if (tot > 2.5) o25 += p;
+      if (tot > 3.5) o35 += p;
+      if (tot > 4.5) o45 += p;
+
+      if (gc > 0 && go > 0) gg += p;
+      if (gc !== go && tot < 4.5) c12u45 += p;
+
+      if (p > maxP) { maxP = p; maxKey = k; }
+    });
+
+    const pct = (v) => Math.round(v * 100);
+
+    return {
+      homeWins: pct(hw),
+      draws: pct(dr),
+      awayWins: pct(aw),
+      over15: pct(o15), under15: pct(1 - o15),
+      over25: pct(o25), under25: pct(1 - o25),
+      over35: pct(o35), under35: pct(1 - o35),
+      over45: pct(o45), under45: pct(1 - o45),
+      gg: pct(gg), ng: pct(1 - gg),
+      pct12Under45: pct(c12u45),
+      maxResult: maxKey,
+      maxResultPct: pct(maxP),
+      lambdaCasa: lambdaHome.toFixed(2),
+      lambdaOspite: lambdaAway.toFixed(2),
+      homeAttacco: hp.attackHome.toFixed(2),
+      homeDifesa: hp.defenseHome.toFixed(2),
+      awayAttacco: ap.attackAway.toFixed(2),
+      awayDifesa: ap.defenseAway.toFixed(2),
+      partiteAnalizzate: Math.min(hp.n, ap.n),
+      numSimulations: 10000, // mantenuto per compatibilità UI
+      risultati: matrix,
+      // info extra per debug
+      leagueAvgHome: (avg.avgHome || 0).toFixed(2),
+      leagueAvgAway: (avg.avgAway || 0).toFixed(2),
+      weakHome: !!hp.weak,
+      weakAway: !!ap.weak,
+    };
+  };
+
+  // ============================================================
+  // CALCOLO DC (Double Chance) — invariato
   // ============================================================
   const calcDC = (mc, dcCode) => {
     if (!mc) return 0;
@@ -59,23 +291,20 @@
     const total = hw + d + aw;
     if (total === 0) return 0;
     const norm = 100 / total;
-    const hwN = hw * norm;
-    const dN  = d  * norm;
-    const awN = aw * norm;
-    if (dcCode === '1X') return Math.round(hwN + dN);
-    if (dcCode === '12') return Math.round(hwN + awN);
-    if (dcCode === 'X2') return Math.round(dN + awN);
+    if (dcCode === '1X') return Math.round((hw + d) * norm);
+    if (dcCode === '12') return Math.round((hw + aw) * norm);
+    if (dcCode === 'X2') return Math.round((d + aw) * norm);
     return 0;
   };
 
   const calcolaCombinata = (mc, dcCode, tipo, soglia) => {
     if (!mc || !mc.risultati) return 0;
-    const totalSim = mc.numSimulations || 10000;
-    if (totalSim === 0) return 0;
     let count = 0;
-    for (const [key, c] of Object.entries(mc.risultati)) {
+    let total = 0;
+    for (const [key, p] of Object.entries(mc.risultati)) {
       const [gC, gO] = key.split('-').map(Number);
       const totale = gC + gO;
+      total += p;
       let dcOk = false;
       if (dcCode === '1X') dcOk = gC >= gO;
       else if (dcCode === '12') dcOk = gC !== gO;
@@ -84,44 +313,53 @@
       let ouOk = false;
       if (tipo === 'over')  ouOk = totale > soglia;
       else if (tipo === 'under') ouOk = totale < soglia;
-      if (!ouOk) continue;
-      count += c;
+      if (ouOk) count += p;
     }
-    return Math.round((count / totalSim) * 100);
+    if (total === 0) return 0;
+    return Math.round((count / total) * 100);
   };
 
   const calcolaCombinataDCMultigol = (mc, dcCode, mgLabel) => {
     if (!mc || !mc.risultati) return 0;
-    const totalSim = mc.numSimulations || 10000;
-    if (totalSim === 0) return 0;
-    const mgMatch = mgLabel.match(/MG\s+(Casa|Ospite|Tot)\s+(\d+)-(\d+)/);
-    if (!mgMatch) return 0;
-    const [, target, minStr, maxStr] = mgMatch;
-    const minV = parseInt(minStr, 10);
-    const maxV = parseInt(maxStr, 10);
-    let count = 0;
-    for (const [key, c] of Object.entries(mc.risultati)) {
+    const mgMatch = mgLabel.match(/MG\s+(Casa|Ospite|Tot)\s+(\d+)-(\d+)/) ||
+                    mgLabel.match(/(\d+)-(\d+)/);
+    let target = 'Tot', minV, maxV;
+    if (mgMatch.length === 4) {
+      target = mgMatch[1];
+      minV = parseInt(mgMatch[2], 10);
+      maxV = parseInt(mgMatch[3], 10);
+    } else if (mgMatch.length === 3) {
+      minV = parseInt(mgMatch[1], 10);
+      maxV = parseInt(mgMatch[2], 10);
+    } else {
+      return 0;
+    }
+
+    let count = 0, total = 0;
+    for (const [key, p] of Object.entries(mc.risultati)) {
       const [gC, gO] = key.split('-').map(Number);
       const totale = gC + gO;
+      total += p;
+
       let dcOk = false;
       if (dcCode === '1X') dcOk = gC >= gO;
       else if (dcCode === '12') dcOk = gC !== gO;
       else if (dcCode === 'X2') dcOk = gO >= gC;
       if (!dcOk) continue;
+
       let mgOk = false;
       if (target === 'Casa')        mgOk = gC >= minV && gC <= maxV;
       else if (target === 'Ospite') mgOk = gO >= minV && gO <= maxV;
-      else if (target === 'Tot')    mgOk = totale >= minV && totale <= maxV;
-      if (!mgOk) continue;
-      count += c;
+      else                          mgOk = totale >= minV && totale <= maxV;
+
+      if (mgOk) count += p;
     }
-    return Math.round((count / totalSim) * 100);
+    if (total === 0) return 0;
+    return Math.round((count / total) * 100);
   };
 
   const calcolaCombinataMGCasaOspite = (mc, label) => {
     if (!mc || !mc.risultati) return 0;
-    const totalSim = mc.numSimulations || 10000;
-    if (totalSim === 0) return 0;
     const parts = label.split('+');
     if (parts.length !== 2) return 0;
     const parseRange = (s) => {
@@ -132,36 +370,48 @@
     const r1 = parseRange(parts[0]);
     const r2 = parseRange(parts[1]);
     if (!r1 || !r2) return 0;
-    let count = 0;
-    for (const [key, c] of Object.entries(mc.risultati)) {
+
+    let count = 0, total = 0;
+    for (const [key, p] of Object.entries(mc.risultati)) {
       const [gC, gO] = key.split('-').map(Number);
+      total += p;
       if (gC >= r1.min && gC <= r1.max && gO >= r2.min && gO <= r2.max) {
-        count += c;
+        count += p;
       }
     }
-    return Math.round((count / totalSim) * 100);
+    if (total === 0) return 0;
+    return Math.round((count / total) * 100);
   };
 
   const calcolaMultigol = (mc, label) => {
     if (!mc || !mc.risultati) return 0;
-    const totalSim = mc.numSimulations || 10000;
-    if (totalSim === 0) return 0;
-    const mgMatch = label.match(/MG\s+(Casa|Ospite|Tot)\s+(\d+)-(\d+)/);
-    if (!mgMatch) return 0;
-    const [, target, minStr, maxStr] = mgMatch;
-    const minV = parseInt(minStr, 10);
-    const maxV = parseInt(maxStr, 10);
-    let count = 0;
-    for (const [key, c] of Object.entries(mc.risultati)) {
+    const mgMatch = label.match(/MG\s+(Casa|Ospite|Tot)\s+(\d+)-(\d+)/) ||
+                    label.match(/^(\d+)-(\d+)$/);
+    let target = 'Tot', minV, maxV;
+    if (mgMatch.length === 4) {
+      target = mgMatch[1];
+      minV = parseInt(mgMatch[2], 10);
+      maxV = parseInt(mgMatch[3], 10);
+    } else if (mgMatch.length === 3) {
+      minV = parseInt(mgMatch[1], 10);
+      maxV = parseInt(mgMatch[2], 10);
+    } else {
+      return 0;
+    }
+
+    let count = 0, total = 0;
+    for (const [key, p] of Object.entries(mc.risultati)) {
       const [gC, gO] = key.split('-').map(Number);
       const totale = gC + gO;
+      total += p;
       let ok = false;
       if (target === 'Casa')        ok = gC >= minV && gC <= maxV;
       else if (target === 'Ospite') ok = gO >= minV && gO <= maxV;
-      else if (target === 'Tot')    ok = totale >= minV && totale <= maxV;
-      if (ok) count += c;
+      else                          ok = totale >= minV && totale <= maxV;
+      if (ok) count += p;
     }
-    return Math.round((count / totalSim) * 100);
+    if (total === 0) return 0;
+    return Math.round((count / total) * 100);
   };
 
   const calcolaPctGiocata = (familyId, opt, mc, stats) => {
@@ -224,112 +474,6 @@
   };
 
   // ============================================================
-  // MONTE CARLO
-  // ============================================================
-  const getTeamPoissonParams = (teamName, allMatches) => {
-    const matches = allMatches.filter(m =>
-      m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName)
-    );
-    if (matches.length < 3) return { attacco: 1.2, difesa: 1.2, partite: matches.length };
-    let golFatti = 0, golSubiti = 0;
-    matches.forEach(m => {
-      const isHome = m.casa === teamName;
-      golFatti += isHome ? m.golCasa : m.golOspite;
-      golSubiti += isHome ? m.golOspite : m.golCasa;
-    });
-    const mediaFatti = golFatti / matches.length;
-    const mediaSubiti = golSubiti / matches.length;
-    const leagueAvg = 1.35;
-    return {
-      attacco: Math.max(0.3, mediaFatti / leagueAvg),
-      difesa: Math.max(0.3, mediaSubiti / leagueAvg),
-      partite: matches.length
-    };
-  };
-
-  const simulatePoissonMatch = (lambdaCasa, lambdaOspite) => {
-    const poisson = (lambda) => {
-      if (lambda < 0) lambda = 0;
-      let L = Math.exp(-lambda);
-      let k = 0;
-      let p = 1;
-      do { k++; p *= Math.random(); } while (p > L);
-      return k - 1;
-    };
-    const rfc = 0.85 + Math.random() * 0.3;
-    const rfo = 0.85 + Math.random() * 0.3;
-    return {
-      golCasa: poisson(lambdaCasa * rfc),
-      golOspite: poisson(lambdaOspite * rfo)
-    };
-  };
-
-  const simulateMatches = (homeTeam, awayTeam, allMatches, numSimulations = 10000) => {
-    const homeParams = getTeamPoissonParams(homeTeam, allMatches);
-    const awayParams = getTeamPoissonParams(awayTeam, allMatches);
-
-    const homeAttacco = Math.max(0.5, homeParams.attacco);
-    const homeDifesa = Math.max(0.5, homeParams.difesa);
-    const awayAttacco = Math.max(0.5, awayParams.attacco);
-    const awayDifesa = Math.max(0.5, awayParams.difesa);
-
-    const lambdaCasa = homeAttacco * awayDifesa * 1.1;
-    const lambdaOspite = awayAttacco * homeDifesa * 0.9;
-
-    let homeWins = 0, draws = 0, awayWins = 0;
-    let over15 = 0, over25 = 0, over35 = 0, over45 = 0;
-    let under15 = 0, under25 = 0, under35 = 0, under45 = 0;
-    let gg = 0, ng = 0;
-    let risultati = {};
-
-    for (let i = 0; i < numSimulations; i++) {
-      const r = simulatePoissonMatch(lambdaCasa, lambdaOspite);
-      const gC = r.golCasa, gO = r.golOspite, total = gC + gO;
-      if (gC > gO) homeWins++;
-      else if (gC === gO) draws++;
-      else awayWins++;
-      if (total > 1.5) over15++; else under15++;
-      if (total > 2.5) over25++; else under25++;
-      if (total > 3.5) over35++; else under35++;
-      if (total > 4.5) over45++; else under45++;
-      if (gC > 0 && gO > 0) gg++; else ng++;
-      const key = `${gC}-${gO}`;
-      if (!risultati[key]) risultati[key] = 0;
-      risultati[key]++;
-    }
-
-    const n = numSimulations;
-    const pct = (val) => Math.round((val / n) * 100);
-
-    let maxResult = '', maxCount = 0;
-    for (const [key, count] of Object.entries(risultati)) {
-      if (count > maxCount) { maxCount = count; maxResult = key; }
-    }
-
-    let c12U45 = 0;
-    for (const [key, count] of Object.entries(risultati)) {
-      const [gC, gO] = key.split('-').map(Number);
-      if (gC !== gO && (gC + gO) < 4.5) c12U45 += count;
-    }
-
-    return {
-      homeWins: pct(homeWins), draws: pct(draws), awayWins: pct(awayWins),
-      over15: pct(over15), under15: pct(under15),
-      over25: pct(over25), under25: pct(under25),
-      over35: pct(over35), under35: pct(under35),
-      over45: pct(over45), under45: pct(under45),
-      gg: pct(gg), ng: pct(ng),
-      pct12Under45: Math.round((c12U45 / n) * 100),
-      maxResult, maxResultPct: pct(maxCount),
-      lambdaCasa: lambdaCasa.toFixed(2), lambdaOspite: lambdaOspite.toFixed(2),
-      homeAttacco: homeAttacco.toFixed(2), homeDifesa: homeDifesa.toFixed(2),
-      awayAttacco: awayAttacco.toFixed(2), awayDifesa: awayDifesa.toFixed(2),
-      partiteAnalizzate: Math.min(homeParams.partite, awayParams.partite),
-      numSimulations: n, risultati
-    };
-  };
-
-  // ============================================================
   // AI ANALYSIS
   // ============================================================
   const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
@@ -343,18 +487,28 @@
     const runSimulation = (homeTeam, awayTeam) => {
       setLoading(true);
       try {
-        const result = simulateMatches(homeTeam, awayTeam, allMatches, 10000);
+        // ⭐ FIX: passa anche match.campionato per normalizzare per campionato
+        const result = simulateMatches(homeTeam, awayTeam, match.campionato, allMatches);
         setMc(result);
         localStorage.setItem(`ft_mc_${match.id}`, JSON.stringify(result));
-      } catch (e) { console.warn('Errore MC:', e); }
+      } catch (e) {
+        console.warn('Errore Dixon-Coles:', e);
+      }
       setLoading(false);
     };
 
     useEffect(() => {
       if (!match) return;
+      // Prova a riusare cache se esiste e ha il formato nuovo (con lambdaCasa)
       const saved = localStorage.getItem(`ft_mc_${match.id}`);
       if (saved) {
-        try { setMc(JSON.parse(saved)); return; } catch (e) {}
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.lambdaCasa && parsed.risultati) {
+            setMc(parsed);
+            return;
+          }
+        } catch (e) {}
       }
       if (match && allMatches.length > 0) runSimulation(match.casa, match.ospiti);
     }, [match]);
@@ -389,14 +543,14 @@
     if (!match) return null;
 
     if (loading) {
-      return <div className="ai-analysis-loading">⏳ Simulazione Monte Carlo in corso... (10000 partite)</div>;
+      return <div className="ai-analysis-loading">⏳ Calcolo matrice Dixon-Coles in corso...</div>;
     }
 
     if (!mc) {
       return (
         <div className="card">
           <p style={{ color: 'var(--text-dim)', marginBottom: '8px' }}>⏳ Caricamento...</p>
-          <button className="btn" onClick={() => runSimulation(match.casa, match.ospiti)}>📊 Avvia Simulazione</button>
+          <button className="btn" onClick={() => runSimulation(match.casa, match.ospiti)}>📊 Avvia Analisi</button>
         </div>
       );
     }
@@ -427,10 +581,12 @@
       <div className="ai-analysis-box">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
           <h3 style={{ color: getChampColor(match.campionato), margin: 0, fontSize: '18px' }}>
-            📊 Simulazione Poisson + Monte Carlo
+            📊 Modello Dixon-Coles
           </h3>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>🔢 {mc.numSimulations} simulazioni</span>
+            <span style={{ fontSize: '11px', color: 'var(--text-dim)' }} title="Matrice esatta su 8x8 risultati">
+              🎯 λ {mc.lambdaCasa} - {mc.lambdaOspite}
+            </span>
             <button onClick={refresh} style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '13px' }}>🔄 Rigenera</button>
           </div>
         </div>
@@ -459,6 +615,35 @@
             </div>
           </div>
         </div>
+
+        {/* Box info modello */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+          gap: '8px', marginTop: '8px', fontSize: '11px', color: 'var(--text-dim)'
+        }}>
+          <div style={{ background: 'var(--surface)', padding: '6px 10px', borderRadius: '6px', textAlign: 'center' }}>
+            🏠 Casa: att {mc.homeAttacco} / dif {mc.homeDifesa}
+          </div>
+          <div style={{ background: 'var(--surface)', padding: '6px 10px', borderRadius: '6px', textAlign: 'center' }}>
+            ✈️ Ospite: att {mc.awayAttacco} / dif {mc.awayDifesa}
+          </div>
+          <div style={{ background: 'var(--surface)', padding: '6px 10px', borderRadius: '6px', textAlign: 'center' }}>
+            📈 Media camp: {mc.leagueAvgHome} / {mc.leagueAvgAway}
+          </div>
+          <div style={{ background: 'var(--surface)', padding: '6px 10px', borderRadius: '6px', textAlign: 'center' }}>
+            📊 Campione: {mc.partiteAnalizzate} partite
+          </div>
+        </div>
+
+        {(mc.weakHome || mc.weakAway) && (
+          <div style={{
+            marginTop: '8px', padding: '8px 12px', borderRadius: '6px',
+            background: 'rgba(255,165,0,0.15)', border: '1px solid var(--neon-gold)',
+            fontSize: '11px', color: 'var(--neon-gold)'
+          }}>
+            ⚠️ {mc.weakHome ? match.casa : match.ospiti} ha meno di 3 partite: previsione poco affidabile
+          </div>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px', marginTop: '12px' }}>
           {famiglieDaMostrare.map((familyId, idx) => {
@@ -495,7 +680,7 @@
   };
 
   // ============================================================
-  // MATCH DETAIL
+  // MATCH DETAIL — invariato
   // ============================================================
   const MatchDetail = ({ match, allMatches }) => {
     const calcFormAndStats = window.calcFormAndStats;
@@ -566,7 +751,7 @@
               <span>Forma:</span>
               <div className="form-squares" style={{ display: 'inline-flex' }}>{renderFormSquares(homeForm.form)}</div>
             </div>
-            <div>xG: {renderXgValue(homeForm.mediaGolFatti || 0)}</div>
+            <div>Media Gol: {renderXgValue(homeForm.mediaGolFatti || 0)}</div>
           </div>
           <div>
             <h4 style={{ color: getChampColor(match.campionato) }}>{match.ospiti}</h4>
@@ -574,7 +759,7 @@
               <span>Forma:</span>
               <div className="form-squares" style={{ display: 'inline-flex' }}>{renderFormSquares(awayForm.form)}</div>
             </div>
-            <div>xG: {renderXgValue(awayForm.mediaGolFatti || 0)}</div>
+            <div>Media Gol: {renderXgValue(awayForm.mediaGolFatti || 0)}</div>
           </div>
         </div>
 
@@ -621,7 +806,7 @@
   };
 
   // ============================================================
-  // TUTTE LE FAMIGLIE
+  // TUTTE LE FAMIGLIE — invariato
   // ============================================================
   const TutteLeFamigliePanel = ({ match, allMatches }) => {
     const getPercentualeClasse = window.getPercentualeClasse;
@@ -632,12 +817,23 @@
     const ORDINE = ['fisse', 'dc', 'gg_ng', 'over', 'under', 'multigol', 'dc_over', 'dc_under', 'mg_casa_ospite', 'dc_multigol'];
     const hasQM = !!(window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function');
 
+    // Calcola una sola volta la matrice Dixon-Coles per questa partita
+    let mcCache = null;
+    try {
+      mcCache = simulateMatches(match.casa, match.ospiti, match.campionato, allMatches);
+    } catch (e) {
+      console.warn('Dixon-Coles fallito, fallback su stats storiche', e);
+    }
+
     const sezioni = ORDINE
       .filter(familyId => FAMIGLIE[familyId])
       .map(familyId => {
         const family = FAMIGLIE[familyId];
         const opzioni = family.options.map(opt => {
-          const pct = calcolaPctGiocata(familyId, opt, null, stats);
+          // Preferisci la matrice Dixon-Coles; fallback su stats storiche
+          const pct = mcCache
+            ? calcolaPctGiocata(familyId, opt, mcCache, stats)
+            : calcolaPctGiocata(familyId, opt, null, stats);
           let quota = null, isValue = false;
           if (hasQM) {
             try {
@@ -703,7 +899,7 @@
   };
 
   // ============================================================
-  // STANDINGS
+  // STANDINGS — invariato
   // ============================================================
   const Standings = ({ matches, filterChampionship, highlightTeams = [] }) => {
     const [view, setView] = useState('generale');
@@ -870,7 +1066,7 @@
   };
 
   // ============================================================
-  // RISULTATI FREQUENTI
+  // RISULTATI FREQUENTI — invariato
   // ============================================================
   const RisultatiFrequenti = ({ teamName, allMatches }) => {
     const parseDate = window.parseDate;
@@ -946,7 +1142,7 @@
   };
 
   // ============================================================
-  // FREQUENZA GOL
+  // FREQUENZA GOL — invariato
   // ============================================================
   const FrequenzaGol = ({ teamName, allMatches }) => {
     const teamMatches = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName));
@@ -1000,7 +1196,7 @@
   };
 
   // ============================================================
-  // INDICE AFFIDABILITÀ
+  // INDICE AFFIDABILITÀ — invariato
   // ============================================================
   const IndiceAffidabilita = ({ teamName, allMatches }) => {
     const teamMatches = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName));
@@ -1043,7 +1239,7 @@
   };
 
   // ============================================================
-  // TEAM MATCHES HISTORY
+  // TEAM MATCHES HISTORY — invariato
   // ============================================================
   const TeamMatchesHistory = ({ teamName, championship, allMatches }) => {
     const parseDate = window.parseDate;
@@ -1141,7 +1337,7 @@
   };
 
   // ============================================================
-  // WEATHER
+  // WEATHER — invariato
   // ============================================================
   const WeatherProfessionale = ({ weatherData, city, matchDate }) => {
     if (!weatherData) {
@@ -1213,6 +1409,11 @@
       [matches, filtroCampionati]
     );
 
+    // Pulisci la cache quando cambiano le partite (dati aggiornati)
+    useEffect(() => {
+      clearStatsCache();
+    }, [matchesFiltrati.length]);
+
     const selectedMatch = matchesFiltrati.find(m => m.id === selectedMatchId);
 
     return (
@@ -1228,7 +1429,6 @@
           <span>📊 <b style={{ color: 'var(--neon-cyan)' }}>{matchesFiltrati.length}</b> partite totali</span>
         </div>
 
-        {/* ⭐ Sub-tabs con bottoni uniformi (CSS gestisce larghezza/altezza fisse) */}
         <div className="sub-tabs">
           <button className={statsSubTab === 'Classifica' ? 'active' : ''} onClick={() => setStatsSubTab('Classifica')}>📊 Classifica</button>
           <button className={statsSubTab === 'Scontri' ? 'active' : ''} onClick={() => setStatsSubTab('Scontri')}>⚔️ Scontri</button>
@@ -1380,6 +1580,9 @@
     );
   }
 
+  // ============================================================
+  // EXPORT GLOBALI
+  // ============================================================
   window.StatisticheComponent = StatisticheComponent;
   window.AIAnalysis = AIAnalysis;
   window.WeatherProfessionale = WeatherProfessionale;
@@ -1389,7 +1592,9 @@
   window.Standings = Standings;
   window.TeamMatchesHistory = TeamMatchesHistory;
   window.TutteLeFamigliePanel = TutteLeFamigliePanel;
+  window.simulateMatches = simulateMatches;
+  window.clearStatsCache = clearStatsCache;
 
-  console.log('✅ Modulo Statistiche v9 - Sub-tabs uniformi + classifica griglia');
+  console.log('✅ statistiche.js v10 - Dixon-Coles attivo');
 
 })();
