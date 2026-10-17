@@ -1,14 +1,10 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v10)
-// ✅ Motore predittivo Dixon-Coles (no Monte Carlo rumoroso)
-// ✅ Parametri casa/trasferta separati
-// ✅ Decay temporale (half-life 365 giorni)
-// ✅ Media gol calcolata per campionato (no hardcode)
-// ✅ Correzione τ sui pareggi (0-0, 1-1, 0-1, 1-0)
-// ✅ Matrice esatta deterministica (10.000 "simulazioni" equivalenti)
-// ✅ Ultimi avversari sotto la squadra giusta
-// ✅ Classifica a griglia con colonne separate
-// ✅ PC: 2 colonne - Mobile: 1 colonna
+// statistiche.js - Modulo Statistiche (v11)
+// ✅ TutteLeFamigliePanel = SOLO statistiche reali
+// ✅ NUOVA TAB "Analisi Dixon-Coles" (dopo Riepilogo AI)
+//    → contiene AIAnalysis + TutteLeFamigliePanelDixon
+// ✅ Riepilogo AI = meteo + frequenze + affidabilità (no AIAnalysis)
+// ✅ Motore Dixon-Coles invariato (v10)
 // ============================================================
 
 (function () {
@@ -17,7 +13,7 @@
   const { useState, useEffect, useMemo } = React;
 
   // ============================================================
-  // CACHE PER I PARAMETRI (evita ricalcoli inutili)
+  // CACHE PER I PARAMETRI
   // ============================================================
   const _paramCache = new Map();
   const _cacheKey = (team, champ) => `${team}__${champ}`;
@@ -67,8 +63,6 @@
   // ============================================================
   // MOTORE PREDITTIVO DIXON-COLES
   // ============================================================
-
-  // Media gol per campionato (separata casa/trasferta)
   const getLeagueAverages = (championship, allMatches) => {
     const key = _avgKey(championship);
     if (_paramCache.has(key)) return _paramCache.get(key);
@@ -98,8 +92,6 @@
     return result;
   };
 
-  // Parametri squadra con decay temporale
-  // halfLifeDays: 365 => una partita di 1 anno fa pesa 50%
   const getTeamParams = (teamName, championship, allMatches, halfLifeDays = 365) => {
     const key = _cacheKey(teamName, championship);
     if (_paramCache.has(key)) return _paramCache.get(key);
@@ -160,7 +152,6 @@
     return result;
   };
 
-  // Fattoriale piccolo (memoizzato)
   const _factCache = [1, 1];
   const factorial = (n) => {
     if (n < 0) return 1;
@@ -178,8 +169,6 @@
     return Math.exp(-lambda) * Math.pow(lambda, k) / factorial(k);
   };
 
-  // Matrice punteggi esatti con correzione Dixon-Coles
-  // rho tipico stimato storicamente ≈ -0.10 (range -0.05 / -0.15)
   const buildScoreMatrix = (lambdaHome, lambdaAway, rho = -0.10, maxGol = 8) => {
     const matrix = {};
     let sum = 0;
@@ -188,7 +177,6 @@
       for (let j = 0; j <= maxGol; j++) {
         let p = poissonPmf(lambdaHome, i) * poissonPmf(lambdaAway, j);
 
-        // Correzione Dixon-Coles
         if (i === 0 && j === 0) p *= (1 - lambdaHome * lambdaAway * rho);
         else if (i === 0 && j === 1) p *= (1 + lambdaHome * rho);
         else if (i === 1 && j === 0) p *= (1 + lambdaAway * rho);
@@ -200,7 +188,6 @@
       }
     }
 
-    // Normalizzazione (per sicurezza, la somma dovrebbe essere ~1)
     if (sum > 0) {
       Object.keys(matrix).forEach(k => { matrix[k] /= sum; });
     }
@@ -208,23 +195,18 @@
     return matrix;
   };
 
-  // Funzione principale: sostituisce il vecchio simulateMatches
   const simulateMatches = (homeTeam, awayTeam, championship, allMatches) => {
-    // Pulisci la cache per assicurarti di usare i dati aggiornati
     clearStatsCache();
 
     const hp = getTeamParams(homeTeam, championship, allMatches);
     const ap = getTeamParams(awayTeam, championship, allMatches);
     const avg = getLeagueAverages(championship, allMatches);
 
-    // λ Dixon-Coles classica
     const lambdaHome = hp.attackHome * ap.defenseAway * (avg.avgHome || 1.4);
     const lambdaAway = ap.attackAway * hp.defenseHome * (avg.avgAway || 1.1);
 
-    // Matrice esatta (no Monte Carlo)
     const matrix = buildScoreMatrix(lambdaHome, lambdaAway);
 
-    // Statistiche derivate
     let hw = 0, dr = 0, aw = 0;
     let o15 = 0, o25 = 0, o35 = 0, o45 = 0;
     let gg = 0, c12u45 = 0;
@@ -270,9 +252,8 @@
       awayAttacco: ap.attackAway.toFixed(2),
       awayDifesa: ap.defenseAway.toFixed(2),
       partiteAnalizzate: Math.min(hp.n, ap.n),
-      numSimulations: 10000, // mantenuto per compatibilità UI
+      numSimulations: 10000,
       risultati: matrix,
-      // info extra per debug
       leagueAvgHome: (avg.avgHome || 0).toFixed(2),
       leagueAvgAway: (avg.avgAway || 0).toFixed(2),
       weakHome: !!hp.weak,
@@ -281,7 +262,7 @@
   };
 
   // ============================================================
-  // CALCOLO DC (Double Chance) — invariato
+  // CALCOLO DC / COMBINATE
   // ============================================================
   const calcDC = (mc, dcCode) => {
     if (!mc) return 0;
@@ -299,8 +280,7 @@
 
   const calcolaCombinata = (mc, dcCode, tipo, soglia) => {
     if (!mc || !mc.risultati) return 0;
-    let count = 0;
-    let total = 0;
+    let count = 0, total = 0;
     for (const [key, p] of Object.entries(mc.risultati)) {
       const [gC, gO] = key.split('-').map(Number);
       const totale = gC + gO;
@@ -331,27 +311,22 @@
     } else if (mgMatch.length === 3) {
       minV = parseInt(mgMatch[1], 10);
       maxV = parseInt(mgMatch[2], 10);
-    } else {
-      return 0;
-    }
+    } else { return 0; }
 
     let count = 0, total = 0;
     for (const [key, p] of Object.entries(mc.risultati)) {
       const [gC, gO] = key.split('-').map(Number);
       const totale = gC + gO;
       total += p;
-
       let dcOk = false;
       if (dcCode === '1X') dcOk = gC >= gO;
       else if (dcCode === '12') dcOk = gC !== gO;
       else if (dcCode === 'X2') dcOk = gO >= gC;
       if (!dcOk) continue;
-
       let mgOk = false;
       if (target === 'Casa')        mgOk = gC >= minV && gC <= maxV;
       else if (target === 'Ospite') mgOk = gO >= minV && gO <= maxV;
       else                          mgOk = totale >= minV && totale <= maxV;
-
       if (mgOk) count += p;
     }
     if (total === 0) return 0;
@@ -395,9 +370,7 @@
     } else if (mgMatch.length === 3) {
       minV = parseInt(mgMatch[1], 10);
       maxV = parseInt(mgMatch[2], 10);
-    } else {
-      return 0;
-    }
+    } else { return 0; }
 
     let count = 0, total = 0;
     for (const [key, p] of Object.entries(mc.risultati)) {
@@ -487,7 +460,6 @@
     const runSimulation = (homeTeam, awayTeam) => {
       setLoading(true);
       try {
-        // ⭐ FIX: passa anche match.campionato per normalizzare per campionato
         const result = simulateMatches(homeTeam, awayTeam, match.campionato, allMatches);
         setMc(result);
         localStorage.setItem(`ft_mc_${match.id}`, JSON.stringify(result));
@@ -499,7 +471,6 @@
 
     useEffect(() => {
       if (!match) return;
-      // Prova a riusare cache se esiste e ha il formato nuovo (con lambdaCasa)
       const saved = localStorage.getItem(`ft_mc_${match.id}`);
       if (saved) {
         try {
@@ -584,7 +555,7 @@
             📊 Modello Dixon-Coles
           </h3>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <span style={{ fontSize: '11px', color: 'var(--text-dim)' }} title="Matrice esatta su 8x8 risultati">
+            <span style={{ fontSize: '11px', color: 'var(--text-dim)' }} title="Matrice esatta su 9x9 risultati">
               🎯 λ {mc.lambdaCasa} - {mc.lambdaOspite}
             </span>
             <button onClick={refresh} style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '13px' }}>🔄 Rigenera</button>
@@ -616,7 +587,6 @@
           </div>
         </div>
 
-        {/* Box info modello */}
         <div style={{
           display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
           gap: '8px', marginTop: '8px', fontSize: '11px', color: 'var(--text-dim)'
@@ -680,7 +650,7 @@
   };
 
   // ============================================================
-  // MATCH DETAIL — invariato
+  // MATCH DETAIL
   // ============================================================
   const MatchDetail = ({ match, allMatches }) => {
     const calcFormAndStats = window.calcFormAndStats;
@@ -806,7 +776,7 @@
   };
 
   // ============================================================
-  // TUTTE LE FAMIGLIE — invariato
+  // ⭐ TUTTE LE FAMIGLIE PANEL (SOLO STATISTICHE REALI)
   // ============================================================
   const TutteLeFamigliePanel = ({ match, allMatches }) => {
     const getPercentualeClasse = window.getPercentualeClasse;
@@ -817,23 +787,13 @@
     const ORDINE = ['fisse', 'dc', 'gg_ng', 'over', 'under', 'multigol', 'dc_over', 'dc_under', 'mg_casa_ospite', 'dc_multigol'];
     const hasQM = !!(window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function');
 
-    // Calcola una sola volta la matrice Dixon-Coles per questa partita
-    let mcCache = null;
-    try {
-      mcCache = simulateMatches(match.casa, match.ospiti, match.campionato, allMatches);
-    } catch (e) {
-      console.warn('Dixon-Coles fallito, fallback su stats storiche', e);
-    }
-
     const sezioni = ORDINE
       .filter(familyId => FAMIGLIE[familyId])
       .map(familyId => {
         const family = FAMIGLIE[familyId];
         const opzioni = family.options.map(opt => {
-          // Preferisci la matrice Dixon-Coles; fallback su stats storiche
-          const pct = mcCache
-            ? calcolaPctGiocata(familyId, opt, mcCache, stats)
-            : calcolaPctGiocata(familyId, opt, null, stats);
+          // ⭐ SEMPRE statistiche reali (mc = null)
+          const pct = calcolaPctGiocata(familyId, opt, null, stats);
           let quota = null, isValue = false;
           if (hasQM) {
             try {
@@ -849,8 +809,11 @@
     return (
       <div className="card" style={{ marginTop: '20px' }}>
         <h3 style={{ color: 'var(--neon-cyan)', marginBottom: '8px' }}>
-          📊 Tutte le Giocate — {match.casa} vs {match.ospiti}
+          📊 Tutte le Giocate (Statistiche Reali) — {match.casa} vs {match.ospiti}
         </h3>
+        <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '12px' }}>
+          Basato sulle medie storiche reali delle due squadre
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
           {sezioni.map(({ familyId, family, opzioni }) => (
             <div key={familyId} style={{
@@ -899,7 +862,107 @@
   };
 
   // ============================================================
-  // STANDINGS — invariato
+  // ⭐ TUTTE LE FAMIGLIE PANEL DIXON (con calcoli Dixon-Coles)
+  // ============================================================
+  const TutteLeFamigliePanelDixon = ({ match, allMatches }) => {
+    const getPercentualeClasse = window.getPercentualeClasse;
+    const FAMIGLIE = window.FAMIGLIE_GIOCATE;
+    const stats = window.computeMatchStats(match, allMatches);
+
+    const ORDINE = ['fisse', 'dc', 'gg_ng', 'over', 'under', 'multigol', 'dc_over', 'dc_under', 'mg_casa_ospite', 'dc_multigol'];
+    const hasQM = !!(window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function');
+
+    // Calcola una sola volta la matrice Dixon-Coles
+    let mcCache = null;
+    try {
+      mcCache = simulateMatches(match.casa, match.ospiti, match.campionato, allMatches);
+    } catch (e) {
+      console.warn('Dixon-Coles fallito', e);
+    }
+
+    if (!mcCache) {
+      return (
+        <div className="card" style={{ marginTop: '20px' }}>
+          <p style={{ color: 'var(--text-dim)' }}>⚠️ Impossibile calcolare la matrice Dixon-Coles.</p>
+        </div>
+      );
+    }
+
+    const sezioni = ORDINE
+      .filter(familyId => FAMIGLIE[familyId])
+      .map(familyId => {
+        const family = FAMIGLIE[familyId];
+        const opzioni = family.options.map(opt => {
+          const pct = calcolaPctGiocata(familyId, opt, mcCache, null);
+          let quota = null, isValue = false;
+          if (hasQM) {
+            try {
+              const q = window.QuoteManager.analizzaGiocata(match, familyId, opt, pct);
+              if (q && q.quotaBook) { quota = q.quotaBook; isValue = q.isValue; }
+            } catch (e) {}
+          }
+          return { opt, pct, quota, isValue };
+        });
+        return { familyId, family, opzioni };
+      });
+
+    return (
+      <div className="card" style={{ marginTop: '20px' }}>
+        <h3 style={{ color: 'var(--neon-magenta, #ff00e5)', marginBottom: '8px' }}>
+          🧮 Tutte le Giocate (Dixon-Coles) — {match.casa} vs {match.ospiti}
+        </h3>
+        <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '12px' }}>
+          Basato sulla matrice esatta λ {mcCache.lambdaCasa} - {mcCache.lambdaOspite} con correzione τ
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+          {sezioni.map(({ familyId, family, opzioni }) => (
+            <div key={familyId} style={{
+              background: 'var(--surface)', borderRadius: '10px',
+              border: familyId === 'gg_ng' ? '2px solid #e74c3c' : '2px solid rgba(255,0,229,0.3)',
+              padding: '12px',
+            }}>
+              <h4 style={{
+                color: familyId === 'gg_ng' ? '#e74c3c' : 'var(--neon-magenta, #ff00e5)',
+                marginBottom: '8px', fontSize: '14px',
+              }}>
+                {family.icon} {family.label}
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {opzioni.map(({ opt, pct, quota, isValue }) => (
+                  <div key={opt} style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    padding: '6px 8px', borderRadius: '6px',
+                    background: 'var(--card)', fontSize: '12px',
+                  }}>
+                    <span style={{ fontWeight: 'bold', color: 'var(--text)', flex: 1 }}>
+                      {formatGiocataLabel(familyId, opt)}
+                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span className={`giocata-pct ${getPercentualeClasse(pct)}`}
+                        style={{ fontSize: '11px', padding: '2px 8px' }}>
+                        {pct}%
+                      </span>
+                      {quota && (
+                        <span style={{
+                          fontSize: '11px', padding: '2px 6px', borderRadius: '4px',
+                          background: isValue ? 'rgba(0, 255, 136, 0.2)' : 'rgba(255, 215, 0, 0.15)',
+                          color: isValue ? 'var(--neon-green)' : 'var(--neon-gold)',
+                          fontWeight: 'bold',
+                        }}>💰 {quota.toFixed(2)}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================================
+  // STANDINGS
   // ============================================================
   const Standings = ({ matches, filterChampionship, highlightTeams = [] }) => {
     const [view, setView] = useState('generale');
@@ -1066,7 +1129,7 @@
   };
 
   // ============================================================
-  // RISULTATI FREQUENTI — invariato
+  // RISULTATI FREQUENTI
   // ============================================================
   const RisultatiFrequenti = ({ teamName, allMatches }) => {
     const parseDate = window.parseDate;
@@ -1142,7 +1205,7 @@
   };
 
   // ============================================================
-  // FREQUENZA GOL — invariato
+  // FREQUENZA GOL
   // ============================================================
   const FrequenzaGol = ({ teamName, allMatches }) => {
     const teamMatches = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName));
@@ -1196,7 +1259,7 @@
   };
 
   // ============================================================
-  // INDICE AFFIDABILITÀ — invariato
+  // INDICE AFFIDABILITÀ
   // ============================================================
   const IndiceAffidabilita = ({ teamName, allMatches }) => {
     const teamMatches = allMatches.filter(m => m.stato === 'Giocata' && (m.casa === teamName || m.ospiti === teamName));
@@ -1239,7 +1302,7 @@
   };
 
   // ============================================================
-  // TEAM MATCHES HISTORY — invariato
+  // TEAM MATCHES HISTORY
   // ============================================================
   const TeamMatchesHistory = ({ teamName, championship, allMatches }) => {
     const parseDate = window.parseDate;
@@ -1337,7 +1400,7 @@
   };
 
   // ============================================================
-  // WEATHER — invariato
+  // WEATHER
   // ============================================================
   const WeatherProfessionale = ({ weatherData, city, matchDate }) => {
     if (!weatherData) {
@@ -1409,7 +1472,6 @@
       [matches, filtroCampionati]
     );
 
-    // Pulisci la cache quando cambiano le partite (dati aggiornati)
     useEffect(() => {
       clearStatsCache();
     }, [matchesFiltrati.length]);
@@ -1429,10 +1491,12 @@
           <span>📊 <b style={{ color: 'var(--neon-cyan)' }}>{matchesFiltrati.length}</b> partite totali</span>
         </div>
 
+        {/* ⭐ 5 sub-tabs con la nuova "Analisi Dixon-Coles" dopo "Riepilogo AI" */}
         <div className="sub-tabs">
           <button className={statsSubTab === 'Classifica' ? 'active' : ''} onClick={() => setStatsSubTab('Classifica')}>📊 Classifica</button>
           <button className={statsSubTab === 'Scontri' ? 'active' : ''} onClick={() => setStatsSubTab('Scontri')}>⚔️ Scontri</button>
           <button className={statsSubTab === 'RiepilogoAI' ? 'active' : ''} onClick={() => setStatsSubTab('RiepilogoAI')}>🤖 Riepilogo AI</button>
+          <button className={statsSubTab === 'DixonColes' ? 'active' : ''} onClick={() => setStatsSubTab('DixonColes')}>🧮 Analisi Dixon-Coles</button>
           <button className={statsSubTab === 'UltimaGiornata' ? 'active' : ''} onClick={() => setStatsSubTab('UltimaGiornata')}>📅 Ultima Giornata</button>
         </div>
 
@@ -1463,6 +1527,7 @@
               </div>
             </div>
 
+            {/* ⭐ Statistiche reali (nessun Dixon-Coles) */}
             {selectedMatch && (
               <TutteLeFamigliePanel match={selectedMatch} allMatches={matchesFiltrati} />
             )}
@@ -1482,6 +1547,7 @@
           </div>
         )}
 
+        {/* ⭐ Riepilogo AI — solo meteo + frequenze + affidabilità (NO Dixon) */}
         {statsSubTab === 'RiepilogoAI' && (
           <div>
             {selectedMatch ? (
@@ -1493,7 +1559,6 @@
                   const weather = weatherCache[weatherKey] || null;
                   return <WeatherProfessionale weatherData={weather} city={city} matchDate={selectedMatch.data} />;
                 })()}
-                <AIAnalysis match={selectedMatch} allMatches={matchesFiltrati} selectedFamiglie={selectedFamiglie} />
                 <div className="analisi-compact" style={{ marginTop: '16px' }}>
                   <div>
                     <RisultatiFrequenti teamName={selectedMatch.casa} allMatches={matchesFiltrati} />
@@ -1509,6 +1574,20 @@
               </div>
             ) : (
               <div className="stats-placeholder"><p>👈 Seleziona una partita per il riepilogo AI.</p></div>
+            )}
+          </div>
+        )}
+
+        {/* ⭐ NUOVA TAB — Analisi Dixon-Coles */}
+        {statsSubTab === 'DixonColes' && (
+          <div>
+            {selectedMatch ? (
+              <div>
+                <AIAnalysis match={selectedMatch} allMatches={matchesFiltrati} selectedFamiglie={selectedFamiglie} />
+                <TutteLeFamigliePanelDixon match={selectedMatch} allMatches={matchesFiltrati} />
+              </div>
+            ) : (
+              <div className="stats-placeholder"><p>👈 Seleziona una partita per l'analisi Dixon-Coles.</p></div>
             )}
           </div>
         )}
@@ -1592,9 +1671,10 @@
   window.Standings = Standings;
   window.TeamMatchesHistory = TeamMatchesHistory;
   window.TutteLeFamigliePanel = TutteLeFamigliePanel;
+  window.TutteLeFamigliePanelDixon = TutteLeFamigliePanelDixon;
   window.simulateMatches = simulateMatches;
   window.clearStatsCache = clearStatsCache;
 
-  console.log('✅ statistiche.js v10 - Dixon-Coles attivo');
+  console.log('✅ statistiche.js v11 - Dixon-Coles in tab dedicata');
 
 })();
