@@ -6,12 +6,13 @@
 // - Alert se PDF non aggiornato
 // - Hook React useQuote() per accedere alle quote
 // - BannerAlertPDF componente per avvisi
+// + FIX v2: useQuote chiamato correttamente, log debug migliorati
 // ============================================================
 
 (function () {
   'use strict';
 
-  const { useState, useEffect } = React;
+  const { useState, useEffect, useCallback } = React;
 
   // ============================================================
   // CONFIGURAZIONE
@@ -19,7 +20,6 @@
 
   const REPO_BASE_URL = 'https://gesss26.github.io/GesssAI-Pro---Auto';
 
-  // ⭐ LISTA DEI PDF DA SCARICARE E UNIRE
   const PDF_FILES = [
     'quote/marathonbet.pdf',
     'quote/marathonbet-2.pdf',
@@ -40,6 +40,7 @@
     errore: null,
     ultimaDataMax: null,
     numPartite: 0,
+    risultati: [],
   };
 
   const listeners = new Set();
@@ -69,7 +70,8 @@
           const elapsed = Date.now() - parseInt(last, 10);
           if (elapsed < CACHE_DURATION_MS) {
             if (DEBUG) console.log('⏩ Cache recente, skip download');
-            const meta = window.PDFQuoteParser && window.PDFQuoteParser.leggiMeta ? window.PDFQuoteParser.leggiMeta() : null;
+            const meta = window.PDFQuoteParser && window.PDFQuoteParser.leggiMeta
+              ? window.PDFQuoteParser.leggiMeta() : null;
             return {
               ok: true,
               motivo: 'cache',
@@ -94,11 +96,9 @@
     notifyListeners({ inCorso: true });
 
     try {
-      // Backup quote esistenti prima del reset (per ripristino in caso di fallimento totale)
       const quoteVecchie = window.PDFQuoteParser.leggiQuote();
       const avevaQuoteVecchie = Object.keys(quoteVecchie).length > 0;
 
-      // Reset quote vecchie
       window.PDFQuoteParser.resetQuote();
 
       let totalePartite = 0;
@@ -140,7 +140,6 @@
             continue;
           }
 
-          // MERGE invece di overwrite
           window.PDFQuoteParser.aggiungiQuote(partite);
 
           totalePartite += partite.length;
@@ -153,7 +152,6 @@
         }
       }
 
-      // Se TUTTI i file falliscono ma c'erano quote vecchie, ripristina quelle vecchie
       if (totalePartite === 0 && avevaQuoteVecchie) {
         console.warn('⚠️ Download fallito, ripristino quote precedenti');
         try {
@@ -168,7 +166,10 @@
             numPartite: Object.keys(quoteVecchie).length,
           }));
           window.dispatchEvent(new CustomEvent('quote-updated', {
-            detail: { numPartite: Object.keys(quoteVecchie).length, dataMaxPDF: dateValide[dateValide.length - 1] || null }
+            detail: {
+              numPartite: Object.keys(quoteVecchie).length,
+              dataMaxPDF: dateValide[dateValide.length - 1] || null,
+            }
           }));
         } catch (e) {
           console.error('Impossibile ripristinare quote vecchie:', e);
@@ -184,6 +185,7 @@
       state.numPartite = totalePartite;
       state.errore = null;
       state.inCorso = false;
+      state.risultati = risultati;
 
       const payload = {
         inCorso: false,
@@ -234,7 +236,12 @@
     try {
       const result = window.PDFQuoteParser.analizzaGiocataConQuota(match, familyId, giocata, pctTua);
       if (DEBUG && result) {
-        console.log('💰 Quota trovata: ' + match.casa + ' vs ' + match.ospiti + ' | ' + familyId + '/' + giocata + ' → ' + result.quotaBook + ' (edge ' + result.edge + '%)');
+        console.log(
+          '💰 ' + match.casa + ' vs ' + match.ospiti +
+          ' | ' + familyId + '/' + giocata +
+          ' → quota ' + result.quotaBook +
+          ' (edge ' + result.edge + '%)'
+        );
       }
       return result;
     } catch (e) {
@@ -251,43 +258,54 @@
 
   // ============================================================
   // HOOK REACT: useQuote
+  // ⭐ FIX: chiamata unica e non condizionale
   // ============================================================
 
   const useQuote = () => {
     const [stato, setStato] = useState(function () {
-      const meta = window.PDFQuoteParser && window.PDFQuoteParser.leggiMeta ? window.PDFQuoteParser.leggiMeta() : null;
+      const meta = window.PDFQuoteParser && window.PDFQuoteParser.leggiMeta
+        ? window.PDFQuoteParser.leggiMeta() : null;
       return {
         scaricato: state.scaricato,
         inCorso: state.inCorso,
         errore: state.errore,
-        numPartite: state.numPartite,
-        dataMaxPDF: state.ultimaDataMax,
+        numPartite: state.numPartite || (meta ? meta.numPartite : 0),
+        dataMaxPDF: state.ultimaDataMax || (meta ? meta.dataMaxPDF : null),
         aggiornato: null,
         meta: meta,
+        risultati: state.risultati || [],
       };
     });
 
     useEffect(function () {
       const update = (payload) => {
         setStato(function (prev) {
-          const meta = window.PDFQuoteParser && window.PDFQuoteParser.leggiMeta ? window.PDFQuoteParser.leggiMeta() : null;
+          const meta = window.PDFQuoteParser && window.PDFQuoteParser.leggiMeta
+            ? window.PDFQuoteParser.leggiMeta() : null;
           return Object.assign({}, prev, payload, { meta: meta });
         });
       };
 
       const updateFromGlobalEvent = () => {
         setStato(function (prev) {
-          const meta = window.PDFQuoteParser && window.PDFQuoteParser.leggiMeta ? window.PDFQuoteParser.leggiMeta() : null;
-          return Object.assign({}, prev, { meta: meta });
+          const meta = window.PDFQuoteParser && window.PDFQuoteParser.leggiMeta
+            ? window.PDFQuoteParser.leggiMeta() : null;
+          return Object.assign({}, prev, {
+            numPartite: meta ? meta.numPartite : 0,
+            dataMaxPDF: meta ? meta.dataMaxPDF : null,
+            meta: meta,
+          });
         });
       };
 
       listeners.add(update);
       window.addEventListener('quote-updated', updateFromGlobalEvent);
 
-      const meta = window.PDFQuoteParser && window.PDFQuoteParser.leggiMeta ? window.PDFQuoteParser.leggiMeta() : null;
+      const meta = window.PDFQuoteParser && window.PDFQuoteParser.leggiMeta
+        ? window.PDFQuoteParser.leggiMeta() : null;
       if (meta) {
-        const check = window.PDFQuoteParser && window.PDFQuoteParser.checkAggiornamentoPDF ? window.PDFQuoteParser.checkAggiornamentoPDF() : {};
+        const check = window.PDFQuoteParser && window.PDFQuoteParser.checkAggiornamentoPDF
+          ? window.PDFQuoteParser.checkAggiornamentoPDF() : {};
         setStato(function (prev) {
           return Object.assign({}, prev, {
             numPartite: meta.numPartite,
@@ -358,7 +376,7 @@
   };
 
   // ============================================================
-  // COMPONENTE: BannerAlertPDF (React)
+  // COMPONENTE: BannerAlertPDF
   // ============================================================
 
   function BannerAlertPDF() {
@@ -477,10 +495,12 @@
   // ============================================================
 
   const stampaTutteQuote = () => {
-    const quote = (window.PDFQuoteParser && window.PDFQuoteParser.leggiQuote) ? window.PDFQuoteParser.leggiQuote() : {};
+    const quote = (window.PDFQuoteParser && window.PDFQuoteParser.leggiQuote)
+      ? window.PDFQuoteParser.leggiQuote() : {};
     const numKeys = Object.keys(quote).length;
     console.log('📊 Quote salvate: ' + numKeys + ' partite');
-    console.log('📅 Data max: ' + ((window.PDFQuoteParser && window.PDFQuoteParser.getMaxDataPDF) ? window.PDFQuoteParser.getMaxDataPDF() : 'N/D'));
+    console.log('📅 Data max: ' + ((window.PDFQuoteParser && window.PDFQuoteParser.getMaxDataPDF)
+      ? window.PDFQuoteParser.getMaxDataPDF() : 'N/D'));
     console.log('─'.repeat(50));
     Object.entries(quote).forEach(function (entry) {
       const k = entry[0];
@@ -511,6 +531,6 @@
     DEBUG: DEBUG,
   };
 
-  console.log('✅ QuoteManager caricato (MULTI-FILE) - file configurati: ' + PDF_FILES.length);
+  console.log('✅ QuoteManager caricato v2 (MULTI-FILE) - file configurati: ' + PDF_FILES.length);
 
 })();

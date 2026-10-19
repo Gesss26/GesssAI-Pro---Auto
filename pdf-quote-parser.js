@@ -7,6 +7,11 @@
 // + FIX: checkAggiornamentoPDF con stati ok/scaduto/assente
 // + FIX: controllo età salvataggio (>7 giorni = scaduto)
 // + NEW: supporto MULTI-FILE (aggiungiQuote + resetQuote)
+// + FIX v2: mapping quote corretto (18 quote, MG14_SI / MG25_SI singole)
+// + FIX v2: normalizzazione data ISO per match esatto
+// + FIX v2: normalizzaNome rimuove prefissi extra (Dsc, VfI, Energie...)
+// + FIX v2: fuzzy matching con fallback "includes"
+// + FIX v2: refusi PDF (barri → bari, ecc.)
 // ============================================================
 
 (function () {
@@ -23,13 +28,17 @@
 
   const STORAGE_KEY = 'ft_quote_pdf';
   const STORAGE_META_KEY = 'ft_quote_pdf_meta';
-  const SOGLIA_MATCH = 0.62;
+  const SOGLIA_MATCH = 0.55; // ⭐ abbassata da 0.62
   const GIORNI_SCADENZA = 7;
 
   // ============================================================
   // DIZIONARIO TRADUZIONI SQUADRE
   // ============================================================
   const TRADUZIONI_SQUADRE = {
+    // Refusi PDF
+    'barri': 'bari',
+
+    // Spagna
     'siviglia': 'sevilla',
     'barcellona': 'barcelona',
     'real madrid': 'realmadrid',
@@ -51,6 +60,7 @@
     'racing santander': 'racingsantander',
     'deportivo la coruna': 'deportivolacoruna',
 
+    // Italia
     'inter': 'inter',
     'inter milano': 'intermilano',
     'milan': 'milan',
@@ -99,6 +109,7 @@
     'atalanta u23': 'atalantau23',
     'milan u23': 'milanu23',
 
+    // Inghilterra
     'manchester city': 'manchestercity',
     'manchester united': 'manchesterunited',
     'newcastle': 'newcastle',
@@ -124,6 +135,7 @@
     'ipswich town': 'ipswichtown',
     'coventry city': 'coventrycity',
 
+    // Germania
     'bayern monaco': 'bayernmonaco',
     'bayern munich': 'bayernmonaco',
     'borussia dortmund': 'borussiadortmund',
@@ -146,6 +158,7 @@
     'lipsia': 'lipsia',
     'rb lipsia': 'lipsia',
 
+    // Francia
     'paris saint-germain': 'psg',
     'paris saint germain': 'psg',
     'psg': 'psg',
@@ -177,6 +190,7 @@
     'le mans': 'lemans',
     'paris fc': 'parisfc',
 
+    // Olanda
     'ajax': 'ajax',
     'psv eindhoven': 'psveindhoven',
     'psv': 'psveindhoven',
@@ -200,6 +214,7 @@
     'telstar': 'telstar',
     'den bosch': 'denbosch',
 
+    // Portogallo
     'benfica': 'benfica',
     'fc porto': 'porto',
     'porto': 'porto',
@@ -225,6 +240,7 @@
     'estrela amadora': 'estrelaamadora',
     'academico de viseu fc': 'academicoviseu',
 
+    // Belgio
     'club bruges': 'clubbruges',
     'anderlecht': 'anderlecht',
     'gent': 'gent',
@@ -247,6 +263,7 @@
     'lommel sk': 'lommel',
     'mechelen': 'mechelen',
 
+    // Turchia
     'galatasaray': 'galatasaray',
     'fenerbahce': 'fenerbahce',
     'besiktas': 'besiktas',
@@ -264,6 +281,7 @@
     'kasimpasa': 'kasimpasa',
     'goster': 'goster',
 
+    // Scozia
     'celtic': 'celtic',
     'glasgow rangers': 'rangers',
     'rangers': 'rangers',
@@ -283,12 +301,14 @@
     'st mirren': 'stmirren',
     'falkirk': 'falkirk',
 
+    // Grecia
     'olympiacos': 'olympiacos',
     'panathinaikos': 'panathinaikos',
     'aek atene': 'aek',
     'aek': 'aek',
     'paok': 'paok',
 
+    // Corea
     'daejeon citizen': 'daejeon',
     'daejeon': 'daejeon',
     'fc pohang steelers': 'pohang',
@@ -298,6 +318,7 @@
     'gwangju': 'gwangju',
     'anyang': 'anyang',
 
+    // Giappone
     'kashima antlers': 'kashima',
     'yokohama f marinos': 'yokohama',
     'kawasaki frontale': 'kawasaki',
@@ -307,21 +328,67 @@
   // NORMALIZZAZIONE NOMI
   // ============================================================
 
+  // ⭐ Lista prefissi/suffissi da rimuovere
+  const PREFISSI_SQUADRA = [
+    'dsc', 'vfi', 'vfl', 'energie', 'ssc', 'usl', 'acf', 'fbc', 'asd', 'usd',
+    'fc', 'ac', 'ssc', 'as', 'us', 'ss', 'asd', 'ssd', 'calcio', 'sportiva',
+    'società', 'societa', 'cf', 'sk', 'sv', 'sc', 'vv', 'kvc', 'fk', 'bk',
+    'if', 'ff', 'cd', 'sd', 'ud', 'rc', 'rcd', 'afc', 'cfc', 'u23', 'u21', 'u19',
+  ];
+
   const normalizzaNome = (nome) => {
     if (!nome) return '';
     let n = nome
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
-      .replace(/\b(fc|ac|ssc|as|us|ss|asd|ssd|calcio|sportiva|società|societa|1919|1929|1937|1908|1911|u23|u21|u19|cf|sk|sv|sc|vv|kvc|fk|bk|if|ff|cd|sd|ud|rc|rcd|afc|cfc)\b/g, '')
-      .replace(/[^a-z0-9]/g, '')
-      .trim();
+      .replace(/ß/g, 'ss')
+      .replace(/ø/g, 'o')
+      .replace(/æ/g, 'ae');
 
+    // Rimuovi prefissi/suffissi noti come parole intere
+    const prefissiRegex = new RegExp(
+      '\\b(' + PREFISSI_SQUADRA.join('|') + ')\\b',
+      'g'
+    );
+    n = n.replace(prefissiRegex, '');
+
+    // Rimuovi anni tipo 1919, 1929, ecc.
+    n = n.replace(/\b(18|19|20)\d{2}\b/g, '');
+
+    // Rimuovi caratteri non alfanumerici
+    n = n.replace(/[^a-z0-9]/g, '').trim();
+
+    // Applica traduzioni (dopo la pulizia)
     if (TRADUZIONI_SQUADRE[n]) {
       n = TRADUZIONI_SQUADRE[n];
     }
 
     return n;
+  };
+
+  // ============================================================
+  // NORMALIZZAZIONE DATA → formato ISO YYYY-MM-DD
+  // ============================================================
+
+  const normalizzaDataISO = (d) => {
+    if (!d) return '';
+    if (d instanceof Date) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+    const s = String(d).trim();
+    // Già ISO
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    // GG/MM/YYYY o GG-MM-YYYY
+    const m1 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (m1) return `${m1[3]}-${m1[2].padStart(2, '0')}-${m1[1].padStart(2, '0')}`;
+    // YYYY/MM/DD
+    const m2 = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+    if (m2) return `${m2[1]}-${m2[2].padStart(2, '0')}-${m2[3].padStart(2, '0')}`;
+    return s;
   };
 
   // ============================================================
@@ -442,13 +509,16 @@
   // ============================================================
 
   const parseRigaPartita = (testo) => {
-    const pattern = /^(\d{3,6})\s+(\d{1,2}:\d{2})\s+(.+)$/;
+    // ⭐ FIX: accetta anche alias+ora senza spazio (es. "665618:30...")
+    // e con spazio (es. "6656 18:30...")
+    const pattern = /^(\d{3,6})\s*(\d{1,2}:\d{2})\s*(.+)$/;
     const match = testo.match(pattern);
     if (!match) return null;
 
     const [, alias, ora, resto] = match;
 
-    const quotePattern = /(\d+\.\d+)/g;
+    // Estrai tutte le quote come numeri con 2 decimali
+    const quotePattern = /(\d+\.\d{2})/g;
     const quote = [];
     let qMatch;
     while ((qMatch = quotePattern.exec(resto)) !== null) {
@@ -457,8 +527,11 @@
 
     if (quote.length < 3) return null;
 
-    const primaQuotaIndex = resto.indexOf(quote[0].toString());
-    const eventoRaw = resto.substring(0, primaQuotaIndex).trim();
+    // ⭐ FIX: usa regex ancorata invece di indexOf
+    const primaQuotaMatch = resto.match(/\d+\.\d{2}/);
+    if (!primaQuotaMatch) return null;
+
+    const eventoRaw = resto.substring(0, primaQuotaMatch.index).trim();
 
     const sepIndex = eventoRaw.lastIndexOf(' - ');
     if (sepIndex === -1) return null;
@@ -468,6 +541,7 @@
 
     if (!casa || !ospiti) return null;
 
+    // ⭐ FIX: mapping corretto per 18 quote (MG14_SI e MG25_SI singole)
     const quoteMappate = {
       '1': quote[0] ?? null,
       'X': quote[1] ?? null,
@@ -486,9 +560,7 @@
       'U4.5': quote[14] ?? null,
       'O4.5': quote[15] ?? null,
       'MG14_SI': quote[16] ?? null,
-      'MG14_NO': quote[17] ?? null,
-      'MG25_SI': quote[18] ?? null,
-      'MG25_NO': quote[19] ?? null,
+      'MG25_SI': quote[17] ?? null,
     };
 
     return {
@@ -558,6 +630,11 @@
   const similarita = (a, b) => {
     if (a === b) return 1;
     if (!a || !b) return 0;
+
+    // ⭐ FIX: se uno contiene l'altro, è match forte
+    if (a.length >= 3 && b.length >= 3) {
+      if (a.includes(b) || b.includes(a)) return 0.95;
+    }
 
     const bigrams = (str) => {
       const set = new Set();
@@ -681,7 +758,7 @@
   };
 
   // ============================================================
-  // SALVATAGGIO IN LOCALSTORAGE (singolo file - SOVRASCRIVE)
+  // SALVATAGGIO IN LOCALSTORAGE
   // ============================================================
 
   const salvaQuote = (partite) => {
@@ -729,7 +806,7 @@
   };
 
   // ============================================================
-  // ⭐ NUOVO: AGGIUNGI QUOTE (MERGE con quelle esistenti)
+  // AGGIUNGI QUOTE (MERGE con quelle esistenti)
   // ============================================================
 
   const aggiungiQuote = (partite) => {
@@ -779,7 +856,7 @@
   };
 
   // ============================================================
-  // ⭐ NUOVO: RESET QUOTE
+  // RESET QUOTE
   // ============================================================
 
   const resetQuote = () => {
@@ -831,6 +908,8 @@
   // ============================================================
 
   const mappaGiocataAQuota = (quotePDF, familyId, giocata) => {
+    if (!quotePDF) return null;
+
     if (familyId === 'fisse') {
       if (giocata === '1') return quotePDF['1'] || null;
       if (giocata === 'X') return quotePDF['X'] || null;
@@ -903,27 +982,34 @@
 
     const casaNorm = normalizzaNome(match.casa);
     const ospitiNorm = normalizzaNome(match.ospiti);
-    const dataMatch = match.data || '';
+    const dataMatch = normalizzaDataISO(match.data); // ⭐ FIX
 
     let entry = null;
+    let matchedBy = null;
 
+    // 1. Match esatto con data normalizzata
     const keyEsatta = `${casaNorm}|${ospitiNorm}|${dataMatch}`;
     if (quote[keyEsatta]) {
       entry = quote[keyEsatta];
+      matchedBy = 'exact';
     }
 
+    // 2. Match per prefisso casa|ospiti (ignora data)
     if (!entry) {
-      const keys = Object.keys(quote).filter(k => k.startsWith(`${casaNorm}|${ospitiNorm}|`));
+      const prefisso = `${casaNorm}|${ospitiNorm}|`;
+      const keys = Object.keys(quote).filter(k => k.startsWith(prefisso));
       if (keys.length > 0) {
         entry = quote[keys[0]];
+        matchedBy = 'prefix';
       }
     }
 
+    // 3. Fuzzy match
     if (!entry) {
       let bestMatch = null;
       let bestScore = 0;
 
-      for (const [key, val] of Object.entries(quote)) {
+      for (const [, val] of Object.entries(quote)) {
         const scoreCasa = similarita(casaNorm, normalizzaNome(val.casa));
         const scoreOspiti = similarita(ospitiNorm, normalizzaNome(val.ospiti));
         const score = (scoreCasa + scoreOspiti) / 2;
@@ -936,10 +1022,22 @@
 
       if (bestMatch) {
         entry = bestMatch;
+        matchedBy = `fuzzy(${bestScore.toFixed(2)})`;
       }
     }
 
-    if (!entry || !entry.quote) return null;
+    if (!entry || !entry.quote) {
+      if (window.QuoteManager && window.QuoteManager.DEBUG) {
+        console.warn('❌ QUOTA NON TROVATA:', match.casa, 'vs', match.ospiti,
+          '| norm:', casaNorm, '|', ospitiNorm, '| data:', dataMatch);
+      }
+      return null;
+    }
+
+    if (window.QuoteManager && window.QuoteManager.DEBUG) {
+      console.log('🎯 Match trovato per', match.casa, 'vs', match.ospiti,
+        '[' + matchedBy + ']');
+    }
 
     return mappaGiocataAQuota(entry.quote, familyId, giocata);
   };
@@ -1032,11 +1130,10 @@
 
   const debugPartita = (nomeCasa) => {
     const quote = leggiQuote();
-    const keys = Object.keys(quote).filter(k =>
-      k.includes(normalizzaNome(nomeCasa))
-    );
+    const norm = normalizzaNome(nomeCasa);
+    const keys = Object.keys(quote).filter(k => k.includes(norm));
     if (keys.length === 0) {
-      console.log(`❌ Nessuna partita trovata contenente "${nomeCasa}"`);
+      console.log(`❌ Nessuna partita trovata contenente "${nomeCasa}" (norm: "${norm}")`);
       return;
     }
     keys.forEach(k => {
@@ -1058,12 +1155,13 @@
     isIntestazioneCampionato,
     isRigaData,
     normalizzaNome,
+    normalizzaDataISO, // ⭐ nuova
     similarita,
     trovaMatchApp,
     analizzaValueBet,
     salvaQuote,
-    aggiungiQuote,   // ⭐ NUOVO
-    resetQuote,      // ⭐ NUOVO
+    aggiungiQuote,
+    resetQuote,
     leggiQuote,
     leggiMeta,
     getMaxDataPDF,
@@ -1074,12 +1172,13 @@
     debugPartita,
     CAMPIONATI_RICONOSCIBILI,
     TRADUZIONI_SQUADRE,
+    PREFISSI_SQUADRA, // ⭐ esposto per debug
     SOGLIA_MATCH,
     STORAGE_KEY,
     STORAGE_META_KEY,
     GIORNI_SCADENZA,
   };
 
-  console.log('✅ PDFQuoteParser caricato - con supporto MULTI-FILE (aggiungiQuote + resetQuote)');
+  console.log('✅ PDFQuoteParser caricato v2 - fix mapping quote + normalizzazione data + fuzzy matching migliorato');
 
 })();
