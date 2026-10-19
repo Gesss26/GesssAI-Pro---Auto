@@ -6,12 +6,37 @@
 //     + bottoni TOP 5 (Maggiori / Minori / Tutti) con selezione atomica
 //     + FIX: palinsesto non si svuota se CHAMPIONSHIP_LIST non pronta
 //     + Dixon-Coles integrato via window.getDixonPct
+//     + FALLBACK: se useMotoreAnalisi o getDixonPct mancano, non crasha
 // ============================================================
 
 (function () {
   'use strict';
 
   const { useState, useMemo, useEffect, useCallback } = React;
+
+  // ⭐ FALLBACK SICURO: se useMotoreAnalisi non esiste in filtri-campionati.js,
+  // crealo qui per evitare crash del Palinsesto (comportamento v6).
+  if (!window.FiltriCampionati) window.FiltriCampionati = {};
+  if (typeof window.FiltriCampionati.useMotoreAnalisi !== 'function') {
+    window.FiltriCampionati.useMotoreAnalisi = function () {
+      const [motore, setMotoreState] = React.useState(
+        () => localStorage.getItem('ft_motore') || 'storico'
+      );
+      const setMotore = React.useCallback((v) => {
+        setMotoreState(v);
+        localStorage.setItem('ft_motore', v);
+      }, []);
+      return { motore, setMotore };
+    };
+    console.warn('⚠️ useMotoreAnalisi non trovato in filtri-campionati.js — uso fallback locale (Palinsesto v7)');
+  }
+
+  // ⭐ FALLBACK SICURO: se getDixonPct non esiste in statistiche.js,
+  // usa una funzione che ritorna 0 → Dixon disabilitato, Palinsesto funziona.
+  if (typeof window.getDixonPct !== 'function') {
+    window.getDixonPct = function () { return 0; };
+    console.warn('⚠️ getDixonPct non trovato in statistiche.js — Dixon disabilitato (fallback 0)');
+  }
 
   const normalizzaAccenti = (str) => {
     if (!str) return '';
@@ -76,6 +101,7 @@
     'EFL Championship',
   ];
 
+  // Confronto robusto: case-insensitive, accenti normalizzati, alias comuni
   const matchCampionato = (nomeDb, nomeTarget) => {
     if (!nomeDb || !nomeTarget) return false;
     const a = normalizzaAccenti(nomeDb).toLowerCase().trim();
@@ -761,6 +787,7 @@
       return [];
     }, [championships]);
 
+    // ⭐ LISTA COMPLETA NOMI CAMPIONATI (DB + LISTA, con fallback)
     const tuttiNomiCampionati = useMemo(() => {
       const dalDb = Array.isArray(matches)
         ? [...new Set(matches.map(m => m.campionato).filter(Boolean))]
@@ -773,8 +800,12 @@
       return unione;
     }, [matches]);
 
+    // ⭐ SELEZIONE RAPIDA TOP 5 — atomica via setFiltro
     const selezionaSoloCampionati = useCallback((targetList) => {
-      if (typeof setFiltro !== 'function') return;
+      if (typeof setFiltro !== 'function') {
+        console.warn('⚠️ TOP 5: setFiltro non disponibile in useFiltroCampionati');
+        return;
+      }
       if (!Array.isArray(tuttiNomiCampionati) || tuttiNomiCampionati.length === 0) {
         console.warn('⚠️ TOP 5: nessun campionato disponibile, selezione ignorata');
         return;
@@ -822,15 +853,20 @@
       if (Array.isArray(campionatiAttivi) && campionatiAttivi.length > 0) {
         list = list.filter(m => campionatiAttivi.includes(m.campionato));
       } else {
+        // FIX: se il filtro è vuoto ma non è una scelta esplicita dell'utente
+        // (es. localStorage corrotto o filtro mai inizializzato), mostra tutto.
         let filtroRaw = null;
         try {
-          filtroRaw = window.FiltriCampionati.leggiFiltroCampionati();
+          filtroRaw = window.FiltriCampionati.leggiFiltroCampionati
+            ? window.FiltriCampionati.leggiFiltroCampionati()
+            : null;
         } catch (e) { filtroRaw = null; }
         const nessunoEsplicitamenteSelezionato =
           filtroRaw && Object.values(filtroRaw).every(v => v === false);
         if (nessunoEsplicitamenteSelezionato) {
           list = [];
         }
+        // altrimenti lascia list com'è (mostra tutto)
       }
 
       return list.sort((a, b) => {
@@ -977,6 +1013,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto v7 caricato — switch motore Storico/Dixon/Confronto');
+  console.log('✅ Modulo Palinsesto v7 caricato — filtro giorni + TOP 5 + bordi neon + motore Storico/Dixon/Confronto + fallback');
 
 })();
