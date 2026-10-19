@@ -1,11 +1,11 @@
 // ============================================================
 // statistiche.js - Modulo Statistiche (v12)
-// ✅ Integrazione turnover/formazioni nel Dixon-Coles
-// ✅ Fattori correttivi applicati ai λ PRIMA della matrice
-// ✅ Panel manuale (Nessuno/Moderato/Pesante) + API opzionale
-// ✅ Tutte le famiglie ricalcolate con λ corretti
-// ✅ TutteLeFamigliePanel = statistiche reali (Classifica)
-// ✅ TutteLeFamigliePanelDixon = Dixon-Coles (tab dedicata)
+// ✅ TutteLeFamigliePanel = SOLO statistiche reali
+// ✅ NUOVA TAB "Analisi Dixon-Coles" (dopo Riepilogo AI)
+//    → contiene AIAnalysis + TutteLeFamigliePanelDixon
+// ✅ Riepilogo AI = meteo + frequenze + affidabilità (no AIAnalysis)
+// ✅ Motore Dixon-Coles invariato (v10)
+// ✅ NEW: window.getDixonPct esposta per il Palinsesto (Confronto)
 // ============================================================
 
 (function () {
@@ -59,104 +59,6 @@
       if (label === 'No Goal' || label === 'NG') return 'NG';
     }
     return label;
-  };
-
-  // ============================================================
-  // ⭐ TURNOVER / FORMAZIONI
-  // ============================================================
-  // Fattori di default per il turnover manuale (moltiplicano λ)
-  const TURNOVER_FACTORS = {
-    nessuno:  1.00,  // formazione titolare
-    leggero:  0.97,  // 1 titolare a riposo
-    moderato: 0.92,  // 2-3 titolari a riposo
-    pesante:  0.82,  // 4+ titolari a riposo
-  };
-
-  // Fattore fatica basato sui giorni di riposo
-  const getRestDays = (teamName, matchDate, allMatches) => {
-    if (!matchDate) return 7;
-    const prevMatches = allMatches
-      .filter(m => m.stato === 'Giocata' &&
-                   (m.casa === teamName || m.ospiti === teamName) &&
-                   m.data && m.data < matchDate)
-      .sort((a, b) => b.data.localeCompare(a.data));
-    if (prevMatches.length === 0) return 7;
-    const last = new Date(prevMatches[0].data + 'T00:00:00');
-    const current = new Date(matchDate + 'T00:00:00');
-    const diff = Math.round((current - last) / 86400000);
-    return Math.max(0, isNaN(diff) ? 7 : diff);
-  };
-
-  const getRestFatigueFactor = (restDays) => {
-    if (restDays < 3) return 0.88;
-    if (restDays < 4) return 0.92;
-    if (restDays < 5) return 0.96;
-    return 1.00;
-  };
-
-  // Estrae automaticamente i "giocatori chiave" dal DB storico
-  // (quelli che hanno segnato più gol nella squadra)
-  // Nota: se il tuo DB non ha dati individuali, ritorna un array vuoto
-  // e il turnover manuale resta comunque disponibile.
-  const getKeyPlayers = (teamName, championship, allMatches) => {
-    // Prova a leggere da window.playerStats se esiste (futuro)
-    if (window.playerStats && window.playerStats[teamName]) {
-      return window.playerStats[teamName].slice(0, 3).map(p => ({
-        name: p.name,
-        importance: p.importance || 0.15,
-      }));
-    }
-    // Fallback: nessun dato individuale → nessun aggiustamento automatico
-    return [];
-  };
-
-  /**
-   * Calcola il fattore di aggiustamento λ basato sulla probabilità di titolarità.
-   * Se lineupData è null o non contiene dati utili, ritorna 1.0 (nessun aggiustamento).
-   *
-   * Formato lineupData atteso (compatibile FutPicks/Sportmonks):
-   * {
-   *   lineups: [
-   *     { player_name: "Lautaro Martinez", team_side: "home", start_probability: 45 },
-   *     ...
-   *   ]
-   * }
-   */
-  const getLineupAdjustmentFactor = (lineupData, keyPlayers, teamSide) => {
-    if (!lineupData || !lineupData.lineups || !keyPlayers || keyPlayers.length === 0) {
-      return 1.0;
-    }
-    const teamPlayers = lineupData.lineups.filter(p =>
-      (p.team_side || '').toLowerCase() === teamSide
-    );
-    if (teamPlayers.length === 0) return 1.0;
-
-    let totalWeight = 0;
-    let expectedWeight = 0;
-
-    keyPlayers.forEach(kp => {
-      const apiPlayer = teamPlayers.find(p =>
-        (p.player_name || '').toLowerCase().includes((kp.name || '').toLowerCase())
-      );
-      const weight = kp.importance || 0.15;
-      totalWeight += weight;
-      if (apiPlayer) {
-        const raw = apiPlayer.start_probability ?? apiPlayer.probability ?? 100;
-        const startProb = raw > 1 ? raw / 100 : raw;  // gestisce 0-1 e 0-100
-        expectedWeight += weight * Math.max(0, Math.min(1, startProb));
-      } else {
-        // Giocatore non trovato: assume titolare
-        expectedWeight += weight * 1.0;
-      }
-    });
-
-    if (totalWeight === 0) return 1.0;
-
-    const availabilityRatio = expectedWeight / totalWeight;
-    const replacementRecovery = 0.5;  // il sostituto recupera ~50% della produzione
-
-    const factor = 1 - (totalWeight * (1 - availabilityRatio) * (1 - replacementRecovery));
-    return Math.max(0.75, Math.min(1.0, factor));
   };
 
   // ============================================================
@@ -294,75 +196,16 @@
     return matrix;
   };
 
-  /**
-   * simulateMatches v12
-   * 
-   * @param {string} homeTeam
-   * @param {string} awayTeam
-   * @param {string} championship
-   * @param {Array} allMatches
-   * @param {Object} options - { lineupData, turnoverHome, turnoverAway, matchDate }
-   *   - lineupData: risposta API formazioni (opzionale)
-   *   - turnoverHome/turnoverAway: 'nessuno' | 'leggero' | 'moderato' | 'pesante'
-   *   - matchDate: data partita (per calcolo giorni di riposo)
-   */
-  const simulateMatches = (homeTeam, awayTeam, championship, allMatches, options = {}) => {
+  const simulateMatches = (homeTeam, awayTeam, championship, allMatches) => {
     clearStatsCache();
-
-    const {
-      lineupData = null,
-      turnoverHome = 'nessuno',
-      turnoverAway = 'nessuno',
-      matchDate = null,
-    } = options;
 
     const hp = getTeamParams(homeTeam, championship, allMatches);
     const ap = getTeamParams(awayTeam, championship, allMatches);
     const avg = getLeagueAverages(championship, allMatches);
 
-    // [1] λ base Dixon-Coles
-    let lambdaHome = hp.attackHome * ap.defenseAway * (avg.avgHome || 1.4);
-    let lambdaAway = ap.attackAway * hp.defenseHome * (avg.avgAway || 1.1);
+    const lambdaHome = hp.attackHome * ap.defenseAway * (avg.avgHome || 1.4);
+    const lambdaAway = ap.attackAway * hp.defenseHome * (avg.avgAway || 1.1);
 
-    const lambdaHomeBase = lambdaHome;
-    const lambdaAwayBase = lambdaAway;
-
-    // [2] Fattore turnover manuale
-    const fTurnHome = TURNOVER_FACTORS[turnoverHome] ?? 1.0;
-    const fTurnAway = TURNOVER_FACTORS[turnoverAway] ?? 1.0;
-    lambdaHome *= fTurnHome;
-    lambdaAway *= fTurnAway;
-
-    // [3] Fattore fatica (giorni di riposo)
-    let fRestHome = 1.0, fRestAway = 1.0;
-    let restHome = null, restAway = null;
-    if (matchDate) {
-      restHome = getRestDays(homeTeam, matchDate, allMatches);
-      restAway = getRestDays(awayTeam, matchDate, allMatches);
-      fRestHome = getRestFatigueFactor(restHome);
-      fRestAway = getRestFatigueFactor(restAway);
-      lambdaHome *= fRestHome;
-      lambdaAway *= fRestAway;
-    }
-
-    // [4] Fattore formazioni (se API disponibile)
-    let fLineupHome = 1.0, fLineupAway = 1.0;
-    let usedApi = false;
-    if (lineupData && lineupData.lineups && lineupData.lineups.length > 0) {
-      const kpHome = getKeyPlayers(homeTeam, championship, allMatches);
-      const kpAway = getKeyPlayers(awayTeam, championship, allMatches);
-      fLineupHome = getLineupAdjustmentFactor(lineupData, kpHome, 'home');
-      fLineupAway = getLineupAdjustmentFactor(lineupData, kpAway, 'away');
-      lambdaHome *= fLineupHome;
-      lambdaAway *= fLineupAway;
-      usedApi = true;
-    }
-
-    // Clamp di sicurezza: λ non deve collassare né esplodere
-    lambdaHome = Math.max(0.15, Math.min(5.0, lambdaHome));
-    lambdaAway = Math.max(0.15, Math.min(5.0, lambdaAway));
-
-    // [5] Matrice Dixon-Coles con λ corretti
     const matrix = buildScoreMatrix(lambdaHome, lambdaAway);
 
     let hw = 0, dr = 0, aw = 0;
@@ -405,8 +248,6 @@
       maxResultPct: pct(maxP),
       lambdaCasa: lambdaHome.toFixed(2),
       lambdaOspite: lambdaAway.toFixed(2),
-      lambdaCasaBase: lambdaHomeBase.toFixed(2),
-      lambdaOspiteBase: lambdaAwayBase.toFixed(2),
       homeAttacco: hp.attackHome.toFixed(2),
       homeDifesa: hp.defenseHome.toFixed(2),
       awayAttacco: ap.attackAway.toFixed(2),
@@ -418,19 +259,6 @@
       leagueAvgAway: (avg.avgAway || 0).toFixed(2),
       weakHome: !!hp.weak,
       weakAway: !!ap.weak,
-      // ⭐ Info turnover per la UI
-      turnoverInfo: {
-        turnoverHome, turnoverAway,
-        factorTurnHome: fTurnHome,
-        factorTurnAway: fTurnAway,
-        factorRestHome: fRestHome,
-        factorRestAway: fRestAway,
-        factorLineupHome: fLineupHome,
-        factorLineupAway: fLineupAway,
-        restHome, restAway,
-        usedApi,
-        hasLineupData: !!(lineupData && lineupData.lineups && lineupData.lineups.length > 0),
-      },
     };
   };
 
@@ -620,169 +448,39 @@
   };
 
   // ============================================================
-  // ⭐ PANEL TURNOVER (UI)
+  // ⭐ NEW: GET DIXON PCT PER IL PALINSESTO
   // ============================================================
-  const LineupPanel = ({ match, lineupOptions, setLineupOptions, lineupData, setLineupData }) => {
-    const [showApi, setShowApi] = useState(!!lineupData);
-    const [apiText, setApiText] = useState('');
-    const [apiError, setApiError] = useState(null);
-
-    const TURNOVER_LABELS = {
-      nessuno:  '😴 Nessuno',
-      leggero:  '🤏 Leggero (1)',
-      moderato: '⚠️ Moderato (2-3)',
-      pesante:  '🔴 Pesante (4+)',
-    };
-
-    const tryParseApi = () => {
-      try {
-        const parsed = JSON.parse(apiText);
-        if (!parsed || !Array.isArray(parsed.lineups)) {
-          setApiError('Formato non valido: manca "lineups" array');
-          return;
-        }
-        setLineupData(parsed);
-        setApiError(null);
-      } catch (e) {
-        setApiError('JSON non valido: ' + e.message);
+  window.getDixonPct = function(familyId, giocata, match, allMatches) {
+    if (!match || !allMatches || allMatches.length === 0) return 0;
+    try {
+      // Usa la cache se disponibile (evita ricalcolo ad ogni render)
+      const cacheKey = `ft_mc_${match.id}`;
+      let mc = null;
+      const saved = localStorage.getItem(cacheKey);
+      
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.lambdaCasa && parsed.risultati) {
+            mc = parsed;
+          }
+        } catch (e) {}
       }
-    };
-
-    const clearApi = () => {
-      setLineupData(null);
-      setApiText('');
-      setApiError(null);
-    };
-
-    return (
-      <div style={{
-        background: 'var(--surface)',
-        border: '2px solid var(--neon-gold)',
-        borderRadius: '10px',
-        padding: '12px 14px',
-        marginBottom: '12px',
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
-          <h4 style={{ margin: 0, color: 'var(--neon-gold)', fontSize: '14px' }}>
-            🔄 Turnover / Formazioni
-          </h4>
-          <button
-            onClick={() => setShowApi(s => !s)}
-            style={{
-              background: 'transparent', border: '1px solid var(--border)',
-              color: 'var(--text-dim)', padding: '4px 10px',
-              borderRadius: '6px', cursor: 'pointer', fontSize: '11px',
-            }}
-          >
-            {showApi ? '▲ Nascondi API' : '▼ Aggiungi API (opzionale)'}
-          </button>
-        </div>
-
-        {/* Turnover manuale */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-          <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '4px', fontWeight: 'bold' }}>
-              🏠 {match.casa}
-            </div>
-            <select
-              value={lineupOptions.turnoverHome}
-              onChange={(e) => setLineupOptions({ ...lineupOptions, turnoverHome: e.target.value })}
-              style={{
-                width: '100%', padding: '6px 8px', borderRadius: '6px',
-                background: 'var(--card)', color: 'var(--text)',
-                border: '1px solid var(--border)', fontSize: '12px',
-              }}
-            >
-              {Object.entries(TURNOVER_LABELS).map(([v, l]) => (
-                <option key={v} value={v}>{l}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '4px', fontWeight: 'bold' }}>
-              ✈️ {match.ospiti}
-            </div>
-            <select
-              value={lineupOptions.turnoverAway}
-              onChange={(e) => setLineupOptions({ ...lineupOptions, turnoverAway: e.target.value })}
-              style={{
-                width: '100%', padding: '6px 8px', borderRadius: '6px',
-                background: 'var(--card)', color: 'var(--text)',
-                border: '1px solid var(--border)', fontSize: '12px',
-              }}
-            >
-              {Object.entries(TURNOVER_LABELS).map(([v, l]) => (
-                <option key={v} value={v}>{l}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* API opzionale */}
-        {showApi && (
-          <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px dashed var(--border)' }}>
-            <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '6px' }}>
-              Incolla qui il JSON dell'API formazioni (formato: <code>{'{ lineups: [{player_name, team_side, start_probability}] }'}</code>).
-              <br />
-              Fonti consigliate: <b>FutPicks</b> (<code>flab_match_details</code>) o <b>Sportmonks</b> (<code>expectedLineups</code>).
-            </div>
-            <textarea
-              value={apiText}
-              onChange={(e) => setApiText(e.target.value)}
-              placeholder='{"lineups":[{"player_name":"Lautaro Martinez","team_side":"home","start_probability":45}]}'
-              style={{
-                width: '100%', minHeight: '80px', padding: '8px',
-                borderRadius: '6px', background: 'var(--card)',
-                color: 'var(--text)', border: '1px solid var(--border)',
-                fontSize: '11px', fontFamily: 'monospace', resize: 'vertical',
-              }}
-            />
-            <div style={{ display: 'flex', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
-              <button
-                onClick={tryParseApi}
-                style={{
-                  background: 'var(--neon-cyan)', color: '#000',
-                  border: 'none', padding: '6px 14px', borderRadius: '6px',
-                  cursor: 'pointer', fontWeight: 'bold', fontSize: '11px',
-                }}
-              >
-                ✓ Applica API
-              </button>
-              {lineupData && (
-                <button
-                  onClick={clearApi}
-                  style={{
-                    background: 'transparent', color: 'var(--neon-red)',
-                    border: '1px solid var(--neon-red)', padding: '6px 14px',
-                    borderRadius: '6px', cursor: 'pointer', fontSize: '11px',
-                  }}
-                >
-                  ✕ Rimuovi API
-                </button>
-              )}
-              {lineupData && (
-                <span style={{ fontSize: '11px', color: 'var(--neon-green)', alignSelf: 'center' }}>
-                  ✓ API applicata ({lineupData.lineups.length} giocatori)
-                </span>
-              )}
-            </div>
-            {apiError && (
-              <div style={{ marginTop: '6px', color: 'var(--neon-red)', fontSize: '11px' }}>
-                ⚠️ {apiError}
-              </div>
-            )}
-          </div>
-        )}
-
-        <div style={{ marginTop: '10px', fontSize: '10px', color: 'var(--text-dim)', fontStyle: 'italic' }}>
-          ℹ️ Il turnover moltiplica i λ di Dixon-Coles (es. Pesante = −18%). Le formazioni via API correggono ulteriormente in base alle probabilità di titolarità.
-        </div>
-      </div>
-    );
+      
+      if (!mc) {
+        mc = simulateMatches(match.casa, match.ospiti, match.campionato, allMatches);
+        localStorage.setItem(cacheKey, JSON.stringify(mc));
+      }
+      
+      return calcolaPctGiocata(familyId, giocata, mc, null);
+    } catch (e) {
+      console.warn('Errore in window.getDixonPct:', e);
+      return 0;
+    }
   };
 
   // ============================================================
-  // AI ANALYSIS (con integrazione turnover)
+  // AI ANALYSIS
   // ============================================================
   const AIAnalysis = ({ match, allMatches, selectedFamiglie }) => {
     const getChampColor = window.getChampColor;
@@ -792,22 +490,10 @@
     const [mc, setMc] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    // ⭐ Stato turnover locale
-    const [lineupOptions, setLineupOptions] = useState({
-      turnoverHome: 'nessuno',
-      turnoverAway: 'nessuno',
-    });
-    const [lineupData, setLineupData] = useState(null);
-
-    const runSimulation = (homeTeam, awayTeam, options = {}) => {
+    const runSimulation = (homeTeam, awayTeam) => {
       setLoading(true);
       try {
-        const result = simulateMatches(homeTeam, awayTeam, match.campionato, allMatches, {
-          lineupData: options.lineupData !== undefined ? options.lineupData : lineupData,
-          turnoverHome: options.turnoverHome || lineupOptions.turnoverHome,
-          turnoverAway: options.turnoverAway || lineupOptions.turnoverAway,
-          matchDate: match.data,
-        });
+        const result = simulateMatches(homeTeam, awayTeam, match.campionato, allMatches);
         setMc(result);
         localStorage.setItem(`ft_mc_${match.id}`, JSON.stringify(result));
       } catch (e) {
@@ -831,24 +517,11 @@
       if (match && allMatches.length > 0) runSimulation(match.casa, match.ospiti);
     }, [match]);
 
-    // ⭐ Ricalcola quando cambia il turnover
-    const applyTurnover = (newOpts) => {
-      const merged = { ...lineupOptions, ...newOpts };
-      setLineupOptions(merged);
-      runSimulation(match.casa, match.ospiti, {
-        ...merged,
-        lineupData,
-      });
-    };
-
     const refresh = () => {
       if (match) {
         localStorage.removeItem(`ft_mc_${match.id}`);
         setMc(null);
-        runSimulation(match.casa, match.ospiti, {
-          ...lineupOptions,
-          lineupData,
-        });
+        runSimulation(match.casa, match.ospiti);
       }
     };
 
@@ -908,35 +581,20 @@
       return lista;
     })();
 
-    const ti = mc.turnoverInfo || {};
-
     return (
       <div className="ai-analysis-box">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
           <h3 style={{ color: getChampColor(match.campionato), margin: 0, fontSize: '18px' }}>
             📊 Modello Dixon-Coles
           </h3>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '11px', color: 'var(--text-dim)' }} title="λ finale (base → dopo turnover)">
-              🎯 λ {mc.lambdaCasaBase} → <b>{mc.lambdaCasa}</b> - {mc.lambdaOspiteBase} → <b>{mc.lambdaOspite}</b>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <span style={{ fontSize: '11px', color: 'var(--text-dim)' }} title="Matrice esatta su 9x9 risultati">
+              🎯 λ {mc.lambdaCasa} - {mc.lambdaOspite}
             </span>
             <button onClick={refresh} style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '13px' }}>🔄 Rigenera</button>
           </div>
         </div>
 
-        {/* ⭐ PANEL TURNOVER */}
-        <LineupPanel
-          match={match}
-          lineupOptions={lineupOptions}
-          setLineupOptions={(o) => applyTurnover(o)}
-          lineupData={lineupData}
-          setLineupData={(d) => {
-            setLineupData(d);
-            runSimulation(match.casa, match.ospiti, { ...lineupOptions, lineupData: d });
-          }}
-        />
-
-        {/* Box principale 1X2 / 12+U4.5 / Risultato */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', background: 'var(--card)', padding: '12px', borderRadius: '8px', border: '2px solid var(--neon-cyan)' }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '10px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>1 - X - 2</div>
@@ -962,7 +620,6 @@
           </div>
         </div>
 
-        {/* Info modello */}
         <div style={{
           display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
           gap: '8px', marginTop: '8px', fontSize: '11px', color: 'var(--text-dim)'
@@ -980,28 +637,6 @@
             📊 Campione: {mc.partiteAnalizzate} partite
           </div>
         </div>
-
-        {/* ⭐ Info fattori turnover applicati */}
-        {(ti.turnoverHome !== 'nessuno' || ti.turnoverAway !== 'nessuno' || ti.usedApi || ti.restHome !== null) && (
-          <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-            gap: '8px', marginTop: '8px', fontSize: '11px'
-          }}>
-            <div style={{ background: 'var(--card)', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--neon-gold)' }}>
-              🔄 Turnover: 🏠 <b>×{ti.factorTurnHome?.toFixed(2)}</b> | ✈️ <b>×{ti.factorTurnAway?.toFixed(2)}</b>
-            </div>
-            {ti.restHome !== null && ti.restAway !== null && (
-              <div style={{ background: 'var(--card)', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--neon-cyan)' }}>
-                😴 Riposo: 🏠 {ti.restHome}g (×{ti.factorRestHome?.toFixed(2)}) | ✈️ {ti.restAway}g (×{ti.factorRestAway?.toFixed(2)})
-              </div>
-            )}
-            {ti.usedApi && (
-              <div style={{ background: 'var(--card)', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--neon-green)' }}>
-                📋 Formazioni: 🏠 ×{ti.factorLineupHome?.toFixed(2)} | ✈️ ×{ti.factorLineupAway?.toFixed(2)}
-              </div>
-            )}
-          </div>
-        )}
 
         {(mc.weakHome || mc.weakAway) && (
           <div style={{
@@ -1127,7 +762,7 @@
               <span>Forma:</span>
               <div className="form-squares" style={{ display: 'inline-flex' }}>{renderFormSquares(awayForm.form)}</div>
             </div>
-            <div>Media Gol: {renderXgValue(awayForm.mediaGolFtiti || 0)}</div>
+            <div>Media Gol: {renderXgValue(awayForm.mediaGolFatti || 0)}</div>
           </div>
         </div>
 
@@ -1190,6 +825,7 @@
       .map(familyId => {
         const family = FAMIGLIE[familyId];
         const opzioni = family.options.map(opt => {
+          // ⭐ SEMPRE statistiche reali (mc = null)
           const pct = calcolaPctGiocata(familyId, opt, null, stats);
           let quota = null, isValue = false;
           if (hasQM) {
@@ -1259,23 +895,20 @@
   };
 
   // ============================================================
-  // TUTTE LE FAMIGLIE PANEL DIXON (con turnover opzionale)
+  // TUTTE LE FAMIGLIE PANEL DIXON (con calcoli Dixon-Coles)
   // ============================================================
-  const TutteLeFamigliePanelDixon = ({ match, allMatches, lineupData = null, turnoverHome = 'nessuno', turnoverAway = 'nessuno' }) => {
+  const TutteLeFamigliePanelDixon = ({ match, allMatches }) => {
     const getPercentualeClasse = window.getPercentualeClasse;
     const FAMIGLIE = window.FAMIGLIE_GIOCATE;
+    const stats = window.computeMatchStats(match, allMatches);
 
     const ORDINE = ['fisse', 'dc', 'gg_ng', 'over', 'under', 'multigol', 'dc_over', 'dc_under', 'mg_casa_ospite', 'dc_multigol'];
     const hasQM = !!(window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function');
 
+    // Calcola una sola volta la matrice Dixon-Coles
     let mcCache = null;
     try {
-      mcCache = simulateMatches(match.casa, match.ospiti, match.campionato, allMatches, {
-        lineupData,
-        turnoverHome,
-        turnoverAway,
-        matchDate: match.data,
-      });
+      mcCache = simulateMatches(match.casa, match.ospiti, match.campionato, allMatches);
     } catch (e) {
       console.warn('Dixon-Coles fallito', e);
     }
@@ -1306,18 +939,13 @@
         return { familyId, family, opzioni };
       });
 
-    const ti = mcCache.turnoverInfo || {};
-
     return (
       <div className="card" style={{ marginTop: '20px' }}>
         <h3 style={{ color: 'var(--neon-magenta, #ff00e5)', marginBottom: '8px' }}>
           🧮 Tutte le Giocate (Dixon-Coles) — {match.casa} vs {match.ospiti}
         </h3>
         <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '12px' }}>
-          Basato sulla matrice esatta λ {mcCache.lambdaCasaBase} → <b>{mcCache.lambdaCasa}</b> - {mcCache.lambdaOspiteBase} → <b>{mcCache.lambdaOspite}</b> con correzione τ
-          {ti.usedApi && <span style={{ color: 'var(--neon-green)' }}> • API formazioni applicata</span>}
-          {ti.turnoverHome !== 'nessuno' && <span style={{ color: 'var(--neon-gold)' }}> • Turnover 🏠: {ti.turnoverHome}</span>}
-          {ti.turnoverAway !== 'nessuno' && <span style={{ color: 'var(--neon-gold)' }}> • Turnover ✈️: {ti.turnoverAway}</span>}
+          Basato sulla matrice esatta λ {mcCache.lambdaCasa} - {mcCache.lambdaOspite} con correzione τ
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
           {sezioni.map(({ familyId, family, opzioni }) => (
@@ -1896,6 +1524,7 @@
           <span>📊 <b style={{ color: 'var(--neon-cyan)' }}>{matchesFiltrati.length}</b> partite totali</span>
         </div>
 
+        {/* ⭐ 5 sub-tabs con la nuova "Analisi Dixon-Coles" dopo "Riepilogo AI" */}
         <div className="sub-tabs">
           <button className={statsSubTab === 'Classifica' ? 'active' : ''} onClick={() => setStatsSubTab('Classifica')}>📊 Classifica</button>
           <button className={statsSubTab === 'Scontri' ? 'active' : ''} onClick={() => setStatsSubTab('Scontri')}>⚔️ Scontri</button>
@@ -1931,6 +1560,7 @@
               </div>
             </div>
 
+            {/* ⭐ Statistiche reali (nessun Dixon-Coles) */}
             {selectedMatch && (
               <TutteLeFamigliePanel match={selectedMatch} allMatches={matchesFiltrati} />
             )}
@@ -1950,6 +1580,7 @@
           </div>
         )}
 
+        {/* ⭐ Riepilogo AI — solo meteo + frequenze + affidabilità (NO Dixon) */}
         {statsSubTab === 'RiepilogoAI' && (
           <div>
             {selectedMatch ? (
@@ -1980,6 +1611,7 @@
           </div>
         )}
 
+        {/* ⭐ NUOVA TAB — Analisi Dixon-Coles */}
         {statsSubTab === 'DixonColes' && (
           <div>
             {selectedMatch ? (
@@ -2065,7 +1697,6 @@
   // ============================================================
   window.StatisticheComponent = StatisticheComponent;
   window.AIAnalysis = AIAnalysis;
-  window.LineupPanel = LineupPanel;
   window.WeatherProfessionale = WeatherProfessionale;
   window.IndiceAffidabilita = IndiceAffidabilita;
   window.RisultatiFrequenti = RisultatiFrequenti;
@@ -2076,11 +1707,7 @@
   window.TutteLeFamigliePanelDixon = TutteLeFamigliePanelDixon;
   window.simulateMatches = simulateMatches;
   window.clearStatsCache = clearStatsCache;
-  window.getLineupAdjustmentFactor = getLineupAdjustmentFactor;
-  window.getKeyPlayers = getKeyPlayers;
-  window.getRestDays = getRestDays;
-  window.TURNOVER_FACTORS = TURNOVER_FACTORS;
 
-  console.log('✅ statistiche.js v12 - Dixon-Coles + Turnover integrato');
+  console.log('✅ statistiche.js v12 - Aggiunto getDixonPct per Palinsesto');
 
 })();
