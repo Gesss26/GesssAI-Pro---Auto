@@ -1,12 +1,12 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto
-// v7: filtro giorni (1-7) + switch Scelte/Calcolate
+// v8: FIX Dixon finto (0%) + lazy check per getDixonPct
+//     + filtro giorni (1-7) + switch Scelte/Calcolate
 //     + switch Motore (Storico / Dixon / Confronto)
 //     + bordi neon colorati sulle card match
 //     + bottoni TOP 5 (Maggiori / Minori / Tutti) con selezione atomica
 //     + FIX: palinsesto non si svuota se CHAMPIONSHIP_LIST non pronta
-//     + Dixon-Coles integrato via window.getDixonPct
-//     + FALLBACK: se useMotoreAnalisi o getDixonPct mancano, non crasha
+//     + Dixon-Coles integrato via window.getDixonPct (senza fallback congelato)
 //     + QuotaBox: placeholder "-.--" se la quota non è nel PDF
 // ============================================================
 
@@ -15,8 +15,7 @@
 
   const { useState, useMemo, useEffect, useCallback } = React;
 
-  // ⭐ FALLBACK SICURO: se useMotoreAnalisi non esiste in filtri-campionati.js,
-  // crealo qui per evitare crash del Palinsesto (comportamento v6).
+  // ⭐ FALLBACK SICURO per useMotoreAnalisi
   if (!window.FiltriCampionati) window.FiltriCampionati = {};
   if (typeof window.FiltriCampionati.useMotoreAnalisi !== 'function') {
     window.FiltriCampionati.useMotoreAnalisi = function () {
@@ -29,15 +28,21 @@
       }, []);
       return { motore, setMotore };
     };
-    console.warn('⚠️ useMotoreAnalisi non trovato in filtri-campionati.js — uso fallback locale (Palinsesto v7)');
+    console.warn('⚠️ useMotoreAnalisi non trovato in filtri-campionati.js — uso fallback locale (Palinsesto v8)');
   }
 
-  // ⭐ FALLBACK SICURO: se getDixonPct non esiste in statistiche.js,
-  // usa una funzione che ritorna 0 → Dixon disabilitato, Palinsesto funziona.
-  if (typeof window.getDixonPct !== 'function') {
-    window.getDixonPct = function () { return 0; };
-    console.warn('⚠️ getDixonPct non trovato in statistiche.js — Dixon disabilitato (fallback 0)');
-  }
+  // ⭐ FUNZIONE SICURA PER DIXON: evita di congelare il fallback a 0
+  const safeGetDixonPct = (familyId, giocata, match, allMatches) => {
+    if (typeof window.getDixonPct === 'function' && !window.getDixonPct._isFallback) {
+      try {
+        return window.getDixonPct(familyId, giocata, match, allMatches);
+      } catch (e) {
+        console.warn('Errore getDixonPct:', e);
+        return 0;
+      }
+    }
+    return 0;
+  };
 
   const normalizzaAccenti = (str) => {
     if (!str) return '';
@@ -102,7 +107,6 @@
     'EFL Championship',
   ];
 
-  // Confronto robusto: case-insensitive, accenti normalizzati, alias comuni
   const matchCampionato = (nomeDb, nomeTarget) => {
     if (!nomeDb || !nomeTarget) return false;
     const a = normalizzaAccenti(nomeDb).toLowerCase().trim();
@@ -176,41 +180,33 @@
   };
 
   // ============================================================
-  // QUOTA BOX — placeholder "-.--" se la quota manca
+  // QUOTA BOX
   // ============================================================
   const QuotaBox = ({ match, familyId, giocata, pctTua }) => {
     const [quotaInfo, setQuotaInfo] = useState(null);
-    const { numPartite, dataMaxPDF } = window.QuoteManager ? window.QuoteManager.useQuote() : { numPartite: 0 };
+    const quoteCtx = window.QuoteManager && window.QuoteManager.useQuote ? window.QuoteManager.useQuote() : {};
+    const numPartite = quoteCtx.numPartite || 0;
+    const dataMaxPDF = quoteCtx.dataMaxPDF || null;
 
     useEffect(() => {
       const info = getQuotaInfo(match, familyId, giocata, pctTua);
       setQuotaInfo(info);
     }, [match.id, familyId, giocata, pctTua, numPartite, dataMaxPDF]);
 
-    const hasQuota = quotaInfo && quotaInfo.quotaBook;
+    const hasQuota = quotaInfo && (quotaInfo.quotaBook !== undefined) && (quotaInfo.quotaBook !== null);
     const quotaBook = hasQuota ? quotaInfo.quotaBook : null;
     const isValue = hasQuota ? !!quotaInfo.isValue : false;
 
-    // Placeholder: quota non disponibile nel PDF
     if (!hasQuota) {
       return (
         <div
           title="Quota non disponibile nel PDF"
           style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px',
-            padding: '2px 6px',
-            marginLeft: '6px',
-            borderRadius: '4px',
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px dashed var(--border)',
-            fontSize: '11px',
-            fontWeight: 'bold',
-            color: 'var(--text-dim)',
-            whiteSpace: 'nowrap',
-            opacity: 0.6,
-            flexShrink: 0,
+            display: 'inline-flex', alignItems: 'center', gap: '4px',
+            padding: '2px 6px', marginLeft: '6px', borderRadius: '4px',
+            background: 'rgba(255, 255, 255, 0.03)', border: '1px dashed var(--border)',
+            fontSize: '11px', fontWeight: 'bold', color: 'var(--text-dim)',
+            whiteSpace: 'nowrap', opacity: 0.6, flexShrink: 0,
           }}
         >
           <span>💰</span><span>-.--</span>
@@ -220,19 +216,12 @@
 
     return (
       <div style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '4px',
-        padding: '2px 6px',
-        marginLeft: '6px',
-        borderRadius: '4px',
+        display: 'inline-flex', alignItems: 'center', gap: '4px',
+        padding: '2px 6px', marginLeft: '6px', borderRadius: '4px',
         background: isValue ? 'rgba(0, 255, 136, 0.15)' : 'rgba(255, 255, 255, 0.05)',
         border: `1px solid ${isValue ? 'var(--neon-green)' : 'var(--border)'}`,
-        fontSize: '11px',
-        fontWeight: 'bold',
-        color: isValue ? 'var(--neon-green)' : 'var(--text)',
-        whiteSpace: 'nowrap',
-        flexShrink: 0,
+        fontSize: '11px', fontWeight: 'bold', color: isValue ? 'var(--neon-green)' : 'var(--text)',
+        whiteSpace: 'nowrap', flexShrink: 0,
       }}>
         <span>💰</span><span>{quotaBook.toFixed(2)}</span>
       </div>
@@ -240,7 +229,7 @@
   };
 
   // ============================================================
-  // MATCH TAB — v7 con motore storico/dixon/confronto
+  // MATCH TAB — v8 con Dixon Lazy e fix UI Confronto
   // ============================================================
   const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie }) => {
     const computeMatchStats = window.computeMatchStats;
@@ -252,7 +241,10 @@
     const getGiocataPct = window.getGiocataPct;
     const getPercentualeClasse = window.getPercentualeClasse;
     const calcolaGG_NG = window.calcolaGG_NG;
-    const getDixonPct = window.getDixonPct;
+    
+    // ⭐ USO IL SAFE GETTER
+    const getDixonPct = safeGetDixonPct; 
+
     const { mode: visualizzaMode } = window.FiltriCampionati.useVisualizzaGiocateMode();
     const { motore } = window.FiltriCampionati.useMotoreAnalisi();
 
@@ -279,7 +271,6 @@
       return 'var(--neon-red)';
     };
 
-    // ── Lista famiglie da analizzare
     const famiglieDaAnalizzare = useMemo(() => {
       if (stats.error) return [];
       let ids;
@@ -288,7 +279,7 @@
       return [...new Set(ids)].filter(id => FAMIGLIE_GIOCATE[id]);
     }, [visualizzaMode, selectedFamiglie, stats.error]);
 
-    // ── Migliore giocata storica per ogni famiglia
+    // ── Migliore giocata storica
     const bestStoricoPerFamiglia = useMemo(() => {
       const homeMG = stats.homeMG || {};
       const awayMG = stats.awayMG || {};
@@ -321,7 +312,7 @@
       return out;
     }, [famiglieDaAnalizzare, stats]);
 
-    // ── Dixon migliore per ogni famiglia (solo per ramo "dixon" puro)
+    // ── Dixon migliore
     const bestDixonPerFamiglia = useMemo(() => {
       if (motore === 'storico' || !getDixonPct) return [];
       const out = [];
@@ -344,11 +335,11 @@
       return out;
     }, [motore, famiglieDaAnalizzare, match.id, allMatches.length]);
 
-    // ── Le 3 righe da mostrare (logica per modalità × motore)
+    // ── Righe da mostrare
     const righeDaMostrare = useMemo(() => {
       if (stats.error) return [];
 
-      // ⭐ STORICO puro: top 3 per pct storica
+      // ⭐ STORICO puro
       if (motore === 'storico') {
         return bestStoricoPerFamiglia
           .sort((a, b) => b.pct - a.pct)
@@ -356,7 +347,7 @@
           .map(g => ({ ...g, pctDixon: null, delta: null, fonte: 'storico' }));
       }
 
-      // ⭐ DIXON puro: top 3 per pct Dixon
+      // ⭐ DIXON puro
       if (motore === 'dixon') {
         return bestDixonPerFamiglia
           .sort((a, b) => b.pct - a.pct)
@@ -364,28 +355,28 @@
           .map(g => ({ ...g, pctDixon: g.pct, delta: null, fonte: 'dixon' }));
       }
 
-      // ⭐ CONFRONTO + Scelte: giocate fisse, calcolo delta
+      // ⭐ CONFRONTO + Scelte
       if (motore === 'confronto' && visualizzaMode === 'scelte') {
         return bestStoricoPerFamiglia
           .sort((a, b) => b.pct - a.pct)
           .slice(0, 3)
           .map(g => {
-            const pctDixon = getDixonPct ? getDixonPct(g.familyId, g.giocata, match, allMatches) : null;
-            const delta = pctDixon != null ? pctDixon - g.pct : null;
-            return { ...g, pctDixon, delta, fonte: 'storico' };
+            const pctDixon = getDixonPct ? getDixonPct(g.familyId, g.giocata, match, allMatches) : 0;
+            const hasDixon = pctDixon > 0;
+            const delta = hasDixon ? pctDixon - g.pct : null;
+            return { ...g, pctDixon: hasDixon ? pctDixon : 0, delta, fonte: 'storico' };
           });
       }
 
-      // ⭐ CONFRONTO + Calcolate: meglio dei 2 per (famiglia, opzione), top 3 per max
+      // ⭐ CONFRONTO + Calcolate
       if (motore === 'confronto' && visualizzaMode === 'calcolate') {
-        if (!getDixonPct) return [];
         const tutte = [];
         famiglieDaAnalizzare.forEach(familyId => {
           const family = FAMIGLIE_GIOCATE[familyId];
           if (!family) return;
           family.options.forEach(opt => {
             const pctStorico = getGiocataPct(opt, stats, stats.homeMG, stats.awayMG, stats.mgTot) || 0;
-            const pctDixon = getDixonPct(familyId, opt, match, allMatches);
+            const pctDixon = getDixonPct ? getDixonPct(familyId, opt, match, allMatches) : 0;
             if (pctStorico <= 0 && pctDixon <= 0) return;
             tutte.push({
               familyId, familyLabel: family.label, familyIcon: family.icon,
@@ -400,9 +391,11 @@
           .sort((a, b) => b.max - a.max)
           .slice(0, 3)
           .map(g => {
-            const delta = g.pctDixon - g.pct;
+            const hasDixon = g.pctDixon > 0;
+            const delta = hasDixon ? g.pctDixon - g.pct : null;
             let fonte = 'concordi';
-            if (Math.abs(delta) > 3) fonte = delta > 0 ? 'dixon' : 'storico';
+            if (!hasDixon) fonte = 'storico';
+            else if (Math.abs(delta) > 3) fonte = delta > 0 ? 'dixon' : 'storico';
             return { ...g, delta, fonte };
           });
       }
@@ -431,12 +424,11 @@
       boxShadow: `0 0 12px ${champColor}88, 0 0 4px ${champColor}44, inset 0 0 8px ${champColor}11`,
     };
 
-    // ── Rendering di una singola riga in base al motore
+    // ── Rendering riga
     const renderRiga = (g, idx) => {
       const isBomb = g.isBomb;
       const pctColor = getColorForPct(g.pct);
 
-      // ⭐ Storico puro
       if (motore === 'storico') {
         return (
           <div key={idx} className={`bet-item-vertical ${isBomb ? 'bomb' : ''}`} style={{ borderColor: pctColor }}>
@@ -451,7 +443,6 @@
         );
       }
 
-      // ⭐ Dixon puro
       if (motore === 'dixon') {
         const pct = g.pctDixon ?? g.pct;
         return (
@@ -468,10 +459,13 @@
         );
       }
 
-      // ⭐ CONFRONTO
+      // CONFRONTO
       const { pct, pctDixon, delta, fonte } = g;
-      const accordo = delta != null && Math.abs(delta) <= 3;
-      const divergenza = delta != null && Math.abs(delta) > 10;
+      const hasDixon = pctDixon > 0;
+      
+      const accordo = hasDixon && delta != null && Math.abs(delta) <= 3;
+      const divergenza = hasDixon && delta != null && Math.abs(delta) > 10;
+      
       const bordo = accordo ? 'var(--neon-green)' : divergenza ? 'var(--neon-gold)' : 'var(--border)';
       const freccia = delta > 0 ? '↗' : delta < 0 ? '↘' : '↔';
       const coloreDelta = delta > 0 ? 'var(--neon-green)' : delta < 0 ? 'var(--neon-red)' : 'var(--text-dim)';
@@ -482,7 +476,7 @@
         concordi: { txt: '⚖️', color: 'var(--neon-green)' },
       }[fonte] || null;
 
-      const pctTuaQuota = pctDixon != null ? Math.min(pct, pctDixon) : pct;
+      const pctTuaQuota = hasDixon ? Math.min(pct, pctDixon) : pct;
 
       return (
         <div key={idx} className={`bet-item-vertical ${isBomb ? 'bomb' : ''}`} style={{ borderColor: bordo }}>
@@ -501,11 +495,15 @@
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', flexWrap: 'wrap' }}>
               <span title="Statistiche storiche">📊 <b>{pct}%</b></span>
-              <span style={{ color: 'var(--text-dim)' }}>→</span>
-              <span title="Dixon-Coles" style={{ color: 'var(--neon-magenta)' }}>
-                🧮 <b>{pctDixon != null ? pctDixon + '%' : 'N/D'}</b>
-              </span>
-              {delta != null && (
+              {hasDixon && (
+                <>
+                  <span style={{ color: 'var(--text-dim)' }}>→</span>
+                  <span title="Dixon-Coles" style={{ color: 'var(--neon-magenta)' }}>
+                    🧮 <b>{pctDixon}%</b>
+                  </span>
+                </>
+              )}
+              {hasDixon && delta != null && (
                 <span style={{ color: coloreDelta, fontWeight: 900, fontSize: '10px' }}>
                   {freccia} {delta > 0 ? '+' : ''}{delta}
                 </span>
@@ -579,7 +577,7 @@
   };
 
   // ============================================================
-  // CHAMP BAR — con badge oggi (rosso) / 2 giorni (giallo)
+  // CHAMP BAR
   // ============================================================
   const ChampBar = ({ matches, campionatiSelezionati, onToggle, onSelezionaTutti, onDeselezionaTutti, championships }) => {
     const normalizeDate = window.normalizeDate;
@@ -604,7 +602,6 @@
     };
 
     const campionatiOrdinati = useMemo(() => getCampionatiOrdinati(), []);
-
     const isTuttiSelezionati = campionatiSelezionati.length === championships.length && championships.length > 0;
 
     const renderBadge = (camp) => {
@@ -678,7 +675,7 @@
   };
 
   // ============================================================
-  // VISUALIZZA GIOCATE SWITCH — v7 con Motore (storico/dixon/confronto)
+  // VISUALIZZA GIOCATE SWITCH
   // ============================================================
   const VisualizzaGiocateSwitch = ({
     mode, setMode, motore, setMotore,
@@ -705,7 +702,6 @@
         background: 'var(--bg-elevated)', borderRadius: '12px',
         border: '1px solid var(--border)', justifyContent: 'center'
       }}>
-        {/* ── RANGE GIORNI ── */}
         <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neon-cyan)', textTransform: 'uppercase' }}>
           📅 Giorni
         </span>
@@ -729,7 +725,6 @@
 
         <span style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 4px' }} />
 
-        {/* ── TOP 5 ── */}
         <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neon-gold)', textTransform: 'uppercase' }}>
           🏆 Top 5
         </span>
@@ -741,7 +736,6 @@
 
         <span style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 4px' }} />
 
-        {/* ── SWITCH SCELTE/CALCOLATE ── */}
         <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neon-cyan)', textTransform: 'uppercase' }}>
           🎯 Giocate
         </span>
@@ -769,7 +763,6 @@
 
         <span style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 4px' }} />
 
-        {/* ── SWITCH MOTORE ── */}
         <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neon-magenta)', textTransform: 'uppercase' }}>
           🔬 Motore
         </span>
@@ -810,7 +803,7 @@
   };
 
   // ============================================================
-  // PALINSESTO COMPONENT — v7
+  // PALINSESTO COMPONENT
   // ============================================================
   function PalinsestoComponent({ matches, selectedFamiglie, onSelectMatch, weatherCache, championships }) {
     const normalizeDate = window.normalizeDate;
@@ -835,7 +828,6 @@
       return [];
     }, [championships]);
 
-    // ⭐ LISTA COMPLETA NOMI CAMPIONATI (DB + LISTA, con fallback)
     const tuttiNomiCampionati = useMemo(() => {
       const dalDb = Array.isArray(matches)
         ? [...new Set(matches.map(m => m.campionato).filter(Boolean))]
@@ -848,7 +840,6 @@
       return unione;
     }, [matches]);
 
-    // ⭐ SELEZIONE RAPIDA TOP 5 — atomica via setFiltro
     const selezionaSoloCampionati = useCallback((targetList) => {
       if (typeof setFiltro !== 'function') {
         console.warn('⚠️ TOP 5: setFiltro non disponibile in useFiltroCampionati');
@@ -901,8 +892,6 @@
       if (Array.isArray(campionatiAttivi) && campionatiAttivi.length > 0) {
         list = list.filter(m => campionatiAttivi.includes(m.campionato));
       } else {
-        // FIX: se il filtro è vuoto ma non è una scelta esplicita dell'utente
-        // (es. localStorage corrotto o filtro mai inizializzato), mostra tutto.
         let filtroRaw = null;
         try {
           filtroRaw = window.FiltriCampionati.leggiFiltroCampionati
@@ -1060,6 +1049,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto v7 caricato — filtro giorni + TOP 5 + bordi neon + motore Storico/Dixon/Confronto + fallback + QuotaBox placeholder');
+  console.log('✅ Modulo Palinsesto v8 caricato — fix Dixon (safe getter + UI confronto)');
 
 })();
