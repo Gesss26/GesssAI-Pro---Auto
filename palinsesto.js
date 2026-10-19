@@ -7,6 +7,7 @@
 //     + FIX: palinsesto non si svuota se CHAMPIONSHIP_LIST non pronta
 //     + Dixon-Coles integrato via window.getDixonPct
 //     + FALLBACK: se useMotoreAnalisi o getDixonPct mancano, non crasha
+//     + QuotaBox: placeholder "-.--" se la quota non è nel PDF
 // ============================================================
 
 (function () {
@@ -174,6 +175,9 @@
     );
   };
 
+  // ============================================================
+  // QUOTA BOX — placeholder "-.--" se la quota manca
+  // ============================================================
   const QuotaBox = ({ match, familyId, giocata, pctTua }) => {
     const [quotaInfo, setQuotaInfo] = useState(null);
     const { numPartite, dataMaxPDF } = window.QuoteManager ? window.QuoteManager.useQuote() : { numPartite: 0 };
@@ -183,11 +187,53 @@
       setQuotaInfo(info);
     }, [match.id, familyId, giocata, pctTua, numPartite, dataMaxPDF]);
 
-    if (!quotaInfo || !quotaInfo.quotaBook) return null;
-    const { quotaBook, edge, isValue } = quotaInfo;
+    const hasQuota = quotaInfo && quotaInfo.quotaBook;
+    const quotaBook = hasQuota ? quotaInfo.quotaBook : null;
+    const isValue = hasQuota ? !!quotaInfo.isValue : false;
+
+    // Placeholder: quota non disponibile nel PDF
+    if (!hasQuota) {
+      return (
+        <div
+          title="Quota non disponibile nel PDF"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            padding: '2px 6px',
+            marginLeft: '6px',
+            borderRadius: '4px',
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px dashed var(--border)',
+            fontSize: '11px',
+            fontWeight: 'bold',
+            color: 'var(--text-dim)',
+            whiteSpace: 'nowrap',
+            opacity: 0.6,
+            flexShrink: 0,
+          }}
+        >
+          <span>💰</span><span>-.--</span>
+        </div>
+      );
+    }
 
     return (
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 6px', marginLeft: '6px', borderRadius: '4px', background: isValue ? 'rgba(0, 255, 136, 0.15)' : 'rgba(255, 255, 255, 0.05)', border: `1px solid ${isValue ? 'var(--neon-green)' : 'var(--border)'}`, fontSize: '11px', fontWeight: 'bold', color: isValue ? 'var(--neon-green)' : 'var(--text)', whiteSpace: 'nowrap' }}>
+      <div style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px',
+        padding: '2px 6px',
+        marginLeft: '6px',
+        borderRadius: '4px',
+        background: isValue ? 'rgba(0, 255, 136, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+        border: `1px solid ${isValue ? 'var(--neon-green)' : 'var(--border)'}`,
+        fontSize: '11px',
+        fontWeight: 'bold',
+        color: isValue ? 'var(--neon-green)' : 'var(--text)',
+        whiteSpace: 'nowrap',
+        flexShrink: 0,
+      }}>
         <span>💰</span><span>{quotaBook.toFixed(2)}</span>
       </div>
     );
@@ -397,7 +443,7 @@
             <span className="bet-label" style={{ color: isBomb ? 'var(--neon-gold)' : pctColor, fontWeight: 700 }}>
               {isBomb && '💣 '}{g.displayLabel || g.label}
             </span>
-            <span className="bet-value">
+            <span className="bet-value" style={{ flexShrink: 0 }}>
               <span className={`giocata-pct ${getPercentualeClasse(g.pct)}`}>{g.pct}%</span>
               <QuotaBox match={match} familyId={g.familyId} giocata={g.giocata} pctTua={g.pct} />
             </span>
@@ -414,7 +460,7 @@
             <span className="bet-label" style={{ color: isBomb ? 'var(--neon-gold)' : 'var(--neon-magenta)', fontWeight: 700 }}>
               {isBomb && '💣 '}{g.displayLabel || g.label}
             </span>
-            <span className="bet-value">
+            <span className="bet-value" style={{ flexShrink: 0 }}>
               <span className={`giocata-pct ${getPercentualeClasse(pct)}`}>{pct}%</span>
               <QuotaBox match={match} familyId={g.familyId} giocata={g.giocata} pctTua={pct} />
             </span>
@@ -480,7 +526,9 @@
               )}
             </div>
           </div>
-          <QuotaBox match={match} familyId={g.familyId} giocata={g.giocata} pctTua={pctTuaQuota} />
+          <div style={{ flexShrink: 0 }}>
+            <QuotaBox match={match} familyId={g.familyId} giocata={g.giocata} pctTua={pctTuaQuota} />
+          </div>
         </div>
       );
     };
@@ -866,7 +914,6 @@
         if (nessunoEsplicitamenteSelezionato) {
           list = [];
         }
-        // altrimenti lascia list com'è (mostra tutto)
       }
 
       return list.sort((a, b) => {
@@ -1013,6 +1060,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto v7 caricato — filtro giorni + TOP 5 + bordi neon + motore Storico/Dixon/Confronto + fallback');
+  console.log('✅ Modulo Palinsesto v7 caricato — filtro giorni + TOP 5 + bordi neon + motore Storico/Dixon/Confronto + fallback + QuotaBox placeholder');
 
 })();
