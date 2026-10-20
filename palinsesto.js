@@ -1,9 +1,9 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto
-// v10: FIX switch Scelte/Calcolate + NUOVA vista "Tripla Affiancata"
-//      + 3 viste: 📖 Dettagliata / ⚡ Compatta / 🔀 Tripla
-//      + toggle per-card ciclico + toggle globale
-//      + tutto il resto invariato (motore Dixon, TOP 5, ChampBar)
+// v11: Logica Vista Tripla perfezionata (allineamento per famiglia)
+//      + FIX switch Scelte/Calcolate (da filtri-campionati.js v3)
+//      + Vista Compatta e Tripla
+//      + Tutto il resto invariato (motore Dixon, TOP 5, ChampBar)
 // ============================================================
 
 (function () {
@@ -25,32 +25,33 @@
       }, []);
       return { motore, setMotore };
     };
-    console.warn('⚠️ useMotoreAnalisi non trovato in filtri-campionati.js — uso fallback locale (Palinsesto v10)');
+    console.warn('⚠️ useMotoreAnalisi non trovato in filtri-campionati.js — uso fallback locale (Palinsesto v11)');
   }
 
-  // ⭐ FALLBACK SICURO per useVisualizzaGiocateMode (FIX BUG)
+  // ⭐ FALLBACK SICURO per useVisualizzaGiocateMode
   if (typeof window.FiltriCampionati.useVisualizzaGiocateMode !== 'function') {
     window.FiltriCampionati.useVisualizzaGiocateMode = function () {
       const [mode, setModeState] = React.useState(
-        () => localStorage.getItem('ft_visualizza_mode') || 'scelte'
+        () => localStorage.getItem('ft_visualizza_giocate_mode') || 'scelte'
       );
       const setMode = React.useCallback((v) => {
-        setModeState(v);
-        localStorage.setItem('ft_visualizza_mode', v);
-        window.dispatchEvent(new Event('visualizza-mode-changed'));
+        const val = (v === 'calcolate' || v === 'tutte') ? 'calcolate' : 'scelte';
+        setModeState(val);
+        localStorage.setItem('ft_visualizza_giocate_mode', val);
+        window.dispatchEvent(new Event('visualizza-giocate-mode-updated'));
       }, []);
       React.useEffect(() => {
-        const handler = () => setModeState(localStorage.getItem('ft_visualizza_mode') || 'scelte');
-        window.addEventListener('visualizza-mode-changed', handler);
+        const handler = () => setModeState(localStorage.getItem('ft_visualizza_giocate_mode') || 'scelte');
+        window.addEventListener('visualizza-giocate-mode-updated', handler);
         window.addEventListener('storage', handler);
         return () => {
-          window.removeEventListener('visualizza-mode-changed', handler);
+          window.removeEventListener('visualizza-giocate-mode-updated', handler);
           window.removeEventListener('storage', handler);
         };
       }, []);
       return { mode, setMode };
     };
-    console.warn('⚠️ useVisualizzaGiocateMode non trovato — uso fallback locale (Palinsesto v10)');
+    console.warn('⚠️ useVisualizzaGiocateMode non trovato — uso fallback locale (Palinsesto v11)');
   }
 
   // ⭐ FUNZIONE SICURA PER DIXON
@@ -345,7 +346,7 @@
   };
 
   // ============================================================
-  // MATCH TAB — v10 con 3 viste
+  // MATCH TAB
   // ============================================================
   const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie }) => {
     const computeMatchStats = window.computeMatchStats;
@@ -532,25 +533,65 @@
       return [];
     }, [motore, visualizzaMode, bestStoricoPerFamiglia, bestDixonPerFamiglia, stats, match.id, allMatches.length]);
 
-    // ⭐ Per la vista TRIPLA: prendo le top 3 sia da storico che da dixon
+    // ⭐ Per la vista TRIPLA: allinea Storico e Dixon in base alla FAMIGLIA di giocata
     const topTripla = useMemo(() => {
       if (stats.error) return [];
+      
+      // 1. Prendo le top 3 dello Storico
       const topStorico = bestStoricoPerFamiglia.sort((a, b) => b.pct - a.pct).slice(0, 3);
-      const topDixon = bestDixonPerFamiglia.sort((a, b) => b.pct - a.pct).slice(0, 3);
-      const maxLen = Math.max(topStorico.length, topDixon.length);
-      const result = [];
-      for (let i = 0; i < maxLen; i++) {
-        const s = topStorico[i] || null;
-        const d = topDixon[i] || null;
-        // Determina la giocata "vincente" per la colonna quota (la % più alta)
-        let quotaSource = null;
-        if (s && d) {
-          quotaSource = s.pct >= d.pct ? s : d;
-        } else {
-          quotaSource = s || d;
+      
+      // 2. Prendo le migliori giocate del Dixon raggruppate per famiglia
+      const dixonByFamily = {};
+      bestDixonPerFamiglia.sort((a, b) => b.pct - a.pct).forEach(d => {
+        if (!dixonByFamily[d.familyId]) {
+          dixonByFamily[d.familyId] = d;
         }
-        result.push({ storico: s, dixon: d, quotaSource });
-      }
+      });
+
+      const result = [];
+      const usedDixonKeys = new Set();
+
+      // 3. Per ogni giocata dello Storico, cerco il Dixon della stessa famiglia
+      topStorico.forEach(s => {
+        let d = dixonByFamily[s.familyId] || null;
+        
+        // Se la famiglia coincide, la uso e la marco come "usata"
+        if (d) {
+          usedDixonKeys.add(d.familyId);
+        }
+
+        // Quota: prendo la versione con % più alta tra le due
+        let quotaSource = null;
+        if (s && d) quotaSource = s.pct >= d.pct ? s : d;
+        else quotaSource = s || d;
+
+        result.push({ 
+          storico: s, 
+          dixon: d, 
+          quotaSource, 
+          tipo: d ? 'match-famiglia' : 'solo-storico' 
+        });
+      });
+
+      // 4. Aggiungo le giocate Dixon "orfane" (famiglie non presenti nello Storico)
+      bestDixonPerFamiglia
+        .sort((a, b) => b.pct - a.pct)
+        .forEach(d => {
+          if (!usedDixonKeys.has(d.familyId)) {
+            // Evito duplicati se per qualche motivo la stessa giocata è già stata aggiunta
+            const isDuplicate = result.some(r => r.dixon && r.dixon.familyId === d.familyId);
+            if (!isDuplicate) {
+              result.push({ 
+                storico: null, 
+                dixon: d, 
+                quotaSource: d, 
+                tipo: 'solo-dixon' 
+              });
+              usedDixonKeys.add(d.familyId);
+            }
+          }
+        });
+
       return result;
     }, [bestStoricoPerFamiglia, bestDixonPerFamiglia, stats.error]);
 
@@ -728,7 +769,7 @@
     };
 
     // ============================================================
-    // 🔀 RIGA TRIPLA (nuova vista a 3 colonne)
+    // 🔀 RIGA TRIPLA (allineamento per famiglia)
     // ============================================================
     const renderRigaTripla = () => {
       if (topTripla.length === 0) {
@@ -745,6 +786,16 @@
             const s = row.storico;
             const d = row.dixon;
             const q = row.quotaSource;
+            
+            // Colore bordo riga in base al tipo
+            const isMatch = row.tipo === 'match-famiglia';
+            const isSoloDixon = row.tipo === 'solo-dixon';
+
+            const borderRowColor = isMatch
+              ? 'var(--neon-green)'
+              : row.tipo === 'solo-storico'
+                ? 'var(--neon-cyan)'
+                : 'var(--neon-magenta)';
 
             return (
               <div key={idx} style={{
@@ -754,8 +805,34 @@
                 padding: '6px',
                 background: 'var(--bg-elevated)',
                 borderRadius: '8px',
-                border: '1px solid var(--border)',
+                border: `1px solid ${borderRowColor}50`,
+                position: 'relative',
               }}>
+                {/* Badge Match Famiglia */}
+                {isMatch && (
+                  <span
+                    title="Storico e Dixon suggeriscono una giocata per la stessa famiglia"
+                    style={{
+                      position: 'absolute', top: '-6px', right: '6px',
+                      background: 'var(--neon-green)', color: '#000',
+                      fontSize: '9px', fontWeight: 900, padding: '1px 6px',
+                      borderRadius: '8px', zIndex: 2,
+                    }}
+                  >✓ MATCH</span>
+                )}
+                {/* Badge Solo Dixon */}
+                {isSoloDixon && (
+                  <span
+                    title="Solo Dixon suggerisce questa giocata"
+                    style={{
+                      position: 'absolute', top: '-6px', right: '6px',
+                      background: 'var(--neon-magenta)', color: '#000',
+                      fontSize: '9px', fontWeight: 900, padding: '1px 6px',
+                      borderRadius: '8px', zIndex: 2,
+                    }}
+                  >+ DIXON</span>
+                )}
+
                 {/* Col 1: Storico */}
                 <div style={{
                   display: 'flex', flexDirection: 'column', gap: '2px',
@@ -1077,7 +1154,7 @@
   };
 
   // ============================================================
-  // VISUALIZZA GIOCATE SWITCH (con FIX sincronizzazione)
+  // VISUALIZZA GIOCATE SWITCH
   // ============================================================
   const VisualizzaGiocateSwitch = ({
     mode, setMode, motore, setMotore,
@@ -1426,6 +1503,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto v10 caricato — FIX switch Scelte/Calcolate + Vista Tripla');
+  console.log('✅ Modulo Palinsesto v11 caricato — Vista Tripla con allineamento per famiglia');
 
 })();
