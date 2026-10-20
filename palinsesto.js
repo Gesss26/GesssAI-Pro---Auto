@@ -1,7 +1,9 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto
-// v14: Vista Compatta FISSA + Rimossa icona Tripla
-//      + Sfondo Oro Pulsante per le Bombe
+// v15: Vista Tripla FISSA (Storico | Dixon | Quota)
+//      + Rimosso lo switch della vista (dettagliata/compatta/tripla)
+//      + Dixon allineato per famiglia
+//      + Sfondo oro pulsante se la giocata è una bomba
 //      + FIX per i loghi EFL Championship
 // ============================================================
 
@@ -245,88 +247,6 @@
     );
   };
 
-  // ============================================================
-  // VISTA COMPATTA - Componenti visivi
-  // ============================================================
-  const TermometroForma = ({ formString }) => {
-    if (!formString || formString === '-----') {
-      return (<div style={{ height: '8px', background: 'var(--bg-deep)', borderRadius: '4px', opacity: 0.5 }} />);
-    }
-    const v = [...formString].filter(c => c === 'V').length;
-    const p = [...formString].filter(c => c === 'P').length;
-    const s = [...formString].filter(c => c === 'S').length;
-
-    return (
-      <div style={{ display: 'flex', height: '8px', borderRadius: '4px', overflow: 'hidden', gap: '2px' }}>
-        {Array(v).fill(0).map((_, i) => (
-          <div key={`v${i}`} style={{ flex: 1, background: 'var(--neon-green)', boxShadow: '0 0 6px var(--neon-green)' }} />
-        ))}
-        {Array(p).fill(0).map((_, i) => (
-          <div key={`p${i}`} style={{ flex: 1, background: 'var(--neon-gold)' }} />
-        ))}
-        {Array(s).fill(0).map((_, i) => (
-          <div key={`s${i}`} style={{ flex: 1, background: 'var(--neon-red)' }} />
-        ))}
-      </div>
-    );
-  };
-
-  const BarraPct = ({ pct, isBomb }) => {
-    const colore = pct >= 90 ? 'var(--neon-gold)'
-                 : pct >= 66 ? 'var(--neon-green)'
-                 : pct >= 33 ? 'var(--text-dim)'
-                 : 'var(--neon-red)';
-    const icona = isBomb ? '💣' : pct >= 66 ? '🔥' : pct >= 33 ? '•' : '▫️';
-
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', width: '100%' }}>
-        <span style={{ fontSize: '14px', minWidth: '18px', textAlign: 'center' }}>{icona}</span>
-        <div style={{
-          flex: 1, height: '12px', background: 'var(--bg-deep)',
-          borderRadius: '6px', overflow: 'hidden', border: `1px solid ${colore}40`,
-        }}>
-          <div style={{
-            width: `${Math.min(pct, 100)}%`, height: '100%',
-            background: `linear-gradient(90deg, ${colore}, ${colore}88)`,
-            boxShadow: `0 0 6px ${colore}`,
-            transition: 'width 0.3s ease',
-          }} />
-        </div>
-        <span style={{ fontSize: '11px', fontWeight: 900, color: colore, minWidth: '32px', textAlign: 'right', fontFamily: 'Orbitron, sans-serif' }}>
-          {pct}%
-        </span>
-      </div>
-    );
-  };
-
-  const BadgeAccordo = ({ pctStorico, pctDixon }) => {
-    if (!pctDixon || pctDixon <= 0) return null;
-    const delta = pctDixon - pctStorico;
-    const abs = Math.abs(delta);
-
-    if (abs <= 3) {
-      return (
-        <span title={`Concordi: Storico ${pctStorico}% / Dixon ${pctDixon}%`}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: '2px',
-            padding: '1px 5px', borderRadius: '8px', fontSize: '9px',
-            background: 'var(--neon-green)', color: '#000', fontWeight: 900,
-          }}>⚖️ ✓</span>
-      );
-    }
-    if (abs > 10) {
-      return (
-        <span title={`Divergenza: Storico ${pctStorico}% / Dixon ${pctDixon}%`}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: '2px',
-            padding: '1px 5px', borderRadius: '8px', fontSize: '9px',
-            background: 'var(--neon-gold)', color: '#000', fontWeight: 900,
-          }}>⚖️ ⚠️</span>
-      );
-    }
-    return null;
-  };
-
   const getRischioCard = (righe) => {
     if (!righe || righe.length === 0) return { level: 'vuoto', colore: '#555', label: '▫️' };
     const nBombe = righe.filter(g => (g.pct >= 90) || (g.pctDixon >= 90)).length;
@@ -341,7 +261,7 @@
   };
 
   // ============================================================
-  // MATCH TAB (VISTA COMPATTA FISSA + SFONDO BOMBA)
+  // MATCH TAB (VISTA TRIPLA FISSA)
   // ============================================================
   const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie }) => {
     const computeMatchStats = window.computeMatchStats;
@@ -370,11 +290,9 @@
     stats._homeTeam = match.casa;
     stats._awayTeam = match.ospiti;
 
-    const getColorForPct = (valore) => {
-      if (valore >= 90) return 'var(--neon-gold)';
-      if (valore >= 66.67) return 'var(--neon-green)';
-      if (valore >= 33.34) return 'var(--text-dim)';
-      return 'var(--neon-red)';
+    const renderFormSquares = (formStr) => {
+      if (!formStr) return <span>N/D</span>;
+      return [...formStr].map((letter, idx) => <div key={idx} className={`form-square form-square-${letter}`}>{letter}</div>);
     };
 
     const famiglieDaAnalizzare = useMemo(() => {
@@ -502,6 +420,44 @@
       return [];
     }, [motore, visualizzaMode, bestStoricoPerFamiglia, bestDixonPerFamiglia, stats, match.id, allMatches.length]);
 
+    // ⭐ Allineamento per la vista TRIPLA
+    const topTripla = useMemo(() => {
+      if (stats.error) return [];
+      const topStorico = bestStoricoPerFamiglia.sort((a, b) => b.pct - a.pct).slice(0, 3);
+      const topDixon = bestDixonPerFamiglia.sort((a, b) => b.pct - a.pct).slice(0, 3);
+
+      const dixonByFamily = {};
+      topDixon.forEach(d => {
+        if (!dixonByFamily[d.familyId]) dixonByFamily[d.familyId] = d;
+      });
+
+      const result = [];
+      const usedDixonKeys = new Set();
+
+      topStorico.forEach(s => {
+        let d = dixonByFamily[s.familyId] || null;
+        if (d) usedDixonKeys.add(d.familyId);
+
+        let quotaSource = null;
+        if (s && d) quotaSource = s.pct >= d.pct ? s : d;
+        else quotaSource = s || d;
+
+        result.push({ storico: s, dixon: d, quotaSource, tipo: d ? 'match-famiglia' : 'solo-storico' });
+      });
+
+      topDixon.forEach(d => {
+        if (!usedDixonKeys.has(d.familyId)) {
+          const isDuplicate = result.some(r => r.dixon && r.dixon.familyId === d.familyId);
+          if (!isDuplicate) {
+            result.push({ storico: null, dixon: d, quotaSource: d, tipo: 'solo-dixon' });
+            usedDixonKeys.add(d.familyId);
+          }
+        }
+      });
+
+      return result;
+    }, [bestStoricoPerFamiglia, bestDixonPerFamiglia, stats.error]);
+
     const score = useMemo(() => {
       if (righeDaMostrare.length === 0) return 0;
       const sum = righeDaMostrare.reduce((s, g) => {
@@ -526,76 +482,155 @@
     };
 
     // ============================================================
-    // ⚡ RIGA COMPATTA CON SFONDO BOMBA ORO PULSANTE
+    // 🔀 RIGA TRIPLA (allineamento per famiglia)
     // ============================================================
-    const renderRigaCompatta = (g, idx) => {
-      const pctBase = motore === 'dixon' ? (g.pctDixon ?? g.pct)
-                      : motore === 'confronto' ? Math.max(g.pct || 0, g.pctDixon || 0)
-                      : g.pct;
-      const pctPerQuota = motore === 'confronto' && g.pctDixon > 0
-        ? Math.min(g.pct, g.pctDixon)
-        : pctBase;
-
-      const isBombItem = g.isBomb;
-      const colore = pctBase >= 90 ? 'var(--neon-gold)'
-                   : pctBase >= 66 ? 'var(--neon-green)'
-                   : pctBase >= 33 ? 'var(--text-dim)'
-                   : 'var(--neon-red)';
-
-      // Sfondo Oro Pulsante se è una bomba, altrimenti lieve sfumatura del colore
-      const backgroundStyle = isBombItem
-        ? `linear-gradient(90deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.1))`
-        : `linear-gradient(90deg, ${colore}15, transparent)`;
-
-      const borderStyle = isBombItem
-        ? `2px solid var(--neon-gold)`
-        : `1px solid ${colore}50`;
+    const renderRigaTripla = () => {
+      if (topTripla.length === 0) {
+        return (
+          <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '20px' }}>
+            Nessuna giocata disponibile
+          </div>
+        );
+      }
 
       return (
-        <div key={idx} className={isBombItem ? 'bomb-bg-pulse' : ''} style={{
-          display: 'flex', flexDirection: 'column', gap: '4px',
-          padding: '6px 8px', borderRadius: '8px',
-          background: backgroundStyle,
-          border: borderStyle,
-          boxShadow: isBombItem ? '0 0 15px rgba(255, 215, 0, 0.4)' : 'none',
-          transition: 'all 0.3s ease',
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, minWidth: 0 }}>
-              <span style={{
-                fontSize: '11px', fontWeight: 700, color: isBombItem ? '#000' : colore,
-                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                textShadow: isBombItem ? '0 0 2px rgba(255,255,255,0.5)' : 'none',
-              }}>
-                {isBombItem && '💣 '}{g.displayLabel || g.label}
-              </span>
-              {motore === 'confronto' && g.pctDixon > 0 && (
-                <BadgeAccordo pctStorico={g.pct} pctDixon={g.pctDixon} />
-              )}
-            </div>
-            <QuotaBox match={match} familyId={g.familyId} giocata={g.giocata} pctTua={pctPerQuota} />
-          </div>
-          <BarraPct pct={pctBase} isBomb={isBombItem} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {topTripla.map((row, idx) => {
+            const s = row.storico;
+            const d = row.dixon;
+            const q = row.quotaSource;
+            
+            const isMatch = row.tipo === 'match-famiglia';
+            const isSoloDixon = row.tipo === 'solo-dixon';
+
+            const borderRowColor = isMatch
+              ? 'var(--neon-green)'
+              : row.tipo === 'solo-storico'
+                ? 'var(--neon-cyan)'
+                : 'var(--neon-magenta)';
+
+            // Controlla se una delle due giocate è una bomba
+            const isBombRow = (s && s.pct >= 90) || (d && d.pct >= 90);
+
+            const rowStyle = {
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr 1fr',
+              gap: '4px',
+              padding: '6px',
+              background: isBombRow 
+                ? 'linear-gradient(90deg, rgba(255, 215, 0, 0.25), rgba(255, 215, 0, 0.05))' 
+                : 'var(--bg-elevated)',
+              borderRadius: '8px',
+              border: isBombRow 
+                ? '2px solid var(--neon-gold)' 
+                : `1px solid ${borderRowColor}50`,
+              position: 'relative',
+              boxShadow: isBombRow ? '0 0 15px rgba(255, 215, 0, 0.4)' : 'none',
+              animation: isBombRow ? 'bomb-glow 1.2s infinite alternate' : 'none',
+            };
+
+            return (
+              <div key={idx} style={rowStyle}>
+                {isMatch && (
+                  <span title="Storico e Dixon suggeriscono la stessa famiglia" style={{ position: 'absolute', top: '-6px', right: '6px', background: 'var(--neon-green)', color: '#000', fontSize: '9px', fontWeight: 900, padding: '1px 6px', borderRadius: '8px', zIndex: 2 }}>
+                    ✓ MATCH
+                  </span>
+                )}
+                {isSoloDixon && (
+                  <span title="Solo Dixon suggerisce questa giocata" style={{ position: 'absolute', top: '-6px', right: '6px', background: 'var(--neon-magenta)', color: '#000', fontSize: '9px', fontWeight: 900, padding: '1px 6px', borderRadius: '8px', zIndex: 2 }}>
+                    + DIXON
+                  </span>
+                )}
+
+                {/* Col 1: Storico */}
+                <div style={{
+                  display: 'flex', flexDirection: 'column', gap: '2px',
+                  padding: '6px 8px', borderRadius: '6px',
+                  background: s ? 'rgba(0, 245, 255, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                  border: s ? '1px solid var(--neon-cyan)' : '1px dashed var(--border)',
+                  minHeight: '52px', justifyContent: 'center',
+                }}>
+                  <div style={{ fontSize: '9px', color: 'var(--neon-cyan)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'center' }}>
+                    📊 Storico
+                  </div>
+                  {s ? (
+                    <>
+                      <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'center' }}>
+                        {s.displayLabel || s.label}
+                      </div>
+                      <div style={{ fontSize: '16px', fontWeight: 900, fontFamily: 'Orbitron, sans-serif', color: s.pct >= 90 ? 'var(--neon-gold)' : s.pct >= 66 ? 'var(--neon-green)' : s.pct >= 33 ? 'var(--text-dim)' : 'var(--neon-red)', textAlign: 'center', lineHeight: 1.1 }}>
+                        {s.pct}%{s.isBomb && <span style={{ fontSize: '10px', marginLeft: '2px' }}>💣</span>}
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ fontSize: '11px', color: 'var(--text-dim)', textAlign: 'center' }}>—</div>
+                  )}
+                </div>
+
+                {/* Col 2: Dixon */}
+                <div style={{
+                  display: 'flex', flexDirection: 'column', gap: '2px',
+                  padding: '6px 8px', borderRadius: '6px',
+                  background: d ? 'rgba(255, 0, 229, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                  border: d ? '1px solid var(--neon-magenta)' : '1px dashed var(--border)',
+                  minHeight: '52px', justifyContent: 'center',
+                }}>
+                  <div style={{ fontSize: '9px', color: 'var(--neon-magenta)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'center' }}>
+                    🧮 Dixon
+                  </div>
+                  {d ? (
+                    <>
+                      <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'center' }}>
+                        {d.displayLabel || d.label}
+                      </div>
+                      <div style={{ fontSize: '16px', fontWeight: 900, fontFamily: 'Orbitron, sans-serif', color: d.pct >= 90 ? 'var(--neon-gold)' : d.pct >= 66 ? 'var(--neon-green)' : d.pct >= 33 ? 'var(--text-dim)' : 'var(--neon-red)', textAlign: 'center', lineHeight: 1.1 }}>
+                        {d.pct}%{d.isBomb && <span style={{ fontSize: '10px', marginLeft: '2px' }}>💣</span>}
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ fontSize: '11px', color: 'var(--text-dim)', textAlign: 'center' }}>—</div>
+                  )}
+                </div>
+
+                {/* Col 3: Quota */}
+                <div style={{
+                  display: 'flex', flexDirection: 'column', gap: '2px',
+                  padding: '6px 8px', borderRadius: '6px',
+                  background: q ? 'rgba(0, 255, 136, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                  border: q ? '1px solid var(--neon-green)' : '1px dashed var(--border)',
+                  minHeight: '52px', justifyContent: 'center', alignItems: 'center',
+                }}>
+                  <div style={{ fontSize: '9px', color: 'var(--neon-green)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'center' }}>
+                    💰 Quota
+                  </div>
+                  {q ? (
+                    <>
+                      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '2px' }}>
+                        <QuotaBox match={match} familyId={q.familyId} giocata={q.giocata} pctTua={q.pct} compact={true} />
+                      </div>
+                      <div style={{ fontSize: '9px', color: 'var(--text-dim)', textAlign: 'center', marginTop: '2px' }}>
+                        {q.displayLabel || q.label}
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>—</div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       );
     };
 
     return (
-      <div className="match-tab"
-        style={neonBorderStyle}
-        onClick={handleClick}>
+      <div className="match-tab" style={neonBorderStyle} onClick={handleClick}>
         <div className="score-badge" style={{
-          background: `${rischio.colore}22`,
-          border: `2px solid ${rischio.colore}`,
-          color: rischio.colore,
-          padding: '2px 10px',
-          borderRadius: '10px',
-          boxShadow: `0 0 10px ${rischio.colore}66`,
+          background: `${rischio.colore}22`, border: `2px solid ${rischio.colore}`, color: rischio.colore,
+          padding: '2px 10px', borderRadius: '10px', boxShadow: `0 0 10px ${rischio.colore}66`,
         }}>
           <span style={{ fontSize: '14px', marginRight: '4px' }}>{rischio.label}</span>
-          <span className={`giocata-pct ${getPercentualeClasse(score)}`} style={{ fontSize: '13px' }}>
-            {isNaN(score) ? 0 : score}%
-          </span>
+          <span className={`giocata-pct ${getPercentualeClasse(score)}`} style={{ fontSize: '13px' }}>{isNaN(score) ? 0 : score}%</span>
           {hasBomb && <span className="bomb-inline">💣</span>}
         </div>
 
@@ -621,31 +656,15 @@
           <div className="team"><TeamLogo teamName={match.ospiti} championship={match.campionato} size={50} /><div className="team-name">{match.ospiti || 'Ospite'}</div></div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px', marginBottom: '6px' }}>
-          <div style={{ padding: '6px 8px', background: 'var(--surface)', borderRadius: '6px', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: '9px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px', textAlign: 'center' }}>
-              🏠 {homeForm.pct || 0}%
-            </div>
-            <TermometroForma formString={homeForm.form} />
-          </div>
-          <div style={{ padding: '6px 8px', background: 'var(--surface)', borderRadius: '6px', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: '9px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px', textAlign: 'center' }}>
-              ✈️ {awayForm.pct || 0}%
-            </div>
-            <TermometroForma formString={awayForm.form} />
-          </div>
+        <div className="form-row-compact">
+          <div className="form-block-compact"><div className="form-label">Forma</div><div className="form-squares">{renderFormSquares(homeForm.form)}</div><div className="form-pct-compact">{homeForm.pct || 0}%</div></div>
+          <div className="form-block-compact"><div className="form-label">Forma</div><div className="form-squares">{renderFormSquares(awayForm.form)}</div><div className="form-pct-compact">{awayForm.pct || 0}%</div></div>
         </div>
 
         <div className="form-diff">📊 Differenza forma: <span className={diff >= 20 ? 'diff-alta' : 'diff-bassa'}>{isNaN(diff) ? 0 : diff}%</span></div>
 
         <div className="bet-row-vertical">
-          {righeDaMostrare.length > 0 ? (
-            righeDaMostrare.map((g, idx) => renderRigaCompatta(g, idx))
-          ) : (
-            <div className="bet-item-vertical" style={{ textAlign: 'center', color: 'var(--text-dim)' }}>
-              <span>Nessuna giocata</span>
-            </div>
-          )}
+          {renderRigaTripla()}
         </div>
       </div>
     );
@@ -1047,6 +1066,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto v14 caricato — Rimosso fulmine + Sfondo oro pulsante');
+  console.log('✅ Modulo Palinsesto v15 caricato — Vista Tripla Fissa + Sfondo Oro se Bomba');
 
 })();
