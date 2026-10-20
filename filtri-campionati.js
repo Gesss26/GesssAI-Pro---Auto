@@ -3,11 +3,18 @@
 // Sistema centralizzato di filtro campionati + giorni + modalità giocate.
 // Il PALINSESTO è la fonte di verità: scrive la selezione.
 // Tutti gli altri tab la leggono e si sincronizzano.
+// ⭐ v3: FIX switch Scelte/Calcolate
+//        - valori allineati a 'scelte' | 'calcolate'
+//        - retrocompatibile con 'tutte' salvato in passato
+//        - setMode ora dispatcha correttamente l'evento
 // ============================================================
 
 (function () {
   'use strict';
 
+  // ============================================================
+  // COSTANTI
+  // ============================================================
   const STORAGE_KEY = 'ft_campionati_selezionati';
   const EVENT_NAME = 'campionati-filter-updated';
 
@@ -17,10 +24,10 @@
   const GIORNI_MIN = 1;
   const GIORNI_MAX = 7;
 
-  // ⭐ NUOVO: modalità visualizzazione giocate nel Palinsesto
+  // ⭐ FIX: modalità visualizzazione giocate con valori 'scelte' | 'calcolate'
   const GIOCATE_MODE_STORAGE_KEY = 'ft_visualizza_giocate_mode';
   const GIOCATE_MODE_EVENT_NAME = 'visualizza-giocate-mode-updated';
-  const GIOCATE_MODE_DEFAULT = 'scelte'; // 'scelte' | 'tutte'
+  const GIOCATE_MODE_DEFAULT = 'scelte';
 
   const getChampList = () => {
     const list = window.CHAMPIONSHIP_LIST || [];
@@ -99,13 +106,23 @@
   };
 
   // ============================================================
-  // MODALITÀ VISUALIZZAZIONE GIOCATE
+  // ⭐ MODALITÀ VISUALIZZAZIONE GIOCATE (FIX)
   // ============================================================
+
+  /**
+   * Normalizza un valore arbitrario in 'scelte' o 'calcolate'.
+   * Accetta 'tutte' come sinonimo di 'calcolate' (retrocompatibile
+   * con eventuali valori salvati in localStorage da versioni precedenti).
+   */
+  const normalizzaGiocateMode = (mode) => {
+    if (mode === 'calcolate' || mode === 'tutte') return 'calcolate';
+    return 'scelte';
+  };
 
   const leggiVisualizzaGiocateMode = () => {
     try {
       const raw = localStorage.getItem(GIOCATE_MODE_STORAGE_KEY);
-      if (raw === 'scelte' || raw === 'tutte') return raw;
+      if (raw) return normalizzaGiocateMode(raw);
     } catch (e) {
       console.warn('Errore lettura visualizza giocate mode:', e);
     }
@@ -114,7 +131,8 @@
 
   const salvaVisualizzaGiocateMode = (mode) => {
     try {
-      const val = (mode === 'tutte') ? 'tutte' : 'scelte';
+      // ⭐ FIX: normalizza e salva sempre 'scelte' o 'calcolate'
+      const val = normalizzaGiocateMode(mode);
       localStorage.setItem(GIOCATE_MODE_STORAGE_KEY, val);
       window.dispatchEvent(new CustomEvent(GIOCATE_MODE_EVENT_NAME, { detail: val }));
     } catch (e) {
@@ -224,7 +242,7 @@
   };
 
   // ============================================================
-  // HOOK: useVisualizzaGiocateMode
+  // ⭐ HOOK: useVisualizzaGiocateMode (FIX)
   // ============================================================
 
   const useVisualizzaGiocateMode = () => {
@@ -234,10 +252,15 @@
 
     useEffect(() => {
       const handler = (e) => {
-        setModeState(typeof e.detail === 'string' ? e.detail : leggiVisualizzaGiocateMode());
+        const val = typeof e.detail === 'string'
+          ? normalizzaGiocateMode(e.detail)
+          : leggiVisualizzaGiocateMode();
+        setModeState(val);
       };
       const storageHandler = (e) => {
-        if (e.key === GIOCATE_MODE_STORAGE_KEY) setModeState(leggiVisualizzaGiocateMode());
+        if (e.key === GIOCATE_MODE_STORAGE_KEY) {
+          setModeState(leggiVisualizzaGiocateMode());
+        }
       };
       window.addEventListener(GIOCATE_MODE_EVENT_NAME, handler);
       window.addEventListener('storage', storageHandler);
@@ -248,7 +271,8 @@
     }, []);
 
     const setMode = useCallback((nuovo) => {
-      const val = (nuovo === 'tutte') ? 'tutte' : 'scelte';
+      // ⭐ FIX: normalizza prima di salvare e aggiornare lo stato
+      const val = normalizzaGiocateMode(nuovo);
       salvaVisualizzaGiocateMode(val);
       setModeState(val);
     }, []);
@@ -261,6 +285,7 @@
   // ============================================================
 
   window.FiltriCampionati = {
+    // Campionati
     STORAGE_KEY,
     EVENT_NAME,
     leggiFiltroCampionati,
@@ -269,6 +294,8 @@
     isCampionatoAttivo,
     filtraPartitePerCampionato,
     useFiltroCampionati,
+
+    // Giorni
     GIORNI_STORAGE_KEY,
     GIORNI_EVENT_NAME,
     GIORNI_DEFAULT,
@@ -277,14 +304,16 @@
     leggiGiorniRange,
     salvaGiorniRange,
     useGiorniRange,
-    // ⭐ NUOVO
+
+    // Modalità giocate (⭐ FIX)
     GIOCATE_MODE_STORAGE_KEY,
     GIOCATE_MODE_EVENT_NAME,
     GIOCATE_MODE_DEFAULT,
+    normalizzaGiocateMode,
     leggiVisualizzaGiocateMode,
     salvaVisualizzaGiocateMode,
     useVisualizzaGiocateMode,
   };
 
-  console.log('✅ Modulo FiltriCampionati caricato (campionati + giorni + modalità giocate)');
+  console.log('✅ FiltriCampionati v3 — FIX switch Scelte/Calcolate');
 })();
