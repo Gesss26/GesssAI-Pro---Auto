@@ -1,10 +1,7 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto
-// v15: Vista Tripla FISSA (Storico | Dixon | Quota)
-//      + Rimosso lo switch della vista (dettagliata/compatta/tripla)
-//      + Dixon allineato per famiglia
-//      + Sfondo oro pulsante se la giocata è una bomba
-//      + FIX per i loghi EFL Championship
+// v16: Vista Tripla FISSA + Rimossi switch motore e badge invasivi
+//      + Dixon allineato per famiglia + Sfondo Oro se bomba
 // ============================================================
 
 (function () {
@@ -16,14 +13,7 @@
   if (!window.FiltriCampionati) window.FiltriCampionati = {};
   if (typeof window.FiltriCampionati.useMotoreAnalisi !== 'function') {
     window.FiltriCampionati.useMotoreAnalisi = function () {
-      const [motore, setMotoreState] = React.useState(
-        () => localStorage.getItem('ft_motore') || 'storico'
-      );
-      const setMotore = React.useCallback((v) => {
-        setMotoreState(v);
-        localStorage.setItem('ft_motore', v);
-      }, []);
-      return { motore, setMotore };
+      return { motore: 'confronto', setMotore: () => {} };
     };
   }
 
@@ -276,8 +266,9 @@
 
     const getDixonPct = safeGetDixonPct;
 
+    // Forziamo il motore su 'confronto' per la vista tripla fissa
+    const motore = 'confronto';
     const { mode: visualizzaMode } = window.FiltriCampionati.useVisualizzaGiocateMode();
-    const { motore } = window.FiltriCampionati.useMotoreAnalisi();
 
     if (!match) return null;
 
@@ -357,68 +348,18 @@
       return out;
     }, [famiglieDaAnalizzare, match.id, allMatches.length]);
 
+    // Calcoliamo le righe per il badge in alto (score)
     const righeDaMostrare = useMemo(() => {
       if (stats.error) return [];
-
-      if (motore === 'storico') {
-        return bestStoricoPerFamiglia
-          .sort((a, b) => b.pct - a.pct)
-          .slice(0, 3)
-          .map(g => ({ ...g, pctDixon: null, delta: null, fonte: 'storico' }));
-      }
-
-      if (motore === 'dixon') {
-        return bestDixonPerFamiglia
-          .sort((a, b) => b.pct - a.pct)
-          .slice(0, 3)
-          .map(g => ({ ...g, pctDixon: g.pct, delta: null, fonte: 'dixon' }));
-      }
-
-      if (motore === 'confronto' && visualizzaMode === 'scelte') {
-        return bestStoricoPerFamiglia
-          .sort((a, b) => b.pct - a.pct)
-          .slice(0, 3)
-          .map(g => {
-            const pctDixon = getDixonPct ? getDixonPct(g.familyId, g.giocata, match, allMatches) : 0;
-            const hasDixon = pctDixon > 0;
-            const delta = hasDixon ? pctDixon - g.pct : null;
-            return { ...g, pctDixon: hasDixon ? pctDixon : 0, delta, fonte: 'storico' };
-          });
-      }
-
-      if (motore === 'confronto' && visualizzaMode === 'calcolate') {
-        const tutte = [];
-        famiglieDaAnalizzare.forEach(familyId => {
-          const family = FAMIGLIE_GIOCATE[familyId];
-          if (!family) return;
-          family.options.forEach(opt => {
-            const pctStorico = getGiocataPct(opt, stats, stats.homeMG, stats.awayMG, stats.mgTot) || 0;
-            const pctDixon = getDixonPct ? getDixonPct(familyId, opt, match, allMatches) : 0;
-            if (pctStorico <= 0 && pctDixon <= 0) return;
-            tutte.push({
-              familyId, familyLabel: family.label, familyIcon: family.icon,
-              label: opt, giocata: opt, displayLabel: formatGiocataLabel(familyId, opt),
-              pct: pctStorico, pctDixon,
-              max: Math.max(pctStorico, pctDixon),
-              isBomb: Math.max(pctStorico, pctDixon) >= 90,
-            });
-          });
+      return bestStoricoPerFamiglia
+        .sort((a, b) => b.pct - a.pct)
+        .slice(0, 3)
+        .map(g => {
+          const pctDixon = getDixonPct ? getDixonPct(g.familyId, g.giocata, match, allMatches) : 0;
+          const hasDixon = pctDixon > 0;
+          return { ...g, pctDixon: hasDixon ? pctDixon : 0 };
         });
-        return tutte
-          .sort((a, b) => b.max - a.max)
-          .slice(0, 3)
-          .map(g => {
-            const hasDixon = g.pctDixon > 0;
-            const delta = hasDixon ? g.pctDixon - g.pct : null;
-            let fonte = 'concordi';
-            if (!hasDixon) fonte = 'storico';
-            else if (Math.abs(delta) > 3) fonte = delta > 0 ? 'dixon' : 'storico';
-            return { ...g, delta, fonte };
-          });
-      }
-
-      return [];
-    }, [motore, visualizzaMode, bestStoricoPerFamiglia, bestDixonPerFamiglia, stats, match.id, allMatches.length]);
+    }, [bestStoricoPerFamiglia, match.id, allMatches.length, stats.error]);
 
     // ⭐ Allineamento per la vista TRIPLA
     const topTripla = useMemo(() => {
@@ -460,16 +401,11 @@
 
     const score = useMemo(() => {
       if (righeDaMostrare.length === 0) return 0;
-      const sum = righeDaMostrare.reduce((s, g) => {
-        const v = motore === 'dixon' ? (g.pctDixon ?? g.pct)
-                : motore === 'confronto' ? Math.max(g.pct, g.pctDixon ?? 0)
-                : g.pct;
-        return s + v;
-      }, 0);
+      const sum = righeDaMostrare.reduce((s, g) => s + Math.max(g.pct || 0, g.pctDixon || 0), 0);
       return Math.round(sum / righeDaMostrare.length);
-    }, [righeDaMostrare, motore]);
+    }, [righeDaMostrare]);
 
-    const hasBomb = righeDaMostrare.some(g => g.isBomb);
+    const hasBomb = righeDaMostrare.some(g => g.isBomb || g.pctDixon >= 90);
     const rischio = getRischioCard(righeDaMostrare);
     const handleClick = (e) => { e.stopPropagation(); onSelect(match.id); };
     const formattedDate = match.data ? formatDateEU(match.data) : 'N/D';
@@ -482,7 +418,7 @@
     };
 
     // ============================================================
-    // 🔀 RIGA TRIPLA (allineamento per famiglia)
+    // 🔀 RIGA TRIPLA
     // ============================================================
     const renderRigaTripla = () => {
       if (topTripla.length === 0) {
@@ -509,7 +445,6 @@
                 ? 'var(--neon-cyan)'
                 : 'var(--neon-magenta)';
 
-            // Controlla se una delle due giocate è una bomba
             const isBombRow = (s && s.pct >= 90) || (d && d.pct >= 90);
 
             const rowStyle = {
@@ -640,12 +575,6 @@
             <span>{match.campionato || 'N/D'}</span>
           </div>
           <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--neon-cyan)', background: 'var(--bg-elevated)', padding: '3px 8px', borderRadius: '6px', border: '1px solid var(--border)' }}>G.{match.round || 'N/A'}</span>
-          {motore === 'dixon' && (
-            <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--neon-magenta)', border: '1px solid var(--neon-magenta)', padding: '2px 6px', borderRadius: '4px' }}>🧮 DC</span>
-          )}
-          {motore === 'confronto' && (
-            <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--neon-gold)', border: '1px solid var(--neon-gold)', padding: '2px 6px', borderRadius: '4px' }}>⚖️ CONFRONTO</span>
-          )}
         </div>
 
         <div style={{ color: 'var(--text-dim)', fontSize: '11px', marginBottom: '6px', textAlign: 'center' }}>📅 {formattedDate} • ⏰ {match.ora || 'TBD'}</div>
@@ -769,10 +698,10 @@
   };
 
   // ============================================================
-  // VISUALIZZA GIOCATE SWITCH
+  // VISUALIZZA GIOCATE SWITCH (Senza Motore)
   // ============================================================
   const VisualizzaGiocateSwitch = ({
-    mode, setMode, motore, setMotore,
+    mode, setMode,
     selectedFamiglie,
     onTop5Maggiori, onTop5Minori, onTop5Tutti,
     isTop5MaggioriAttivo, isTop5MinoriAttivo, isTop5TuttiAttivo,
@@ -854,41 +783,6 @@
             }}
           >🌐 Calcolate ({totalFamiglie})</button>
         </div>
-
-        <span style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 4px' }} />
-
-        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neon-magenta)', textTransform: 'uppercase' }}>
-          🔬 Motore
-        </span>
-        <div style={{
-          display: 'flex', background: 'var(--bg-deep)', borderRadius: '8px',
-          padding: '3px', border: '1px solid var(--border)'
-        }}>
-          <button onClick={() => setMotore('storico')}
-            style={{
-              padding: '6px 14px', fontSize: '11px', fontWeight: 700,
-              borderRadius: '6px', border: 'none', cursor: 'pointer',
-              background: motore === 'storico' ? 'var(--neon-green)' : 'transparent',
-              color: motore === 'storico' ? '#000' : 'var(--text-dim)'
-            }}
-          >📊 Storico</button>
-          <button onClick={() => setMotore('dixon')}
-            style={{
-              padding: '6px 14px', fontSize: '11px', fontWeight: 700,
-              borderRadius: '6px', border: 'none', cursor: 'pointer',
-              background: motore === 'dixon' ? 'var(--neon-magenta)' : 'transparent',
-              color: motore === 'dixon' ? '#000' : 'var(--text-dim)'
-            }}
-          >🧮 Dixon</button>
-          <button onClick={() => setMotore('confronto')}
-            style={{
-              padding: '6px 14px', fontSize: '11px', fontWeight: 700,
-              borderRadius: '6px', border: 'none', cursor: 'pointer',
-              background: motore === 'confronto' ? 'var(--neon-gold)' : 'transparent',
-              color: motore === 'confronto' ? '#000' : 'var(--text-dim)'
-            }}
-          >⚖️ Confronto</button>
-        </div>
       </div>
     );
   };
@@ -902,7 +796,6 @@
     const addDaysToDateStr = window.addDaysToDateStr;
     const isMobile = useIsMobile();
     const { mode: visualizzaMode, setMode: setVisualizzaMode } = window.FiltriCampionati.useVisualizzaGiocateMode();
-    const { motore, setMotore } = window.FiltriCampionati.useMotoreAnalisi();
     const { giorni } = window.FiltriCampionati.useGiorniRange();
 
     const {
@@ -1009,7 +902,7 @@
             <span style={{ color: 'var(--text-dim)', fontSize: '11px', marginLeft: 'auto' }}>{partiteOggi.length} partite</span>
           </div>
           <ChampBar matches={matches} championships={championshipsList} campionatiSelezionati={campionatiAttivi} onToggle={toggleCampionato} onSelezionaTutti={selezionaTutti} onDeselezionaTutti={deselezionaTutti} />
-          <VisualizzaGiocateSwitch mode={visualizzaMode} setMode={setVisualizzaMode} motore={motore} setMotore={setMotore} selectedFamiglie={selectedFamiglie} onTop5Maggiori={handleTop5Maggiori} onTop5Minori={handleTop5Minori} onTop5Tutti={handleTop5Tutti} isTop5MaggioriAttivo={isTop5MaggioriAttivo} isTop5MinoriAttivo={isTop5MinoriAttivo} isTop5TuttiAttivo={isTop5TuttiAttivo} />
+          <VisualizzaGiocateSwitch mode={visualizzaMode} setMode={setVisualizzaMode} selectedFamiglie={selectedFamiglie} onTop5Maggiori={handleTop5Maggiori} onTop5Minori={handleTop5Minori} onTop5Tutti={handleTop5Tutti} isTop5MaggioriAttivo={isTop5MaggioriAttivo} isTop5MinoriAttivo={isTop5MinoriAttivo} isTop5TuttiAttivo={isTop5TuttiAttivo} />
           {partiteOggi.length === 0 ? (
             <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
               <div style={{ fontSize: '48px', marginBottom: '12px' }}>😴</div>
@@ -1043,7 +936,7 @@
             {isTuttiMode ? 'Tutti i campionati' : `${campionatiAttivi.length} campionati`} • {partiteOggi.length} partite
           </span>
         </div>
-        <VisualizzaGiocateSwitch mode={visualizzaMode} setMode={setVisualizzaMode} motore={motore} setMotore={setMotore} selectedFamiglie={selectedFamiglie} onTop5Maggiori={handleTop5Maggiori} onTop5Minori={handleTop5Minori} onTop5Tutti={handleTop5Tutti} isTop5MaggioriAttivo={isTop5MaggioriAttivo} isTop5MinoriAttivo={isTop5MinoriAttivo} isTop5TuttiAttivo={isTop5TuttiAttivo} />
+        <VisualizzaGiocateSwitch mode={visualizzaMode} setMode={setVisualizzaMode} selectedFamiglie={selectedFamiglie} onTop5Maggiori={handleTop5Maggiori} onTop5Minori={handleTop5Minori} onTop5Tutti={handleTop5Tutti} isTop5MaggioriAttivo={isTop5MaggioriAttivo} isTop5MinoriAttivo={isTop5MinoriAttivo} isTop5TuttiAttivo={isTop5TuttiAttivo} />
         <ChampBar matches={matches} championships={championshipsList} campionatiSelezionati={campionatiAttivi} onToggle={toggleCampionato} onSelezionaTutti={selezionaTutti} onDeselezionaTutti={deselezionaTutti} />
         {partiteOggi.length === 0 ? (
           <div className="card" style={{ textAlign: 'center', padding: '60px 20px' }}>
@@ -1066,6 +959,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto v15 caricato — Vista Tripla Fissa + Sfondo Oro se Bomba');
+  console.log('✅ Modulo Palinsesto v16 caricato — Rimossi switch motore e badge invasivi');
 
 })();
