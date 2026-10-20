@@ -1,13 +1,11 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto
-// v8: FIX Dixon finto (0%) + lazy check per getDixonPct
-//     + filtro giorni (1-7) + switch Scelte/Calcolate
-//     + switch Motore (Storico / Dixon / Confronto)
-//     + bordi neon colorati sulle card match
-//     + bottoni TOP 5 (Maggiori / Minori / Tutti) con selezione atomica
-//     + FIX: palinsesto non si svuota se CHAMPIONSHIP_LIST non pronta
-//     + Dixon-Coles integrato via window.getDixonPct (senza fallback congelato)
-//     + QuotaBox: placeholder "-.--" se la quota non è nel PDF
+// v9: Vista Compatta (sintesi visiva a colpo d'occhio)
+//     + toggle ⚡/📖 su ogni card (persistito in localStorage)
+//     + bordo card colorato per rischio (💎🔥✅•▫️)
+//     + barra pct colorata + termometro forma
+//     + badge accordo ⚖️✓/⚠️ per Confronto
+//     + TUTTO il resto invariato (motore Dixon, TOP 5, ChampBar)
 // ============================================================
 
 (function () {
@@ -28,10 +26,10 @@
       }, []);
       return { motore, setMotore };
     };
-    console.warn('⚠️ useMotoreAnalisi non trovato in filtri-campionati.js — uso fallback locale (Palinsesto v8)');
+    console.warn('⚠️ useMotoreAnalisi non trovato in filtri-campionati.js — uso fallback locale (Palinsesto v9)');
   }
 
-  // ⭐ FUNZIONE SICURA PER DIXON: evita di congelare il fallback a 0
+  // ⭐ FUNZIONE SICURA PER DIXON
   const safeGetDixonPct = (familyId, giocata, match, allMatches) => {
     if (typeof window.getDixonPct === 'function' && !window.getDixonPct._isFallback) {
       try {
@@ -229,7 +227,110 @@
   };
 
   // ============================================================
-  // MATCH TAB — v8 con Dixon Lazy e fix UI Confronto
+  // ⭐ VISTA COMPATTA - Componenti visivi
+  // ============================================================
+
+  const TermometroForma = ({ formString }) => {
+    if (!formString || formString === '-----') {
+      return (
+        <div style={{ height: '8px', background: 'var(--bg-deep)', borderRadius: '4px', opacity: 0.5 }} />
+      );
+    }
+    const v = [...formString].filter(c => c === 'V').length;
+    const p = [...formString].filter(c => c === 'P').length;
+    const s = [...formString].filter(c => c === 'S').length;
+
+    return (
+      <div style={{ display: 'flex', height: '8px', borderRadius: '4px', overflow: 'hidden', gap: '2px' }}>
+        {Array(v).fill(0).map((_, i) => (
+          <div key={`v${i}`} style={{ flex: 1, background: 'var(--neon-green)', boxShadow: '0 0 6px var(--neon-green)' }} />
+        ))}
+        {Array(p).fill(0).map((_, i) => (
+          <div key={`p${i}`} style={{ flex: 1, background: 'var(--neon-gold)' }} />
+        ))}
+        {Array(s).fill(0).map((_, i) => (
+          <div key={`s${i}`} style={{ flex: 1, background: 'var(--neon-red)' }} />
+        ))}
+      </div>
+    );
+  };
+
+  const BarraPct = ({ pct, isBomb }) => {
+    const colore = pct >= 90 ? 'var(--neon-gold)'
+                 : pct >= 66 ? 'var(--neon-green)'
+                 : pct >= 33 ? 'var(--text-dim)'
+                 : 'var(--neon-red)';
+    const icona = isBomb ? '💣' : pct >= 66 ? '🔥' : pct >= 33 ? '•' : '▫️';
+
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', width: '100%' }}>
+        <span style={{ fontSize: '14px', minWidth: '18px', textAlign: 'center' }}>{icona}</span>
+        <div style={{
+          flex: 1, height: '12px', background: 'var(--bg-deep)',
+          borderRadius: '6px', overflow: 'hidden', border: `1px solid ${colore}40`,
+        }}>
+          <div style={{
+            width: `${Math.min(pct, 100)}%`, height: '100%',
+            background: `linear-gradient(90deg, ${colore}, ${colore}88)`,
+            boxShadow: `0 0 6px ${colore}`,
+            transition: 'width 0.3s ease',
+          }} />
+        </div>
+        <span style={{
+          fontSize: '11px', fontWeight: 900, color: colore,
+          minWidth: '32px', textAlign: 'right', fontFamily: 'Orbitron, sans-serif',
+        }}>{pct}%</span>
+      </div>
+    );
+  };
+
+  const BadgeAccordo = ({ pctStorico, pctDixon }) => {
+    if (!pctDixon || pctDixon <= 0) return null;
+    const delta = pctDixon - pctStorico;
+    const abs = Math.abs(delta);
+
+    if (abs <= 3) {
+      return (
+        <span title={`Concordi: Storico ${pctStorico}% / Dixon ${pctDixon}%`}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '2px',
+            padding: '1px 5px', borderRadius: '8px', fontSize: '9px',
+            background: 'var(--neon-green)', color: '#000', fontWeight: 900,
+          }}>
+          ⚖️ ✓
+        </span>
+      );
+    }
+    if (abs > 10) {
+      return (
+        <span title={`Divergenza: Storico ${pctStorico}% / Dixon ${pctDixon}%`}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '2px',
+            padding: '1px 5px', borderRadius: '8px', fontSize: '9px',
+            background: 'var(--neon-gold)', color: '#000', fontWeight: 900,
+          }}>
+          ⚖️ ⚠️
+        </span>
+      );
+    }
+    return null;
+  };
+
+  const getRischioCard = (righe) => {
+    if (!righe || righe.length === 0) return { level: 'vuoto', colore: '#555', label: '▫️' };
+    const nBombe = righe.filter(g => (g.pct >= 90) || (g.pctDixon >= 90)).length;
+    const nBuone = righe.filter(g => Math.max(g.pct || 0, g.pctDixon || 0) >= 66).length;
+    const mediaPct = righe.reduce((s, g) => s + Math.max(g.pct || 0, g.pctDixon || 0), 0) / righe.length;
+
+    if (nBombe >= 2) return { level: 'top', colore: 'var(--neon-gold)', label: '💎' };
+    if (nBombe >= 1) return { level: 'alta', colore: 'var(--neon-green)', label: '🔥' };
+    if (nBuone >= 2) return { level: 'buona', colore: 'var(--neon-cyan)', label: '✅' };
+    if (mediaPct >= 50) return { level: 'media', colore: 'var(--text-dim)', label: '•' };
+    return { level: 'bassa', colore: 'var(--neon-red)', label: '▫️' };
+  };
+
+  // ============================================================
+  // MATCH TAB — v9 con Vista Compatta
   // ============================================================
   const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie }) => {
     const computeMatchStats = window.computeMatchStats;
@@ -241,12 +342,37 @@
     const getGiocataPct = window.getGiocataPct;
     const getPercentualeClasse = window.getPercentualeClasse;
     const calcolaGG_NG = window.calcolaGG_NG;
-    
-    // ⭐ USO IL SAFE GETTER
-    const getDixonPct = safeGetDixonPct; 
+
+    const getDixonPct = safeGetDixonPct;
 
     const { mode: visualizzaMode } = window.FiltriCampionati.useVisualizzaGiocateMode();
     const { motore } = window.FiltriCampionati.useMotoreAnalisi();
+
+    // ⭐ Stato vista compatta (persistito)
+    const [vistaCompatta, setVistaCompatta] = useState(() => {
+      return localStorage.getItem('ft_vista_compatta') === '1';
+    });
+
+    // ⭐ Ascolta eventi globali di cambio vista
+    useEffect(() => {
+      const handler = () => {
+        setVistaCompatta(localStorage.getItem('ft_vista_compatta') === '1');
+      };
+      window.addEventListener('vista-mode-changed', handler);
+      window.addEventListener('storage', handler);
+      return () => {
+        window.removeEventListener('vista-mode-changed', handler);
+        window.removeEventListener('storage', handler);
+      };
+    }, []);
+
+    const toggleVistaCompatta = (e) => {
+      e.stopPropagation();
+      const nuovo = !vistaCompatta;
+      setVistaCompatta(nuovo);
+      localStorage.setItem('ft_vista_compatta', nuovo ? '1' : '0');
+      window.dispatchEvent(new Event('vista-mode-changed'));
+    };
 
     if (!match) return null;
 
@@ -279,7 +405,6 @@
       return [...new Set(ids)].filter(id => FAMIGLIE_GIOCATE[id]);
     }, [visualizzaMode, selectedFamiglie, stats.error]);
 
-    // ── Migliore giocata storica
     const bestStoricoPerFamiglia = useMemo(() => {
       const homeMG = stats.homeMG || {};
       const awayMG = stats.awayMG || {};
@@ -312,7 +437,6 @@
       return out;
     }, [famiglieDaAnalizzare, stats]);
 
-    // ── Dixon migliore
     const bestDixonPerFamiglia = useMemo(() => {
       if (motore === 'storico' || !getDixonPct) return [];
       const out = [];
@@ -335,11 +459,9 @@
       return out;
     }, [motore, famiglieDaAnalizzare, match.id, allMatches.length]);
 
-    // ── Righe da mostrare
     const righeDaMostrare = useMemo(() => {
       if (stats.error) return [];
 
-      // ⭐ STORICO puro
       if (motore === 'storico') {
         return bestStoricoPerFamiglia
           .sort((a, b) => b.pct - a.pct)
@@ -347,7 +469,6 @@
           .map(g => ({ ...g, pctDixon: null, delta: null, fonte: 'storico' }));
       }
 
-      // ⭐ DIXON puro
       if (motore === 'dixon') {
         return bestDixonPerFamiglia
           .sort((a, b) => b.pct - a.pct)
@@ -355,7 +476,6 @@
           .map(g => ({ ...g, pctDixon: g.pct, delta: null, fonte: 'dixon' }));
       }
 
-      // ⭐ CONFRONTO + Scelte
       if (motore === 'confronto' && visualizzaMode === 'scelte') {
         return bestStoricoPerFamiglia
           .sort((a, b) => b.pct - a.pct)
@@ -368,7 +488,6 @@
           });
       }
 
-      // ⭐ CONFRONTO + Calcolate
       if (motore === 'confronto' && visualizzaMode === 'calcolate') {
         const tutte = [];
         famiglieDaAnalizzare.forEach(familyId => {
@@ -403,7 +522,6 @@
       return [];
     }, [motore, visualizzaMode, bestStoricoPerFamiglia, bestDixonPerFamiglia, stats, match.id, allMatches.length]);
 
-    // ── Punteggio card
     const score = useMemo(() => {
       if (righeDaMostrare.length === 0) return 0;
       const sum = righeDaMostrare.reduce((s, g) => {
@@ -416,16 +534,63 @@
     }, [righeDaMostrare, motore]);
 
     const hasBomb = righeDaMostrare.some(g => g.isBomb);
+    const rischio = getRischioCard(righeDaMostrare);
     const handleClick = (e) => { e.stopPropagation(); onSelect(match.id); };
     const formattedDate = match.data ? formatDateEU(match.data) : 'N/D';
 
     const neonBorderStyle = {
       border: `2px solid ${champColor}`,
+      borderLeftWidth: '6px',
+      borderLeftColor: rischio.colore,
       boxShadow: `0 0 12px ${champColor}88, 0 0 4px ${champColor}44, inset 0 0 8px ${champColor}11`,
     };
 
-    // ── Rendering riga
-    const renderRiga = (g, idx) => {
+    // ============================================================
+    // ⭐ RIGA COMPATTA
+    // ============================================================
+    const renderRigaCompatta = (g, idx) => {
+      const pctBase = motore === 'dixon' ? (g.pctDixon ?? g.pct)
+                      : motore === 'confronto' ? Math.max(g.pct || 0, g.pctDixon || 0)
+                      : g.pct;
+      const pctPerQuota = motore === 'confronto' && g.pctDixon > 0
+        ? Math.min(g.pct, g.pctDixon)
+        : pctBase;
+
+      const colore = pctBase >= 90 ? 'var(--neon-gold)'
+                   : pctBase >= 66 ? 'var(--neon-green)'
+                   : pctBase >= 33 ? 'var(--text-dim)'
+                   : 'var(--neon-red)';
+
+      return (
+        <div key={idx} style={{
+          display: 'flex', flexDirection: 'column', gap: '4px',
+          padding: '6px 8px', borderRadius: '8px',
+          background: `linear-gradient(90deg, ${colore}15, transparent)`,
+          border: `1px solid ${colore}50`,
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, minWidth: 0 }}>
+              <span style={{
+                fontSize: '11px', fontWeight: 700, color: colore,
+                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              }}>
+                {g.isBomb && '💣 '}{g.displayLabel || g.label}
+              </span>
+              {motore === 'confronto' && g.pctDixon > 0 && (
+                <BadgeAccordo pctStorico={g.pct} pctDixon={g.pctDixon} />
+              )}
+            </div>
+            <QuotaBox match={match} familyId={g.familyId} giocata={g.giocata} pctTua={pctPerQuota} />
+          </div>
+          <BarraPct pct={pctBase} isBomb={g.isBomb} />
+        </div>
+      );
+    };
+
+    // ============================================================
+    // RIGA DETTAGLIATA (originale)
+    // ============================================================
+    const renderRigaDettagliata = (g, idx) => {
       const isBomb = g.isBomb;
       const pctColor = getColorForPct(g.pct);
 
@@ -459,13 +624,12 @@
         );
       }
 
-      // CONFRONTO
       const { pct, pctDixon, delta, fonte } = g;
       const hasDixon = pctDixon > 0;
-      
+
       const accordo = hasDixon && delta != null && Math.abs(delta) <= 3;
       const divergenza = hasDixon && delta != null && Math.abs(delta) > 10;
-      
+
       const bordo = accordo ? 'var(--neon-green)' : divergenza ? 'var(--neon-gold)' : 'var(--border)';
       const freccia = delta > 0 ? '↗' : delta < 0 ? '↘' : '↔';
       const coloreDelta = delta > 0 ? 'var(--neon-green)' : delta < 0 ? 'var(--neon-red)' : 'var(--text-dim)';
@@ -531,14 +695,46 @@
       );
     };
 
+    const renderRiga = vistaCompatta ? renderRigaCompatta : renderRigaDettagliata;
+
     return (
       <div className="match-tab"
-        style={{ ...neonBorderStyle, borderLeftWidth: '6px', borderLeftColor: champColor }}
+        style={neonBorderStyle}
         onClick={handleClick}>
-        <div className="score-badge">
-          <span className={`giocata-pct ${getPercentualeClasse(score)}`}>{isNaN(score) ? 0 : score}%</span>
+        <div className="score-badge" style={{
+          background: `${rischio.colore}22`,
+          border: `2px solid ${rischio.colore}`,
+          color: rischio.colore,
+          padding: '2px 10px',
+          borderRadius: '10px',
+          boxShadow: `0 0 10px ${rischio.colore}66`,
+        }}>
+          <span style={{ fontSize: '14px', marginRight: '4px' }}>{rischio.label}</span>
+          <span className={`giocata-pct ${getPercentualeClasse(score)}`} style={{ fontSize: '13px' }}>
+            {isNaN(score) ? 0 : score}%
+          </span>
           {hasBomb && <span className="bomb-inline">💣</span>}
         </div>
+
+        <button
+          onClick={toggleVistaCompatta}
+          title={vistaCompatta ? 'Mostra dettagli' : 'Vista compatta'}
+          style={{
+            position: 'absolute', top: '10px', right: '110px',
+            background: vistaCompatta ? 'var(--neon-cyan)' : 'var(--bg-elevated)',
+            color: vistaCompatta ? '#000' : 'var(--text-dim)',
+            border: '1px solid var(--border)',
+            borderRadius: '6px',
+            padding: '2px 8px',
+            fontSize: '12px',
+            cursor: 'pointer',
+            fontWeight: 700,
+            zIndex: 11,
+          }}
+        >
+          {vistaCompatta ? '⚡' : '📖'}
+        </button>
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
           <div className="tab-header" style={{ background: champColor, marginBottom: 0 }}>
             <ChampLogo campionato={match.campionato} size={16} />
@@ -552,17 +748,39 @@
             <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--neon-gold)', border: '1px solid var(--neon-gold)', padding: '2px 6px', borderRadius: '4px' }}>⚖️ CONFRONTO</span>
           )}
         </div>
+
         <div style={{ color: 'var(--text-dim)', fontSize: '11px', marginBottom: '6px', textAlign: 'center' }}>📅 {formattedDate} • ⏰ {match.ora || 'TBD'}</div>
+
         <div className="teams-row">
           <div className="team"><TeamLogo teamName={match.casa} championship={match.campionato} size={50} /><div className="team-name">{match.casa || 'Casa'}</div></div>
           <div className="vs">VS</div>
           <div className="team"><TeamLogo teamName={match.ospiti} championship={match.campionato} size={50} /><div className="team-name">{match.ospiti || 'Ospite'}</div></div>
         </div>
-        <div className="form-row-compact">
-          <div className="form-block-compact"><div className="form-label">Forma</div><div className="form-squares">{renderFormSquares(homeForm.form)}</div><div className="form-pct-compact">{homeForm.pct || 0}%</div></div>
-          <div className="form-block-compact"><div className="form-label">Forma</div><div className="form-squares">{renderFormSquares(awayForm.form)}</div><div className="form-pct-compact">{awayForm.pct || 0}%</div></div>
-        </div>
+
+        {vistaCompatta ? (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px', marginBottom: '6px' }}>
+            <div style={{ padding: '6px 8px', background: 'var(--surface)', borderRadius: '6px', border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: '9px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px', textAlign: 'center' }}>
+                🏠 {homeForm.pct || 0}%
+              </div>
+              <TermometroForma formString={homeForm.form} />
+            </div>
+            <div style={{ padding: '6px 8px', background: 'var(--surface)', borderRadius: '6px', border: '1px solid var(--border)' }}>
+              <div style={{ fontSize: '9px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px', textAlign: 'center' }}>
+                ✈️ {awayForm.pct || 0}%
+              </div>
+              <TermometroForma formString={awayForm.form} />
+            </div>
+          </div>
+        ) : (
+          <div className="form-row-compact">
+            <div className="form-block-compact"><div className="form-label">Forma</div><div className="form-squares">{renderFormSquares(homeForm.form)}</div><div className="form-pct-compact">{homeForm.pct || 0}%</div></div>
+            <div className="form-block-compact"><div className="form-label">Forma</div><div className="form-squares">{renderFormSquares(awayForm.form)}</div><div className="form-pct-compact">{awayForm.pct || 0}%</div></div>
+          </div>
+        )}
+
         <div className="form-diff">📊 Differenza forma: <span className={diff >= 20 ? 'diff-alta' : 'diff-bassa'}>{isNaN(diff) ? 0 : diff}%</span></div>
+
         <div className="bet-row-vertical">
           {righeDaMostrare.length > 0 ? (
             righeDaMostrare.map((g, idx) => renderRiga(g, idx))
@@ -687,6 +905,21 @@
     const totalFamiglie = Object.keys(window.FAMIGLIE_GIOCATE || {}).length;
     const { giorni, setGiorni } = window.FiltriCampionati.useGiorniRange();
 
+    // ⭐ Stato vista (compatta/dettagliata)
+    const [vistaCompatta, setVistaCompatta] = useState(() => localStorage.getItem('ft_vista_compatta') === '1');
+
+    useEffect(() => {
+      const handler = () => setVistaCompatta(localStorage.getItem('ft_vista_compatta') === '1');
+      window.addEventListener('vista-mode-changed', handler);
+      return () => window.removeEventListener('vista-mode-changed', handler);
+    }, []);
+
+    const cambiaVista = (compatta) => {
+      localStorage.setItem('ft_vista_compatta', compatta ? '1' : '0');
+      setVistaCompatta(compatta);
+      window.dispatchEvent(new Event('vista-mode-changed'));
+    };
+
     const btnTopStyle = (attivo, colore) => ({
       padding: '6px 12px', fontSize: '11px', fontWeight: 700,
       borderRadius: '6px', border: `1px solid ${colore}`, cursor: 'pointer',
@@ -797,6 +1030,36 @@
             }}
             title="Confronto Storico ↔ Dixon"
           >⚖️ Confronto</button>
+        </div>
+
+        {/* ⭐ Toggle Vista Compatta/Dettagliata */}
+        <span style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 4px' }} />
+
+        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neon-cyan)', textTransform: 'uppercase' }}>
+          👁️ Vista
+        </span>
+        <div style={{
+          display: 'flex', background: 'var(--bg-deep)', borderRadius: '8px',
+          padding: '3px', border: '1px solid var(--border)'
+        }}>
+          <button onClick={() => cambiaVista(false)}
+            style={{
+              padding: '6px 14px', fontSize: '11px', fontWeight: 700,
+              borderRadius: '6px', border: 'none', cursor: 'pointer',
+              background: !vistaCompatta ? 'var(--neon-cyan)' : 'transparent',
+              color: !vistaCompatta ? '#000' : 'var(--text-dim)'
+            }}
+            title="Vista dettagliata (default)"
+          >📖 Dettagli</button>
+          <button onClick={() => cambiaVista(true)}
+            style={{
+              padding: '6px 14px', fontSize: '11px', fontWeight: 700,
+              borderRadius: '6px', border: 'none', cursor: 'pointer',
+              background: vistaCompatta ? 'var(--neon-cyan)' : 'transparent',
+              color: vistaCompatta ? '#000' : 'var(--text-dim)'
+            }}
+            title="Sintesi visiva (a colpo d'occhio)"
+          >⚡ Compatta</button>
         </div>
       </div>
     );
@@ -1049,6 +1312,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto v8 caricato — fix Dixon (safe getter + UI confronto)');
+  console.log('✅ Modulo Palinsesto v9 caricato — Vista Compatta + toggle ⚡/📖 + bordo rischio');
 
 })();
