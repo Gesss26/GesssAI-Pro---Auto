@@ -1,9 +1,8 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto
-// v11: Logica Vista Tripla perfezionata (allineamento per famiglia)
-//      + FIX switch Scelte/Calcolate (da filtri-campionati.js v3)
-//      + Vista Compatta e Tripla
-//      + Tutto il resto invariato (motore Dixon, TOP 5, ChampBar)
+// v14: Vista Compatta FISSA + Rimossa icona Tripla
+//      + Sfondo Oro Pulsante per le Bombe
+//      + FIX per i loghi EFL Championship
 // ============================================================
 
 (function () {
@@ -21,11 +20,9 @@
       const setMotore = React.useCallback((v) => {
         setMotoreState(v);
         localStorage.setItem('ft_motore', v);
-        window.dispatchEvent(new Event('motore-mode-changed'));
       }, []);
       return { motore, setMotore };
     };
-    console.warn('⚠️ useMotoreAnalisi non trovato in filtri-campionati.js — uso fallback locale (Palinsesto v11)');
   }
 
   // ⭐ FALLBACK SICURO per useVisualizzaGiocateMode
@@ -51,7 +48,6 @@
       }, []);
       return { mode, setMode };
     };
-    console.warn('⚠️ useVisualizzaGiocateMode non trovato — uso fallback locale (Palinsesto v11)');
   }
 
   // ⭐ FUNZIONE SICURA PER DIXON
@@ -163,7 +159,16 @@
       const normalized = normalizzaAccenti(champ);
       const kebab = normalized.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/[\s-]+/g, '-').replace(/^-+|-+$/g, '');
       const snake = normalized.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+      
+      // ⭐ FIX LOGHI EFL CHAMPIONSHIP
+      const specificPaths = [];
+      if (champ.toLowerCase().includes('efl championship')) {
+        specificPaths.push('logos/campionati/championship.png');
+        specificPaths.push('logos/campionati/efl-championship.png');
+      }
+
       return [
+        ...specificPaths,
         `logos/campionati/${kebab}.png`,
         `logos/campionati/${snake}.png`,
         `logos/campionati/${champ}.png`,
@@ -335,18 +340,8 @@
     return { level: 'bassa', colore: 'var(--neon-red)', label: '▫️' };
   };
 
-  // ⭐ Ciclo vista: dettagliata → compatta → tripla → dettagliata
-  const VISTE_CICLO = ['dettagliata', 'compatta', 'tripla'];
-  const VISTA_ICONE = { dettagliata: '📖', compatta: '⚡', tripla: '🔀' };
-  const VISTA_NOMI = { dettagliata: 'Dettagliata', compatta: 'Compatta', tripla: 'Tripla' };
-
-  const getVistaIniziale = () => {
-    const v = localStorage.getItem('ft_vista_mode');
-    return VISTE_CICLO.includes(v) ? v : 'dettagliata';
-  };
-
   // ============================================================
-  // MATCH TAB
+  // MATCH TAB (VISTA COMPATTA FISSA + SFONDO BOMBA)
   // ============================================================
   const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie }) => {
     const computeMatchStats = window.computeMatchStats;
@@ -364,27 +359,6 @@
     const { mode: visualizzaMode } = window.FiltriCampionati.useVisualizzaGiocateMode();
     const { motore } = window.FiltriCampionati.useMotoreAnalisi();
 
-    const [vista, setVista] = useState(getVistaIniziale);
-
-    useEffect(() => {
-      const handler = () => setVista(getVistaIniziale());
-      window.addEventListener('vista-mode-changed', handler);
-      window.addEventListener('storage', handler);
-      return () => {
-        window.removeEventListener('vista-mode-changed', handler);
-        window.removeEventListener('storage', handler);
-      };
-    }, []);
-
-    const toggleVista = (e) => {
-      e.stopPropagation();
-      const currentIdx = VISTE_CICLO.indexOf(vista);
-      const nextVista = VISTE_CICLO[(currentIdx + 1) % VISTE_CICLO.length];
-      setVista(nextVista);
-      localStorage.setItem('ft_vista_mode', nextVista);
-      window.dispatchEvent(new Event('vista-mode-changed'));
-    };
-
     if (!match) return null;
 
     const homeForm = calcFormAndStats(allMatches, match.casa);
@@ -395,11 +369,6 @@
     stats._allMatches = allMatches;
     stats._homeTeam = match.casa;
     stats._awayTeam = match.ospiti;
-
-    const renderFormSquares = (formStr) => {
-      if (!formStr) return <span>N/D</span>;
-      return [...formStr].map((letter, idx) => <div key={idx} className={`form-square form-square-${letter}`}>{letter}</div>);
-    };
 
     const getColorForPct = (valore) => {
       if (valore >= 90) return 'var(--neon-gold)';
@@ -533,68 +502,6 @@
       return [];
     }, [motore, visualizzaMode, bestStoricoPerFamiglia, bestDixonPerFamiglia, stats, match.id, allMatches.length]);
 
-    // ⭐ Per la vista TRIPLA: allinea Storico e Dixon in base alla FAMIGLIA di giocata
-    const topTripla = useMemo(() => {
-      if (stats.error) return [];
-      
-      // 1. Prendo le top 3 dello Storico
-      const topStorico = bestStoricoPerFamiglia.sort((a, b) => b.pct - a.pct).slice(0, 3);
-      
-      // 2. Prendo le migliori giocate del Dixon raggruppate per famiglia
-      const dixonByFamily = {};
-      bestDixonPerFamiglia.sort((a, b) => b.pct - a.pct).forEach(d => {
-        if (!dixonByFamily[d.familyId]) {
-          dixonByFamily[d.familyId] = d;
-        }
-      });
-
-      const result = [];
-      const usedDixonKeys = new Set();
-
-      // 3. Per ogni giocata dello Storico, cerco il Dixon della stessa famiglia
-      topStorico.forEach(s => {
-        let d = dixonByFamily[s.familyId] || null;
-        
-        // Se la famiglia coincide, la uso e la marco come "usata"
-        if (d) {
-          usedDixonKeys.add(d.familyId);
-        }
-
-        // Quota: prendo la versione con % più alta tra le due
-        let quotaSource = null;
-        if (s && d) quotaSource = s.pct >= d.pct ? s : d;
-        else quotaSource = s || d;
-
-        result.push({ 
-          storico: s, 
-          dixon: d, 
-          quotaSource, 
-          tipo: d ? 'match-famiglia' : 'solo-storico' 
-        });
-      });
-
-      // 4. Aggiungo le giocate Dixon "orfane" (famiglie non presenti nello Storico)
-      bestDixonPerFamiglia
-        .sort((a, b) => b.pct - a.pct)
-        .forEach(d => {
-          if (!usedDixonKeys.has(d.familyId)) {
-            // Evito duplicati se per qualche motivo la stessa giocata è già stata aggiunta
-            const isDuplicate = result.some(r => r.dixon && r.dixon.familyId === d.familyId);
-            if (!isDuplicate) {
-              result.push({ 
-                storico: null, 
-                dixon: d, 
-                quotaSource: d, 
-                tipo: 'solo-dixon' 
-              });
-              usedDixonKeys.add(d.familyId);
-            }
-          }
-        });
-
-      return result;
-    }, [bestStoricoPerFamiglia, bestDixonPerFamiglia, stats.error]);
-
     const score = useMemo(() => {
       if (righeDaMostrare.length === 0) return 0;
       const sum = righeDaMostrare.reduce((s, g) => {
@@ -619,115 +526,7 @@
     };
 
     // ============================================================
-    // 📖 RIGA DETTAGLIATA (originale)
-    // ============================================================
-    const renderRigaDettagliata = (g, idx) => {
-      const isBomb = g.isBomb;
-      const pctColor = getColorForPct(g.pct);
-
-      if (motore === 'storico') {
-        return (
-          <div key={idx} className={`bet-item-vertical ${isBomb ? 'bomb' : ''}`} style={{ borderColor: pctColor }}>
-            <span className="bet-label" style={{ color: isBomb ? 'var(--neon-gold)' : pctColor, fontWeight: 700 }}>
-              {isBomb && '💣 '}{g.displayLabel || g.label}
-            </span>
-            <span className="bet-value" style={{ flexShrink: 0 }}>
-              <span className={`giocata-pct ${getPercentualeClasse(g.pct)}`}>{g.pct}%</span>
-              <QuotaBox match={match} familyId={g.familyId} giocata={g.giocata} pctTua={g.pct} />
-            </span>
-          </div>
-        );
-      }
-
-      if (motore === 'dixon') {
-        const pct = g.pctDixon ?? g.pct;
-        return (
-          <div key={idx} className={`bet-item-vertical ${isBomb ? 'bomb' : ''}`}
-            style={{ borderColor: isBomb ? 'var(--neon-gold)' : 'var(--neon-magenta)' }}>
-            <span className="bet-label" style={{ color: isBomb ? 'var(--neon-gold)' : 'var(--neon-magenta)', fontWeight: 700 }}>
-              {isBomb && '💣 '}{g.displayLabel || g.label}
-            </span>
-            <span className="bet-value" style={{ flexShrink: 0 }}>
-              <span className={`giocata-pct ${getPercentualeClasse(pct)}`}>{pct}%</span>
-              <QuotaBox match={match} familyId={g.familyId} giocata={g.giocata} pctTua={pct} />
-            </span>
-          </div>
-        );
-      }
-
-      const { pct, pctDixon, delta, fonte } = g;
-      const hasDixon = pctDixon > 0;
-
-      const accordo = hasDixon && delta != null && Math.abs(delta) <= 3;
-      const divergenza = hasDixon && delta != null && Math.abs(delta) > 10;
-
-      const bordo = accordo ? 'var(--neon-green)' : divergenza ? 'var(--neon-gold)' : 'var(--border)';
-      const freccia = delta > 0 ? '↗' : delta < 0 ? '↘' : '↔';
-      const coloreDelta = delta > 0 ? 'var(--neon-green)' : delta < 0 ? 'var(--neon-red)' : 'var(--text-dim)';
-
-      const badgeFonte = {
-        storico:  { txt: '📊', color: 'var(--neon-cyan)' },
-        dixon:    { txt: '🧮', color: 'var(--neon-magenta)' },
-        concordi: { txt: '⚖️', color: 'var(--neon-green)' },
-      }[fonte] || null;
-
-      const pctTuaQuota = hasDixon ? Math.min(pct, pctDixon) : pct;
-
-      return (
-        <div key={idx} className={`bet-item-vertical ${isBomb ? 'bomb' : ''}`} style={{ borderColor: bordo }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
-              <span style={{ color: isBomb ? 'var(--neon-gold)' : 'var(--text)', fontWeight: 700, fontSize: '11px' }}>
-                {isBomb && '💣 '}{g.displayLabel || g.label}
-              </span>
-              {badgeFonte && (
-                <span title={`Fonte: ${fonte}`} style={{
-                  fontSize: '10px', color: badgeFonte.color,
-                  border: `1px solid ${badgeFonte.color}`, borderRadius: '4px',
-                  padding: '0 4px', fontWeight: 900, flexShrink: 0,
-                }}>{badgeFonte.txt}</span>
-              )}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', flexWrap: 'wrap' }}>
-              <span title="Statistiche storiche">📊 <b>{pct}%</b></span>
-              {hasDixon && (
-                <>
-                  <span style={{ color: 'var(--text-dim)' }}>→</span>
-                  <span title="Dixon-Coles" style={{ color: 'var(--neon-magenta)' }}>
-                    🧮 <b>{pctDixon}%</b>
-                  </span>
-                </>
-              )}
-              {hasDixon && delta != null && (
-                <span style={{ color: coloreDelta, fontWeight: 900, fontSize: '10px' }}>
-                  {freccia} {delta > 0 ? '+' : ''}{delta}
-                </span>
-              )}
-              {accordo && (
-                <span style={{
-                  fontSize: '9px', color: 'var(--neon-green)',
-                  border: '1px solid var(--neon-green)', borderRadius: '4px',
-                  padding: '0 4px', fontWeight: 900,
-                }}>✅</span>
-              )}
-              {divergenza && (
-                <span style={{
-                  fontSize: '9px', color: 'var(--neon-gold)',
-                  border: '1px solid var(--neon-gold)', borderRadius: '4px',
-                  padding: '0 4px', fontWeight: 900,
-                }}>⚠️</span>
-              )}
-            </div>
-          </div>
-          <div style={{ flexShrink: 0 }}>
-            <QuotaBox match={match} familyId={g.familyId} giocata={g.giocata} pctTua={pctTuaQuota} />
-          </div>
-        </div>
-      );
-    };
-
-    // ============================================================
-    // ⚡ RIGA COMPATTA
+    // ⚡ RIGA COMPATTA CON SFONDO BOMBA ORO PULSANTE
     // ============================================================
     const renderRigaCompatta = (g, idx) => {
       const pctBase = motore === 'dixon' ? (g.pctDixon ?? g.pct)
@@ -737,25 +536,38 @@
         ? Math.min(g.pct, g.pctDixon)
         : pctBase;
 
+      const isBombItem = g.isBomb;
       const colore = pctBase >= 90 ? 'var(--neon-gold)'
                    : pctBase >= 66 ? 'var(--neon-green)'
                    : pctBase >= 33 ? 'var(--text-dim)'
                    : 'var(--neon-red)';
 
+      // Sfondo Oro Pulsante se è una bomba, altrimenti lieve sfumatura del colore
+      const backgroundStyle = isBombItem
+        ? `linear-gradient(90deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.1))`
+        : `linear-gradient(90deg, ${colore}15, transparent)`;
+
+      const borderStyle = isBombItem
+        ? `2px solid var(--neon-gold)`
+        : `1px solid ${colore}50`;
+
       return (
-        <div key={idx} style={{
+        <div key={idx} className={isBombItem ? 'bomb-bg-pulse' : ''} style={{
           display: 'flex', flexDirection: 'column', gap: '4px',
           padding: '6px 8px', borderRadius: '8px',
-          background: `linear-gradient(90deg, ${colore}15, transparent)`,
-          border: `1px solid ${colore}50`,
+          background: backgroundStyle,
+          border: borderStyle,
+          boxShadow: isBombItem ? '0 0 15px rgba(255, 215, 0, 0.4)' : 'none',
+          transition: 'all 0.3s ease',
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flex: 1, minWidth: 0 }}>
               <span style={{
-                fontSize: '11px', fontWeight: 700, color: colore,
+                fontSize: '11px', fontWeight: 700, color: isBombItem ? '#000' : colore,
                 whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                textShadow: isBombItem ? '0 0 2px rgba(255,255,255,0.5)' : 'none',
               }}>
-                {g.isBomb && '💣 '}{g.displayLabel || g.label}
+                {isBombItem && '💣 '}{g.displayLabel || g.label}
               </span>
               {motore === 'confronto' && g.pctDixon > 0 && (
                 <BadgeAccordo pctStorico={g.pct} pctDixon={g.pctDixon} />
@@ -763,202 +575,7 @@
             </div>
             <QuotaBox match={match} familyId={g.familyId} giocata={g.giocata} pctTua={pctPerQuota} />
           </div>
-          <BarraPct pct={pctBase} isBomb={g.isBomb} />
-        </div>
-      );
-    };
-
-    // ============================================================
-    // 🔀 RIGA TRIPLA (allineamento per famiglia)
-    // ============================================================
-    const renderRigaTripla = () => {
-      if (topTripla.length === 0) {
-        return (
-          <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '20px' }}>
-            Nessuna giocata disponibile
-          </div>
-        );
-      }
-
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {topTripla.map((row, idx) => {
-            const s = row.storico;
-            const d = row.dixon;
-            const q = row.quotaSource;
-            
-            // Colore bordo riga in base al tipo
-            const isMatch = row.tipo === 'match-famiglia';
-            const isSoloDixon = row.tipo === 'solo-dixon';
-
-            const borderRowColor = isMatch
-              ? 'var(--neon-green)'
-              : row.tipo === 'solo-storico'
-                ? 'var(--neon-cyan)'
-                : 'var(--neon-magenta)';
-
-            return (
-              <div key={idx} style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr',
-                gap: '4px',
-                padding: '6px',
-                background: 'var(--bg-elevated)',
-                borderRadius: '8px',
-                border: `1px solid ${borderRowColor}50`,
-                position: 'relative',
-              }}>
-                {/* Badge Match Famiglia */}
-                {isMatch && (
-                  <span
-                    title="Storico e Dixon suggeriscono una giocata per la stessa famiglia"
-                    style={{
-                      position: 'absolute', top: '-6px', right: '6px',
-                      background: 'var(--neon-green)', color: '#000',
-                      fontSize: '9px', fontWeight: 900, padding: '1px 6px',
-                      borderRadius: '8px', zIndex: 2,
-                    }}
-                  >✓ MATCH</span>
-                )}
-                {/* Badge Solo Dixon */}
-                {isSoloDixon && (
-                  <span
-                    title="Solo Dixon suggerisce questa giocata"
-                    style={{
-                      position: 'absolute', top: '-6px', right: '6px',
-                      background: 'var(--neon-magenta)', color: '#000',
-                      fontSize: '9px', fontWeight: 900, padding: '1px 6px',
-                      borderRadius: '8px', zIndex: 2,
-                    }}
-                  >+ DIXON</span>
-                )}
-
-                {/* Col 1: Storico */}
-                <div style={{
-                  display: 'flex', flexDirection: 'column', gap: '2px',
-                  padding: '6px 8px', borderRadius: '6px',
-                  background: s ? 'rgba(0, 245, 255, 0.08)' : 'rgba(255, 255, 255, 0.02)',
-                  border: s ? '1px solid var(--neon-cyan)' : '1px dashed var(--border)',
-                  minHeight: '52px',
-                  justifyContent: 'center',
-                }}>
-                  <div style={{
-                    fontSize: '9px', color: 'var(--neon-cyan)', fontWeight: 900,
-                    textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'center',
-                  }}>📊 Storico</div>
-                  {s ? (
-                    <>
-                      <div style={{
-                        fontSize: '10px', fontWeight: 700, color: 'var(--text)',
-                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                        textAlign: 'center',
-                      }}>{s.displayLabel || s.label}</div>
-                      <div style={{
-                        fontSize: '16px', fontWeight: 900, fontFamily: 'Orbitron, sans-serif',
-                        color: s.pct >= 90 ? 'var(--neon-gold)' : s.pct >= 66 ? 'var(--neon-green)' : s.pct >= 33 ? 'var(--text-dim)' : 'var(--neon-red)',
-                        textAlign: 'center', lineHeight: 1.1,
-                      }}>
-                        {s.pct}%{s.isBomb && <span style={{ fontSize: '10px', marginLeft: '2px' }}>💣</span>}
-                      </div>
-                    </>
-                  ) : (
-                    <div style={{ fontSize: '11px', color: 'var(--text-dim)', textAlign: 'center' }}>—</div>
-                  )}
-                </div>
-
-                {/* Col 2: Dixon */}
-                <div style={{
-                  display: 'flex', flexDirection: 'column', gap: '2px',
-                  padding: '6px 8px', borderRadius: '6px',
-                  background: d ? 'rgba(255, 0, 229, 0.08)' : 'rgba(255, 255, 255, 0.02)',
-                  border: d ? '1px solid var(--neon-magenta)' : '1px dashed var(--border)',
-                  minHeight: '52px',
-                  justifyContent: 'center',
-                }}>
-                  <div style={{
-                    fontSize: '9px', color: 'var(--neon-magenta)', fontWeight: 900,
-                    textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'center',
-                  }}>🧮 Dixon</div>
-                  {d ? (
-                    <>
-                      <div style={{
-                        fontSize: '10px', fontWeight: 700, color: 'var(--text)',
-                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                        textAlign: 'center',
-                      }}>{d.displayLabel || d.label}</div>
-                      <div style={{
-                        fontSize: '16px', fontWeight: 900, fontFamily: 'Orbitron, sans-serif',
-                        color: d.pct >= 90 ? 'var(--neon-gold)' : d.pct >= 66 ? 'var(--neon-green)' : d.pct >= 33 ? 'var(--text-dim)' : 'var(--neon-red)',
-                        textAlign: 'center', lineHeight: 1.1,
-                      }}>
-                        {d.pct}%{d.isBomb && <span style={{ fontSize: '10px', marginLeft: '2px' }}>💣</span>}
-                      </div>
-                    </>
-                  ) : (
-                    <div style={{ fontSize: '11px', color: 'var(--text-dim)', textAlign: 'center' }}>—</div>
-                  )}
-                </div>
-
-                {/* Col 3: Quota (della giocata con % più alta) */}
-                <div style={{
-                  display: 'flex', flexDirection: 'column', gap: '2px',
-                  padding: '6px 8px', borderRadius: '6px',
-                  background: q ? 'rgba(0, 255, 136, 0.08)' : 'rgba(255, 255, 255, 0.02)',
-                  border: q ? '1px solid var(--neon-green)' : '1px dashed var(--border)',
-                  minHeight: '52px',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                  <div style={{
-                    fontSize: '9px', color: 'var(--neon-green)', fontWeight: 900,
-                    textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'center',
-                  }}>💰 Quota</div>
-                  {q ? (
-                    <>
-                      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '2px' }}>
-                        <QuotaBox
-                          match={match}
-                          familyId={q.familyId}
-                          giocata={q.giocata}
-                          pctTua={q.pct}
-                          compact={true}
-                        />
-                      </div>
-                      <div style={{
-                        fontSize: '9px', color: 'var(--text-dim)',
-                        textAlign: 'center', marginTop: '2px',
-                      }}>
-                        {q.displayLabel || q.label}
-                      </div>
-                    </>
-                  ) : (
-                    <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>—</div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      );
-    };
-
-    // ============================================================
-    // Render riga in base alla vista
-    // ============================================================
-    const renderRigheContenuto = () => {
-      if (vista === 'tripla') {
-        return renderRigaTripla();
-      }
-      const renderRiga = vista === 'compatta' ? renderRigaCompatta : renderRigaDettagliata;
-      return (
-        <div className="bet-row-vertical">
-          {righeDaMostrare.length > 0 ? (
-            righeDaMostrare.map((g, idx) => renderRiga(g, idx))
-          ) : (
-            <div className="bet-item-vertical" style={{ textAlign: 'center', color: 'var(--text-dim)' }}>
-              <span>Nessuna giocata</span>
-            </div>
-          )}
+          <BarraPct pct={pctBase} isBomb={isBombItem} />
         </div>
       );
     };
@@ -982,25 +599,6 @@
           {hasBomb && <span className="bomb-inline">💣</span>}
         </div>
 
-        <button
-          onClick={toggleVista}
-          title={`Vista: ${VISTA_NOMI[vista]} (clicca per cambiare)`}
-          style={{
-            position: 'absolute', top: '10px', right: '110px',
-            background: 'var(--neon-cyan)',
-            color: '#000',
-            border: '1px solid var(--border)',
-            borderRadius: '6px',
-            padding: '2px 8px',
-            fontSize: '12px',
-            cursor: 'pointer',
-            fontWeight: 700,
-            zIndex: 11,
-          }}
-        >
-          {VISTA_ICONE[vista]}
-        </button>
-
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
           <div className="tab-header" style={{ background: champColor, marginBottom: 0 }}>
             <ChampLogo campionato={match.campionato} size={16} />
@@ -1013,9 +611,6 @@
           {motore === 'confronto' && (
             <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--neon-gold)', border: '1px solid var(--neon-gold)', padding: '2px 6px', borderRadius: '4px' }}>⚖️ CONFRONTO</span>
           )}
-          <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--text-dim)', border: '1px solid var(--border)', padding: '2px 6px', borderRadius: '4px' }}>
-            {VISTA_ICONE[vista]} {VISTA_NOMI[vista]}
-          </span>
         </div>
 
         <div style={{ color: 'var(--text-dim)', fontSize: '11px', marginBottom: '6px', textAlign: 'center' }}>📅 {formattedDate} • ⏰ {match.ora || 'TBD'}</div>
@@ -1026,31 +621,32 @@
           <div className="team"><TeamLogo teamName={match.ospiti} championship={match.campionato} size={50} /><div className="team-name">{match.ospiti || 'Ospite'}</div></div>
         </div>
 
-        {vista === 'compatta' ? (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px', marginBottom: '6px' }}>
-            <div style={{ padding: '6px 8px', background: 'var(--surface)', borderRadius: '6px', border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '9px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px', textAlign: 'center' }}>
-                🏠 {homeForm.pct || 0}%
-              </div>
-              <TermometroForma formString={homeForm.form} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px', marginBottom: '6px' }}>
+          <div style={{ padding: '6px 8px', background: 'var(--surface)', borderRadius: '6px', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: '9px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px', textAlign: 'center' }}>
+              🏠 {homeForm.pct || 0}%
             </div>
-            <div style={{ padding: '6px 8px', background: 'var(--surface)', borderRadius: '6px', border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '9px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px', textAlign: 'center' }}>
-                ✈️ {awayForm.pct || 0}%
-              </div>
-              <TermometroForma formString={awayForm.form} />
+            <TermometroForma formString={homeForm.form} />
+          </div>
+          <div style={{ padding: '6px 8px', background: 'var(--surface)', borderRadius: '6px', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: '9px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px', textAlign: 'center' }}>
+              ✈️ {awayForm.pct || 0}%
             </div>
+            <TermometroForma formString={awayForm.form} />
           </div>
-        ) : (
-          <div className="form-row-compact">
-            <div className="form-block-compact"><div className="form-label">Forma</div><div className="form-squares">{renderFormSquares(homeForm.form)}</div><div className="form-pct-compact">{homeForm.pct || 0}%</div></div>
-            <div className="form-block-compact"><div className="form-label">Forma</div><div className="form-squares">{renderFormSquares(awayForm.form)}</div><div className="form-pct-compact">{awayForm.pct || 0}%</div></div>
-          </div>
-        )}
+        </div>
 
         <div className="form-diff">📊 Differenza forma: <span className={diff >= 20 ? 'diff-alta' : 'diff-bassa'}>{isNaN(diff) ? 0 : diff}%</span></div>
 
-        {renderRigheContenuto()}
+        <div className="bet-row-vertical">
+          {righeDaMostrare.length > 0 ? (
+            righeDaMostrare.map((g, idx) => renderRigaCompatta(g, idx))
+          ) : (
+            <div className="bet-item-vertical" style={{ textAlign: 'center', color: 'var(--text-dim)' }}>
+              <span>Nessuna giocata</span>
+            </div>
+          )}
+        </div>
       </div>
     );
   };
@@ -1166,20 +762,6 @@
     const totalFamiglie = Object.keys(window.FAMIGLIE_GIOCATE || {}).length;
     const { giorni, setGiorni } = window.FiltriCampionati.useGiorniRange();
 
-    const [vista, setVista] = useState(getVistaIniziale);
-
-    useEffect(() => {
-      const handler = () => setVista(getVistaIniziale());
-      window.addEventListener('vista-mode-changed', handler);
-      return () => window.removeEventListener('vista-mode-changed', handler);
-    }, []);
-
-    const cambiaVista = (nuovaVista) => {
-      localStorage.setItem('ft_vista_mode', nuovaVista);
-      setVista(nuovaVista);
-      window.dispatchEvent(new Event('vista-mode-changed'));
-    };
-
     const btnTopStyle = (attivo, colore) => ({
       padding: '6px 12px', fontSize: '11px', fontWeight: 700,
       borderRadius: '6px', border: `1px solid ${colore}`, cursor: 'pointer',
@@ -1287,44 +869,6 @@
               color: motore === 'confronto' ? '#000' : 'var(--text-dim)'
             }}
           >⚖️ Confronto</button>
-        </div>
-
-        <span style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 4px' }} />
-
-        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--neon-cyan)', textTransform: 'uppercase' }}>
-          👁️ Vista
-        </span>
-        <div style={{
-          display: 'flex', background: 'var(--bg-deep)', borderRadius: '8px',
-          padding: '3px', border: '1px solid var(--border)'
-        }}>
-          <button onClick={() => cambiaVista('dettagliata')}
-            style={{
-              padding: '6px 12px', fontSize: '11px', fontWeight: 700,
-              borderRadius: '6px', border: 'none', cursor: 'pointer',
-              background: vista === 'dettagliata' ? 'var(--neon-cyan)' : 'transparent',
-              color: vista === 'dettagliata' ? '#000' : 'var(--text-dim)'
-            }}
-            title="Vista dettagliata"
-          >📖</button>
-          <button onClick={() => cambiaVista('compatta')}
-            style={{
-              padding: '6px 12px', fontSize: '11px', fontWeight: 700,
-              borderRadius: '6px', border: 'none', cursor: 'pointer',
-              background: vista === 'compatta' ? 'var(--neon-cyan)' : 'transparent',
-              color: vista === 'compatta' ? '#000' : 'var(--text-dim)'
-            }}
-            title="Vista compatta (a colpo d'occhio)"
-          >⚡</button>
-          <button onClick={() => cambiaVista('tripla')}
-            style={{
-              padding: '6px 12px', fontSize: '11px', fontWeight: 700,
-              borderRadius: '6px', border: 'none', cursor: 'pointer',
-              background: vista === 'tripla' ? 'var(--neon-cyan)' : 'transparent',
-              color: vista === 'tripla' ? '#000' : 'var(--text-dim)'
-            }}
-            title="Vista tripla (Storico | Dixon | Quota)"
-          >🔀</button>
         </div>
       </div>
     );
@@ -1503,6 +1047,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto v11 caricato — Vista Tripla con allineamento per famiglia');
+  console.log('✅ Modulo Palinsesto v14 caricato — Rimosso fulmine + Sfondo oro pulsante');
 
 })();
