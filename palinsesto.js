@@ -1,7 +1,8 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto
-// v16: Vista Tripla FISSA + Rimossi switch motore e badge invasivi
+// v17: Vista Tripla FISSA + Rimossi switch motore e badge invasivi
 //      + Dixon allineato per famiglia + Sfondo Oro se bomba
+//      + NEW: Pulsante "TOP Coppe" (Champions + Europa + Conference)
 // ============================================================
 
 (function () {
@@ -100,10 +101,12 @@
   };
 
   // ============================================================
-  // TOP 5
+  // TOP 5 + TOP COPPE
   // ============================================================
   const TOP_5_MAGGIORI = ['Serie A', 'Ligue 1', 'La Liga', 'Bundesliga', 'Premier League'];
   const TOP_5_MINORI = ['Serie B', '2. Bundesliga', 'Ligue 2', 'Segunda División', 'EFL Championship'];
+  // ⭐ NEW: Top Coppe UEFA (solo per club)
+  const TOP_COPPE = ['UEFA Champions League', 'UEFA Europa League', 'UEFA Europa Conference'];
 
   const matchCampionato = (nomeDb, nomeTarget) => {
     if (!nomeDb || !nomeTarget) return false;
@@ -705,6 +708,8 @@
     selectedFamiglie,
     onTop5Maggiori, onTop5Minori, onTop5Tutti,
     isTop5MaggioriAttivo, isTop5MinoriAttivo, isTop5TuttiAttivo,
+    // ⭐ NEW: Top Coppe
+    onTopCoppe, isTopCoppeAttivo,
   }) => {
     const countScelte = (selectedFamiglie || []).length;
     const totalFamiglie = Object.keys(window.FAMIGLIE_GIOCATE || {}).length;
@@ -755,6 +760,8 @@
           <button onClick={onTop5Maggiori} style={btnTopStyle(isTop5MaggioriAttivo, 'var(--neon-gold)')} title="Serie A, Ligue 1, La Liga, Bundesliga, Premier League">⭐ Maggiori</button>
           <button onClick={onTop5Minori} style={btnTopStyle(isTop5MinoriAttivo, 'var(--neon-cyan)')} title="Serie B, 2. Bundesliga, Ligue 2, Segunda División, EFL Championship">🔹 Minori</button>
           <button onClick={onTop5Tutti} style={btnTopStyle(isTop5TuttiAttivo, 'var(--neon-magenta)')} title="Maggiori + Minori (10 campionati)">💎 Maggiori + Minori</button>
+          {/* ⭐ NEW: TOP Coppe UEFA */}
+          <button onClick={onTopCoppe} style={btnTopStyle(isTopCoppeAttivo, 'var(--neon-blue, #1a1aff)')} title="UEFA Champions League, Europa League, Conference League">🏆 Coppe</button>
         </div>
 
         <span style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 4px' }} />
@@ -838,6 +845,8 @@
     const handleTop5Maggiori = useCallback(() => selezionaSoloCampionati(TOP_5_MAGGIORI), [selezionaSoloCampionati]);
     const handleTop5Minori = useCallback(() => selezionaSoloCampionati(TOP_5_MINORI), [selezionaSoloCampionati]);
     const handleTop5Tutti = useCallback(() => selezionaSoloCampionati([...TOP_5_MAGGIORI, ...TOP_5_MINORI]), [selezionaSoloCampionati]);
+    // ⭐ NEW: Top Coppe
+    const handleTopCoppe = useCallback(() => selezionaSoloCampionati(TOP_COPPE), [selezionaSoloCampionati]);
 
     const isSelezioneUgualeA = useCallback((targetList) => {
       if (!Array.isArray(campionatiAttivi)) return false;
@@ -850,6 +859,8 @@
     const isTop5MaggioriAttivo = useMemo(() => isSelezioneUgualeA(TOP_5_MAGGIORI), [isSelezioneUgualeA]);
     const isTop5MinoriAttivo = useMemo(() => isSelezioneUgualeA(TOP_5_MINORI), [isSelezioneUgualeA]);
     const isTop5TuttiAttivo = useMemo(() => isSelezioneUgualeA([...TOP_5_MAGGIORI, ...TOP_5_MINORI]), [isSelezioneUgualeA]);
+    // ⭐ NEW: Top Coppe
+    const isTopCoppeAttivo = useMemo(() => isSelezioneUgualeA(TOP_COPPE), [isSelezioneUgualeA]);
 
     const partiteOggi = useMemo(() => {
       const todayStr = getTodayStr();
@@ -902,7 +913,19 @@
             <span style={{ color: 'var(--text-dim)', fontSize: '11px', marginLeft: 'auto' }}>{partiteOggi.length} partite</span>
           </div>
           <ChampBar matches={matches} championships={championshipsList} campionatiSelezionati={campionatiAttivi} onToggle={toggleCampionato} onSelezionaTutti={selezionaTutti} onDeselezionaTutti={deselezionaTutti} />
-          <VisualizzaGiocateSwitch mode={visualizzaMode} setMode={setVisualizzaMode} selectedFamiglie={selectedFamiglie} onTop5Maggiori={handleTop5Maggiori} onTop5Minori={handleTop5Minori} onTop5Tutti={handleTop5Tutti} isTop5MaggioriAttivo={isTop5MaggioriAttivo} isTop5MinoriAttivo={isTop5MinoriAttivo} isTop5TuttiAttivo={isTop5TuttiAttivo} />
+          <VisualizzaGiocateSwitch
+            mode={visualizzaMode}
+            setMode={setVisualizzaMode}
+            selectedFamiglie={selectedFamiglie}
+            onTop5Maggiori={handleTop5Maggiori}
+            onTop5Minori={handleTop5Minori}
+            onTop5Tutti={handleTop5Tutti}
+            isTop5MaggioriAttivo={isTop5MaggioriAttivo}
+            isTop5MinoriAttivo={isTop5MinoriAttivo}
+            isTop5TuttiAttivo={isTop5TuttiAttivo}
+            onTopCoppe={handleTopCoppe}
+            isTopCoppeAttivo={isTopCoppeAttivo}
+          />
           {partiteOggi.length === 0 ? (
             <div className="card" style={{ textAlign: 'center', padding: '40px 20px' }}>
               <div style={{ fontSize: '48px', marginBottom: '12px' }}>😴</div>
@@ -936,7 +959,19 @@
             {isTuttiMode ? 'Tutti i campionati' : `${campionatiAttivi.length} campionati`} • {partiteOggi.length} partite
           </span>
         </div>
-        <VisualizzaGiocateSwitch mode={visualizzaMode} setMode={setVisualizzaMode} selectedFamiglie={selectedFamiglie} onTop5Maggiori={handleTop5Maggiori} onTop5Minori={handleTop5Minori} onTop5Tutti={handleTop5Tutti} isTop5MaggioriAttivo={isTop5MaggioriAttivo} isTop5MinoriAttivo={isTop5MinoriAttivo} isTop5TuttiAttivo={isTop5TuttiAttivo} />
+        <VisualizzaGiocateSwitch
+          mode={visualizzaMode}
+          setMode={setVisualizzaMode}
+          selectedFamiglie={selectedFamiglie}
+          onTop5Maggiori={handleTop5Maggiori}
+          onTop5Minori={handleTop5Minori}
+          onTop5Tutti={handleTop5Tutti}
+          isTop5MaggioriAttivo={isTop5MaggioriAttivo}
+          isTop5MinoriAttivo={isTop5MinoriAttivo}
+          isTop5TuttiAttivo={isTop5TuttiAttivo}
+          onTopCoppe={handleTopCoppe}
+          isTopCoppeAttivo={isTopCoppeAttivo}
+        />
         <ChampBar matches={matches} championships={championshipsList} campionatiSelezionati={campionatiAttivi} onToggle={toggleCampionato} onSelezionaTutti={selezionaTutti} onDeselezionaTutti={deselezionaTutti} />
         {partiteOggi.length === 0 ? (
           <div className="card" style={{ textAlign: 'center', padding: '60px 20px' }}>
@@ -959,6 +994,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto v16 caricato — Rimossi switch motore e badge invasivi');
+  console.log('✅ Modulo Palinsesto v17 caricato — Aggiunto pulsante TOP Coppe (Champions + Europa + Conference)');
 
 })();
