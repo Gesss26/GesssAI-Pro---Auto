@@ -619,29 +619,28 @@
 
       const getTeamPaths = (teamName, champ) => {
         const withUnderscore = teamName.replace(/\s+/g, '_');
+        const encodedSpaces = teamName.replace(/\s+/g, '%20');
 
         // ⭐ COPPE UEFA: SOLO la cartella specifica, MASSIMO 4 tentativi
-        // ⭐ FIX: prova PRIMA con underscore (formato reale su GitHub)
         if (isCoppaUEFA(champ)) {
           const uefaFolder = getUefaFolder(champ);
           return [
             `logos/${uefaFolder}/${withUnderscore}.png`,
-            `logos/${uefaFolder}/${teamName}.png`,
+            `logos/${uefaFolder}/${encodedSpaces}.png`,
             `logos/${uefaFolder}/${withUnderscore}.jpg`,
-            `logos/${uefaFolder}/${teamName}.jpg`,
+            `logos/${uefaFolder}/${encodedSpaces}.jpg`,
           ];
         }
 
         // ⭐ CAMPIONATI NAZIONALI: SOLO la cartella del campionato, MASSIMO 6 tentativi
-        // ⭐ FIX: prova PRIMA con underscore (formato reale su GitHub)
         const leagueFolder = getLeagueFolder(champ);
         return [
           `logos/${leagueFolder}/${withUnderscore}.png`,
-          `logos/${leagueFolder}/${teamName}.png`,
+          `logos/${leagueFolder}/${encodedSpaces}.png`,
           `logos/${leagueFolder}/${withUnderscore}.jpg`,
-          `logos/${leagueFolder}/${teamName}.jpg`,
+          `logos/${leagueFolder}/${encodedSpaces}.jpg`,
           `logos/${leagueFolder}/${withUnderscore}.svg`,
-          `logos/${leagueFolder}/${teamName}.svg`,
+          `logos/${leagueFolder}/${encodedSpaces}.svg`,
         ];
       };
 
@@ -1159,7 +1158,7 @@
     window.get12Under45 = get12Under45;
     window.normalizzaAccenti = normalizzaAccenti;
 
-    console.log('✅ Funzioni globali esposte v21 - FIX nomi file con underscore');
+    console.log('✅ Funzioni globali esposte v22 - FIX nomi file con spazi codificati');
 
     // ============================================================
     // LOAD/SAVE STATE
