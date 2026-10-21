@@ -483,15 +483,15 @@
     };
 
     // ============================================================
-    // ⭐ TEAM LOGO — versione DEFINITIVA
-    // FIX: getLeagueFolder allineato a getUefaFolder (nomi cartelle reali)
-    // FIX: override estesi + normalizzazione caratteri accentati nel filename
+    // ⭐ TEAM LOGO — versione DEFINITIVA con fallback a cascata
     // ============================================================
     const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
       const [finalError, setFinalError] = useState(false);
+      const [attemptIndex, setAttemptIndex] = useState(0);
 
       useEffect(() => {
         setFinalError(false);
+        setAttemptIndex(0);
       }, [teamName, championship]);
 
       const isCampionatoScuro = (champ) => {
@@ -512,7 +512,6 @@
         return false;
       };
 
-      // ⭐ Cartelle REALI delle coppe su GitHub
       const getUefaFolder = (champ) => {
         const c = champ.toLowerCase();
         if (c.includes('europa league')) return 'Europa_League';
@@ -522,12 +521,10 @@
         return 'Champions_League';
       };
 
-      // ⭐ FIX: usa gli stessi nomi cartella di getUefaFolder (senza prefisso UEFA_)
       const getLeagueFolder = (champ) => {
         if (!champ) return '';
         const c = champ.trim();
         const cLower = c.toLowerCase();
-
         const map = {
           'jupiler pro league': 'Jupiler_Pro_League',
           'premier league': 'Premier_League',
@@ -556,91 +553,36 @@
           'segunda division': 'Segunda_Division',
           'süper lig': 'Super_Lig',
           'super lig': 'Super_Lig',
-          // ⭐ FIX: cartelle reali delle coppe (senza prefisso UEFA_)
           'uefa champions league': 'Champions_League',
           'uefa europa league': 'Europa_League',
           'uefa europa conference': 'Conference_League',
           'uefa nations league': 'Nations_League',
         };
-
         if (map[cLower]) return map[cLower];
         return c.replace(/ /g, '_');
       };
 
-      // ⭐ Override manuali: mappa nome DB → nome file reale
       const LOGO_OVERRIDES = {
-        // Coppe UEFA (dai log 404)
-        'FK Crvena Zvezda': 'Crvena Zvezda',
-        'Ferencvarosi TC': 'Ferencvaros',
-        'Beşiktaş': 'Besiktas',
-        'Kauno Žalgiris': 'Kauno Zalgiris',
-        'Egnatia Rrogozhinë': 'Egnatia Rrogozhine',
-        'St. Truiden': 'Sint-Truiden',
-        'HNK Hajduk Split': 'Hajduk Split',
-        '1899 Hoffenheim': 'Hoffenheim',
-        'Red Bull Salzburg': 'Salzburg',
-        'Sparta Praha': 'Sparta Prague',
-        'Plzen': 'Viktoria Plzen',
-        'Olympiakos Piraeus': 'Olympiacos',
-        'Torreense': 'Torreense',
-        'Lillestrom': 'Lillestrom',
-        'Jagiellonia': 'Jagiellonia',
-        'Omonia Nicosia': 'Omonia',
-        'Ararat-Armenia': 'Ararat Armenia',
-        'Celje': 'Celje',
-        'Levski Sofia': 'Levski Sofia',
-        'Borac Banja Luka': 'Borac Banja Luka',
-        'KuPS': 'KuPS',
-        'Lech Poznan': 'Lech Poznan',
-        'NEC Nijmegen': 'NEC Nijmegen',
-        'Sturm Graz': 'Sturm Graz',
-        'OFI': 'OFI',
-        'Pafos': 'Pafos',
-        'Riga': 'Riga',
-        'FC Iberia 1999': 'Iberia 1999',
-        'Mjallby AIF': 'Mjallby',
-        'FC Nordsjaelland': 'Nordsjaelland',
-        'CSKA Sofia': 'CSKA Sofia',
-        'FC Lugano': 'Lugano',
-        'Trabzonspor': 'Trabzonspor',
-        'Heart Of Midlothian': 'Hearts',
-        'FK Jablonec': 'Jablonec',
-        'Inter Club d\'Escaldes': 'Inter Escaldes',
-        'Universitatea Craiova': 'Universitatea Craiova',
-        'FC Thun': 'Thun',
-        'SC Braga': 'Braga',
-        'FC Midtjylland': 'Midtjylland',
-        'Gent': 'Gent',
-        'Aarhus': 'Aarhus',
-        'Lincoln Red Imps FC': 'Lincoln Red Imps',
-        'Twente': 'Twente',
-        'Lens': 'Lens',
-        'Kairat Almaty': 'Kairat Almaty',
-        'Panathinaikos': 'Panathinaikos',
-        'Monaco': 'Monaco',
-        'SC Freiburg': 'Freiburg',
-        'Ajax': 'Ajax',
-        'Atalanta': 'Atalanta',
-        'RB Leipzig': 'RB Leipzig',
-      };
-
-      const sanitizeFileName = (name) => {
-        // Mantiene gli accenti (i file su GitHub li hanno), ma normalizza spazi
-        return name.replace(/\s+/g, '%20');
-      };
-
-      const getLogoUrl = (teamName, champ) => {
-        const overrideName = LOGO_OVERRIDES[teamName];
-        const finalName = overrideName || teamName;
-        const encodedName = sanitizeFileName(finalName);
-
-        if (isCoppaUEFA(champ)) {
-          const uefaFolder = getUefaFolder(champ);
-          return `logos/${uefaFolder}/${encodedName}.png`;
-        }
-
-        const leagueFolder = getLeagueFolder(champ);
-        return `logos/${leagueFolder}/${encodedName}.png`;
+        'FK Crvena Zvezda': 'Crvena Zvezda', 'Ferencvarosi TC': 'Ferencvaros',
+        'Beşiktaş': 'Besiktas', 'Kauno Žalgiris': 'Kauno Zalgiris',
+        'Egnatia Rrogozhinë': 'Egnatia Rrogozhine', 'St. Truiden': 'Sint-Truiden',
+        'HNK Hajduk Split': 'Hajduk Split', '1899 Hoffenheim': 'Hoffenheim',
+        'Red Bull Salzburg': 'Salzburg', 'Sparta Praha': 'Sparta Prague',
+        'Plzen': 'Viktoria Plzen', 'Olympiakos Piraeus': 'Olympiacos',
+        'Torreense': 'Torreense', 'Lillestrom': 'Lillestrom', 'Jagiellonia': 'Jagiellonia',
+        'Omonia Nicosia': 'Omonia', 'Ararat-Armenia': 'Ararat Armenia',
+        'Celje': 'Celje', 'Levski Sofia': 'Levski Sofia', 'Borac Banja Luka': 'Borac Banja Luka',
+        'KuPS': 'KuPS', 'Lech Poznan': 'Lech Poznan', 'NEC Nijmegen': 'NEC Nijmegen',
+        'Sturm Graz': 'Sturm Graz', 'OFI': 'OFI', 'Pafos': 'Pafos', 'Riga': 'Riga',
+        'FC Iberia 1999': 'Iberia 1999', 'Mjallby AIF': 'Mjallby', 'FC Nordsjaelland': 'Nordsjaelland',
+        'CSKA Sofia': 'CSKA Sofia', 'FC Lugano': 'Lugano', 'Trabzonspor': 'Trabzonspor',
+        'Heart Of Midlothian': 'Hearts', 'FK Jablonec': 'Jablonec',
+        'Inter Club d\'Escaldes': 'Inter Escaldes', 'Universitatea Craiova': 'Universitatea Craiova',
+        'FC Thun': 'Thun', 'SC Braga': 'Braga', 'FC Midtjylland': 'Midtjylland',
+        'Gent': 'Gent', 'Aarhus': 'Aarhus', 'Lincoln Red Imps FC': 'Lincoln Red Imps',
+        'Twente': 'Twente', 'Lens': 'Lens', 'Kairat Almaty': 'Kairat Almaty',
+        'Panathinaikos': 'Panathinaikos', 'Monaco': 'Monaco', 'SC Freiburg': 'Freiburg',
+        'Ajax': 'Ajax', 'Atalanta': 'Atalanta', 'RB Leipzig': 'RB Leipzig',
       };
 
       const getInitials = (name) => {
@@ -666,31 +608,35 @@
         );
       };
 
-      if (!championship || championship === 'Tutti') {
+      if (!championship || championship === 'Tutti' || finalError) {
         return renderFallback();
       }
 
-      if (finalError) {
-        return renderFallback();
-      }
+      // Genera lista di path da provare
+      const buildPaths = () => {
+        const folder = isCoppaUEFA(championship) ? getUefaFolder(championship) : getLeagueFolder(championship);
+        const baseFolder = `logos/${folder}/`;
+        
+        const overrideName = LOGO_OVERRIDES[teamName];
+        
+        const p1 = overrideName ? `${baseFolder}${overrideName.replace(/\s+/g, '%20')}.png` : null;
+        const p2 = `${baseFolder}${teamName.replace(/\s+/g, '%20')}.png`;
+        const p3 = `${baseFolder}${teamName.replace(/\s+/g, '%20').toLowerCase()}.png`;
 
-      const currentSrc = getLogoUrl(teamName, championship);
+        return [p1, p2, p3].filter(Boolean);
+      };
+
+      const paths = buildPaths();
+      const currentSrc = paths[Math.min(attemptIndex, paths.length - 1)];
       const needsLightBg = isCampionatoScuro(championship);
 
       return (
         <div style={{
-          width: size,
-          height: size,
-          maxWidth: size,
-          maxHeight: size,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          borderRadius: '4px',
+          width: size, height: size, maxWidth: size, maxHeight: size,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0, borderRadius: '4px',
           backgroundColor: needsLightBg ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
-          padding: needsLightBg ? '2px' : '0',
-          boxSizing: 'border-box',
+          padding: needsLightBg ? '2px' : '0', boxSizing: 'border-box',
         }}>
           <img
             key={currentSrc}
@@ -698,15 +644,14 @@
             alt={teamName}
             width={size}
             height={size}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              display: 'block',
-            }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
             className={`team-logo ${className}`}
             onError={() => {
-              setFinalError(true);
+              if (attemptIndex + 1 < paths.length) {
+                setAttemptIndex(attemptIndex + 1);
+              } else {
+                setFinalError(true);
+              }
             }}
           />
         </div>
@@ -1085,34 +1030,28 @@
     };
 
     // ============================================================
-    // ⭐ formatGiocataLabel — VERSIONE UNICA E COERENTE
-    // Formato: "1X + Under 4,5" (spazi uniformi, virgola decimale)
+    // formatGiocataLabel — VERSIONE UNICA E COERENTE
     // ============================================================
     const formatGiocataLabel = (familyId, label) => {
       if (!label) return '—';
 
-      // Over/Under semplici
       if (label.startsWith('Over '))  return label.replace('.', ',');
       if (label.startsWith('Under ')) return label.replace('.', ',');
 
-      // Multigol
       if (familyId === 'multigol') return label;
 
-      // MG Casa + Ospite
       if (familyId === 'mg_casa_ospite') {
         const parts = label.split('+');
         if (parts.length === 2) return `MG ${parts[0]} C + MG ${parts[1]} O`;
         return label;
       }
 
-      // DC + Multigol
       if (familyId === 'dc_multigol') {
         const parts = label.split('+');
         if (parts.length === 2) return `${parts[0]} + ${parts[1]}`;
         return label;
       }
 
-      // DC + Under
       if (familyId === 'dc_under') {
         const parts = label.split('+');
         if (parts.length === 2) {
@@ -1122,7 +1061,6 @@
         return label;
       }
 
-      // DC + Over
       if (familyId === 'dc_over') {
         const parts = label.split('+');
         if (parts.length === 2) {
@@ -1132,7 +1070,6 @@
         return label;
       }
 
-      // GG / NG
       if (familyId === 'gg_ng') {
         if (label === 'Goal-Goal' || label === 'GG') return 'GG';
         if (label === 'No Goal' || label === 'NG') return 'NG';
@@ -1171,7 +1108,7 @@
     window.get12Under45 = get12Under45;
     window.normalizzaAccenti = normalizzaAccenti;
 
-    console.log('✅ Funzioni globali esposte v25 - FIX cartelle UEFA + format label unico');
+    console.log('✅ Funzioni globali esposte v26 - Fix loghi a cascata');
 
     // ============================================================
     // LOAD/SAVE STATE
