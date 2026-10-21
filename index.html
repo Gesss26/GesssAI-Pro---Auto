@@ -509,7 +509,7 @@
     };
 
     // ============================================================
-    // TEAM LOGO — versione DEFINITIVA con cartelle corrette e fallback limitato
+    // TEAM LOGO — versione DEFINITIVA con logica semplificata (spazi %20)
     // ============================================================
     const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
       const [pathIndex, setPathIndex] = useState(0);
@@ -618,29 +618,22 @@
       };
 
       const getTeamPaths = (teamName, champ) => {
-        const withUnderscore = teamName.replace(/\s+/g, '_');
         const encodedSpaces = teamName.replace(/\s+/g, '%20');
 
-        // ⭐ COPPE UEFA: SOLO la cartella specifica, MASSIMO 4 tentativi
+        // ⭐ COPPE UEFA: SOLO la cartella specifica, SOLO .png e .jpg con spazi codificati
         if (isCoppaUEFA(champ)) {
           const uefaFolder = getUefaFolder(champ);
           return [
-            `logos/${uefaFolder}/${withUnderscore}.png`,
             `logos/${uefaFolder}/${encodedSpaces}.png`,
-            `logos/${uefaFolder}/${withUnderscore}.jpg`,
             `logos/${uefaFolder}/${encodedSpaces}.jpg`,
           ];
         }
 
-        // ⭐ CAMPIONATI NAZIONALI: SOLO la cartella del campionato, MASSIMO 6 tentativi
+        // ⭐ CAMPIONATI NAZIONALI: SOLO la cartella del campionato, SOLO .png e .jpg con spazi codificati
         const leagueFolder = getLeagueFolder(champ);
         return [
-          `logos/${leagueFolder}/${withUnderscore}.png`,
           `logos/${leagueFolder}/${encodedSpaces}.png`,
-          `logos/${leagueFolder}/${withUnderscore}.jpg`,
           `logos/${leagueFolder}/${encodedSpaces}.jpg`,
-          `logos/${leagueFolder}/${withUnderscore}.svg`,
-          `logos/${leagueFolder}/${encodedSpaces}.svg`,
         ];
       };
 
@@ -1158,7 +1151,7 @@
     window.get12Under45 = get12Under45;
     window.normalizzaAccenti = normalizzaAccenti;
 
-    console.log('✅ Funzioni globali esposte v22 - FIX nomi file con spazi codificati');
+    console.log('✅ Funzioni globali esposte v23 - Loghi caricati con %20 (spazi)');
 
     // ============================================================
     // LOAD/SAVE STATE
