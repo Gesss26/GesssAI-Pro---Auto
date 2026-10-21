@@ -509,11 +509,17 @@
     };
 
     // ============================================================
-    // TEAM LOGO — versione corretta con cartelle UEFA specifiche
+    // TEAM LOGO — versione DEFINITIVA con fallback limitato
     // ============================================================
     const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
       const [pathIndex, setPathIndex] = useState(0);
       const [finalError, setFinalError] = useState(false);
+
+      // Reset quando cambiano team/champ
+      useEffect(() => {
+        setPathIndex(0);
+        setFinalError(false);
+      }, [teamName, championship]);
 
       const isCompetition = (name, champ) => {
         if (!name || !champ) return false;
@@ -591,14 +597,6 @@
         return c.replace(/ /g, '_');
       };
 
-      const CARTELLE_NAZIONALI = [
-        'Jupiler_Pro_League', 'Premier_League', 'Championship', 'Ligue_1', 'Ligue_2',
-        'Bundesliga', '2. Bundesliga', 'Serie_A', 'Serie_B', 'Serie_C_Girone_A',
-        'Serie_C_Girone_B', 'Serie_C_Girone_C', 'J1_League', 'Eredivisie', 'Eerste_Divisie',
-        'Primeira_Liga', 'Scottish_Premiership', 'K_League_1', 'La_Liga', 'Segunda_Division',
-        'Super_Lig',
-      ];
-
       const isCoppaUEFA = (champ) => {
         if (!champ) return false;
         const c = champ.toLowerCase().trim();
@@ -612,45 +610,30 @@
       const getTeamPaths = (teamName, champ) => {
         const withUnderscore = teamName.replace(/\s+/g, '_');
 
-        // ⭐ COPPE UEFA: usa la cartella corretta per ogni competizione
+        // ⭐ COPPE UEFA: SOLO la cartella specifica, MASSIMO 4 tentativi
         if (isCoppaUEFA(champ)) {
           let uefaFolder = 'UEFA_Champions_League';
           const c = champ.toLowerCase();
 
-          if (c.includes('champions league')) {
-            uefaFolder = 'UEFA_Champions_League';
-          } else if (c.includes('europa league')) {
+          if (c.includes('europa league')) {
             uefaFolder = 'UEFA_Europa_League';
           } else if (c.includes('conference')) {
             uefaFolder = 'UEFA_Europa_Conference';
           } else if (c.includes('nations league')) {
             uefaFolder = 'UEFA_Nations_League';
+          } else if (c.includes('champions league')) {
+            uefaFolder = 'UEFA_Champions_League';
           }
 
-          const paths = [
+          return [
             `logos/${uefaFolder}/${teamName}.png`,
             `logos/${uefaFolder}/${withUnderscore}.png`,
             `logos/${uefaFolder}/${teamName}.jpg`,
             `logos/${uefaFolder}/${withUnderscore}.jpg`,
           ];
-
-          // Fallback su Champions_League legacy (loghi già presenti lì)
-          paths.push(
-            `logos/Champions_League/${teamName}.png`,
-            `logos/Champions_League/${withUnderscore}.png`,
-            `logos/Champions_League/${teamName}.jpg`,
-            `logos/Champions_League/${withUnderscore}.jpg`
-          );
-
-          // Fallback su cartelle nazionali (per squadre che giocano anche in campionato)
-          CARTELLE_NAZIONALI.forEach(folder => {
-            paths.push(`logos/${folder}/${teamName}.png`, `logos/${folder}/${withUnderscore}.png`);
-            paths.push(`logos/${folder}/${teamName}.jpg`, `logos/${folder}/${withUnderscore}.jpg`);
-          });
-
-          return paths;
         }
 
+        // ⭐ CAMPIONATI NAZIONALI: SOLO la cartella del campionato, MASSIMO 6 tentativi
         const leagueFolder = getLeagueFolder(champ);
         return [
           `logos/${leagueFolder}/${teamName}.png`,
@@ -1176,7 +1159,7 @@
     window.get12Under45 = get12Under45;
     window.normalizzaAccenti = normalizzaAccenti;
 
-    console.log('✅ Funzioni globali esposte v18 - FIX loghi UEFA (Europa League + Conference League)');
+    console.log('✅ Funzioni globali esposte v19 - FIX loghi UEFA (cartelle corrette + fallback limitato)');
 
     // ============================================================
     // LOAD/SAVE STATE
