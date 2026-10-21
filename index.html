@@ -509,7 +509,7 @@
     };
 
     // ============================================================
-    // TEAM LOGO — versione DEFINITIVA con fallback limitato
+    // TEAM LOGO — versione DEFINITIVA con cartelle corrette e fallback limitato
     // ============================================================
     const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
       const [pathIndex, setPathIndex] = useState(0);
@@ -607,24 +607,22 @@
         return false;
       };
 
+      // ⭐ MAPPA CORRETTA: usa le cartelle che ESISTONO su GitHub
+      const getUefaFolder = (champ) => {
+        const c = champ.toLowerCase();
+        if (c.includes('europa league')) return 'Europa_League';
+        if (c.includes('conference')) return 'Conference_League';
+        if (c.includes('nations')) return 'Nations_League';
+        if (c.includes('champions')) return 'Champions_League';
+        return 'Champions_League';
+      };
+
       const getTeamPaths = (teamName, champ) => {
         const withUnderscore = teamName.replace(/\s+/g, '_');
 
         // ⭐ COPPE UEFA: SOLO la cartella specifica, MASSIMO 4 tentativi
         if (isCoppaUEFA(champ)) {
-          let uefaFolder = 'UEFA_Champions_League';
-          const c = champ.toLowerCase();
-
-          if (c.includes('europa league')) {
-            uefaFolder = 'UEFA_Europa_League';
-          } else if (c.includes('conference')) {
-            uefaFolder = 'UEFA_Europa_Conference';
-          } else if (c.includes('nations league')) {
-            uefaFolder = 'UEFA_Nations_League';
-          } else if (c.includes('champions league')) {
-            uefaFolder = 'UEFA_Champions_League';
-          }
-
+          const uefaFolder = getUefaFolder(champ);
           return [
             `logos/${uefaFolder}/${teamName}.png`,
             `logos/${uefaFolder}/${withUnderscore}.png`,
@@ -1159,7 +1157,7 @@
     window.get12Under45 = get12Under45;
     window.normalizzaAccenti = normalizzaAccenti;
 
-    console.log('✅ Funzioni globali esposte v19 - FIX loghi UEFA (cartelle corrette + fallback limitato)');
+    console.log('✅ Funzioni globali esposte v20 - FIX loghi UEFA (cartelle corrette)');
 
     // ============================================================
     // LOAD/SAVE STATE
