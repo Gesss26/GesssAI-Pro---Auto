@@ -1,11 +1,11 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v12)
-// ✅ TutteLeFamigliePanel = SOLO statistiche reali
-// ✅ NUOVA TAB "Analisi Dixon-Coles" (dopo Riepilogo AI)
-//    → contiene AIAnalysis + TutteLeFamigliePanelDixon
-// ✅ Riepilogo AI = meteo + frequenze + affidabilità (no AIAnalysis)
-// ✅ Motore Dixon-Coles invariato (v10)
-// ✅ NEW: window.getDixonPct esposta per il Palinsesto (Confronto)
+// statistiche.js - Modulo Statistiche (v13)
+// ✅ Cache Dixon in memoria (Map) al posto di localStorage
+// ✅ clearStatsCache svuota entrambe le cache (param + mc)
+// ✅ getDixonPct usa cache in memoria
+// ✅ formatGiocataLabel centralizzata (usa window.formatGiocataLabel)
+// ✅ TutteLeFamigliePanel/Dixon null-safe su stats.error
+// ✅ AIAnalysis carica da cache memoria (no localStorage)
 // ============================================================
 
 (function () {
@@ -14,27 +14,34 @@
   const { useState, useEffect, useMemo } = React;
 
   // ============================================================
-  // CACHE PER I PARAMETRI
+  // CACHE PARAMETRI + CACHE MATRICI DIXON (in memoria)
   // ============================================================
-  const _paramCache = new Map();
+  const _paramCache = new Map();   // chiave: team__champ / __avg__champ
+  const _mcCache = new Map();      // chiave: match.id → matrice Dixon
+
   const _cacheKey = (team, champ) => `${team}__${champ}`;
   const _avgKey = (champ) => `__avg__${champ}`;
 
   const clearStatsCache = () => {
     _paramCache.clear();
+    _mcCache.clear();
   };
 
   // ============================================================
-  // FORMATTAZIONE ETICHETTE
+  // FORMATTAZIONE ETICHETTE (usa globale con fallback)
   // ============================================================
   const formatGiocataLabel = (familyId, label) => {
+    if (typeof window.formatGiocataLabel === 'function') {
+      return window.formatGiocataLabel(familyId, label);
+    }
+    // Fallback minimale (coerente con index.html)
     if (!label) return '—';
-    if (label.startsWith('Over '))  return label;
-    if (label.startsWith('Under ')) return label;
+    if (label.startsWith('Over '))  return label.replace('.', ',');
+    if (label.startsWith('Under ')) return label.replace('.', ',');
     if (familyId === 'multigol') return label;
     if (familyId === 'mg_casa_ospite') {
       const parts = label.split('+');
-      if (parts.length === 2) return `MG ${parts[0]} Casa + MG ${parts[1]} Ospite`;
+      if (parts.length === 2) return `MG ${parts[0]} C + MG ${parts[1]} O`;
     }
     if (familyId === 'dc_multigol') {
       const parts = label.split('+');
@@ -43,14 +50,14 @@
     if (familyId === 'dc_under') {
       const parts = label.split('+');
       if (parts.length === 2) {
-        const uLabel = parts[1].replace('U', 'Under ').replace(',', '.');
+        const uLabel = parts[1].replace('U', 'Under ').replace('.', ',');
         return `${parts[0]} + ${uLabel}`;
       }
     }
     if (familyId === 'dc_over') {
       const parts = label.split('+');
       if (parts.length === 2) {
-        const oLabel = parts[1].replace('O', 'Over ').replace(',', '.');
+        const oLabel = parts[1].replace('O', 'Over ').replace('.', ',');
         return `${parts[0]} + ${oLabel}`;
       }
     }
@@ -141,11 +148,15 @@
     const avg = getLeagueAverages(championship, allMatches);
     const safe = (num, den, fallback = 1) => den > 0 ? num / den : fallback;
 
+    // ⭐ FIX: fallback sicuro se media campionato è 0 (evita divisione per zero)
+    const avgHomeSafe = avg.avgHome > 0 ? avg.avgHome : 1.4;
+    const avgAwaySafe = avg.avgAway > 0 ? avg.avgAway : 1.1;
+
     const result = {
-      attackHome:  safe(gfHome, wHome) / (avg.avgHome || 1),
-      defenseHome: safe(gsHome, wHome) / (avg.avgAway || 1),
-      attackAway:  safe(gfAway, wAway) / (avg.avgAway || 1),
-      defenseAway: safe(gsAway, wAway) / (avg.avgHome || 1),
+      attackHome:  safe(gfHome, wHome) / avgHomeSafe,
+      defenseHome: safe(gsHome, wHome) / avgAwaySafe,
+      attackAway:  safe(gfAway, wAway) / avgAwaySafe,
+      defenseAway: safe(gsAway, wAway) / avgHomeSafe,
       n: played.length,
       wHome, wAway,
     };
@@ -197,14 +208,16 @@
   };
 
   const simulateMatches = (homeTeam, awayTeam, championship, allMatches) => {
-    clearStatsCache();
-
+    // ⭐ NON chiamiamo clearStatsCache qui: è gestita da App al cambio matches.
     const hp = getTeamParams(homeTeam, championship, allMatches);
     const ap = getTeamParams(awayTeam, championship, allMatches);
     const avg = getLeagueAverages(championship, allMatches);
 
-    const lambdaHome = hp.attackHome * ap.defenseAway * (avg.avgHome || 1.4);
-    const lambdaAway = ap.attackAway * hp.defenseHome * (avg.avgAway || 1.1);
+    const avgHomeSafe = avg.avgHome > 0 ? avg.avgHome : 1.4;
+    const avgAwaySafe = avg.avgAway > 0 ? avg.avgAway : 1.1;
+
+    const lambdaHome = hp.attackHome * ap.defenseAway * avgHomeSafe;
+    const lambdaAway = ap.attackAway * hp.defenseHome * avgAwaySafe;
 
     const matrix = buildScoreMatrix(lambdaHome, lambdaAway);
 
@@ -255,8 +268,8 @@
       partiteAnalizzate: Math.min(hp.n, ap.n),
       numSimulations: 10000,
       risultati: matrix,
-      leagueAvgHome: (avg.avgHome || 0).toFixed(2),
-      leagueAvgAway: (avg.avgAway || 0).toFixed(2),
+      leagueAvgHome: avgHomeSafe.toFixed(2),
+      leagueAvgAway: avgAwaySafe.toFixed(2),
       weakHome: !!hp.weak,
       weakAway: !!ap.weak,
     };
@@ -304,6 +317,7 @@
     if (!mc || !mc.risultati) return 0;
     const mgMatch = mgLabel.match(/MG\s+(Casa|Ospite|Tot)\s+(\d+)-(\d+)/) ||
                     mgLabel.match(/(\d+)-(\d+)/);
+    if (!mgMatch) return 0;
     let target = 'Tot', minV, maxV;
     if (mgMatch.length === 4) {
       target = mgMatch[1];
@@ -363,6 +377,7 @@
     if (!mc || !mc.risultati) return 0;
     const mgMatch = label.match(/MG\s+(Casa|Ospite|Tot)\s+(\d+)-(\d+)/) ||
                     label.match(/^(\d+)-(\d+)$/);
+    if (!mgMatch) return 0;
     let target = 'Tot', minV, maxV;
     if (mgMatch.length === 4) {
       target = mgMatch[1];
@@ -448,30 +463,16 @@
   };
 
   // ============================================================
-  // ⭐ NEW: GET DIXON PCT PER IL PALINSESTO
+  // ⭐ GET DIXON PCT PER IL PALINSESTO (usa cache in memoria)
   // ============================================================
   window.getDixonPct = function(familyId, giocata, match, allMatches) {
     if (!match || !allMatches || allMatches.length === 0) return 0;
     try {
-      // Usa la cache se disponibile (evita ricalcolo ad ogni render)
-      const cacheKey = `ft_mc_${match.id}`;
-      let mc = null;
-      const saved = localStorage.getItem(cacheKey);
-      
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (parsed && parsed.lambdaCasa && parsed.risultati) {
-            mc = parsed;
-          }
-        } catch (e) {}
-      }
-      
+      let mc = _mcCache.get(match.id);
       if (!mc) {
         mc = simulateMatches(match.casa, match.ospiti, match.campionato, allMatches);
-        localStorage.setItem(cacheKey, JSON.stringify(mc));
+        _mcCache.set(match.id, mc);
       }
-      
       return calcolaPctGiocata(familyId, giocata, mc, null);
     } catch (e) {
       console.warn('Errore in window.getDixonPct:', e);
@@ -494,8 +495,8 @@
       setLoading(true);
       try {
         const result = simulateMatches(homeTeam, awayTeam, match.campionato, allMatches);
+        _mcCache.set(match.id, result);
         setMc(result);
-        localStorage.setItem(`ft_mc_${match.id}`, JSON.stringify(result));
       } catch (e) {
         console.warn('Errore Dixon-Coles:', e);
       }
@@ -504,12 +505,19 @@
 
     useEffect(() => {
       if (!match) return;
-      const saved = localStorage.getItem(`ft_mc_${match.id}`);
-      if (saved) {
+      // ⭐ Prima: cache in memoria; poi fallback su localStorage legacy (per compatibilità)
+      const cached = _mcCache.get(match.id);
+      if (cached) { setMc(cached); return; }
+
+      const legacy = localStorage.getItem(`ft_mc_${match.id}`);
+      if (legacy) {
         try {
-          const parsed = JSON.parse(saved);
+          const parsed = JSON.parse(legacy);
           if (parsed && parsed.lambdaCasa && parsed.risultati) {
+            _mcCache.set(match.id, parsed);
             setMc(parsed);
+            // pulizia opzionale: rimuoviamo la vecchia chiave
+            try { localStorage.removeItem(`ft_mc_${match.id}`); } catch (e) {}
             return;
           }
         } catch (e) {}
@@ -519,7 +527,8 @@
 
     const refresh = () => {
       if (match) {
-        localStorage.removeItem(`ft_mc_${match.id}`);
+        _mcCache.delete(match.id);
+        try { localStorage.removeItem(`ft_mc_${match.id}`); } catch (e) {}
         setMc(null);
         runSimulation(match.casa, match.ospiti);
       }
@@ -815,7 +824,7 @@
     const getPercentualeClasse = window.getPercentualeClasse;
     const FAMIGLIE = window.FAMIGLIE_GIOCATE;
     const stats = window.computeMatchStats(match, allMatches);
-    if (stats.error) return null;
+    if (!stats || stats.error) return null;
 
     const ORDINE = ['fisse', 'dc', 'gg_ng', 'over', 'under', 'multigol', 'dc_over', 'dc_under', 'mg_casa_ospite', 'dc_multigol'];
     const hasQM = !!(window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function');
@@ -895,22 +904,25 @@
   };
 
   // ============================================================
-  // TUTTE LE FAMIGLIE PANEL DIXON (con calcoli Dixon-Coles)
+  // TUTTE LE FAMIGLIE PANEL DIXON
   // ============================================================
   const TutteLeFamigliePanelDixon = ({ match, allMatches }) => {
     const getPercentualeClasse = window.getPercentualeClasse;
     const FAMIGLIE = window.FAMIGLIE_GIOCATE;
-    const stats = window.computeMatchStats(match, allMatches);
 
     const ORDINE = ['fisse', 'dc', 'gg_ng', 'over', 'under', 'multigol', 'dc_over', 'dc_under', 'mg_casa_ospite', 'dc_multigol'];
     const hasQM = !!(window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function');
 
-    // Calcola una sola volta la matrice Dixon-Coles
-    let mcCache = null;
-    try {
-      mcCache = simulateMatches(match.casa, match.ospiti, match.campionato, allMatches);
-    } catch (e) {
-      console.warn('Dixon-Coles fallito', e);
+    // Calcola una sola volta la matrice Dixon-Coles (con cache in memoria)
+    let mcCache = _mcCache.get(match.id);
+    if (!mcCache) {
+      try {
+        mcCache = simulateMatches(match.casa, match.ospiti, match.campionato, allMatches);
+        _mcCache.set(match.id, mcCache);
+      } catch (e) {
+        console.warn('Dixon-Coles fallito', e);
+        mcCache = null;
+      }
     }
 
     if (!mcCache) {
@@ -1049,8 +1061,9 @@
         return b[1].gf - a[1].gf;
       })
       .map(([name, stats], index) => {
-        const formData = calcFormAndStats(matches, name);
-        const multigol = getMultigolRange(name, matches);
+        const hasPlayed = stats.pg > 0;
+        const formData = hasPlayed ? calcFormAndStats(matches, name) : { form: '-----' };
+        const multigol = hasPlayed ? getMultigolRange(name, matches) : { label: 'N/A', pct: 0, range: 'default' };
         return {
           pos: index + 1,
           name,
@@ -1459,21 +1472,6 @@
       return '🌤️';
     };
 
-    const getRiskLevel = (weather) => {
-      let risk = 0;
-      if (weather.rain > 5) risk += 3;
-      else if (weather.rain > 1) risk += 2;
-      else if (weather.rain > 0.5) risk += 1;
-      if (weather.wind_speed > 15) risk += 3;
-      else if (weather.wind_speed > 10) risk += 2;
-      else if (weather.wind_speed > 5) risk += 1;
-      if (risk >= 6) return { level: 'high', label: '🔴 ALTO' };
-      if (risk >= 4) return { level: 'medium', label: '🟡 MEDIO' };
-      if (risk >= 2) return { level: 'low', label: '🟢 BASSO' };
-      return { level: 'low', label: '🟢 OTTIMALE' };
-    };
-
-    const risk = getRiskLevel(weatherData);
     const icon = getWeatherIcon(weatherData.weather, weatherData.rain);
 
     return (
@@ -1506,6 +1504,7 @@
     );
 
     useEffect(() => {
+      // Invalida la cache quando cambiano le partite filtrate
       clearStatsCache();
     }, [matchesFiltrati.length]);
 
@@ -1524,7 +1523,6 @@
           <span>📊 <b style={{ color: 'var(--neon-cyan)' }}>{matchesFiltrati.length}</b> partite totali</span>
         </div>
 
-        {/* ⭐ 5 sub-tabs con la nuova "Analisi Dixon-Coles" dopo "Riepilogo AI" */}
         <div className="sub-tabs">
           <button className={statsSubTab === 'Classifica' ? 'active' : ''} onClick={() => setStatsSubTab('Classifica')}>📊 Classifica</button>
           <button className={statsSubTab === 'Scontri' ? 'active' : ''} onClick={() => setStatsSubTab('Scontri')}>⚔️ Scontri</button>
@@ -1560,7 +1558,6 @@
               </div>
             </div>
 
-            {/* ⭐ Statistiche reali (nessun Dixon-Coles) */}
             {selectedMatch && (
               <TutteLeFamigliePanel match={selectedMatch} allMatches={matchesFiltrati} />
             )}
@@ -1580,7 +1577,6 @@
           </div>
         )}
 
-        {/* ⭐ Riepilogo AI — solo meteo + frequenze + affidabilità (NO Dixon) */}
         {statsSubTab === 'RiepilogoAI' && (
           <div>
             {selectedMatch ? (
@@ -1611,7 +1607,6 @@
           </div>
         )}
 
-        {/* ⭐ NUOVA TAB — Analisi Dixon-Coles */}
         {statsSubTab === 'DixonColes' && (
           <div>
             {selectedMatch ? (
@@ -1708,6 +1703,6 @@
   window.simulateMatches = simulateMatches;
   window.clearStatsCache = clearStatsCache;
 
-  console.log('✅ statistiche.js v12 - Aggiunto getDixonPct per Palinsesto');
+  console.log('✅ statistiche.js v13 - cache Dixon in memoria (Map) + clearStatsCache completo');
 
 })();

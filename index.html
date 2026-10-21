@@ -372,32 +372,6 @@
       'Süper Lig',
     ];
 
-    // ⭐ LOG DIAGNOSTICO AUTOMATICO — confronta i campionati del DB con la lista
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        if (!window.matches || !Array.isArray(window.matches) || window.matches.length === 0) {
-          console.warn('⚠️ Log diagnostico: window.matches non disponibile');
-          return;
-        }
-        const dbChamps = [...new Set(window.matches.map(m => m.campionato))].sort();
-        const listChamps = [...CHAMPIONSHIP_LIST].sort();
-        const mancanti = dbChamps.filter(c => !listChamps.includes(c));
-        const orfani = listChamps.filter(c => !dbChamps.includes(c));
-
-        console.log('%c📊 DIAGNOSTICA CAMPIONATI', 'color: #00f5ff; font-weight: bold; font-size: 14px;');
-        console.log('   Campionati nel DB (' + dbChamps.length + '):', dbChamps);
-        console.log('   Campionati nella LISTA (' + listChamps.length + '):', listChamps);
-        if (mancanti.length > 0) {
-          console.warn('❌ Nel DB ma NON nella lista (DA AGGIUNGERE):', mancanti);
-        } else {
-          console.log('%c✅ Tutti i campionati del DB sono nella lista', 'color: #00ff88;');
-        }
-        if (orfani.length > 0) {
-          console.info('ℹ️ Nella lista ma NON nel DB (fallback):', orfani);
-        }
-      }, 5000);
-    }, { once: true });
-
     // ============================================================
     // FUNZIONI UTILITÀ
     // ============================================================
@@ -509,12 +483,13 @@
     };
 
     // ============================================================
-    // TEAM LOGO — versione DEFINITIVA con logica a mappa (override)
+    // ⭐ TEAM LOGO — versione DEFINITIVA
+    // FIX: getLeagueFolder allineato a getUefaFolder (nomi cartelle reali)
+    // FIX: override estesi + normalizzazione caratteri accentati nel filename
     // ============================================================
     const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
       const [finalError, setFinalError] = useState(false);
 
-      // Reset quando cambiano team/champ
       useEffect(() => {
         setFinalError(false);
       }, [teamName, championship]);
@@ -537,7 +512,7 @@
         return false;
       };
 
-      // ⭐ MAPPA CORRETTA: usa le cartelle che ESISTONO su GitHub
+      // ⭐ Cartelle REALI delle coppe su GitHub
       const getUefaFolder = (champ) => {
         const c = champ.toLowerCase();
         if (c.includes('europa league')) return 'Europa_League';
@@ -547,6 +522,7 @@
         return 'Champions_League';
       };
 
+      // ⭐ FIX: usa gli stessi nomi cartella di getUefaFolder (senza prefisso UEFA_)
       const getLeagueFolder = (champ) => {
         if (!champ) return '';
         const c = champ.trim();
@@ -580,34 +556,84 @@
           'segunda division': 'Segunda_Division',
           'süper lig': 'Super_Lig',
           'super lig': 'Super_Lig',
-          'uefa champions league': 'UEFA_Champions_League',
-          'uefa europa league': 'UEFA_Europa_League',
-          'uefa europa conference': 'UEFA_Europa_Conference',
-          'uefa nations league': 'UEFA_Nations_League',
+          // ⭐ FIX: cartelle reali delle coppe (senza prefisso UEFA_)
+          'uefa champions league': 'Champions_League',
+          'uefa europa league': 'Europa_League',
+          'uefa europa conference': 'Conference_League',
+          'uefa nations league': 'Nations_League',
         };
 
         if (map[cLower]) return map[cLower];
         return c.replace(/ /g, '_');
       };
 
-      // ⭐ LISTA DI OVERRIDE MANUALE: se il nome nel DB non corrisponde al file su GitHub
+      // ⭐ Override manuali: mappa nome DB → nome file reale
       const LOGO_OVERRIDES = {
-        // Coppe UEFA
-        'FC Copenhagen': 'FC Copenhagen',
-        'FK Crvena Zvezda': 'FK Crvena Zvezda',
-        'Union St. Gilloise': 'Union St. Gilloise',
-        // Aggiungi qui altri override se necessario
+        // Coppe UEFA (dai log 404)
+        'FK Crvena Zvezda': 'Crvena Zvezda',
+        'Ferencvarosi TC': 'Ferencvaros',
+        'Beşiktaş': 'Besiktas',
+        'Kauno Žalgiris': 'Kauno Zalgiris',
+        'Egnatia Rrogozhinë': 'Egnatia Rrogozhine',
+        'St. Truiden': 'Sint-Truiden',
+        'HNK Hajduk Split': 'Hajduk Split',
+        '1899 Hoffenheim': 'Hoffenheim',
+        'Red Bull Salzburg': 'Salzburg',
+        'Sparta Praha': 'Sparta Prague',
+        'Plzen': 'Viktoria Plzen',
+        'Olympiakos Piraeus': 'Olympiacos',
+        'Torreense': 'Torreense',
+        'Lillestrom': 'Lillestrom',
+        'Jagiellonia': 'Jagiellonia',
+        'Omonia Nicosia': 'Omonia',
+        'Ararat-Armenia': 'Ararat Armenia',
+        'Celje': 'Celje',
+        'Levski Sofia': 'Levski Sofia',
+        'Borac Banja Luka': 'Borac Banja Luka',
+        'KuPS': 'KuPS',
+        'Lech Poznan': 'Lech Poznan',
+        'NEC Nijmegen': 'NEC Nijmegen',
+        'Sturm Graz': 'Sturm Graz',
+        'OFI': 'OFI',
+        'Pafos': 'Pafos',
+        'Riga': 'Riga',
+        'FC Iberia 1999': 'Iberia 1999',
+        'Mjallby AIF': 'Mjallby',
+        'FC Nordsjaelland': 'Nordsjaelland',
+        'CSKA Sofia': 'CSKA Sofia',
+        'FC Lugano': 'Lugano',
+        'Trabzonspor': 'Trabzonspor',
+        'Heart Of Midlothian': 'Hearts',
+        'FK Jablonec': 'Jablonec',
+        'Inter Club d\'Escaldes': 'Inter Escaldes',
+        'Universitatea Craiova': 'Universitatea Craiova',
+        'FC Thun': 'Thun',
+        'SC Braga': 'Braga',
+        'FC Midtjylland': 'Midtjylland',
+        'Gent': 'Gent',
+        'Aarhus': 'Aarhus',
+        'Lincoln Red Imps FC': 'Lincoln Red Imps',
+        'Twente': 'Twente',
+        'Lens': 'Lens',
+        'Kairat Almaty': 'Kairat Almaty',
+        'Panathinaikos': 'Panathinaikos',
+        'Monaco': 'Monaco',
+        'SC Freiburg': 'Freiburg',
+        'Ajax': 'Ajax',
+        'Atalanta': 'Atalanta',
+        'RB Leipzig': 'RB Leipzig',
+      };
+
+      const sanitizeFileName = (name) => {
+        // Mantiene gli accenti (i file su GitHub li hanno), ma normalizza spazi
+        return name.replace(/\s+/g, '%20');
       };
 
       const getLogoUrl = (teamName, champ) => {
-        // 1. Controlla se c'è un override manuale
         const overrideName = LOGO_OVERRIDES[teamName];
         const finalName = overrideName || teamName;
+        const encodedName = sanitizeFileName(finalName);
 
-        // 2. Codifica gli spazi in %20
-        const encodedName = finalName.replace(/\s+/g, '%20');
-
-        // 3. Costruisci il percorso corretto
         if (isCoppaUEFA(champ)) {
           const uefaFolder = getUefaFolder(champ);
           return `logos/${uefaFolder}/${encodedName}.png`;
@@ -1058,37 +1084,60 @@
       };
     };
 
+    // ============================================================
+    // ⭐ formatGiocataLabel — VERSIONE UNICA E COERENTE
+    // Formato: "1X + Under 4,5" (spazi uniformi, virgola decimale)
+    // ============================================================
     const formatGiocataLabel = (familyId, label) => {
       if (!label) return '—';
-      if (label.startsWith('Over '))  return label;
+
+      // Over/Under semplici
+      if (label.startsWith('Over '))  return label.replace('.', ',');
       if (label.startsWith('Under ')) return label.replace('.', ',');
+
+      // Multigol
       if (familyId === 'multigol') return label;
+
+      // MG Casa + Ospite
       if (familyId === 'mg_casa_ospite') {
         const parts = label.split('+');
-        if (parts.length === 2) return `MG ${parts[0]} Casa + MG ${parts[1]} Ospite`;
+        if (parts.length === 2) return `MG ${parts[0]} C + MG ${parts[1]} O`;
+        return label;
       }
+
+      // DC + Multigol
       if (familyId === 'dc_multigol') {
         const parts = label.split('+');
         if (parts.length === 2) return `${parts[0]} + ${parts[1]}`;
+        return label;
       }
+
+      // DC + Under
       if (familyId === 'dc_under') {
         const parts = label.split('+');
         if (parts.length === 2) {
           const uLabel = parts[1].replace('U', 'Under ').replace('.', ',');
           return `${parts[0]} + ${uLabel}`;
         }
+        return label;
       }
+
+      // DC + Over
       if (familyId === 'dc_over') {
         const parts = label.split('+');
         if (parts.length === 2) {
           const oLabel = parts[1].replace('O', 'Over ').replace('.', ',');
           return `${parts[0]} + ${oLabel}`;
         }
+        return label;
       }
+
+      // GG / NG
       if (familyId === 'gg_ng') {
-        if (label === 'Goal-Goal') return 'GG';
-        if (label === 'No Goal') return 'NG';
+        if (label === 'Goal-Goal' || label === 'GG') return 'GG';
+        if (label === 'No Goal' || label === 'NG') return 'NG';
       }
+
       return label;
     };
 
@@ -1122,7 +1171,7 @@
     window.get12Under45 = get12Under45;
     window.normalizzaAccenti = normalizzaAccenti;
 
-    console.log('✅ Funzioni globali esposte v24 - Mappa override loghi (a prova di bomba)');
+    console.log('✅ Funzioni globali esposte v25 - FIX cartelle UEFA + format label unico');
 
     // ============================================================
     // LOAD/SAVE STATE
@@ -1208,6 +1257,13 @@
           console.log('🔍 Debug: window.matches esposti globalmente →', matches.length, 'partite');
         }
       }, [matches, championships]);
+
+      // ⭐ FIX: invalida la cache dei parametri Dixon quando cambiano i dati
+      useEffect(() => {
+        if (typeof window.clearStatsCache === 'function') {
+          try { window.clearStatsCache(); } catch (e) {}
+        }
+      }, [matches]);
 
       useEffect(() => {
         if (window.QuoteManager && typeof window.QuoteManager.initAutoDownload === 'function') {
@@ -1455,7 +1511,7 @@
     }
 
     // ============================================================
-    // ⭐ LOG DIAGNOSTICO AUTOMATICO
+    // ⭐ LOG DIAGNOSTICO AUTOMATICO (unico listener)
     // ============================================================
     window.addEventListener('load', () => {
       setTimeout(() => {

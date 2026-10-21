@@ -1,8 +1,8 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto
-// v17: Vista Tripla FISSA + Rimossi switch motore e badge invasivi
-//      + Dixon allineato per famiglia + Sfondo Oro se bomba
-//      + NEW: Pulsante "TOP Coppe" (Champions + Europa + Conference)
+// v18: FIX allineamento etichette globali + ChampLogo robusto
+//      + useMemo dipendenze corrette + safeGetDixonPct robusto
+//      + rimosso duplicate formatGiocataLabel/normalizzaAccenti
 // ============================================================
 
 (function () {
@@ -10,7 +10,7 @@
 
   const { useState, useMemo, useEffect, useCallback } = React;
 
-  // ⭐ FALLBACK SICURO per useMotoreAnalisi
+  // ⭐ FALLBACK SICURO per useMotoreAnalisi (non più usato ma mantenuto per compatibilità)
   if (!window.FiltriCampionati) window.FiltriCampionati = {};
   if (typeof window.FiltriCampionati.useMotoreAnalisi !== 'function') {
     window.FiltriCampionati.useMotoreAnalisi = function () {
@@ -43,32 +43,18 @@
     };
   }
 
-  // ⭐ FUNZIONE SICURA PER DIXON
-  const safeGetDixonPct = (familyId, giocata, match, allMatches) => {
-    if (typeof window.getDixonPct === 'function' && !window.getDixonPct._isFallback) {
-      try {
-        return window.getDixonPct(familyId, giocata, match, allMatches);
-      } catch (e) {
-        console.warn('Errore getDixonPct:', e);
-        return 0;
-      }
-    }
-    return 0;
-  };
-
+  // ⭐ Riferimenti globali (evita dipendenza da ordine di caricamento)
   const normalizzaAccenti = (str) => {
+    if (typeof window.normalizzaAccenti === 'function') return window.normalizzaAccenti(str);
     if (!str) return '';
-    return str
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/ß/g, 'ss')
-      .replace(/ø/g, 'o')
-      .replace(/æ/g, 'ae');
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/ß/g, 'ss').replace(/ø/g, 'o').replace(/æ/g, 'ae');
   };
 
   const formatGiocataLabel = (familyId, label) => {
+    if (typeof window.formatGiocataLabel === 'function') return window.formatGiocataLabel(familyId, label);
     if (!label) return '—';
-    if (label.startsWith('Over '))  return label;
+    if (label.startsWith('Over '))  return label.replace('.', ',');
     if (label.startsWith('Under ')) return label.replace('.', ',');
     if (familyId === 'multigol') return label;
     if (familyId === 'mg_casa_ospite') {
@@ -82,22 +68,37 @@
     if (familyId === 'dc_under') {
       const parts = label.split('+');
       if (parts.length === 2) {
-        const uLabel = parts[1].replace('U', 'U').replace('.', ',');
-        return `${parts[0]}+${uLabel}`;
+        const uLabel = parts[1].replace('U', 'Under ').replace('.', ',');
+        return `${parts[0]} + ${uLabel}`;
       }
     }
     if (familyId === 'dc_over') {
       const parts = label.split('+');
       if (parts.length === 2) {
-        const oLabel = parts[1].replace('O', 'O').replace('.', ',');
-        return `${parts[0]}+${oLabel}`;
+        const oLabel = parts[1].replace('O', 'Over ').replace('.', ',');
+        return `${parts[0]} + ${oLabel}`;
       }
     }
     if (familyId === 'gg_ng') {
-      if (label === 'Goal-Goal') return 'GG';
-      if (label === 'No Goal') return 'NG';
+      if (label === 'Goal-Goal' || label === 'GG') return 'GG';
+      if (label === 'No Goal' || label === 'NG') return 'NG';
     }
     return label;
+  };
+
+  // ⭐ FUNZIONE SICURA PER DIXON
+  const safeGetDixonPct = (familyId, giocata, match, allMatches) => {
+    if (!match || !allMatches || allMatches.length === 0) return 0;
+    if (typeof window.getDixonPct === 'function' && !window.getDixonPct._isFallback) {
+      try {
+        const v = window.getDixonPct(familyId, giocata, match, allMatches);
+        return (typeof v === 'number' && !isNaN(v)) ? v : 0;
+      } catch (e) {
+        console.warn('Errore getDixonPct:', e);
+        return 0;
+      }
+    }
+    return 0;
   };
 
   // ============================================================
@@ -105,7 +106,6 @@
   // ============================================================
   const TOP_5_MAGGIORI = ['Serie A', 'Ligue 1', 'La Liga', 'Bundesliga', 'Premier League'];
   const TOP_5_MINORI = ['Serie B', '2. Bundesliga', 'Ligue 2', 'Segunda División', 'EFL Championship'];
-  // ⭐ NEW: Top Coppe UEFA (solo per club)
   const TOP_COPPE = ['UEFA Champions League', 'UEFA Europa League', 'UEFA Europa Conference'];
 
   const matchCampionato = (nomeDb, nomeTarget) => {
@@ -145,22 +145,37 @@
     return [...list].sort((a, b) => (a || '').localeCompare(b || '', 'it', { sensitivity: 'base' }));
   };
 
+  // ============================================================
+  // CHAMP LOGO — più varianti fallback per EFL Championship
+  // ============================================================
   const ChampLogo = ({ campionato, size = 24 }) => {
     const [hasError, setHasError] = useState(false);
     const [pathIndex, setPathIndex] = useState(0);
+
+    // Reset quando cambia il campionato
+    useEffect(() => {
+      setHasError(false);
+      setPathIndex(0);
+    }, [campionato]);
 
     const getPaths = (champ) => {
       if (!champ) return [];
       const normalized = normalizzaAccenti(champ);
       const kebab = normalized.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/[\s-]+/g, '-').replace(/^-+|-+$/g, '');
       const snake = normalized.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
-      
-      // ⭐ FIX LOGHI EFL CHAMPIONSHIP
+
       const specificPaths = [];
       if (champ.toLowerCase().includes('efl championship')) {
-        specificPaths.push('logos/campionati/championship.png');
-        specificPaths.push('logos/campionati/efl-championship.png');
+        specificPaths.push(
+          'logos/campionati/championship.png',
+          'logos/campionati/efl-championship.png',
+          'logos/campionati/efl_championship.png',
+          'logos/campionati/EFL_Championship.png'
+        );
       }
+      if (champ.toLowerCase() === 'serie c - girone a') specificPaths.push('logos/campionati/serie-c-girone-a.png');
+      if (champ.toLowerCase() === 'serie c - girone b') specificPaths.push('logos/campionati/serie-c-girone-b.png');
+      if (champ.toLowerCase() === 'serie c - girone c') specificPaths.push('logos/campionati/serie-c-girone-c.png');
 
       return [
         ...specificPaths,
@@ -269,8 +284,6 @@
 
     const getDixonPct = safeGetDixonPct;
 
-    // Forziamo il motore su 'confronto' per la vista tripla fissa
-    const motore = 'confronto';
     const { mode: visualizzaMode } = window.FiltriCampionati.useVisualizzaGiocateMode();
 
     if (!match) return null;
@@ -298,6 +311,7 @@
     }, [visualizzaMode, selectedFamiglie, stats.error]);
 
     const bestStoricoPerFamiglia = useMemo(() => {
+      if (stats.error) return [];
       const homeMG = stats.homeMG || {};
       const awayMG = stats.awayMG || {};
       const mgTot = stats.mgTot || {};
@@ -331,6 +345,7 @@
 
     const bestDixonPerFamiglia = useMemo(() => {
       if (!getDixonPct) return [];
+      if (stats.error) return [];
       const out = [];
       famiglieDaAnalizzare.forEach(familyId => {
         const family = FAMIGLIE_GIOCATE[familyId];
@@ -349,7 +364,7 @@
         }
       });
       return out;
-    }, [famiglieDaAnalizzare, match.id, allMatches.length]);
+    }, [famiglieDaAnalizzare, match.id, allMatches.length, stats.error]);
 
     // Calcoliamo le righe per il badge in alto (score)
     const righeDaMostrare = useMemo(() => {
@@ -367,8 +382,8 @@
     // ⭐ Allineamento per la vista TRIPLA
     const topTripla = useMemo(() => {
       if (stats.error) return [];
-      const topStorico = bestStoricoPerFamiglia.sort((a, b) => b.pct - a.pct).slice(0, 3);
-      const topDixon = bestDixonPerFamiglia.sort((a, b) => b.pct - a.pct).slice(0, 3);
+      const topStorico = [...bestStoricoPerFamiglia].sort((a, b) => b.pct - a.pct).slice(0, 3);
+      const topDixon = [...bestDixonPerFamiglia].sort((a, b) => b.pct - a.pct).slice(0, 3);
 
       const dixonByFamily = {};
       topDixon.forEach(d => {
@@ -438,7 +453,7 @@
             const s = row.storico;
             const d = row.dixon;
             const q = row.quotaSource;
-            
+
             const isMatch = row.tipo === 'match-famiglia';
             const isSoloDixon = row.tipo === 'solo-dixon';
 
@@ -455,12 +470,12 @@
               gridTemplateColumns: '1fr 1fr 1fr',
               gap: '4px',
               padding: '6px',
-              background: isBombRow 
-                ? 'linear-gradient(90deg, rgba(255, 215, 0, 0.25), rgba(255, 215, 0, 0.05))' 
+              background: isBombRow
+                ? 'linear-gradient(90deg, rgba(255, 215, 0, 0.25), rgba(255, 215, 0, 0.05))'
                 : 'var(--bg-elevated)',
               borderRadius: '8px',
-              border: isBombRow 
-                ? '2px solid var(--neon-gold)' 
+              border: isBombRow
+                ? '2px solid var(--neon-gold)'
                 : `1px solid ${borderRowColor}50`,
               position: 'relative',
               boxShadow: isBombRow ? '0 0 15px rgba(255, 215, 0, 0.4)' : 'none',
@@ -631,6 +646,7 @@
     const isTuttiSelezionati = campionatiSelezionati.length === championships.length && championships.length > 0;
 
     const renderBadge = (camp) => {
+      if (!camp) return null;
       const nOggi = countOggi(camp);
       const n2g = countEntro2Giorni(camp);
       if (nOggi > 0) {
@@ -701,14 +717,13 @@
   };
 
   // ============================================================
-  // VISUALIZZA GIOCATE SWITCH (Senza Motore)
+  // VISUALIZZA GIOCATE SWITCH
   // ============================================================
   const VisualizzaGiocateSwitch = ({
     mode, setMode,
     selectedFamiglie,
     onTop5Maggiori, onTop5Minori, onTop5Tutti,
     isTop5MaggioriAttivo, isTop5MinoriAttivo, isTop5TuttiAttivo,
-    // ⭐ NEW: Top Coppe
     onTopCoppe, isTopCoppeAttivo,
   }) => {
     const countScelte = (selectedFamiglie || []).length;
@@ -760,8 +775,7 @@
           <button onClick={onTop5Maggiori} style={btnTopStyle(isTop5MaggioriAttivo, 'var(--neon-gold)')} title="Serie A, Ligue 1, La Liga, Bundesliga, Premier League">⭐ Maggiori</button>
           <button onClick={onTop5Minori} style={btnTopStyle(isTop5MinoriAttivo, 'var(--neon-cyan)')} title="Serie B, 2. Bundesliga, Ligue 2, Segunda División, EFL Championship">🔹 Minori</button>
           <button onClick={onTop5Tutti} style={btnTopStyle(isTop5TuttiAttivo, 'var(--neon-magenta)')} title="Maggiori + Minori (10 campionati)">💎 Maggiori + Minori</button>
-          {/* ⭐ NEW: TOP Coppe UEFA */}
-          <button onClick={onTopCoppe} style={btnTopStyle(isTopCoppeAttivo, 'var(--neon-blue, #1a1aff)')} title="UEFA Champions League, Europa League, Conference League">🏆 Coppe</button>
+          <button onClick={onTopCoppe} style={btnTopStyle(isTopCoppeAttivo, '#1a1aff')} title="UEFA Champions League, Europa League, Conference League">🏆 Coppe</button>
         </div>
 
         <span style={{ width: '1px', height: '24px', background: 'var(--border)', margin: '0 4px' }} />
@@ -845,7 +859,6 @@
     const handleTop5Maggiori = useCallback(() => selezionaSoloCampionati(TOP_5_MAGGIORI), [selezionaSoloCampionati]);
     const handleTop5Minori = useCallback(() => selezionaSoloCampionati(TOP_5_MINORI), [selezionaSoloCampionati]);
     const handleTop5Tutti = useCallback(() => selezionaSoloCampionati([...TOP_5_MAGGIORI, ...TOP_5_MINORI]), [selezionaSoloCampionati]);
-    // ⭐ NEW: Top Coppe
     const handleTopCoppe = useCallback(() => selezionaSoloCampionati(TOP_COPPE), [selezionaSoloCampionati]);
 
     const isSelezioneUgualeA = useCallback((targetList) => {
@@ -859,7 +872,6 @@
     const isTop5MaggioriAttivo = useMemo(() => isSelezioneUgualeA(TOP_5_MAGGIORI), [isSelezioneUgualeA]);
     const isTop5MinoriAttivo = useMemo(() => isSelezioneUgualeA(TOP_5_MINORI), [isSelezioneUgualeA]);
     const isTop5TuttiAttivo = useMemo(() => isSelezioneUgualeA([...TOP_5_MAGGIORI, ...TOP_5_MINORI]), [isSelezioneUgualeA]);
-    // ⭐ NEW: Top Coppe
     const isTopCoppeAttivo = useMemo(() => isSelezioneUgualeA(TOP_COPPE), [isSelezioneUgualeA]);
 
     const partiteOggi = useMemo(() => {
@@ -994,6 +1006,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto v17 caricato — Aggiunto pulsante TOP Coppe (Champions + Europa + Conference)');
+  console.log('✅ Modulo Palinsesto v18 caricato — etichette globali unificate + ChampLogo robusto');
 
 })();
