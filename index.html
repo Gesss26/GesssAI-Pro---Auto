@@ -509,11 +509,11 @@
     };
 
     // ============================================================
-    // TEAM LOGO — versione corretta con isCoppaUEFA precisa
+    // TEAM LOGO — versione corretta con cartelle UEFA specifiche
     // ============================================================
     const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
-      const [hasError, setHasError] = useState(false);
       const [pathIndex, setPathIndex] = useState(0);
+      const [finalError, setFinalError] = useState(false);
 
       const isCompetition = (name, champ) => {
         if (!name || !champ) return false;
@@ -548,13 +548,11 @@
         ];
       };
 
-      // ⭐ FIX: getLeagueFolder più robusta con case-insensitive e fallback
       const getLeagueFolder = (champ) => {
         if (!champ) return '';
         const c = champ.trim();
         const cLower = c.toLowerCase();
 
-        // Mappatura esplicita (case-insensitive)
         const map = {
           'jupiler pro league': 'Jupiler_Pro_League',
           'premier league': 'Premier_League',
@@ -590,76 +588,66 @@
         };
 
         if (map[cLower]) return map[cLower];
-        // Fallback: sostituisci spazi con underscore
         return c.replace(/ /g, '_');
       };
 
       const CARTELLE_NAZIONALI = [
-        'Jupiler_Pro_League',
-        'Premier_League',
-        'Championship',
-        'Ligue_1',
-        'Ligue_2',
-        'Bundesliga',
-        '2. Bundesliga',
-        'Serie_A',
-        'Serie_B',
-        'Serie_C_Girone_A',
-        'Serie_C_Girone_B',
-        'Serie_C_Girone_C',
-        'J1_League',
-        'Eredivisie',
-        'Eerste_Divisie',
-        'Primeira_Liga',
-        'Scottish_Premiership',
-        'K_League_1',
-        'La_Liga',
-        'Segunda_Division',
+        'Jupiler_Pro_League', 'Premier_League', 'Championship', 'Ligue_1', 'Ligue_2',
+        'Bundesliga', '2. Bundesliga', 'Serie_A', 'Serie_B', 'Serie_C_Girone_A',
+        'Serie_C_Girone_B', 'Serie_C_Girone_C', 'J1_League', 'Eredivisie', 'Eerste_Divisie',
+        'Primeira_Liga', 'Scottish_Premiership', 'K_League_1', 'La_Liga', 'Segunda_Division',
         'Super_Lig',
       ];
 
-      // ⭐ FIX CRITICA: isCoppaUEFA ora è precisa e NON cattura "EFL Championship"
       const isCoppaUEFA = (champ) => {
         if (!champ) return false;
         const c = champ.toLowerCase().trim();
-
-        // ⭐ Escludi esplicitamente campionati nazionali che contengono parole ambigue
         if (c === 'efl championship' || c === 'championship') return false;
-
-        // ⭐ Riconosci SOLO le coppe UEFA vere
-        if (c === 'uefa champions league') return true;
-        if (c === 'uefa europa league') return true;
-        if (c === 'uefa europa conference') return true;
-        if (c === 'uefa europa conference league') return true;
-        if (c === 'uefa nations league') return true;
-
-        // Fallback: controlla se contiene "uefa" o "europa" o "conference" o "nations"
-        // ma NON "championship" (che è un campionato nazionale)
+        if (c === 'uefa champions league' || c === 'uefa europa league' || c === 'uefa europa conference' || c === 'uefa nations league') return true;
         if (c.includes('championship')) return false;
-        if (c.includes('uefa')) return true;
-        if (c.includes('europa')) return true;
-        if (c.includes('conference')) return true;
-        if (c.includes('nations')) return true;
-
+        if (c.includes('uefa') || c.includes('europa') || c.includes('conference') || c.includes('nations')) return true;
         return false;
       };
 
       const getTeamPaths = (teamName, champ) => {
         const withUnderscore = teamName.replace(/\s+/g, '_');
 
+        // ⭐ COPPE UEFA: usa la cartella corretta per ogni competizione
         if (isCoppaUEFA(champ)) {
+          let uefaFolder = 'UEFA_Champions_League';
+          const c = champ.toLowerCase();
+
+          if (c.includes('champions league')) {
+            uefaFolder = 'UEFA_Champions_League';
+          } else if (c.includes('europa league')) {
+            uefaFolder = 'UEFA_Europa_League';
+          } else if (c.includes('conference')) {
+            uefaFolder = 'UEFA_Europa_Conference';
+          } else if (c.includes('nations league')) {
+            uefaFolder = 'UEFA_Nations_League';
+          }
+
           const paths = [
+            `logos/${uefaFolder}/${teamName}.png`,
+            `logos/${uefaFolder}/${withUnderscore}.png`,
+            `logos/${uefaFolder}/${teamName}.jpg`,
+            `logos/${uefaFolder}/${withUnderscore}.jpg`,
+          ];
+
+          // Fallback su Champions_League legacy (loghi già presenti lì)
+          paths.push(
             `logos/Champions_League/${teamName}.png`,
             `logos/Champions_League/${withUnderscore}.png`,
             `logos/Champions_League/${teamName}.jpg`,
-            `logos/Champions_League/${withUnderscore}.jpg`,
-          ];
+            `logos/Champions_League/${withUnderscore}.jpg`
+          );
+
+          // Fallback su cartelle nazionali (per squadre che giocano anche in campionato)
           CARTELLE_NAZIONALI.forEach(folder => {
-            paths.push(`logos/${folder}/${teamName}.png`);
-            paths.push(`logos/${folder}/${withUnderscore}.png`);
-            paths.push(`logos/${folder}/${teamName}.jpg`);
-            paths.push(`logos/${folder}/${withUnderscore}.jpg`);
+            paths.push(`logos/${folder}/${teamName}.png`, `logos/${folder}/${withUnderscore}.png`);
+            paths.push(`logos/${folder}/${teamName}.jpg`, `logos/${folder}/${withUnderscore}.jpg`);
           });
+
           return paths;
         }
 
@@ -705,7 +693,7 @@
         ? getCompetitionPaths(championship)
         : getTeamPaths(teamName, championship);
 
-      if (hasError || pathIndex >= paths.length) {
+      if (finalError || pathIndex >= paths.length) {
         return renderFallback();
       }
 
@@ -741,10 +729,11 @@
             }}
             className={`team-logo ${className}`}
             onError={() => {
-              if (pathIndex + 1 < paths.length) {
-                setPathIndex(pathIndex + 1);
+              const nextIndex = pathIndex + 1;
+              if (nextIndex < paths.length) {
+                setPathIndex(nextIndex);
               } else {
-                setHasError(true);
+                setFinalError(true);
               }
             }}
           />
@@ -1187,7 +1176,7 @@
     window.get12Under45 = get12Under45;
     window.normalizzaAccenti = normalizzaAccenti;
 
-    console.log('✅ Funzioni globali esposte v17 - FIX isCoppaUEFA (EFL Championship)');
+    console.log('✅ Funzioni globali esposte v18 - FIX loghi UEFA (Europa League + Conference League)');
 
     // ============================================================
     // LOAD/SAVE STATE
