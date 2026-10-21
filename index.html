@@ -509,22 +509,15 @@
     };
 
     // ============================================================
-    // TEAM LOGO — versione DEFINITIVA con logica semplificata (spazi %20)
+    // TEAM LOGO — versione DEFINITIVA con logica a mappa (override)
     // ============================================================
     const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
-      const [pathIndex, setPathIndex] = useState(0);
       const [finalError, setFinalError] = useState(false);
 
       // Reset quando cambiano team/champ
       useEffect(() => {
-        setPathIndex(0);
         setFinalError(false);
       }, [teamName, championship]);
-
-      const isCompetition = (name, champ) => {
-        if (!name || !champ) return false;
-        return name.trim().toLowerCase() === champ.trim().toLowerCase();
-      };
 
       const isCampionatoScuro = (champ) => {
         if (!champ) return false;
@@ -534,24 +527,24 @@
         return false;
       };
 
-      const getCompetitionPaths = (champ) => {
-        const normalized = normalizzaAccenti(champ);
-        const kebab = normalized
-          .toLowerCase()
-          .replace(/[^a-z0-9\s-]/g, '')
-          .trim()
-          .replace(/[\s-]+/g, '-')
-          .replace(/^-+|-+$/g, '');
-        const snake = normalized.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
-        const original = champ;
+      const isCoppaUEFA = (champ) => {
+        if (!champ) return false;
+        const c = champ.toLowerCase().trim();
+        if (c === 'efl championship' || c === 'championship') return false;
+        if (c === 'uefa champions league' || c === 'uefa europa league' || c === 'uefa europa conference' || c === 'uefa nations league') return true;
+        if (c.includes('championship')) return false;
+        if (c.includes('uefa') || c.includes('europa') || c.includes('conference') || c.includes('nations')) return true;
+        return false;
+      };
 
-        return [
-          `logos/campionati/${kebab}.png`,
-          `logos/campionati/${snake}.png`,
-          `logos/campionati/${original}.png`,
-          `logos/campionati/${kebab}.jpg`,
-          `logos/campionati/${snake}.jpg`,
-        ];
+      // ⭐ MAPPA CORRETTA: usa le cartelle che ESISTONO su GitHub
+      const getUefaFolder = (champ) => {
+        const c = champ.toLowerCase();
+        if (c.includes('europa league')) return 'Europa_League';
+        if (c.includes('conference')) return 'Conference_League';
+        if (c.includes('nations')) return 'Nations_League';
+        if (c.includes('champions')) return 'Champions_League';
+        return 'Champions_League';
       };
 
       const getLeagueFolder = (champ) => {
@@ -597,44 +590,31 @@
         return c.replace(/ /g, '_');
       };
 
-      const isCoppaUEFA = (champ) => {
-        if (!champ) return false;
-        const c = champ.toLowerCase().trim();
-        if (c === 'efl championship' || c === 'championship') return false;
-        if (c === 'uefa champions league' || c === 'uefa europa league' || c === 'uefa europa conference' || c === 'uefa nations league') return true;
-        if (c.includes('championship')) return false;
-        if (c.includes('uefa') || c.includes('europa') || c.includes('conference') || c.includes('nations')) return true;
-        return false;
+      // ⭐ LISTA DI OVERRIDE MANUALE: se il nome nel DB non corrisponde al file su GitHub
+      const LOGO_OVERRIDES = {
+        // Coppe UEFA
+        'FC Copenhagen': 'FC Copenhagen',
+        'FK Crvena Zvezda': 'FK Crvena Zvezda',
+        'Union St. Gilloise': 'Union St. Gilloise',
+        // Aggiungi qui altri override se necessario
       };
 
-      // ⭐ MAPPA CORRETTA: usa le cartelle che ESISTONO su GitHub
-      const getUefaFolder = (champ) => {
-        const c = champ.toLowerCase();
-        if (c.includes('europa league')) return 'Europa_League';
-        if (c.includes('conference')) return 'Conference_League';
-        if (c.includes('nations')) return 'Nations_League';
-        if (c.includes('champions')) return 'Champions_League';
-        return 'Champions_League';
-      };
+      const getLogoUrl = (teamName, champ) => {
+        // 1. Controlla se c'è un override manuale
+        const overrideName = LOGO_OVERRIDES[teamName];
+        const finalName = overrideName || teamName;
 
-      const getTeamPaths = (teamName, champ) => {
-        const encodedSpaces = teamName.replace(/\s+/g, '%20');
+        // 2. Codifica gli spazi in %20
+        const encodedName = finalName.replace(/\s+/g, '%20');
 
-        // ⭐ COPPE UEFA: SOLO la cartella specifica, SOLO .png e .jpg con spazi codificati
+        // 3. Costruisci il percorso corretto
         if (isCoppaUEFA(champ)) {
           const uefaFolder = getUefaFolder(champ);
-          return [
-            `logos/${uefaFolder}/${encodedSpaces}.png`,
-            `logos/${uefaFolder}/${encodedSpaces}.jpg`,
-          ];
+          return `logos/${uefaFolder}/${encodedName}.png`;
         }
 
-        // ⭐ CAMPIONATI NAZIONALI: SOLO la cartella del campionato, SOLO .png e .jpg con spazi codificati
         const leagueFolder = getLeagueFolder(champ);
-        return [
-          `logos/${leagueFolder}/${encodedSpaces}.png`,
-          `logos/${leagueFolder}/${encodedSpaces}.jpg`,
-        ];
+        return `logos/${leagueFolder}/${encodedName}.png`;
       };
 
       const getInitials = (name) => {
@@ -664,15 +644,11 @@
         return renderFallback();
       }
 
-      const paths = isCompetition(teamName, championship)
-        ? getCompetitionPaths(championship)
-        : getTeamPaths(teamName, championship);
-
-      if (finalError || pathIndex >= paths.length) {
+      if (finalError) {
         return renderFallback();
       }
 
-      const currentSrc = paths[pathIndex];
+      const currentSrc = getLogoUrl(teamName, championship);
       const needsLightBg = isCampionatoScuro(championship);
 
       return (
@@ -704,12 +680,7 @@
             }}
             className={`team-logo ${className}`}
             onError={() => {
-              const nextIndex = pathIndex + 1;
-              if (nextIndex < paths.length) {
-                setPathIndex(nextIndex);
-              } else {
-                setFinalError(true);
-              }
+              setFinalError(true);
             }}
           />
         </div>
@@ -1151,7 +1122,7 @@
     window.get12Under45 = get12Under45;
     window.normalizzaAccenti = normalizzaAccenti;
 
-    console.log('✅ Funzioni globali esposte v23 - Loghi caricati con %20 (spazi)');
+    console.log('✅ Funzioni globali esposte v24 - Mappa override loghi (a prova di bomba)');
 
     // ============================================================
     // LOAD/SAVE STATE
@@ -1503,7 +1474,7 @@
         if (mancanti.length > 0) {
           console.warn('❌ Nel DB ma NON nella lista (DA AGGIUNGERE):', mancanti);
         } else {
-          console.log('%c✅ Tutti i campionati del DB sono presenti nella lista', 'color: #00ff88;');
+          console.log('%c✅ Tutti i campionati del DB sono nella lista', 'color: #00ff88;');
         }
         if (orfani.length > 0) {
           console.info('ℹ️ Nella lista ma NON nel DB (fallback):', orfani);
