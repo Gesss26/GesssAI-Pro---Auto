@@ -1,6 +1,8 @@
 // ============================================================
-// assenze.js - Modulo Assenze e Infortuni
-// Legge data/assenze.json e calcola i pesi di impatto sul Dixon-Coles
+// assenze.js - Modulo Assenze e Infortuni (v2.1)
+// ✅ Fix: normalizzazione nomi squadre (Roma = AS Roma = Roma )
+// ✅ Fix: mappa giocatori più robusta (accetta varianti nomi colonne)
+// ✅ Fix: normalizzazione nomi squadre anche per il match giocatori
 // ============================================================
 
 (function () {
@@ -12,10 +14,45 @@
     marginale: 0.2,
   };
 
+  // Prefissi comuni nei nomi squadre italiani/europei
+  const PREFISSI_SQUADRA = [
+    'as ', 'a.s. ', 'ssc ', 's.s.c. ', 'ss ', 's.s. ',
+    'ac ', 'a.c. ', 'fc ', 'f.c. ', 'us ', 'u.s. ',
+    'ssd ', 'asd ', 'pol. ', 'pol ', 'calcio ',
+    'hellas ', 'ss lazio', 'as roma',
+  ];
+
+  /**
+   * Normalizza il nome squadra per il match:
+   * - trim + collapse spazi
+   * - lowercase
+   * - rimuove prefissi comuni
+   * - rimuove accenti
+   */
+  const normalizzaNomeSquadra = (nome) => {
+    if (!nome) return '';
+    let n = nome.toString().trim().toLowerCase();
+    // Rimuovi accenti
+    n = n.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    // Collassa spazi multipli
+    n = n.replace(/\s+/g, ' ').trim();
+    // Rimuovi prefissi comuni
+    for (const pref of PREFISSI_SQUADRA) {
+      if (n.startsWith(pref)) {
+        n = n.substring(pref.length).trim();
+        break;
+      }
+    }
+    // Rimuovi suffissi tipo "calcio", "fc"
+    n = n.replace(/\s+(calcio|fc|ac|ss|as)$/i, '').trim();
+    return n;
+  };
+
   window.AssenzeDB = {
     aggiornato: null,
     squadre: {},
     _mappa: {},
+    _indiceSquadre: {},   // mappa normalizzata → chiave originale
     _caricato: false,
 
     async carica() {
@@ -25,6 +62,7 @@
         const data = await r.json();
         this.aggiornato = data.aggiornato || null;
         this.squadre = data.squadre || {};
+        this._costruisciIndice();
         this._caricato = true;
         console.log(
           '✅ Assenze caricate:',
@@ -42,13 +80,45 @@
       }
     },
 
+    _costruisciIndice() {
+      this._indiceSquadre = {};
+      Object.keys(this.squadre).forEach(chiaveOriginale => {
+        const normalizzata = normalizzaNomeSquadra(chiaveOriginale);
+        this._indiceSquadre[normalizzata] = chiaveOriginale;
+      });
+      console.log('📇 Indice squadre (normalizzato → originale):', this._indiceSquadre);
+    },
+
     _contaTotale() {
       return Object.values(this.squadre).reduce((s, arr) => s + arr.length, 0);
     },
 
+    /**
+     * Trova la chiave originale nel JSON che corrisponde al nome squadra.
+     * Tenta: match esatto → match normalizzato → match parziale.
+     */
+    _trovaChiaveSquadra(squadra) {
+      if (!squadra) return null;
+      // 1. Match esatto
+      if (this.squadre[squadra] !== undefined) return squadra;
+      // 2. Match normalizzato
+      const norm = normalizzaNomeSquadra(squadra);
+      if (this._indiceSquadre[norm]) return this._indiceSquadre[norm];
+      // 3. Match parziale (include)
+      const chiavi = Object.keys(this.squadre);
+      for (const k of chiavi) {
+        const normK = normalizzaNomeSquadra(k);
+        if (normK === norm) return k;
+        if (normK.includes(norm) || norm.includes(normK)) return k;
+      }
+      return null;
+    },
+
     getAssenze(squadra) {
       if (!squadra) return [];
-      return this.squadre[squadra] || [];
+      const chiave = this._trovaChiaveSquadra(squadra);
+      if (!chiave) return [];
+      return this.squadre[chiave] || [];
     },
 
     getByImportanza(squadra, importanza) {
@@ -58,24 +128,63 @@
     setStatsGiocatori(rows) {
       this._mappa = {};
       if (!Array.isArray(rows)) return;
+      
+      // Trova i nomi delle colonne (case-insensitive)
+      const trovaColonna = (row, nomiPossibili) => {
+        for (const nome of nomiPossibili) {
+          for (const key of Object.keys(row)) {
+            if (key.toLowerCase() === nome.toLowerCase()) return key;
+          }
+        }
+        return null;
+      };
+
       rows.forEach(row => {
-        const nome = (row.Nome || row.nome || '').toString().trim();
+        // Trova la colonna "Nome" (può essere "Nome", "nome", "NOME")
+        const colNome = trovaColonna(row, ['nome', 'name', 'giocatore']);
+        if (!colNome) return;
+        
+        const nome = (row[colNome] || '').toString().trim();
         if (!nome) return;
+        
+        // Trova la colonna "Squadra" (può essere "Squadra", "squadra", "Team", ecc.)
+        const colSquadra = trovaColonna(row, ['squadra', 'team', 'club']);
+        const squadra = colSquadra ? (row[colSquadra] || '').toString().trim() : '';
+        
+        // Trova la colonna "R" (ruolo)
+        const colRuolo = trovaColonna(row, ['r', 'ruolo', 'role']);
+        const ruolo = colRuolo ? (row[colRuolo] || '').toString().trim() : '';
+        
+        // Funzione helper per trovare un valore numerico
+        const getNum = (nomiPossibili) => {
+          const col = trovaColonna(row, nomiPossibili);
+          if (!col) return 0;
+          const val = parseFloat(row[col]);
+          return isNaN(val) ? 0 : val;
+        };
+        
         this._mappa[nome] = {
           nome,
-          squadra: (row.Squadra || row.squadra || '').toString().trim(),
-          ruolo: (row.R || row.r || '').toString().trim(),
-          Pv: parseFloat(row.Pv || row.pv || 0) || 0,
-          Mv: parseFloat(row.Mv || row.mv || 0) || 0,
-          Fm: parseFloat(row.Fm || row.fm || 0) || 0,
-          Gf: parseFloat(row.Gf || row.gf || 0) || 0,
-          Gs: parseFloat(row.Gs || row.gs || 0) || 0,
-          Ass: parseFloat(row.Ass || row.ass || 0) || 0,
-          Rp: parseFloat(row.Rp || row.rp || 0) || 0,
-          Rc: parseFloat(row.Rc || row.rc || 0) || 0,
+          squadra,
+          ruolo,
+          Pv: getNum(['pv', 'presenze', 'presenze voto']),
+          Mv: getNum(['mv', 'media voto']),
+          Fm: getNum(['fm', 'fantamedia', 'fanta media']),
+          Gf: getNum(['gf', 'gol fatti', 'gol']),
+          Gs: getNum(['gs', 'gol subiti']),
+          Ass: getNum(['ass', 'assist']),
+          Rp: getNum(['rp', 'rigori parati']),
+          Rc: getNum(['rc', 'rigori causati']),
         };
       });
+      
       console.log('✅ AssenzeDB: mappati', Object.keys(this._mappa).length, 'giocatori');
+      
+      // Debug: mostra i primi 3 giocatori mappati
+      const primiTre = Object.values(this._mappa).slice(0, 3);
+      if (primiTre.length > 0) {
+        console.log('🔍 Esempio giocatori mappati:', primiTre);
+      }
     },
 
     getGiocatore(nome) {
@@ -157,8 +266,11 @@
       let fmTotale = 0;
       let difTotale = 0;
       let nGiocatori = 0;
+      // ⭐ Usa la normalizzazione anche qui
+      const normSquadra = normalizzaNomeSquadra(squadra);
       Object.values(this._mappa).forEach(g => {
-        if (g.squadra !== squadra) return;
+        const normG = normalizzaNomeSquadra(g.squadra);
+        if (normG !== normSquadra) return;
         nGiocatori++;
         golTotali += g.Gf || 0;
         if (g.Pv > 0) {
@@ -193,7 +305,28 @@
       const chiave = assenze.filter(a => a.importanza === 'chiave').length;
       return `${assenze.length} assenti${chiave ? ` (${chiave} chiave)` : ''}`;
     },
+
+    // ⭐ Debug: mostra tutte le chiavi e l'indice normalizzato
+    debugSquadre() {
+      console.log('📊 Chiavi originali nel JSON:', Object.keys(this.squadre));
+      console.log('📇 Indice normalizzato:', this._indiceSquadre);
+      const test = ['Roma', 'AS Roma', 'Napoli', 'SSC Napoli', 'Inter', 'FC Inter', 'Juventus', 'Milan', 'AC Milan'];
+      test.forEach(t => {
+        const chiave = this._trovaChiaveSquadra(t);
+        console.log(`  "${t}" → ${chiave ? `"${chiave}" (${this.squadre[chiave].length} assenze)` : '❌ NON TROVATA'}`);
+      });
+    },
+
+    debugGiocatori() {
+      console.log('📊 Mappa giocatori:', Object.keys(this._mappa).length);
+      const primiCinque = Object.values(this._mappa).slice(0, 5);
+      if (primiCinque.length > 0) {
+        console.log('🔍 Primi 5 giocatori mappati:', primiCinque);
+      } else {
+        console.log('❌ Nessun giocatore mappato. Verifica il formato del file Excel (colonne Nome, Squadra, R, Pv, Mv, Fm, Gf, Ass)');
+      }
+    },
   };
 
-  console.log('✅ Modulo assenze.js caricato');
+  console.log('✅ Modulo assenze.js v2.1 caricato - normalizzazione nomi squadre + mappa giocatori robusta');
 })();
