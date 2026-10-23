@@ -27,7 +27,7 @@
 "Roma": [
 { "nome": "Angelino", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
 { "nome": "El Aynaoui", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
-{ "nome": "Pellegrini Lo.", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" }
+{ "nome": "Pellegrini Lo.", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
 { "nome": "Svilar", "ruolo": "P", "motivo": "Infortunio", "importanza": "chiave", "rientro": "2026-11-21" },
 { "nome": "Dybala", "ruolo": "A", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" }
 ],
