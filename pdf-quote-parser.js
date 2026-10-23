@@ -1,17 +1,11 @@
 // ============================================================
-// pdf-quote-parser.js
-// Parser PDF Marathonbet → quote strutturate
-// + salvataggio in localStorage
-// + dizionario traduzioni squadre (Siviglia → Sevilla, ecc.)
-// + FIX: gestione anno Dicembre/Gennaio
-// + FIX: checkAggiornamentoPDF con stati ok/scaduto/assente
-// + FIX: controllo età salvataggio (>7 giorni = scaduto)
-// + NEW: supporto MULTI-FILE (aggiungiQuote + resetQuote)
-// + FIX v2: mapping quote corretto (18 quote, MG14_SI / MG25_SI singole)
-// + FIX v2: normalizzazione data ISO per match esatto
-// + FIX v2: normalizzaNome rimuove prefissi extra (Dsc, VfI, Energie...)
-// + FIX v2: fuzzy matching con fallback "includes"
-// + FIX v2: refusi PDF (barri → bari, ecc.)
+// pdf-quote-parser.js — v3 (fix definitivo)
+// Fix principali:
+// - isRigaData: logica stagione calcistica corretta (Lug-Dic / Gen-Giu)
+// - PREFISSI_SQUADRA: rimossi u23/u21/u19 (identificatori squadra, non prefissi)
+// - parseMarathonbetPDF: campionato estratto anche a fine riga
+// - TRADUZIONI: Juventus Next Gen → juventus, aggiunte diverse squadre
+// - normalizzaNome: log diagnostico in DEBUG
 // ============================================================
 
 (function () {
@@ -28,17 +22,27 @@
 
   const STORAGE_KEY = 'ft_quote_pdf';
   const STORAGE_META_KEY = 'ft_quote_pdf_meta';
-  const SOGLIA_MATCH = 0.55; // ⭐ abbassata da 0.62
+  const SOGLIA_MATCH = 0.55;
   const GIORNI_SCADENZA = 7;
 
   // ============================================================
-  // DIZIONARIO TRADUZIONI SQUADRE
+  // TRADUZIONI SQUADRE
   // ============================================================
   const TRADUZIONI_SQUADRE = {
-    // Refusi PDF
+    // --- Refusi PDF ---
     'barri': 'bari',
+    'novara': 'novara',
 
-    // Spagna
+    // --- Squadre "next gen" / primavera ---
+    'juventusnextgen': 'juventus',
+    'juventusnextgenu23': 'juventus',
+    'juventusu23': 'juventus',
+    'nextgen': 'juventus',
+    'interu23': 'inter',
+    'atalantau23': 'atalanta',
+    'milanu23': 'milan',
+
+    // --- Spagna ---
     'siviglia': 'sevilla',
     'barcellona': 'barcelona',
     'real madrid': 'realmadrid',
@@ -46,21 +50,41 @@
     'athletic bilbao': 'athleticbilbao',
     'real betis': 'realbetis',
     'real sociedad': 'realsociedad',
-    'valencia': 'valencia',
-    'villarreal': 'villarreal',
-    'getafe': 'getafe',
-    'osasuna': 'osasuna',
-    'elche': 'elche',
-    'levante': 'levante',
-    'espanyol': 'espanyol',
+    'realsociedadb': 'realsociedadb',
+    'real valladolid': 'realvalladolid',
     'rayo vallecano': 'rayovallecano',
+    'rc celta': 'celta',
+    'rc celta fortuna': 'celtafortuna',
+    'celta fortuna': 'celtafortuna',
+    'ud las palmas': 'laspalmas',
+    'las palmas': 'laspalmas',
+    'deportivo alaves': 'alaves',
     'alaves': 'alaves',
-    'malaga': 'malaga',
     'cf malaga': 'malaga',
-    'racing santander': 'racingsantander',
-    'deportivo la coruna': 'deportivolacoruna',
+    'malaga': 'malaga',
+    'cadice': 'cadice',
+    'ad ceuta': 'ceuta',
+    'fc andorra': 'andorra',
+    'burgos cf': 'burgos',
+    'ce sabadell': 'sabadell',
+    'ce sabadell fc': 'sabadell',
+    'albacete': 'albacete',
+    'eldense': 'eldense',
+    'castellon': 'castellon',
+    'sporting gijon': 'sportinggijon',
+    'cordoba cf': 'cordoba',
+    'cordoba': 'cordoba',
+    'eibar': 'eibar',
+    'leganes': 'leganes',
+    'red maiorca': 'maiorca',
+    'maiorca': 'maiorca',
+    'girona': 'girona',
+    'ud almeria': 'almeria',
+    'almeria': 'almeria',
+    'real oviedo': 'realoviedo',
+    'real zaragoza': 'zaragoza',
 
-    // Italia
+    // --- Italia ---
     'inter': 'inter',
     'inter milano': 'intermilano',
     'milan': 'milan',
@@ -91,6 +115,7 @@
     'frosinone': 'frosinone',
     'frosinone calcio': 'frosinone',
     'empoli': 'empoli',
+    'empoli fc': 'empoli',
     'salernitana': 'salernitana',
     'us salernitana': 'salernitana',
     'sampdoria': 'sampdoria',
@@ -104,12 +129,52 @@
     'catania': 'catania',
     'catania fc': 'catania',
     'crotone': 'crotone',
-    'inter u23': 'interu23',
-    'juventus u23': 'juventusu23',
-    'atalanta u23': 'atalantau23',
-    'milan u23': 'milanu23',
+    'casertana': 'casertana',
+    'lr vicenza': 'vicenza',
+    'vicenza': 'vicenza',
+    'delfino pescara': 'pescara',
+    'pescara': 'pescara',
+    'perugia': 'perugia',
+    'altamura': 'altamura',
+    'potenza': 'potenza',
+    'pineto': 'pineto',
+    'gubbio': 'gubbio',
+    'ac savoia': 'savoia',
+    'savoia': 'savoia',
+    'cosenza': 'cosenza',
+    'alcione milano': 'alcione',
+    'alcione': 'alcione',
+    'carpi': 'carpi',
+    'catanzaro': 'catanzaro',
+    'us catanzaro 1929': 'catanzaro',
+    'ascoli': 'ascoli',
+    'trento': 'trento',
+    'renate': 'renate',
+    'albinoleffe': 'albinoleffe',
+    'grosseto': 'grosseto',
+    'ac reggiana': 'reggiana',
+    'reggiana': 'reggiana',
+    'ac reggiana 1919': 'reggiana',
+    'forli fc': 'forli',
+    'forli': 'forli',
+    'us pianese': 'pianese',
+    'pianese': 'pianese',
+    'desenzano': 'desenzano',
+    'giana erminio': 'gianaerminio',
+    'torres': 'torres',
+    'guidonia montecelio 1937 fc': 'guidonia',
+    'guidonia': 'guidonia',
+    'giugliano': 'giugliano',
+    'pergolettese': 'pergolettese',
+    'lumezzane': 'lumezzane',
+    'lecco': 'lecco',
+    'folgore caratese': 'caratese',
+    'arzignano valchiampo': 'arzignano',
+    'novara': 'novara',
+    'vado': 'vado',
+    'ostiame': 'ostiame',
 
-    // Inghilterra
+    // --- Inghilterra ---
     'manchester city': 'manchestercity',
     'manchester united': 'manchesterunited',
     'newcastle': 'newcastle',
@@ -122,6 +187,7 @@
     'brighton': 'brighton',
     'aston villa': 'astonvilla',
     'west ham': 'westham',
+    'west ham united': 'westham',
     'crystal palace': 'crystalpalace',
     'wolverhampton': 'wolverhampton',
     'nottingham forest': 'nottinghamforest',
@@ -134,18 +200,37 @@
     'hull city': 'hullcity',
     'ipswich town': 'ipswichtown',
     'coventry city': 'coventrycity',
+    'stoke city': 'stokecity',
+    'bristol city': 'bristolcity',
+    'preston north end': 'preston',
+    'west bromwich': 'westbromwich',
+    'west bromwich albion': 'westbromwich',
+    'watford': 'watford',
+    'lincoln city': 'lincoln',
+    'burnley': 'burnley',
+    'southampton': 'southampton',
+    'portsmouth': 'portsmouth',
+    'millwall': 'millwall',
+    'charlton athletic': 'charlton',
+    'norwich': 'norwich',
+    'norwich city': 'norwich',
+    'sheffield united': 'sheffieldunited',
+    'sheffield united fc': 'sheffieldunited',
+    'derby county': 'derbycounty',
 
-    // Germania
+    // --- Germania ---
     'bayern monaco': 'bayernmonaco',
     'bayern munich': 'bayernmonaco',
     'borussia dortmund': 'borussiadortmund',
     'borussia monchengladbach': 'borussiamonchengladbach',
     'eintracht francoforte': 'eintrachtfrancoforte',
+    'eintracht francforte': 'eintrachtfrancoforte',
     'bayer leverkusen': 'bayerleverkusen',
     'werder brema': 'werderbrema',
     'werder bremen': 'werderbrema',
     'augsburg': 'augsburg',
     'mainz': 'mainz',
+    'mainz 05': 'mainz',
     'amburgo': 'amburgo',
     'hamburger sv': 'amburgo',
     'colonia': 'colonia',
@@ -153,12 +238,35 @@
     'friburgo': 'friburgo',
     'stoccarda': 'stoccarda',
     'union berlino': 'unionberlino',
+    'union berlin': 'unionberlino',
     'schalke 04': 'schalke04',
+    'schalke': 'schalke04',
     'hoffenheim': 'hoffenheim',
     'lipsia': 'lipsia',
     'rb lipsia': 'lipsia',
+    'sv darmstadt 98': 'darmstadt',
+    'darmstadt': 'darmstadt',
+    'sv 07 elversberg': 'elversberg',
+    'elversberg': 'elversberg',
+    'sc paderborn': 'paderborn',
+    'paderborn': 'paderborn',
+    '1 fc heidenheim 1846': 'heidenheim',
+    'heidenheim': 'heidenheim',
+    'energie cottbus': 'cottbus',
+    'cottbus': 'cottbus',
+    'hertha bsc': 'hertha',
+    'hertha': 'hertha',
+    'dsc arminia bielefeld': 'arminiabilefeld',
+    'arminia bielefeld': 'arminiabilefeld',
+    'magdeburg': 'magdeburg',
+    'karlsruhe': 'karlsruhe',
+    'st pauli': 'stpauli',
+    'vfl bochum 1848': 'bochum',
+    'bochum': 'bochum',
+    'wolfsburg': 'wolfsburg',
+    'vfl wolfsburg': 'wolfsburg',
 
-    // Francia
+    // --- Francia ---
     'paris saint-germain': 'psg',
     'paris saint germain': 'psg',
     'psg': 'psg',
@@ -189,8 +297,33 @@
     'le mans fc': 'lemans',
     'le mans': 'lemans',
     'paris fc': 'parisfc',
+    'sochaux-montbeliard': 'sochaux',
+    'sochaux': 'sochaux',
+    'fc annecy': 'annecy',
+    'annecy': 'annecy',
+    'pau fc': 'pau',
+    'pau': 'pau',
+    'grenoble foot 38': 'grenoble',
+    'grenoble': 'grenoble',
+    'clermont': 'clermont',
+    'guingamp': 'guingamp',
+    'usl dunkerque': 'dunkerque',
+    'dunkerque': 'dunkerque',
+    'metz': 'metz',
+    'nancy': 'nancy',
+    'stade lavallois mfc': 'laval',
+    'laval': 'laval',
+    'digione': 'digione',
+    'dijon': 'digione',
+    'rodez aveyron football': 'rodez',
+    'rodez': 'rodez',
+    'saint etienne': 'saintetienne',
+    'nantes': 'nantes',
+    'us boulogne': 'boulogne',
+    'boulogne': 'boulogne',
+    'reims': 'reims',
 
-    // Olanda
+    // --- Olanda ---
     'ajax': 'ajax',
     'psv eindhoven': 'psveindhoven',
     'psv': 'psveindhoven',
@@ -213,8 +346,27 @@
     'excelsior rotterdam': 'excelsior',
     'telstar': 'telstar',
     'den bosch': 'denbosch',
+    'nac breda': 'nacbreda',
+    'heracles almelo': 'heracles',
+    'top oss': 'toposs',
+    'jong ajax amsterdam youth': 'jongajax',
+    'vitesse arnhem': 'vitesse',
+    'emmen': 'emmen',
+    'volendam': 'volendam',
+    'jong fc utrecht youth': 'jongutrecht',
+    'fc eindhoven': 'fceindhoven',
+    'jong psv eindhoven youth': 'jongpsv',
+    'mvv maastricht': 'mvv',
+    'almere city fc': 'almere',
+    'roda': 'roda',
+    'de graafschap': 'graafschap',
+    'waalwijk': 'waalwijk',
+    'jong az alkmaar youth': 'jongaz',
+    'helmond sport': 'helmond',
+    'dordrecht': 'dordrecht',
+    'venlo': 'venlo',
 
-    // Portogallo
+    // --- Portogallo ---
     'benfica': 'benfica',
     'fc porto': 'porto',
     'porto': 'porto',
@@ -240,7 +392,7 @@
     'estrela amadora': 'estrelaamadora',
     'academico de viseu fc': 'academicoviseu',
 
-    // Belgio
+    // --- Belgio ---
     'club bruges': 'clubbruges',
     'anderlecht': 'anderlecht',
     'gent': 'gent',
@@ -249,21 +401,22 @@
     'standard': 'standardliegi',
     'anversa': 'anversa',
     'antwerp': 'anversa',
-    'union saint gilloise': 'unionsaintgilloise',
-    'cercle brugge': 'cerclebrugge',
     'royal charleroi': 'charleroi',
     'charleroi': 'charleroi',
+    'union saint gilloise': 'unionsaintgilloise',
+    'cercle brugge': 'cerclebrugge',
     'zulte waregem': 'zultewaregem',
     'kortrijk': 'kortrijk',
+    'mechelen': 'mechelen',
     'sk beveren': 'beveren',
     'oud-heverlee leuven': 'leuven',
+    'lommel sk': 'lommel',
     'raal la louviere': 'lalouviere',
+    'st truiden': 'sinttruiden',
     'st. truidense vv': 'sinttruiden',
     'kvc westerlo': 'westerlo',
-    'lommel sk': 'lommel',
-    'mechelen': 'mechelen',
 
-    // Turchia
+    // --- Turchia ---
     'galatasaray': 'galatasaray',
     'fenerbahce': 'fenerbahce',
     'besiktas': 'besiktas',
@@ -277,11 +430,15 @@
     'antalyaspor': 'antalyaspor',
     'alanyaspor': 'alanyaspor',
     'gaziantep fk': 'gaziantep',
+    'gaziantep': 'gaziantep',
     'rizespor': 'rizespor',
     'kasimpasa': 'kasimpasa',
     'goster': 'goster',
+    'kocaelispor': 'kocaelispor',
+    'genclerbirligi sk': 'genclerbirligi',
+    'caykur rizespor': 'rizespor',
 
-    // Scozia
+    // --- Scozia ---
     'celtic': 'celtic',
     'glasgow rangers': 'rangers',
     'rangers': 'rangers',
@@ -295,20 +452,20 @@
     'dundee fc': 'dundee',
     'motherwell': 'motherwell',
     'kilmarnock': 'kilmarnock',
-    'st. johnstone fc': 'stjohnstone',
     'st johnstone': 'stjohnstone',
-    'st. mirren': 'stmirren',
+    'st. johnstone fc': 'stjohnstone',
     'st mirren': 'stmirren',
+    'st. mirren': 'stmirren',
     'falkirk': 'falkirk',
 
-    // Grecia
+    // --- Grecia ---
     'olympiacos': 'olympiacos',
     'panathinaikos': 'panathinaikos',
     'aek atene': 'aek',
     'aek': 'aek',
     'paok': 'paok',
 
-    // Corea
+    // --- Corea ---
     'daejeon citizen': 'daejeon',
     'daejeon': 'daejeon',
     'fc pohang steelers': 'pohang',
@@ -317,25 +474,33 @@
     'gangwon': 'gangwon',
     'gwangju': 'gwangju',
     'anyang': 'anyang',
+    'ulsan': 'ulsan',
+    'seul': 'seul',
+    'incheon united': 'incheon',
+    'jeju united fc': 'jeju',
+    'bucheon': 'bucheon',
+    'jeonbuk fc': 'jeonbuk',
 
-    // Giappone
+    // --- Giappone ---
     'kashima antlers': 'kashima',
     'yokohama f marinos': 'yokohama',
     'kawasaki frontale': 'kawasaki',
   };
 
   // ============================================================
-  // NORMALIZZAZIONE NOMI
+  // PREFISSI SQUADRA (rimossi u23/u21/u19)
   // ============================================================
-
-  // ⭐ Lista prefissi/suffissi da rimuovere
   const PREFISSI_SQUADRA = [
     'dsc', 'vfi', 'vfl', 'energie', 'ssc', 'usl', 'acf', 'fbc', 'asd', 'usd',
     'fc', 'ac', 'ssc', 'as', 'us', 'ss', 'asd', 'ssd', 'calcio', 'sportiva',
     'società', 'societa', 'cf', 'sk', 'sv', 'sc', 'vv', 'kvc', 'fk', 'bk',
-    'if', 'ff', 'cd', 'sd', 'ud', 'rc', 'rcd', 'afc', 'cfc', 'u23', 'u21', 'u19',
+    'if', 'ff', 'cd', 'sd', 'ud', 'rc', 'rcd', 'afc', 'cfc',
+    // ❌ RIMOSSI: 'u23', 'u21', 'u19' (identificatori squadra, non prefissi)
   ];
 
+  // ============================================================
+  // NORMALIZZAZIONE NOMI
+  // ============================================================
   const normalizzaNome = (nome) => {
     if (!nome) return '';
     let n = nome
@@ -346,31 +511,21 @@
       .replace(/ø/g, 'o')
       .replace(/æ/g, 'ae');
 
-    // Rimuovi prefissi/suffissi noti come parole intere
-    const prefissiRegex = new RegExp(
-      '\\b(' + PREFISSI_SQUADRA.join('|') + ')\\b',
-      'g'
-    );
+    const prefissiRegex = new RegExp('\\b(' + PREFISSI_SQUADRA.join('|') + ')\\b', 'g');
     n = n.replace(prefissiRegex, '');
 
-    // Rimuovi anni tipo 1919, 1929, ecc.
     n = n.replace(/\b(18|19|20)\d{2}\b/g, '');
 
-    // Rimuovi caratteri non alfanumerici
     n = n.replace(/[^a-z0-9]/g, '').trim();
 
-    // Applica traduzioni (dopo la pulizia)
-    if (TRADUZIONI_SQUADRE[n]) {
-      n = TRADUZIONI_SQUADRE[n];
-    }
+    if (TRADUZIONI_SQUADRE[n]) n = TRADUZIONI_SQUADRE[n];
 
     return n;
   };
 
   // ============================================================
-  // NORMALIZZAZIONE DATA → formato ISO YYYY-MM-DD
+  // NORMALIZZAZIONE DATA
   // ============================================================
-
   const normalizzaDataISO = (d) => {
     if (!d) return '';
     if (d instanceof Date) {
@@ -380,12 +535,9 @@
       return `${y}-${m}-${day}`;
     }
     const s = String(d).trim();
-    // Già ISO
     if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-    // GG/MM/YYYY o GG-MM-YYYY
     const m1 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
     if (m1) return `${m1[3]}-${m1[2].padStart(2, '0')}-${m1[1].padStart(2, '0')}`;
-    // YYYY/MM/DD
     const m2 = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
     if (m2) return `${m2[1]}-${m2[2].padStart(2, '0')}-${m2[3].padStart(2, '0')}`;
     return s;
@@ -394,58 +546,46 @@
   // ============================================================
   // ESTRAZIONE TESTO DA PDF
   // ============================================================
-
   const estraiRigheDaPDF = async (file) => {
     if (typeof pdfjsLib === 'undefined') {
-      throw new Error('PDF.js non caricato. Aggiungi lo script nell\'HTML.');
+      throw new Error('PDF.js non caricato.');
     }
-
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-
     const tutteLeRighe = [];
 
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
-
       const righeMap = new Map();
 
       content.items.forEach(item => {
         if (!item.str || item.str.trim() === '') return;
         const yKey = Math.round(item.transform[5] / 3) * 3;
         if (!righeMap.has(yKey)) righeMap.set(yKey, []);
-        righeMap.get(yKey).push({
-          text: item.str,
-          x: item.transform[4],
-        });
+        righeMap.get(yKey).push({ text: item.str, x: item.transform[4] });
       });
 
       const ySorted = Array.from(righeMap.keys()).sort((a, b) => b - a);
-
       ySorted.forEach(y => {
         const items = righeMap.get(y).sort((a, b) => a.x - b.x);
         const riga = items.map(i => i.text).join(' ').replace(/\s+/g, ' ').trim();
-        if (riga) {
-          tutteLeRighe.push({ pagina: i, y, testo: riga });
-        }
+        if (riga) tutteLeRighe.push({ pagina: i, y, testo: riga });
       });
     }
-
     return tutteLeRighe;
   };
 
   // ============================================================
   // RICONOSCIMENTO RIGHE
   // ============================================================
-
   const CAMPIONATI_RICONOSCIBILI = [
     'Italia - Serie A', 'Italia - Serie B', 'Italia - Serie C',
     'Inghilterra - Premier League', 'Inghilterra - Championship', 'Inghilterra - EFL Cup',
     'Spagna - La Liga', 'Spagna - LaLiga2', 'Spagna - LaLiga 2',
-    'Germania - Bundesliga', 'Germania - 2. Bundesliga',
+    'Germania - Bundesliga', 'Germania - 2. Bundesliga', 'Germania - 2',
     'Francia - Ligue 1', 'Francia - Ligue 2',
-    'Olanda - Eredivisie', 'Olanda - Eerste Divisie',
+    'Olanda - Eredivisie', 'Olanda - Eerste Divisie', 'Olanda - Erdiveisie',
     'Portogallo - Liga Portugal', 'Belgio - Pro League',
     'Turchia - Süper Lig', 'Scozia - Premiership',
     'Repubblica di Corea - K-Legue 1', 'Corea - K League 1',
@@ -459,16 +599,31 @@
     const match = testo.match(pattern);
     if (!match) return null;
     if (GIORNI.some(g => testo.includes(g))) return null;
-
     const campionato = testo.trim();
     const isKnown = CAMPIONATI_RICONOSCIBILI.some(c =>
       campionato.toLowerCase().includes(c.toLowerCase()) ||
       c.toLowerCase().includes(campionato.toLowerCase())
     );
-
     return isKnown ? campionato : null;
   };
 
+  // ⭐ NUOVO: estrae un campionato dalla riga (anche in coda)
+  const estraiCampionatoDaRiga = (testo) => {
+    // Cerca pattern tipo "Italia - Serie A" o "Spagna - LaLiga 2"
+    const pattern = /([A-Z][a-zà-ù]+(?:\s+di\s+[A-Z][a-zà-ù]+)?\s+-\s+(?:Serie [A-Z]|Serie C - Girone [A-Z]|Premier League|Championship|EFL Championship|La ?Liga(?:\s?\d)?|Ligue [12]|Bundesliga|2\. Bundesliga|2|Eredivisie|Eerste Divisie|Erdiveisie|Primeira Liga|Liga Portugal|Pro League|Jupiler Pro League|Süper Lig|K[- ]Legue 1|K League 1|J1 League|Scottish Premiership|Premiership|Segunda Divisi[oó]n))/;
+    const match = testo.match(pattern);
+    if (!match) return null;
+    const candidato = match[1].trim();
+    const isKnown = CAMPIONATI_RICONOSCIBILI.some(c =>
+      candidato.toLowerCase().includes(c.toLowerCase()) ||
+      c.toLowerCase().includes(candidato.toLowerCase())
+    );
+    return isKnown ? candidato : null;
+  };
+
+  // ============================================================
+  // isRigaData — FIX stagione calcistica
+  // ============================================================
   const isRigaData = (testo) => {
     const pattern = new RegExp(
       `^(${GIORNI.join('|')})\\s+(\\d{1,2})\\s+(${MESI.join('|')})`,
@@ -485,13 +640,16 @@
     const annoCorrente = oggi.getFullYear();
     const meseCorrente = oggi.getMonth() + 1;
 
+    // ⭐ FIX: stagione calcistica
+    // - Lug-Dic con PDF Gen-Giu → anno + 1
+    // - Gen-Giu con PDF Lug-Dic → anno - 1
+    // - altrimenti anno corrente
     let anno = annoCorrente;
+    const oggiPrimoSemestre = meseCorrente >= 7; // Lug-Dic
+    const pdfPrimoSemestre = mese >= 7;          // Lug-Dic
 
-    if (meseCorrente === 1 && mese === 12) {
-      anno = annoCorrente - 1;
-    } else if (mese < meseCorrente - 1) {
-      anno = annoCorrente + 1;
-    }
+    if (oggiPrimoSemestre && !pdfPrimoSemestre) anno = annoCorrente + 1;
+    else if (!oggiPrimoSemestre && pdfPrimoSemestre) anno = annoCorrente - 1;
 
     const dataISO = `${anno}-${meseStr}-${giorno}`;
 
@@ -507,61 +665,61 @@
   // ============================================================
   // PARSING RIGA PARTITA
   // ============================================================
-
   const parseRigaPartita = (testo) => {
-    // ⭐ FIX: accetta anche alias+ora senza spazio (es. "665618:30...")
-    // e con spazio (es. "6656 18:30...")
     const pattern = /^(\d{3,6})\s*(\d{1,2}:\d{2})\s*(.+)$/;
     const match = testo.match(pattern);
     if (!match) return null;
 
     const [, alias, ora, resto] = match;
 
-    // Estrai tutte le quote come numeri con 2 decimali
     const quotePattern = /(\d+\.\d{2})/g;
     const quote = [];
     let qMatch;
     while ((qMatch = quotePattern.exec(resto)) !== null) {
       quote.push(parseFloat(qMatch[1]));
     }
-
     if (quote.length < 3) return null;
 
-    // ⭐ FIX: usa regex ancorata invece di indexOf
     const primaQuotaMatch = resto.match(/\d+\.\d{2}/);
     if (!primaQuotaMatch) return null;
 
     const eventoRaw = resto.substring(0, primaQuotaMatch.index).trim();
-
     const sepIndex = eventoRaw.lastIndexOf(' - ');
     if (sepIndex === -1) return null;
 
     const casa = eventoRaw.substring(0, sepIndex).trim();
     const ospiti = eventoRaw.substring(sepIndex + 3).trim();
-
     if (!casa || !ospiti) return null;
 
-    // ⭐ FIX: mapping corretto per 18 quote (MG14_SI e MG25_SI singole)
-    const quoteMappate = {
-      '1': quote[0] ?? null,
-      'X': quote[1] ?? null,
-      '2': quote[2] ?? null,
-      '1X': quote[3] ?? null,
-      '12': quote[4] ?? null,
-      'X2': quote[5] ?? null,
-      'GG': quote[6] ?? null,
-      'NG': quote[7] ?? null,
-      'U1.5': quote[8] ?? null,
-      'O1.5': quote[9] ?? null,
-      'U2.5': quote[10] ?? null,
-      'O2.5': quote[11] ?? null,
-      'U3.5': quote[12] ?? null,
-      'O3.5': quote[13] ?? null,
-      'U4.5': quote[14] ?? null,
-      'O4.5': quote[15] ?? null,
-      'MG14_SI': quote[16] ?? null,
-      'MG25_SI': quote[17] ?? null,
-    };
+    let quoteMappate;
+
+    if (quote.length >= 18) {
+      // Formato completo: 18 quote con U4.5/O4.5
+      quoteMappate = {
+        '1': quote[0], 'X': quote[1], '2': quote[2],
+        '1X': quote[3], '12': quote[4], 'X2': quote[5],
+        'GG': quote[6], 'NG': quote[7],
+        'U1.5': quote[8], 'O1.5': quote[9],
+        'U2.5': quote[10], 'O2.5': quote[11],
+        'U3.5': quote[12], 'O3.5': quote[13],
+        'U4.5': quote[14], 'O4.5': quote[15],
+        'MG14_SI': quote[16], 'MG25_SI': quote[17],
+      };
+    } else if (quote.length >= 16) {
+      // Formato ridotto: 16 quote (senza U4.5/O4.5)
+      quoteMappate = {
+        '1': quote[0], 'X': quote[1], '2': quote[2],
+        '1X': quote[3], '12': quote[4], 'X2': quote[5],
+        'GG': quote[6], 'NG': quote[7],
+        'U1.5': quote[8], 'O1.5': quote[9],
+        'U2.5': quote[10], 'O2.5': quote[11],
+        'U3.5': quote[12], 'O3.5': quote[13],
+        'U4.5': null, 'O4.5': null,
+        'MG14_SI': quote[14], 'MG25_SI': quote[15],
+      };
+    } else {
+      return null;
+    }
 
     return {
       alias: alias.trim(),
@@ -577,7 +735,6 @@
   // ============================================================
   // PARSER PRINCIPALE
   // ============================================================
-
   const parseMarathonbetPDF = (righe) => {
     const partite = [];
     let campionatoCorrente = null;
@@ -588,12 +745,14 @@
     for (const riga of righe) {
       const testo = riga.testo;
 
+      // 1) Intestazione campionato pulita (inizio riga)
       const camp = isIntestazioneCampionato(testo);
       if (camp) {
         campionatoCorrente = camp;
         continue;
       }
 
+      // 2) Data
       const data = isRigaData(testo);
       if (data) {
         dataCorrente = data.dataCompleta;
@@ -602,12 +761,18 @@
         continue;
       }
 
-      if (/^(Alias|Codice|Evento|Calcio|1X2|DOPPIA|GG\/NG|U\/O|MG|SI|NO)/i.test(testo)) {
+      // 3) Skip intestazioni tabella
+      if (/^(Alias|Codice|Evento|Calcio|1X2|DOPPIA|GG\/NG|U\/O|U\/0|MG|SI|NO)/i.test(testo)) {
         continue;
       }
 
+      // 4) Prova a parsare come partita
       const partita = parseRigaPartita(testo);
       if (partita) {
+        // ⭐ Controlla se c'è un campionato in coda alla riga (es. "Siviglia - Osasuna ... Spagna - LaLiga 2")
+        const campInCoda = estraiCampionatoDaRiga(testo);
+        if (campInCoda) campionatoCorrente = campInCoda;
+
         partite.push({
           ...partita,
           campionato: campionatoCorrente,
@@ -617,6 +782,13 @@
           fonte: 'Marathonbet',
           estrattoIl: new Date().toISOString(),
         });
+        continue;
+      }
+
+      // 5) Se la riga contiene solo un campionato (a volte succede)
+      const campSolo = estraiCampionatoDaRiga(testo);
+      if (campSolo) {
+        campionatoCorrente = campSolo;
       }
     }
 
@@ -626,30 +798,24 @@
   // ============================================================
   // SIMILARITÀ
   // ============================================================
-
   const similarita = (a, b) => {
     if (a === b) return 1;
     if (!a || !b) return 0;
 
-    // ⭐ FIX: se uno contiene l'altro, è match forte
     if (a.length >= 3 && b.length >= 3) {
       if (a.includes(b) || b.includes(a)) return 0.95;
     }
 
     const bigrams = (str) => {
       const set = new Set();
-      for (let i = 0; i < str.length - 1; i++) {
-        set.add(str.substring(i, i + 2));
-      }
+      for (let i = 0; i < str.length - 1; i++) set.add(str.substring(i, i + 2));
       return set;
     };
 
     const aBigrams = bigrams(a);
     const bBigrams = bigrams(b);
     let intersection = 0;
-    aBigrams.forEach(bg => {
-      if (bBigrams.has(bg)) intersection++;
-    });
+    aBigrams.forEach(bg => { if (bBigrams.has(bg)) intersection++; });
 
     return (2 * intersection) / (aBigrams.size + bBigrams.size);
   };
@@ -657,7 +823,6 @@
   // ============================================================
   // FUZZY MATCHING
   // ============================================================
-
   const trovaMatchApp = (partitaPDF, matchesApp) => {
     const casaNorm = normalizzaNome(partitaPDF.casa);
     const ospitiNorm = normalizzaNome(partitaPDF.ospiti);
@@ -683,9 +848,8 @@
   };
 
   // ============================================================
-  // ANALISI VALUE BET
+  // VALUE BET
   // ============================================================
-
   const analizzaValueBet = (partitaPDF, matchApp, stats) => {
     if (!stats || stats.error) return [];
 
@@ -714,14 +878,12 @@
 
     for (const [mercato, quotaBook] of Object.entries(partitaPDF.quote)) {
       if (!quotaBook || quotaBook <= 1) continue;
-
       const map = mapping[mercato];
       if (!map) continue;
 
       const pctTua = window.getGiocataPct
         ? window.getGiocataPct(map.giocata, stats, stats.homeMG, stats.awayMG, stats.mgTot)
         : 0;
-
       if (pctTua === 0) continue;
 
       const quotaFair = 100 / pctTua;
@@ -740,16 +902,10 @@
       else if (edge > 0) { classificazione = '⚪ Quota fair'; livello = 'fair'; }
 
       risultati.push({
-        mercato,
-        giocata: map.giocata,
-        familyId: map.familyId,
-        pctTua,
-        quotaFair: parseFloat(quotaFair.toFixed(2)),
-        quotaBook,
+        mercato, giocata: map.giocata, familyId: map.familyId,
+        pctTua, quotaFair: parseFloat(quotaFair.toFixed(2)), quotaBook,
         edge: parseFloat(edge.toFixed(1)),
-        isValue: edge > 5,
-        livello,
-        classificazione,
+        isValue: edge > 5, livello, classificazione,
         kellyStake: parseFloat((kelly * 100).toFixed(2)),
       });
     }
@@ -758,31 +914,21 @@
   };
 
   // ============================================================
-  // SALVATAGGIO IN LOCALSTORAGE
+  // SALVATAGGIO
   // ============================================================
-
   const salvaQuote = (partite) => {
     try {
       const mappa = {};
-
       partite.forEach(p => {
         const key = `${normalizzaNome(p.casa)}|${normalizzaNome(p.ospiti)}|${p.dataISO || ''}`;
         mappa[key] = {
-          casa: p.casa,
-          ospiti: p.ospiti,
-          campionato: p.campionato,
-          data: p.data,
-          dataISO: p.dataISO,
-          ora: p.ora,
-          quote: p.quote,
+          casa: p.casa, ospiti: p.ospiti, campionato: p.campionato,
+          data: p.data, dataISO: p.dataISO, ora: p.ora, quote: p.quote,
         };
       });
 
-      const dateValide = partite
-        .map(p => p.dataISO)
-        .filter(d => d && d.match(/^\d{4}-\d{2}-\d{2}$/))
-        .sort();
-
+      const dateValide = partite.map(p => p.dataISO)
+        .filter(d => d && d.match(/^\d{4}-\d{2}-\d{2}$/)).sort();
       const dataMax = dateValide[dateValide.length - 1] || null;
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(mappa));
@@ -792,22 +938,17 @@
         numPartite: partite.length,
       }));
 
-      console.log(`✅ Quote salvate: ${partite.length} partite, data max: ${dataMax}`);
-
       window.dispatchEvent(new CustomEvent('quote-updated', {
         detail: { numPartite: partite.length, dataMaxPDF: dataMax }
       }));
 
+      console.log(`✅ Quote salvate: ${partite.length} partite, data max: ${dataMax}`);
       return { numPartite: partite.length, dataMaxPDF: dataMax };
     } catch (e) {
-      console.warn('Errore salvataggio quote:', e);
+      console.warn('Errore salvataggio:', e);
       return null;
     }
   };
-
-  // ============================================================
-  // AGGIUNGI QUOTE (MERGE con quelle esistenti)
-  // ============================================================
 
   const aggiungiQuote = (partite) => {
     try {
@@ -817,22 +958,14 @@
       partite.forEach(p => {
         const key = `${normalizzaNome(p.casa)}|${normalizzaNome(p.ospiti)}|${p.dataISO || ''}`;
         mappa[key] = {
-          casa: p.casa,
-          ospiti: p.ospiti,
-          campionato: p.campionato,
-          data: p.data,
-          dataISO: p.dataISO,
-          ora: p.ora,
-          quote: p.quote,
+          casa: p.casa, ospiti: p.ospiti, campionato: p.campionato,
+          data: p.data, dataISO: p.dataISO, ora: p.ora, quote: p.quote,
         };
       });
 
       const tutte = Object.values(mappa);
-      const dateValide = tutte
-        .map(p => p.dataISO)
-        .filter(d => d && d.match(/^\d{4}-\d{2}-\d{2}$/))
-        .sort();
-
+      const dateValide = tutte.map(p => p.dataISO)
+        .filter(d => d && d.match(/^\d{4}-\d{2}-\d{2}$/)).sort();
       const dataMax = dateValide[dateValide.length - 1] || null;
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(mappa));
@@ -842,60 +975,41 @@
         numPartite: tutte.length,
       }));
 
-      console.log(`✅ Quote aggiunte: +${partite.length} (totale: ${tutte.length}), data max: ${dataMax}`);
-
       window.dispatchEvent(new CustomEvent('quote-updated', {
         detail: { numPartite: tutte.length, dataMaxPDF: dataMax }
       }));
 
+      console.log(`✅ Quote aggiunte: +${partite.length} (totale: ${tutte.length}), data max: ${dataMax}`);
       return { numPartite: tutte.length, dataMaxPDF: dataMax };
     } catch (e) {
-      console.warn('Errore aggiunta quote:', e);
+      console.warn('Errore aggiunta:', e);
       return null;
     }
   };
-
-  // ============================================================
-  // RESET QUOTE
-  // ============================================================
 
   const resetQuote = () => {
     try {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(STORAGE_META_KEY);
-      console.log('🗑️ Quote resettate');
       window.dispatchEvent(new CustomEvent('quote-updated', {
         detail: { numPartite: 0, dataMaxPDF: null }
       }));
       return true;
-    } catch (e) {
-      console.warn('Errore reset quote:', e);
-      return false;
-    }
+    } catch (e) { return false; }
   };
-
-  // ============================================================
-  // LETTURA
-  // ============================================================
 
   const leggiQuote = () => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return {};
-      return JSON.parse(raw);
-    } catch (e) {
-      return {};
-    }
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
   };
 
   const leggiMeta = () => {
     try {
       const raw = localStorage.getItem(STORAGE_META_KEY);
-      if (!raw) return null;
-      return JSON.parse(raw);
-    } catch (e) {
-      return null;
-    }
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
   };
 
   const getMaxDataPDF = () => {
@@ -906,7 +1020,6 @@
   // ============================================================
   // MAPPA GIOCATA → QUOTA
   // ============================================================
-
   const mappaGiocataAQuota = (quotePDF, familyId, giocata) => {
     if (!quotePDF) return null;
 
@@ -915,42 +1028,32 @@
       if (giocata === 'X') return quotePDF['X'] || null;
       if (giocata === '2') return quotePDF['2'] || null;
     }
-
     if (familyId === 'dc') {
       if (giocata === '1X') return quotePDF['1X'] || null;
       if (giocata === '12') return quotePDF['12'] || null;
       if (giocata === 'X2') return quotePDF['X2'] || null;
     }
-
     if (familyId === 'gg_ng') {
       const g = String(giocata || '').trim().toLowerCase();
-      if (g === 'gg' || g === 'goal-goal' || g === 'goal goal' || g === 'g' || g === 'goal') {
-        return quotePDF['GG'] || null;
-      }
-      if (g === 'ng' || g === 'no goal' || g === 'no-goal' || g === 'n' || g === 'nogoal') {
-        return quotePDF['NG'] || null;
-      }
+      if (g === 'gg' || g === 'goal-goal' || g === 'goal' || g === 'g') return quotePDF['GG'] || null;
+      if (g === 'ng' || g === 'no goal' || g === 'nogoal' || g === 'n') return quotePDF['NG'] || null;
     }
-
     if (familyId === 'over') {
       if (giocata === 'Over 1.5') return quotePDF['O1.5'] || null;
       if (giocata === 'Over 2.5') return quotePDF['O2.5'] || null;
       if (giocata === 'Over 3.5') return quotePDF['O3.5'] || null;
       if (giocata === 'Over 4.5') return quotePDF['O4.5'] || null;
     }
-
     if (familyId === 'under') {
       if (giocata === 'Under 1.5') return quotePDF['U1.5'] || null;
       if (giocata === 'Under 2.5') return quotePDF['U2.5'] || null;
       if (giocata === 'Under 3.5') return quotePDF['U3.5'] || null;
       if (giocata === 'Under 4.5') return quotePDF['U4.5'] || null;
     }
-
     if (familyId === 'multigol') {
       if (giocata === '1-4') return quotePDF['MG14_SI'] || null;
       if (giocata === '2-5') return quotePDF['MG25_SI'] || null;
     }
-
     if (familyId === 'dc_over') {
       const parts = giocata.split('+');
       if (parts.length === 2) {
@@ -959,7 +1062,6 @@
         if (dcQ && overQ) return parseFloat((dcQ * overQ).toFixed(2));
       }
     }
-
     if (familyId === 'dc_under') {
       const parts = giocata.split('+');
       if (parts.length === 2) {
@@ -968,58 +1070,58 @@
         if (dcQ && underQ) return parseFloat((dcQ * underQ).toFixed(2));
       }
     }
-
     return null;
   };
 
   // ============================================================
-  // TROVA QUOTA PER PARTITA + GIOCATA
+  // TROVA QUOTA PER GIOCATA
   // ============================================================
-
   const trovaQuotaPerGiocata = (match, familyId, giocata) => {
     const quote = leggiQuote();
     if (!quote || Object.keys(quote).length === 0) return null;
 
     const casaNorm = normalizzaNome(match.casa);
     const ospitiNorm = normalizzaNome(match.ospiti);
-    const dataMatch = normalizzaDataISO(match.data); // ⭐ FIX
+    const dataMatch = normalizzaDataISO(match.data);
 
     let entry = null;
     let matchedBy = null;
 
-    // 1. Match esatto con data normalizzata
+    // 1. Match esatto
     const keyEsatta = `${casaNorm}|${ospitiNorm}|${dataMatch}`;
-    if (quote[keyEsatta]) {
-      entry = quote[keyEsatta];
-      matchedBy = 'exact';
-    }
+    if (quote[keyEsatta]) { entry = quote[keyEsatta]; matchedBy = 'exact'; }
 
-    // 2. Match per prefisso casa|ospiti (ignora data)
+    // 2. Prefix (ignora data)
     if (!entry) {
       const prefisso = `${casaNorm}|${ospitiNorm}|`;
       const keys = Object.keys(quote).filter(k => k.startsWith(prefisso));
       if (keys.length > 0) {
         entry = quote[keys[0]];
-        matchedBy = 'prefix';
+        matchedBy = `prefix(${keys[0]})`;
       }
     }
 
-    // 3. Fuzzy match
+    // 3. Ordine invertito
     if (!entry) {
-      let bestMatch = null;
-      let bestScore = 0;
+      const prefissoInv = `${ospitiNorm}|${casaNorm}|`;
+      const keys = Object.keys(quote).filter(k => k.startsWith(prefissoInv));
+      if (keys.length > 0) {
+        entry = quote[keys[0]];
+        matchedBy = 'prefix-invertito';
+      }
+    }
 
+    // 4. Fuzzy
+    if (!entry) {
+      let bestMatch = null, bestScore = 0;
       for (const [, val] of Object.entries(quote)) {
         const scoreCasa = similarita(casaNorm, normalizzaNome(val.casa));
         const scoreOspiti = similarita(ospitiNorm, normalizzaNome(val.ospiti));
         const score = (scoreCasa + scoreOspiti) / 2;
-
         if (score > bestScore && score > SOGLIA_MATCH) {
-          bestScore = score;
-          bestMatch = val;
+          bestScore = score; bestMatch = val;
         }
       }
-
       if (bestMatch) {
         entry = bestMatch;
         matchedBy = `fuzzy(${bestScore.toFixed(2)})`;
@@ -1035,17 +1137,16 @@
     }
 
     if (window.QuoteManager && window.QuoteManager.DEBUG) {
-      console.log('🎯 Match trovato per', match.casa, 'vs', match.ospiti,
-        '[' + matchedBy + ']');
+      console.log('🎯 Match [' + matchedBy + ']:', match.casa, 'vs', match.ospiti,
+        '→ entry:', entry.casa, 'vs', entry.ospiti);
     }
 
     return mappaGiocataAQuota(entry.quote, familyId, giocata);
   };
 
   // ============================================================
-  // ANALISI GIOCATA CON EDGE
+  // ANALISI CON EDGE
   // ============================================================
-
   const analizzaGiocataConQuota = (match, familyId, giocata, pctTua) => {
     const quotaBook = trovaQuotaPerGiocata(match, familyId, giocata);
     if (!quotaBook || !pctTua || pctTua <= 0) return null;
@@ -1068,117 +1169,64 @@
   };
 
   // ============================================================
-  // CHECK AGGIORNAMENTO PDF
+  // CHECK AGGIORNAMENTO
   // ============================================================
-
   const checkAggiornamentoPDF = () => {
     const dataMax = getMaxDataPDF();
     const oggi = new Date().toISOString().slice(0, 10);
     const meta = leggiMeta();
 
     if (!dataMax || !meta || meta.numPartite === 0) {
-      return {
-        stato: 'assente',
-        aggiornato: false,
-        dataMax: null,
-        oggi,
-        motivo: 'no-data',
-        messaggio: '📄 Nessun PDF quote caricato. Ricontrolla il file.',
-      };
+      return { stato: 'assente', aggiornato: false, dataMax: null, oggi, motivo: 'no-data', messaggio: '📄 Nessun PDF caricato.' };
     }
 
     if (meta.salvatoIl) {
-      const msDaSalvataggio = Date.now() - new Date(meta.salvatoIl).getTime();
-      const giorniDaSalvataggio = msDaSalvataggio / (1000 * 60 * 60 * 24);
-      if (giorniDaSalvataggio > GIORNI_SCADENZA) {
+      const giorni = (Date.now() - new Date(meta.salvatoIl).getTime()) / 86400000;
+      if (giorni > GIORNI_SCADENZA) {
         return {
-          stato: 'scaduto',
-          aggiornato: false,
-          dataMax,
-          oggi,
-          motivo: 'vecchio',
-          giorniDaSalvataggio: Math.round(giorniDaSalvataggio),
-          messaggio: `⚠️ Quote caricate ${Math.round(giorniDaSalvataggio)} giorni fa. Aggiorna il PDF!`,
+          stato: 'scaduto', aggiornato: false, dataMax, oggi, motivo: 'vecchio',
+          giorniDaSalvataggio: Math.round(giorni),
+          messaggio: `⚠️ Quote caricate ${Math.round(giorni)} giorni fa.`,
         };
       }
     }
 
     if (dataMax < oggi) {
       return {
-        stato: 'scaduto',
-        aggiornato: false,
-        dataMax,
-        oggi,
-        motivo: 'scaduto',
-        messaggio: `⚠️ Quote SCADUTE! Ultima data nel PDF: ${dataMax.split('-').reverse().join('/')} (oggi: ${oggi.split('-').reverse().join('/')}). Aggiorna il PDF!`,
+        stato: 'scaduto', aggiornato: false, dataMax, oggi, motivo: 'scaduto',
+        messaggio: `⚠️ Quote scadute! Ultima: ${dataMax.split('-').reverse().join('/')}`,
       };
     }
 
-    return {
-      stato: 'ok',
-      aggiornato: true,
-      dataMax,
-      oggi,
-      motivo: 'ok',
-      messaggio: null,
-    };
+    return { stato: 'ok', aggiornato: true, dataMax, oggi, motivo: 'ok', messaggio: null };
   };
-
-  // ============================================================
-  // DEBUG
-  // ============================================================
 
   const debugPartita = (nomeCasa) => {
     const quote = leggiQuote();
     const norm = normalizzaNome(nomeCasa);
     const keys = Object.keys(quote).filter(k => k.includes(norm));
-    if (keys.length === 0) {
-      console.log(`❌ Nessuna partita trovata contenente "${nomeCasa}" (norm: "${norm}")`);
-      return;
-    }
-    keys.forEach(k => {
+    console.log(`🔍 Debug "${nomeCasa}" (norm: "${norm}") → ${keys.length} risultati`);
+    keys.slice(0, 5).forEach(k => {
       const val = quote[k];
-      console.log(`📌 KEY: ${k}`);
-      console.log(`   ${val.casa} vs ${val.ospiti} (${val.data})`);
-      console.log(`   Quote:`, val.quote);
+      console.log(`   ${k} → ${val.casa} vs ${val.ospiti} (${val.data})`);
     });
   };
 
   // ============================================================
-  // ESPOSIZIONE GLOBALE
+  // EXPORT
   // ============================================================
-
   window.PDFQuoteParser = {
-    estraiRigheDaPDF,
-    parseMarathonbetPDF,
-    parseRigaPartita,
-    isIntestazioneCampionato,
-    isRigaData,
-    normalizzaNome,
-    normalizzaDataISO, // ⭐ nuova
-    similarita,
-    trovaMatchApp,
-    analizzaValueBet,
-    salvaQuote,
-    aggiungiQuote,
-    resetQuote,
-    leggiQuote,
-    leggiMeta,
-    getMaxDataPDF,
-    trovaQuotaPerGiocata,
-    analizzaGiocataConQuota,
-    mappaGiocataAQuota,
-    checkAggiornamentoPDF,
-    debugPartita,
-    CAMPIONATI_RICONOSCIBILI,
-    TRADUZIONI_SQUADRE,
-    PREFISSI_SQUADRA, // ⭐ esposto per debug
-    SOGLIA_MATCH,
-    STORAGE_KEY,
-    STORAGE_META_KEY,
-    GIORNI_SCADENZA,
+    estraiRigheDaPDF, parseMarathonbetPDF, parseRigaPartita,
+    isIntestazioneCampionato, isRigaData,
+    normalizzaNome, normalizzaDataISO,
+    similarita, trovaMatchApp, analizzaValueBet,
+    salvaQuote, aggiungiQuote, resetQuote, leggiQuote, leggiMeta, getMaxDataPDF,
+    trovaQuotaPerGiocata, analizzaGiocataConQuota, mappaGiocataAQuota,
+    checkAggiornamentoPDF, debugPartita,
+    CAMPIONATI_RICONOSCIBILI, TRADUZIONI_SQUADRE, PREFISSI_SQUADRA,
+    SOGLIA_MATCH, STORAGE_KEY, STORAGE_META_KEY, GIORNI_SCADENZA,
   };
 
-  console.log('✅ PDFQuoteParser caricato v2 - fix mapping quote + normalizzazione data + fuzzy matching migliorato');
+  console.log('✅ PDFQuoteParser v3 caricato — fix stagione calcistica + u23 + campionato in coda');
 
 })();
