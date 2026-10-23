@@ -1,8 +1,8 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto
-// v18: FIX allineamento etichette globali + ChampLogo robusto
-//      + useMemo dipendenze corrette + safeGetDixonPct robusto
-//      + rimosso duplicate formatGiocataLabel/normalizzaAccenti
+// v19: Aggiunto ⏳ durante download, tooltip diagnostico su -.--
+//      + quoteVersion per re-render automatico su quote-updated
+//      + safeGetDixonPct robusto
 // ============================================================
 
 (function () {
@@ -43,7 +43,7 @@
     };
   }
 
-  // ⭐ Riferimenti globali (evita dipendenza da ordine di caricamento)
+  // ⭐ Riferimenti globali
   const normalizzaAccenti = (str) => {
     if (typeof window.normalizzaAccenti === 'function') return window.normalizzaAccenti(str);
     if (!str) return '';
@@ -86,7 +86,6 @@
     return label;
   };
 
-  // ⭐ FUNZIONE SICURA PER DIXON
   const safeGetDixonPct = (familyId, giocata, match, allMatches) => {
     if (!match || !allMatches || allMatches.length === 0) return 0;
     if (typeof window.getDixonPct === 'function' && !window.getDixonPct._isFallback) {
@@ -146,13 +145,12 @@
   };
 
   // ============================================================
-  // CHAMP LOGO — più varianti fallback per EFL Championship
+  // CHAMP LOGO
   // ============================================================
   const ChampLogo = ({ campionato, size = 24 }) => {
     const [hasError, setHasError] = useState(false);
     const [pathIndex, setPathIndex] = useState(0);
 
-    // Reset quando cambia il campionato
     useEffect(() => {
       setHasError(false);
       setPathIndex(0);
@@ -205,12 +203,13 @@
   };
 
   // ============================================================
-  // QUOTA BOX
+  // ⭐ QUOTA BOX — v2 con ⏳ durante download + tooltip diagnostico
   // ============================================================
   const QuotaBox = ({ match, familyId, giocata, pctTua, compact = false }) => {
     const [quotaInfo, setQuotaInfo] = useState(null);
     const quoteCtx = window.QuoteManager && window.QuoteManager.useQuote ? window.QuoteManager.useQuote() : {};
     const numPartite = quoteCtx.numPartite || 0;
+    const inCorso = quoteCtx.inCorso || false;
     const dataMaxPDF = quoteCtx.dataMaxPDF || null;
 
     useEffect(() => {
@@ -222,19 +221,67 @@
     const quotaBook = hasQuota ? quotaInfo.quotaBook : null;
     const isValue = hasQuota ? !!quotaInfo.isValue : false;
 
-    if (!hasQuota) {
+    // ⭐ Durante il download mostra ⏳
+    if (!hasQuota && inCorso) {
       return (
         <div
-          title="Quota non disponibile nel PDF"
+          title="Download quote Marathonbet in corso..."
           style={{
             display: 'inline-flex', alignItems: 'center', gap: '3px',
-            padding: compact ? '1px 5px' : '2px 6px', marginLeft: compact ? '0' : '6px', borderRadius: '4px',
-            background: 'rgba(255, 255, 255, 0.03)', border: '1px dashed var(--border)',
-            fontSize: compact ? '10px' : '11px', fontWeight: 'bold', color: 'var(--text-dim)',
-            whiteSpace: 'nowrap', opacity: 0.6, flexShrink: 0,
+            padding: compact ? '1px 5px' : '2px 6px',
+            marginLeft: compact ? '0' : '6px',
+            borderRadius: '4px',
+            background: 'rgba(0, 245, 255, 0.08)',
+            border: '1px dashed var(--neon-cyan)',
+            fontSize: compact ? '10px' : '11px',
+            fontWeight: 'bold',
+            color: 'var(--neon-cyan)',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+            cursor: 'progress',
           }}
         >
-          <span>💰</span><span>-.--</span>
+          <span>💰</span><span>⏳</span>
+        </div>
+      );
+    }
+
+    // ⭐ Nessuna quota: mostra motivo nel tooltip
+    if (!hasQuota) {
+      let motivo = 'Quota non disponibile';
+      let icona = '-.-';
+
+      if (numPartite === 0) {
+        motivo = '⚠️ Nessun PDF quote caricato. Vai in Impostazioni → Quote Book per importare il PDF.';
+        icona = '❌';
+      } else if (dataMaxPDF && match.data && match.data > dataMaxPDF) {
+        motivo = `📅 Partita oltre la data max del PDF (${dataMaxPDF.split('-').reverse().join('/')}). Il PDF non copre ancora questa data.`;
+        icona = '-.-';
+      } else {
+        motivo = '🔍 Partita non trovata nel PDF Marathonbet (nome squadra o data non coincidono). Verifica in console con: PDFQuoteParser.debugPartita("NomeSquadra")';
+        icona = '-.-';
+      }
+
+      return (
+        <div
+          title={motivo}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '3px',
+            padding: compact ? '1px 5px' : '2px 6px',
+            marginLeft: compact ? '0' : '6px',
+            borderRadius: '4px',
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px dashed var(--border)',
+            fontSize: compact ? '10px' : '11px',
+            fontWeight: 'bold',
+            color: 'var(--text-dim)',
+            whiteSpace: 'nowrap',
+            opacity: 0.8,
+            cursor: 'help',
+            flexShrink: 0,
+          }}
+        >
+          <span>💰</span><span>{icona}</span>
         </div>
       );
     }
@@ -242,12 +289,16 @@
     return (
       <div style={{
         display: 'inline-flex', alignItems: 'center', gap: '3px',
-        padding: compact ? '1px 5px' : '2px 6px', marginLeft: compact ? '0' : '6px', borderRadius: '4px',
+        padding: compact ? '1px 5px' : '2px 6px',
+        marginLeft: compact ? '0' : '6px',
+        borderRadius: '4px',
         background: isValue ? 'rgba(0, 255, 136, 0.15)' : 'rgba(255, 255, 255, 0.05)',
         border: `1px solid ${isValue ? 'var(--neon-green)' : 'var(--border)'}`,
-        fontSize: compact ? '10px' : '11px', fontWeight: 'bold',
+        fontSize: compact ? '10px' : '11px',
+        fontWeight: 'bold',
         color: isValue ? 'var(--neon-green)' : 'var(--text)',
-        whiteSpace: 'nowrap', flexShrink: 0,
+        whiteSpace: 'nowrap',
+        flexShrink: 0,
       }}>
         <span>💰</span><span>{quotaBook.toFixed(2)}</span>
         {isValue && <span style={{ fontSize: '9px' }}>⭐</span>}
@@ -269,7 +320,7 @@
   };
 
   // ============================================================
-  // MATCH TAB (VISTA TRIPLA FISSA)
+  // MATCH TAB
   // ============================================================
   const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie }) => {
     const computeMatchStats = window.computeMatchStats;
@@ -366,7 +417,6 @@
       return out;
     }, [famiglieDaAnalizzare, match.id, allMatches.length, stats.error]);
 
-    // Calcoliamo le righe per il badge in alto (score)
     const righeDaMostrare = useMemo(() => {
       if (stats.error) return [];
       return bestStoricoPerFamiglia
@@ -379,7 +429,6 @@
         });
     }, [bestStoricoPerFamiglia, match.id, allMatches.length, stats.error]);
 
-    // ⭐ Allineamento per la vista TRIPLA
     const topTripla = useMemo(() => {
       if (stats.error) return [];
       const topStorico = [...bestStoricoPerFamiglia].sort((a, b) => b.pct - a.pct).slice(0, 3);
@@ -435,9 +484,6 @@
       boxShadow: `0 0 12px ${champColor}88, 0 0 4px ${champColor}44, inset 0 0 8px ${champColor}11`,
     };
 
-    // ============================================================
-    // 🔀 RIGA TRIPLA
-    // ============================================================
     const renderRigaTripla = () => {
       if (topTripla.length === 0) {
         return (
@@ -495,7 +541,6 @@
                   </span>
                 )}
 
-                {/* Col 1: Storico */}
                 <div style={{
                   display: 'flex', flexDirection: 'column', gap: '2px',
                   padding: '6px 8px', borderRadius: '6px',
@@ -520,7 +565,6 @@
                   )}
                 </div>
 
-                {/* Col 2: Dixon */}
                 <div style={{
                   display: 'flex', flexDirection: 'column', gap: '2px',
                   padding: '6px 8px', borderRadius: '6px',
@@ -545,7 +589,6 @@
                   )}
                 </div>
 
-                {/* Col 3: Quota */}
                 <div style={{
                   display: 'flex', flexDirection: 'column', gap: '2px',
                   padding: '6px 8px', borderRadius: '6px',
@@ -819,6 +862,17 @@
     const { mode: visualizzaMode, setMode: setVisualizzaMode } = window.FiltriCampionati.useVisualizzaGiocateMode();
     const { giorni } = window.FiltriCampionati.useGiorniRange();
 
+    // ⭐ FIX: forza re-render quando le quote vengono aggiornate
+    const [quoteVersion, setQuoteVersion] = useState(0);
+    useEffect(() => {
+      const handler = () => {
+        console.log('🔄 Palinsesto: quote aggiornate, re-render forzato');
+        setQuoteVersion(v => v + 1);
+      };
+      window.addEventListener('quote-updated', handler);
+      return () => window.removeEventListener('quote-updated', handler);
+    }, []);
+
     const {
       campionatiAttivi,
       toggleCampionato,
@@ -945,7 +999,7 @@
             </div>
           ) : (
             <div className="matches-grid">
-              {partiteOggi.map(m => (<MatchTab key={m.id} match={m} allMatches={matches} onSelect={onSelectMatch} selectedFamiglie={selectedFamiglie} />))}
+              {partiteOggi.map(m => (<MatchTab key={`${m.id}-${quoteVersion}`} match={m} allMatches={matches} onSelect={onSelectMatch} selectedFamiglie={selectedFamiglie} />))}
             </div>
           )}
         </div>
@@ -997,7 +1051,7 @@
           </div>
         ) : (
           <div className="matches-grid">
-            {partiteOggi.map(m => (<MatchTab key={m.id} match={m} allMatches={matches} onSelect={onSelectMatch} selectedFamiglie={selectedFamiglie} />))}
+            {partiteOggi.map(m => (<MatchTab key={`${m.id}-${quoteVersion}`} match={m} allMatches={matches} onSelect={onSelectMatch} selectedFamiglie={selectedFamiglie} />))}
           </div>
         )}
       </div>
@@ -1006,6 +1060,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto v18 caricato — etichette globali unificate + ChampLogo robusto');
+  console.log('✅ Modulo Palinsesto v19 caricato — quote reattive + ⏳ + tooltip diagnostico');
 
 })();

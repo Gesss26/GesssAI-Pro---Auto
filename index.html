@@ -612,17 +612,13 @@
         return renderFallback();
       }
 
-      // Genera lista di path da provare
       const buildPaths = () => {
         const folder = isCoppaUEFA(championship) ? getUefaFolder(championship) : getLeagueFolder(championship);
         const baseFolder = `logos/${folder}/`;
-        
         const overrideName = LOGO_OVERRIDES[teamName];
-        
         const p1 = overrideName ? `${baseFolder}${overrideName.replace(/\s+/g, '%20')}.png` : null;
         const p2 = `${baseFolder}${teamName.replace(/\s+/g, '%20')}.png`;
         const p3 = `${baseFolder}${teamName.replace(/\s+/g, '%20').toLowerCase()}.png`;
-
         return [p1, p2, p3].filter(Boolean);
       };
 
@@ -1108,7 +1104,7 @@
     window.get12Under45 = get12Under45;
     window.normalizzaAccenti = normalizzaAccenti;
 
-    console.log('✅ Funzioni globali esposte v26 - Fix loghi a cascata');
+    console.log('✅ Funzioni globali esposte v27 - Quote reattive + barra di stato');
 
     // ============================================================
     // LOAD/SAVE STATE
@@ -1164,6 +1160,145 @@
     };
 
     // ============================================================
+    // STATO QUOTE GLOBALE (barra in header)
+    // ============================================================
+    const QuoteStatusBar = () => {
+      const [stato, setStato] = useState({
+        numPartite: 0,
+        dataMaxPDF: null,
+        inCorso: false,
+        errore: null,
+      });
+      const [espanso, setEspanso] = useState(false);
+
+      useEffect(() => {
+        const aggiorna = () => {
+          const meta = window.PDFQuoteParser && window.PDFQuoteParser.leggiMeta
+            ? window.PDFQuoteParser.leggiMeta() : null;
+          const qm = window.QuoteManager ? window.QuoteManager.useQuote?.() : null;
+          setStato({
+            numPartite: meta?.numPartite || 0,
+            dataMaxPDF: meta?.dataMaxPDF || null,
+            inCorso: qm?.inCorso || false,
+            errore: qm?.errore || null,
+          });
+        };
+
+        aggiorna();
+
+        const handler = () => aggiorna();
+        window.addEventListener('quote-updated', handler);
+        const timer = setInterval(aggiorna, 2000);
+
+        return () => {
+          window.removeEventListener('quote-updated', handler);
+          clearInterval(timer);
+        };
+      }, []);
+
+      const dataMaxEU = stato.dataMaxPDF
+        ? stato.dataMaxPDF.split('-').reverse().join('/')
+        : 'N/D';
+
+      const oggi = new Date().toISOString().slice(0, 10);
+      const aggiornato = stato.dataMaxPDF && stato.dataMaxPDF >= oggi;
+
+      const colore = stato.errore
+        ? 'var(--neon-red)'
+        : stato.inCorso
+          ? 'var(--neon-cyan)'
+          : stato.numPartite === 0
+            ? 'var(--neon-red)'
+            : aggiornato
+              ? 'var(--neon-green)'
+              : 'var(--neon-gold)';
+
+      const icona = stato.errore
+        ? '❌'
+        : stato.inCorso
+          ? '⏳'
+          : stato.numPartite === 0
+            ? '📄'
+            : aggiornato
+              ? '✅'
+              : '⚠️';
+
+      const label = stato.errore
+        ? 'Errore download'
+        : stato.inCorso
+          ? 'Download quote in corso...'
+          : stato.numPartite === 0
+            ? 'Nessun PDF caricato'
+            : aggiornato
+              ? `${stato.numPartite} partite • ${dataMaxEU}`
+              : `${stato.numPartite} partite • scadute`;
+
+      const ricarica = (e) => {
+        e.stopPropagation();
+        if (window.QuoteManager && typeof window.QuoteManager.scaricaEAggiorna === 'function') {
+          window.QuoteManager.scaricaEAggiorna(true);
+        }
+      };
+
+      return (
+        <div
+          onClick={() => setEspanso(v => !v)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            padding: '6px 14px',
+            marginBottom: '12px',
+            background: `linear-gradient(135deg, ${colore}15, ${colore}08)`,
+            border: `1px solid ${colore}66`,
+            borderRadius: '10px',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            color: colore,
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            userSelect: 'none',
+          }}
+          title={stato.errore || `Quote Marathonbet: ${stato.numPartite} partite • Data max ${dataMaxEU}`}
+        >
+          <span style={{ fontSize: '14px' }}>{icona}</span>
+          <span>Quote Book: {label}</span>
+          <button
+            onClick={ricarica}
+            disabled={stato.inCorso}
+            style={{
+              marginLeft: '6px',
+              padding: '3px 10px',
+              fontSize: '11px',
+              fontWeight: 'bold',
+              borderRadius: '6px',
+              border: `1px solid ${colore}`,
+              background: stato.inCorso ? 'transparent' : `${colore}22`,
+              color: colore,
+              cursor: stato.inCorso ? 'wait' : 'pointer',
+              opacity: stato.inCorso ? 0.5 : 1,
+            }}
+            title="Ricarica le quote dal repository GitHub"
+          >
+            {stato.inCorso ? '⏳' : '🔄'} Ricarica
+          </button>
+          {espanso && stato.numPartite > 0 && (
+            <span style={{ fontSize: '10px', opacity: 0.8, marginLeft: '8px', fontWeight: 'normal' }}>
+              {' '}• File: {window.QuoteManager?.PDF_FILES?.length || 0} PDF
+              {' '}• Stato: {aggiornato ? 'aggiornate' : 'da aggiornare'}
+            </span>
+          )}
+          {stato.errore && (
+            <span style={{ fontSize: '10px', fontWeight: 'normal', marginLeft: '8px' }}>
+              {stato.errore.substring(0, 60)}...
+            </span>
+          )}
+        </div>
+      );
+    };
+
+    // ============================================================
     // APP COMPONENT
     // ============================================================
     function App() {
@@ -1195,7 +1330,6 @@
         }
       }, [matches, championships]);
 
-      // ⭐ FIX: invalida la cache dei parametri Dixon quando cambiano i dati
       useEffect(() => {
         if (typeof window.clearStatsCache === 'function') {
           try { window.clearStatsCache(); } catch (e) {}
@@ -1307,6 +1441,9 @@
           </div>
 
           <div className="container">
+            {/* ⭐ BARRA DI STATO QUOTE GLOBALE */}
+            <QuoteStatusBar />
+
             {window.QuoteManager && window.QuoteManager.BannerAlertPDF && (
               <window.QuoteManager.BannerAlertPDF />
             )}
@@ -1331,6 +1468,7 @@
                 selectedFamiglie={selectedFamiglie}
                 onSelectMatch={selectMatch}
                 weatherCache={weatherCache}
+                championships={championships}
               />
             )}
 
@@ -1448,7 +1586,7 @@
     }
 
     // ============================================================
-    // ⭐ LOG DIAGNOSTICO AUTOMATICO (unico listener)
+    // ⭐ LOG DIAGNOSTICO AUTOMATICO
     // ============================================================
     window.addEventListener('load', () => {
       setTimeout(() => {

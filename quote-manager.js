@@ -6,7 +6,7 @@
 // - Alert se PDF non aggiornato
 // - Hook React useQuote() per accedere alle quote
 // - BannerAlertPDF componente per avvisi
-// + FIX v2: useQuote chiamato correttamente, log debug migliorati
+// + FIX v3: forceRefresh() per notifica globale reattiva
 // ============================================================
 
 (function () {
@@ -198,6 +198,10 @@
       };
 
       notifyListeners(payload);
+
+      // ⭐ FIX: forza il refresh globale dopo il download
+      forceRefresh();
+
       if (DEBUG) console.log('✅ Quote aggiornate: ' + totalePartite + ' partite totali da ' + PDF_FILES.length + ' file');
 
       return payload;
@@ -209,6 +213,29 @@
       notifyListeners({ inCorso: false, errore: err.message });
       return { ok: false, errore: err.message };
     }
+  };
+
+  // ============================================================
+  // FORCE REFRESH — notifica tutti i listener + dispatch event
+  // ============================================================
+
+  const forceRefresh = () => {
+    const meta = window.PDFQuoteParser && window.PDFQuoteParser.leggiMeta
+      ? window.PDFQuoteParser.leggiMeta() : null;
+    notifyListeners({
+      inCorso: state.inCorso,
+      numPartite: meta ? meta.numPartite : 0,
+      dataMaxPDF: meta ? meta.dataMaxPDF : null,
+      meta: meta,
+    });
+    // Dispatch esplicito per i componenti che ascoltano window events
+    window.dispatchEvent(new CustomEvent('quote-updated', {
+      detail: {
+        numPartite: meta ? meta.numPartite : 0,
+        dataMaxPDF: meta ? meta.dataMaxPDF : null,
+      }
+    }));
+    if (DEBUG) console.log('🔄 forceRefresh: notifica globale inviata');
   };
 
   // ============================================================
@@ -258,7 +285,6 @@
 
   // ============================================================
   // HOOK REACT: useQuote
-  // ⭐ FIX: chiamata unica e non condizionale
   // ============================================================
 
   const useQuote = () => {
@@ -526,11 +552,12 @@
     BannerAlertPDF: BannerAlertPDF,
     initAutoDownload: initAutoDownload,
     stampaTutteQuote: stampaTutteQuote,
+    forceRefresh: forceRefresh,
     PDF_FILES: PDF_FILES,
     REPO_BASE_URL: REPO_BASE_URL,
     DEBUG: DEBUG,
   };
 
-  console.log('✅ QuoteManager caricato v2 (MULTI-FILE) - file configurati: ' + PDF_FILES.length);
+  console.log('✅ QuoteManager caricato v3 (MULTI-FILE) - file configurati: ' + PDF_FILES.length + ' + forceRefresh');
 
 })();
