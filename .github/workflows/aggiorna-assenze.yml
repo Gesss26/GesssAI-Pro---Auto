@@ -3,7 +3,7 @@ name: Aggiorna Assenze Venerdì
 on:
   schedule:
     # Ogni venerdì alle 15:00 UTC (17:00 ora italiana, prima delle partite serali)
-    - cron: '0 15 * * 5'
+    - cron: '0 8 * * 5'
   workflow_dispatch:  # Permette di lanciarlo manualmente da GitHub
 
 jobs:
