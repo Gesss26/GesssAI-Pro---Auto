@@ -1,0 +1,96 @@
+{
+  "aggiornato": "2026-10-23",
+  "squadre": {
+    "Atalanta": [
+      { "nome": "Hien", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "Djimsiti", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+      { "nome": "Sulemana K.", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ],
+    "Bologna": [
+      { "nome": "Dallinga", "ruolo": "A", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "Mbangula", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+      { "nome": "Vitik", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ],
+    "Cagliari": [
+      { "nome": "Prati", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+      { "nome": "Ciervo", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ],
+    "Como": [
+      { "nome": "Morata", "ruolo": "A", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "Kambwala", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+      { "nome": "Goldaniga", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ],
+    "Fiorentina": [
+      { "nome": "Parisi", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ],
+    "Frosinone": [
+      { "nome": "Birligea", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+      { "nome": "El Azzouzi A.", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+      { "nome": "Akpoguma", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ],
+    "Genoa": [
+      { "nome": "Martin", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "Vogliacco", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ],
+    "Inter": [],
+    "Juventus": [
+      { "nome": "Di Gregorio", "ruolo": "P", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "Thuram K.", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "Cabal", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+      { "nome": "Miretti", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+      { "nome": "Milik", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ],
+    "Lazio": [
+      { "nome": "Romagnoli", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "Lazzari", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+      { "nome": "Patric", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+      { "nome": "Cataldi", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ],
+    "Lecce": [
+      { "nome": "Berisha M.", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ],
+    "Milan": [
+      { "nome": "Leao", "ruolo": "A", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "Tomori", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "Fofana Y.", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "Nkunku", "ruolo": "A", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "Gimenez", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ],
+    "Monza": [
+      { "nome": "Pessina", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "Ciurria", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+      { "nome": "Petagna", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ],
+    "Napoli": [
+      { "nome": "Lukaku", "ruolo": "A", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "Buongiorno", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "Gutierrez", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ],
+    "Parma": [
+      { "nome": "Suzuki", "ruolo": "P", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "Nicolussi Caviglia", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "Circati", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ],
+    "Roma": [
+      { "nome": "Angelino", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "El Aynaoui", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ],
+    "Sassuolo": [
+      { "nome": "Walukiewicz", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+      { "nome": "Boloca", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+      { "nome": "Konè I.", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ],
+    "Torino": [
+      { "nome": "Biraghi", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "Anjorin", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ],
+    "Udinese": [
+      { "nome": "Lovric", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+      { "nome": "Buksa", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ],
+    "Venezia": [
+      { "nome": "Duncan", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+      { "nome": "Adorante", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+    ]
+  }
+}

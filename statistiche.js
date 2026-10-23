@@ -1,11 +1,13 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v13)
+// statistiche.js - Modulo Statistiche (v14)
+// ✅ Aggiunto modulo Assenze e Infortuni
 // ✅ Cache Dixon in memoria (Map) al posto di localStorage
 // ✅ clearStatsCache svuota entrambe le cache (param + mc)
 // ✅ getDixonPct usa cache in memoria
 // ✅ formatGiocataLabel centralizzata (usa window.formatGiocataLabel)
 // ✅ TutteLeFamigliePanel/Dixon null-safe su stats.error
 // ✅ AIAnalysis carica da cache memoria (no localStorage)
+// ✅ simulateMatches applica pesi assenze (pesoAttacco, pesoDifesa)
 // ============================================================
 
 (function () {
@@ -16,8 +18,8 @@
   // ============================================================
   // CACHE PARAMETRI + CACHE MATRICI DIXON (in memoria)
   // ============================================================
-  const _paramCache = new Map();   // chiave: team__champ / __avg__champ
-  const _mcCache = new Map();      // chiave: match.id → matrice Dixon
+  const _paramCache = new Map();
+  const _mcCache = new Map();
 
   const _cacheKey = (team, champ) => `${team}__${champ}`;
   const _avgKey = (champ) => `__avg__${champ}`;
@@ -28,13 +30,12 @@
   };
 
   // ============================================================
-  // FORMATTAZIONE ETICHETTE (usa globale con fallback)
+  // FORMATTAZIONE ETICHETTE
   // ============================================================
   const formatGiocataLabel = (familyId, label) => {
     if (typeof window.formatGiocataLabel === 'function') {
       return window.formatGiocataLabel(familyId, label);
     }
-    // Fallback minimale (coerente con index.html)
     if (!label) return '—';
     if (label.startsWith('Over '))  return label.replace('.', ',');
     if (label.startsWith('Under ')) return label.replace('.', ',');
@@ -148,7 +149,6 @@
     const avg = getLeagueAverages(championship, allMatches);
     const safe = (num, den, fallback = 1) => den > 0 ? num / den : fallback;
 
-    // ⭐ FIX: fallback sicuro se media campionato è 0 (evita divisione per zero)
     const avgHomeSafe = avg.avgHome > 0 ? avg.avgHome : 1.4;
     const avgAwaySafe = avg.avgAway > 0 ? avg.avgAway : 1.1;
 
@@ -208,7 +208,6 @@
   };
 
   const simulateMatches = (homeTeam, awayTeam, championship, allMatches) => {
-    // ⭐ NON chiamiamo clearStatsCache qui: è gestita da App al cambio matches.
     const hp = getTeamParams(homeTeam, championship, allMatches);
     const ap = getTeamParams(awayTeam, championship, allMatches);
     const avg = getLeagueAverages(championship, allMatches);
@@ -216,8 +215,28 @@
     const avgHomeSafe = avg.avgHome > 0 ? avg.avgHome : 1.4;
     const avgAwaySafe = avg.avgAway > 0 ? avg.avgAway : 1.1;
 
-    const lambdaHome = hp.attackHome * ap.defenseAway * avgHomeSafe;
-    const lambdaAway = ap.attackAway * hp.defenseHome * avgAwaySafe;
+    // ⭐ Pesi assenze
+    let pesoAttaccoHome = 0, pesoDifesaHome = 0;
+    let pesoAttaccoAway = 0, pesoDifesaAway = 0;
+    let dettagliAssenzeHome = null, dettagliAssenzeAway = null;
+
+    if (window.AssenzeDB && typeof window.AssenzeDB.calcolaPesi === 'function') {
+      const hAss = window.AssenzeDB.calcolaPesi(homeTeam);
+      const aAss = window.AssenzeDB.calcolaPesi(awayTeam);
+      pesoAttaccoHome = hAss.pesoAttacco;
+      pesoDifesaHome = hAss.pesoDifesa;
+      pesoAttaccoAway = aAss.pesoAttacco;
+      pesoDifesaAway = aAss.pesoDifesa;
+      dettagliAssenzeHome = hAss;
+      dettagliAssenzeAway = aAss;
+    }
+
+    const lambdaHome = hp.attackHome * (1 - pesoAttaccoHome)
+                     * ap.defenseAway * (1 + pesoDifesaAway)
+                     * avgHomeSafe;
+    const lambdaAway = ap.attackAway * (1 - pesoAttaccoAway)
+                     * hp.defenseHome * (1 + pesoDifesaHome)
+                     * avgAwaySafe;
 
     const matrix = buildScoreMatrix(lambdaHome, lambdaAway);
 
@@ -272,6 +291,18 @@
       leagueAvgAway: avgAwaySafe.toFixed(2),
       weakHome: !!hp.weak,
       weakAway: !!ap.weak,
+      assenze: {
+        home: dettagliAssenzeHome,
+        away: dettagliAssenzeAway,
+        impattoHome: {
+          attacco: Math.round(pesoAttaccoHome * 100),
+          difesa: Math.round(pesoDifesaHome * 100),
+        },
+        impattoAway: {
+          attacco: Math.round(pesoAttaccoAway * 100),
+          difesa: Math.round(pesoDifesaAway * 100),
+        },
+      },
     };
   };
 
@@ -463,7 +494,7 @@
   };
 
   // ============================================================
-  // ⭐ GET DIXON PCT PER IL PALINSESTO (usa cache in memoria)
+  // GET DIXON PCT
   // ============================================================
   window.getDixonPct = function(familyId, giocata, match, allMatches) {
     if (!match || !allMatches || allMatches.length === 0) return 0;
@@ -505,7 +536,6 @@
 
     useEffect(() => {
       if (!match) return;
-      // ⭐ Prima: cache in memoria; poi fallback su localStorage legacy (per compatibilità)
       const cached = _mcCache.get(match.id);
       if (cached) { setMc(cached); return; }
 
@@ -516,7 +546,6 @@
           if (parsed && parsed.lambdaCasa && parsed.risultati) {
             _mcCache.set(match.id, parsed);
             setMc(parsed);
-            // pulizia opzionale: rimuoviamo la vecchia chiave
             try { localStorage.removeItem(`ft_mc_${match.id}`); } catch (e) {}
             return;
           }
@@ -629,6 +658,33 @@
           </div>
         </div>
 
+        {/* ⭐ BANNER IMPATTO ASSENZE */}
+        {mc.assenze && (mc.assenze.impattoHome.attacco > 0 || mc.assenze.impattoHome.difesa > 0
+                       || mc.assenze.impattoAway.attacco > 0 || mc.assenze.impattoAway.difesa > 0) && (
+          <div style={{
+            marginTop: '8px', padding: '8px 12px', borderRadius: '6px',
+            background: 'rgba(255, 0, 229, 0.10)',
+            border: '1px solid rgba(255, 0, 229, 0.4)',
+            fontSize: '11px',
+          }}>
+            <div style={{ fontWeight: 900, color: 'var(--neon-magenta)', marginBottom: '4px' }}>
+              🏥 Impatto assenze sui λ
+            </div>
+            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+              <span>
+                🏠 {match.casa}:{' '}
+                <b style={{ color: '#ff6b35' }}>-{mc.assenze.impattoHome.attacco}% att</b>{' '}
+                <b style={{ color: '#3498db' }}>-{mc.assenze.impattoHome.difesa}% dif</b>
+              </span>
+              <span>
+                ✈️ {match.ospiti}:{' '}
+                <b style={{ color: '#ff6b35' }}>-{mc.assenze.impattoAway.attacco}% att</b>{' '}
+                <b style={{ color: '#3498db' }}>-{mc.assenze.impattoAway.difesa}% dif</b>
+              </span>
+            </div>
+          </div>
+        )}
+
         <div style={{
           display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
           gap: '8px', marginTop: '8px', fontSize: '11px', color: 'var(--text-dim)'
@@ -687,6 +743,114 @@
             );
           })}
         </div>
+      </div>
+    );
+  };
+
+  // ============================================================
+  // PANNELLO ASSENZE E INFORTUNI
+  // ============================================================
+  const AssenzePanel = ({ squadra, teamColor }) => {
+    const [, setVersion] = useState(0);
+
+    useEffect(() => {
+      const h = () => setVersion(v => v + 1);
+      window.addEventListener('assenze-updated', h);
+      window.addEventListener('stats-giocatori-pronte', h);
+      return () => {
+        window.removeEventListener('assenze-updated', h);
+        window.removeEventListener('stats-giocatori-pronte', h);
+      };
+    }, []);
+
+    const assenze = window.AssenzeDB?.getAssenze(squadra) || [];
+    const pesi = window.AssenzeDB?.calcolaPesi(squadra);
+    const aggiornato = window.AssenzeDB?.aggiornato;
+
+    const getImportanzaColor = (imp) => {
+      if (imp === 'chiave') return '#ff00e5';
+      if (imp === 'rotazione') return 'var(--neon-gold)';
+      return 'var(--text-dim)';
+    };
+
+    const getRuoloBadge = (r) => {
+      const map = {
+        P: { label: 'POR', color: '#e67e22' },
+        D: { label: 'DIF', color: '#3498db' },
+        C: { label: 'CEN', color: '#2ecc71' },
+        A: { label: 'ATT', color: '#e74c3c' },
+      };
+      return map[r] || { label: r || '?', color: '#95a5a6' };
+    };
+
+    return (
+      <div className="card" style={{ padding: '14px', borderTop: `3px solid ${teamColor || 'var(--neon-cyan)'}` }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+          <h4 style={{ margin: 0, fontSize: '14px', color: teamColor || 'var(--neon-cyan)' }}>
+            🏥 {squadra}
+          </h4>
+          {aggiornato && (
+            <span style={{ fontSize: '10px', color: 'var(--text-dim)' }}>
+              agg. {aggiornato.split('-').reverse().join('/')}
+            </span>
+          )}
+        </div>
+
+        {assenze.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--neon-green)', fontSize: '13px' }}>
+            ✅ Nessuna assenza
+          </div>
+        ) : (
+          <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '10px' }}>
+              {assenze.map((a, idx) => {
+                const rb = getRuoloBadge(a.ruolo);
+                const col = getImportanzaColor(a.importanza);
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                      padding: '5px 8px', borderRadius: '6px',
+                      background: 'var(--surface)',
+                      borderLeft: `3px solid ${col}`,
+                      fontSize: '11px',
+                    }}
+                  >
+                    <span style={{
+                      background: rb.color, color: '#000', fontWeight: 900,
+                      padding: '1px 5px', borderRadius: '3px', fontSize: '9px',
+                      minWidth: '26px', textAlign: 'center',
+                    }}>{rb.label}</span>
+                    <span style={{ flex: 1, fontWeight: 'bold', color: 'var(--text)' }}>
+                      {a.nome}
+                    </span>
+                    <span style={{ fontSize: '9px', color: col, fontWeight: 900, textTransform: 'uppercase' }}>
+                      {a.importanza}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {pesi && (pesi.pesoAttacco > 0 || pesi.pesoDifesa > 0) && (
+              <div style={{
+                background: 'rgba(255, 0, 229, 0.08)',
+                border: '1px solid rgba(255, 0, 229, 0.4)',
+                borderRadius: '6px', padding: '8px',
+                fontSize: '10px', color: 'var(--text-dim)',
+              }}>
+                <div style={{ fontWeight: 900, color: 'var(--neon-magenta)', marginBottom: '4px', textTransform: 'uppercase' }}>
+                  📉 Impatto su Dixon-Coles
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <span>⚔️ Attacco: <b style={{ color: '#ff6b35' }}>-{Math.round(pesi.pesoAttacco * 100)}%</b></span>
+                  <span>🛡️ Difesa: <b style={{ color: '#3498db' }}>-{Math.round(pesi.pesoDifesa * 100)}%</b></span>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     );
   };
@@ -818,7 +982,7 @@
   };
 
   // ============================================================
-  // TUTTE LE FAMIGLIE PANEL (SOLO STATISTICHE REALI)
+  // TUTTE LE FAMIGLIE PANEL
   // ============================================================
   const TutteLeFamigliePanel = ({ match, allMatches }) => {
     const getPercentualeClasse = window.getPercentualeClasse;
@@ -834,7 +998,6 @@
       .map(familyId => {
         const family = FAMIGLIE[familyId];
         const opzioni = family.options.map(opt => {
-          // ⭐ SEMPRE statistiche reali (mc = null)
           const pct = calcolaPctGiocata(familyId, opt, null, stats);
           let quota = null, isValue = false;
           if (hasQM) {
@@ -913,7 +1076,6 @@
     const ORDINE = ['fisse', 'dc', 'gg_ng', 'over', 'under', 'multigol', 'dc_over', 'dc_under', 'mg_casa_ospite', 'dc_multigol'];
     const hasQM = !!(window.QuoteManager && typeof window.QuoteManager.analizzaGiocata === 'function');
 
-    // Calcola una sola volta la matrice Dixon-Coles (con cache in memoria)
     let mcCache = _mcCache.get(match.id);
     if (!mcCache) {
       try {
@@ -1504,7 +1666,6 @@
     );
 
     useEffect(() => {
-      // Invalida la cache quando cambiano le partite filtrate
       clearStatsCache();
     }, [matchesFiltrati.length]);
 
@@ -1527,7 +1688,8 @@
           <button className={statsSubTab === 'Classifica' ? 'active' : ''} onClick={() => setStatsSubTab('Classifica')}>📊 Classifica</button>
           <button className={statsSubTab === 'Scontri' ? 'active' : ''} onClick={() => setStatsSubTab('Scontri')}>⚔️ Scontri</button>
           <button className={statsSubTab === 'RiepilogoAI' ? 'active' : ''} onClick={() => setStatsSubTab('RiepilogoAI')}>🤖 Riepilogo AI</button>
-          <button className={statsSubTab === 'DixonColes' ? 'active' : ''} onClick={() => setStatsSubTab('DixonColes')}>🧮 Analisi Dixon-Coles</button>
+          <button className={statsSubTab === 'DixonColes' ? 'active' : ''} onClick={() => setStatsSubTab('DixonColes')}>🧮 Dixon-Coles</button>
+          <button className={statsSubTab === 'Assenze' ? 'active' : ''} onClick={() => setStatsSubTab('Assenze')}>🏥 Assenze</button>
           <button className={statsSubTab === 'UltimaGiornata' ? 'active' : ''} onClick={() => setStatsSubTab('UltimaGiornata')}>📅 Ultima Giornata</button>
         </div>
 
@@ -1620,6 +1782,34 @@
           </div>
         )}
 
+        {statsSubTab === 'Assenze' && (
+          <div>
+            {selectedMatch ? (
+              <div>
+                <div style={{
+                  padding: '10px 14px', marginBottom: '14px',
+                  background: 'linear-gradient(135deg, rgba(255, 0, 229, 0.08), rgba(0, 245, 255, 0.05))',
+                  borderRadius: '10px', border: '1px solid var(--border)',
+                  fontSize: '12px', color: 'var(--text-dim)',
+                }}>
+                  🏥 <b style={{ color: 'var(--neon-magenta)' }}>Assenze e Infortuni</b> —{' '}
+                  {selectedMatch.casa} vs {selectedMatch.ospiti}
+                  <br />
+                  <span style={{ fontSize: '11px' }}>
+                    ℹ️ Le assenze dei giocatori chiave modificano i λ del modello Dixon-Coles (riducendo attacco e difesa)
+                  </span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <AssenzePanel squadra={selectedMatch.casa} teamColor={getChampColor(selectedMatch.campionato)} />
+                  <AssenzePanel squadra={selectedMatch.ospiti} teamColor={getChampColor(selectedMatch.campionato)} />
+                </div>
+              </div>
+            ) : (
+              <div className="stats-placeholder"><p>👈 Seleziona una partita per vedere le assenze.</p></div>
+            )}
+          </div>
+        )}
+
         {statsSubTab === 'UltimaGiornata' && (
           <div>
             {selectedMatch ? (
@@ -1692,6 +1882,7 @@
   // ============================================================
   window.StatisticheComponent = StatisticheComponent;
   window.AIAnalysis = AIAnalysis;
+  window.AssenzePanel = AssenzePanel;
   window.WeatherProfessionale = WeatherProfessionale;
   window.IndiceAffidabilita = IndiceAffidabilita;
   window.RisultatiFrequenti = RisultatiFrequenti;
@@ -1703,6 +1894,6 @@
   window.simulateMatches = simulateMatches;
   window.clearStatsCache = clearStatsCache;
 
-  console.log('✅ statistiche.js v13 - cache Dixon in memoria (Map) + clearStatsCache completo');
+  console.log('✅ statistiche.js v14 - Dixon-Coles + Modulo Assenze integrato');
 
 })();

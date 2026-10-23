@@ -32,6 +32,9 @@
 <!-- Parser PDF -->
 <script src="pdf-quote-parser.js"></script>
 
+<!-- Modulo Assenze e Infortuni -->
+<script src="assenze.js"></script>
+
 <!-- Moduli esterni (ordine importante) -->
 <script type="text/javascript" src="meteo.js"></script>
 <script src="filtri-campionati.js"></script>
@@ -296,6 +299,35 @@
       } catch (error) {
         console.error('❌ Errore Excel:', error.message);
         return null;
+      }
+    }
+
+    // ============================================================
+    // CARICA STATISTICHE GIOCATORI (per modulo Assenze)
+    // ============================================================
+    async function loadStatisticheGiocatori() {
+      const paths = [
+        'excel/Statistiche_Fantacalcio_Stagione_2026_27.xlsx',
+        'data/Statistiche_Fantacalcio_Stagione_2026_27.xlsx',
+        'Statistiche_Fantacalcio_Stagione_2026_27.xlsx',
+      ];
+      for (const path of paths) {
+        try {
+          const r = await fetch(path);
+          if (!r.ok) continue;
+          const buf = await r.arrayBuffer();
+          const wb = XLSX.read(buf, { type: 'array' });
+          const sheet = wb.Sheets[wb.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+          if (window.AssenzeDB && typeof window.AssenzeDB.setStatsGiocatori === 'function') {
+            window.AssenzeDB.setStatsGiocatori(rows);
+            console.log('✅ Statistiche giocatori caricate:', rows.length, 'righe');
+            window.dispatchEvent(new Event('stats-giocatori-pronte'));
+          }
+          return;
+        } catch (e) {
+          console.warn('⚠️ Statistiche giocatori non caricate da', path, ':', e.message);
+        }
       }
     }
 
@@ -1104,7 +1136,7 @@
     window.get12Under45 = get12Under45;
     window.normalizzaAccenti = normalizzaAccenti;
 
-    console.log('✅ Funzioni globali esposte v28 - Quote reattive + fix hook');
+    console.log('✅ Funzioni globali esposte v29 - Assenze + Dixon-Coles');
 
     // ============================================================
     // LOAD/SAVE STATE
@@ -1160,10 +1192,9 @@
     };
 
     // ============================================================
-    // QUOTE STATUS BAR (fix React error #321)
+    // QUOTE STATUS BAR
     // ============================================================
     const QuoteStatusBar = () => {
-      // ⭐ HOOK CHIAMATO AL TOP — non dentro callback!
       const quoteState = window.QuoteManager && window.QuoteManager.useQuote
         ? window.QuoteManager.useQuote()
         : { numPartite: 0, dataMaxPDF: null, inCorso: false, errore: null };
@@ -1343,6 +1374,14 @@
         console.log('📂 Carico dati al mount di App...');
         const loadData = async () => {
           try {
+            // Carica assenze + stats giocatori in parallelo
+            Promise.all([
+              window.AssenzeDB && window.AssenzeDB.carica ? window.AssenzeDB.carica() : Promise.resolve(false),
+              loadStatisticheGiocatori(),
+            ]).then(() => {
+              console.log('✅ Assenze + stats giocatori pronti');
+            });
+
             const data = await loadScrapedData();
             if (data && data.matches && data.matches.length > 0) {
               setMatches(data.matches);

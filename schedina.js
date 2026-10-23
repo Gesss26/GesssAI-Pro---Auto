@@ -1,7 +1,8 @@
 // ============================================================
 // schedina.js - Modulo Schedina con quote PDF visibili
-// v9.7: griglia 5x5 con badge oggi/2 giorni + tutti i campionati
-//       + sub-tabs uniformi (CSS gestisce larghezza/altezza fisse)
+// v9.8: + switch Storico/Dixon-Coles (Schedina Classica + Quota)
+//       griglia 5x5 con badge oggi/2 giorni + tutti i campionati
+//       sub-tabs uniformi (CSS gestisce larghezza/altezza fisse)
 // ============================================================
 
 const formatGiocataLabel = (familyId, label) => {
@@ -144,6 +145,92 @@ const ChampLogoSchedina = ({ campionato, size = 24 }) => {
 };
 
 // ============================================================
+// HOOK: MODALITÀ STATISTICHE (condiviso tra Schedina Classica e Quota)
+// 'storico' → statistiche reali | 'dixon' → Dixon-Coles
+// ============================================================
+const useModeStatisticheSchedina = () => {
+  const { useState, useEffect } = React;
+  const [mode, setModeState] = useState(
+    () => localStorage.getItem('ft_schedina_mode') || 'storico'
+  );
+
+  const setMode = React.useCallback((v) => {
+    const val = v === 'dixon' ? 'dixon' : 'storico';
+    setModeState(val);
+    localStorage.setItem('ft_schedina_mode', val);
+    window.dispatchEvent(new Event('schedina-mode-updated'));
+  }, []);
+
+  useEffect(() => {
+    const handler = () => setModeState(localStorage.getItem('ft_schedina_mode') || 'storico');
+    window.addEventListener('schedina-mode-updated', handler);
+    window.addEventListener('storage', handler);
+    return () => {
+      window.removeEventListener('schedina-mode-updated', handler);
+      window.removeEventListener('storage', handler);
+    };
+  }, []);
+
+  return { mode, setMode };
+};
+
+// ============================================================
+// SWITCH: STATISTICHE / DIXON-COLES
+// ============================================================
+const SwitchModeStatistiche = ({ mode, setMode }) => {
+  const isStorico = mode !== 'dixon';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: '10px',
+      padding: '10px 14px', marginBottom: '16px',
+      background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.06), rgba(255, 0, 229, 0.06))',
+      borderRadius: '12px', border: '1px solid var(--border)',
+      flexWrap: 'wrap', justifyContent: 'center',
+    }}>
+      <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+        🔀 Motore
+      </span>
+      <div style={{
+        display: 'flex', background: 'var(--bg-deep)', borderRadius: '8px',
+        padding: '3px', border: '1px solid var(--border)', gap: '2px',
+      }}>
+        <button
+          onClick={() => setMode('storico')}
+          style={{
+            padding: '7px 18px', fontSize: '12px', fontWeight: 700,
+            borderRadius: '6px', border: 'none', cursor: 'pointer',
+            background: isStorico ? 'var(--neon-cyan)' : 'transparent',
+            color: isStorico ? '#000' : 'var(--text-dim)',
+            transition: 'all 0.15s', whiteSpace: 'nowrap',
+          }}
+          title="Usa le statistiche storiche reali (medie squadre)"
+        >
+          📊 Storico
+        </button>
+        <button
+          onClick={() => setMode('dixon')}
+          style={{
+            padding: '7px 18px', fontSize: '12px', fontWeight: 700,
+            borderRadius: '6px', border: 'none', cursor: 'pointer',
+            background: !isStorico ? 'var(--neon-magenta, #ff00e5)' : 'transparent',
+            color: !isStorico ? '#000' : 'var(--text-dim)',
+            transition: 'all 0.15s', whiteSpace: 'nowrap',
+          }}
+          title="Usa il modello Dixon-Coles (matrice esatta λ + assenze)"
+        >
+          🧮 Dixon-Coles
+        </button>
+      </div>
+      <span style={{ fontSize: '11px', color: 'var(--text-dim)', fontStyle: 'italic' }}>
+        {isStorico
+          ? '📈 Medie storiche reali delle due squadre'
+          : '🧮 Matrice esatta Poisson + correzione τ + assenze'}
+      </span>
+    </div>
+  );
+};
+
+// ============================================================
 // GRUPPI GIOCATE
 // ============================================================
 const GRUPPI_GIOCATE = [
@@ -249,6 +336,48 @@ const GRUPPI_GIOCATE = [
 ];
 
 // ============================================================
+// HELPER: calcola % di una giocata usando la sorgente scelta
+// ============================================================
+const calcPctConSorgente = (familyId, giocata, match, matches, mode, stats, allMatches) => {
+  if (mode === 'dixon') {
+    if (typeof window.getDixonPct === 'function') {
+      try {
+        const v = window.getDixonPct(familyId, giocata, match, allMatches || matches);
+        return (typeof v === 'number' && !isNaN(v)) ? v : 0;
+      } catch (e) {
+        return 0;
+      }
+    }
+    return 0;
+  }
+  // Storico
+  const computeMatchStats = window.computeMatchStats;
+  const getGiocataPct = window.getGiocataPct;
+  const calcolaGG_NG = window.calcolaGG_NG;
+
+  let st = stats;
+  if (!st) {
+    st = computeMatchStats ? computeMatchStats(match, matches) : null;
+  }
+  if (!st || st.error) return 0;
+
+  const homeMG = st.homeMG || {};
+  const awayMG = st.awayMG || {};
+  const mgTot = st.mgTot || {};
+
+  try {
+    if (familyId === 'gg_ng') {
+      const ggNg = calcolaGG_NG ? calcolaGG_NG(st) : null;
+      if (ggNg) return giocata === 'GG' ? ggNg.gg : ggNg.ng;
+      return 0;
+    }
+    return getGiocataPct(giocata, st, homeMG, awayMG, mgTot) || 0;
+  } catch (e) {
+    return 0;
+  }
+};
+
+// ============================================================
 // QUOTA INLINE
 // ============================================================
 const QuotaInline = ({ match, familyId, giocata, pctTua, size = 'sm' }) => {
@@ -311,6 +440,7 @@ const SchedinaQuotaPanel = ({
   getPercentualeClasse,
   normalizeDate,
   formatDateEU,
+  modeStatistiche,
 }) => {
   const { useState, useMemo, useCallback } = React;
 
@@ -327,8 +457,6 @@ const SchedinaQuotaPanel = ({
   const [mostraCandidate, setMostraCandidate] = useState(false);
 
   const computeMatchStats = window.computeMatchStats;
-  const getGiocataPct = window.getGiocataPct;
-  const calcolaGG_NG = window.calcolaGG_NG;
 
   const giocateInUso = useMemo(() => {
     const isTutteMode = giocateSelezionate.includes('tutte') || giocateSelezionate.length === 0;
@@ -377,30 +505,17 @@ const SchedinaQuotaPanel = ({
     const out = [];
 
     partite.forEach(match => {
-      const stats = computeMatchStats(match, matches);
-      if (stats.error) return;
+      const stats = computeMatchStats ? computeMatchStats(match, matches) : null;
+      if (!stats || stats.error) return;
       stats._allMatches = matches;
       stats._homeTeam = match.casa;
       stats._awayTeam = match.ospiti;
 
-      const homeMG = stats.homeMG || {};
-      const awayMG = stats.awayMG || {};
-      const mgTot = stats.mgTot || {};
-
       giocateInUso.forEach(g => {
-        let pct = 0;
-        try {
-          if (g.familyId === 'gg_ng') {
-            const ggNg = calcolaGG_NG ? calcolaGG_NG(stats) : null;
-            if (ggNg) {
-              pct = g.giocata === 'GG' ? ggNg.gg : ggNg.ng;
-            }
-          } else {
-            pct = getGiocataPct(g.giocata, stats, homeMG, awayMG, mgTot);
-          }
-        } catch (e) {
-          pct = 0;
-        }
+        const pct = calcPctConSorgente(
+          g.familyId, g.giocata, match, matches,
+          modeStatistiche, stats, matches
+        );
 
         if (pct <= 0) return;
 
@@ -432,7 +547,7 @@ const SchedinaQuotaPanel = ({
       if (b.pct !== a.pct) return b.pct - a.pct;
       return b.quota - a.quota;
     });
-  }, [getPartiteDisponibili, matches, computeMatchStats, getGiocataPct, calcolaGG_NG, giocateInUso]);
+  }, [getPartiteDisponibili, matches, giocateInUso, modeStatistiche]);
 
   const eseguiAlgoritmo = useCallback((target) => {
     if (candidati.length === 0) {
@@ -555,6 +670,7 @@ const SchedinaQuotaPanel = ({
     if (!schedinaGenerata) return;
     const lines = [];
     lines.push('💰 *SCHEDINA QUOTA - GesssAI-Pro*');
+    lines.push(`🔀 Motore: ${modeStatistiche === 'dixon' ? '🧮 Dixon-Coles' : '📊 Storico'}`);
     lines.push(`🎯 Target: ${schedinaGenerata.quotaTarget.toFixed(2)} (±${TOLLERANZA_FISSA.toFixed(2)})`);
     lines.push(`📊 Quota finale: ${schedinaGenerata.quotaFinale.toFixed(2)}`);
     lines.push(`📈 Media %: ${schedinaGenerata.mediaPct}%`);
@@ -606,6 +722,27 @@ const SchedinaQuotaPanel = ({
 
   return (
     <div>
+      {/* BANNER MOTORE ATTIVO */}
+      <div style={{
+        marginBottom: '14px', padding: '10px 14px',
+        background: modeStatistiche === 'dixon'
+          ? 'linear-gradient(135deg, rgba(255, 0, 229, 0.10), rgba(255, 0, 229, 0.03))'
+          : 'linear-gradient(135deg, rgba(0, 245, 255, 0.10), rgba(0, 245, 255, 0.03))',
+        borderRadius: '10px',
+        border: `1px solid ${modeStatistiche === 'dixon' ? 'rgba(255, 0, 229, 0.4)' : 'rgba(0, 245, 255, 0.4)'}`,
+        fontSize: '12px', fontWeight: 'bold',
+        color: modeStatistiche === 'dixon' ? 'var(--neon-magenta, #ff00e5)' : 'var(--neon-cyan)',
+        display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap',
+      }}>
+        <span>{modeStatistiche === 'dixon' ? '🧮' : '📊'}</span>
+        <span>Motore attivo: <b>{modeStatistiche === 'dixon' ? 'Dixon-Coles' : 'Storico'}</b></span>
+        <span style={{ fontWeight: 'normal', fontSize: '11px', color: 'var(--text-dim)', marginLeft: 'auto' }}>
+          {modeStatistiche === 'dixon'
+            ? 'Matrice esatta λ + correzione τ + assenze'
+            : 'Medie storiche reali delle due squadre'}
+        </span>
+      </div>
+
       <div className="card" style={{ marginBottom: '16px' }}>
         <h3 style={{ color: 'var(--accent)', marginBottom: '14px', fontSize: '18px' }}>
           💰 Genera Schedina da Quota Target
@@ -871,6 +1008,9 @@ const SchedinaComponent = ({
   const [partiteSelezionate, setPartiteSelezionate] = useState([]);
   const [filtroOrario, setFiltroOrario] = useState('dopo_ora');
 
+  // ⭐ Switch Storico / Dixon-Coles (condiviso con Schedina Quota)
+  const { mode: modeStatistiche, setMode: setModeStatistiche } = useModeStatisticheSchedina();
+
   const MAX_GIOCATE = 3;
   const [giocateSelezionate, setGiocateSelezionate] = useState(['tutte']);
 
@@ -922,20 +1062,14 @@ const SchedinaComponent = ({
 
   const calcolaTop3GiocatePerPartita = useCallback((match) => {
     const computeMatchStats = window.computeMatchStats;
-    const getGiocataPct = window.getGiocataPct;
-    const calcolaGG_NG = window.calcolaGG_NG;
 
-    const stats = computeMatchStats(match, matches);
-    if (stats.error) {
+    const stats = computeMatchStats ? computeMatchStats(match, matches) : null;
+    if (!stats || stats.error) {
       return { top3Calcolate: [], top3Scelte: [], scoreCalcolate: 0, scoreScelte: 0 };
     }
     stats._allMatches = matches;
     stats._homeTeam = match.casa;
     stats._awayTeam = match.ospiti;
-
-    const homeMG = stats.homeMG || {};
-    const awayMG = stats.awayMG || {};
-    const mgTot = stats.mgTot || {};
 
     const tutteCalcolate = [];
     const viste = new Set();
@@ -948,12 +1082,10 @@ const SchedinaComponent = ({
 
         let pct = 0;
         try {
-          if (gruppo.familyId === 'gg_ng') {
-            const ggNg = calcolaGG_NG ? calcolaGG_NG(stats) : null;
-            if (ggNg) pct = g.giocata === 'GG' ? ggNg.gg : ggNg.ng;
-          } else {
-            pct = getGiocataPct(g.giocata, stats, homeMG, awayMG, mgTot);
-          }
+          pct = calcPctConSorgente(
+            gruppo.familyId, g.giocata, match, matches,
+            modeStatistiche, stats, matches
+          );
         } catch (e) { pct = 0; }
 
         if (pct > 0) {
@@ -983,12 +1115,10 @@ const SchedinaComponent = ({
         if (typeof sel !== 'object' || !sel.familyId || !sel.giocata) return;
         let pct = 0;
         try {
-          if (sel.familyId === 'gg_ng') {
-            const ggNg = calcolaGG_NG ? calcolaGG_NG(stats) : null;
-            if (ggNg) pct = sel.giocata === 'GG' ? ggNg.gg : ggNg.ng;
-          } else {
-            pct = getGiocataPct(sel.giocata, stats, homeMG, awayMG, mgTot);
-          }
+          pct = calcPctConSorgente(
+            sel.familyId, sel.giocata, match, matches,
+            modeStatistiche, stats, matches
+          );
         } catch (e) { pct = 0; }
 
         if (pct > 0) {
@@ -1013,7 +1143,7 @@ const SchedinaComponent = ({
       : 0;
 
     return { top3Calcolate, top3Scelte, scoreCalcolate, scoreScelte };
-  }, [matches, giocateSelezionate]);
+  }, [matches, giocateSelezionate, modeStatistiche]);
 
   const partiteDisponibili = useMemo(() => {
     const partite = getPartiteDisponibili();
@@ -1070,7 +1200,7 @@ const SchedinaComponent = ({
         <window.QuoteManager.BannerScadenzaQuote />
       )}
 
-      {/* ⭐ Sub-tabs con bottoni uniformi (CSS gestisce larghezza/altezza fisse) */}
+      {/* ⭐ Sub-tabs con bottoni uniformi */}
       <div className="sub-tabs" style={{ marginBottom: '16px' }}>
         <button className={sottoTab === 'classica' ? 'active' : ''} onClick={() => setSottoTab('classica')}>
           📋 Schedina Classica
@@ -1093,6 +1223,7 @@ const SchedinaComponent = ({
           getPercentualeClasse={getPercentualeClasse}
           normalizeDate={normalizeDate}
           formatDateEU={formatDateEU}
+          modeStatistiche={modeStatistiche}
         />
       )}
 
@@ -1103,12 +1234,19 @@ const SchedinaComponent = ({
               🎯 Crea Schedina
               <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginLeft: '12px', fontWeight: 'normal' }}>
                 📅 {giorniRange} giorno/i • 🏆 {campionatiSelezionati.length} campionati attivi
+                {modeStatistiche === 'dixon' && (
+                  <span style={{
+                    marginLeft: '8px', padding: '2px 8px', borderRadius: '10px',
+                    background: 'var(--neon-magenta, #ff00e5)', color: '#000',
+                    fontSize: '10px', fontWeight: 900,
+                  }}>🧮 DIXON</span>
+                )}
               </span>
             </h3>
 
             {/* ⭐ GRIGLIA CAMPIONATI 5×5 - CON BADGE OGGI/2 GIORNI */}
             <div style={{
-              marginBottom: '20px', padding: '10px 12px',
+              marginBottom: '16px', padding: '10px 12px',
               background: 'linear-gradient(135deg, rgba(30, 40, 66, 0.7), rgba(20, 27, 46, 0.9))',
               borderRadius: '14px',
               border: '1px solid var(--border)',
@@ -1218,6 +1356,9 @@ const SchedinaComponent = ({
                 🔄 Modifica la selezione nel <b>Palinsesto</b> per sincronizzarla
               </div>
             </div>
+
+            {/* ⭐ SWITCH STATISTICHE / DIXON-COLES */}
+            <SwitchModeStatistiche mode={modeStatistiche} setMode={setModeStatistiche} />
 
             {/* GIOCATE */}
             <div style={{
@@ -1435,4 +1576,4 @@ const SchedinaComponent = ({
 };
 
 window.SchedinaComponent = SchedinaComponent;
-console.log('✅ SchedinaComponent v9.7 caricato - griglia 5x5 + sub-tabs uniformi');
+console.log('✅ SchedinaComponent v9.8 caricato - switch Storico/Dixon-Coles + griglia 5x5');
