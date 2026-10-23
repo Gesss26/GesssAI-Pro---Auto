@@ -314,7 +314,7 @@
     const MAIN_TABS = ['Home', 'Palinsesto', 'Statistiche', 'Storico', 'Schedina', 'Impostazioni'];
 
     // ============================================================
-    // ⭐ CHAMPIONSHIP_COLORS — allineato ai nomi esatti del DB
+    // CHAMPIONSHIP_COLORS
     // ============================================================
     const CHAMPIONSHIP_COLORS = {
       'UEFA Champions League':        '#1a1aff',
@@ -483,7 +483,7 @@
     };
 
     // ============================================================
-    // ⭐ TEAM LOGO — versione DEFINITIVA con fallback a cascata
+    // TEAM LOGO
     // ============================================================
     const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
       const [finalError, setFinalError] = useState(false);
@@ -1026,7 +1026,7 @@
     };
 
     // ============================================================
-    // formatGiocataLabel — VERSIONE UNICA E COERENTE
+    // formatGiocataLabel
     // ============================================================
     const formatGiocataLabel = (familyId, label) => {
       if (!label) return '—';
@@ -1104,7 +1104,7 @@
     window.get12Under45 = get12Under45;
     window.normalizzaAccenti = normalizzaAccenti;
 
-    console.log('✅ Funzioni globali esposte v27 - Quote reattive + barra di stato');
+    console.log('✅ Funzioni globali esposte v28 - Quote reattive + fix hook');
 
     // ============================================================
     // LOAD/SAVE STATE
@@ -1160,78 +1160,72 @@
     };
 
     // ============================================================
-    // STATO QUOTE GLOBALE (barra in header)
+    // QUOTE STATUS BAR (fix React error #321)
     // ============================================================
     const QuoteStatusBar = () => {
-      const [stato, setStato] = useState({
-        numPartite: 0,
-        dataMaxPDF: null,
-        inCorso: false,
-        errore: null,
-      });
+      // ⭐ HOOK CHIAMATO AL TOP — non dentro callback!
+      const quoteState = window.QuoteManager && window.QuoteManager.useQuote
+        ? window.QuoteManager.useQuote()
+        : { numPartite: 0, dataMaxPDF: null, inCorso: false, errore: null };
+
       const [espanso, setEspanso] = useState(false);
 
+      const [meta, setMeta] = useState(() => {
+        return window.PDFQuoteParser && window.PDFQuoteParser.leggiMeta
+          ? window.PDFQuoteParser.leggiMeta() : null;
+      });
+
       useEffect(() => {
-        const aggiorna = () => {
-          const meta = window.PDFQuoteParser && window.PDFQuoteParser.leggiMeta
+        const handler = () => {
+          const m = window.PDFQuoteParser && window.PDFQuoteParser.leggiMeta
             ? window.PDFQuoteParser.leggiMeta() : null;
-          const qm = window.QuoteManager ? window.QuoteManager.useQuote?.() : null;
-          setStato({
-            numPartite: meta?.numPartite || 0,
-            dataMaxPDF: meta?.dataMaxPDF || null,
-            inCorso: qm?.inCorso || false,
-            errore: qm?.errore || null,
-          });
+          setMeta(m);
         };
-
-        aggiorna();
-
-        const handler = () => aggiorna();
         window.addEventListener('quote-updated', handler);
-        const timer = setInterval(aggiorna, 2000);
-
-        return () => {
-          window.removeEventListener('quote-updated', handler);
-          clearInterval(timer);
-        };
+        return () => window.removeEventListener('quote-updated', handler);
       }, []);
 
-      const dataMaxEU = stato.dataMaxPDF
-        ? stato.dataMaxPDF.split('-').reverse().join('/')
+      const numPartite = quoteState.numPartite || (meta?.numPartite || 0);
+      const dataMaxPDF = quoteState.dataMaxPDF || (meta?.dataMaxPDF || null);
+      const inCorso = quoteState.inCorso || false;
+      const errore = quoteState.errore || null;
+
+      const dataMaxEU = dataMaxPDF
+        ? dataMaxPDF.split('-').reverse().join('/')
         : 'N/D';
 
       const oggi = new Date().toISOString().slice(0, 10);
-      const aggiornato = stato.dataMaxPDF && stato.dataMaxPDF >= oggi;
+      const aggiornato = dataMaxPDF && dataMaxPDF >= oggi;
 
-      const colore = stato.errore
+      const colore = errore
         ? 'var(--neon-red)'
-        : stato.inCorso
+        : inCorso
           ? 'var(--neon-cyan)'
-          : stato.numPartite === 0
+          : numPartite === 0
             ? 'var(--neon-red)'
             : aggiornato
               ? 'var(--neon-green)'
               : 'var(--neon-gold)';
 
-      const icona = stato.errore
+      const icona = errore
         ? '❌'
-        : stato.inCorso
+        : inCorso
           ? '⏳'
-          : stato.numPartite === 0
+          : numPartite === 0
             ? '📄'
             : aggiornato
               ? '✅'
               : '⚠️';
 
-      const label = stato.errore
+      const label = errore
         ? 'Errore download'
-        : stato.inCorso
+        : inCorso
           ? 'Download quote in corso...'
-          : stato.numPartite === 0
+          : numPartite === 0
             ? 'Nessun PDF caricato'
             : aggiornato
-              ? `${stato.numPartite} partite • ${dataMaxEU}`
-              : `${stato.numPartite} partite • scadute`;
+              ? `${numPartite} partite • ${dataMaxEU}`
+              : `${numPartite} partite • scadute`;
 
       const ricarica = (e) => {
         e.stopPropagation();
@@ -1260,13 +1254,13 @@
             transition: 'all 0.2s',
             userSelect: 'none',
           }}
-          title={stato.errore || `Quote Marathonbet: ${stato.numPartite} partite • Data max ${dataMaxEU}`}
+          title={errore || `Quote Marathonbet: ${numPartite} partite • Data max ${dataMaxEU}`}
         >
           <span style={{ fontSize: '14px' }}>{icona}</span>
           <span>Quote Book: {label}</span>
           <button
             onClick={ricarica}
-            disabled={stato.inCorso}
+            disabled={inCorso}
             style={{
               marginLeft: '6px',
               padding: '3px 10px',
@@ -1274,24 +1268,24 @@
               fontWeight: 'bold',
               borderRadius: '6px',
               border: `1px solid ${colore}`,
-              background: stato.inCorso ? 'transparent' : `${colore}22`,
+              background: inCorso ? 'transparent' : `${colore}22`,
               color: colore,
-              cursor: stato.inCorso ? 'wait' : 'pointer',
-              opacity: stato.inCorso ? 0.5 : 1,
+              cursor: inCorso ? 'wait' : 'pointer',
+              opacity: inCorso ? 0.5 : 1,
             }}
             title="Ricarica le quote dal repository GitHub"
           >
-            {stato.inCorso ? '⏳' : '🔄'} Ricarica
+            {inCorso ? '⏳' : '🔄'} Ricarica
           </button>
-          {espanso && stato.numPartite > 0 && (
+          {espanso && numPartite > 0 && (
             <span style={{ fontSize: '10px', opacity: 0.8, marginLeft: '8px', fontWeight: 'normal' }}>
               {' '}• File: {window.QuoteManager?.PDF_FILES?.length || 0} PDF
               {' '}• Stato: {aggiornato ? 'aggiornate' : 'da aggiornare'}
             </span>
           )}
-          {stato.errore && (
+          {errore && (
             <span style={{ fontSize: '10px', fontWeight: 'normal', marginLeft: '8px' }}>
-              {stato.errore.substring(0, 60)}...
+              {errore.substring(0, 60)}...
             </span>
           )}
         </div>
@@ -1441,7 +1435,6 @@
           </div>
 
           <div className="container">
-            {/* ⭐ BARRA DI STATO QUOTE GLOBALE */}
             <QuoteStatusBar />
 
             {window.QuoteManager && window.QuoteManager.BannerAlertPDF && (
@@ -1586,7 +1579,7 @@
     }
 
     // ============================================================
-    // ⭐ LOG DIAGNOSTICO AUTOMATICO
+    // LOG DIAGNOSTICO AUTOMATICO
     // ============================================================
     window.addEventListener('load', () => {
       setTimeout(() => {
