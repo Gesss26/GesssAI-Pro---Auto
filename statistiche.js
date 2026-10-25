@@ -1,8 +1,8 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v15)
-// - Pulsante rinominato "Formazioni e Assenze"
-// - Formazioni con Mv/Fm medi per titolari e panchina
-// - Resto invariato rispetto alla v14
+// statistiche.js - Modulo Statistiche (v16)
+// - Pulsante "Formazioni e Assenze"
+// - Visualizzazione per ruolo (Por, Dif, Cen, Att) con Voto (Mv)
+// - Matching nomi migliorato (risolve i nomi con abbreviazioni)
 // ============================================================
 
 (function () {
@@ -849,29 +849,94 @@
   };
 
   // ============================================================
-  // PANNELLO FORMAZIONI (con Mv/Fm medi)
+  // PANNELLO FORMAZIONI (con Voti, Fm e raggruppamento per ruolo)
   // ============================================================
   const FormazionePanel = ({ nomeSquadra, formazione, colore }) => {
-    const MvKeys = ['Mv', 'mv', 'media voto', 'Media Voto'];
-    const FmKeys = ['Fm', 'fm', 'fantamedia', 'FantaMedia'];
+    const [, setVersion] = useState(0);
 
-    const getGiocatoreStats = (nomeGiocatore) => {
-      const g = window.AssenzeDB?.getGiocatore(nomeGiocatore);
-      if (!g) return null;
-      return g;
+    useEffect(() => {
+      const h = () => setVersion(v => v + 1);
+      window.addEventListener('stats-giocatori-pronte', h);
+      window.addEventListener('assenze-updated', h);
+      return () => {
+        window.removeEventListener('stats-giocatori-pronte', h);
+        window.removeEventListener('assenze-updated', h);
+      };
+    }, []);
+
+    // Ricerca ultra-robusta del giocatore
+    const cercaGiocatore = (nomeFanta) => {
+      const db = window.AssenzeDB;
+      if (!db || !db._mappa) return null;
+
+      // 1) Match esatto
+      if (db._mappa[nomeFanta]) return db._mappa[nomeFanta];
+
+      // Prepara stringhe normalizzate
+      const pulisci = (s) => s.toString().toLowerCase().replace(/[.'`]/g, '').replace(/\s+/g, ' ').trim();
+      const target = pulisci(nomeFanta);
+      
+      const keys = Object.keys(db._mappa);
+      
+      // 2) Match normalizzato (senza punti/trattini)
+      for (const k of keys) {
+        if (pulisci(k) === target) return db._mappa[k];
+      }
+
+      // 3) Match per prefisso (es. "Martinez Jo." vs "Martinez J.")
+      // Prendiamo la prima parola (cognome) e la verifichiamo
+      const targetWords = target.split(' ');
+      const cognomeTarget = targetWords[0];
+      if (cognomeTarget.length < 3) return null;
+
+      for (const k of keys) {
+        const keyWords = pulisci(k).split(' ');
+        const cognomeKey = keyWords[0];
+        
+        // Se il cognome matcha esattamente
+        if (cognomeKey === cognomeTarget) {
+          // Verifica che anche la squadra coincida (o il nome sia quasi identico)
+          const g = db._mappa[k];
+          if (g.squadra && nomeSquadra && pulisci(g.squadra).includes(pulisci(nomeSquadra))) {
+            return g;
+          }
+        }
+      }
+
+      // 4) Match parziale sul cognome (es. "Esposito F.P." cerca "Esposito")
+      for (const k of keys) {
+        const keyWords = pulisci(k).split(' ');
+        const cognomeKey = keyWords[0];
+        if (cognomeKey.length > 4 && cognomeTarget.includes(cognomeKey)) {
+           const g = db._mappa[k];
+           if (g.squadra && nomeSquadra && pulisci(g.squadra).includes(pulisci(nomeSquadra))) {
+             return g;
+           }
+        }
+      }
+
+      return null;
     };
 
-    // Ritorna {mv, fm, count, countMv, countFm}
+    const getStats = (nome) => {
+      const g = cercaGiocatore(nome);
+      if (!g) return { g: null, mv: null, fm: null, ruolo: '' };
+      const mv = parseFloat(g.Mv);
+      const fm = parseFloat(g.Fm);
+      return {
+        g,
+        mv: (!isNaN(mv) && mv > 0) ? mv : null,
+        fm: (!isNaN(fm) && fm > 0) ? fm : null,
+        ruolo: g.ruolo || '',
+      };
+    };
+
     const calcolaMedie = (listaNomi) => {
-      let sumMv = 0, sumFm = 0;
-      let countMv = 0, countFm = 0;
+      let sumMv = 0, sumFm = 0, countMv = 0, countFm = 0;
       listaNomi.forEach(nome => {
-        const g = getGiocatoreStats(nome);
-        if (!g) return;
-        const mv = parseFloat(g.Mv ?? g.Mv);
-        const fm = parseFloat(g.Fm ?? g.Fm);
-        if (!isNaN(mv) && mv > 0) { sumMv += mv; countMv++; }
-        if (!isNaN(fm) && fm > 0) { sumFm += fm; countFm++; }
+        const { mv, fm } = getStats(nome);
+        if (mv !== null) { sumMv += mv; countMv++; }
+        if (fm !== null) { sumFm += fm; countFm++; }
       });
       return {
         mv: countMv > 0 ? sumMv / countMv : null,
@@ -889,6 +954,19 @@
     const mediePanchina = calcolaMedie(panchina);
 
     const fmt = (v) => (v === null || v === undefined) ? '—' : v.toFixed(2);
+    const fmtMv = (v) => (v === null || v === undefined) ? '—' : v.toFixed(2).replace('.', ',');
+
+    // Raggruppa per ruolo
+    const raggruppa = (listaNomi) => {
+      const gruppi = { P: [], D: [], C: [], A: [], '?': [] };
+      listaNomi.forEach(nome => {
+        const { mv, fm, ruolo } = getStats(nome);
+        let r = ruolo || '?';
+        if (!gruppi[r]) gruppi[r] = [];
+        gruppi[r].push({ nome, mv, fm, ruolo: r });
+      });
+      return gruppi;
+    };
 
     const renderBadgeMedia = (label, medie, colorBg) => (
       <div style={{
@@ -897,53 +975,76 @@
         background: colorBg, fontSize: '10px', fontWeight: 'bold',
       }}>
         <span style={{ opacity: 0.8 }}>{label}</span>
-        <span style={{ color: '#fff' }}>{fmt(medie.mv)}</span>
+        <span style={{ color: '#4ade80' }}>{fmt(medie.mv)}</span>
         <span style={{ opacity: 0.5 }}>·</span>
         <span style={{ color: '#fbbf24' }}>{fmt(medie.fm)}</span>
       </div>
     );
 
-    const renderListaGiocatori = (lista, bg, borderColor) => (
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-        {lista.map((n, i) => {
-          const g = getGiocatoreStats(n);
-          const mv = g ? parseFloat(g.Mv ?? g.Mv) : NaN;
-          const fm = g ? parseFloat(g.Fm ?? g.Fm) : NaN;
-          const mvTxt = (!isNaN(mv) && mv > 0) ? mv.toFixed(1) : '—';
-          const fmTxt = (!isNaN(fm) && fm > 0) ? fm.toFixed(1) : '—';
-          return (
-            <span
-              key={i}
-              title={g ? `${n} · Mv ${mvTxt} · Fm ${fmTxt} (${g.Pv || 0} pres.)` : `${n} (stats non disponibili)`}
-              style={{
-                padding: '3px 6px',
-                background: bg,
-                border: `1px solid ${borderColor}`,
-                borderRadius: '4px',
-                fontSize: '10px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '3px',
-              }}
-            >
-              <span>{n}</span>
-              <span style={{ fontSize: '9px', color: '#4ade80', fontWeight: 'bold' }}>{mvTxt}</span>
-              <span style={{ fontSize: '9px', color: '#fbbf24', fontWeight: 'bold' }}>{fmTxt}</span>
-            </span>
-          );
-        })}
-      </div>
-    );
+    const renderSezioneRuolo = (titolo, lista, coloreRuolo, bg, borderColor) => {
+      if (!lista || lista.length === 0) return null;
+      return (
+        <div style={{ marginBottom: '6px' }}>
+          <div style={{
+            color: coloreRuolo,
+            fontWeight: 'bold',
+            fontSize: '10px',
+            textTransform: 'uppercase',
+            marginBottom: '3px',
+            letterSpacing: '0.5px',
+          }}>
+            {titolo}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+            {lista.map((item, i) => {
+              const mvTxt = item.mv !== null ? `V: ${fmtMv(item.mv)}` : 'V: —';
+              const fmTxt = item.fm !== null ? `Fm: ${fmtMv(item.fm)}` : 'Fm: —';
+              return (
+                <span
+                  key={i}
+                  title={item.nome}
+                  style={{
+                    padding: '3px 7px',
+                    background: bg,
+                    border: `1px solid ${borderColor}`,
+                    borderRadius: '4px',
+                    fontSize: '10px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                  }}
+                >
+                  <span>{item.nome}</span>
+                  <span style={{ fontSize: '9px', color: '#4ade80', fontWeight: 'bold' }}>{mvTxt}</span>
+                  <span style={{ fontSize: '9px', color: '#fbbf24', fontWeight: 'bold' }}>{fmTxt}</span>
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      );
+    };
+
+    const gruppiTitolari = raggruppa(titolari);
+    const gruppiPanchina = raggruppa(panchina);
+
+    const RUOLI_ORDER = [
+      { key: 'P', label: 'Portiere',      color: '#e67e22' },
+      { key: 'D', label: 'Difensori',     color: '#3498db' },
+      { key: 'C', label: 'Centrocampisti',color: '#2ecc71' },
+      { key: 'A', label: 'Attaccanti',    color: '#e74c3c' },
+      { key: '?', label: 'Altri',         color: '#95a5a6' },
+    ];
 
     return (
       <div style={{
         background: 'var(--surface)', borderRadius: '8px',
-        padding: '10px', fontSize: '11px',
+        padding: '12px', fontSize: '11px',
         borderTop: `3px solid ${colore || 'var(--neon-cyan)'}`,
       }}>
         <div style={{
           display: 'flex', justifyContent: 'space-between',
-          alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '4px',
+          alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '4px',
         }}>
           <div style={{ fontWeight: 900, color: colore || 'var(--neon-cyan)', fontSize: '13px' }}>
             {nomeSquadra} {mod ? `· ${mod}` : ''}
@@ -954,28 +1055,44 @@
           </div>
         </div>
 
-        <div style={{ color: 'var(--neon-green)', marginBottom: '4px', fontWeight: 'bold', fontSize: '10px', textTransform: 'uppercase' }}>
-          Titolari ({titolari.length}) — media Mv {fmt(medieTitolari.mv)} · Fm {fmt(medieTitolari.fm)}
+        <div style={{
+          color: 'var(--neon-green)', marginBottom: '8px',
+          fontWeight: 'bold', fontSize: '11px',
+          borderBottom: '1px solid rgba(0,255,136,0.2)', paddingBottom: '4px',
+        }}>
+          ⚽ TITOLARI ({titolari.length})
         </div>
-        {renderListaGiocatori(titolari, 'rgba(0,255,136,0.12)', 'rgba(0,255,136,0.25)')}
-
-        <div style={{ color: 'var(--text-dim)', marginBottom: '4px', marginTop: '8px', fontWeight: 'bold', fontSize: '10px', textTransform: 'uppercase' }}>
-          Panchina ({panchina.length}) — media Mv {fmt(mediePanchina.mv)} · Fm {fmt(mediePanchina.fm)}
-        </div>
-        {renderListaGiocatori(panchina, 'rgba(255,255,255,0.05)', 'rgba(255,255,255,0.1)')}
+        {RUOLI_ORDER.map(r => renderSezioneRuolo(
+          r.label,
+          gruppiTitolari[r.key],
+          r.color,
+          'rgba(0,255,136,0.12)',
+          'rgba(0,255,136,0.25)',
+        ))}
 
         <div style={{
-          marginTop: '8px', paddingTop: '6px',
+          color: 'var(--text-dim)', marginTop: '12px', marginBottom: '8px',
+          fontWeight: 'bold', fontSize: '11px',
+          borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '4px',
+        }}>
+          🪑 PANCHINA ({panchina.length})
+        </div>
+        {RUOLI_ORDER.map(r => renderSezioneRuolo(
+          r.label,
+          gruppiPanchina[r.key],
+          r.color,
+          'rgba(255,255,255,0.05)',
+          'rgba(255,255,255,0.1)',
+        ))}
+
+        <div style={{
+          marginTop: '10px', paddingTop: '6px',
           borderTop: '1px dashed var(--border)',
           fontSize: '10px', color: 'var(--text-dim)',
           display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px',
         }}>
-          <span>
-            📊 Titolari con Mv: {medieTitolari.countMv}/{medieTitolari.tot}
-          </span>
-          <span>
-            📊 Panchina con Mv: {mediePanchina.countMv}/{mediePanchina.tot}
-          </span>
+          <span>📊 Titolari con V: {medieTitolari.countMv}/{medieTitolari.tot}</span>
+          <span>📊 Panchina con V: {mediePanchina.countMv}/{mediePanchina.tot}</span>
         </div>
       </div>
     );
@@ -1926,7 +2043,7 @@
                   </span>
                 </div>
 
-                {/* ─── Formazioni titolari / panchina con medie ─── */}
+                {/* ─── Formazioni titolari / panchina con Voti ─── */}
                 {(() => {
                   const fHome = window.AssenzeDB?.getFormazione(selectedMatch.casa);
                   const fAway = window.AssenzeDB?.getFormazione(selectedMatch.ospiti);
@@ -2054,5 +2171,5 @@
   window.simulateMatches = simulateMatches;
   window.clearStatsCache = clearStatsCache;
 
-  console.log('✅ statistiche.js v15 - Formazioni con Mv/Fm medi');
+  console.log('✅ statistiche.js v16 - Formazioni con Voti e Ruoli');
 })();
