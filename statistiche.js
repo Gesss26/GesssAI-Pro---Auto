@@ -1,7 +1,7 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v20)
-// - Fix: Voti e Ruoli letti correttamente da AssenzeDB
-// - Fix: Unione assenze (json + formazioni_seriea) con Motivo
+// statistiche.js - Modulo Statistiche (v21)
+// - Fix: Ripristinato AssenzePanel (mostra infortunati con motivo)
+// - Fix: FormazionePanel legge i voti in modo robusto
 // - Design: Colonna, colori reparto, ruolo prima del nome
 // ============================================================
 
@@ -741,7 +741,115 @@
   };
 
   // ============================================================
-  // PANNELLO FORMAZIONI (con Voti, Ruoli e in Colonna)
+  // PANNELLO ASSENZE E INFORTUNI (RIPRISTINATO)
+  // ============================================================
+  const AssenzePanel = ({ squadra, teamColor }) => {
+    const [, setVersion] = useState(0);
+
+    useEffect(() => {
+      const h = () => setVersion(v => v + 1);
+      window.addEventListener('assenze-updated', h);
+      window.addEventListener('stats-giocatori-pronte', h);
+      return () => {
+        window.removeEventListener('assenze-updated', h);
+        window.removeEventListener('stats-giocatori-pronte', h);
+      };
+    }, []);
+
+    const assenze = window.AssenzeDB?.getAssenze(squadra) || [];
+    const pesi = window.AssenzeDB?.calcolaPesi(squadra);
+    const aggiornato = window.AssenzeDB?.aggiornato;
+
+    const getImportanzaColor = (imp) => {
+      if (imp === 'chiave') return '#ff00e5';
+      if (imp === 'rotazione') return 'var(--neon-gold)';
+      return 'var(--text-dim)';
+    };
+
+    const getRuoloBadge = (r) => {
+      const map = {
+        P: { label: 'POR', color: '#e67e22' },
+        D: { label: 'DIF', color: '#3498db' },
+        C: { label: 'CEN', color: '#2ecc71' },
+        A: { label: 'ATT', color: '#e74c3c' },
+      };
+      return map[r] || { label: r || '?', color: '#95a5a6' };
+    };
+
+    return (
+      <div className="card" style={{ padding: '14px', borderTop: `3px solid ${teamColor || 'var(--neon-cyan)'}` }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+          <h4 style={{ margin: 0, fontSize: '14px', color: teamColor || 'var(--neon-cyan)' }}>
+            🏥 {squadra}
+          </h4>
+          {aggiornato && (
+            <span style={{ fontSize: '10px', color: 'var(--text-dim)' }}>
+              agg. {aggiornato.split('-').reverse().join('/')}
+            </span>
+          )}
+        </div>
+
+        {assenze.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--neon-green)', fontSize: '13px' }}>
+            ✅ Nessuna assenza
+          </div>
+        ) : (
+          <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '10px' }}>
+              {assenze.map((a, idx) => {
+                const rb = getRuoloBadge(a.ruolo);
+                const col = getImportanzaColor(a.importanza);
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                      padding: '5px 8px', borderRadius: '6px',
+                      background: 'var(--surface)',
+                      borderLeft: `3px solid ${col}`,
+                      fontSize: '11px',
+                    }}
+                  >
+                    <span style={{
+                      background: rb.color, color: '#000', fontWeight: 900,
+                      padding: '1px 5px', borderRadius: '3px', fontSize: '9px',
+                      minWidth: '26px', textAlign: 'center',
+                    }}>{rb.label}</span>
+                    <span style={{ flex: 1, fontWeight: 'bold', color: 'var(--text)' }}>
+                      {a.nome}
+                    </span>
+                    <span style={{ fontSize: '9px', color: col, fontWeight: 900, textTransform: 'uppercase' }}>
+                      {a.importanza}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {pesi && (pesi.pesoAttacco > 0 || pesi.pesoDifesa > 0) && (
+              <div style={{
+                background: 'rgba(255, 0, 229, 0.08)',
+                border: '1px solid rgba(255, 0, 229, 0.4)',
+                borderRadius: '6px', padding: '8px',
+                fontSize: '10px', color: 'var(--text-dim)',
+              }}>
+                <div style={{ fontWeight: 900, color: 'var(--neon-magenta)', marginBottom: '4px', textTransform: 'uppercase' }}>
+                  📉 Impatto su Dixon-Coles
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <span>⚔️ Attacco: <b style={{ color: '#ff6b35' }}>-{Math.round(pesi.pesoAttacco * 100)}%</b></span>
+                  <span>🛡️ Difesa: <b style={{ color: '#3498db' }}>-{Math.round(pesi.pesoDifesa * 100)}%</b></span>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    );
+  };
+
+  // ============================================================
+  // PANNELLO FORMAZIONI (con Voti e Ruoli)
   // ============================================================
   const FormazionePanel = ({ nomeSquadra, formazione, colore }) => {
     // Funzione di ricerca interna
@@ -2053,5 +2161,5 @@
   window.simulateMatches = simulateMatches;
   window.clearStatsCache = clearStatsCache;
 
-  console.log('✅ statistiche.js v20 - Formazioni in Colonna con Voti, Ruoli e Motivi Assenze');
+  console.log('✅ statistiche.js v21 - Ripristinato AssenzePanel + Formazioni con Voti, Ruoli e Colonna');
 })();
