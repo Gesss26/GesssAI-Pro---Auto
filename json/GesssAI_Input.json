@@ -22812,12 +22812,12 @@
     "giornata": "10",
     "squadra_casa": "Fortuna Sittard",
     "squadra_ospite": "Excelsior",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Sitard",
     "stadio": "Fortuna Sittard Stadion",
-    "stato": "Futura"
+    "stato": "In corso"
   },
   {
     "campionato": "Eredivisie",
@@ -60066,12 +60066,12 @@
     "giornata": "10",
     "squadra_casa": "Hibernian",
     "squadra_ospite": "Celtic",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Edinburgh",
     "stadio": "Easter Road",
-    "stato": "Futura"
+    "stato": "In corso"
   },
   {
     "campionato": "Scottish Premiership",
@@ -69544,12 +69544,12 @@
     "giornata": "8",
     "squadra_casa": "Inter",
     "squadra_ospite": "Fiorentina",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Milan",
     "stadio": "San Siro/Giuseppe Meazza",
-    "stato": "Futura"
+    "stato": "In corso"
   },
   {
     "campionato": "Serie A",
@@ -80576,12 +80576,12 @@
     "giornata": "11",
     "squadra_casa": "Renate",
     "squadra_ospite": "Albinoleffe",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Meda",
     "stadio": "Mino Favini",
-    "stato": "Futura"
+    "stato": "In corso"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -80590,12 +80590,12 @@
     "giornata": "11",
     "squadra_casa": "Trento",
     "squadra_ospite": "Juventus U23",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–1",
+    "gol_casa": "0",
+    "gol_ospite": "1",
     "citta": "Trento",
     "stadio": "Stadio Briamasco",
-    "stato": "Futura"
+    "stato": "In corso"
   },
   {
     "campionato": "Serie C - Girone A",
@@ -91230,12 +91230,12 @@
     "giornata": "11",
     "squadra_casa": "SS Monopoli",
     "squadra_ospite": "Audace Cerignola",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–0",
+    "gol_casa": "0",
+    "gol_ospite": "0",
     "citta": "Monopoli",
     "stadio": "Stadio Vito Simone Veneziani",
-    "stato": "Futura"
+    "stato": "In corso"
   },
   {
     "campionato": "Serie C - Girone C",
