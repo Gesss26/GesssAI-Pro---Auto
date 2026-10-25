@@ -1,0 +1,115 @@
+const FormazionePanel = ({ nomeSquadra, formazione, colore }) => {
+  if (!formazione) return null;
+
+  const titolari = formazione?.titolari || [];
+  const panchina = formazione?.panchina || [];
+  const mod = formazione?.modulo;
+
+  // Ora i voti sono già dentro ogni oggetto giocatore
+  const getStats = (g) => {
+    const mv = parseFloat(g.Mv) || 0;
+    const fm = parseFloat(g.Fm) || 0;
+    return {
+      mv: mv > 0 ? mv : null,
+      fm: fm > 0 ? fm : null,
+      ruolo: (g.ruolo || '?').toUpperCase(),
+    };
+  };
+
+  const calcolaMedie = (lista) => {
+    let sumMv = 0, countMv = 0;
+    lista.forEach(g => {
+      const { mv } = getStats(g);
+      if (mv !== null) { sumMv += mv; countMv++; }
+    });
+    return { mv: countMv > 0 ? sumMv / countMv : null, countMv, tot: lista.length };
+  };
+
+  const fmt = (v) => (v === null || v === undefined) ? '—' : v.toFixed(2);
+  const fmtMv = (v) => (v === null || v === undefined) ? '—' : v.toFixed(2).replace('.', ',');
+
+  const raggruppa = (lista) => {
+    const gruppi = { P: [], D: [], C: [], A: [], '?': [] };
+    lista.forEach(g => {
+      const { mv, fm, ruolo } = getStats(g);
+      let r = ['P','D','C','A'].includes(ruolo) ? ruolo : '?';
+      gruppi[r].push({ nome: g.nome, mv, fm, ruolo: r });
+    });
+    return gruppi;
+  };
+
+  const getRuoloLabel = (r) => ({ P: 'Por', D: 'Dif', C: 'Cen', A: 'Att' }[r] || '?');
+
+  const COLORI_RUOLO = {
+    P: { color: '#e67e22', bg: 'rgba(230, 126, 34, 0.15)', border: '#e67e22' },
+    D: { color: '#3498db', bg: 'rgba(52, 152, 219, 0.15)', border: '#3498db' },
+    C: { color: '#2ecc71', bg: 'rgba(46, 204, 113, 0.15)', border: '#2ecc71' },
+    A: { color: '#e74c3c', bg: 'rgba(231, 76, 60, 0.15)', border: '#e74c3c' },
+    '?': { color: '#95a5a6', bg: 'rgba(149, 165, 166, 0.1)', border: '#95a5a6' }
+  };
+
+  const renderSezioneRuolo = (ruoloKey, lista) => {
+    if (!lista || lista.length === 0) return null;
+    const titolo = { P: 'Portiere', D: 'Difensori', C: 'Centrocampisti', A: 'Attaccanti', '?': 'Altri' }[ruoloKey];
+    const stile = COLORI_RUOLO[ruoloKey] || COLORI_RUOLO['?'];
+
+    return (
+      <div style={{ marginBottom: '10px' }}>
+        <div style={{ color: stile.color, fontWeight: 'bold', fontSize: '11px', textTransform: 'uppercase', marginBottom: '4px', borderBottom: `1px solid ${stile.border}`, paddingBottom: '2px' }}>
+          {titolo}:
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          {lista.map((item, i) => (
+            <div key={i} style={{ padding: '4px 8px', background: stile.bg, borderLeft: `3px solid ${stile.border}`, borderRadius: '4px', fontSize: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '9px', fontWeight: 'bold', background: stile.border, color: '#000', padding: '1px 4px', borderRadius: '3px', minWidth: '24px', textAlign: 'center' }}>
+                  {getRuoloLabel(item.ruolo)}
+                </span>
+                <span style={{ color: 'var(--text)' }}>{item.nome}</span>
+              </div>
+              <span style={{ fontSize: '11px', color: '#4ade80', fontWeight: 'bold' }}>
+                {item.mv !== null ? `(V: ${fmtMv(item.mv)})` : '(V: —)'}
+                {item.fm !== null && <span style={{ color: '#fbbf24', fontSize: '10px', marginLeft: '4px' }}>[Fm: {fmtMv(item.fm)}]</span>}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const gruppiTitolari = raggruppa(titolari);
+  const gruppiPanchina = raggruppa(panchina);
+  const medieTitolari = calcolaMedie(titolari);
+  const mediePanchina = calcolaMedie(panchina);
+  const RUOLI_ORDER = ['P', 'D', 'C', 'A', '?'];
+
+  return (
+    <div style={{ background: 'var(--surface)', borderRadius: '8px', padding: '12px', fontSize: '12px', borderTop: `3px solid ${colore || 'var(--neon-cyan)'}` }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '4px' }}>
+        <div style={{ fontWeight: 900, color: colore || 'var(--neon-cyan)', fontSize: '15px' }}>
+          {nomeSquadra} {mod ? `(${mod})` : ''}
+        </div>
+        <div style={{ display: 'flex', gap: '6px', fontSize: '11px', fontWeight: 'bold' }}>
+          <span style={{ color: '#4ade80', background: 'rgba(0,255,136,0.1)', padding: '2px 6px', borderRadius: '4px' }}>TIT: {fmt(medieTitolari.mv)}</span>
+          <span style={{ color: '#fbbf24', background: 'rgba(251,191,36,0.1)', padding: '2px 6px', borderRadius: '4px' }}>PAN: {fmt(mediePanchina.mv)}</span>
+        </div>
+      </div>
+
+      <div style={{ color: 'var(--neon-green)', marginBottom: '10px', fontWeight: 'bold', fontSize: '12px', borderBottom: '1px solid rgba(0,255,136,0.2)', paddingBottom: '4px' }}>
+        ⚽ TITOLARI ({titolari.length})
+      </div>
+      {RUOLI_ORDER.map(r => renderSezioneRuolo(r, gruppiTitolari[r]))}
+
+      <div style={{ color: 'var(--text-dim)', marginTop: '16px', marginBottom: '10px', fontWeight: 'bold', fontSize: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '4px' }}>
+        🪑 PANCHINA ({panchina.length})
+      </div>
+      {RUOLI_ORDER.map(r => renderSezioneRuolo(r, gruppiPanchina[r]))}
+
+      <div style={{ marginTop: '10px', paddingTop: '6px', borderTop: '1px dashed var(--border)', fontSize: '10px', color: 'var(--text-dim)', display: 'flex', justifyContent: 'space-between' }}>
+        <span>📊 Titolari con V: {medieTitolari.countMv}/{medieTitolari.tot}</span>
+        <span>📊 Panchina con V: {mediePanchina.countMv}/{mediePanchina.tot}</span>
+      </div>
+    </div>
+  );
+};
