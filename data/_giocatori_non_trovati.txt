@@ -1,0 +1,9 @@
+[PAN] Torino → Pellegri
+[PAN] Cagliari → Sulev
+[PAN] Cagliari → Sugamele
+[PAN] Como → Dossena
+[PAN] Sassuolo → Ghion
+[PAN] Sassuolo → Skjellerup
+[PAN] Parma → Konate A.
+[PAN] Venezia → Fanne
+[PAN] Lecce → Borbei

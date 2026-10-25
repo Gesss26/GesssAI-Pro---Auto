@@ -1,1149 +1,2810 @@
 {
+  "giornata": null,
+  "aggiornato": "2026-10-25",
   "formazioni": {
     "Torino": {
+      "nome": "Torino",
       "modulo": "3-4-2-1",
       "titolari": [
-        "Perri",
-        "Comuzzo",
-        "Ismajli",
-        "Coco",
-        "Belghali",
-        "Mandragora",
-        "Fitz-Jim",
-        "Cacciamani",
-        "Vlasic",
-        "Adams C.",
-        "Simeone"
+        {
+          "nome": "Perri",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Comuzzo",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Ismajli",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Coco",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Belghali",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Mandragora",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Fitz-Jim",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Cacciamani",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Vlasic",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Adams C.",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Simeone",
+          "ruolo": "A"
+        }
       ],
       "panchina": [
-        "Mascardi",
-        "Siviero",
-        "Comert",
-        "Patterson",
-        "Biraghi",
-        "Braganca",
-        "Oristanio",
-        "Gineitis",
-        "Casadei",
-        "Aboukhlal",
-        "Zapata D.",
-        "Pellegri",
-        "Kulenovic"
+        {
+          "nome": "Mascardi",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Siviero",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Comert",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Patterson",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Biraghi",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Braganca",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Oristanio",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Gineitis",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Casadei",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Aboukhlal",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Zapata D.",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Pellegri",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Kulenovic",
+          "ruolo": "A"
+        }
       ],
       "indisponibili": [
         {
+          "squadra": "Torino",
           "nome": "Ilkhan",
-          "motivo": "noie muscolari, out contro il Monza",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "noie muscolari, out contro il Monza"
         },
         {
+          "squadra": "Torino",
           "nome": "Fortini",
-          "motivo": "affaticamento muscolare all'adduttore, da valutare convocazione contro il Monza",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "affaticamento muscolare all'adduttore, da valutare convocazione contro il Monza"
         },
         {
+          "squadra": "Torino",
           "nome": "Rodriguez R.",
-          "motivo": "lesione tendinea di basso grado ai muscoli flessori della coscia sinistra, rientro dalla prima metà di novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "lesione tendinea di basso grado ai muscoli flessori della coscia sinistra, rientro dalla prima metà di novembre"
         }
-      ]
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [],
+      "in_dubbio": []
     },
     "Monza": {
+      "nome": "Monza",
       "modulo": "3-4-2-1",
       "titolari": [
-        "Tornqvist",
-        "Goglichidze",
-        "Lucchesi",
-        "Carboni A.",
-        "Birindelli",
-        "Akinsanmiro",
-        "Foe Ondoa",
-        "Mangas",
-        "Mota",
-        "Robinson J.",
-        "Varela G."
+        {
+          "nome": "Tornqvist",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Goglichidze",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Lucchesi",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Carboni A.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Birindelli",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Akinsanmiro",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Foe Ondoa",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Mangas",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Mota",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Robinson J.",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Varela G.",
+          "ruolo": "A"
+        }
       ],
       "panchina": [
-        "Thiam",
-        "Strajnar",
-        "Kouadio",
-        "Bakoune",
-        "Antov",
-        "Folorunsho",
-        "Colombo L.",
-        "Mout",
-        "Colpani",
-        "Tourè I.",
-        "Ciurria",
-        "Forson O.",
-        "Cutrone",
-        "Ngonge",
-        "Zeballos"
+        {
+          "nome": "Thiam",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Strajnar",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Kouadio",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Bakoune",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Antov",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Folorunsho",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Colombo L.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Mout",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Colpani",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Tourè I.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Ciurria",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Forson O.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Cutrone",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Ngonge",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Zeballos",
+          "ruolo": "A"
+        }
       ],
       "indisponibili": [
         {
+          "squadra": "Monza",
           "nome": "Pessina",
-          "motivo": "lussazione della rotula del ginocchio destro, rientro da metà novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "lussazione della rotula del ginocchio destro, rientro da metà novembre"
         },
         {
+          "squadra": "Monza",
           "nome": "Maye",
-          "motivo": "noie fisiche, da valutare per Torino",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "noie fisiche, da valutare per Torino"
         },
         {
+          "squadra": "Monza",
           "nome": "Ziolkowski",
-          "motivo": "fascite plantare, rientro da metà novembre",
-          "importanza": "marginale",
-          "stato": "injureds"
+          "motivo": "fascite plantare, rientro da metà novembre"
         }
-      ]
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [],
+      "in_dubbio": []
     },
     "Cagliari": {
+      "nome": "Cagliari",
       "modulo": "4-4-1-1",
       "titolari": [
-        "Caprile",
-        "Zè Pedro",
-        "Deiola",
-        "Rodriguez Ju.",
-        "Obert",
-        "Adopo",
-        "Winks",
-        "Romano",
-        "Massolin",
-        "Maldini",
-        "Mendy P."
+        {
+          "nome": "Caprile",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Zè Pedro",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Deiola",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Rodriguez Ju.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Obert",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Adopo",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Winks",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Romano",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Massolin",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Maldini",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Mendy P.",
+          "ruolo": "A"
+        }
       ],
       "panchina": [
-        "Radunovic",
-        "Sherri",
-        "Aurelio",
-        "Sugawara",
-        "Mina",
-        "Kofler",
-        "Ciervo",
-        "Fazzini",
-        "Gagliardini",
-        "Fadera",
-        "Liteta",
-        "Sulev",
-        "Nzola",
-        "Sugamele",
-        "Kevin Carlos"
+        {
+          "nome": "Radunovic",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Sherri",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Aurelio",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Sugawara",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Mina",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Kofler",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Ciervo",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Fazzini",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Gagliardini",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Fadera",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Liteta",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Sulev",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Nzola",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Sugamele",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Kevin Carlos",
+          "ruolo": "A"
+        }
       ],
       "indisponibili": [
         {
+          "squadra": "Cagliari",
           "nome": "Idrissi R.",
-          "motivo": "rottura del legamento crociato, rientro da metà novembre",
-          "importanza": "chiave",
-          "stato": "injureds"
+          "motivo": "rottura del legamento crociato, rientro da metà novembre"
         },
         {
+          "squadra": "Cagliari",
           "nome": "Felici",
-          "motivo": "rottura del legamento crociato anteriore, ipotesi rientro da marzo",
-          "importanza": "chiave",
-          "stato": "injureds"
+          "motivo": "rottura del legamento crociato anteriore, ipotesi rientro da marzo"
         }
-      ]
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [],
+      "in_dubbio": []
     },
     "Bologna": {
+      "nome": "Bologna",
       "modulo": "3-4-2-1",
       "titolari": [
-        "Skorupski",
-        "Darmian",
-        "Casale",
-        "Theate",
-        "Zortea",
-        "Pobega",
-        "Ferguson",
-        "Miranda J.",
-        "Bernardeschi",
-        "Cambiaghi",
-        "Odgaard"
+        {
+          "nome": "Skorupski",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Darmian",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Casale",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Theate",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Zortea",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Pobega",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Ferguson",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Miranda J.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Bernardeschi",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Cambiaghi",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Odgaard",
+          "ruolo": "C"
+        }
       ],
       "panchina": [
-        "Pessina Mas.",
-        "Happonen",
-        "Alhassane",
-        "Helland",
-        "Heggem",
-        "Vitik",
-        "De Silvestri",
-        "Moro N.",
-        "Amondarain",
-        "El Azzouzi O.",
-        "Mbangula",
-        "Libra",
-        "Enem",
-        "Dovbyk"
+        {
+          "nome": "Pessina Mas.",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Happonen",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Alhassane",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Helland",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Heggem",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Vitik",
+          "ruolo": "D"
+        },
+        {
+          "nome": "De Silvestri",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Moro N.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Amondarain",
+          "ruolo": "C"
+        },
+        {
+          "nome": "El Azzouzi O.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Mbangula",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Libra",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Enem",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Dovbyk",
+          "ruolo": "A"
+        }
       ],
       "indisponibili": [
         {
+          "squadra": "Bologna",
           "nome": "Holm",
-          "motivo": "problema al tendine della coscia destra, ipotesi rientro da fine febbraio",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "problema al tendine della coscia destra, ipotesi rientro da fine febbraio"
         },
         {
+          "squadra": "Bologna",
           "nome": "Orsolini",
-          "motivo": "lesione di primo grado al bicipite femorale della coscia destra, rientro dalla prima metà di novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "lesione di primo grado al bicipite femorale della coscia destra, rientro dalla prima metà di novembre"
         },
         {
+          "squadra": "Bologna",
           "nome": "Piccoli",
-          "motivo": "problema muscolare al bicipite femorale della coscia destra, rientro dalla metà di novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "problema muscolare al bicipite femorale della coscia destra, rientro dalla metà di novembre"
         }
-      ]
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [],
+      "in_dubbio": []
     },
     "Como": {
+      "nome": "Como",
       "modulo": "4-2-3-1",
       "titolari": [
-        "Butez",
-        "Couto",
-        "Kempf",
-        "Kambwala",
-        "Kaiki",
-        "Perrone",
-        "Ricci S.",
-        "Da Cunha",
-        "Caqueret",
-        "Baturina",
-        "Douvikas"
+        {
+          "nome": "Butez",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Couto",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Kempf",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Kambwala",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Kaiki",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Perrone",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Ricci S.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Da Cunha",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Caqueret",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Baturina",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Douvikas",
+          "ruolo": "A"
+        }
       ],
       "panchina": [
-        "Sanchez Ro.",
-        "Vigorito",
-        "Smolcic I.",
-        "Goldaniga",
-        "Valle",
-        "Ramon",
-        "Dossena",
-        "Paz N.",
-        "Milla",
-        "Lahdo",
-        "Addai"
+        {
+          "nome": "Sanchez Ro.",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Vigorito",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Smolcic I.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Goldaniga",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Valle",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Ramon",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Dossena",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Paz N.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Milla",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Lahdo",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Addai",
+          "ruolo": "C"
+        }
       ],
       "indisponibili": [
         {
+          "squadra": "Como",
           "nome": "Liberali",
-          "motivo": "fastidio alla gamba, out contro Sassuolo",
-          "importanza": "marginale",
-          "stato": "injureds"
+          "motivo": "fastidio alla gamba, out contro Sassuolo"
         },
         {
+          "squadra": "Como",
           "nome": "Rodriguez Je.",
-          "motivo": "problema fisico, out contro Sassuolo",
-          "importanza": "marginale",
-          "stato": "injureds"
+          "motivo": "problema fisico, out contro Sassuolo"
         },
         {
+          "squadra": "Como",
           "nome": "Diao",
-          "motivo": "lesione muscolare al flessore della gamba, rientro dalla metà di novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "lesione muscolare al flessore della gamba, rientro dalla metà di novembre"
         },
         {
+          "squadra": "Como",
           "nome": "Chalobah T.",
-          "motivo": "problema muscolare alla gamba, rientro da inizio novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "problema muscolare alla gamba, rientro da inizio novembre"
         },
         {
+          "squadra": "Como",
           "nome": "Kean",
-          "motivo": "fastidio alla tibia, tentativo rientro dalla 9a giornata",
-          "importanza": "marginale",
-          "stato": "injureds"
+          "motivo": "fastidio alla tibia, tentativo rientro dalla 9a giornata"
         }
-      ]
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [],
+      "in_dubbio": []
     },
     "Sassuolo": {
+      "nome": "Sassuolo",
       "modulo": "4-3-3",
       "titolari": [
-        "Turati",
-        "Van Der Brempt",
-        "Caleta-Car",
-        "Candè",
-        "Obrador",
-        "Adzic",
-        "Matic",
-        "Bakola",
-        "Berardi",
-        "Bowie",
-        "Dominguez B."
+        {
+          "nome": "Turati",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Van Der Brempt",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Caleta-Car",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Candè",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Obrador",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Adzic",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Matic",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Bakola",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Berardi",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Bowie",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Dominguez B.",
+          "ruolo": "C"
+        }
       ],
       "panchina": [
-        "Muric",
-        "Satalino",
-        "Cinquegrano",
-        "Doig",
-        "Odenthal",
-        "Pieragnolo",
-        "Walukiewicz",
-        "Thorstvedt",
-        "Lipani",
-        "Ghion",
-        "Sulemana I.",
-        "Volpato",
-        "Esposito Se.",
-        "Laurientè",
-        "Skjellerup"
+        {
+          "nome": "Muric",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Satalino",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Cinquegrano",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Doig",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Odenthal",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Pieragnolo",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Walukiewicz",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Thorstvedt",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Lipani",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Ghion",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Sulemana I.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Volpato",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Esposito Se.",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Laurientè",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Skjellerup",
+          "ruolo": "A"
+        }
       ],
       "indisponibili": [
         {
+          "squadra": "Sassuolo",
           "nome": "Idzes",
-          "motivo": "lesione di grado moderato al quadricipite della gamba sinistra, rientro da fine ottobre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "lesione di grado moderato al quadricipite della gamba sinistra, rientro da fine ottobre"
         },
         {
+          "squadra": "Sassuolo",
           "nome": "Boloca",
-          "motivo": "problema al ginocchio, da valutare rientro da fine ottobre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "problema al ginocchio, da valutare rientro da fine ottobre"
         },
         {
+          "squadra": "Sassuolo",
           "nome": "Konè I.",
-          "motivo": "rottura di tibia e perone gamba sinistra, rientro da dicembre",
-          "importanza": "chiave",
-          "stato": "injureds"
+          "motivo": "rottura di tibia e perone gamba sinistra, rientro da dicembre"
         },
         {
+          "squadra": "Sassuolo",
           "nome": "Leysen F.",
-          "motivo": "lesione crociato anteriore del ginocchio sinistro, ipotesi rientro da aprile",
-          "importanza": "chiave",
-          "stato": "injureds"
+          "motivo": "lesione crociato anteriore del ginocchio sinistro, ipotesi rientro da aprile"
         }
-      ]
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [],
+      "in_dubbio": []
     },
     "Napoli": {
+      "nome": "Napoli",
       "modulo": "4-3-3",
       "titolari": [
-        "Meret",
-        "Di Lorenzo",
-        "Marin R.",
-        "Badiashile",
-        "Olivera",
-        "Zambo Anguissa",
-        "De Bruyne",
-        "McTominay",
-        "Politano",
-        "Hojlund",
-        "Lang"
+        {
+          "nome": "Meret",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Di Lorenzo",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Marin R.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Badiashile",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Olivera",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Zambo Anguissa",
+          "ruolo": "C"
+        },
+        {
+          "nome": "De Bruyne",
+          "ruolo": "C"
+        },
+        {
+          "nome": "McTominay",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Politano",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Hojlund",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Lang",
+          "ruolo": "A"
+        }
       ],
       "panchina": [
-        "Milinkovic-Savic V.",
-        "Contini",
-        "Marianucci",
-        "Spinazzola",
-        "Beukema",
-        "Lobotka",
-        "Gilmour",
-        "Vergara",
-        "Giovane",
-        "Lucca"
+        {
+          "nome": "Milinkovic-Savic V.",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Contini",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Marianucci",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Spinazzola",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Beukema",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Lobotka",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Gilmour",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Vergara",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Giovane",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Lucca",
+          "ruolo": "A"
+        }
       ],
       "indisponibili": [
         {
+          "squadra": "Napoli",
           "nome": "Buongiorno",
-          "motivo": "problema al menisco del ginocchio destro, rientro da fine dicembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "problema al menisco del ginocchio destro, rientro da fine dicembre"
         },
         {
+          "squadra": "Napoli",
           "nome": "Rrahmani",
-          "motivo": "influenzato, out contro la Roma",
-          "importanza": "marginale",
-          "stato": "injureds"
+          "motivo": "influenzato, out contro la Roma"
         },
         {
+          "squadra": "Napoli",
           "nome": "Santos A.",
-          "motivo": "lesione distrattiva di medio grado del bicipite femorale sinistro, rientro da inizio dicembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "lesione distrattiva di medio grado del bicipite femorale sinistro, rientro da inizio dicembre"
         },
         {
+          "squadra": "Napoli",
           "nome": "Neres",
-          "motivo": "lesione di basso grado al muscolo semimembranoso della coscia destra, tentativo rientro dalla prima metà di novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "lesione di basso grado al muscolo semimembranoso della coscia destra, tentativo rientro dalla prima metà di novembre"
         },
         {
+          "squadra": "Napoli",
           "nome": "Favasuli",
-          "motivo": "lesione muscolare al retto femorale, rientro da metà novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "lesione muscolare al retto femorale, rientro da metà novembre"
         }
-      ]
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [],
+      "in_dubbio": []
     },
     "Roma": {
+      "nome": "Roma",
       "modulo": "3-4-2-1",
       "titolari": [
-        "Gollini",
-        "Mancini",
-        "N'Dicka",
-        "Hermoso",
-        "Wesley",
-        "De Roon",
-        "Cristante",
-        "Rensch",
-        "Soulè",
-        "Pisilli",
-        "Malen"
+        {
+          "nome": "Gollini",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Mancini",
+          "ruolo": "D"
+        },
+        {
+          "nome": "N'Dicka",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Hermoso",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Wesley",
+          "ruolo": "D"
+        },
+        {
+          "nome": "De Roon",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Cristante",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Rensch",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Soulè",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Pisilli",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Malen",
+          "ruolo": "A"
+        }
       ],
       "panchina": [
-        "De Marzi",
-        "Vasquez D.",
-        "Balerdi",
-        "Koulierakis",
-        "Lulli",
-        "Molina N.",
-        "Ghilardi",
-        "Mora",
-        "Castro S."
+        {
+          "nome": "De Marzi",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Vasquez D.",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Balerdi",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Koulierakis",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Lulli",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Molina N.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Ghilardi",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Mora",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Castro S.",
+          "ruolo": "A"
+        }
       ],
       "indisponibili": [
         {
+          "squadra": "Roma",
           "nome": "Svilar",
-          "motivo": "frattura a un dito del piede, ipotesi rientro metà novembre",
-          "importanza": "chiave",
-          "stato": "injureds"
+          "motivo": "frattura a un dito del piede, ipotesi rientro metà novembre"
         },
         {
+          "squadra": "Roma",
           "nome": "Konè M.",
-          "motivo": "lesione di primo grado al bicipite femorale destro, tentativo di rientro dalla prima metà di novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "lesione di primo grado al bicipite femorale destro, tentativo di rientro dalla prima metà di novembre"
         },
         {
+          "squadra": "Roma",
           "nome": "Dybala",
-          "motivo": "lesione muscolare al gemello del polpaccio destro, rientro dalla 9a giornata",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "lesione muscolare al gemello del polpaccio destro, rientro dalla 9a giornata"
         },
         {
+          "squadra": "Roma",
           "nome": "Pellegrini Lo.",
-          "motivo": "lesione di alto grado in corrispondenza della giunzione muscolo - tendinea distale del muscolo semitendinoso della coscia destra, ipotesi rientro dalla fine di dicembre",
-          "importanza": "chiave",
-          "stato": "injureds"
+          "motivo": "lesione di alto grado in corrispondenza della giunzione muscolo - tendinea distale del muscolo semitendinoso della coscia destra, ipotesi rientro dalla fine di dicembre"
         }
-      ]
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [],
+      "in_dubbio": []
     },
     "Lazio": {
+      "nome": "Lazio",
       "modulo": "4-3-3",
       "titolari": [
-        "Mandas",
-        "Floriani Mussolini",
-        "Sutalo J.",
-        "Provstgaard",
-        "Tavares N.",
-        "Frattesi",
-        "Belahyane",
-        "Taylor K.",
-        "Isaksen",
-        "Noslin",
-        "Zaccagni"
+        {
+          "nome": "Mandas",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Floriani Mussolini",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Sutalo J.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Provstgaard",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Tavares N.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Frattesi",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Belahyane",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Taylor K.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Isaksen",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Noslin",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Zaccagni",
+          "ruolo": "C"
+        }
       ],
       "panchina": [
-        "Motta",
-        "Renzetti",
-        "Pedraza",
-        "Doekhi",
-        "Leite",
-        "Lazzari",
-        "Pellegrini Lu.",
-        "Cataldi",
-        "Przyborek",
-        "Dele-Bashiru",
-        "Cancellieri"
+        {
+          "nome": "Motta",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Renzetti",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Pedraza",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Doekhi",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Leite",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Lazzari",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Pellegrini Lu.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Cataldi",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Przyborek",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Dele-Bashiru",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Cancellieri",
+          "ruolo": "C"
+        }
       ],
       "indisponibili": [
         {
+          "squadra": "Lazio",
           "nome": "Marusic",
-          "motivo": "problema muscolare alla coscia destra, rientro da fine ottobre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "problema muscolare alla coscia destra, rientro da fine ottobre"
         },
         {
+          "squadra": "Lazio",
           "nome": "Rovella",
-          "motivo": "problema muscolare al polpaccio, rientro da fine ottobre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "problema muscolare al polpaccio, rientro da fine ottobre"
         },
         {
+          "squadra": "Lazio",
           "nome": "Pinamonti",
-          "motivo": "noie fisiche, out contro il Parma",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "noie fisiche, out contro il Parma"
         },
         {
+          "squadra": "Lazio",
           "nome": "Gudmundsson A.",
-          "motivo": "problema alla spalla destra, rientro da metà novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "problema alla spalla destra, rientro da metà novembre"
         }
-      ]
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [],
+      "in_dubbio": []
     },
     "Parma": {
+      "nome": "Parma",
       "modulo": "3-5-2",
       "titolari": [
-        "Corvi",
-        "Drobnic",
-        "Troilo",
-        "Diego Carlos",
-        "Delprato",
-        "Ordonez C.",
-        "Sierro",
-        "Keita M.",
-        "Valeri",
-        "Tourè E.",
-        "Romero D."
+        {
+          "nome": "Corvi",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Drobnic",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Troilo",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Diego Carlos",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Delprato",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Ordonez C.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Sierro",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Keita M.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Valeri",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Tourè E.",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Romero D.",
+          "ruolo": "A"
+        }
       ],
       "panchina": [
-        "Daffara",
-        "Ghidotti",
-        "Britschgi",
-        "Carboni F.",
-        "Ndiaye",
-        "Bernabè",
-        "Fabbian",
-        "Cremaschi",
-        "Konate A.",
-        "Diallo O.",
-        "Lontani",
-        "De Martis",
-        "Frigan"
+        {
+          "nome": "Daffara",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Ghidotti",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Britschgi",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Carboni F.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Ndiaye",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Bernabè",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Fabbian",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Cremaschi",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Konate A.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Diallo O.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Lontani",
+          "ruolo": "A"
+        },
+        {
+          "nome": "De Martis",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Frigan",
+          "ruolo": "A"
+        }
       ],
       "indisponibili": [
         {
+          "squadra": "Parma",
           "nome": "Nicolussi Caviglia",
-          "motivo": "lesione di medio grado alla coscia destra, rientro da dicembre",
-          "importanza": "chiave",
-          "stato": "injureds"
+          "motivo": "lesione di medio grado alla coscia destra, rientro da dicembre"
         },
         {
+          "squadra": "Parma",
           "nome": "Almqvist",
-          "motivo": "lesione muscolare polpaccio sinistro, rientro da fine ottobre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "lesione muscolare polpaccio sinistro, rientro da fine ottobre"
         },
         {
+          "squadra": "Parma",
           "nome": "Elphege",
-          "motivo": "appendicite acuta, out contro la Lazio",
-          "importanza": "marginale",
-          "stato": "injureds"
+          "motivo": "appendicite acuta, out contro la Lazio"
         }
-      ]
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [],
+      "in_dubbio": []
     },
     "Inter": {
+      "nome": "Inter",
       "modulo": "3-5-2",
       "titolari": [
-        "Martinez Jo.",
-        "Bisseck",
-        "Akanji",
-        "Bastoni",
-        "Diouf",
-        "Barella",
-        "Calhanoglu",
-        "Zielinski",
-        "Dimarco",
-        "Esposito F.P.",
-        "Thuram"
+        {
+          "nome": "Martinez Jo.",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Bisseck",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Akanji",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Bastoni",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Diouf",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Barella",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Calhanoglu",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Zielinski",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Dimarco",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Esposito F.P.",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Thuram",
+          "ruolo": "A"
+        }
       ],
       "panchina": [
-        "Provedel",
-        "Di Gennaro",
-        "Carlos Augusto",
-        "Stones",
-        "Spence",
-        "Sucic P.",
-        "Stankovic A.",
-        "Mkhitaryan",
-        "Bonny"
-      ],
-      "indisponibili": [
         {
-          "nome": "Pavard",
-          "motivo": "risentimento agli adduttori della coscia destra, rientro fine di ottobre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "nome": "Provedel",
+          "ruolo": "P"
         },
         {
-          "nome": "Luis Henrique",
-          "motivo": "risentimento all'adduttore lungo della coscia sinistra, ipotesi rientro da metà novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "nome": "Di Gennaro",
+          "ruolo": "P"
         },
         {
-          "nome": "Martinez L.",
-          "motivo": "risentimento muscolare ai flessori della coscia sinistra, rientro da metà novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
-        },
-        {
-          "nome": "Jones C.",
-          "motivo": "risentimento miofasciale agli adduttori della coscia destra, tentativo rientro dalla fine di ottobre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "nome": "Carlos Augusto",
+          "ruolo": "D"
         },
         {
           "nome": "Stones",
-          "motivo": "risentimento ai flessori della coscia sinistra, da valutare convocazione contro la Fiorentina",
-          "importanza": "rotazione",
-          "stato": "dubts"
+          "ruolo": "D"
+        },
+        {
+          "nome": "Spence",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Sucic P.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Stankovic A.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Mkhitaryan",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Bonny",
+          "ruolo": "A"
+        }
+      ],
+      "indisponibili": [
+        {
+          "squadra": "Inter",
+          "nome": "Pavard",
+          "motivo": "risentimento agli adduttori della coscia destra, rientro fine di ottobre"
+        },
+        {
+          "squadra": "Inter",
+          "nome": "Luis Henrique",
+          "motivo": "risentimento all'adduttore lungo della coscia sinistra, ipotesi rientro da metà novembre"
+        },
+        {
+          "squadra": "Inter",
+          "nome": "Martinez L.",
+          "motivo": "risentimento muscolare ai flessori della coscia sinistra, rientro da metà novembre"
+        },
+        {
+          "squadra": "Inter",
+          "nome": "Jones C.",
+          "motivo": "risentimento miofasciale agli adduttori della coscia destra, tentativo rientro dalla fine di ottobre"
+        }
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [
+        {
+          "squadra": "Inter",
+          "giocatori": [
+            {
+              "nome": "Barella",
+              "percentuale": "60%"
+            },
+            {
+              "nome": "Sucic P.",
+              "percentuale": "40%"
+            }
+          ]
+        },
+        {
+          "squadra": "Inter",
+          "giocatori": [
+            {
+              "nome": "Dimarco",
+              "percentuale": "55%"
+            },
+            {
+              "nome": "Carlos Augusto",
+              "percentuale": "45%"
+            }
+          ]
+        },
+        {
+          "squadra": "Inter",
+          "giocatori": [
+            {
+              "nome": "Thuram",
+              "percentuale": "60%"
+            },
+            {
+              "nome": "Bonny",
+              "percentuale": "40%"
+            }
+          ]
+        }
+      ],
+      "in_dubbio": [
+        {
+          "squadra": "Inter",
+          "nome": "Stones",
+          "motivo": "risentimento ai flessori della coscia sinistra, da valutare convocazione contro la Fiorentina"
         }
       ]
     },
     "Fiorentina": {
+      "nome": "Fiorentina",
       "modulo": "4-3-2-1",
       "titolari": [
-        "De Gea",
-        "Jimenez A.",
-        "Dragusin",
-        "Pongracic",
-        "Viery",
-        "Ndour",
-        "Fagioli",
-        "Brescianini",
-        "Mastantuono",
-        "Njie",
-        "Pellegrino M."
+        {
+          "nome": "De Gea",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Jimenez A.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Dragusin",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Pongracic",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Viery",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Ndour",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Fagioli",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Brescianini",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Mastantuono",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Njie",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Pellegrino M.",
+          "ruolo": "A"
+        }
       ],
       "panchina": [
-        "Christensen O.",
-        "Lezzerini",
-        "Joao Mario",
-        "Valdepenas",
-        "Dodò",
-        "Oulai",
-        "Goncalves P.",
-        "Gnonto",
-        "Beto"
+        {
+          "nome": "Christensen O.",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Lezzerini",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Joao Mario",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Valdepenas",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Dodò",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Oulai",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Goncalves P.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Gnonto",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Beto",
+          "ruolo": "A"
+        }
       ],
       "indisponibili": [
         {
+          "squadra": "Fiorentina",
           "nome": "Ranieri L.",
-          "motivo": "schiacciamento di un nervo al piede, out contro l'Inter",
-          "importanza": "marginale",
-          "stato": "injureds"
+          "motivo": "schiacciamento di un nervo al piede, out contro l'Inter"
         },
         {
+          "squadra": "Fiorentina",
           "nome": "Parisi",
-          "motivo": "infortunio al legamento crociato, rientro da dicembre",
-          "importanza": "chiave",
-          "stato": "injureds"
+          "motivo": "infortunio al legamento crociato, rientro da dicembre"
         },
         {
+          "squadra": "Fiorentina",
           "nome": "Atta",
-          "motivo": "sovraccarico funzionale dell'addome, out contro l'Inter",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "sovraccarico funzionale dell'addome, out contro l'Inter"
         }
-      ]
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [
+        {
+          "squadra": "Fiorentina",
+          "giocatori": [
+            {
+              "nome": "Jimenez A.",
+              "percentuale": "60%"
+            },
+            {
+              "nome": "Dodò",
+              "percentuale": "40%"
+            }
+          ]
+        },
+        {
+          "squadra": "Fiorentina",
+          "giocatori": [
+            {
+              "nome": "Pellegrino M.",
+              "percentuale": "55%"
+            },
+            {
+              "nome": "Beto",
+              "percentuale": "45%"
+            }
+          ]
+        }
+      ],
+      "in_dubbio": []
     },
     "Atalanta": {
+      "nome": "Atalanta",
       "modulo": "4-2-3-1",
       "titolari": [
-        "Carnesecchi",
-        "Bellanova",
-        "Kristensen T.",
-        "Obric",
-        "Bernasconi",
-        "Gaetano",
-        "Ederson D.S.",
-        "Elmas",
-        "De Ketelaere",
-        "Rowe",
-        "Krstovic"
+        {
+          "nome": "Carnesecchi",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Bellanova",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Kristensen T.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Obric",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Bernasconi",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Gaetano",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Ederson D.S.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Elmas",
+          "ruolo": "C"
+        },
+        {
+          "nome": "De Ketelaere",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Rowe",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Krstovic",
+          "ruolo": "A"
+        }
       ],
       "panchina": [
-        "Sportiello",
-        "Zappacosta",
-        "Kessiè",
-        "Pasalic",
-        "Samardzic",
-        "Zalewski",
-        "Scamacca"
-      ],
-      "indisponibili": [
         {
-          "nome": "Hien",
-          "motivo": "lesione del tendine prossimale del muscolo semimembranoso della coscia sinistra, rientro da metà novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "nome": "Sportiello",
+          "ruolo": "P"
         },
         {
-          "nome": "Scalvini",
-          "motivo": "distrazione di basso grado dei muscoli flessori della gamba sinistra, rientro da fine ottobre",
-          "importanza": "rotazione",
-          "stato": "injureds"
-        },
-        {
-          "nome": "Kossounou",
-          "motivo": "lesione muscolare di medio-alto grado del bicipite femorale della coscia sinistra, rientro dalla seconda metà di novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
-        },
-        {
-          "nome": "Kolasinac",
-          "motivo": "distrazione muscolare al retto femorale della coscia sinistra, rientro metà novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
-        },
-        {
-          "nome": "Sulemana K.",
-          "motivo": "lesione del collaterale mediale di secondo grado del ginocchio sinistro, da valutare convocazione contro il Frosinone",
-          "importanza": "rotazione",
-          "stato": "injureds"
-        },
-        {
-          "nome": "Raspadori",
-          "motivo": "distrazione muscolare di basso grado al bicipite femorale della coscia destra, rientro dall'inizio di novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
-        },
-        {
-          "nome": "Pompei",
-          "motivo": "frattura della falange della mano destra, out contro il Frosinone",
-          "importanza": "chiave",
-          "stato": "injureds"
+          "nome": "Zappacosta",
+          "ruolo": "D"
         },
         {
           "nome": "Kessiè",
-          "motivo": "distrazione di basso grado al polpaccio della gamba destra, in dubbio contro il Frosinone",
-          "importanza": "rotazione",
-          "stato": "dubts"
+          "ruolo": "C"
+        },
+        {
+          "nome": "Pasalic",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Samardzic",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Zalewski",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Scamacca",
+          "ruolo": "A"
+        }
+      ],
+      "indisponibili": [
+        {
+          "squadra": "Atalanta",
+          "nome": "Hien",
+          "motivo": "lesione del tendine prossimale del muscolo semimembranoso della coscia sinistra, rientro da metà novembre"
+        },
+        {
+          "squadra": "Atalanta",
+          "nome": "Scalvini",
+          "motivo": "distrazione di basso grado dei muscoli flessori della gamba sinistra, rientro da fine ottobre"
+        },
+        {
+          "squadra": "Atalanta",
+          "nome": "Kossounou",
+          "motivo": "lesione muscolare di medio-alto grado del bicipite femorale della coscia sinistra, rientro dalla seconda metà di novembre"
+        },
+        {
+          "squadra": "Atalanta",
+          "nome": "Kolasinac",
+          "motivo": "distrazione muscolare al retto femorale della coscia sinistra, rientro metà novembre"
+        },
+        {
+          "squadra": "Atalanta",
+          "nome": "Sulemana K.",
+          "motivo": "lesione del collaterale mediale di secondo grado del ginocchio sinistro, da valutare convocazione contro il Frosinone"
+        },
+        {
+          "squadra": "Atalanta",
+          "nome": "Raspadori",
+          "motivo": "distrazione muscolare di basso grado al bicipite femorale della coscia destra, rientro dall'inizio di novembre"
+        },
+        {
+          "squadra": "Atalanta",
+          "nome": "Pompei",
+          "motivo": "frattura della falange della mano destra, out contro il Frosinone"
+        }
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [
+        {
+          "squadra": "Atalanta",
+          "giocatori": [
+            {
+              "nome": "Bellanova",
+              "percentuale": "60%"
+            },
+            {
+              "nome": "Zappacosta",
+              "percentuale": "40%"
+            }
+          ]
+        },
+        {
+          "squadra": "Atalanta",
+          "giocatori": [
+            {
+              "nome": "Gaetano",
+              "percentuale": "60%"
+            },
+            {
+              "nome": "Kessiè",
+              "percentuale": "40%"
+            }
+          ]
+        },
+        {
+          "squadra": "Atalanta",
+          "giocatori": [
+            {
+              "nome": "Elmas",
+              "percentuale": "60%"
+            },
+            {
+              "nome": "Zalewski",
+              "percentuale": "40%"
+            }
+          ]
+        }
+      ],
+      "in_dubbio": [
+        {
+          "squadra": "Atalanta",
+          "nome": "Kessiè",
+          "motivo": "distrazione di basso grado al polpaccio della gamba destra, in dubbio contro il Frosinone"
         }
       ]
     },
     "Frosinone": {
+      "nome": "Frosinone",
       "modulo": "4-2-3-1",
       "titolari": [
-        "Palmisani",
-        "Oyono A.",
-        "Calvani",
-        "Cittadini",
-        "Bracaglia",
-        "Calò",
-        "Masini",
-        "Ghedjemis",
-        "Schmid",
-        "Kvernadze",
-        "Raimondo"
+        {
+          "nome": "Palmisani",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Oyono A.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Calvani",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Cittadini",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Bracaglia",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Calò",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Masini",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Ghedjemis",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Schmid",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Kvernadze",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Raimondo",
+          "ruolo": "A"
+        }
       ],
       "panchina": [
-        "Desplanches",
-        "Pisseri",
-        "Monterisi",
-        "Tchato",
-        "Omar Fayed",
-        "Amey",
-        "Terzic",
-        "Akpoguma",
-        "Fini",
-        "Cichella",
-        "Hasa",
-        "El Azzouzi A.",
-        "Zerbin",
-        "Birligea",
-        "Bobcek"
+        {
+          "nome": "Desplanches",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Pisseri",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Monterisi",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Tchato",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Omar Fayed",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Amey",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Terzic",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Akpoguma",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Fini",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Cichella",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Hasa",
+          "ruolo": "C"
+        },
+        {
+          "nome": "El Azzouzi A.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Zerbin",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Birligea",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Bobcek",
+          "ruolo": "A"
+        }
       ],
       "indisponibili": [
         {
+          "squadra": "Frosinone",
           "nome": "Grillitsch",
-          "motivo": "sindrome retto-adduttoria, rientro da inizio novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "sindrome retto-adduttoria, rientro da inizio novembre"
         }
-      ]
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [
+        {
+          "squadra": "Frosinone",
+          "giocatori": [
+            {
+              "nome": "Cittadini",
+              "percentuale": "55%"
+            },
+            {
+              "nome": "Monterisi",
+              "percentuale": "45%"
+            }
+          ]
+        }
+      ],
+      "in_dubbio": []
     },
     "Genoa": {
+      "nome": "Genoa",
       "modulo": "3-4-2-1",
       "titolari": [
-        "Bijlow",
-        "Marcandalli",
-        "Ostigard",
-        "Vasquez",
-        "Ellertsson",
-        "Frendrup",
-        "Traorè Hj.",
-        "Puczka",
-        "Messias",
-        "El Shaarawy",
-        "Osmajic"
+        {
+          "nome": "Bijlow",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Marcandalli",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Ostigard",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Vasquez",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Ellertsson",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Frendrup",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Traorè Hj.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Puczka",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Messias",
+          "ruolo": "C"
+        },
+        {
+          "nome": "El Shaarawy",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Osmajic",
+          "ruolo": "A"
+        }
       ],
       "panchina": [
-        "Stolz",
-        "Sommariva",
-        "Mitaj",
-        "Otoa",
-        "Sabelli",
-        "Drameh",
-        "Wiafe",
-        "Baldanzi",
-        "Amorim",
-        "Meichtry",
-        "Robinho Junior",
-        "Colombo",
-        "Vitinha O."
-      ],
-      "indisponibili": [
         {
-          "nome": "Venturino",
-          "motivo": "problema al tendine rotuleo, rientro inizio novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "nome": "Stolz",
+          "ruolo": "P"
         },
         {
-          "nome": "Havel",
-          "motivo": "problema alla caviglia, rientro dalla fine di ottobre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "nome": "Sommariva",
+          "ruolo": "P"
         },
         {
-          "nome": "Sow",
-          "motivo": "distrazione muscolare al bicipite femorale della coscia sinistra, rientro da inizio novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "nome": "Mitaj",
+          "ruolo": "D"
         },
         {
-          "nome": "Ehizibue",
-          "motivo": "noie fisiche, out contro il Venezia",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "nome": "Otoa",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Sabelli",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Drameh",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Wiafe",
+          "ruolo": "C"
         },
         {
           "nome": "Baldanzi",
-          "motivo": "virus intestinale, in dubbio contro il Venezia",
-          "importanza": "rotazione",
-          "stato": "dubts"
+          "ruolo": "C"
+        },
+        {
+          "nome": "Amorim",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Meichtry",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Robinho Junior",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Colombo",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Vitinha O.",
+          "ruolo": "A"
+        }
+      ],
+      "indisponibili": [
+        {
+          "squadra": "Genoa",
+          "nome": "Venturino",
+          "motivo": "problema al tendine rotuleo, rientro inizio novembre"
+        },
+        {
+          "squadra": "Genoa",
+          "nome": "Havel",
+          "motivo": "problema alla caviglia, rientro dalla fine di ottobre"
+        },
+        {
+          "squadra": "Genoa",
+          "nome": "Sow",
+          "motivo": "distrazione muscolare al bicipite femorale della coscia sinistra, rientro da inizio novembre"
+        },
+        {
+          "squadra": "Genoa",
+          "nome": "Ehizibue",
+          "motivo": "noie fisiche, out contro il Venezia"
+        }
+      ],
+      "squalificati": [],
+      "diffidati": [
+        {
+          "squadra": "Genoa",
+          "nome": "Ostigard",
+          "motivo": null
+        }
+      ],
+      "ballottaggi": [],
+      "in_dubbio": [
+        {
+          "squadra": "Genoa",
+          "nome": "Baldanzi",
+          "motivo": "virus intestinale, in dubbio contro il Venezia"
         }
       ]
     },
     "Venezia": {
+      "nome": "Venezia",
       "modulo": "3-5-2",
       "titolari": [
-        "Stankovic F.",
-        "Moreno M.",
-        "Juan Jesus",
-        "Halhal",
-        "Hainaut",
-        "Perez K.",
-        "Sohm",
-        "Basic",
-        "Haps",
-        "Yeboah J.",
-        "Adams A."
+        {
+          "nome": "Stankovic F.",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Moreno M.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Juan Jesus",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Halhal",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Hainaut",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Perez K.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Sohm",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Basic",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Haps",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Yeboah J.",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Adams A.",
+          "ruolo": "A"
+        }
       ],
       "panchina": [
-        "Montipò",
-        "Grandi",
-        "Schingtienne",
-        "Gomes",
-        "Sagrado",
-        "Mazzocchi",
-        "Bella-Kotchap",
-        "Busio",
-        "Dagasso",
-        "Helgason",
-        "Fanne",
-        "Fernandez T.",
-        "Rrahmani Al.",
-        "Lauberbach",
-        "Lisman"
+        {
+          "nome": "Montipò",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Grandi",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Schingtienne",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Gomes",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Sagrado",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Mazzocchi",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Bella-Kotchap",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Busio",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Dagasso",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Helgason",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Fanne",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Fernandez T.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Rrahmani Al.",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Lauberbach",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Lisman",
+          "ruolo": "A"
+        }
       ],
       "indisponibili": [
         {
+          "squadra": "Venezia",
           "nome": "Sverko",
-          "motivo": "problema all'anca, rientro metà novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "problema all'anca, rientro metà novembre"
         },
         {
+          "squadra": "Venezia",
           "nome": "Franjic",
-          "motivo": "problema alla spalla, rientro dalla metà di dicembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "problema alla spalla, rientro dalla metà di dicembre"
         },
         {
+          "squadra": "Venezia",
           "nome": "Correia T.",
-          "motivo": "risentimento muscolare al flessore della gamba sinistra, out contro il Genoa",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "risentimento muscolare al flessore della gamba sinistra, out contro il Genoa"
         },
         {
+          "squadra": "Venezia",
           "nome": "Adorante",
-          "motivo": "problema alla schiena, rientro dalla fine di ottobre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "problema alla schiena, rientro dalla fine di ottobre"
         }
-      ]
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [
+        {
+          "squadra": "Venezia",
+          "giocatori": [
+            {
+              "nome": "Moreno M.",
+              "percentuale": "55%"
+            },
+            {
+              "nome": "Schingtienne",
+              "percentuale": "45%"
+            }
+          ]
+        }
+      ],
+      "in_dubbio": []
     },
     "Lecce": {
+      "nome": "Lecce",
       "modulo": "4-3-3",
       "titolari": [
-        "Falcone",
-        "Veiga D.",
-        "Gaspar K.",
-        "Tiago Gabriel",
-        "Gallo",
-        "Kaba",
-        "Ngom",
-        "Maleh",
-        "N'Dri",
-        "Geubbels",
-        "Fatah"
+        {
+          "nome": "Falcone",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Veiga D.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Gaspar K.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Tiago Gabriel",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Gallo",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Kaba",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Ngom",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Maleh",
+          "ruolo": "C"
+        },
+        {
+          "nome": "N'Dri",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Geubbels",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Fatah",
+          "ruolo": "A"
+        }
       ],
       "panchina": [
-        "Bleve",
-        "Borbei",
-        "Ndaba",
-        "Dembelè A.",
-        "Siebert",
-        "Jean",
-        "Gandelman",
-        "Gorter",
-        "Fofana Sa.",
-        "Monteiro J.",
-        "Stulic",
-        "Esteban"
+        {
+          "nome": "Bleve",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Borbei",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Ndaba",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Dembelè A.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Siebert",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Jean",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Gandelman",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Gorter",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Fofana Sa.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Monteiro J.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Stulic",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Esteban",
+          "ruolo": "A"
+        }
       ],
       "indisponibili": [
         {
+          "squadra": "Lecce",
           "nome": "Coulibaly L.",
-          "motivo": "lesione muscolare al bicipite femorale della coscia destra, rientro dall'inizio di novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "lesione muscolare al bicipite femorale della coscia destra, rientro dall'inizio di novembre"
         },
         {
+          "squadra": "Lecce",
           "nome": "Berisha M.",
-          "motivo": "sovraccarico muscolare alla gamba, rientro da fine ottobre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "sovraccarico muscolare alla gamba, rientro da fine ottobre"
         },
         {
+          "squadra": "Lecce",
           "nome": "Pierotti",
-          "motivo": "frattura composta del malleolo mediale della caviglia destra, ipotesi rientro da gennaio",
-          "importanza": "chiave",
-          "stato": "injureds"
+          "motivo": "frattura composta del malleolo mediale della caviglia destra, ipotesi rientro da gennaio"
         },
         {
+          "squadra": "Lecce",
           "nome": "Ilic",
-          "motivo": "lesione miotendinea del retto femorale sinistro con lesione parziale del tendine, rientro da fine marzo",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "lesione miotendinea del retto femorale sinistro con lesione parziale del tendine, rientro da fine marzo"
         }
-      ]
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [
+        {
+          "squadra": "Lecce",
+          "giocatori": [
+            {
+              "nome": "Gaspar K.",
+              "percentuale": "55%"
+            },
+            {
+              "nome": "Siebert",
+              "percentuale": "45%"
+            }
+          ]
+        },
+        {
+          "squadra": "Lecce",
+          "giocatori": [
+            {
+              "nome": "Fatah",
+              "percentuale": "60%"
+            },
+            {
+              "nome": "Monteiro J.",
+              "percentuale": "40%"
+            }
+          ]
+        }
+      ],
+      "in_dubbio": []
     },
     "Juventus": {
+      "nome": "Juventus",
       "modulo": "3-5-2",
       "titolari": [
-        "Vicario",
-        "Gatti",
-        "Bremer",
-        "Lucumì",
-        "Kalulu",
-        "McKennie",
-        "Douglas Luiz",
-        "Sarr P.",
-        "Cambiaso",
-        "Woltemade",
-        "Kolo Muani"
+        {
+          "nome": "Vicario",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Gatti",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Bremer",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Lucumì",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Kalulu",
+          "ruolo": "D"
+        },
+        {
+          "nome": "McKennie",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Douglas Luiz",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Sarr P.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Cambiaso",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Woltemade",
+          "ruolo": "A"
+        },
+        {
+          "nome": "Kolo Muani",
+          "ruolo": "A"
+        }
       ],
       "panchina": [
-        "Neto",
-        "Pinsoglio",
-        "Kelly L.",
-        "Cabal",
-        "Rugani",
-        "Koopmeiners",
-        "Zhegrova",
-        "Alajbegovic",
-        "Boga"
+        {
+          "nome": "Neto",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Pinsoglio",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Kelly L.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Cabal",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Rugani",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Koopmeiners",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Zhegrova",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Alajbegovic",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Boga",
+          "ruolo": "A"
+        }
       ],
       "indisponibili": [
         {
+          "squadra": "Juventus",
           "nome": "Celik",
-          "motivo": "lesione di basso grado del bicipite femorale sinistro, recuperabile da metà novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "lesione di basso grado del bicipite femorale sinistro, recuperabile da metà novembre"
         },
         {
+          "squadra": "Juventus",
           "nome": "Locatelli",
-          "motivo": "rottura del menisco esterno del ginocchio, rientro in campo da febbraio",
-          "importanza": "chiave",
-          "stato": "injureds"
+          "motivo": "rottura del menisco esterno del ginocchio, rientro in campo da febbraio"
         },
         {
+          "squadra": "Juventus",
           "nome": "Thuram K.",
-          "motivo": "sindrome femoro-rotulea, ipotesi rientro da gennaio",
-          "importanza": "chiave",
-          "stato": "injureds"
+          "motivo": "sindrome femoro-rotulea, ipotesi rientro da gennaio"
         },
         {
+          "squadra": "Juventus",
           "nome": "Conceicao",
-          "motivo": "lussazione alla spalla sinistra, rientro dalla metà di novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "lussazione alla spalla sinistra, rientro dalla metà di novembre"
         },
         {
+          "squadra": "Juventus",
           "nome": "Ekhator",
-          "motivo": "lesione di medio grado del muscolo semitendinoso, rientro da metà novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "lesione di medio grado del muscolo semitendinoso, rientro da metà novembre"
         },
         {
+          "squadra": "Juventus",
           "nome": "Yildiz",
-          "motivo": "frattura metatarso piede sinistro, rientro da inizio dicembre",
-          "importanza": "chiave",
-          "stato": "injureds"
+          "motivo": "frattura metatarso piede sinistro, rientro da inizio dicembre"
         },
         {
+          "squadra": "Juventus",
           "nome": "Grabara",
-          "motivo": "lesione al crociato anteriore del ginocchio destro, rientro da aprile",
-          "importanza": "chiave",
-          "stato": "injureds"
+          "motivo": "lesione al crociato anteriore del ginocchio destro, rientro da aprile"
         },
         {
+          "squadra": "Juventus",
           "nome": "Gonzalez N.",
-          "motivo": "lesione di basso grado del soleo destro, rientro metà novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "lesione di basso grado del soleo destro, rientro metà novembre"
         }
-      ]
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [
+        {
+          "squadra": "Juventus",
+          "giocatori": [
+            {
+              "nome": "Bremer",
+              "percentuale": "60%"
+            },
+            {
+              "nome": "Kelly L.",
+              "percentuale": "40%"
+            }
+          ]
+        },
+        {
+          "squadra": "Juventus",
+          "giocatori": [
+            {
+              "nome": "Sarr P.",
+              "percentuale": "55%"
+            },
+            {
+              "nome": "Koopmeiners",
+              "percentuale": "45%"
+            }
+          ]
+        },
+        {
+          "squadra": "Juventus",
+          "giocatori": [
+            {
+              "nome": "Woltemade",
+              "percentuale": "60%"
+            },
+            {
+              "nome": "Alajbegovic",
+              "percentuale": "40%"
+            }
+          ]
+        }
+      ],
+      "in_dubbio": []
     },
     "Udinese": {
+      "nome": "Udinese",
       "modulo": "3-4-2-1",
       "titolari": [
-        "Okoye",
-        "Palma",
-        "Solet",
-        "Ebosse",
-        "Vojvoda",
-        "Karlstrom",
-        "Piotrowski",
-        "Kamara H.",
-        "Ekkelenkamp",
-        "Chakvetadze",
-        "Davis K."
-      ],
-      "panchina": [
-        "Mrozek",
-        "Padelli",
-        "Bertola",
-        "Abankwah",
-        "Kabasele",
-        "Arizala",
-        "Lovric",
-        "Zarraga",
-        "Jovanovic",
-        "Miller L.",
-        "Unai Gomez",
-        "Zaniolo"
-      ],
-      "indisponibili": [
         {
-          "nome": "Zanoli",
-          "motivo": "problema muscolare, out contro il Milan",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "nome": "Okoye",
+          "ruolo": "P"
         },
         {
-          "nome": "Bayo V.",
-          "motivo": "lesione al bicipite femorale della coscia destra, rientro da metà novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
-        },
-        {
-          "nome": "Gueye",
-          "motivo": "problema alla caviglia, rientro da fine gennaio",
-          "importanza": "rotazione",
-          "stato": "injureds"
-        },
-        {
-          "nome": "Alaba",
-          "motivo": "risentimento muscolare al polpaccio destro, rientro da metà novembre",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "nome": "Palma",
+          "ruolo": "D"
         },
         {
           "nome": "Solet",
-          "motivo": "lieve fastidio muscolare, in dubbio dal 1' contro il Milan",
-          "importanza": "rotazione",
-          "stato": "dubts"
+          "ruolo": "D"
+        },
+        {
+          "nome": "Ebosse",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Vojvoda",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Karlstrom",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Piotrowski",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Kamara H.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Ekkelenkamp",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Chakvetadze",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Davis K.",
+          "ruolo": "A"
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Mrozek",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Padelli",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Bertola",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Abankwah",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Kabasele",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Arizala",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Lovric",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Zarraga",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Jovanovic",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Miller L.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Unai Gomez",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Zaniolo",
+          "ruolo": "C"
+        }
+      ],
+      "indisponibili": [
+        {
+          "squadra": "Udinese",
+          "nome": "Zanoli",
+          "motivo": "problema muscolare, out contro il Milan"
+        },
+        {
+          "squadra": "Udinese",
+          "nome": "Bayo V.",
+          "motivo": "lesione al bicipite femorale della coscia destra, rientro da metà novembre"
+        },
+        {
+          "squadra": "Udinese",
+          "nome": "Gueye",
+          "motivo": "problema alla caviglia, rientro da fine gennaio"
+        },
+        {
+          "squadra": "Udinese",
+          "nome": "Alaba",
+          "motivo": "risentimento muscolare al polpaccio destro, rientro da metà novembre"
+        }
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [
+        {
+          "squadra": "Udinese",
+          "giocatori": [
+            {
+              "nome": "Solet",
+              "percentuale": "55%"
+            },
+            {
+              "nome": "Abankwah",
+              "percentuale": "45%"
+            }
+          ]
+        },
+        {
+          "squadra": "Udinese",
+          "giocatori": [
+            {
+              "nome": "Piotrowski",
+              "percentuale": "55%"
+            },
+            {
+              "nome": "Zarraga",
+              "percentuale": "45%"
+            }
+          ]
+        },
+        {
+          "squadra": "Udinese",
+          "giocatori": [
+            {
+              "nome": "Chakvetadze",
+              "percentuale": "60%"
+            },
+            {
+              "nome": "Unai Gomez",
+              "percentuale": "40%"
+            }
+          ]
+        }
+      ],
+      "in_dubbio": [
+        {
+          "squadra": "Udinese",
+          "nome": "Solet",
+          "motivo": "lieve fastidio muscolare, in dubbio dal 1' contro il Milan"
         }
       ]
     },
     "Milan": {
+      "nome": "Milan",
       "modulo": "3-4-2-1",
       "titolari": [
-        "Maignan",
-        "Tomori",
-        "De Winter",
-        "Pavlovic",
-        "Terracciano F.",
-        "Musah",
-        "Modric",
-        "Estupinan",
-        "Cissè A.",
-        "Pulisic",
-        "Ramos G."
+        {
+          "nome": "Maignan",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Tomori",
+          "ruolo": "D"
+        },
+        {
+          "nome": "De Winter",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Pavlovic",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Terracciano F.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Musah",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Modric",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Estupinan",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Cissè A.",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Pulisic",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Ramos G.",
+          "ruolo": "A"
+        }
       ],
       "panchina": [
-        "Torriani",
-        "Bartesaghi",
-        "Diawara S.",
-        "Jashari",
-        "Comotto",
-        "Hutchinson",
-        "Loftus-Cheek",
-        "Camarda"
+        {
+          "nome": "Torriani",
+          "ruolo": "P"
+        },
+        {
+          "nome": "Bartesaghi",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Diawara S.",
+          "ruolo": "D"
+        },
+        {
+          "nome": "Jashari",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Comotto",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Hutchinson",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Loftus-Cheek",
+          "ruolo": "C"
+        },
+        {
+          "nome": "Camarda",
+          "ruolo": "A"
+        }
       ],
       "indisponibili": [
         {
+          "squadra": "Milan",
           "nome": "Gabbia",
-          "motivo": "lesione del flessore della coscia sinistra con parziale interessamento tendineo, ipotesi rientro da fine febbraio",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "lesione del flessore della coscia sinistra con parziale interessamento tendineo, ipotesi rientro da fine febbraio"
         },
         {
+          "squadra": "Milan",
           "nome": "Gila",
-          "motivo": "sovraccarico alla caviglia sinistra, out a Udine",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "sovraccarico alla caviglia sinistra, out a Udine"
         },
         {
+          "squadra": "Milan",
           "nome": "Saelemaekers",
-          "motivo": "problema alla caviglia destra, ipotesi rientro da febbraio",
-          "importanza": "chiave",
-          "stato": "injureds"
+          "motivo": "problema alla caviglia destra, ipotesi rientro da febbraio"
         },
         {
+          "squadra": "Milan",
           "nome": "Rabiot",
-          "motivo": "affaticamento muscolare al polpaccio destro, out a Udine",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "affaticamento muscolare al polpaccio destro, out a Udine"
         },
         {
+          "squadra": "Milan",
           "nome": "Chukwueze",
-          "motivo": "problema all'anca sinistra, out per Udine",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "problema all'anca sinistra, out per Udine"
         },
         {
+          "squadra": "Milan",
           "nome": "Moreira",
-          "motivo": "affaticamento muscolare al flessore sinistro, out a Udine",
-          "importanza": "rotazione",
-          "stato": "injureds"
+          "motivo": "affaticamento muscolare al flessore sinistro, out a Udine"
         }
-      ]
+      ],
+      "squalificati": [],
+      "diffidati": [],
+      "ballottaggi": [
+        {
+          "squadra": "Milan",
+          "giocatori": [
+            {
+              "nome": "Estupinan",
+              "percentuale": "60%"
+            },
+            {
+              "nome": "Bartesaghi",
+              "percentuale": "40%"
+            }
+          ]
+        },
+        {
+          "squadra": "Milan",
+          "giocatori": [
+            {
+              "nome": "Musah",
+              "percentuale": "55%"
+            },
+            {
+              "nome": "Jashari",
+              "percentuale": "45%"
+            }
+          ]
+        }
+      ],
+      "in_dubbio": []
     }
   }
 }
