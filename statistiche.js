@@ -1,8 +1,7 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v25)
-// - FormazionePanel legge voti direttamente da formazioni_con_voti.json
+// statistiche.js - Modulo Statistiche (v26)
+// - FormazionePanel: legge i voti da formazioni_con_voti.json O da AssenzeDB
 // - Design: Colonna, colori reparto, ruolo prima del nome
-// - Unione assenze (json + formazioni_seriea)
 // ============================================================
 
 (function () {
@@ -856,15 +855,15 @@
   };
 
   // ============================================================
-  // PANNELLO FORMAZIONI
-  // Legge voti DIRETTAMENTE da formazioni_con_voti.json
-  // (generato da unifica_formazioni_voti.py a partire da Excel + formazioni_seriea.json)
+  // PANNELLO FORMAZIONI (A PROVA DI BOMBA)
+  // - Se formazione.titolari contiene stringhe -> usa AssenzeDB
+  // - Se contiene oggetti con Mv/Fm -> li usa direttamente
   // ============================================================
   const FormazionePanel = ({ nomeSquadra, formazione, colore }) => {
     if (!formazione) {
       return (
         <div style={{ background: 'var(--surface)', borderRadius: '8px', padding: '12px', color: 'var(--text-dim)', fontSize: '12px' }}>
-          ⏳ Formazione non disponibile per {nomeSquadra}
+          ⏳ Formazione non disponibile
         </div>
       );
     }
@@ -873,23 +872,34 @@
     const panchina = formazione?.panchina || [];
     const mod = formazione?.modulo;
 
-    // Legge i voti direttamente dall'oggetto giocatore
+    // Funzione che estrae i dati da un giocatore (stringa o oggetto)
     const getStats = (g) => {
-      if (!g) return { nome: '', mv: null, fm: null, ruolo: '?' };
-      // Supporta sia stringhe che oggetti {nome, ruolo, Mv, Fm}
-      if (typeof g === 'string') {
-        return { nome: g, mv: null, fm: null, ruolo: '?' };
-      }
-      const mv = parseFloat(g.Mv) || 0;
-      const fm = parseFloat(g.Fm) || 0;
-      const ruoloRaw = (g.ruolo || '?').toUpperCase();
+      let nome = '';
+      let mv = 0;
+      let fm = 0;
       let ruolo = '?';
-      if (ruoloRaw === 'P') ruolo = 'P';
-      else if (ruoloRaw === 'D') ruolo = 'D';
-      else if (ruoloRaw === 'C') ruolo = 'C';
-      else if (ruoloRaw === 'A') ruolo = 'A';
+
+      if (typeof g === 'object' && g !== null) {
+        // Formato nuovo: l'oggetto ha già i voti
+        nome = g.nome || '';
+        mv = parseFloat(g.Mv) || 0;
+        fm = parseFloat(g.Fm) || 0;
+        ruolo = (g.ruolo || '?').toUpperCase();
+      } else {
+        // Formato vecchio: è solo una stringa. Cerchiamo i dati in AssenzeDB
+        nome = g;
+        if (window.AssenzeDB && typeof window.AssenzeDB.getGiocatore === 'function') {
+          const info = window.AssenzeDB.getGiocatore(nome);
+          if (info) {
+            mv = parseFloat(info.Mv) || 0;
+            fm = parseFloat(info.Fm) || 0;
+            ruolo = (info.ruolo || '?').toUpperCase();
+          }
+        }
+      }
+
       return {
-        nome: g.nome || '',
+        nome,
         mv: mv > 0 ? mv : null,
         fm: fm > 0 ? fm : null,
         ruolo: ruolo,
@@ -897,22 +907,13 @@
     };
 
     const calcolaMedie = (lista) => {
-      let sumMv = 0, sumFm = 0, countMv = 0, countFm = 0;
+      let sumMv = 0, countMv = 0;
       lista.forEach(g => {
-        const { mv, fm } = getStats(g);
+        const { mv } = getStats(g);
         if (mv !== null) { sumMv += mv; countMv++; }
-        if (fm !== null) { sumFm += fm; countFm++; }
       });
-      return {
-        mv: countMv > 0 ? sumMv / countMv : null,
-        fm: countFm > 0 ? sumFm / countFm : null,
-        countMv, countFm,
-        tot: lista.length,
-      };
+      return { mv: countMv > 0 ? sumMv / countMv : null, countMv, tot: lista.length };
     };
-
-    const medieTitolari = calcolaMedie(titolari);
-    const mediePanchina = calcolaMedie(panchina);
 
     const fmt = (v) => (v === null || v === undefined) ? '—' : v.toFixed(2);
     const fmtMv = (v) => (v === null || v === undefined) ? '—' : v.toFixed(2).replace('.', ',');
@@ -920,21 +921,14 @@
     const raggruppa = (lista) => {
       const gruppi = { P: [], D: [], C: [], A: [], '?': [] };
       lista.forEach(g => {
-        const stats = getStats(g);
-        const r = stats.ruolo || '?';
-        if (!gruppi[r]) gruppi[r] = [];
-        gruppi[r].push({ ...stats, originale: g });
+        const { nome, mv, fm, ruolo } = getStats(g);
+        let r = ['P','D','C','A'].includes(ruolo) ? ruolo : '?';
+        gruppi[r].push({ nome, mv, fm, ruolo: r });
       });
       return gruppi;
     };
 
-    const getRuoloLabel = (r) => {
-      if (r === 'P') return 'Por';
-      if (r === 'D') return 'Dif';
-      if (r === 'C') return 'Cen';
-      if (r === 'A') return 'Att';
-      return '?';
-    };
+    const getRuoloLabel = (r) => ({ P: 'Por', D: 'Dif', C: 'Cen', A: 'Att' }[r] || '?');
 
     const COLORI_RUOLO = {
       P: { color: '#e67e22', bg: 'rgba(230, 126, 34, 0.15)', border: '#e67e22' },
@@ -946,62 +940,29 @@
 
     const renderSezioneRuolo = (ruoloKey, lista) => {
       if (!lista || lista.length === 0) return null;
-      const titolo = ruoloKey === 'P' ? 'Portiere' : ruoloKey === 'D' ? 'Difensori' : ruoloKey === 'C' ? 'Centrocampisti' : ruoloKey === 'A' ? 'Attaccanti' : 'Altri';
+      const titolo = { P: 'Portiere', D: 'Difensori', C: 'Centrocampisti', A: 'Attaccanti', '?': 'Altri' }[ruoloKey];
       const stile = COLORI_RUOLO[ruoloKey] || COLORI_RUOLO['?'];
 
       return (
         <div style={{ marginBottom: '10px' }}>
-          <div style={{
-            color: stile.color,
-            fontWeight: 'bold',
-            fontSize: '11px',
-            textTransform: 'uppercase',
-            marginBottom: '4px',
-            letterSpacing: '0.5px',
-            borderBottom: `1px solid ${stile.border}`,
-            paddingBottom: '2px',
-          }}>
+          <div style={{ color: stile.color, fontWeight: 'bold', fontSize: '11px', textTransform: 'uppercase', marginBottom: '4px', borderBottom: `1px solid ${stile.border}`, paddingBottom: '2px' }}>
             {titolo}:
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            {lista.map((item, i) => {
-              const mvTxt = item.mv !== null ? `(V: ${fmtMv(item.mv)})` : '(V: —)';
-              const fmTxt = item.fm !== null ? ` [Fm: ${fmtMv(item.fm)}]` : '';
-              return (
-                <div
-                  key={i}
-                  style={{
-                    padding: '4px 8px',
-                    background: stile.bg,
-                    borderLeft: `3px solid ${stile.border}`,
-                    borderRadius: '4px',
-                    fontSize: '12px',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{
-                      fontSize: '9px',
-                      fontWeight: 'bold',
-                      background: stile.border,
-                      color: '#000',
-                      padding: '1px 4px',
-                      borderRadius: '3px',
-                      minWidth: '24px',
-                      textAlign: 'center'
-                    }}>
-                      {getRuoloLabel(item.ruolo)}
-                    </span>
-                    <span style={{ color: 'var(--text)' }}>{item.nome}</span>
-                  </div>
-                  <span style={{ fontSize: '11px', color: '#4ade80', fontWeight: 'bold' }}>
-                    {mvTxt} <span style={{color:'#fbbf24', fontSize: '10px'}}>{fmTxt}</span>
+            {lista.map((item, i) => (
+              <div key={i} style={{ padding: '4px 8px', background: stile.bg, borderLeft: `3px solid ${stile.border}`, borderRadius: '4px', fontSize: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '9px', fontWeight: 'bold', background: stile.border, color: '#000', padding: '1px 4px', borderRadius: '3px', minWidth: '24px', textAlign: 'center' }}>
+                    {getRuoloLabel(item.ruolo)}
                   </span>
+                  <span style={{ color: 'var(--text)' }}>{item.nome}</span>
                 </div>
-              );
-            })}
+                <span style={{ fontSize: '11px', color: '#4ade80', fontWeight: 'bold' }}>
+                  {item.mv !== null ? `(V: ${fmtMv(item.mv)})` : '(V: —)'}
+                  {item.fm !== null && <span style={{ color: '#fbbf24', fontSize: '10px', marginLeft: '4px' }}>[Fm: {fmtMv(item.fm)}]</span>}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       );
@@ -1009,28 +970,19 @@
 
     const gruppiTitolari = raggruppa(titolari);
     const gruppiPanchina = raggruppa(panchina);
+    const medieTitolari = calcolaMedie(titolari);
+    const mediePanchina = calcolaMedie(panchina);
     const RUOLI_ORDER = ['P', 'D', 'C', 'A', '?'];
 
     return (
-      <div style={{
-        background: 'var(--surface)', borderRadius: '8px',
-        padding: '12px', fontSize: '12px',
-        borderTop: `3px solid ${colore || 'var(--neon-cyan)'}`,
-      }}>
-        <div style={{
-          display: 'flex', justifyContent: 'space-between',
-          alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '4px',
-        }}>
+      <div style={{ background: 'var(--surface)', borderRadius: '8px', padding: '12px', fontSize: '12px', borderTop: `3px solid ${colore || 'var(--neon-cyan)'}` }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '4px' }}>
           <div style={{ fontWeight: 900, color: colore || 'var(--neon-cyan)', fontSize: '15px' }}>
             {nomeSquadra} {mod ? `(${mod})` : ''}
           </div>
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', fontSize: '11px', fontWeight: 'bold' }}>
-            <span style={{ color: '#4ade80', background: 'rgba(0,255,136,0.1)', padding: '2px 6px', borderRadius: '4px' }}>
-              TIT: {fmt(medieTitolari.mv)}
-            </span>
-            <span style={{ color: '#fbbf24', background: 'rgba(251,191,36,0.1)', padding: '2px 6px', borderRadius: '4px' }}>
-              PAN: {fmt(mediePanchina.mv)}
-            </span>
+          <div style={{ display: 'flex', gap: '6px', fontSize: '11px', fontWeight: 'bold' }}>
+            <span style={{ color: '#4ade80', background: 'rgba(0,255,136,0.1)', padding: '2px 6px', borderRadius: '4px' }}>TIT: {fmt(medieTitolari.mv)}</span>
+            <span style={{ color: '#fbbf24', background: 'rgba(251,191,36,0.1)', padding: '2px 6px', borderRadius: '4px' }}>PAN: {fmt(mediePanchina.mv)}</span>
           </div>
         </div>
 
@@ -1044,7 +996,7 @@
         </div>
         {RUOLI_ORDER.map(r => renderSezioneRuolo(r, gruppiPanchina[r]))}
 
-        <div style={{ marginTop: '10px', paddingTop: '6px', borderTop: '1px dashed var(--border)', fontSize: '10px', color: 'var(--text-dim)', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px' }}>
+        <div style={{ marginTop: '10px', paddingTop: '6px', borderTop: '1px dashed var(--border)', fontSize: '10px', color: 'var(--text-dim)', display: 'flex', justifyContent: 'space-between' }}>
           <span>📊 Titolari con V: {medieTitolari.countMv}/{medieTitolari.tot}</span>
           <span>📊 Panchina con V: {mediePanchina.countMv}/{mediePanchina.tot}</span>
         </div>
@@ -1858,7 +1810,7 @@
       window.FiltriCampionati.useFiltroCampionati();
 
     const matchesFiltrati = useMemo(
-      () => window.FiltriCampionati.filtraPartitePerCampionato(matches),
+      () => window.FiltriCampionati.filttaPartitePerCampionato(matches),
       [matches, filtroCampionati]
     );
 
@@ -2008,7 +1960,7 @@
                         padding: '12px', fontSize: '12px',
                         color: 'var(--text-dim)', marginBottom: '14px',
                       }}>
-                        ℹ️ Formazioni non ancora caricate. Esegui il parser e aggiorna <code>data/formazioni_con_voti.json</code>.
+                        ℹ️ Formazioni non ancora caricate. Esegui il parser e aggiorna <code>data/formazioni_seriea.json</code>.
                       </div>
                     );
                   }
@@ -2125,5 +2077,5 @@
   window.simulateMatches = simulateMatches;
   window.clearStatsCache = clearStatsCache;
 
-  console.log('✅ statistiche.js v25 - FormazionePanel legge voti da formazioni_con_voti.json');
+  console.log('✅ statistiche.js v26 - FormazionePanel legge voti da formazioni_con_voti.json O da AssenzeDB');
 })();
