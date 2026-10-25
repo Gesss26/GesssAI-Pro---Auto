@@ -1,7 +1,8 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v17)
-// - Fix: Lettura voti direttamente dai dati passati
-// - Fix: Formazioni visualizzate in COLONNA (uno sotto l'altro)
+// statistiche.js - Modulo Statistiche (v20)
+// - Fix: Voti e Ruoli letti correttamente da AssenzeDB
+// - Fix: Unione assenze (json + formazioni_seriea) con Motivo
+// - Design: Colonna, colori reparto, ruolo prima del nome
 // ============================================================
 
 (function () {
@@ -740,146 +741,37 @@
   };
 
   // ============================================================
-  // PANNELLO ASSENZE E INFORTUNI
+  // PANNELLO FORMAZIONI (con Voti, Ruoli e in Colonna)
   // ============================================================
-  const AssenzePanel = ({ squadra, teamColor }) => {
-    const [, setVersion] = useState(0);
-
-    useEffect(() => {
-      const h = () => setVersion(v => v + 1);
-      window.addEventListener('assenze-updated', h);
-      window.addEventListener('stats-giocatori-pronte', h);
-      return () => {
-        window.removeEventListener('assenze-updated', h);
-        window.removeEventListener('stats-giocatori-pronte', h);
-      };
-    }, []);
-
-    const assenze = window.AssenzeDB?.getAssenze(squadra) || [];
-    const pesi = window.AssenzeDB?.calcolaPesi(squadra);
-    const aggiornato = window.AssenzeDB?.aggiornato;
-
-    const getImportanzaColor = (imp) => {
-      if (imp === 'chiave') return '#ff00e5';
-      if (imp === 'rotazione') return 'var(--neon-gold)';
-      return 'var(--text-dim)';
-    };
-
-    const getRuoloBadge = (r) => {
-      const map = {
-        P: { label: 'POR', color: '#e67e22' },
-        D: { label: 'DIF', color: '#3498db' },
-        C: { label: 'CEN', color: '#2ecc71' },
-        A: { label: 'ATT', color: '#e74c3c' },
-      };
-      return map[r] || { label: r || '?', color: '#95a5a6' };
-    };
-
-    return (
-      <div className="card" style={{ padding: '14px', borderTop: `3px solid ${teamColor || 'var(--neon-cyan)'}` }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <h4 style={{ margin: 0, fontSize: '14px', color: teamColor || 'var(--neon-cyan)' }}>
-            🏥 {squadra}
-          </h4>
-          {aggiornato && (
-            <span style={{ fontSize: '10px', color: 'var(--text-dim)' }}>
-              agg. {aggiornato.split('-').reverse().join('/')}
-            </span>
-          )}
-        </div>
-
-        {assenze.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--neon-green)', fontSize: '13px' }}>
-            ✅ Nessuna assenza
-          </div>
-        ) : (
-          <>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '10px' }}>
-              {assenze.map((a, idx) => {
-                const rb = getRuoloBadge(a.ruolo);
-                const col = getImportanzaColor(a.importanza);
-                return (
-                  <div
-                    key={idx}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '6px',
-                      padding: '5px 8px', borderRadius: '6px',
-                      background: 'var(--surface)',
-                      borderLeft: `3px solid ${col}`,
-                      fontSize: '11px',
-                    }}
-                  >
-                    <span style={{
-                      background: rb.color, color: '#000', fontWeight: 900,
-                      padding: '1px 5px', borderRadius: '3px', fontSize: '9px',
-                      minWidth: '26px', textAlign: 'center',
-                    }}>{rb.label}</span>
-                    <span style={{ flex: 1, fontWeight: 'bold', color: 'var(--text)' }}>
-                      {a.nome}
-                    </span>
-                    <span style={{ fontSize: '9px', color: col, fontWeight: 900, textTransform: 'uppercase' }}>
-                      {a.importanza}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-
-            {pesi && (pesi.pesoAttacco > 0 || pesi.pesoDifesa > 0) && (
-              <div style={{
-                background: 'rgba(255, 0, 229, 0.08)',
-                border: '1px solid rgba(255, 0, 229, 0.4)',
-                borderRadius: '6px', padding: '8px',
-                fontSize: '10px', color: 'var(--text-dim)',
-              }}>
-                <div style={{ fontWeight: 900, color: 'var(--neon-magenta)', marginBottom: '4px', textTransform: 'uppercase' }}>
-                  📉 Impatto su Dixon-Coles
-                </div>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <span>⚔️ Attacco: <b style={{ color: '#ff6b35' }}>-{Math.round(pesi.pesoAttacco * 100)}%</b></span>
-                  <span>🛡️ Difesa: <b style={{ color: '#3498db' }}>-{Math.round(pesi.pesoDifesa * 100)}%</b></span>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    );
-  };
-
-  // ============================================================
-  // PANNELLO FORMAZIONI (con Voti e in Colonna)
-  // ============================================================
-  const FormazionePanel = ({ nomeSquadra, formazione, colore, allPlayers }) => {
-    // Funzione per cercare un giocatore nell'array passato da App.js
+  const FormazionePanel = ({ nomeSquadra, formazione, colore }) => {
+    // Funzione di ricerca interna
     const cercaGiocatore = (nomeFanta) => {
-      if (!allPlayers || !Array.isArray(allPlayers)) return null;
+      if (!window.AssenzeDB || !window.AssenzeDB._mappa) return null;
+      
+      // 1. Match esatto
+      if (window.AssenzeDB._mappa[nomeFanta]) return window.AssenzeDB._mappa[nomeFanta];
 
+      // 2. Match normalizzato
       const pulisci = (s) => String(s || '').toLowerCase().replace(/[.'`]/g, '').replace(/\s+/g, ' ').trim();
       const target = pulisci(nomeFanta);
-      if (!target) return null;
+      const keys = Object.keys(window.AssenzeDB._mappa);
 
-      // 1) Match esatto
-      let found = allPlayers.find(p => pulisci(p.Nome || p.nome) === target);
-      if (found) return found;
+      for (const k of keys) {
+        if (pulisci(k) === target) return window.AssenzeDB._mappa[k];
+      }
 
-      // 2) Match per cognome + iniziale (es. "Martinez L." trova "Lautaro Martinez")
-      const targetWords = target.split(' ');
-      const cognomeTarget = targetWords[0];
+      // 3. Match parziale sul cognome (es. "Martinez Jo." cerca "Martinez")
+      const cognomeTarget = target.split(' ')[0];
       if (cognomeTarget.length < 3) return null;
 
-      // Cerca giocatori della stessa squadra
-      const targetSquadra = pulisci(nomeSquadra);
-      
-      found = allPlayers.find(p => {
-        const pNome = pulisci(p.Nome || p.nome);
-        const pSq = pulisci(p.Squadra || p.squadra);
-        return pNome.includes(cognomeTarget) && pSq.includes(targetSquadra);
-      });
-      if (found) return found;
+      for (const k of keys) {
+        const cognomeKey = pulisci(k).split(' ')[0];
+        if (cognomeKey === cognomeTarget) {
+          return window.AssenzeDB._mappa[k];
+        }
+      }
 
-      // 3) Fallback sul solo cognome
-      return allPlayers.find(p => pulisci(p.Nome || p.nome).includes(cognomeTarget));
+      return null;
     };
 
     const getStats = (nome) => {
@@ -889,13 +781,12 @@
       const mv = parseFloat(g.Mv || g.mv || 0);
       const fm = parseFloat(g.Fm || g.fm || 0);
       
-      let r = (g.R || g.r || g.Rm || g.rm || '?').toUpperCase();
+      let r = (g.ruolo || g.R || '?').toUpperCase();
       let ruolo = '?';
       if (r.startsWith('POR') || r === 'P') ruolo = 'P';
       else if (r.startsWith('D') || r === 'DIF') ruolo = 'D';
       else if (r.startsWith('C') || r === 'CEN') ruolo = 'C';
       else if (r.startsWith('A') || r === 'ATT') ruolo = 'A';
-      else if (['E','W','T','M'].includes(r)) ruolo = 'C';
 
       return {
         mv: (!isNaN(mv) && mv > 0) ? mv : null,
@@ -929,6 +820,7 @@
     const fmt = (v) => (v === null || v === undefined) ? '—' : v.toFixed(2);
     const fmtMv = (v) => (v === null || v === undefined) ? '—' : v.toFixed(2).replace('.', ',');
 
+    // Raggruppa per ruolo e calcola le medie per gruppo
     const raggruppa = (listaNomi) => {
       const gruppi = { P: [], D: [], C: [], A: [], '?': [] };
       listaNomi.forEach(nome => {
@@ -940,21 +832,33 @@
       return gruppi;
     };
 
-    const renderSezioneRuolo = (titolo, lista, coloreRuolo, bg, borderColor) => {
+    const getRuoloLabel = (r) => {
+      if (r === 'P') return 'Por';
+      if (r === 'D') return 'Dif';
+      if (r === 'C') return 'Cen';
+      if (r === 'A') return 'Att';
+      return '?';
+    };
+
+    const renderSezioneRuolo = (ruoloKey, lista, coloreRuolo, bg, borderColor) => {
       if (!lista || lista.length === 0) return null;
+      const titolo = ruoloKey === 'P' ? 'Portiere' : ruoloKey === 'D' ? 'Difensori' : ruoloKey === 'C' ? 'Centrocampisti' : ruoloKey === 'A' ? 'Attaccanti' : 'Altri';
+      
       return (
-        <div style={{ marginBottom: '8px' }}>
+        <div style={{ marginBottom: '12px' }}>
           <div style={{
             color: coloreRuolo,
             fontWeight: 'bold',
             fontSize: '11px',
             textTransform: 'uppercase',
-            marginBottom: '4px',
+            marginBottom: '6px',
             letterSpacing: '0.5px',
+            borderBottom: `1px solid ${borderColor}`,
+            paddingBottom: '2px',
           }}>
             {titolo}:
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {lista.map((item, i) => {
               const mvTxt = item.mv !== null ? `(V: ${fmtMv(item.mv)})` : '(V: —)';
               const fmTxt = item.fm !== null ? ` [Fm: ${fmtMv(item.fm)}]` : '';
@@ -962,9 +866,9 @@
                 <div
                   key={i}
                   style={{
-                    padding: '4px 8px',
+                    padding: '6px 10px',
                     background: bg,
-                    borderLeft: `2px solid ${borderColor}`,
+                    borderLeft: `3px solid ${borderColor}`,
                     borderRadius: '4px',
                     fontSize: '12px',
                     display: 'flex',
@@ -972,7 +876,21 @@
                     alignItems: 'center',
                   }}
                 >
-                  <span style={{ color: 'var(--text)' }}>{item.nome}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ 
+                      fontSize: '9px', 
+                      fontWeight: 'bold', 
+                      background: borderColor, 
+                      color: '#000', 
+                      padding: '1px 4px', 
+                      borderRadius: '3px',
+                      minWidth: '24px',
+                      textAlign: 'center'
+                    }}>
+                      {getRuoloLabel(item.ruolo)}
+                    </span>
+                    <span style={{ color: 'var(--text)' }}>{item.nome}</span>
+                  </div>
                   <span style={{ fontSize: '11px', color: '#4ade80', fontWeight: 'bold' }}>
                     {mvTxt} <span style={{color:'#fbbf24', fontSize: '10px'}}>{fmTxt}</span>
                   </span>
@@ -987,13 +905,14 @@
     const gruppiTitolari = raggruppa(titolari);
     const gruppiPanchina = raggruppa(panchina);
 
-    const RUOLI_ORDER = [
-      { key: 'P', label: 'Portiere',      color: '#e67e22' },
-      { key: 'D', label: 'Difensori',     color: '#3498db' },
-      { key: 'C', label: 'Centrocampisti',color: '#2ecc71' },
-      { key: 'A', label: 'Attaccanti',    color: '#e74c3c' },
-      { key: '?', label: 'Altri',         color: '#95a5a6' },
-    ];
+    const COLORI_RUOLO = {
+      P: { color: '#e67e22', bg: 'rgba(230, 126, 34, 0.1)' }, // Arancione
+      D: { color: '#3498db', bg: 'rgba(52, 152, 219, 0.1)' }, // Blu
+      C: { color: '#2ecc71', bg: 'rgba(46, 204, 113, 0.1)' }, // Verde
+      A: { color: '#e74c3c', bg: 'rgba(231, 76, 60, 0.1)' },  // Rosso
+      '?': { color: '#95a5a6', bg: 'rgba(149, 165, 166, 0.1)' }
+    };
+    const RUOLI_ORDER = ['P', 'D', 'C', 'A', '?'];
 
     return (
       <div style={{
@@ -1026,11 +945,11 @@
           ⚽ TITOLARI ({titolari.length})
         </div>
         {RUOLI_ORDER.map(r => renderSezioneRuolo(
-          r.label,
-          gruppiTitolari[r.key],
-          r.color,
-          'rgba(255,255,255,0.03)',
-          'rgba(0,255,136,0.2)',
+          r,
+          gruppiTitolari[r],
+          COLORI_RUOLO[r].color,
+          COLORI_RUOLO[r].bg,
+          COLORI_RUOLO[r].color,
         ))}
 
         <div style={{
@@ -1041,11 +960,11 @@
           🪑 PANCHINA ({panchina.length})
         </div>
         {RUOLI_ORDER.map(r => renderSezioneRuolo(
-          r.label,
-          gruppiPanchina[r.key],
-          r.color,
-          'rgba(255,255,255,0.02)',
-          'rgba(255,255,255,0.1)',
+          r,
+          gruppiPanchina[r],
+          COLORI_RUOLO[r].color,
+          COLORI_RUOLO[r].bg,
+          COLORI_RUOLO[r].color,
         ))}
 
         <div style={{
@@ -1859,7 +1778,7 @@
   // ============================================================
   // COMPONENTE PRINCIPALE
   // ============================================================
-  function StatisticheComponent({ matches, selectedMatchId, selectedFamiglie, weatherCache, allPlayers }) {
+  function StatisticheComponent({ matches, selectedMatchId, selectedFamiglie, weatherCache }) {
     const [statsSubTab, setStatsSubTab] = useState('Classifica');
     const getChampColor = window.getChampColor;
 
@@ -2006,7 +1925,7 @@
                   </span>
                 </div>
 
-                {/* ─── Formazioni titolari / panchina in Colonna ─── */}
+                {/* ─── Formazioni titolari / panchina con Voti e Ruoli ─── */}
                 {(() => {
                   const fHome = window.AssenzeDB?.getFormazione(selectedMatch.casa);
                   const fAway = window.AssenzeDB?.getFormazione(selectedMatch.ospiti);
@@ -2027,19 +1946,17 @@
                         nomeSquadra={selectedMatch.casa}
                         formazione={fHome}
                         colore={getChampColor(selectedMatch.campionato)}
-                        allPlayers={allPlayers}
                       />
                       <FormazionePanel
                         nomeSquadra={selectedMatch.ospiti}
                         formazione={fAway}
                         colore={getChampColor(selectedMatch.campionato)}
-                        allPlayers={allPlayers}
                       />
                     </div>
                   );
                 })()}
 
-                {/* ─── Pannelli assenze esistenti ─── */}
+                {/* ─── Pannelli assenze esistenti (con Motivo) ─── */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <AssenzePanel squadra={selectedMatch.casa} teamColor={getChampColor(selectedMatch.campionato)} />
                   <AssenzePanel squadra={selectedMatch.ospiti} teamColor={getChampColor(selectedMatch.campionato)} />
@@ -2136,5 +2053,5 @@
   window.simulateMatches = simulateMatches;
   window.clearStatsCache = clearStatsCache;
 
-  console.log('✅ statistiche.js v17 - Formazioni in Colonna con Voti');
+  console.log('✅ statistiche.js v20 - Formazioni in Colonna con Voti, Ruoli e Motivi Assenze');
 })();
