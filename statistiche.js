@@ -1,8 +1,7 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v16)
-// - Pulsante "Formazioni e Assenze"
-// - Visualizzazione per ruolo (Por, Dif, Cen, Att) con Voto (Mv)
-// - Matching nomi migliorato (risolve i nomi con abbreviazioni)
+// statistiche.js - Modulo Statistiche (v17)
+// - Fix: Lettura voti direttamente dai dati passati
+// - Fix: Formazioni visualizzate in COLONNA (uno sotto l'altro)
 // ============================================================
 
 (function () {
@@ -849,85 +848,59 @@
   };
 
   // ============================================================
-  // PANNELLO FORMAZIONI (con Voti, Fm e raggruppamento per ruolo)
+  // PANNELLO FORMAZIONI (con Voti e in Colonna)
   // ============================================================
-  const FormazionePanel = ({ nomeSquadra, formazione, colore }) => {
-    const [, setVersion] = useState(0);
-
-    useEffect(() => {
-      const h = () => setVersion(v => v + 1);
-      window.addEventListener('stats-giocatori-pronte', h);
-      window.addEventListener('assenze-updated', h);
-      return () => {
-        window.removeEventListener('stats-giocatori-pronte', h);
-        window.removeEventListener('assenze-updated', h);
-      };
-    }, []);
-
-    // Ricerca ultra-robusta del giocatore
+  const FormazionePanel = ({ nomeSquadra, formazione, colore, allPlayers }) => {
+    // Funzione per cercare un giocatore nell'array passato da App.js
     const cercaGiocatore = (nomeFanta) => {
-      const db = window.AssenzeDB;
-      if (!db || !db._mappa) return null;
+      if (!allPlayers || !Array.isArray(allPlayers)) return null;
+
+      const pulisci = (s) => String(s || '').toLowerCase().replace(/[.'`]/g, '').replace(/\s+/g, ' ').trim();
+      const target = pulisci(nomeFanta);
+      if (!target) return null;
 
       // 1) Match esatto
-      if (db._mappa[nomeFanta]) return db._mappa[nomeFanta];
+      let found = allPlayers.find(p => pulisci(p.Nome || p.nome) === target);
+      if (found) return found;
 
-      // Prepara stringhe normalizzate
-      const pulisci = (s) => s.toString().toLowerCase().replace(/[.'`]/g, '').replace(/\s+/g, ' ').trim();
-      const target = pulisci(nomeFanta);
-      
-      const keys = Object.keys(db._mappa);
-      
-      // 2) Match normalizzato (senza punti/trattini)
-      for (const k of keys) {
-        if (pulisci(k) === target) return db._mappa[k];
-      }
-
-      // 3) Match per prefisso (es. "Martinez Jo." vs "Martinez J.")
-      // Prendiamo la prima parola (cognome) e la verifichiamo
+      // 2) Match per cognome + iniziale (es. "Martinez L." trova "Lautaro Martinez")
       const targetWords = target.split(' ');
       const cognomeTarget = targetWords[0];
       if (cognomeTarget.length < 3) return null;
 
-      for (const k of keys) {
-        const keyWords = pulisci(k).split(' ');
-        const cognomeKey = keyWords[0];
-        
-        // Se il cognome matcha esattamente
-        if (cognomeKey === cognomeTarget) {
-          // Verifica che anche la squadra coincida (o il nome sia quasi identico)
-          const g = db._mappa[k];
-          if (g.squadra && nomeSquadra && pulisci(g.squadra).includes(pulisci(nomeSquadra))) {
-            return g;
-          }
-        }
-      }
+      // Cerca giocatori della stessa squadra
+      const targetSquadra = pulisci(nomeSquadra);
+      
+      found = allPlayers.find(p => {
+        const pNome = pulisci(p.Nome || p.nome);
+        const pSq = pulisci(p.Squadra || p.squadra);
+        return pNome.includes(cognomeTarget) && pSq.includes(targetSquadra);
+      });
+      if (found) return found;
 
-      // 4) Match parziale sul cognome (es. "Esposito F.P." cerca "Esposito")
-      for (const k of keys) {
-        const keyWords = pulisci(k).split(' ');
-        const cognomeKey = keyWords[0];
-        if (cognomeKey.length > 4 && cognomeTarget.includes(cognomeKey)) {
-           const g = db._mappa[k];
-           if (g.squadra && nomeSquadra && pulisci(g.squadra).includes(pulisci(nomeSquadra))) {
-             return g;
-           }
-        }
-      }
-
-      return null;
+      // 3) Fallback sul solo cognome
+      return allPlayers.find(p => pulisci(p.Nome || p.nome).includes(cognomeTarget));
     };
 
     const getStats = (nome) => {
       const g = cercaGiocatore(nome);
-      if (!g) return { g: null, mv: null, fm: null, ruolo: '' };
-      const mv = parseFloat(g.Mv);
-      const fm = parseFloat(g.Fm);
+      if (!g) return { mv: null, fm: null, ruolo: '?' };
+      
+      const mv = parseFloat(g.Mv || g.mv || 0);
+      const fm = parseFloat(g.Fm || g.fm || 0);
+      
+      let r = (g.R || g.r || g.Rm || g.rm || '?').toUpperCase();
+      let ruolo = '?';
+      if (r.startsWith('POR') || r === 'P') ruolo = 'P';
+      else if (r.startsWith('D') || r === 'DIF') ruolo = 'D';
+      else if (r.startsWith('C') || r === 'CEN') ruolo = 'C';
+      else if (r.startsWith('A') || r === 'ATT') ruolo = 'A';
+      else if (['E','W','T','M'].includes(r)) ruolo = 'C';
+
       return {
-        g,
         mv: (!isNaN(mv) && mv > 0) ? mv : null,
         fm: (!isNaN(fm) && fm > 0) ? fm : null,
-        ruolo: g.ruolo || '',
+        ruolo: ruolo,
       };
     };
 
@@ -956,7 +929,6 @@
     const fmt = (v) => (v === null || v === undefined) ? '—' : v.toFixed(2);
     const fmtMv = (v) => (v === null || v === undefined) ? '—' : v.toFixed(2).replace('.', ',');
 
-    // Raggruppa per ruolo
     const raggruppa = (listaNomi) => {
       const gruppi = { P: [], D: [], C: [], A: [], '?': [] };
       listaNomi.forEach(nome => {
@@ -968,56 +940,43 @@
       return gruppi;
     };
 
-    const renderBadgeMedia = (label, medie, colorBg) => (
-      <div style={{
-        display: 'inline-flex', alignItems: 'center', gap: '4px',
-        padding: '2px 6px', borderRadius: '4px',
-        background: colorBg, fontSize: '10px', fontWeight: 'bold',
-      }}>
-        <span style={{ opacity: 0.8 }}>{label}</span>
-        <span style={{ color: '#4ade80' }}>{fmt(medie.mv)}</span>
-        <span style={{ opacity: 0.5 }}>·</span>
-        <span style={{ color: '#fbbf24' }}>{fmt(medie.fm)}</span>
-      </div>
-    );
-
     const renderSezioneRuolo = (titolo, lista, coloreRuolo, bg, borderColor) => {
       if (!lista || lista.length === 0) return null;
       return (
-        <div style={{ marginBottom: '6px' }}>
+        <div style={{ marginBottom: '8px' }}>
           <div style={{
             color: coloreRuolo,
             fontWeight: 'bold',
-            fontSize: '10px',
+            fontSize: '11px',
             textTransform: 'uppercase',
-            marginBottom: '3px',
+            marginBottom: '4px',
             letterSpacing: '0.5px',
           }}>
-            {titolo}
+            {titolo}:
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
             {lista.map((item, i) => {
-              const mvTxt = item.mv !== null ? `V: ${fmtMv(item.mv)}` : 'V: —';
-              const fmTxt = item.fm !== null ? `Fm: ${fmtMv(item.fm)}` : 'Fm: —';
+              const mvTxt = item.mv !== null ? `(V: ${fmtMv(item.mv)})` : '(V: —)';
+              const fmTxt = item.fm !== null ? ` [Fm: ${fmtMv(item.fm)}]` : '';
               return (
-                <span
+                <div
                   key={i}
-                  title={item.nome}
                   style={{
-                    padding: '3px 7px',
+                    padding: '4px 8px',
                     background: bg,
-                    border: `1px solid ${borderColor}`,
+                    borderLeft: `2px solid ${borderColor}`,
                     borderRadius: '4px',
-                    fontSize: '10px',
-                    display: 'inline-flex',
+                    fontSize: '12px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
-                    gap: '5px',
                   }}
                 >
-                  <span>{item.nome}</span>
-                  <span style={{ fontSize: '9px', color: '#4ade80', fontWeight: 'bold' }}>{mvTxt}</span>
-                  <span style={{ fontSize: '9px', color: '#fbbf24', fontWeight: 'bold' }}>{fmTxt}</span>
-                </span>
+                  <span style={{ color: 'var(--text)' }}>{item.nome}</span>
+                  <span style={{ fontSize: '11px', color: '#4ade80', fontWeight: 'bold' }}>
+                    {mvTxt} <span style={{color:'#fbbf24', fontSize: '10px'}}>{fmTxt}</span>
+                  </span>
+                </div>
               );
             })}
           </div>
@@ -1039,25 +998,29 @@
     return (
       <div style={{
         background: 'var(--surface)', borderRadius: '8px',
-        padding: '12px', fontSize: '11px',
+        padding: '12px', fontSize: '12px',
         borderTop: `3px solid ${colore || 'var(--neon-cyan)'}`,
       }}>
         <div style={{
           display: 'flex', justifyContent: 'space-between',
-          alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '4px',
+          alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '4px',
         }}>
-          <div style={{ fontWeight: 900, color: colore || 'var(--neon-cyan)', fontSize: '13px' }}>
-            {nomeSquadra} {mod ? `· ${mod}` : ''}
+          <div style={{ fontWeight: 900, color: colore || 'var(--neon-cyan)', fontSize: '15px' }}>
+            {nomeSquadra} {mod ? `(${mod})` : ''}
           </div>
-          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-            {renderBadgeMedia('TIT', medieTitolari, 'rgba(0,255,136,0.18)')}
-            {renderBadgeMedia('PAN', mediePanchina, 'rgba(255,255,255,0.08)')}
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', fontSize: '11px', fontWeight: 'bold' }}>
+            <span style={{ color: '#4ade80', background: 'rgba(0,255,136,0.1)', padding: '2px 6px', borderRadius: '4px' }}>
+              TIT: {fmt(medieTitolari.mv)} 
+            </span>
+            <span style={{ color: '#fbbf24', background: 'rgba(251,191,36,0.1)', padding: '2px 6px', borderRadius: '4px' }}>
+              PAN: {fmt(mediePanchina.mv)}
+            </span>
           </div>
         </div>
 
         <div style={{
-          color: 'var(--neon-green)', marginBottom: '8px',
-          fontWeight: 'bold', fontSize: '11px',
+          color: 'var(--neon-green)', marginBottom: '10px',
+          fontWeight: 'bold', fontSize: '12px',
           borderBottom: '1px solid rgba(0,255,136,0.2)', paddingBottom: '4px',
         }}>
           ⚽ TITOLARI ({titolari.length})
@@ -1066,13 +1029,13 @@
           r.label,
           gruppiTitolari[r.key],
           r.color,
-          'rgba(0,255,136,0.12)',
-          'rgba(0,255,136,0.25)',
+          'rgba(255,255,255,0.03)',
+          'rgba(0,255,136,0.2)',
         ))}
 
         <div style={{
-          color: 'var(--text-dim)', marginTop: '12px', marginBottom: '8px',
-          fontWeight: 'bold', fontSize: '11px',
+          color: 'var(--text-dim)', marginTop: '16px', marginBottom: '10px',
+          fontWeight: 'bold', fontSize: '12px',
           borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '4px',
         }}>
           🪑 PANCHINA ({panchina.length})
@@ -1081,7 +1044,7 @@
           r.label,
           gruppiPanchina[r.key],
           r.color,
-          'rgba(255,255,255,0.05)',
+          'rgba(255,255,255,0.02)',
           'rgba(255,255,255,0.1)',
         ))}
 
@@ -1896,7 +1859,7 @@
   // ============================================================
   // COMPONENTE PRINCIPALE
   // ============================================================
-  function StatisticheComponent({ matches, selectedMatchId, selectedFamiglie, weatherCache }) {
+  function StatisticheComponent({ matches, selectedMatchId, selectedFamiglie, weatherCache, allPlayers }) {
     const [statsSubTab, setStatsSubTab] = useState('Classifica');
     const getChampColor = window.getChampColor;
 
@@ -2043,7 +2006,7 @@
                   </span>
                 </div>
 
-                {/* ─── Formazioni titolari / panchina con Voti ─── */}
+                {/* ─── Formazioni titolari / panchina in Colonna ─── */}
                 {(() => {
                   const fHome = window.AssenzeDB?.getFormazione(selectedMatch.casa);
                   const fAway = window.AssenzeDB?.getFormazione(selectedMatch.ospiti);
@@ -2064,11 +2027,13 @@
                         nomeSquadra={selectedMatch.casa}
                         formazione={fHome}
                         colore={getChampColor(selectedMatch.campionato)}
+                        allPlayers={allPlayers}
                       />
                       <FormazionePanel
                         nomeSquadra={selectedMatch.ospiti}
                         formazione={fAway}
                         colore={getChampColor(selectedMatch.campionato)}
+                        allPlayers={allPlayers}
                       />
                     </div>
                   );
@@ -2171,5 +2136,5 @@
   window.simulateMatches = simulateMatches;
   window.clearStatsCache = clearStatsCache;
 
-  console.log('✅ statistiche.js v16 - Formazioni con Voti e Ruoli');
+  console.log('✅ statistiche.js v17 - Formazioni in Colonna con Voti');
 })();
