@@ -1,13 +1,8 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v14)
-// ✅ Aggiunto modulo Assenze e Infortuni
-// ✅ Cache Dixon in memoria (Map) al posto di localStorage
-// ✅ clearStatsCache svuota entrambe le cache (param + mc)
-// ✅ getDixonPct usa cache in memoria
-// ✅ formatGiocataLabel centralizzata (usa window.formatGiocataLabel)
-// ✅ TutteLeFamigliePanel/Dixon null-safe su stats.error
-// ✅ AIAnalysis carica da cache memoria (no localStorage)
-// ✅ simulateMatches applica pesi assenze (pesoAttacco, pesoDifesa)
+// statistiche.js - Modulo Statistiche (v15)
+// - Pulsante rinominato "Formazioni e Assenze"
+// - Formazioni con Mv/Fm medi per titolari e panchina
+// - Resto invariato rispetto alla v14
 // ============================================================
 
 (function () {
@@ -215,7 +210,6 @@
     const avgHomeSafe = avg.avgHome > 0 ? avg.avgHome : 1.4;
     const avgAwaySafe = avg.avgAway > 0 ? avg.avgAway : 1.1;
 
-    // ⭐ Pesi assenze
     let pesoAttaccoHome = 0, pesoDifesaHome = 0;
     let pesoAttaccoAway = 0, pesoDifesaAway = 0;
     let dettagliAssenzeHome = null, dettagliAssenzeAway = null;
@@ -658,7 +652,6 @@
           </div>
         </div>
 
-        {/* ⭐ BANNER IMPATTO ASSENZE */}
         {mc.assenze && (mc.assenze.impattoHome.attacco > 0 || mc.assenze.impattoHome.difesa > 0
                        || mc.assenze.impattoAway.attacco > 0 || mc.assenze.impattoAway.difesa > 0) && (
           <div style={{
@@ -851,6 +844,139 @@
             )}
           </>
         )}
+      </div>
+    );
+  };
+
+  // ============================================================
+  // PANNELLO FORMAZIONI (con Mv/Fm medi)
+  // ============================================================
+  const FormazionePanel = ({ nomeSquadra, formazione, colore }) => {
+    const MvKeys = ['Mv', 'mv', 'media voto', 'Media Voto'];
+    const FmKeys = ['Fm', 'fm', 'fantamedia', 'FantaMedia'];
+
+    const getGiocatoreStats = (nomeGiocatore) => {
+      const g = window.AssenzeDB?.getGiocatore(nomeGiocatore);
+      if (!g) return null;
+      return g;
+    };
+
+    // Ritorna {mv, fm, count, countMv, countFm}
+    const calcolaMedie = (listaNomi) => {
+      let sumMv = 0, sumFm = 0;
+      let countMv = 0, countFm = 0;
+      listaNomi.forEach(nome => {
+        const g = getGiocatoreStats(nome);
+        if (!g) return;
+        const mv = parseFloat(g.Mv ?? g.Mv);
+        const fm = parseFloat(g.Fm ?? g.Fm);
+        if (!isNaN(mv) && mv > 0) { sumMv += mv; countMv++; }
+        if (!isNaN(fm) && fm > 0) { sumFm += fm; countFm++; }
+      });
+      return {
+        mv: countMv > 0 ? sumMv / countMv : null,
+        fm: countFm > 0 ? sumFm / countFm : null,
+        countMv, countFm,
+        tot: listaNomi.length,
+      };
+    };
+
+    const titolari = formazione?.titolari || [];
+    const panchina = formazione?.panchina || [];
+    const mod = formazione?.modulo;
+
+    const medieTitolari = calcolaMedie(titolari);
+    const mediePanchina = calcolaMedie(panchina);
+
+    const fmt = (v) => (v === null || v === undefined) ? '—' : v.toFixed(2);
+
+    const renderBadgeMedia = (label, medie, colorBg) => (
+      <div style={{
+        display: 'inline-flex', alignItems: 'center', gap: '4px',
+        padding: '2px 6px', borderRadius: '4px',
+        background: colorBg, fontSize: '10px', fontWeight: 'bold',
+      }}>
+        <span style={{ opacity: 0.8 }}>{label}</span>
+        <span style={{ color: '#fff' }}>{fmt(medie.mv)}</span>
+        <span style={{ opacity: 0.5 }}>·</span>
+        <span style={{ color: '#fbbf24' }}>{fmt(medie.fm)}</span>
+      </div>
+    );
+
+    const renderListaGiocatori = (lista, bg, borderColor) => (
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
+        {lista.map((n, i) => {
+          const g = getGiocatoreStats(n);
+          const mv = g ? parseFloat(g.Mv ?? g.Mv) : NaN;
+          const fm = g ? parseFloat(g.Fm ?? g.Fm) : NaN;
+          const mvTxt = (!isNaN(mv) && mv > 0) ? mv.toFixed(1) : '—';
+          const fmTxt = (!isNaN(fm) && fm > 0) ? fm.toFixed(1) : '—';
+          return (
+            <span
+              key={i}
+              title={g ? `${n} · Mv ${mvTxt} · Fm ${fmTxt} (${g.Pv || 0} pres.)` : `${n} (stats non disponibili)`}
+              style={{
+                padding: '3px 6px',
+                background: bg,
+                border: `1px solid ${borderColor}`,
+                borderRadius: '4px',
+                fontSize: '10px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px',
+              }}
+            >
+              <span>{n}</span>
+              <span style={{ fontSize: '9px', color: '#4ade80', fontWeight: 'bold' }}>{mvTxt}</span>
+              <span style={{ fontSize: '9px', color: '#fbbf24', fontWeight: 'bold' }}>{fmTxt}</span>
+            </span>
+          );
+        })}
+      </div>
+    );
+
+    return (
+      <div style={{
+        background: 'var(--surface)', borderRadius: '8px',
+        padding: '10px', fontSize: '11px',
+        borderTop: `3px solid ${colore || 'var(--neon-cyan)'}`,
+      }}>
+        <div style={{
+          display: 'flex', justifyContent: 'space-between',
+          alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '4px',
+        }}>
+          <div style={{ fontWeight: 900, color: colore || 'var(--neon-cyan)', fontSize: '13px' }}>
+            {nomeSquadra} {mod ? `· ${mod}` : ''}
+          </div>
+          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+            {renderBadgeMedia('TIT', medieTitolari, 'rgba(0,255,136,0.18)')}
+            {renderBadgeMedia('PAN', mediePanchina, 'rgba(255,255,255,0.08)')}
+          </div>
+        </div>
+
+        <div style={{ color: 'var(--neon-green)', marginBottom: '4px', fontWeight: 'bold', fontSize: '10px', textTransform: 'uppercase' }}>
+          Titolari ({titolari.length}) — media Mv {fmt(medieTitolari.mv)} · Fm {fmt(medieTitolari.fm)}
+        </div>
+        {renderListaGiocatori(titolari, 'rgba(0,255,136,0.12)', 'rgba(0,255,136,0.25)')}
+
+        <div style={{ color: 'var(--text-dim)', marginBottom: '4px', marginTop: '8px', fontWeight: 'bold', fontSize: '10px', textTransform: 'uppercase' }}>
+          Panchina ({panchina.length}) — media Mv {fmt(mediePanchina.mv)} · Fm {fmt(mediePanchina.fm)}
+        </div>
+        {renderListaGiocatori(panchina, 'rgba(255,255,255,0.05)', 'rgba(255,255,255,0.1)')}
+
+        <div style={{
+          marginTop: '8px', paddingTop: '6px',
+          borderTop: '1px dashed var(--border)',
+          fontSize: '10px', color: 'var(--text-dim)',
+          display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px',
+        }}>
+          <span>
+            📊 Titolari con Mv: {medieTitolari.countMv}/{medieTitolari.tot}
+          </span>
+          <span>
+            📊 Panchina con Mv: {mediePanchina.countMv}/{mediePanchina.tot}
+          </span>
+        </div>
       </div>
     );
   };
@@ -1661,7 +1787,7 @@
       window.FiltriCampionati.useFiltroCampionati();
 
     const matchesFiltrati = useMemo(
-      () => window.FiltriCampionati.filtraPartitePerCampionato(matches),
+      () => window.FiltriCampionati.filtaPartitePerCampionato(matches),
       [matches, filtroCampionati]
     );
 
@@ -1689,7 +1815,7 @@
           <button className={statsSubTab === 'Scontri' ? 'active' : ''} onClick={() => setStatsSubTab('Scontri')}>⚔️ Scontri</button>
           <button className={statsSubTab === 'RiepilogoAI' ? 'active' : ''} onClick={() => setStatsSubTab('RiepilogoAI')}>🤖 Riepilogo AI</button>
           <button className={statsSubTab === 'DixonColes' ? 'active' : ''} onClick={() => setStatsSubTab('DixonColes')}>🧮 Dixon-Coles</button>
-          <button className={statsSubTab === 'Assenze' ? 'active' : ''} onClick={() => setStatsSubTab('Assenze')}>🏥 Assenze</button>
+          <button className={statsSubTab === 'Assenze' ? 'active' : ''} onClick={() => setStatsSubTab('Assenze')}>🏥 Formazioni e Assenze</button>
           <button className={statsSubTab === 'UltimaGiornata' ? 'active' : ''} onClick={() => setStatsSubTab('UltimaGiornata')}>📅 Ultima Giornata</button>
         </div>
 
@@ -1792,20 +1918,53 @@
                   borderRadius: '10px', border: '1px solid var(--border)',
                   fontSize: '12px', color: 'var(--text-dim)',
                 }}>
-                  🏥 <b style={{ color: 'var(--neon-magenta)' }}>Assenze e Infortuni</b> —{' '}
+                  🏥 <b style={{ color: 'var(--neon-magenta)' }}>Formazioni e Assenze</b> —{' '}
                   {selectedMatch.casa} vs {selectedMatch.ospiti}
                   <br />
                   <span style={{ fontSize: '11px' }}>
                     ℹ️ Le assenze dei giocatori chiave modificano i λ del modello Dixon-Coles (riducendo attacco e difesa)
                   </span>
                 </div>
+
+                {/* ─── Formazioni titolari / panchina con medie ─── */}
+                {(() => {
+                  const fHome = window.AssenzeDB?.getFormazione(selectedMatch.casa);
+                  const fAway = window.AssenzeDB?.getFormazione(selectedMatch.ospiti);
+                  if (!fHome && !fAway) {
+                    return (
+                      <div style={{
+                        background: 'var(--surface)', borderRadius: '8px',
+                        padding: '12px', fontSize: '12px',
+                        color: 'var(--text-dim)', marginBottom: '14px',
+                      }}>
+                        ℹ️ Formazioni non ancora caricate. Esegui il parser e aggiorna <code>data/formazioni_seriea.json</code>.
+                      </div>
+                    );
+                  }
+                  return (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
+                      <FormazionePanel
+                        nomeSquadra={selectedMatch.casa}
+                        formazione={fHome}
+                        colore={getChampColor(selectedMatch.campionato)}
+                      />
+                      <FormazionePanel
+                        nomeSquadra={selectedMatch.ospiti}
+                        formazione={fAway}
+                        colore={getChampColor(selectedMatch.campionato)}
+                      />
+                    </div>
+                  );
+                })()}
+
+                {/* ─── Pannelli assenze esistenti ─── */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <AssenzePanel squadra={selectedMatch.casa} teamColor={getChampColor(selectedMatch.campionato)} />
                   <AssenzePanel squadra={selectedMatch.ospiti} teamColor={getChampColor(selectedMatch.campionato)} />
                 </div>
               </div>
             ) : (
-              <div className="stats-placeholder"><p>👈 Seleziona una partita per vedere le assenze.</p></div>
+              <div className="stats-placeholder"><p>👈 Seleziona una partita per vedere formazioni e assenze.</p></div>
             )}
           </div>
         )}
@@ -1883,6 +2042,7 @@
   window.StatisticheComponent = StatisticheComponent;
   window.AIAnalysis = AIAnalysis;
   window.AssenzePanel = AssenzePanel;
+  window.FormazionePanel = FormazionePanel;
   window.WeatherProfessionale = WeatherProfessionale;
   window.IndiceAffidabilita = IndiceAffidabilita;
   window.RisultatiFrequenti = RisultatiFrequenti;
@@ -1894,6 +2054,5 @@
   window.simulateMatches = simulateMatches;
   window.clearStatsCache = clearStatsCache;
 
-  console.log('✅ statistiche.js v14 - Dixon-Coles + Modulo Assenze integrato');
-
+  console.log('✅ statistiche.js v15 - Formazioni con Mv/Fm medi');
 })();
