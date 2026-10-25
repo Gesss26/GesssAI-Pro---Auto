@@ -1787,7 +1787,7 @@
       window.FiltriCampionati.useFiltroCampionati();
 
     const matchesFiltrati = useMemo(
-      () => window.FiltriCampionati.filtaPartitePerCampionato(matches),
+      () => window.FiltriCampionati.filtraPartitePerCampionato(matches),
       [matches, filtroCampionati]
     );
 
