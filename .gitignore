@@ -24,3 +24,7 @@ public/data/matches.json
 .vscode/
 .idea/
 *.iml
+
+Probabili formazioni Serie A.html
+__pycache__/
+*.pyc
