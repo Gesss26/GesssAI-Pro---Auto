@@ -1,13 +1,11 @@
 name: Aggiorna Dati Fantacalcio
 
-# Si attiva solo quando carichi i due file di input
 on:
   push:
     paths:
       - 'Probabili formazioni Serie A.html'
       - 'Statistiche_Fantacalcio_Stagione_2026_27.xlsx'
 
-# Permessi per scrivere i file nel repository
 permissions:
   contents: write
 
@@ -15,32 +13,34 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # 1. Scarica il codice
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          ref: master
+          fetch-depth: 0          # necessario per il rebase
 
-      # 2. Prepara Python
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
-      # 3. Installa le dipendenze
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4. Esegue i tuoi tre script
       - name: Esegui la pipeline di parsing
         run: |
           python script/parse_formazioni.py
           python script/parse_stats.py
           python script/unifica.py
 
-      # 5. Salva i nuovi file JSON nel repository
+      - name: Sincronizza con il remote (rebase)
+        run: git pull --rebase origin master
+
       - name: Commit e Push dei file aggiornati
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "🤖 Aggiornamento automatico dati (HTML + Excel)"
           file_pattern: 'data/*.json'
+          branch: master
