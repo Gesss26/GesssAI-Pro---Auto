@@ -1,6 +1,7 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v26)
-// - FormazionePanel: legge i voti da formazioni_con_voti.json O da AssenzeDB
+// statistiche.js - Modulo Statistiche (v27)
+// - FormazionePanel: legge voti da formazioni_con_voti.json O da AssenzeDB
+// - Mostra MEDIA TITOLARI in alto, con ruolo colorato prima del nome
 // - Design: Colonna, colori reparto, ruolo prima del nome
 // ============================================================
 
@@ -756,6 +757,23 @@
     }, []);
 
     const assenze = window.AssenzeDB?.getAssenze(squadra) || [];
+    const formazione = window.AssenzeDB?.getFormazione(squadra);
+    const indisponibiliForm = formazione && Array.isArray(formazione.indisponibili) ? formazione.indisponibili : [];
+    const squalificati = formazione && Array.isArray(formazione.squalificati) ? formazione.squalificati : [];
+
+    // Unisci assenze manuali + indisponibili da formazione (evitando duplicati)
+    const tutteAssenze = [...assenze];
+    const nomiGia = new Set(assenze.map(a => (a.nome || '').toLowerCase()));
+    indisponibiliForm.forEach(ind => {
+      const nomeInd = typeof ind === 'string' ? ind : (ind.nome || '');
+      if (!nomiGia.has(nomeInd.toLowerCase())) {
+        tutteAssenze.push(typeof ind === 'string'
+          ? { nome: nomeInd, importanza: 'rotazione' }
+          : ind
+        );
+      }
+    });
+
     const pesi = window.AssenzeDB?.calcolaPesi(squadra);
     const aggiornato = window.AssenzeDB?.aggiornato;
 
@@ -788,15 +806,38 @@
           )}
         </div>
 
-        {assenze.length === 0 ? (
+        {tutteAssenze.length === 0 && squalificati.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--neon-green)', fontSize: '13px' }}>
             ✅ Nessuna assenza
           </div>
         ) : (
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '10px' }}>
-              {assenze.map((a, idx) => {
-                const rb = getRuoloBadge(a.ruolo);
+              {squalificati.map((s, idx) => {
+                const nome = typeof s === 'string' ? s : (s.nome || '');
+                const g = window.AssenzeDB?.getGiocatore(nome);
+                const rb = getRuoloBadge(g?.ruolo);
+                return (
+                  <div key={`sq-${idx}`} style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    padding: '5px 8px', borderRadius: '6px',
+                    background: 'rgba(255,0,0,0.12)',
+                    borderLeft: `3px solid #e74c3c`,
+                    fontSize: '11px',
+                  }}>
+                    <span style={{
+                      background: rb.color, color: '#000', fontWeight: 900,
+                      padding: '1px 5px', borderRadius: '3px', fontSize: '9px',
+                      minWidth: '26px', textAlign: 'center',
+                    }}>{rb.label}</span>
+                    <span style={{ flex: 1, fontWeight: 'bold', color: 'var(--text)' }}>{nome}</span>
+                    <span style={{ fontSize: '9px', color: '#e74c3c', fontWeight: 900 }}>SQUAL.</span>
+                  </div>
+                );
+              })}
+              {tutteAssenze.map((a, idx) => {
+                const g = window.AssenzeDB?.getGiocatore(a.nome);
+                const rb = getRuoloBadge(a.ruolo || g?.ruolo);
                 const col = getImportanzaColor(a.importanza);
                 return (
                   <div
@@ -855,9 +896,10 @@
   };
 
   // ============================================================
-  // PANNELLO FORMAZIONI (A PROVA DI BOMBA)
-  // - Se formazione.titolari contiene stringhe -> usa AssenzeDB
-  // - Se contiene oggetti con Mv/Fm -> li usa direttamente
+  // PANNELLO FORMAZIONI (v27)
+  // - Ruolo colorato prima del nome
+  // - Voti da formazioni_con_voti.json o fallback AssenzeDB
+  // - MEDIA TITOLARI in alto a destra
   // ============================================================
   const FormazionePanel = ({ nomeSquadra, formazione, colore }) => {
     if (!formazione) {
@@ -872,29 +914,66 @@
     const panchina = formazione?.panchina || [];
     const mod = formazione?.modulo;
 
-    // Funzione che estrae i dati da un giocatore (stringa o oggetto)
+    // Normalizza nome per lookup robusto
+    const _norm = (s) => (s || '')
+      .toString()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[''`´]/g, "'")
+      .toLowerCase()
+      .replace(/[.\-–—]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    // Cerca in AssenzeDB._mappa con fallback
+    const _cercaInMappa = (nome) => {
+      if (!window.AssenzeDB) return null;
+      if (typeof window.AssenzeDB.getGiocatore === 'function') {
+        const g = window.AssenzeDB.getGiocatore(nome);
+        if (g) return g;
+      }
+      const mappa = window.AssenzeDB._mappa || {};
+      const n = _norm(nome);
+      for (const k of Object.keys(mappa)) {
+        if (_norm(k) === n) return mappa[k];
+      }
+      const parti = n.split(' ');
+      if (parti.length >= 2) {
+        const cognome = parti[0];
+        const iniziale = parti[1].replace(/\./g, '');
+        for (const k of Object.keys(mappa)) {
+          const kn = _norm(k);
+          if (kn === `${cognome} ${iniziale}`) return mappa[k];
+          if (kn.startsWith(cognome + ' ')) return mappa[k];
+        }
+      }
+      return null;
+    };
+
+    // Estrae stats (nome, mv, fm, ruolo) da stringa o oggetto
     const getStats = (g) => {
-      let nome = '';
-      let mv = 0;
-      let fm = 0;
-      let ruolo = '?';
+      let nome = '', mv = 0, fm = 0, ruolo = '?';
 
       if (typeof g === 'object' && g !== null) {
-        // Formato nuovo: l'oggetto ha già i voti
         nome = g.nome || '';
         mv = parseFloat(g.Mv) || 0;
         fm = parseFloat(g.Fm) || 0;
         ruolo = (g.ruolo || '?').toUpperCase();
-      } else {
-        // Formato vecchio: è solo una stringa. Cerchiamo i dati in AssenzeDB
-        nome = g;
-        if (window.AssenzeDB && typeof window.AssenzeDB.getGiocatore === 'function') {
-          const info = window.AssenzeDB.getGiocatore(nome);
+        // Se manca Mv, prova a recuperarlo da AssenzeDB
+        if (mv <= 0) {
+          const info = _cercaInMappa(nome);
           if (info) {
             mv = parseFloat(info.Mv) || 0;
             fm = parseFloat(info.Fm) || 0;
-            ruolo = (info.ruolo || '?').toUpperCase();
+            if (!ruolo || ruolo === '?') ruolo = (info.ruolo || '?').toUpperCase();
           }
+        }
+      } else {
+        nome = g;
+        const info = _cercaInMappa(nome);
+        if (info) {
+          mv = parseFloat(info.Mv) || 0;
+          fm = parseFloat(info.Fm) || 0;
+          ruolo = (info.ruolo || '?').toUpperCase();
         }
       }
 
@@ -902,7 +981,7 @@
         nome,
         mv: mv > 0 ? mv : null,
         fm: fm > 0 ? fm : null,
-        ruolo: ruolo,
+        ruolo: ruolo || '?',
       };
     };
 
@@ -912,7 +991,11 @@
         const { mv } = getStats(g);
         if (mv !== null) { sumMv += mv; countMv++; }
       });
-      return { mv: countMv > 0 ? sumMv / countMv : null, countMv, tot: lista.length };
+      return {
+        mv: countMv > 0 ? sumMv / countMv : null,
+        countMv,
+        tot: lista.length,
+      };
     };
 
     const fmt = (v) => (v === null || v === undefined) ? '—' : v.toFixed(2);
@@ -981,8 +1064,18 @@
             {nomeSquadra} {mod ? `(${mod})` : ''}
           </div>
           <div style={{ display: 'flex', gap: '6px', fontSize: '11px', fontWeight: 'bold' }}>
-            <span style={{ color: '#4ade80', background: 'rgba(0,255,136,0.1)', padding: '2px 6px', borderRadius: '4px' }}>TIT: {fmt(medieTitolari.mv)}</span>
-            <span style={{ color: '#fbbf24', background: 'rgba(251,191,36,0.1)', padding: '2px 6px', borderRadius: '4px' }}>PAN: {fmt(mediePanchina.mv)}</span>
+            <span
+              title={`Media voto dei ${medieTitolari.countMv} titolari con voto`}
+              style={{ color: '#4ade80', background: 'rgba(0,255,136,0.15)', padding: '3px 8px', borderRadius: '4px', border: '1px solid rgba(0,255,136,0.4)' }}
+            >
+              TIT: {fmt(medieTitolari.mv)}
+            </span>
+            <span
+              title={`Media voto dei ${mediePanchina.countMv} panchinari con voto`}
+              style={{ color: '#fbbf24', background: 'rgba(251,191,36,0.1)', padding: '3px 8px', borderRadius: '4px' }}
+            >
+              PAN: {fmt(mediePanchina.mv)}
+            </span>
           </div>
         </div>
 
@@ -1960,7 +2053,7 @@
                         padding: '12px', fontSize: '12px',
                         color: 'var(--text-dim)', marginBottom: '14px',
                       }}>
-                        ℹ️ Formazioni non ancora caricate. Esegui il parser e aggiorna <code>data/formazioni_seriea.json</code>.
+                        ℹ️ Formazioni non ancora caricate. Esegui la pipeline Python e aggiorna <code>data/formazioni_con_voti.json</code>.
                       </div>
                     );
                   }
@@ -2077,5 +2170,5 @@
   window.simulateMatches = simulateMatches;
   window.clearStatsCache = clearStatsCache;
 
-  console.log('✅ statistiche.js v26 - FormazionePanel legge voti da formazioni_con_voti.json O da AssenzeDB');
+  console.log('✅ statistiche.js v27 - FormazionePanel con media TITOLARI robusta + colori reparto');
 })();

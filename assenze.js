@@ -1,8 +1,11 @@
 // ============================================================
-// assenze.js - Modulo Assenze, Infortuni e Formazioni (v3.1)
+// assenze.js - Modulo Assenze, Infortuni e Formazioni (v4.0)
+// - Legge assenze.json (infortunati manuali con importanza)
+// - Legge formazioni_con_voti.json (formazioni con voti dall'Excel)
+// - Legge stats_giocatori.json (mappa completa giocatori dall'Excel)
 // - Fix: lettura perfetta delle colonne dell'Excel (R, Mv, Fm, ecc.)
 // - Fix: normalizzazione ruoli (Por -> P, Dc -> D, ecc.)
-// - Integrazione formazioni da Fantacalcio.it
+// - v4.0: caricaStats() automatico in carica()
 // ============================================================
 
 (function () {
@@ -45,11 +48,24 @@
     return n;
   };
 
+  // Normalizzazione nomi giocatori per lookup robusto
+  const normalizzaNomeGiocatore = (s) => {
+    if (s === null || s === undefined) return '';
+    let n = String(s);
+    n = n.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    n = n.replace(/[''`´]/g, "'");
+    n = n.toLowerCase();
+    n = n.replace(/[.\-–—]/g, ' ');
+    n = n.replace(/\s+/g, ' ').trim();
+    return n;
+  };
+
   window.AssenzeDB = {
     aggiornato: null,
     squadre: {},
     formazioni: {},
     _mappa: {},
+    _mappaNormalizzata: {},
     _indiceSquadre: {},
     _indiceFormazioni: {},
     _cacheTeamStats: {},
@@ -57,15 +73,16 @@
 
     async carica() {
       try {
+        // 1. Assenze manuali (con importanza)
         const r = await fetch('data/assenze.json');
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const data = await r.json();
         this.aggiornato = data.aggiornato || null;
         this.squadre = data.squadre || {};
 
-        // Carica le formazioni generate da Fantacalcio.it
+        // 2. Formazioni con voti già uniti (generate da unifica.py)
         try {
-          const rf = await fetch('data/formazioni_seriea.json');
+          const rf = await fetch('data/formazioni_con_voti.json');
           if (rf.ok) {
             const fd = await rf.json();
             this.formazioni = fd.formazioni || {};
@@ -79,20 +96,39 @@
 
         this._costruisciIndice();
         this._caricato = true;
+
+        // 3. Stats giocatori dall'Excel (parsato in JSON)
+        await this.caricaStats();
+
         console.log(
           '✅ Assenze caricate:',
-          Object.keys(this.squadre).length,
-          'squadre,',
-          this._contaTotale(),
-          'assenze,',
-          Object.keys(this.formazioni).length,
-          'formazioni'
+          Object.keys(this.squadre).length, 'squadre,',
+          this._contaTotale(), 'assenze,',
+          Object.keys(this.formazioni).length, 'formazioni,',
+          Object.keys(this._mappa).length, 'giocatori'
         );
         window.dispatchEvent(new Event('assenze-updated'));
         return true;
       } catch (e) {
         console.warn('⚠️ Assenze non caricate:', e.message);
         this._caricato = false;
+        return false;
+      }
+    },
+
+    // ============================================================
+    // CARICA STATS GIOCATORI (dall'Excel parsato in JSON)
+    // ============================================================
+    async caricaStats() {
+      try {
+        const r = await fetch('data/stats_giocatori.json');
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const rows = await r.json();
+        this.setStatsGiocatori(rows);
+        console.log(`✅ Stats caricate: ${rows.length} giocatori`);
+        return true;
+      } catch (e) {
+        console.warn('⚠️ Stats giocatori non caricate:', e.message);
         return false;
       }
     },
@@ -165,8 +201,11 @@
 
     isTitolare(squadra, nomeGiocatore) {
       const titolari = this.getTitolari(squadra);
-      const norm = (nomeGiocatore || '').toLowerCase().trim();
-      return titolari.some(t => (t || '').toLowerCase().trim() === norm);
+      const norm = normalizzaNomeGiocatore(nomeGiocatore || '');
+      return titolari.some(t => {
+        const nomeT = typeof t === 'string' ? t : (t && t.nome) || '';
+        return normalizzaNomeGiocatore(nomeT) === norm;
+      });
     },
 
     getAffidabilitaFormazione(squadra) {
@@ -177,10 +216,41 @@
 
     getTitolariConStats(squadra) {
       const titolari = this.getTitolari(squadra);
-      return titolari.map(nome => {
+      return titolari.map(t => {
+        if (typeof t === 'object' && t !== null && t.nome) {
+          return { ...t, titolare: true, trovato: true };
+        }
+        const nome = typeof t === 'string' ? t : '';
         const g = this.getGiocatore(nome);
         return g ? { ...g, titolare: true } : { nome, titolare: true, trovato: false };
       });
+    },
+
+    // Media voto dei soli titolari (con Mv > 0)
+    getMediaTitolari(squadra) {
+      const f = this.getFormazione(squadra);
+      if (!f) return { media: null, conVoto: 0, totale: 0 };
+      const titolari = f.titolari || [];
+      let sum = 0, count = 0;
+      titolari.forEach(t => {
+        let mv = 0;
+        if (typeof t === 'object' && t !== null) {
+          mv = parseFloat(t.Mv) || 0;
+          if (mv <= 0 && t.nome) {
+            const g = this.getGiocatore(t.nome);
+            if (g) mv = parseFloat(g.Mv) || 0;
+          }
+        } else if (typeof t === 'string') {
+          const g = this.getGiocatore(t);
+          if (g) mv = parseFloat(g.Mv) || 0;
+        }
+        if (mv > 0) { sum += mv; count++; }
+      });
+      return {
+        media: count > 0 ? Math.round((sum / count) * 100) / 100 : null,
+        conVoto: count,
+        totale: titolari.length,
+      };
     },
 
     setFormazioni(rows) {
@@ -194,6 +264,8 @@
           titolari: Array.isArray(r.titolari) ? r.titolari : [],
           panchina: Array.isArray(r.panchina) ? r.panchina : [],
           indisponibili: Array.isArray(r.indisponibili) ? r.indisponibili : [],
+          squalificati: Array.isArray(r.squalificati) ? r.squalificati : [],
+          diffidati: Array.isArray(r.diffidati) ? r.diffidati : [],
         };
         n++;
       });
@@ -207,6 +279,7 @@
     // ============================================================
     setStatsGiocatori(rows) {
       this._mappa = {};
+      this._mappaNormalizzata = {};
       if (!Array.isArray(rows)) return;
 
       // Funzione per trovare la colonna ignorando maiuscole/minuscole e spazi
@@ -232,18 +305,32 @@
         const squadra = colSquadra ? (row[colSquadra] || '').toString().trim() : '';
 
         // 3. Cerca il Ruolo
-        // Usiamo "R" o "Rm" (che nel tuo Excel sono le colonne dei ruoli)
-        const colRuolo = trovaColonna(row, ['r', 'rm', 'ruolo', 'role']);
-        let ruoloRaw = colRuolo ? (row[colRuolo] || '').toString().trim().toUpperCase() : '';
-        
-        // Normalizza il ruolo: Por -> P, Dc -> D, ecc.
+        // Se il JSON ha già "ruolo" canonico (P/D/C/A) usalo; altrimenti usa "R"/"Rm"
         let ruolo = '?';
-        if (ruoloRaw.startsWith('POR') || ruoloRaw === 'P') ruolo = 'P';
-        else if (ruoloRaw.startsWith('D') || ruoloRaw === 'DIF') ruolo = 'D';
-        else if (ruoloRaw.startsWith('C') || ruoloRaw === 'CEN') ruolo = 'C';
-        else if (ruoloRaw.startsWith('A') || ruoloRaw === 'ATT') ruolo = 'A';
-        // Se l'Excel usa "E" (esterno), "W" (ala) o "T" (trequartista), li mettiamo a centrocampo
-        else if (['E', 'W', 'T', 'M'].includes(ruoloRaw)) ruolo = 'C';
+        const colRuolo = trovaColonna(row, ['ruolo', 'role']);
+        if (colRuolo) {
+          const r = (row[colRuolo] || '').toString().trim().toUpperCase();
+          if (['P', 'D', 'C', 'A'].includes(r)) ruolo = r;
+          else {
+            // Prova a normalizzare
+            if (r.startsWith('POR') || r === 'P') ruolo = 'P';
+            else if (r.startsWith('D')) ruolo = 'D';
+            else if (r.startsWith('C')) ruolo = 'C';
+            else if (r.startsWith('A')) ruolo = 'A';
+            else if (['E', 'W', 'T', 'M'].includes(r)) ruolo = 'C';
+          }
+        } else {
+          // Fallback: usa "R" o "Rm" (colonne Excel)
+          const colR = trovaColonna(row, ['r', 'rm']);
+          if (colR) {
+            const r = (row[colR] || '').toString().trim().toUpperCase();
+            if (r.startsWith('POR') || r === 'P') ruolo = 'P';
+            else if (r.startsWith('D') || r === 'DIF') ruolo = 'D';
+            else if (r.startsWith('C') || r === 'CEN') ruolo = 'C';
+            else if (r.startsWith('A') || r === 'ATT') ruolo = 'A';
+            else if (['E', 'W', 'T', 'M'].includes(r)) ruolo = 'C';
+          }
+        }
 
         // 4. Funzione helper per estrarre numeri (gestisce la virgola)
         const getNum = (nomiPossibili) => {
@@ -254,8 +341,7 @@
           return isNaN(val) ? 0 : val;
         };
 
-        // 5. Salva il giocatore nella mappa
-        this._mappa[nome] = {
+        const giocatore = {
           nome,
           squadra,
           ruolo,
@@ -268,20 +354,67 @@
           Rp: getNum(['rp', 'rigori parati']),
           Rc: getNum(['rc', 'rigori causati']),
         };
+
+        // Salva in mappa (chiave = nome esatto)
+        this._mappa[nome] = giocatore;
+
+        // Salva anche in mappa normalizzata (per lookup robusto)
+        const norm = normalizzaNomeGiocatore(nome);
+        if (norm && !this._mappaNormalizzata[norm]) {
+          this._mappaNormalizzata[norm] = giocatore;
+        }
       });
 
       this._cacheTeamStats = {};
       console.log('✅ AssenzeDB: mappati', Object.keys(this._mappa).length, 'giocatori');
-      
-      // Debug in console per verificare che i voti siano letti
+
       const primiTre = Object.values(this._mappa).slice(0, 3);
       if (primiTre.length > 0) {
         console.log('🔍 Esempio giocatori mappati:', primiTre);
       }
     },
 
+    // ============================================================
+    // LOOKUP GIOCATORE con fallback multipli
+    // ============================================================
     getGiocatore(nome) {
-      return this._mappa[nome] || null;
+      if (!nome) return null;
+      // 1. match esatto
+      if (this._mappa[nome]) return this._mappa[nome];
+
+      // 2. match normalizzato
+      const norm = normalizzaNomeGiocatore(nome);
+      if (!norm) return null;
+      if (this._mappaNormalizzata[norm]) return this._mappaNormalizzata[norm];
+
+      // 3. match "cognome + iniziale" (es. "Adams C." vs "Adams")
+      const parti = norm.split(' ');
+      if (parti.length >= 2) {
+        const cognome = parti[0];
+        const iniziale = parti[1];
+        // 3a. cognome + iniziale
+        const key1 = `${cognome} ${iniziale}`;
+        if (this._mappaNormalizzata[key1]) return this._mappaNormalizzata[key1];
+        // 3b. solo cognome (prima chiave che inizia con "cognome ")
+        for (const k of Object.keys(this._mappaNormalizzata)) {
+          if (k.startsWith(cognome + ' ')) {
+            return this._mappaNormalizzata[k];
+          }
+        }
+      }
+
+      // 4. match parziale (una stringa contenuta nell'altra), solo se univoco
+      if (norm.length >= 4) {
+        const candidati = [];
+        for (const k of Object.keys(this._mappaNormalizzata)) {
+          if (k.includes(norm) || norm.includes(k)) {
+            candidati.push(this._mappaNormalizzata[k]);
+          }
+        }
+        if (candidati.length === 1) return candidati[0];
+      }
+
+      return null;
     },
 
     calcolaPesi(squadra, teamStats) {
@@ -289,10 +422,16 @@
       const formazione = this.getFormazione(squadra);
 
       const tutteAssenze = [...assenze];
+      // Aggiungi indisponibili dalla formazione (se non già presenti)
       if (formazione && Array.isArray(formazione.indisponibili)) {
         formazione.indisponibili.forEach(ind => {
-          if (!tutteAssenze.some(a => a.nome === ind.nome)) {
-            tutteAssenze.push(ind);
+          const nomeInd = typeof ind === 'string' ? ind : (ind.nome || '');
+          if (!tutteAssenze.some(a => a.nome === nomeInd)) {
+            tutteAssenze.push({
+              nome: nomeInd,
+              importanza: (ind && ind.importanza) || 'rotazione',
+              motivo: (ind && ind.motivo) || null,
+            });
           }
         });
       }
@@ -442,5 +581,5 @@
     },
   };
 
-  console.log('✅ Modulo assenze.js v3.1 caricato - Excel robusto + formazioni');
+  console.log('✅ Modulo assenze.js v4.0 caricato');
 })();
