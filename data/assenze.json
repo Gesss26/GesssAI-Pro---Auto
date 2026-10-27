@@ -1,8 +1,11 @@
 {
-"aggiornato": "2026-10-23",
+"aggiornato": "2026-10-27",
 "squadre": {
 "Inter": [
-{ "nome": "Pavard", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+{ "nome": "Pavard", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Luis Henrique", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Martinez L.", "ruolo": "A", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+{ "nome": "Jones C.", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
 ],
 "Milan": [
 { "nome": "Leao", "ruolo": "A", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
@@ -10,92 +13,149 @@
 { "nome": "Gimenez", "ruolo": "A", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
 { "nome": "Tomori", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
 { "nome": "Fofana Y.", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
-{ "nome": "Gabbia", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+{ "nome": "Gabbia", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Gila", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Saelemaekers", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Rabiot", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+{ "nome": "Chukwueze", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Moreira", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" }
 ],
 "Juventus": [
 { "nome": "Thuram K.", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
 { "nome": "Milik", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
 { "nome": "Cabal", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
 { "nome": "Cambiaso", "ruolo": "D", "motivo": "In dubbio", "importanza": "chiave", "rientro": "N/D" },
-{ "nome": "Yildiz", "ruolo": "A", "motivo": "In dubbio", "importanza": "chiave", "rientro": "N/D" }
+{ "nome": "Yildiz", "ruolo": "A", "motivo": "In dubbio", "importanza": "chiave", "rientro": "N/D" },
+{ "nome": "Celik", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Locatelli", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Conceicao", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Ekhator", "ruolo": "A", "motivo": "Infortunio", "importanza": "marginale", "rientro": "N/D" },
+{ "nome": "Grabara", "ruolo": "P", "motivo": "Infortunio", "importanza": "marginale", "rientro": "N/D" },
+{ "nome": "Gonzalez N.", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
 ],
 "Napoli": [
 { "nome": "Lukaku", "ruolo": "A", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
 { "nome": "Buongiorno", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
-{ "nome": "Gutierrez", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+{ "nome": "Gutierrez", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Rrahmani", "ruolo": "D", "motivo": "Influenza", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Santos A.", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Neres", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Favasuli", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" }
 ],
 "Roma": [
 { "nome": "Angelino", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
 { "nome": "El Aynaoui", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
 { "nome": "Pellegrini Lo.", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
 { "nome": "Svilar", "ruolo": "P", "motivo": "Infortunio", "importanza": "chiave", "rientro": "2026-11-21" },
-{ "nome": "Dybala", "ruolo": "A", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" }
+{ "nome": "Dybala", "ruolo": "A", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+{ "nome": "Konè M.", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" }
 ],
 "Lazio": [
 { "nome": "Romagnoli", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
 { "nome": "Lazzari", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
 { "nome": "Patric", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
 { "nome": "Pellegrini Lu.", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
-{ "nome": "Cataldi", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+{ "nome": "Cataldi", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Marusic", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Rovella", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Gudmundsson A.", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
 ],
 "Atalanta": [
 { "nome": "Djimsiti", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
 { "nome": "Hien", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
-{ "nome": "Sulemana K.", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+{ "nome": "Sulemana K.", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Kossounou", "ruolo": "D", "motivo": "Infortunio", "importanza": "marginale", "rientro": "N/D" },
+{ "nome": "Kolasinac", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Raspadori", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Pompei", "ruolo": "P", "motivo": "Infortunio", "importanza": "marginale", "rientro": "N/D" }
 ],
 "Fiorentina": [
 { "nome": "Parisi", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
 { "nome": "Dodò", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
-{ "nome": "Goncalves P.", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+{ "nome": "Goncalves P.", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Atta", "ruolo": "C", "motivo": "Infortunio", "importanza": "marginale", "rientro": "N/D" },
+{ "nome": "Pongracic", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
 ],
 "Bologna": [
 { "nome": "Dallinga", "ruolo": "A", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
 { "nome": "Vitik", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
-{ "nome": "Mbangula", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+{ "nome": "Mbangula", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Holm", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Orsolini", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+{ "nome": "Piccoli", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
 ],
 "Torino": [
 { "nome": "Zapata D.", "ruolo": "A", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
 { "nome": "Biraghi", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
-{ "nome": "Anjorin", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+{ "nome": "Anjorin", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Ilkhan", "ruolo": "C", "motivo": "Infortunio", "importanza": "marginale", "rientro": "N/D" },
+{ "nome": "Fortini", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Rodriguez R.", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Mandragora", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" }
 ],
 "Como": [
 { "nome": "Morata", "ruolo": "A", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
 { "nome": "Kuhn", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
 { "nome": "Kambwala", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
-{ "nome": "Goldaniga", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+{ "nome": "Goldaniga", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Liberali", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+{ "nome": "Rodriguez Je.", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Diao", "ruolo": "A", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+{ "nome": "Chalobah T.", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Kean", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
 ],
 "Genoa": [
 { "nome": "Martin", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
 { "nome": "Mitaj", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
-{ "nome": "Vogliacco", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+{ "nome": "Vogliacco", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Venturino", "ruolo": "C", "motivo": "Infortunio", "importanza": "marginale", "rientro": "N/D" },
+{ "nome": "Havel", "ruolo": "A", "motivo": "Infortunio", "importanza": "marginale", "rientro": "N/D" },
+{ "nome": "Sow", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Ehizibue", "ruolo": "D", "motivo": "Infortunio", "importanza": "marginale", "rientro": "N/D" }
 ],
 "Cagliari": [
 { "nome": "Prati", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
-{ "nome": "Aurelio", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+{ "nome": "Aurelio", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Idrissi R.", "ruolo": "D", "motivo": "Infortunio", "importanza": "marginale", "rientro": "N/D" },
+{ "nome": "Felici", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Winks", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" }
 ],
 "Udinese": [
 { "nome": "Lovric", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
-{ "nome": "Buksa", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+{ "nome": "Buksa", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Zanoli", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Bayo V.", "ruolo": "A", "motivo": "Infortunio", "importanza": "marginale", "rientro": "N/D" },
+{ "nome": "Gueye", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Alaba", "ruolo": "D", "motivo": "Infortunio", "importanza": "marginale", "rientro": "N/D" }
 ],
 "Parma": [
 { "nome": "Suzuki", "ruolo": "P", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
 { "nome": "Circati", "ruolo": "D", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
 { "nome": "Ondrejka", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
-{ "nome": "Nicolussi Caviglia", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+{ "nome": "Nicolussi Caviglia", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Almqvist", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+{ "nome": "Elphege", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
 ],
 "Lecce": [
 { "nome": "Jean", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
-{ "nome": "Berisha M.", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+{ "nome": "Berisha M.", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Coulibaly L.", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
+{ "nome": "Pierotti", "ruolo": "C", "motivo": "Infortunio", "importanza": "marginale", "rientro": "N/D" },
+{ "nome": "Ilic", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
 ],
 "Sassuolo": [
 { "nome": "Konè I.", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
 { "nome": "Walukiewicz", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
-{ "nome": "Boloca", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+{ "nome": "Boloca", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Idzes", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Leysen F.", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
 ],
 "Monza": [
 { "nome": "Pessina", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
 { "nome": "Ciurria", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
-{ "nome": "Petagna", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+{ "nome": "Petagna", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Maye", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Ziolkowski", "ruolo": "D", "motivo": "Infortunio", "importanza": "marginale", "rientro": "N/D" }
 ],
 "Frosinone": [
 { "nome": "Koutsoupias", "ruolo": "C", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
@@ -105,7 +165,9 @@
 "Venezia": [
 { "nome": "Duncan", "ruolo": "C", "motivo": "Infortunio", "importanza": "chiave", "rientro": "N/D" },
 { "nome": "Sverko", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
-{ "nome": "Adorante", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
+{ "nome": "Adorante", "ruolo": "A", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" },
+{ "nome": "Franjic", "ruolo": "D", "motivo": "Infortunio", "importanza": "marginale", "rientro": "N/D" },
+{ "nome": "Correia T.", "ruolo": "D", "motivo": "Infortunio", "importanza": "rotazione", "rientro": "N/D" }
 ]
 }
 }
