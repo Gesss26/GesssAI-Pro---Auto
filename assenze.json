@@ -59,14 +59,6 @@
         "importanza": "rotazione",
         "tipo": "injureds",
         "rientro": "N/D"
-      },
-      {
-        "nome": "Pinamonti",
-        "ruolo": "",
-        "motivo": "tracheite, da valutare contro il Sassuolo",
-        "importanza": "marginale",
-        "tipo": "dubts",
-        "rientro": "N/D"
       }
     ],
     "Roma": [
@@ -286,14 +278,6 @@
         "motivo": "problema muscolare al bicipite femorale della coscia destra, rientro dalla metà di novembre",
         "importanza": "rotazione",
         "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Enem",
-        "ruolo": "",
-        "motivo": "lieve affaticamento muscolare, in dubbio contro il Milan",
-        "importanza": "rotazione",
-        "tipo": "dubts",
         "rientro": "N/D"
       }
     ],
@@ -661,14 +645,6 @@
         "rientro": "N/D"
       },
       {
-        "nome": "Tiago Gabriel",
-        "ruolo": "",
-        "motivo": "contusione al ginocchio, in forte dubbio dal 1' a Frosinone",
-        "importanza": "marginale",
-        "tipo": "dubts",
-        "rientro": "N/D"
-      },
-      {
         "nome": "Gaspar K.",
         "ruolo": "",
         "motivo": "squalificato",
@@ -700,14 +676,6 @@
         "motivo": "sovraccarico funzionale dell'addome, out contro l'Atalanta",
         "importanza": "rotazione",
         "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Ranieri L.",
-        "ruolo": "",
-        "motivo": "schiacciamento di un nervo al piede, in dubbio convocazione contro l'Atalanta",
-        "importanza": "marginale",
-        "tipo": "dubts",
         "rientro": "N/D"
       }
     ],
@@ -766,22 +734,6 @@
         "motivo": "frattura della falange della mano destra, out contro la Fiorentina",
         "importanza": "chiave",
         "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Scalvini",
-        "ruolo": "",
-        "motivo": "distrazione di basso grado dei muscoli flessori della gamba sinistra, da valutare convocazione per Firenze",
-        "importanza": "rotazione",
-        "tipo": "dubts",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Sulemana K.",
-        "ruolo": "",
-        "motivo": "lesione del collaterale mediale di secondo grado del ginocchio sinistro, da valutare convocazione contro la Fiorentina",
-        "importanza": "rotazione",
-        "tipo": "dubts",
         "rientro": "N/D"
       }
     ]
