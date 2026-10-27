@@ -302,9 +302,6 @@
       }
     }
 
-    // ============================================================
-    // CARICA STATISTICHE GIOCATORI (per modulo Assenze)
-    // ============================================================
     async function loadStatisticheGiocatori() {
       const paths = [
         'excel/Statistiche_Fantacalcio_Stagione_2026_27.xlsx',
@@ -342,8 +339,6 @@
       'Neon': { bg: '#0a0e27', surface: '#131836', card: '#1a1f42', banner: '#24294f', text: '#00ffcc', textMuted: '#ffff00', accent: '#ff00ff', accent2: '#00ffff', border: '#2d325f', tabActive: '#ff00ff' },
       'Calcio': { bg: '#1b5e20', surface: '#2e7d32', card: '#388e3c', banner: '#2e7d32', text: '#fff', textMuted: '#ffff00', accent: '#ffc107', accent2: '#ff9800', border: '#1b5e20', tabActive: '#ffc107' },
     };
-
-    const MAIN_TABS = ['Home', 'Palinsesto', 'Statistiche', 'Storico', 'Schedina', 'Impostazioni'];
 
     // ============================================================
     // CHAMPIONSHIP_COLORS
@@ -1057,29 +1052,21 @@
       };
     };
 
-    // ============================================================
-    // formatGiocataLabel
-    // ============================================================
     const formatGiocataLabel = (familyId, label) => {
       if (!label) return '—';
-
       if (label.startsWith('Over '))  return label.replace('.', ',');
       if (label.startsWith('Under ')) return label.replace('.', ',');
-
       if (familyId === 'multigol') return label;
-
       if (familyId === 'mg_casa_ospite') {
         const parts = label.split('+');
         if (parts.length === 2) return `MG ${parts[0]} C + MG ${parts[1]} O`;
         return label;
       }
-
       if (familyId === 'dc_multigol') {
         const parts = label.split('+');
         if (parts.length === 2) return `${parts[0]} + ${parts[1]}`;
         return label;
       }
-
       if (familyId === 'dc_under') {
         const parts = label.split('+');
         if (parts.length === 2) {
@@ -1088,7 +1075,6 @@
         }
         return label;
       }
-
       if (familyId === 'dc_over') {
         const parts = label.split('+');
         if (parts.length === 2) {
@@ -1097,12 +1083,10 @@
         }
         return label;
       }
-
       if (familyId === 'gg_ng') {
         if (label === 'Goal-Goal' || label === 'GG') return 'GG';
         if (label === 'No Goal' || label === 'NG') return 'NG';
       }
-
       return label;
     };
 
@@ -1136,7 +1120,7 @@
     window.get12Under45 = get12Under45;
     window.normalizzaAccenti = normalizzaAccenti;
 
-    console.log('✅ Funzioni globali esposte v29 - Assenze + Dixon-Coles');
+    console.log('✅ Funzioni globali esposte v31 - Menu Hub con emoji');
 
     // ============================================================
     // LOAD/SAVE STATE
@@ -1329,6 +1313,7 @@
     function App() {
       const initial = loadState();
       const [tab, setTab] = useState('Home');
+      const [homeResetKey, setHomeResetKey] = useState(0);
       const [championships, setChampionships] = useState(initial.championships);
       const [matches, setMatches] = useState(initial.matches);
       const [theme, setTheme] = useState(initial.theme);
@@ -1374,7 +1359,6 @@
         console.log('📂 Carico dati al mount di App...');
         const loadData = async () => {
           try {
-            // Carica assenze + stats giocatori in parallelo
             Promise.all([
               window.AssenzeDB && window.AssenzeDB.carica ? window.AssenzeDB.carica() : Promise.resolve(false),
               loadStatisticheGiocatori(),
@@ -1448,6 +1432,12 @@
         setTab('Statistiche');
       };
 
+      // ⭐ Torna al Menu principale da qualsiasi tab
+      const backToMainMenu = () => {
+        setTab('Home');
+        setHomeResetKey(k => k + 1);
+      };
+
       const renderAppContent = () => (
         <div className="app-shell">
           <div className="header">
@@ -1459,19 +1449,7 @@
             <Clock />
           </div>
 
-          <div className="tabs-nav">
-            {MAIN_TABS.map(t => (
-              <button key={t} className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>
-                {t === 'Home' && '🏠 '}
-                {t === 'Palinsesto' && '📅 '}
-                {t === 'Statistiche' && '📊 '}
-                {t === 'Storico' && '📜 '}
-                {t === 'Schedina' && '🎯 '}
-                {t === 'Impostazioni' && '⚙️ '}
-                {t}
-              </button>
-            ))}
-          </div>
+          {/* ⭐ NAVIGAZIONE: solo dal Menu Home. tabs-nav rimosso. */}
 
           <div className="container">
             <QuoteStatusBar />
@@ -1483,6 +1461,11 @@
             {message && <div className={`alert alert-${message.type}`}>{message.text}</div>}
             {loading && <div className="alert alert-info">⏳ Elaborazione in corso...</div>}
 
+            {/* ⭐ Back to menu button (visibile solo quando NON siamo in Home) */}
+            {tab !== 'Home' && window.BackToMenuButton && (
+              <window.BackToMenuButton onClick={backToMainMenu} />
+            )}
+
             {tab === 'Home' && window.HomeComponent && (
               <window.HomeComponent
                 matches={matches}
@@ -1491,6 +1474,7 @@
                 setTab={setTab}
                 selectedFamiglie={selectedFamiglie}
                 weatherCache={weatherCache}
+                resetKey={homeResetKey}
               />
             )}
 
@@ -1573,8 +1557,8 @@
 
           <button
             className="home-btn-overlay"
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            title="Torna su"
+            onClick={backToMainMenu}
+            title="Torna al Menu Principale"
           >
             🏠
           </button>
@@ -1606,7 +1590,7 @@
     // ============================================================
     // BOOT
     // ============================================================
-    console.log('🚀 Avvio GesssAI-Pro v5.0');
+    console.log('🚀 Avvio GesssAI-Pro v5.0 - Menu Hub con emoji');
 
     try {
       const rootElement = document.getElementById('root');

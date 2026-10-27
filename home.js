@@ -1,13 +1,13 @@
 // ============================================================
-// home.js - Modulo Home (FUTURISTIC + bottoni cyan pieni + Tutti/Deseleziona)
-// v8: Championship + Serie C allineati ai nomi esatti del DB
-//     + fallback per Süper Lig, Segunda, UEFA Conference
+// home.js - Modulo Home con MENU PRINCIPALE a griglia di card
+// v10: Menu hub con EMOJI + preset campionati con loghi reali
+//      + sottomenu Info e Utilità + lista mobile compatta
 // ============================================================
 
 (function () {
   'use strict';
 
-  const { useState, useEffect, useMemo } = React;
+  const { useState, useEffect, useMemo, useCallback } = React;
 
   const CHINESE_TEAMS = new Set([
     'Chengdu Better City', 'Sichuan Jiuniu', 'Tianjin Teda', 'Shandong Luneng',
@@ -41,113 +41,610 @@
     return isMobile;
   };
 
-  (function injectNazioniStyles() {
-    if (document.getElementById('home-nazioni-styles')) return;
+  // ============================================================
+  // STILI INIETTATI (menu card + lista mobile + preset campionati)
+  // ============================================================
+  (function injectMenuStyles() {
+    if (document.getElementById('home-menu-styles')) return;
     const style = document.createElement('style');
-    style.id = 'home-nazioni-styles';
+    style.id = 'home-menu-styles';
     style.textContent = `
-      .nazioni-grid {
+      .menu-home-header {
+        text-align: center;
+        margin-bottom: 24px;
+        padding: 18px 14px;
+        background: linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 229, 0.05));
+        border-radius: 16px;
+        border: 1px solid var(--border);
+      }
+      .menu-home-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 26px;
+        font-weight: 900;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta), var(--neon-gold));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 6px;
+        text-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+      }
+      .menu-home-subtitle {
+        font-size: 12px;
+        color: var(--text-dim);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        font-family: 'Orbitron', sans-serif;
+      }
+      .menu-home-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        width: 100%;
+        margin-bottom: 24px;
+      }
+      @media (max-width: 1500px) and (min-width: 1150px) {
+        .menu-home-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      }
+      @media (max-width: 1149px) and (min-width: 900px) {
+        .menu-home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (max-width: 899px) {
+        .menu-home-grid { display: none; }
+      }
+      .menu-home-card {
+        position: relative;
+        background: linear-gradient(135deg, rgba(30, 40, 66, 0.85), rgba(20, 27, 46, 0.95));
+        border: 2px solid var(--border);
+        border-radius: 18px;
+        padding: 24px 16px 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         gap: 12px;
+        min-height: 200px;
+        text-align: center;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+      }
+      .menu-home-card:hover {
+        transform: translateY(-6px);
+        border-color: var(--neon-cyan);
+        box-shadow: 0 0 30px rgba(0, 245, 255, 0.4), inset 0 0 20px rgba(0, 245, 255, 0.05);
+      }
+      .menu-home-card-emoji {
+        font-size: 64px;
+        line-height: 1;
+        transition: transform 0.3s ease;
+        filter: drop-shadow(0 0 12px rgba(0, 245, 255, 0.4));
+        user-select: none;
+      }
+      .menu-home-card:hover .menu-home-card-emoji {
+        transform: scale(1.12);
+      }
+      .menu-home-card-title {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--text);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .menu-home-card-desc {
+        font-size: 11px;
+        color: var(--text-dim);
+        line-height: 1.3;
+      }
+
+      /* Blocco Seleziona Campionati */
+      .menu-home-section {
+        background: linear-gradient(135deg, rgba(30, 40, 66, 0.7), rgba(20, 27, 46, 0.9));
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 18px;
+        margin-bottom: 20px;
+      }
+      .menu-home-section-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 14px;
+        font-weight: 900;
+        color: var(--neon-cyan);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .menu-home-section-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
       }
       @media (max-width: 1024px) {
-        .nazioni-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-      }
-      @media (max-width: 768px) {
-        .nazioni-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-        .nazione-btn { min-height: 80px !important; padding: 10px 4px !important; }
+        .menu-home-section-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
       @media (max-width: 480px) {
-        .nazioni-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-        .nazione-btn { min-height: 72px !important; padding: 8px 4px !important; }
+        .menu-home-section-grid { grid-template-columns: 1fr; }
       }
-      .calc-select {
-        width: 100%; padding: 10px 12px;
-        background: var(--bg-elevated);
-        color: var(--text);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        font-size: 13px;
-        font-family: 'Rajdhani', sans-serif;
+      .menu-home-section-btn {
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 2px solid var(--neon-cyan);
+        background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+        color: #000;
+        font-weight: 800;
+        font-size: 12px;
         cursor: pointer;
-        outline: none;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-family: 'Rajdhani', sans-serif;
+        box-shadow: 0 0 15px rgba(0, 245, 255, 0.3);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        min-height: 100px;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
       }
-      .calc-select:focus { border-color: var(--neon-cyan); }
-      .calc-select:disabled { opacity: 0.4; cursor: not-allowed; }
-      .calc-input {
-        width: 100%; padding: 10px 12px;
-        background: var(--bg-elevated);
-        color: var(--text);
-        border: 2px solid var(--border);
+      .menu-home-section-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0 30px rgba(0, 245, 255, 0.7);
+      }
+      .menu-home-section-btn .btn-logos {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: nowrap;
+        height: 32px;
+        background: rgba(0, 0, 0, 0.18);
         border-radius: 8px;
-        font-size: 16px;
+        padding: 4px 8px;
+        max-width: 100%;
+      }
+      .menu-home-section-btn .btn-logos .champ-logo-mini {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .menu-home-section-btn .btn-title {
+        font-size: 13px;
+        font-weight: 900;
+        line-height: 1.1;
+      }
+      .menu-home-section-btn .btn-sub {
+        font-size: 9px;
+        opacity: 0.75;
         font-weight: 700;
-        font-family: 'Orbitron', monospace;
-        outline: none;
-        text-align: right;
+        text-transform: none;
+        letter-spacing: 0;
+        text-align: center;
+        line-height: 1.2;
       }
-      .calc-input:focus { border-color: var(--neon-cyan); }
-      .calc-result-row {
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 10px 14px; border-radius: 8px;
-        background: var(--card);
+      .menu-home-section-btn.btn-coppe {
+        background: linear-gradient(135deg, #1a1aff, #4d7cff);
+        border-color: #4d7cff;
+        color: #fff;
+      }
+      .menu-home-section-btn.btn-minori {
+        background: linear-gradient(135deg, #ff9500, #ffd700);
+        border-color: #ffd700;
+      }
+      .menu-home-section-btn.btn-tutti {
+        background: linear-gradient(135deg, var(--neon-magenta), #a855f7);
+        border-color: var(--neon-magenta);
+        color: #fff;
+      }
+      .menu-home-section-info {
+        margin-top: 12px;
+        padding: 10px 14px;
+        background: rgba(0, 245, 255, 0.06);
+        border-radius: 8px;
         border: 1px solid var(--border);
-        margin-bottom: 6px;
+        font-size: 11px;
+        color: var(--text-dim);
+        font-style: italic;
+        text-align: center;
       }
-      .calc-result-label { font-size: 13px; color: var(--text-dim); }
-      .calc-result-value {
-        font-family: 'Orbitron', monospace;
-        font-size: 18px; font-weight: 900;
+
+      /* Lista mobile compatta */
+      .menu-mobile-list {
+        display: none;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
       }
-      .calc-result-value.positive { color: var(--neon-green); }
-      .calc-result-value.negative { color: var(--neon-red); }
-      .calc-result-value.neutral { color: var(--neon-cyan); }
-      .calc-prob-bar {
-        height: 10px; background: var(--bg-deep); border-radius: 5px;
-        overflow: hidden; margin-top: 4px;
+      @media (max-width: 899px) {
+        .menu-mobile-list { display: flex; }
       }
-      .calc-prob-fill {
-        height: 100%; border-radius: 5px;
-        transition: width 0.4s ease;
+      .menu-mobile-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 16px;
+        background: linear-gradient(135deg, rgba(30, 40, 66, 0.85), rgba(20, 27, 46, 0.95));
+        border: 2px solid var(--border);
+        border-radius: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .menu-mobile-item:active {
+        transform: scale(0.98);
+        border-color: var(--neon-cyan);
+        background: rgba(0, 245, 255, 0.08);
+      }
+      .menu-mobile-item-emoji {
+        font-size: 32px;
+        line-height: 1;
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        user-select: none;
+      }
+      .menu-mobile-item-text {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .menu-mobile-item-title {
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--text);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .menu-mobile-item-desc {
+        font-size: 11px;
+        color: var(--text-dim);
+      }
+      .menu-mobile-item-arrow {
+        font-size: 20px;
+        color: var(--neon-cyan);
+        font-weight: 900;
+        flex-shrink: 0;
+      }
+
+      /* Back to menu button */
+      .back-to-menu-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+        color: #000;
+        border: 2px solid var(--neon-cyan);
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 900;
+        font-family: 'Orbitron', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        margin-bottom: 16px;
+        box-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+        transition: all 0.2s ease;
+      }
+      .back-to-menu-btn:hover {
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 0 35px var(--neon-cyan);
       }
     `;
     document.head.appendChild(style);
   })();
 
   // ============================================================
-  // ⭐ NAZIONI — allineate ai nomi esatti del database
+  // CONFIGURAZIONE MENU
   // ============================================================
-const NAZIONI = {
-  'Coppe UEFA': { file: 'uefa.png', campionati: [
-    'UEFA Champions League',
-    'UEFA Europa League',
-    'UEFA Europa Conference',
-    'UEFA Nations League',
-  ]},
-  'Belgio':      { file: 'belgio.png',      campionati: ['Jupiler Pro League'] },
-  'Corea':       { file: 'corea.png',       campionati: ['K League 1'] },
-  'Francia':     { file: 'francia.png',     campionati: ['Ligue 1', 'Ligue 2'] },
-  'Germania':    { file: 'germania.png',    campionati: ['Bundesliga', '2. Bundesliga'] },
-  'Giappone':    { file: 'giappone.png',    campionati: ['J1 League'] },
-  'Inghilterra': { file: 'inghilterra.png', campionati: ['Premier League', 'EFL Championship'] },  // ⭐ nome ESATTO
-  'Italia':      { file: 'italia.png',      campionati: [
-    'Serie A',
-    'Serie B',
-    'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C',   // ⭐ con trattino
-  ]},
-  'Olanda':      { file: 'olanda.png',      campionati: ['Eredivisie', 'Eerste Divisie'] },
-  'Portogallo':  { file: 'portogallo.png',  campionati: ['Primeira Liga'] },
-  'Scozia':      { file: 'scozia.png',      campionati: ['Scottish Premiership'] },
-  'Spagna':      { file: 'spagna.png',      campionati: ['La Liga', 'Segunda División'] },
-  'Turchia':     { file: 'turchia.png',     campionati: ['Süper Lig'] },
-};
+  const MENU_ITEMS = [
+    {
+      id: 'gestione-conto',
+      title: 'Gestione Conto',
+      desc: 'Banca e movimenti',
+      emoji: '💰',
+      action: { type: 'homeTab', value: 'GestioneConto' },
+    },
+    {
+      id: 'giornata',
+      title: 'Visualizza Giornata',
+      desc: 'Partite per nazione',
+      emoji: '⚽',
+      action: { type: 'homeTab', value: 'Nazioni' },
+    },
+    {
+      id: 'palinsesto',
+      title: 'Palinsesto',
+      desc: 'Tutte le partite',
+      emoji: '📅',
+      action: { type: 'mainTab', value: 'Palinsesto' },
+    },
+    {
+      id: 'storico',
+      title: 'Storico Partite',
+      desc: 'Archivio completo',
+      emoji: '📜',
+      action: { type: 'mainTab', value: 'Storico' },
+    },
+    {
+      id: 'schedina',
+      title: 'Crea Schedina',
+      desc: 'Costruisci giocate',
+      emoji: '🎯',
+      action: { type: 'mainTab', value: 'Schedina' },
+    },
+    {
+      id: 'info-utilita',
+      title: 'Info e Utilità',
+      desc: 'Strumenti avanzati',
+      emoji: '🧰',
+      action: { type: 'homeTab', value: 'InfoUtilità' },
+    },
+    {
+      id: 'impostazioni',
+      title: 'Impostazioni',
+      desc: 'Configurazione',
+      emoji: '⚙️',
+      action: { type: 'mainTab', value: 'Impostazioni' },
+    },
+  ];
+
+  const MENU_ITEMS_INFO_UTILITA = [
+    {
+      id: 'calcolatrice',
+      title: 'Calcolatrice',
+      desc: 'Copertura e profitto',
+      emoji: '🧮',
+      action: { type: 'homeTab', value: 'Calcolatrice' },
+    },
+    {
+      id: 'performance',
+      title: 'Performance',
+      desc: 'Statistiche trading',
+      emoji: '📈',
+      action: { type: 'homeTab', value: 'Performance' },
+    },
+  ];
+
+  const TOP_5_MAGGIORI = ['Serie A', 'Ligue 1', 'La Liga', 'Bundesliga', 'Premier League'];
+  const TOP_5_MINORI = ['Serie B', '2. Bundesliga', 'Ligue 2', 'Segunda División', 'EFL Championship'];
+  const TOP_COPPE = ['UEFA Champions League', 'UEFA Europa League', 'UEFA Europa Conference', 'UEFA Nations League'];
+
+  const PRESET_CAMPIONATI = [
+    {
+      id: 'top5-maggiori',
+      label: '🏆 Top 5 Maggiori',
+      sub: 'Serie A · Ligue 1 · Liga · Bundesliga · Premier',
+      className: '',
+      campionati: TOP_5_MAGGIORI,
+    },
+    {
+      id: 'top5-minori',
+      label: '🔹 Top 5 Minori',
+      sub: 'Serie B · 2. Bundes · Ligue 2 · Segunda · EFL',
+      className: 'btn-minori',
+      campionati: TOP_5_MINORI,
+    },
+    {
+      id: 'maggiori-minori',
+      label: '💎 Maggiori + Minori',
+      sub: '10 campionati top',
+      className: 'btn-tutti',
+      campionati: [...TOP_5_MAGGIORI, ...TOP_5_MINORI],
+    },
+    {
+      id: 'coppe',
+      label: '🏆 Coppe UEFA',
+      sub: 'UCL · UEL · UECL · Nations League',
+      className: 'btn-coppe',
+      campionati: TOP_COPPE,
+    },
+  ];
+
+  // ============================================================
+  // NAZIONI
+  // ============================================================
+  const NAZIONI = {
+    'Coppe UEFA': { file: 'uefa.png', campionati: [
+      'UEFA Champions League',
+      'UEFA Europa League',
+      'UEFA Europa Conference',
+      'UEFA Nations League',
+    ]},
+    'Belgio':      { file: 'belgio.png',      campionati: ['Jupiler Pro League'] },
+    'Corea':       { file: 'corea.png',       campionati: ['K League 1'] },
+    'Francia':     { file: 'francia.png',     campionati: ['Ligue 1', 'Ligue 2'] },
+    'Germania':    { file: 'germania.png',    campionati: ['Bundesliga', '2. Bundesliga'] },
+    'Giappone':    { file: 'giappone.png',    campionati: ['J1 League'] },
+    'Inghilterra': { file: 'inghilterra.png', campionati: ['Premier League', 'EFL Championship'] },
+    'Italia':      { file: 'italia.png',      campionati: [
+      'Serie A', 'Serie B',
+      'Serie C - Girone A', 'Serie C - Girone B', 'Serie C - Girone C',
+    ]},
+    'Olanda':      { file: 'olanda.png',      campionati: ['Eredivisie', 'Eerste Divisie'] },
+    'Portogallo':  { file: 'portogallo.png',  campionati: ['Primeira Liga'] },
+    'Scozia':      { file: 'scozia.png',      campionati: ['Scottish Premiership'] },
+    'Spagna':      { file: 'spagna.png',      campionati: ['La Liga', 'Segunda División'] },
+    'Turchia':     { file: 'turchia.png',     campionati: ['Süper Lig'] },
+  };
 
   const NAZIONI_BASE_PATH = 'logos/Nazioni/';
   const SCHEDINA_STORAGE_KEY = 'ft_schedina_selezioni';
   const GIOCATE_SELEZIONATE_KEY = 'ft_giocate_selezionate';
   const FAMIGLIE_SELEZIONATE_KEY = 'ft_selected_famiglie';
 
+  // ============================================================
+  // COMPONENTE: Back to Menu Button
+  // ============================================================
+  const BackToMenuButton = ({ onClick, label = 'Torna al Menù Principale' }) => {
+    if (!onClick) return null;
+    return (
+      <button className="back-to-menu-btn" onClick={onClick}>
+        ← {label}
+      </button>
+    );
+  };
+
+  // ============================================================
+  // COMPONENTE: Menu Home (griglia emoji desktop + lista emoji mobile)
+  // ============================================================
+  const MenuHomeComponent = ({ onSelect, onApplyPreset, presetAttivo }) => {
+    const isMobile = useIsMobile();
+
+    const renderLoghiPreset = (campionati) => {
+      const ChampLogo = window.ChampLogo;
+      if (!ChampLogo) return null;
+      return (
+        <div className="btn-logos">
+          {campionati.slice(0, 5).map((camp, i) => (
+            <span key={i} className="champ-logo-mini" title={camp}>
+              <ChampLogo campionato={camp} size={22} />
+            </span>
+          ))}
+        </div>
+      );
+    };
+
+    return (
+      <div>
+        <div className="menu-home-header">
+          <div className="menu-home-title">Menu Principale</div>
+          <div className="menu-home-subtitle">GesssAI-Pro · Football Trader</div>
+        </div>
+
+        {/* DESKTOP: griglia card emoji */}
+        <div className="menu-home-grid">
+          {MENU_ITEMS.map(item => (
+            <div
+              key={item.id}
+              className="menu-home-card"
+              onClick={() => onSelect(item.action)}
+            >
+              <div className="menu-home-card-emoji">{item.emoji}</div>
+              <div className="menu-home-card-title">{item.title}</div>
+              <div className="menu-home-card-desc">{item.desc}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* MOBILE: lista compatta emoji */}
+        <div className="menu-mobile-list">
+          {MENU_ITEMS.map(item => (
+            <div
+              key={item.id}
+              className="menu-mobile-item"
+              onClick={() => onSelect(item.action)}
+            >
+              <div className="menu-mobile-item-emoji">{item.emoji}</div>
+              <div className="menu-mobile-item-text">
+                <div className="menu-mobile-item-title">{item.title}</div>
+                <div className="menu-mobile-item-desc">{item.desc}</div>
+              </div>
+              <div className="menu-mobile-item-arrow">→</div>
+            </div>
+          ))}
+        </div>
+
+        {/* BLOCCO: Seleziona Campionati */}
+        <div className="menu-home-section">
+          <div className="menu-home-section-title">
+            <span>🏆</span>
+            <span>Seleziona Campionati</span>
+          </div>
+          <div className="menu-home-section-grid">
+            {PRESET_CAMPIONATI.map(preset => {
+              const isActive = presetAttivo === preset.id;
+              return (
+                <button
+                  key={preset.id}
+                  className={`menu-home-section-btn ${preset.className}`}
+                  onClick={() => onApplyPreset(preset)}
+                  style={{
+                    outline: isActive ? '3px solid var(--neon-gold)' : 'none',
+                    outlineOffset: '2px',
+                  }}
+                >
+                  {renderLoghiPreset(preset.campionati)}
+                  <span className="btn-title">{preset.label}</span>
+                  <span className="btn-sub">{preset.sub}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="menu-home-section-info">
+            💡 Il filtro è valido sia per il <b>Palinsesto</b> che per la <b>Schedina</b>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================================
+  // COMPONENTE: Info e Utilità (sottomenu con 2 card emoji)
+  // ============================================================
+  const InfoUtilitàComponent = ({ onSelect, onBack }) => {
+    return (
+      <div>
+        <BackToMenuButton onClick={onBack} label="Torna al Menù" />
+
+        <div className="menu-home-header">
+          <div className="menu-home-title">Info e Utilità</div>
+          <div className="menu-home-subtitle">Strumenti avanzati</div>
+        </div>
+
+        <div className="menu-home-grid" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', maxWidth: '600px', margin: '0 auto 24px' }}>
+          {MENU_ITEMS_INFO_UTILITA.map(item => (
+            <div
+              key={item.id}
+              className="menu-home-card"
+              onClick={() => onSelect(item.action)}
+            >
+              <div className="menu-home-card-emoji">{item.emoji}</div>
+              <div className="menu-home-card-title">{item.title}</div>
+              <div className="menu-home-card-desc">{item.desc}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="menu-mobile-list">
+          {MENU_ITEMS_INFO_UTILITA.map(item => (
+            <div
+              key={item.id}
+              className="menu-mobile-item"
+              onClick={() => onSelect(item.action)}
+            >
+              <div className="menu-mobile-item-emoji">{item.emoji}</div>
+              <div className="menu-mobile-item-text">
+                <div className="menu-mobile-item-title">{item.title}</div>
+                <div className="menu-mobile-item-desc">{item.desc}</div>
+              </div>
+              <div className="menu-mobile-item-arrow">→</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // ============================================================
+  // COMPONENTI ESISTENTI
+  // ============================================================
   const QuotaInline = ({ match, familyId, giocata, pctTua, size = 'sm' }) => {
     const [quotaInfo, setQuotaInfo] = useState(null);
     const quoteHook = window.QuoteManager ? window.QuoteManager.useQuote() : { numPartite: 0 };
@@ -789,7 +1286,7 @@ const NAZIONI = {
   };
 
   // ============================================================
-  // GRIGLIA NAZIONI — bottoni sempre cyan pieni
+  // GRIGLIA NAZIONI
   // ============================================================
   const GrigliaNazioni = ({ matches, onSelectNazione, tipoGiocate, setTipoGiocate }) => {
     const nazioniOrdinate = useMemo(() => Object.keys(NAZIONI).sort((a, b) => a.localeCompare(b)), []);
@@ -849,28 +1346,10 @@ const NAZIONI = {
     };
 
     const bottoneSempreCyanSmallStyle = {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '6px',
-      padding: '8px 10px',
+      ...bottoneSempreCyanStyle,
+      flexDirection: 'row',
       minHeight: '44px',
-      borderRadius: '10px',
-      borderWidth: '2px',
-      borderStyle: 'solid',
-      fontSize: '11px',
-      fontWeight: 700,
-      cursor: 'pointer',
-      transition: 'all 0.2s',
-      overflow: 'hidden',
-      width: '100%',
-      fontFamily: 'Rajdhani, sans-serif',
-      textTransform: 'uppercase',
-      letterSpacing: '0.5px',
-      background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-blue))',
-      color: '#000',
-      borderColor: 'var(--neon-cyan)',
-      boxShadow: '0 0 20px rgba(0, 245, 255, 0.4)',
+      padding: '8px 10px',
     };
 
     const [tutteAttive, setTutteAttive] = useState(true);
@@ -913,7 +1392,6 @@ const NAZIONI = {
           </div>
         </div>
 
-        {/* RIGA SPECIALE: COPPE UEFA */}
         <div style={{
           marginBottom: '20px',
           padding: '12px 14px',
@@ -981,7 +1459,6 @@ const NAZIONI = {
           </div>
         </div>
 
-        {/* GRIGLIA NAZIONI */}
         <div className="nazioni-grid" style={{ gap: '8px' }}>
           {nazioniSenzaUEFA.map(naz => {
             const disabled = conteggi[naz] === 0 || !tutteAttive;
@@ -1024,7 +1501,7 @@ const NAZIONI = {
   };
 
   // ============================================================
-  // CALCOLATRICE
+  // CALCOLATRICE (invariata)
   // ============================================================
   const CalcolatriceComponent = ({ matches }) => {
     const [campionatoSel, setCampionatoSel] = useState('');
@@ -1035,18 +1512,6 @@ const NAZIONI = {
     const [quota, setQuota] = useState('');
     const [profittoMinimo, setProfittoMinimo] = useState('');
     const [quotaLive, setQuotaLive] = useState('');
-    const [pdfData, setPdfData] = useState(null);
-    const [pdfQuota, setPdfQuota] = useState(null);
-
-    useEffect(() => {
-      if (!window.QuoteManager) return;
-      try {
-        if (window.QuoteManager.useQuote) {
-          const hook = window.QuoteManager.useQuote();
-          setPdfData(hook.dataMaxPDF || null);
-        }
-      } catch (e) {}
-    }, []);
 
     const campionatiConPartite = useMemo(() => {
       const oggi = window.getTodayStr();
@@ -1240,6 +1705,26 @@ const NAZIONI = {
       </div>
     );
 
+    const selectStyle = {
+      width: '100%', padding: '10px 12px',
+      background: 'var(--bg-elevated)', color: 'var(--text)',
+      border: '1px solid var(--border)', borderRadius: '8px',
+      fontSize: '13px', cursor: 'pointer', outline: 'none',
+    };
+
+    const inputStyle = {
+      width: '100%', padding: '10px 12px',
+      background: 'var(--bg-elevated)', color: 'var(--text)',
+      border: '2px solid var(--border)', borderRadius: '8px',
+      fontSize: '16px', fontWeight: 700, outline: 'none', textAlign: 'right',
+    };
+
+    const resultRowStyle = {
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      padding: '10px 14px', borderRadius: '8px',
+      background: 'var(--card)', border: '1px solid var(--border)', marginBottom: '6px',
+    };
+
     return (
       <div>
         <div className="card" style={{ marginBottom: '16px' }}>
@@ -1249,21 +1734,21 @@ const NAZIONI = {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
             <div>
               <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>🏆 Campionato</label>
-              <select className="calc-select" value={campionatoSel} onChange={(e) => { setCampionatoSel(e.target.value); setPartitaSel(''); setGiocataSel(''); }}>
+              <select style={selectStyle} value={campionatoSel} onChange={(e) => { setCampionatoSel(e.target.value); setPartitaSel(''); setGiocataSel(''); }}>
                 <option value="">— Seleziona campionato —</option>
                 {campionatiConPartite.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div>
               <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>⚽ Partita</label>
-              <select className="calc-select" value={partitaSel} onChange={(e) => { setPartitaSel(e.target.value); setGiocataSel(''); }} disabled={!campionatoSel}>
+              <select style={selectStyle} value={partitaSel} onChange={(e) => { setPartitaSel(e.target.value); setGiocataSel(''); }} disabled={!campionatoSel}>
                 <option value="">— Seleziona partita —</option>
                 {partiteFiltrate.map(m => <option key={m.id} value={m.id}>{m.casa} vs {m.ospiti} ({window.formatDateEU(m.data)} {m.ora || ''})</option>)}
               </select>
             </div>
             <div>
               <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>💡 Cosa hai giocato</label>
-              <select className="calc-select" value={giocataSel} onChange={(e) => { setGiocataSel(e.target.value); if (e.target.value !== 'custom') setGiocataCustom(''); }} disabled={!partitaSel}>
+              <select style={selectStyle} value={giocataSel} onChange={(e) => { setGiocataSel(e.target.value); if (e.target.value !== 'custom') setGiocataCustom(''); }} disabled={!partitaSel}>
                 <option value="">— Seleziona giocata —</option>
                 {giocateDisponibili.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
               </select>
@@ -1272,7 +1757,7 @@ const NAZIONI = {
           {giocataSel === 'custom' && (
             <div style={{ marginTop: '12px' }}>
               <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>✏️ Inserisci manualmente (es. "1X+O2.5")</label>
-              <input className="calc-input" style={{ textAlign: 'left', fontFamily: 'Rajdhani, sans-serif', fontWeight: 600 }} type="text" value={giocataCustom} onChange={(e) => setGiocataCustom(e.target.value)} placeholder="Es: 1X+O2.5" />
+              <input style={{ ...inputStyle, textAlign: 'left' }} type="text" value={giocataCustom} onChange={(e) => setGiocataCustom(e.target.value)} placeholder="Es: 1X+O2.5" />
             </div>
           )}
           {coperturaInfo && coperturaInfo.copre.length > 0 && (
@@ -1280,11 +1765,6 @@ const NAZIONI = {
               <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginBottom: '4px' }}>🎯 Per coprire devi giocare:</div>
               <div style={{ fontSize: '18px', fontWeight: 900, color: 'var(--neon-cyan)', fontFamily: 'Orbitron, sans-serif' }}>{coperturaInfo.copre.join(' + ')}</div>
               <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '2px' }}>{coperturaInfo.desc}</div>
-            </div>
-          )}
-          {coperturaInfo && coperturaInfo.copre.length === 0 && giocataCustom && (
-            <div style={{ marginTop: '12px', padding: '10px 14px', background: 'rgba(255, 51, 102, 0.1)', borderRadius: '8px', border: '1px solid var(--neon-red)' }}>
-              <div style={{ fontSize: '12px', color: 'var(--neon-red)' }}>⚠️ Giocata personalizzata: specifica manualmente il segno di copertura nei campi sotto.</div>
             </div>
           )}
         </div>
@@ -1301,17 +1781,13 @@ const NAZIONI = {
               <ProbCard label="🔴 Live" value={analisiProbabilita.pctLive} color="var(--neon-green)" />
             </div>
             <div style={{ marginBottom: '14px' }}>
-              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>🔴 Quota aggiornata (opzionale — se la sai)</label>
-              <input className="calc-input" type="number" step="0.01" min="1.01" value={quotaLive} onChange={(e) => { setQuotaLive(e.target.value); if (e.target.value) setQuota(e.target.value); }} placeholder="Es: 2.53" />
-              <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '2px', fontStyle: 'italic' }}>Se la inserisci, aggiorno la probabilità implicita e la uso per il calcolo</div>
+              <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>🔴 Quota aggiornata (opzionale)</label>
+              <input style={inputStyle} type="number" step="0.01" min="1.01" value={quotaLive} onChange={(e) => { setQuotaLive(e.target.value); if (e.target.value) setQuota(e.target.value); }} placeholder="Es: 2.53" />
             </div>
             <div style={{ padding: '14px', borderRadius: '10px', background: 'linear-gradient(135deg, rgba(0, 245, 255, 0.08), rgba(255, 0, 229, 0.05))', border: `2px solid ${analisiProbabilita.consiglio.colore}` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                 <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 700 }}>👉 PROBABILITÀ MEDIA</span>
                 <span style={{ fontSize: '28px', fontWeight: 900, color: analisiProbabilita.consiglio.colore, fontFamily: 'Orbitron, sans-serif' }}>{analisiProbabilita.media}%</span>
-              </div>
-              <div className="calc-prob-bar">
-                <div className="calc-prob-fill" style={{ width: `${Math.min(analisiProbabilita.media, 100)}%`, background: analisiProbabilita.consiglio.colore }} />
               </div>
               <div style={{ marginTop: '12px', padding: '10px 12px', borderRadius: '8px', background: 'rgba(0,0,0,0.3)', border: `1px solid ${analisiProbabilita.consiglio.colore}` }}>
                 <div style={{ fontSize: '14px', fontWeight: 900, color: analisiProbabilita.consiglio.colore, textAlign: 'center' }}>{analisiProbabilita.consiglio.testo}</div>
@@ -1325,56 +1801,43 @@ const NAZIONI = {
           <div style={{ display: 'grid', gap: '12px', marginBottom: '16px' }}>
             <div>
               <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>💰 Vincita attesa schedina (€)</label>
-              <input className="calc-input" type="number" step="0.01" value={vincita} onChange={(e) => setVincita(e.target.value)} placeholder="0.00" />
+              <input style={inputStyle} type="number" step="0.01" value={vincita} onChange={(e) => setVincita(e.target.value)} placeholder="0.00" />
             </div>
             <div>
               <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>📊 Quota copertura {analisiProbabilita && `(${analisiProbabilita.segnoCopertura})`}</label>
-              <input className="calc-input" type="number" step="0.01" min="1.01" value={quota} onChange={(e) => setQuota(e.target.value)} placeholder="0.00" />
+              <input style={inputStyle} type="number" step="0.01" min="1.01" value={quota} onChange={(e) => setQuota(e.target.value)} placeholder="0.00" />
             </div>
             <div>
               <label style={{ fontSize: '11px', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '4px' }}>🎯 Profitto minimo desiderato (€) — opzionale</label>
-              <input className="calc-input" type="number" step="0.01" min="0" value={profittoMinimo} onChange={(e) => setProfittoMinimo(e.target.value)} placeholder={profittoSuggerito ? `Suggerito: ${profittoSuggerito}` : 'Vuoto = copertura esatta'} />
-              <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '2px', fontStyle: 'italic' }}>
-                {profittoSuggerito ? `💡 Suggerito: ${profittoSuggerito}€ (clicca sul campo e inseriscilo)` : 'Lascia vuoto per copertura esatta (pareggio sul segno coperto)'}
-              </div>
+              <input style={inputStyle} type="number" step="0.01" min="0" value={profittoMinimo} onChange={(e) => setProfittoMinimo(e.target.value)} placeholder={profittoSuggerito ? `Suggerito: ${profittoSuggerito}` : 'Vuoto = copertura esatta'} />
             </div>
           </div>
           {calcoli && (
             <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '2px solid var(--neon-cyan)' }}>
-              <div className="calc-result-row" style={{ background: 'rgba(0, 245, 255, 0.08)' }}>
-                <span className="calc-result-label">💵 Devi giocare</span>
-                <span className="calc-result-value neutral">{calcoli.importo.toFixed(2)} €</span>
+              <div style={resultRowStyle}>
+                <span style={{ fontSize: '13px', color: 'var(--text-dim)' }}>💵 Devi giocare</span>
+                <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '18px', fontWeight: 900, color: 'var(--neon-cyan)' }}>{calcoli.importo.toFixed(2)} €</span>
               </div>
-              <div className="calc-result-row">
-                <span className="calc-result-label">✅ Se esce "{analisiProbabilita?.segnoCopertura || 'copertura'}"</span>
-                <span className={`calc-result-value ${calcoli.nettoCoperto >= 0 ? 'positive' : 'negative'}`}>{calcoli.nettoCoperto >= 0 ? '+' : ''}{calcoli.nettoCoperto.toFixed(2)} €</span>
+              <div style={resultRowStyle}>
+                <span style={{ fontSize: '13px', color: 'var(--text-dim)' }}>✅ Se esce "{analisiProbabilita?.segnoCopertura || 'copertura'}"</span>
+                <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '18px', fontWeight: 900, color: calcoli.nettoCoperto >= 0 ? 'var(--neon-green)' : 'var(--neon-red)' }}>
+                  {calcoli.nettoCoperto >= 0 ? '+' : ''}{calcoli.nettoCoperto.toFixed(2)} €
+                </span>
               </div>
-              <div className="calc-result-row">
-                <span className="calc-result-label">🎯 Se esce la schedina</span>
-                <span className={`calc-result-value ${calcoli.nettoSchedina >= 0 ? 'positive' : 'negative'}`}>{calcoli.nettoSchedina >= 0 ? '+' : ''}{calcoli.nettoSchedina.toFixed(2)} €</span>
+              <div style={resultRowStyle}>
+                <span style={{ fontSize: '13px', color: 'var(--text-dim)' }}>🎯 Se esce la schedina</span>
+                <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '18px', fontWeight: 900, color: calcoli.nettoSchedina >= 0 ? 'var(--neon-green)' : 'var(--neon-red)' }}>
+                  {calcoli.nettoSchedina >= 0 ? '+' : ''}{calcoli.nettoSchedina.toFixed(2)} €
+                </span>
               </div>
-              <div className="calc-result-row">
-                <span className="calc-result-label">⚠️ Totale investito</span>
-                <span className="calc-result-value" style={{ color: 'var(--text)' }}>{calcoli.totaleInvestito.toFixed(2)} €</span>
-              </div>
-              <div className="calc-result-row">
-                <span className="calc-result-label">📈 ROI copertura</span>
-                <span className={`calc-result-value ${calcoli.roiCopertura >= 0 ? 'positive' : 'negative'}`}>{calcoli.roiCopertura >= 0 ? '+' : ''}{calcoli.roiCopertura.toFixed(2)}%</span>
+              <div style={resultRowStyle}>
+                <span style={{ fontSize: '13px', color: 'var(--text-dim)' }}>⚠️ Totale investito</span>
+                <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '18px', fontWeight: 900, color: 'var(--text)' }}>{calcoli.totaleInvestito.toFixed(2)} €</span>
               </div>
             </div>
           )}
-          {!calcoli && vincita && quota && (
-            <div style={{ marginTop: '12px', padding: '10px', textAlign: 'center', color: 'var(--text-dim)', fontSize: '12px' }}>Inserisci vincita e quota per vedere i calcoli</div>
-          )}
           <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
             <button className="btn btn-secondary" onClick={resetAll} style={{ flex: 1, minWidth: '100px' }}>🔄 Reset</button>
-            {calcoli && (
-              <button className="btn" onClick={() => {
-                const testo = `🧮 COPERTURA SCHEDINA\n⚽ ${partita?.casa || ''} vs ${partita?.ospiti || ''}\n🎯 Hai giocato: ${giocataCustom || giocataSel}\n🛡️ Copri con: ${analisiProbabilita?.segnoCopertura || '—'}\n💰 Vincita attesa: ${vincita}€\n📊 Quota: ${quota}\n💵 Gioca: ${calcoli.importo.toFixed(2)}€\n✅ Netto se copre: ${calcoli.nettoCoperto.toFixed(2)}€\n🎯 Netto se schedina: ${calcoli.nettoSchedina.toFixed(2)}€`;
-                navigator.clipboard?.writeText?.(testo);
-                if (window.showAlert) window.showAlert('success', '📋 Copiato negli appunti!');
-              }} style={{ flex: 1, minWidth: '100px' }}>📋 Copia</button>
-            )}
           </div>
         </div>
       </div>
@@ -1384,15 +1847,23 @@ const NAZIONI = {
   // ============================================================
   // COMPONENTE PRINCIPALE
   // ============================================================
-  function HomeComponent({ matches, championships, onSelectMatch, setTab, selectedFamiglie, weatherCache }) {
-    const [homeTab, setHomeTab] = useState('Nazioni');
+  function HomeComponent({ matches, championships, onSelectMatch, setTab, selectedFamiglie, weatherCache, resetKey }) {
+    const [homeTab, setHomeTab] = useState('Menu');
     const [nazioneSelezionata, setNazioneSelezionata] = useState(null);
     const [campionatoMobile, setCampionatoMobile] = useState(null);
     const [tipoGiocate, setTipoGiocate] = useState('calcolate');
     const [refreshKey, setRefreshKey] = useState(0);
+    const [presetAttivo, setPresetAttivo] = useState(null);
     const isMobile = useIsMobile();
 
-    const { filtro: filtroCampionati, campionatiAttivi } =
+    useEffect(() => {
+      if (resetKey === undefined) return;
+      setHomeTab('Menu');
+      setNazioneSelezionata(null);
+      setCampionatoMobile(null);
+    }, [resetKey]);
+
+    const { filtro: filtroCampionati, setFiltro, campionatiAttivi } =
       window.FiltriCampionati.useFiltroCampionati();
 
     const matchesPuliti = useMemo(() => {
@@ -1422,38 +1893,138 @@ const NAZIONI = {
       }
     }, [isMobile]);
 
+    const handleApplyPreset = useCallback((preset) => {
+      if (!setFiltro) return;
+
+      const tuttiCampionati = (window.CHAMPIONSHIP_LIST || []).slice();
+      const dalDb = matches.map(m => m.campionato).filter(Boolean);
+      const unione = Array.from(new Set([...tuttiCampionati, ...dalDb]));
+
+      const nuovoFiltro = {};
+      unione.forEach(nome => {
+        const match = preset.campionati.some(t =>
+          t === nome ||
+          nome.toLowerCase().includes(t.toLowerCase()) ||
+          t.toLowerCase().includes(nome.toLowerCase())
+        );
+        nuovoFiltro[nome] = match;
+      });
+
+      setFiltro(nuovoFiltro);
+      setPresetAttivo(preset.id);
+    }, [setFiltro, matches]);
+
+    const handleMenuAction = useCallback((action) => {
+      if (!action) return;
+      if (action.type === 'homeTab') {
+        setHomeTab(action.value);
+        setNazioneSelezionata(null);
+        setCampionatoMobile(null);
+      } else if (action.type === 'mainTab') {
+        if (setTab) setTab(action.value);
+      }
+    }, [setTab]);
+
+    const backToMenu = useCallback(() => {
+      setHomeTab('Menu');
+      setNazioneSelezionata(null);
+      setCampionatoMobile(null);
+    }, []);
+
     if (!matches || matches.length === 0) {
+      if (homeTab === 'Menu') {
+        return (
+          <MenuHomeComponent
+            onSelect={handleMenuAction}
+            onApplyPreset={handleApplyPreset}
+            presetAttivo={presetAttivo}
+          />
+        );
+      }
       return (
         <div className="empty-state" style={{ padding: '60px 20px' }}>
           <div style={{ fontSize: '64px', marginBottom: '16px' }}>🌍</div>
           <h3 style={{ color: 'var(--neon-cyan)', marginBottom: '8px' }}>Nessuna partita disponibile</h3>
           <p style={{ color: 'var(--text-dim)' }}>Importa un campionato da <b>Impostazioni → Importa Campionato</b></p>
+          <button className="back-to-menu-btn" onClick={backToMenu} style={{ marginTop: '20px' }}>← Torna al Menù Principale</button>
         </div>
       );
     }
 
     const renderTabContent = () => {
+      if (homeTab === 'Menu') {
+        return (
+          <MenuHomeComponent
+            onSelect={handleMenuAction}
+            onApplyPreset={handleApplyPreset}
+            presetAttivo={presetAttivo}
+          />
+        );
+      }
+
+      if (homeTab === 'InfoUtilità') {
+        return (
+          <InfoUtilitàComponent
+            onSelect={handleMenuAction}
+            onBack={backToMenu}
+          />
+        );
+      }
+
       if (homeTab === 'GestioneConto') {
-        return window.GestioneContoComponent ? <window.GestioneContoComponent /> : <div className="alert alert-info">⏳ Caricamento Gestione Conto...</div>;
+        return (
+          <div>
+            <BackToMenuButton onClick={backToMenu} />
+            {window.GestioneContoComponent
+              ? <window.GestioneContoComponent />
+              : <div className="alert alert-info">⏳ Caricamento Gestione Conto...</div>}
+          </div>
+        );
       }
       if (homeTab === 'Performance') {
-        return window.PerformanceComponent ? <window.PerformanceComponent matches={matches} championships={championships} onSelectMatch={onSelectMatch} /> : <div className="alert alert-info">⏳ Caricamento Performance...</div>;
+        return (
+          <div>
+            <BackToMenuButton onClick={backToMenu} />
+            {window.PerformanceComponent
+              ? <window.PerformanceComponent matches={matches} championships={championships} onSelectMatch={onSelectMatch} />
+              : <div className="alert alert-info">⏳ Caricamento Performance...</div>}
+          </div>
+        );
       }
       if (homeTab === 'Calcolatrice') {
-        return <CalcolatriceComponent matches={matchesPuliti} />;
+        return (
+          <div>
+            <BackToMenuButton onClick={backToMenu} />
+            <CalcolatriceComponent matches={matchesPuliti} />
+          </div>
+        );
       }
 
       if (isMobile) {
         if (campionatoMobile) {
-          return <MobileVistaGiornata campionato={campionatoMobile} matches={matchesPuliti} onBack={() => setCampionatoMobile(null)} tipoGiocate={tipoGiocate} refreshKey={refreshKey} />;
+          return (
+            <div>
+              <BackToMenuButton onClick={backToMenu} />
+              <MobileVistaGiornata
+                campionato={campionatoMobile}
+                matches={matchesPuliti}
+                onBack={() => setCampionatoMobile(null)}
+                tipoGiocate={tipoGiocate}
+                refreshKey={refreshKey}
+              />
+            </div>
+          );
         }
         if (nazioneSelezionata) {
           const info = NAZIONI[nazioneSelezionata];
           if (!info) {
             return (
-              <div className="card" style={{ textAlign: 'center', padding: '30px' }}>
-                <div style={{ color: 'var(--neon-red)', marginBottom: '12px' }}>Nazione non trovata</div>
-                <button className="btn" onClick={() => setNazioneSelezionata(null)}>← Torna alle nazioni</button>
+              <div>
+                <BackToMenuButton onClick={backToMenu} />
+                <div className="card" style={{ textAlign: 'center', padding: '30px' }}>
+                  <div style={{ color: 'var(--neon-red)', marginBottom: '12px' }}>Nazione non trovata</div>
+                  <button className="btn" onClick={() => setNazioneSelezionata(null)}>← Torna alle nazioni</button>
+                </div>
               </div>
             );
           }
@@ -1462,6 +2033,7 @@ const NAZIONI = {
             .map(c => ({ nome: c, nPartite: matchesPuliti.filter(m => m.campionato === c).length }));
           return (
             <div>
+              <BackToMenuButton onClick={backToMenu} />
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px', padding: '12px 14px', background: 'var(--card)', borderRadius: '12px', border: '1px solid var(--border)' }}>
                 <button onClick={() => setNazioneSelezionata(null)} style={{ background: 'var(--bg-elevated)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '8px', padding: '8px 14px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}>← Indietro</button>
                 <NazioneBandiera nazione={nazioneSelezionata} size={36} />
@@ -1475,49 +2047,68 @@ const NAZIONI = {
             </div>
           );
         }
-        return <GrigliaNazioni matches={matchesPuliti} onSelectNazione={handleSelectNazione} tipoGiocate={tipoGiocate} setTipoGiocate={setTipoGiocate} />;
+        return (
+          <div>
+            <BackToMenuButton onClick={backToMenu} />
+            <GrigliaNazioni
+              matches={matchesPuliti}
+              onSelectNazione={handleSelectNazione}
+              tipoGiocate={tipoGiocate}
+              setTipoGiocate={setTipoGiocate}
+            />
+          </div>
+        );
       }
 
       if (nazioneSelezionata) {
-        return <VistaNazione nazione={nazioneSelezionata} matches={matchesPuliti} onBack={() => setNazioneSelezionata(null)} tipoGiocate={tipoGiocate} refreshKey={refreshKey} />;
+        return (
+          <div>
+            <BackToMenuButton onClick={backToMenu} />
+            <VistaNazione
+              nazione={nazioneSelezionata}
+              matches={matchesPuliti}
+              onBack={() => setNazioneSelezionata(null)}
+              tipoGiocate={tipoGiocate}
+              refreshKey={refreshKey}
+            />
+          </div>
+        );
       }
-      return <GrigliaNazioni matches={matchesPuliti} onSelectNazione={handleSelectNazione} tipoGiocate={tipoGiocate} setTipoGiocate={setTipoGiocate} />;
+      return (
+        <div>
+          <BackToMenuButton onClick={backToMenu} />
+          <GrigliaNazioni
+            matches={matchesPuliti}
+            onSelectNazione={handleSelectNazione}
+            tipoGiocate={tipoGiocate}
+            setTipoGiocate={setTipoGiocate}
+          />
+        </div>
+      );
     };
 
     return (
       <div>
         {window.QuoteManager?.BannerScadenzaQuote && <window.QuoteManager.BannerScadenzaQuote />}
-
-        {homeTab !== 'GestioneConto' && homeTab !== 'Calcolatrice' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', padding: '10px 14px', marginBottom: '14px', background: 'var(--bg-elevated)', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '12px', color: 'var(--text-dim)' }}>
-            <span>🏆 <b style={{ color: 'var(--neon-cyan)' }}>{campionatiAttivi.length}</b> campionati attivi</span>
-            <span>•</span>
-            <span>📊 <b style={{ color: 'var(--neon-cyan)' }}>{matchesPuliti.length}</b> partite totali</span>
-            <span style={{ marginLeft: 'auto', fontStyle: 'italic' }}>Modifica i filtri nel <b>Palinsesto</b> 📅</span>
-          </div>
-        )}
-
-        <div className="sub-tabs" style={{ marginBottom: '16px', flexWrap: 'wrap' }}>
-          <button className={homeTab === 'Nazioni' ? 'active' : ''} onClick={() => { setHomeTab('Nazioni'); setNazioneSelezionata(null); setCampionatoMobile(null); }}>🌍 Seleziona una Nazione</button>
-          <button className={homeTab === 'GestioneConto' ? 'active' : ''} onClick={() => { setHomeTab('GestioneConto'); setNazioneSelezionata(null); setCampionatoMobile(null); }}>💰 Gestione Conto</button>
-          <button className={homeTab === 'Performance' ? 'active' : ''} onClick={() => setHomeTab('Performance')}>📈 Performance</button>
-          <button className={homeTab === 'Calcolatrice' ? 'active' : ''} onClick={() => { setHomeTab('Calcolatrice'); setNazioneSelezionata(null); setCampionatoMobile(null); }}>🧮 Calcolatrice</button>
-        </div>
-
         {renderTabContent()}
       </div>
     );
   }
 
+  // ============================================================
+  // EXPORT GLOBALI
+  // ============================================================
   window.HomeComponent = HomeComponent;
+  window.BackToMenuButton = BackToMenuButton;
+  window.MenuHomeComponent = MenuHomeComponent;
   window.HomeUtils = {
     NAZIONI, NAZIONI_BASE_PATH, SCHEDINA_STORAGE_KEY,
     formatGiocataLabel, getGiornataCorrente, calcolaTop3Giocate,
     leggiSelezioniSchedina, scriviSelezioniSchedina, toggleSelezioneSchedina,
     normalizeMatches, normalizeCampionato, CHINESE_TEAMS,
     leggiFamiglieSelezionate, GIOCATE_SELEZIONATE_KEY, FAMIGLIE_SELEZIONATE_KEY,
+    TOP_5_MAGGIORI, TOP_5_MINORI, TOP_COPPE, PRESET_CAMPIONATI,
   };
 
-  console.log('✅ Modulo Home FUTURISTIC v8 caricato - Championship + Serie C allineati');
-
+  console.log('✅ Modulo Home v10 caricato — Menu hub con EMOJI + preset loghi campionati');
 })();
