@@ -118,10 +118,10 @@
         box-shadow: 0 0 30px rgba(0, 245, 255, 0.4), inset 0 0 20px rgba(0, 245, 255, 0.05);
       }
       .menu-home-card-emoji {
-        font-size: 64px;
+        font-size: 30px;
         line-height: 1;
-        transition: transform 0.3s ease;
-        filter: drop-shadow(0 0 12px rgba(0, 245, 255, 0.4));
+        transition: transform 0.25s ease;
+        filter: drop-shadow(0 0 8px rgba(0, 245, 255, 0.4));
         user-select: none;
       }
       .menu-home-card:hover .menu-home-card-emoji {
@@ -129,16 +129,21 @@
       }
       .menu-home-card-title {
         font-family: 'Rajdhani', sans-serif;
-        font-size: 15px;
+        font-size: 10px;
         font-weight: 800;
         color: var(--text);
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 0.3px;
+        line-height: 1.1;
       }
       .menu-home-card-desc {
-        font-size: 11px;
+        font-size: 8px;
         color: var(--text-dim);
-        line-height: 1.3;
+        line-height: 1.1;
+        display: none;
+      }
+      @media (min-width: 1600px) {
+        .menu-home-card-desc { display: block; }
       }
 
       /* Blocco Seleziona Campionati */
@@ -288,10 +293,10 @@
         background: rgba(0, 245, 255, 0.08);
       }
       .menu-mobile-item-emoji {
-        font-size: 32px;
+        font-size: 26px;
         line-height: 1;
-        width: 42px;
-        height: 42px;
+        width: 36px;
+        height: 36px;
         display: flex;
         align-items: center;
         justify-content: center;
