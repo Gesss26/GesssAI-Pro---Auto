@@ -1,8 +1,4 @@
-# parse_formazioni.py  - v2
-# Parser per "Probabili formazioni Serie A.html" di Fantacalcio.it
-# Estrae: squadre, modulo, titolari, panchina, indisponibili
-# Output: formazioni_seriea.json (formato AssenzeDB)
-
+# parse_formazioni.py - Fase 1: Estrazione dati dal file HTML
 import sys
 import json
 import os
@@ -10,34 +6,14 @@ import re
 from bs4 import BeautifulSoup
 
 FILE_DEFAULT = "Probabili formazioni Serie A.html"
-FILE_OUTPUT = "formazioni_seriea.json"
-
+FILE_OUTPUT = "dati_estratti.json"
 
 def pulisci(testo):
     if not testo:
         return ""
     return re.sub(r"\s+", " ", testo).strip()
 
-
-def stima_importanza(motivo):
-    m = (motivo or "").lower()
-    if any(k in m for k in [
-        "crociato", "rottura", "frattura", "lesione di alto grado",
-        "lungo termine", "stagione intera", "da aprile", "da marzo",
-        "da febbraio", "da gennaio", "da dicembre"
-    ]):
-        return "chiave"
-    if any(k in m for k in [
-        "lesione", "distrazione", "sindrome", "lussazione",
-        "sovraccarico", "affaticamento", "risentimento",
-        "problema muscolare", "problema al", "noie"
-    ]):
-        return "rotazione"
-    return "marginale"
-
-
 def estrai_giocatori_da_lista(ul):
-    """Estrae [{'nome': ..., 'ruolo': 'P/D/C/A'}] da <ul class="player-list ...">"""
     out = []
     if ul is None:
         return out
@@ -52,14 +28,10 @@ def estrai_giocatori_da_lista(ul):
             out.append({"nome": nome, "ruolo": ruolo})
     return out
 
-
 def estrai_indisponibili_da_section(section, tipo):
-    """tipo: 'injureds' | 'dubts' | 'suspendeds'
-       Restituisce due liste (casa, trasferta) nell'ordine dei <div.content>."""
     risultato = [[], []]
     if section is None:
         return risultato
-
     contenuti = section.select("div.content")
     for idx, content in enumerate(contenuti[:2]):
         for li in content.select("ul li"):
@@ -77,106 +49,79 @@ def estrai_indisponibili_da_section(section, tipo):
             risultato[idx].append({
                 "nome": nome,
                 "motivo": motivo,
-                "importanza": stima_importanza(motivo) if tipo == "injureds" else "rotazione",
                 "stato": tipo,
             })
     return risultato
 
+def estrai_ballottaggi(li):
+    ballottaggi = {"casa": [], "trasferta": []}
+    for idx, (lato, content) in enumerate(zip(["casa", "trasferta"], li.select("section.ballots > div.content")[:2])):
+        for ballot_div in content.select("div.ballot"):
+            giocatori = []
+            for li_ballot in ballot_div.select("ul.ballot-list li"):
+                nome_el = li_ballot.select_one(".player-name span")
+                perc_el = li_ballot.select_one(".percentage")
+                if nome_el and perc_el:
+                    giocatori.append({
+                        "nome": pulisci(nome_el.get_text()),
+                        "percentuale": pulisci(perc_el.get_text())
+                    })
+            if len(giocatori) >= 2:
+                ballottaggi[lato].append({"giocatori": giocatori})
+    return ballottaggi
 
 def estrai_squadre(li):
-    """Estrae i due nomi squadra (casa, trasferta) da un <li class='match-item'>."""
     h2 = li.find("h2")
     if h2:
         nomi = [pulisci(a.get_text()) for a in h2.select("a.team-name")]
         if len(nomi) >= 2:
             return nomi[0], nomi[1]
-
-    nomi = []
-    for meta in li.select('label[itemprop="homeTeam"] meta[itemprop="name"], '
-                          'label[itemprop="awayTeam"] meta[itemprop="name"]'):
-        v = meta.get("content")
-        if v:
-            nomi.append(pulisci(v))
-    if len(nomi) >= 2:
-        return nomi[0], nomi[1]
     return None, None
 
-
 def estrai_formazione_team(li, lato):
-    """lato: 'home' | 'away'
-       Restituisce (modulo, titolari, panchina) per quella squadra."""
     team_div = li.select_one(f'div.pitch > div.team.team-{lato}')
     if team_div is None:
         return None, [], []
-
     modulo = team_div.get("data-team-formation") or None
-
     cards = li.select("div.team-card")
     idx = 0 if lato == "home" else 1
     card = cards[idx] if idx < len(cards) else None
-
     if card is None:
         return modulo, [], []
-
     starters_ul = card.select_one("ul.player-list.starters")
     reserves_ul = card.select_one("ul.player-list.reserves")
     titolari = [g["nome"] for g in estrai_giocatori_da_lista(starters_ul)]
     panchina = [g["nome"] for g in estrai_giocatori_da_lista(reserves_ul)]
     return modulo, titolari, panchina
 
-
 def estrai_partite(html):
     soup = BeautifulSoup(html, "html.parser")
     partite = soup.select("ul.match-list > li.match-item")
     formazioni = {}
-
     for li in partite:
         casa, trasferta = estrai_squadre(li)
         if not casa or not trasferta:
             continue
-
         mod_h, tit_h, pan_h = estrai_formazione_team(li, "home")
         mod_a, tit_a, pan_a = estrai_formazione_team(li, "away")
-
         inj = estrai_indisponibili_da_section(li.select_one("section.injureds"), "injureds")
         dub = estrai_indisponibili_da_section(li.select_one("section.dubts"), "dubts")
         squ = estrai_indisponibili_da_section(li.select_one("section.suspendeds"), "suspendeds")
-
+        bal = estrai_ballottaggi(li)
         for i, (squadra, mod, tit, pan) in enumerate([
             (casa, mod_h, tit_h, pan_h),
             (trasferta, mod_a, tit_a, pan_a),
         ]):
             indisponibili = inj[i] + dub[i] + squ[i]
+            lato = "casa" if i == 0 else "trasferta"
             formazioni[squadra] = {
                 "modulo": mod,
                 "titolari": tit,
                 "panchina": pan,
                 "indisponibili": indisponibili,
+                "ballottaggi": bal[lato],
             }
-
     return formazioni
-
-
-def genera_json(formazioni, output_path=FILE_OUTPUT):
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump({"formazioni": formazioni}, f, ensure_ascii=False, indent=2)
-
-    tot_t = sum(len(v["titolari"]) for v in formazioni.values())
-    tot_p = sum(len(v["panchina"]) for v in formazioni.values())
-    tot_i = sum(len(v["indisponibili"]) for v in formazioni.values())
-    print(f"OK - Generato {output_path}")
-    print(f"   Squadre: {len(formazioni)}")
-    print(f"   Titolari totali: {tot_t}")
-    print(f"   Panchina totale: {tot_p}")
-    print(f"   Indisponibili totali: {tot_i}")
-    print()
-    for sq, dati in formazioni.items():
-        mod = dati["modulo"] or "?"
-        print(f"   - {sq:14s} modulo {mod:8s} | "
-              f"{len(dati['titolari']):2d} titolari | "
-              f"{len(dati['panchina']):2d} panchina | "
-              f"{len(dati['indisponibili'])} indisponibili")
-
 
 if __name__ == "__main__":
     html_path = sys.argv[1] if len(sys.argv) >= 2 else FILE_DEFAULT
@@ -188,6 +133,8 @@ if __name__ == "__main__":
         html = f.read()
     formazioni = estrai_partite(html)
     if not formazioni:
-        print("ATTENZIONE - Nessuna formazione trovata. Verifica che il file HTML contenga la struttura attesa.")
+        print("ATTENZIONE - Nessuna formazione trovata.")
         sys.exit(1)
-    genera_json(formazioni)
+    with open(FILE_OUTPUT, "w", encoding="utf-8") as f:
+        json.dump({"formazioni": formazioni}, f, ensure_ascii=False, indent=2)
+    print(f"OK - Generato {FILE_OUTPUT} con {len(formazioni)} squadre.")
