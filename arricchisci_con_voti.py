@@ -1,7 +1,4 @@
 # arricchisci_con_voti.py
-# Legge i dati estratti dall'HTML e li arricchisce con i voti dal file Excel.
-# Genera: formazioni_con_voti.json e assenze.json
-
 import json
 import pandas as pd
 import os
@@ -14,38 +11,71 @@ FILE_OUTPUT_FORMAZIONI = "formazioni_con_voti.json"
 FILE_OUTPUT_ASSENZE = "assenze.json"
 
 def carica_voti_da_excel(excel_path):
-    """Carica il foglio di calcolo e restituisce un dizionario {nome_excel: {Mv, Fm, Pv, Gf, Ass}}"""
+    """Carica il file Excel e restituisce un dizionario {nome_giocatore: {Mv, Fm, Pv, Gf, Ass}}"""
+    if not os.path.exists(excel_path):
+        print(f"ERRORE: File Excel non trovato in {excel_path}")
+        sys.exit(1)
+
     try:
-        # NOTA: se il nome del tuo foglio Excel non è "Voti", cambialo qui sotto
-        df = pd.read_excel(excel_path, sheet_name="Voti")
+        # Legge i nomi dei fogli disponibili
+        xls = pd.ExcelFile(excel_path)
+        sheet_names = xls.sheet_names
+        
+        # Usa 'Voti' se esiste, altrimenti il primo foglio
+        target_sheet = "Voti" if "Voti" in sheet_names else sheet_names[0]
+        print(f"Lettura del foglio Excel: '{target_sheet}'")
+        
+        # Legge il foglio
+        df = pd.read_excel(excel_path, sheet_name=target_sheet)
+        
+        # Rende i nomi delle colonne minuscoli per evitare errori (es. 'MV' vs 'Mv')
+        df.columns = [str(c).strip().lower() for c in df.columns]
+        
+        # Identifica la colonna del nome
+        col_nome = None
+        for c in ['nome_excel', 'nome', 'giocatore', 'calciatore']:
+            if c in df.columns:
+                col_nome = c
+                break
+        if not col_nome:
+            col_nome = df.columns[0] # Fallback alla prima colonna
+            
+        print(f"Colonna nomi identificata: '{col_nome}'")
+        print(f"Colonne voti trovate: {list(df.columns)}")
+
     except Exception as e:
         print(f"ERRORE lettura Excel: {e}")
-        print("Assicurati che il file Excel esista e che contenga un foglio chiamato 'Voti'.")
         sys.exit(1)
     
     voti = {}
     for _, row in df.iterrows():
-        # Gestiamo eventuali valori NaN nel nome
-        nome_grezzo = row.get("nome_excel", "")
+        nome_grezzo = row.get(col_nome, "")
         if pd.isna(nome_grezzo):
             continue
             
+        # Pulisce il nome (rimuove spazi extra, gestisce None)
         nome = str(nome_grezzo).strip()
-        if not nome:
+        if not nome or nome.lower() == 'nan':
             continue
             
+        # Estrae i valori gestendo i NaN (celle vuote)
+        def get_val(col, default, is_int=False):
+            val = row.get(col, default)
+            if pd.isna(val): return default
+            return int(val) if is_int else float(val)
+
         voti[nome] = {
-            "Mv": float(row.get("Mv", 0.0)) if pd.notna(row.get("Mv")) else 0.0,
-            "Fm": float(row.get("Fm", 0.0)) if pd.notna(row.get("Fm")) else 0.0,
-            "Pv": int(row.get("Pv", 0)) if pd.notna(row.get("Pv")) else 0,
-            "Gf": int(row.get("Gf", 0)) if pd.notna(row.get("Gf")) else 0,
-            "Ass": int(row.get("Ass", 0)) if pd.notna(row.get("Ass")) else 0,
+            "Mv": get_val('mv', 0.0),
+            "Fm": get_val('fm', 0.0),
+            "Pv": get_val('pv', 0, is_int=True),
+            "Gf": get_val('gf', 0, is_int=True),
+            "Ass": get_val('ass', 0, is_int=True),
         }
+        
     print(f"Caricati {len(voti)} voti dal file Excel.")
     return voti
 
 def stima_importanza(motivo):
-    """Stima l'importanza dell'assenza in base al motivo."""
     m = (motivo or "").lower()
     if any(k in m for k in ["crociato", "rottura", "frattura", "lesione di alto grado", "stagione", "da aprile", "da marzo", "da febbraio"]):
         return "chiave"
@@ -55,7 +85,7 @@ def stima_importanza(motivo):
 
 def arricchisci(dati_estratti_path, excel_path):
     if not os.path.exists(dati_estratti_path):
-        print(f"ERRORE: File non trovato: {dati_estratti_path}. Esegui prima parse_formazioni.py.")
+        print(f"ERRORE: File non trovato: {dati_estratti_path}.")
         sys.exit(1)
         
     with open(dati_estratti_path, "r", encoding="utf-8") as f:
@@ -69,33 +99,40 @@ def arricchisci(dati_estratti_path, excel_path):
         "squadre": {}
     }
     
+    # Funzione di supporto per cercare i voti ignorando maiuscole/spazi extra
+    def cerca_voto(nome):
+        if nome in voti:
+            return voti[nome]
+        # Prova una ricerca più tollerante
+        for k, v in voti.items():
+            if k.lower() == nome.lower():
+                return v
+        return {"Mv": 0.0, "Fm": 0.0, "Pv": 0, "Gf": 0, "Ass": 0}
+    
     for squadra, info in dati.items():
         titolari_arricchiti = []
         panchina_arricchita = []
         
-        # Arricchisci titolari
         for nome_giocatore in info.get("titolari", []):
-            # Gestiamo se è una stringa o un dizionario
             nome = nome_giocatore if isinstance(nome_giocatore, str) else nome_giocatore.get("nome", "")
             ruolo = nome_giocatore.get("ruolo", "") if isinstance(nome_giocatore, dict) else ""
             
-            v = voti.get(nome, {"Mv": 0.0, "Fm": 0.0, "Pv": 0, "Gf": 0, "Ass": 0})
+            v = cerca_voto(nome)
             titolari_arricchiti.append({
                 "nome": nome, "ruolo": ruolo,
                 "Mv": v["Mv"], "Fm": v["Fm"], "Pv": v["Pv"], "Gf": v["Gf"], "Ass": v["Ass"],
-                "nome_excel": nome if nome in voti else None
+                "nome_excel": nome if (v["Mv"] > 0 or v["Fm"] > 0) else None
             })
         
-        # Arricchisci panchina
         for nome_giocatore in info.get("panchina", []):
             nome = nome_giocatore if isinstance(nome_giocatore, str) else nome_giocatore.get("nome", "")
             ruolo = nome_giocatore.get("ruolo", "") if isinstance(nome_giocatore, dict) else ""
             
-            v = voti.get(nome, {"Mv": 0.0, "Fm": 0.0, "Pv": 0, "Gf": 0, "Ass": 0})
+            v = cerca_voto(nome)
             panchina_arricchita.append({
                 "nome": nome, "ruolo": ruolo,
                 "Mv": v["Mv"], "Fm": v["Fm"], "Pv": v["Pv"], "Gf": v["Gf"], "Ass": v["Ass"],
-                "nome_excel": nome if nome in voti else None
+                "nome_excel": nome if (v["Mv"] > 0 or v["Fm"] > 0) else None
             })
         
         formazioni_finali[squadra] = {
@@ -105,7 +142,6 @@ def arricchisci(dati_estratti_path, excel_path):
             "ballottaggi": info.get("ballottaggi", []),
         }
         
-        # Prepara il file delle assenze
         indisponibili_finali = []
         for ind in info.get("indisponibili", []):
             indisponibili_finali.append({
@@ -118,12 +154,10 @@ def arricchisci(dati_estratti_path, excel_path):
             })
         assenze_finali["squadre"][squadra] = indisponibili_finali
     
-    # Salva formazioni_con_voti.json
     with open(FILE_OUTPUT_FORMAZIONI, "w", encoding="utf-8") as f:
         json.dump({"giornata": None, "aggiornato": datetime.now().strftime("%Y-%m-%d"), "formazioni": formazioni_finali}, f, ensure_ascii=False, indent=2)
     print(f"OK - Generato {FILE_OUTPUT_FORMAZIONI}")
     
-    # Salva assenze.json
     with open(FILE_OUTPUT_ASSENZE, "w", encoding="utf-8") as f:
         json.dump(assenze_finali, f, ensure_ascii=False, indent=2)
     print(f"OK - Generato {FILE_OUTPUT_ASSENZE}")
