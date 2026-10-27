@@ -17,31 +17,22 @@ def carica_voti_da_excel(excel_path):
         sys.exit(1)
 
     try:
-        # Legge i nomi dei fogli disponibili
         xls = pd.ExcelFile(excel_path)
         sheet_names = xls.sheet_names
-        
-        # Usa 'Voti' se esiste, altrimenti il primo foglio
         target_sheet = "Voti" if "Voti" in sheet_names else sheet_names[0]
         print(f"Lettura del foglio Excel: '{target_sheet}'")
-        
-        # Legge il foglio
         df = pd.read_excel(excel_path, sheet_name=target_sheet)
-        
-        # Rende i nomi delle colonne minuscoli per evitare errori (es. 'MV' vs 'Mv')
         df.columns = [str(c).strip().lower() for c in df.columns]
         
-        # Identifica la colonna del nome
         col_nome = None
         for c in ['nome_excel', 'nome', 'giocatore', 'calciatore']:
             if c in df.columns:
                 col_nome = c
                 break
         if not col_nome:
-            col_nome = df.columns[0] # Fallback alla prima colonna
+            col_nome = df.columns[0]
             
         print(f"Colonna nomi identificata: '{col_nome}'")
-        print(f"Colonne voti trovate: {list(df.columns)}")
 
     except Exception as e:
         print(f"ERRORE lettura Excel: {e}")
@@ -52,13 +43,10 @@ def carica_voti_da_excel(excel_path):
         nome_grezzo = row.get(col_nome, "")
         if pd.isna(nome_grezzo):
             continue
-            
-        # Pulisce il nome (rimuove spazi extra, gestisce None)
         nome = str(nome_grezzo).strip()
         if not nome or nome.lower() == 'nan':
             continue
             
-        # Estrae i valori gestendo i NaN (celle vuote)
         def get_val(col, default, is_int=False):
             val = row.get(col, default)
             if pd.isna(val): return default
@@ -99,11 +87,9 @@ def arricchisci(dati_estratti_path, excel_path):
         "squadre": {}
     }
     
-    # Funzione di supporto per cercare i voti ignorando maiuscole/spazi extra
     def cerca_voto(nome):
         if nome in voti:
             return voti[nome]
-        # Prova una ricerca più tollerante
         for k, v in voti.items():
             if k.lower() == nome.lower():
                 return v
@@ -113,9 +99,13 @@ def arricchisci(dati_estratti_path, excel_path):
         titolari_arricchiti = []
         panchina_arricchita = []
         
+        # Set per tracciare chi è schierato (titolari e panchina)
+        giocatori_schierati = set()
+        
         for nome_giocatore in info.get("titolari", []):
             nome = nome_giocatore if isinstance(nome_giocatore, str) else nome_giocatore.get("nome", "")
             ruolo = nome_giocatore.get("ruolo", "") if isinstance(nome_giocatore, dict) else ""
+            giocatori_schierati.add(nome.strip())
             
             v = cerca_voto(nome)
             titolari_arricchiti.append({
@@ -127,6 +117,7 @@ def arricchisci(dati_estratti_path, excel_path):
         for nome_giocatore in info.get("panchina", []):
             nome = nome_giocatore if isinstance(nome_giocatore, str) else nome_giocatore.get("nome", "")
             ruolo = nome_giocatore.get("ruolo", "") if isinstance(nome_giocatore, dict) else ""
+            giocatori_schierati.add(nome.strip())
             
             v = cerca_voto(nome)
             panchina_arricchita.append({
@@ -144,8 +135,14 @@ def arricchisci(dati_estratti_path, excel_path):
         
         indisponibili_finali = []
         for ind in info.get("indisponibili", []):
+            nome_ind = ind.get("nome", "").strip()
+            
+            # FONDAMENTALE: Se il giocatore è in campo o in panchina, NON è infortunato
+            if nome_ind in giocatori_schierati:
+                continue
+                
             indisponibili_finali.append({
-                "nome": ind.get("nome", ""),
+                "nome": nome_ind,
                 "ruolo": ind.get("ruolo", ""),
                 "motivo": ind.get("motivo", ""),
                 "importanza": stima_importanza(ind.get("motivo", "")),
