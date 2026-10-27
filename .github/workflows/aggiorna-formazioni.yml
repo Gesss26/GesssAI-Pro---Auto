@@ -1,0 +1,106 @@
+name: Aggiorna Formazioni e Assenze
+
+on:
+  # Trigger manuale: appare il pulsante "Run workflow" nella scheda Actions
+  workflow_dispatch:
+    inputs:
+      note:
+        description: 'Nota opzionale per questo aggiornamento (es. "Giornata 10")'
+        required: false
+        default: 'Aggiornamento manuale'
+        type: string
+
+  # Trigger automatico: si attiva quando carichi/modifichi uno dei due file
+  push:
+    branches:
+      - master
+    paths:
+      - 'Probabili formazioni Serie A.html'
+      - 'Statistiche_Fantacalcio_Stagione_2026_27.xlsx'
+
+jobs:
+  build-and-commit:
+    runs-on: ubuntu-latest
+
+    # Permessi necessari per permettere al bot di fare commit e push
+    permissions:
+      contents: write
+
+    steps:
+      # 1. Checkout del repository
+      - name: Checkout del repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Python
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 3. Cache delle dipendenze pip per velocizzare le esecuzioni successive
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # 4. Installazione delle dipendenze Python
+      - name: Installa le dipendenze
+        run: |
+          python -m pip install --upgrade pip
+          pip install beautifulsoup4 pandas openpyxl
+
+      # 5. Verifica che i file di input siano presenti
+      - name: Verifica file di input
+        run: |
+          if [ ! -f "Probabili formazioni Serie A.html" ]; then
+            echo "::error::File 'Probabili formazioni Serie A.html' non trovato nel repository."
+            exit 1
+          fi
+          if [ ! -f "Statistiche_Fantacalcio_Stagione_2026_27.xlsx" ]; then
+            echo "::error::File 'Statistiche_Fantacalcio_Stagione_2026_27.xlsx' non trovato nel repository."
+            exit 1
+          fi
+          echo "✅ File di input presenti."
+
+      # 6. Esecuzione del primo script: estrazione dati dal file HTML
+      - name: Esegui parse_formazioni.py (estrazione dati)
+        run: python parse_formazioni.py
+
+      # 7. Esecuzione del secondo script: arricchimento con i voti dall'Excel
+      - name: Esegui arricchisci_con_voti.py (arricchimento voti)
+        run: python arricchisci_con_voti.py
+
+      # 8. Verifica che i file di output siano stati creati
+      - name: Verifica file di output
+        run: |
+          if [ ! -f "formazioni_con_voti.json" ]; then
+            echo "::error::File 'formazioni_con_voti.json' non generato."
+            exit 1
+          fi
+          if [ ! -f "assenze.json" ]; then
+            echo "::error::File 'assenze.json' non generato."
+            exit 1
+          fi
+          echo "✅ File di output generati correttamente."
+
+      # 9. Commit e Push dei file aggiornati
+      - name: Commit e Push dei file aggiornati
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add formazioni_con_voti.json
+          git add assenze.json
+
+          if git diff --staged --quiet; then
+            echo "ℹ️ Nessuna modifica da committare. I file sono già aggiornati."
+          else
+            NOTE="${{ github.event.inputs.note || 'Aggiornamento automatico' }}"
+            TIMESTAMP=$(date +'%Y-%m-%d %H:%M:%S')
+            git commit -m "🤖 Aggiornamento formazioni e assenze - ${NOTE} - ${TIMESTAMP} [skip ci]"
+            git push
+            echo "✅ Commit e push completati."
+          fi
