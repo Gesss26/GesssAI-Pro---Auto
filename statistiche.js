@@ -1,8 +1,9 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v27)
+// statistiche.js - Modulo Statistiche (v28)
 // - FormazionePanel: legge voti da formazioni_con_voti.json O da AssenzeDB
 // - Mostra MEDIA TITOLARI in alto, con ruolo colorato prima del nome
 // - Design: Colonna, colori reparto, ruolo prima del nome
+// - FIX v28: AssenzePanel esclude chiunque sia tra titolari o panchina
 // ============================================================
 
 (function () {
@@ -741,7 +742,8 @@
   };
 
   // ============================================================
-  // PANNELLO ASSENZE E INFORTUNI (con Motivo)
+  // PANNELLO ASSENZE E INFORTUNI (con Motivo) — FIX v28
+  // Esclude chiunque sia tra titolari o panchina della formazione
   // ============================================================
   const AssenzePanel = ({ squadra, teamColor }) => {
     const [, setVersion] = useState(0);
@@ -761,17 +763,76 @@
     const indisponibiliForm = formazione && Array.isArray(formazione.indisponibili) ? formazione.indisponibili : [];
     const squalificati = formazione && Array.isArray(formazione.squalificati) ? formazione.squalificati : [];
 
-    // Unisci assenze manuali + indisponibili da formazione (evitando duplicati)
-    const tutteAssenze = [...assenze];
-    const nomiGia = new Set(assenze.map(a => (a.nome || '').toLowerCase()));
+    // ─── FIX v28: normalizzazione nomi + set di schierati ───
+    const _normNome = (s) => (s || '')
+      .toString()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[''`´]/g, "'")
+      .toLowerCase()
+      .replace(/[.\-–—]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    const _cognome = (s) => {
+      const n = _normNome(s);
+      return n ? n.split(' ')[0] : '';
+    };
+
+    const schieratiNomi = new Set();
+    const schieratiCognomi = new Set();
+
+    const _registra = (lista) => {
+      if (!Array.isArray(lista)) return;
+      lista.forEach(g => {
+        const nome = typeof g === 'string' ? g : (g && g.nome) || '';
+        if (!nome) return;
+        schieratiNomi.add(_normNome(nome));
+        const ck = _cognome(nome);
+        if (ck && ck.length >= 4) schieratiCognomi.add(ck);
+      });
+    };
+
+    if (formazione) {
+      _registra(formazione.titolari);
+      _registra(formazione.panchina);
+    }
+
+    const _èSchierato = (nome) => {
+      const n = _normNome(nome);
+      if (schieratiNomi.has(n)) return true;
+      const ck = _cognome(nome);
+      if (ck && ck.length >= 4 && schieratiCognomi.has(ck)) return true;
+      return false;
+    };
+
+    // Unisci assenze manuali + indisponibili da formazione, escludendo chi è schierato
+    const tutteAssenze = [];
+    const nomiGia = new Set();
+
+    assenze.forEach(a => {
+      const nome = (a && a.nome) || '';
+      if (!nome) return;
+      if (_èSchierato(nome)) return;
+      if (nomiGia.has(_normNome(nome))) return;
+      nomiGia.add(_normNome(nome));
+      tutteAssenze.push(a);
+    });
+
     indisponibiliForm.forEach(ind => {
-      const nomeInd = typeof ind === 'string' ? ind : (ind.nome || '');
-      if (!nomiGia.has(nomeInd.toLowerCase())) {
-        tutteAssenze.push(typeof ind === 'string'
-          ? { nome: nomeInd, importanza: 'rotazione' }
-          : ind
-        );
-      }
+      const nomeInd = typeof ind === 'string' ? ind : (ind && ind.nome) || '';
+      if (!nomeInd) return;
+      if (_èSchierato(nomeInd)) return;
+      if (nomiGia.has(_normNome(nomeInd))) return;
+      nomiGia.add(_normNome(nomeInd));
+      tutteAssenze.push(typeof ind === 'string'
+        ? { nome: nomeInd, importanza: 'rotazione' }
+        : ind
+      );
+    });
+
+    const squalificatiFiltrati = squalificati.filter(s => {
+      const nome = typeof s === 'string' ? s : (s && s.nome) || '';
+      return nome && !_èSchierato(nome);
     });
 
     const pesi = window.AssenzeDB?.calcolaPesi(squadra);
@@ -806,14 +867,14 @@
           )}
         </div>
 
-        {tutteAssenze.length === 0 && squalificati.length === 0 ? (
+        {tutteAssenze.length === 0 && squalificatiFiltrati.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--neon-green)', fontSize: '13px' }}>
             ✅ Nessuna assenza
           </div>
         ) : (
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '10px' }}>
-              {squalificati.map((s, idx) => {
+              {squalificatiFiltrati.map((s, idx) => {
                 const nome = typeof s === 'string' ? s : (s.nome || '');
                 const g = window.AssenzeDB?.getGiocatore(nome);
                 const rb = getRuoloBadge(g?.ruolo);
@@ -2170,5 +2231,5 @@
   window.simulateMatches = simulateMatches;
   window.clearStatsCache = clearStatsCache;
 
-  console.log('✅ statistiche.js v27 - FormazionePanel con media TITOLARI robusta + colori reparto');
+  console.log('✅ statistiche.js v28 - AssenzePanel con filtro schierati (fix Dybala)');
 })();
