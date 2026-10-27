@@ -1120,7 +1120,7 @@
     window.get12Under45 = get12Under45;
     window.normalizzaAccenti = normalizzaAccenti;
 
-    console.log('✅ Funzioni globali esposte v31 - Menu Hub con emoji');
+    console.log('✅ Funzioni globali esposte v32 - Floating nav + scroll to match');
 
     // ============================================================
     // LOAD/SAVE STATE
@@ -1314,6 +1314,7 @@
       const initial = loadState();
       const [tab, setTab] = useState('Home');
       const [homeResetKey, setHomeResetKey] = useState(0);
+      const [palinsestoScrollToId, setPalinsestoScrollToId] = useState(null);
       const [championships, setChampionships] = useState(initial.championships);
       const [matches, setMatches] = useState(initial.matches);
       const [theme, setTheme] = useState(initial.theme);
@@ -1438,6 +1439,30 @@
         setHomeResetKey(k => k + 1);
       };
 
+      // ⭐ Torna al Palinsesto e scrolla alla partita selezionata
+      const backToPalinsesto = () => {
+        if (selectedMatchId) {
+          setPalinsestoScrollToId(selectedMatchId);
+        }
+        setTab('Palinsesto');
+      };
+
+      const renderFloatingNav = () => {
+        if (tab === 'Home') return null;
+        return (
+          <div className="floating-nav-wrap">
+            <button className="floating-nav-btn btn-menu" onClick={backToMainMenu}>
+              ← Torna al Menù
+            </button>
+            {tab === 'Statistiche' && selectedMatchId && (
+              <button className="floating-nav-btn btn-palinsesto" onClick={backToPalinsesto}>
+                ← Torna al Palinsesto
+              </button>
+            )}
+          </div>
+        );
+      };
+
       const renderAppContent = () => (
         <div className="app-shell">
           <div className="header">
@@ -1449,8 +1474,6 @@
             <Clock />
           </div>
 
-          {/* ⭐ NAVIGAZIONE: solo dal Menu Home. tabs-nav rimosso. */}
-
           <div className="container">
             <QuoteStatusBar />
 
@@ -1461,10 +1484,8 @@
             {message && <div className={`alert alert-${message.type}`}>{message.text}</div>}
             {loading && <div className="alert alert-info">⏳ Elaborazione in corso...</div>}
 
-            {/* ⭐ Back to menu button (visibile solo quando NON siamo in Home) */}
-            {tab !== 'Home' && window.BackToMenuButton && (
-              <window.BackToMenuButton onClick={backToMainMenu} />
-            )}
+            {/* Spazio per i bottoni flottanti */}
+            {tab !== 'Home' && <div className="floating-nav-spacer"></div>}
 
             {tab === 'Home' && window.HomeComponent && (
               <window.HomeComponent
@@ -1485,6 +1506,8 @@
                 onSelectMatch={selectMatch}
                 weatherCache={weatherCache}
                 championships={championships}
+                scrollToMatchId={palinsestoScrollToId}
+                onScrollDone={() => setPalinsestoScrollToId(null)}
               />
             )}
 
@@ -1538,6 +1561,8 @@
             )}
           </div>
 
+          {renderFloatingNav()}
+
           <div className="disclaimer-footer">
             <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '24px' }}>⚠️</span>
@@ -1590,7 +1615,7 @@
     // ============================================================
     // BOOT
     // ============================================================
-    console.log('🚀 Avvio GesssAI-Pro v5.0 - Menu Hub con emoji');
+    console.log('🚀 Avvio GesssAI-Pro v5.0 - Floating nav + scroll to match');
 
     try {
       const rootElement = document.getElementById('root');
@@ -1601,9 +1626,6 @@
       console.error('Errore durante il rendering React:', e);
     }
 
-    // ============================================================
-    // LOG DIAGNOSTICO AUTOMATICO
-    // ============================================================
     window.addEventListener('load', () => {
       setTimeout(() => {
         if (!window.matches || !Array.isArray(window.matches) || window.matches.length === 0) {

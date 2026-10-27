@@ -1,8 +1,7 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto
-// v20: RIMOSSO ChampBar (griglia 5×5) → gestita in Home
-//      + quoteVersion per re-render automatico su quote-updated
-//      + safeGetDixonPct robusto
+// v21: + scrollToMatchId + onScrollDone + data-match-id sulle card
+//      + highlight pulse dopo ritorno da Statistiche
 // ============================================================
 
 (function () {
@@ -10,7 +9,6 @@
 
   const { useState, useMemo, useEffect, useCallback } = React;
 
-  // ⭐ FALLBACK SICURO per useMotoreAnalisi (non più usato ma mantenuto per compatibilità)
   if (!window.FiltriCampionati) window.FiltriCampionati = {};
   if (typeof window.FiltriCampionati.useMotoreAnalisi !== 'function') {
     window.FiltriCampionati.useMotoreAnalisi = function () {
@@ -18,7 +16,6 @@
     };
   }
 
-  // ⭐ FALLBACK SICURO per useVisualizzaGiocateMode
   if (typeof window.FiltriCampionati.useVisualizzaGiocateMode !== 'function') {
     window.FiltriCampionati.useVisualizzaGiocateMode = function () {
       const [mode, setModeState] = React.useState(
@@ -43,7 +40,6 @@
     };
   }
 
-  // ⭐ Riferimenti globali
   const normalizzaAccenti = (str) => {
     if (typeof window.normalizzaAccenti === 'function') return window.normalizzaAccenti(str);
     if (!str) return '';
@@ -100,9 +96,6 @@
     return 0;
   };
 
-  // ============================================================
-  // TOP 5 + TOP COPPE
-  // ============================================================
   const TOP_5_MAGGIORI = ['Serie A', 'Ligue 1', 'La Liga', 'Bundesliga', 'Premier League'];
   const TOP_5_MINORI = ['Serie B', '2. Bundesliga', 'Ligue 2', 'Segunda División', 'EFL Championship'];
   const TOP_COPPE = ['UEFA Champions League', 'UEFA Europa League', 'UEFA Europa Conference'];
@@ -139,14 +132,6 @@
     return isMobile;
   };
 
-  const getCampionatiOrdinati = () => {
-    const list = (window.CHAMPIONSHIP_LIST && window.CHAMPIONSHIP_LIST.length > 0) ? window.CHAMPIONSHIP_LIST : [];
-    return [...list].sort((a, b) => (a || '').localeCompare(b || '', 'it', { sensitivity: 'base' }));
-  };
-
-  // ============================================================
-  // CHAMP LOGO
-  // ============================================================
   const ChampLogo = ({ campionato, size = 24 }) => {
     const [hasError, setHasError] = useState(false);
     const [pathIndex, setPathIndex] = useState(0);
@@ -202,9 +187,6 @@
     );
   };
 
-  // ============================================================
-  // QUOTA BOX
-  // ============================================================
   const QuotaBox = ({ match, familyId, giocata, pctTua, compact = false }) => {
     const [quotaInfo, setQuotaInfo] = useState(null);
     const quoteCtx = window.QuoteManager && window.QuoteManager.useQuote ? window.QuoteManager.useQuote() : {};
@@ -317,9 +299,6 @@
     return { level: 'bassa', colore: 'var(--neon-red)', label: '▫️' };
   };
 
-  // ============================================================
-  // MATCH TAB
-  // ============================================================
   const MatchTab = ({ match, allMatches, onSelect, selectedFamiglie }) => {
     const computeMatchStats = window.computeMatchStats;
     const calcFormAndStats = window.calcFormAndStats;
@@ -618,7 +597,7 @@
     };
 
     return (
-      <div className="match-tab" style={neonBorderStyle} onClick={handleClick}>
+      <div className="match-tab" style={neonBorderStyle} onClick={handleClick} data-match-id={match.id}>
         <div className="score-badge" style={{
           background: `${rischio.colore}22`, border: `2px solid ${rischio.colore}`, color: rischio.colore,
           padding: '2px 10px', borderRadius: '10px', boxShadow: `0 0 10px ${rischio.colore}66`,
@@ -658,9 +637,6 @@
     );
   };
 
-  // ============================================================
-  // VISUALIZZA GIOCATE SWITCH
-  // ============================================================
   const VisualizzaGiocateSwitch = ({
     mode, setMode,
     selectedFamiglie,
@@ -750,10 +726,7 @@
     );
   };
 
-  // ============================================================
-  // PALINSESTO COMPONENT
-  // ============================================================
-  function PalinsestoComponent({ matches, selectedFamiglie, onSelectMatch, weatherCache, championships }) {
+  function PalinsestoComponent({ matches, selectedFamiglie, onSelectMatch, weatherCache, championships, scrollToMatchId, onScrollDone }) {
     const normalizeDate = window.normalizeDate;
     const getTodayStr = window.getTodayStr;
     const addDaysToDateStr = window.addDaysToDateStr;
@@ -856,6 +829,38 @@
       });
     }, [matches, campionatiAttivi, giorni, normalizeDate, getTodayStr, addDaysToDateStr]);
 
+    // ⭐ Scroll automatico alla partita selezionata
+    useEffect(() => {
+      if (!scrollToMatchId) return;
+
+      const timer = setTimeout(() => {
+        const el = document.querySelector(`[data-match-id="${scrollToMatchId}"]`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('match-tab-highlight');
+
+          setTimeout(() => {
+            el.classList.remove('match-tab-highlight');
+          }, 2800);
+
+          if (typeof onScrollDone === 'function') {
+            setTimeout(() => onScrollDone(), 300);
+          }
+        } else {
+          // Fallback: mostra un alert leggero se la card non è tra quelle visibili
+          if (typeof window !== 'undefined' && window.matches) {
+            const match = window.matches.find(m => m.id === scrollToMatchId);
+            if (match) {
+              alert(`⚠️ La partita "${match.casa} vs ${match.ospiti}" non è visibile con i filtri attuali (giorni/campionati).\nModifica i filtri per vederla o riapri la partita dal Palinsesto.`);
+            }
+          }
+          if (typeof onScrollDone === 'function') onScrollDone();
+        }
+      }, 250);
+
+      return () => clearTimeout(timer);
+    }, [scrollToMatchId, partiteOggi.length]);
+
     const isTuttiMode = campionatiAttivi.length === championshipsList.length && championshipsList.length > 0;
     const titoloGiorni = giorni === 1 ? 'Oggi' : `Prossimi ${giorni} giorni`;
 
@@ -953,6 +958,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto v20 caricato — ChampBar rimossa (griglia 5×5 gestita in Home)');
+  console.log('✅ Modulo Palinsesto v21 caricato — scroll-to-match + highlight');
 
 })();
