@@ -1,8 +1,8 @@
 // ============================================================
 // schedina.js - Modulo Schedina con quote PDF visibili
-// v9.8: + switch Storico/Dixon-Coles (Schedina Classica + Quota)
-//       griglia 5x5 con badge oggi/2 giorni + tutti i campionati
-//       sub-tabs uniformi (CSS gestisce larghezza/altezza fisse)
+// v10: RIMOSSA griglia 5×5 "Campionati Attivi" → gestita in Home
+//      + switch Storico/Dixon-Coles
+//      + sub-tabs uniformi (CSS gestisce larghezza/altezza fisse)
 // ============================================================
 
 const formatGiocataLabel = (familyId, label) => {
@@ -53,7 +53,7 @@ const normalizzaAccenti = (str) => {
 };
 
 // ============================================================
-// CHAMP LOGO (con sfondo chiaro per loghi scuri)
+// CHAMP LOGO
 // ============================================================
 const ChampLogoSchedina = ({ campionato, size = 24 }) => {
   const [hasError, setHasError] = React.useState(false);
@@ -145,8 +145,7 @@ const ChampLogoSchedina = ({ campionato, size = 24 }) => {
 };
 
 // ============================================================
-// HOOK: MODALITÀ STATISTICHE (condiviso tra Schedina Classica e Quota)
-// 'storico' → statistiche reali | 'dixon' → Dixon-Coles
+// HOOK: MODALITÀ STATISTICHE
 // ============================================================
 const useModeStatisticheSchedina = () => {
   const { useState, useEffect } = React;
@@ -336,7 +335,7 @@ const GRUPPI_GIOCATE = [
 ];
 
 // ============================================================
-// HELPER: calcola % di una giocata usando la sorgente scelta
+// HELPER: calcola % di una giocata
 // ============================================================
 const calcPctConSorgente = (familyId, giocata, match, matches, mode, stats, allMatches) => {
   if (mode === 'dixon') {
@@ -350,7 +349,6 @@ const calcPctConSorgente = (familyId, giocata, match, matches, mode, stats, allM
     }
     return 0;
   }
-  // Storico
   const computeMatchStats = window.computeMatchStats;
   const getGiocataPct = window.getGiocataPct;
   const calcolaGG_NG = window.calcolaGG_NG;
@@ -722,7 +720,6 @@ const SchedinaQuotaPanel = ({
 
   return (
     <div>
-      {/* BANNER MOTORE ATTIVO */}
       <div style={{
         marginBottom: '14px', padding: '10px 14px',
         background: modeStatistiche === 'dixon'
@@ -985,7 +982,6 @@ const SchedinaComponent = ({
 }) => {
   const { useState, useMemo, useCallback, useEffect } = React;
 
-  const getChampColor = window.getChampColor || (() => '#95a5a6');
   const getPercentualeClasse = window.getPercentualeClasse;
   const normalizeDate = window.normalizeDate;
   const getTodayStr = window.getTodayStr;
@@ -996,9 +992,6 @@ const SchedinaComponent = ({
     window.FiltriCampionati.useGiorniRange();
 
   const {
-    toggleCampionato,
-    selezionaTutti: selezionaTuttiCampionati,
-    deselezionaTutti: deselezionaTuttiCampionati,
     campionatiAttivi,
   } = window.FiltriCampionati.useFiltroCampionati();
 
@@ -1008,7 +1001,6 @@ const SchedinaComponent = ({
   const [partiteSelezionate, setPartiteSelezionate] = useState([]);
   const [filtroOrario, setFiltroOrario] = useState('dopo_ora');
 
-  // ⭐ Switch Storico / Dixon-Coles (condiviso con Schedina Quota)
   const { mode: modeStatistiche, setMode: setModeStatistiche } = useModeStatisticheSchedina();
 
   const MAX_GIOCATE = 3;
@@ -1158,12 +1150,6 @@ const SchedinaComponent = ({
     });
   }, [getPartiteDisponibili, calcolaTop3GiocatePerPartita, normalizeDate]);
 
-  const championshipsOrdinati = useMemo(() => {
-    return [...championships].sort((a, b) =>
-      (a.name || '').localeCompare(b.name || '', 'it', { sensitivity: 'base' })
-    );
-  }, [championships]);
-
   const isGiocataSelezionata = (familyId, giocata) => {
     if (giocateSelezionate.includes('tutte')) return false;
     return giocateSelezionate.some(s => typeof s === 'object' && s.familyId === familyId && s.giocata === giocata);
@@ -1200,7 +1186,6 @@ const SchedinaComponent = ({
         <window.QuoteManager.BannerScadenzaQuote />
       )}
 
-      {/* ⭐ Sub-tabs con bottoni uniformi */}
       <div className="sub-tabs" style={{ marginBottom: '16px' }}>
         <button className={sottoTab === 'classica' ? 'active' : ''} onClick={() => setSottoTab('classica')}>
           📋 Schedina Classica
@@ -1244,117 +1229,18 @@ const SchedinaComponent = ({
               </span>
             </h3>
 
-            {/* ⭐ GRIGLIA CAMPIONATI 5×5 - CON BADGE OGGI/2 GIORNI */}
+            {/* ⭐ Info: i campionati si gestiscono dalla Home */}
             <div style={{
-              marginBottom: '16px', padding: '10px 12px',
-              background: 'linear-gradient(135deg, rgba(30, 40, 66, 0.7), rgba(20, 27, 46, 0.9))',
-              borderRadius: '14px',
+              marginBottom: '16px', padding: '10px 14px',
+              background: 'rgba(0, 245, 255, 0.06)',
               border: '1px solid var(--border)',
+              borderRadius: '10px',
+              fontSize: '12px',
+              color: 'var(--text-dim)',
+              textAlign: 'center',
             }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                marginBottom: '10px', borderBottom: '1px solid var(--border)', paddingBottom: '8px',
-              }}>
-                <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text)' }}>
-                  🏆 Campionati Attivi
-                </span>
-                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                  <button className="btn" onClick={selezionaTuttiCampionati}
-                    style={{
-                      fontSize: '10px', padding: '3px 14px',
-                      background: campionatiSelezionati.length === championships.length ? 'var(--accent)' : 'var(--surface)',
-                      color: campionatiSelezionati.length === championships.length ? '#000' : 'var(--text)',
-                      border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer',
-                    }}>✅ Tutti</button>
-                  <button className="btn" onClick={deselezionaTuttiCampionati}
-                    style={{
-                      fontSize: '10px', padding: '3px 14px',
-                      background: 'var(--surface)', color: 'var(--text)',
-                      border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer',
-                    }}>❌ Deseleziona</button>
-                  <span style={{ fontSize: '11px', color: 'var(--text-muted)', padding: '3px 10px', background: 'var(--surface)', borderRadius: '4px' }}>
-                    {campionatiSelezionati.length} / {championships.length}
-                  </span>
-                </div>
-              </div>
-
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
-                gap: '4px',
-                width: '100%',
-              }}>
-                {championshipsOrdinati.map(c => {
-                  const isSelected = campionatiSelezionati.includes(c.name);
-                  const color = getChampColor(c.name);
-                  const label = c.name.length > 16 ? c.name.substring(0, 14) + '…' : c.name;
-                  const hasPartite = matches.some(m => m.campionato === c.name);
-
-                  const todayStr = getTodayStr();
-                  const maxDateStr = addDaysToDateStr(todayStr, 2);
-                  const nOggi = matches.filter(m => m.campionato === c.name && m.stato === 'Futura' && normalizeDate(m.data) === todayStr).length;
-                  const n2g = matches.filter(m => {
-                    if (m.campionato !== c.name || m.stato !== 'Futura') return false;
-                    const d = normalizeDate(m.data);
-                    return d > todayStr && d <= maxDateStr;
-                  }).length;
-
-                  let badge = null;
-                  if (nOggi > 0) {
-                    badge = <span style={{ background: isSelected ? 'rgba(0,0,0,0.3)' : 'var(--neon-red)', color: isSelected ? '#000' : '#fff', fontSize: '9px', fontWeight: 900, padding: '1px 6px', borderRadius: '10px', flexShrink: 0 }}>{nOggi}</span>;
-                  } else if (n2g > 0) {
-                    badge = <span style={{ background: isSelected ? 'rgba(0,0,0,0.3)' : 'var(--neon-gold)', color: isSelected ? '#000' : '#000', fontSize: '9px', fontWeight: 900, padding: '1px 6px', borderRadius: '10px', flexShrink: 0 }}>{n2g}</span>;
-                  }
-
-                  return (
-                    <button
-                      key={c.name}
-                      onClick={() => toggleCampionato(c.name)}
-                      className={`champ-bar-item ${isSelected ? 'active' : ''}`}
-                      style={{
-                        borderColor: isSelected ? 'var(--neon-cyan)' : `${color}66`,
-                        background: isSelected
-                          ? 'linear-gradient(135deg, var(--neon-cyan), var(--neon-blue))'
-                          : 'var(--bg-elevated)',
-                        color: isSelected ? '#000' : 'var(--text-dim)',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '4px',
-                        padding: '5px 6px',
-                        minHeight: '36px',
-                        borderWidth: isSelected ? '2px' : '1px',
-                        borderRadius: '10px',
-                        fontSize: '10px',
-                        fontWeight: isSelected ? 'bold' : '700',
-                        width: '100%',
-                        transition: 'all 0.2s',
-                        overflow: 'hidden',
-                        boxShadow: isSelected ? '0 0 20px rgba(0, 245, 255, 0.5)' : 'none',
-                        opacity: hasPartite ? 1 : 0.4,
-                      }}
-                      title={c.name}
-                    >
-                      <ChampLogoSchedina campionato={c.name} size={14} />
-                      <span style={{
-                        fontSize: '10px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        maxWidth: '75px',
-                      }}>
-                        {label}
-                      </span>
-                      {badge}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '6px', fontStyle: 'italic' }}>
-                🔄 Modifica la selezione nel <b>Palinsesto</b> per sincronizzarla
-              </div>
+              🏆 <b style={{ color: 'var(--neon-cyan)' }}>{campionatiSelezionati.length} campionati attivi</b> —
+              Gestisci la selezione dalla <b>Home → Seleziona Campionati</b>
             </div>
 
             {/* ⭐ SWITCH STATISTICHE / DIXON-COLES */}
@@ -1576,4 +1462,4 @@ const SchedinaComponent = ({
 };
 
 window.SchedinaComponent = SchedinaComponent;
-console.log('✅ SchedinaComponent v9.8 caricato - switch Storico/Dixon-Coles + griglia 5x5');
+console.log('✅ SchedinaComponent v10 caricato — griglia 5×5 rimossa (gestita in Home) + switch Storico/Dixon-Coles');

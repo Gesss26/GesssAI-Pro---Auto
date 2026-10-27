@@ -1,6 +1,7 @@
 // ============================================================
 // home.js - Modulo Home con MENU PRINCIPALE a griglia di card
-// v10: Menu hub con EMOJI + preset campionati con loghi reali
+// v11: Menu hub con EMOJI + preset campionati con loghi reali
+//      + griglia 5×5 unificata "Campionati Attivi" in Home
 //      + sottomenu Info e Utilità + lista mobile compatta
 // ============================================================
 
@@ -502,10 +503,72 @@
   };
 
   // ============================================================
-  // COMPONENTE: Menu Home (griglia emoji desktop + lista emoji mobile)
+  // COMPONENTE: Menu Home (emoji + preset + griglia 5x5 campionati)
   // ============================================================
-  const MenuHomeComponent = ({ onSelect, onApplyPreset, presetAttivo }) => {
+  const MenuHomeComponent = ({ onSelect, onApplyPreset, presetAttivo, matches, championships }) => {
     const isMobile = useIsMobile();
+
+    const {
+      campionatiAttivi,
+      toggleCampionato,
+      selezionaTutti,
+      deselezionaTutti,
+    } = window.FiltriCampionati.useFiltroCampionati();
+
+    const championshipsOrdinati = useMemo(() => {
+      const lista = (championships && championships.length > 0)
+        ? championships
+        : (window.CHAMPIONSHIP_LIST || []).map(name => ({ name }));
+      return [...lista].sort((a, b) =>
+        (a.name || '').localeCompare(b.name || '', 'it', { sensitivity: 'base' })
+      );
+    }, [championships]);
+
+    const getBadge = (nomeCampionato) => {
+      if (!Array.isArray(matches)) return null;
+      const todayStr = window.getTodayStr();
+      const maxDateStr = window.addDaysToDateStr(todayStr, 2);
+
+      const nOggi = matches.filter(m =>
+        m.campionato === nomeCampionato &&
+        m.stato === 'Futura' &&
+        window.normalizeDate(m.data) === todayStr
+      ).length;
+
+      const n2g = matches.filter(m => {
+        if (m.campionato !== nomeCampionato || m.stato !== 'Futura') return false;
+        const d = window.normalizeDate(m.data);
+        return d > todayStr && d <= maxDateStr;
+      }).length;
+
+      if (nOggi > 0) {
+        return (
+          <span style={{
+            background: 'var(--neon-red)',
+            color: '#fff',
+            fontSize: '9px',
+            fontWeight: 900,
+            padding: '1px 6px',
+            borderRadius: '10px',
+            flexShrink: 0,
+          }}>{nOggi}</span>
+        );
+      }
+      if (n2g > 0) {
+        return (
+          <span style={{
+            background: 'var(--neon-gold)',
+            color: '#000',
+            fontSize: '9px',
+            fontWeight: 900,
+            padding: '1px 6px',
+            borderRadius: '10px',
+            flexShrink: 0,
+          }}>{n2g}</span>
+        );
+      }
+      return null;
+    };
 
     const renderLoghiPreset = (campionati) => {
       const ChampLogo = window.ChampLogo;
@@ -520,6 +583,10 @@
         </div>
       );
     };
+
+    const numeroCampionatiSelezionati = campionatiAttivi.length;
+    const numeroCampionatiTotali = championshipsOrdinati.length;
+    const tuttiSelezionati = numeroCampionatiSelezionati === numeroCampionatiTotali && numeroCampionatiTotali > 0;
 
     return (
       <div>
@@ -561,12 +628,14 @@
           ))}
         </div>
 
-        {/* BLOCCO: Seleziona Campionati */}
+        {/* BLOCCO: Seleziona Campionati (UNIFICATO) */}
         <div className="menu-home-section">
           <div className="menu-home-section-title">
             <span>🏆</span>
             <span>Seleziona Campionati</span>
           </div>
+
+          {/* RIGA 1: Preset rapidi con loghi */}
           <div className="menu-home-section-grid">
             {PRESET_CAMPIONATI.map(preset => {
               const isActive = presetAttivo === preset.id;
@@ -587,8 +656,134 @@
               );
             })}
           </div>
+
+          {/* RIGA 2: Griglia 5×5 completa */}
+          <div style={{
+            marginTop: '16px',
+            paddingTop: '14px',
+            borderTop: '1px dashed var(--border)',
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '10px',
+              flexWrap: 'wrap',
+              gap: '8px',
+            }}>
+              <span style={{
+                fontSize: '12px',
+                fontWeight: 700,
+                color: 'var(--neon-cyan)',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+              }}>
+                ⚙️ Campionati Attivi
+              </span>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                <button
+                  className="btn"
+                  onClick={selezionaTutti}
+                  style={{
+                    fontSize: '10px',
+                    padding: '4px 14px',
+                    background: tuttiSelezionati ? 'var(--accent)' : 'var(--surface)',
+                    color: tuttiSelezionati ? '#000' : 'var(--text)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                  }}
+                >✅ Tutti</button>
+                <button
+                  className="btn"
+                  onClick={deselezionaTutti}
+                  style={{
+                    fontSize: '10px',
+                    padding: '4px 14px',
+                    background: 'var(--surface)',
+                    color: 'var(--text)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                  }}
+                >❌ Deseleziona</button>
+                <span style={{
+                  fontSize: '11px',
+                  color: 'var(--text-muted)',
+                  padding: '4px 10px',
+                  background: 'var(--surface)',
+                  borderRadius: '6px',
+                  fontWeight: 700,
+                }}>
+                  {numeroCampionatiSelezionati} / {numeroCampionatiTotali}
+                </span>
+              </div>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+              gap: '4px',
+              width: '100%',
+            }}>
+              {championshipsOrdinati.map((c, idx) => {
+                const nomeCamp = c.name || c;
+                const isActive = campionatiAttivi.includes(nomeCamp);
+                const color = window.getChampColor(nomeCamp);
+                const label = nomeCamp.length > 16 ? nomeCamp.substring(0, 14) + '…' : nomeCamp;
+                const hasPartite = Array.isArray(matches) && matches.some(m => m.campionato === nomeCamp);
+
+                return (
+                  <button
+                    key={`${nomeCamp}-${idx}`}
+                    onClick={() => toggleCampionato(nomeCamp)}
+                    className={`champ-bar-item ${isActive ? 'active' : ''}`}
+                    style={{
+                      borderColor: isActive ? 'var(--neon-cyan)' : `${color}66`,
+                      background: isActive
+                        ? 'linear-gradient(135deg, var(--neon-cyan), var(--neon-blue))'
+                        : 'var(--bg-elevated)',
+                      color: isActive ? '#000' : 'var(--text-dim)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '4px',
+                      padding: '5px 6px',
+                      minHeight: '36px',
+                      borderWidth: isActive ? '2px' : '1px',
+                      borderStyle: 'solid',
+                      borderRadius: '10px',
+                      fontSize: '10px',
+                      fontWeight: isActive ? 'bold' : '700',
+                      width: '100%',
+                      transition: 'all 0.2s',
+                      overflow: 'hidden',
+                      boxShadow: isActive ? '0 0 20px rgba(0, 245, 255, 0.5)' : 'none',
+                      opacity: hasPartite ? 1 : 0.4,
+                    }}
+                    title={nomeCamp}
+                  >
+                    {window.ChampLogo && <window.ChampLogo campionato={nomeCamp} size={14} />}
+                    <span style={{
+                      fontSize: '10px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      maxWidth: '75px',
+                    }}>
+                      {label}
+                    </span>
+                    {getBadge(nomeCamp)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="menu-home-section-info">
-            💡 Il filtro è valido sia per il <b>Palinsesto</b> che per la <b>Schedina</b>
+            💡 Il filtro è valido per <b>Palinsesto</b>, <b>Schedina</b> e tutte le altre schermate
           </div>
         </div>
       </div>
@@ -596,7 +791,7 @@
   };
 
   // ============================================================
-  // COMPONENTE: Info e Utilità (sottomenu con 2 card emoji)
+  // COMPONENTE: Info e Utilità
   // ============================================================
   const InfoUtilitàComponent = ({ onSelect, onBack }) => {
     return (
@@ -1501,7 +1696,7 @@
   };
 
   // ============================================================
-  // CALCOLATRICE (invariata)
+  // CALCOLATRICE
   // ============================================================
   const CalcolatriceComponent = ({ matches }) => {
     const [campionatoSel, setCampionatoSel] = useState('');
@@ -1938,6 +2133,8 @@
             onSelect={handleMenuAction}
             onApplyPreset={handleApplyPreset}
             presetAttivo={presetAttivo}
+            matches={matches}
+            championships={championships}
           />
         );
       }
@@ -1958,6 +2155,8 @@
             onSelect={handleMenuAction}
             onApplyPreset={handleApplyPreset}
             presetAttivo={presetAttivo}
+            matches={matches}
+            championships={championships}
           />
         );
       }
@@ -2110,5 +2309,5 @@
     TOP_5_MAGGIORI, TOP_5_MINORI, TOP_COPPE, PRESET_CAMPIONATI,
   };
 
-  console.log('✅ Modulo Home v10 caricato — Menu hub con EMOJI + preset loghi campionati');
+  console.log('✅ Modulo Home v11 caricato — Menu hub con EMOJI + preset loghi + griglia 5×5 unificata');
 })();
