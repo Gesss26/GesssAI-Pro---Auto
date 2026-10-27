@@ -3,6 +3,8 @@ import json
 import pandas as pd
 import os
 import sys
+import re
+import unicodedata
 from datetime import datetime
 
 FILE_DATI_ESTRATTI = "dati_estratti.json"
@@ -12,10 +14,22 @@ FILE_OUTPUT_ASSENZE = "assenze.json"
 
 
 def normalizza_nome(nome):
-    """Normalizza un nome per il confronto: rimuove spazi extra e converte in minuscolo."""
+    """Normalizza un nome: rimuove accenti, punteggiatura e spazi extra, converte in minuscolo."""
     if not nome:
         return ""
-    return str(nome).strip().lower()
+    s = str(nome).strip().lower()
+    s = ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
+    s = re.sub(r"[.'\-]", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
+def chiave_giocatore(nome):
+    """Estrae il cognome principale (primo token normalizzato) per matching robusto."""
+    n = normalizza_nome(nome)
+    if not n:
+        return ""
+    return n.split(" ")[0]
 
 
 def carica_voti_da_excel(excel_path):
@@ -27,18 +41,46 @@ def carica_voti_da_excel(excel_path):
     try:
         xls = pd.ExcelFile(excel_path)
         sheet_names = xls.sheet_names
-        target_sheet = "Voti" if "Voti" in sheet_names else sheet_names[0]
+        print(f"Fogli trovati: {sheet_names}")
+
+        # Priorità: foglio 'Tutti' -> 'Voti' -> primo foglio
+        target_sheet = None
+        for candidate in ["Tutti", "Voti"]:
+            if candidate in sheet_names:
+                target_sheet = candidate
+                break
+        if target_sheet is None:
+            target_sheet = sheet_names[0]
+
         print(f"Lettura del foglio Excel: '{target_sheet}'")
+
+        # Prova prima senza skiprows
         df = pd.read_excel(excel_path, sheet_name=target_sheet)
+        df.columns = [str(c).strip() for c in df.columns]
+
+        # Se la colonna 'Nome' o 'Id' non è presente, c'è una riga di titolo: salta la prima riga
+        colonne_lower = [str(c).strip().lower() for c in df.columns]
+        if 'nome' not in colonne_lower and 'id' not in colonne_lower:
+            print("Rilevata riga di titolo, salto la prima riga...")
+            df = pd.read_excel(excel_path, sheet_name=target_sheet, skiprows=1)
+            df.columns = [str(c).strip() for c in df.columns]
+
+        print(f"Colonne trovate: {df.columns.tolist()}")
+
+        # Rinomina tutte le colonne in minuscolo per uniformità
         df.columns = [str(c).strip().lower() for c in df.columns]
 
+        # Trova la colonna nome
         col_nome = None
         for c in ['nome_excel', 'nome', 'giocatore', 'calciatore']:
             if c in df.columns:
                 col_nome = c
                 break
+
         if not col_nome:
-            col_nome = df.columns[0]
+            print("ERRORE: Colonna 'Nome' non trovata nell'Excel.")
+            print(f"Colonne disponibili: {df.columns.tolist()}")
+            sys.exit(1)
 
         print(f"Colonna nomi identificata: '{col_nome}'")
 
@@ -53,6 +95,9 @@ def carica_voti_da_excel(excel_path):
             continue
         nome = str(nome_grezzo).strip()
         if not nome or nome.lower() == 'nan':
+            continue
+        # Filtra eventuali righe di titolo residue
+        if nome.lower().startswith('statistiche'):
             continue
 
         def get_val(col, default, is_int=False):
@@ -94,8 +139,13 @@ def arricchisci(dati_estratti_path, excel_path):
 
     voti = carica_voti_da_excel(excel_path)
 
-    # Indice normalizzato dei voti per lookup robusto (case-insensitive, trim)
+    # Indici per lookup robusto
     voti_normalizzati = {normalizza_nome(k): v for k, v in voti.items()}
+    voti_per_cognome = {}
+    for k, v in voti.items():
+        ck = chiave_giocatore(k)
+        if ck and ck not in voti_per_cognome:
+            voti_per_cognome[ck] = v
 
     formazioni_finali = {}
     assenze_finali = {
@@ -107,29 +157,33 @@ def arricchisci(dati_estratti_path, excel_path):
         # 1. Match esatto
         if nome in voti:
             return voti[nome]
-        # 2. Match normalizzato (case-insensitive, trim)
+        # 2. Match normalizzato
         n = normalizza_nome(nome)
         if n in voti_normalizzati:
             return voti_normalizzati[n]
-        # 3. Fallback: match case-insensitive lineare
-        for k, v in voti.items():
-            if k.lower() == nome.lower():
-                return v
+        # 3. Match per cognome principale
+        ck = chiave_giocatore(nome)
+        if ck in voti_per_cognome:
+            return voti_per_cognome[ck]
         return {"Mv": 0.0, "Fm": 0.0, "Pv": 0, "Gf": 0, "Ass": 0}
 
     for squadra, info in dati.items():
         titolari_arricchiti = []
         panchina_arricchita = []
 
-        # Set per tracciare chi è schierato (titolari + panchina) con nomi normalizzati
-        giocatori_schierati = set()
+        nomi_normalizzati_schierati = set()
+        cognomi_schierati = set()
+
+        def registra_schierato(nome):
+            nomi_normalizzati_schierati.add(normalizza_nome(nome))
+            ck = chiave_giocatore(nome)
+            if ck:
+                cognomi_schierati.add(ck)
 
         for nome_giocatore in info.get("titolari", []):
             nome = nome_giocatore if isinstance(nome_giocatore, str) else nome_giocatore.get("nome", "")
             ruolo = nome_giocatore.get("ruolo", "") if isinstance(nome_giocatore, dict) else ""
-
-            # Salva la versione normalizzata nel set per i confronti successivi
-            giocatori_schierati.add(normalizza_nome(nome))
+            registra_schierato(nome)
 
             v = cerca_voto(nome)
             titolari_arricchiti.append({
@@ -141,8 +195,7 @@ def arricchisci(dati_estratti_path, excel_path):
         for nome_giocatore in info.get("panchina", []):
             nome = nome_giocatore if isinstance(nome_giocatore, str) else nome_giocatore.get("nome", "")
             ruolo = nome_giocatore.get("ruolo", "") if isinstance(nome_giocatore, dict) else ""
-
-            giocatori_schierati.add(normalizza_nome(nome))
+            registra_schierato(nome)
 
             v = cerca_voto(nome)
             panchina_arricchita.append({
@@ -162,9 +215,14 @@ def arricchisci(dati_estratti_path, excel_path):
         for ind in info.get("indisponibili", []):
             nome_ind = ind.get("nome", "").strip()
             nome_ind_norm = normalizza_nome(nome_ind)
+            ck_ind = chiave_giocatore(nome_ind)
 
-            # Se il giocatore è schierato (titolare o panchina) NON è infortunato
-            if nome_ind_norm in giocatori_schierati:
+            # Doppio controllo: nome completo normalizzato E cognome principale
+            if nome_ind_norm in nomi_normalizzati_schierati:
+                print(f"[FILTRO] '{nome_ind}' ({squadra}) rimosso dagli indisponibili: match esatto normalizzato")
+                continue
+            if ck_ind and ck_ind in cognomi_schierati and len(ck_ind) >= 4:
+                print(f"[FILTRO] '{nome_ind}' ({squadra}) rimosso dagli indisponibili: match cognome '{ck_ind}'")
                 continue
 
             indisponibili_finali.append({
