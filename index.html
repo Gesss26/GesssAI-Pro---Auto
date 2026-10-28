@@ -1330,6 +1330,9 @@
         return saved ? parseInt(saved) : 100;
       });
 
+      // ⭐ Stato per il bottone "Torna Su"
+      const [showBackToTop, setShowBackToTop] = useState(false);
+
       const hasLoadedRef = useRef(false);
       const saveTimeoutRef = useRef(null);
 
@@ -1351,6 +1354,25 @@
         if (window.QuoteManager && typeof window.QuoteManager.initAutoDownload === 'function') {
           window.QuoteManager.initAutoDownload();
         }
+      }, []);
+
+      // ⭐ Scroll in alto ad ogni cambio tab
+      useEffect(() => {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }, [tab]);
+
+      // ⭐ Mostra/nascondi il bottone "Torna Su" in base allo scroll
+      useEffect(() => {
+        const onScroll = () => {
+          const y = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+          setShowBackToTop(y > 300);
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        // Controllo iniziale
+        onScroll();
+        return () => window.removeEventListener('scroll', onScroll);
       }, []);
 
       useEffect(() => {
@@ -1445,6 +1467,11 @@
           setPalinsestoScrollToId(selectedMatchId);
         }
         setTab('Palinsesto');
+      };
+
+      // ⭐ Torna su (smooth scroll)
+      const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       };
 
       const renderFloatingNav = () => {
@@ -1580,13 +1607,17 @@
             </div>
           </div>
 
-          <button
-            className="home-btn-overlay"
-            onClick={backToMainMenu}
-            title="Torna al Menu Principale"
-          >
-            🏠
-          </button>
+          {/* ⭐ Bottone "Torna Su" - visibile solo dopo aver scrollato */}
+          {showBackToTop && (
+            <button
+              className="home-btn-overlay"
+              onClick={scrollToTop}
+              title="Torna su"
+              aria-label="Torna su"
+            >
+              ⬆️
+            </button>
+          )}
         </div>
       );
 

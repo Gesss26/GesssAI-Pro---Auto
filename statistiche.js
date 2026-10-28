@@ -1,9 +1,10 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v28)
+// statistiche.js - Modulo Statistiche (v29)
 // - FormazionePanel: legge voti da formazioni_con_voti.json O da AssenzeDB
 // - Mostra MEDIA TITOLARI in alto, con ruolo colorato prima del nome
 // - Design: Colonna, colori reparto, ruolo prima del nome
 // - FIX v28: AssenzePanel esclude chiunque sia tra titolari o panchina
+// - FIX v29: scroll in alto ad ogni cambio sub-tab
 // ============================================================
 
 (function () {
@@ -1972,6 +1973,13 @@
       clearStatsCache();
     }, [matchesFiltrati.length]);
 
+    // ⭐ Scroll in alto ad ogni cambio sub-tab
+    useEffect(() => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }, [statsSubTab]);
+
     const selectedMatch = matchesFiltrati.find(m => m.id === selectedMatchId);
 
     return (
@@ -2231,5 +2239,5 @@
   window.simulateMatches = simulateMatches;
   window.clearStatsCache = clearStatsCache;
 
-  console.log('✅ statistiche.js v28 - AssenzePanel con filtro schierati (fix Dybala)');
+  console.log('✅ statistiche.js v29 - scroll in alto ad ogni cambio sub-tab');
 })();
