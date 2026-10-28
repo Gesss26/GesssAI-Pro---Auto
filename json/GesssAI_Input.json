@@ -1144,7 +1144,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Bielefeld",
-    "stadio": "",
+    "stadio": "Schüco-Arena",
     "stato": "Futura"
   },
   {
@@ -1158,7 +1158,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Cottbus",
-    "stadio": "LEAG Energie Stadion",
+    "stadio": "Stadion der Freundschaft",
     "stato": "Futura"
   },
   {
@@ -1513,6 +1513,34 @@
   },
   {
     "campionato": "2. Bundesliga",
+    "data": "27/11/2026",
+    "ora": "17:30",
+    "giornata": "13",
+    "squadra_casa": "VfL Bochum",
+    "squadra_ospite": "Darmstadt 98",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Bochum",
+    "stadio": "Vonovia Ruhrstadion",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "2. Bundesliga",
+    "data": "27/11/2026",
+    "ora": "17:30",
+    "giornata": "13",
+    "squadra_casa": "1. FC Heidenheim",
+    "squadra_ospite": "1. FC Nürnberg",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Heidenheim",
+    "stadio": "Voith-Arena",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "2. Bundesliga",
     "data": "28/11/2026",
     "ora": "12:30",
     "giornata": "13",
@@ -1523,20 +1551,6 @@
     "gol_ospite": "",
     "citta": "Berlin",
     "stadio": "Olympiastadion",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "2. Bundesliga",
-    "data": "28/11/2026",
-    "ora": "12:30",
-    "giornata": "13",
-    "squadra_casa": "VfL Bochum",
-    "squadra_ospite": "Darmstadt 98",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Bochum",
-    "stadio": "Vonovia Ruhrstadion",
     "stato": "Futura"
   },
   {
@@ -1565,20 +1579,6 @@
     "gol_ospite": "",
     "citta": "Magdeburg",
     "stadio": "Avnet-Arena",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "2. Bundesliga",
-    "data": "28/11/2026",
-    "ora": "12:30",
-    "giornata": "13",
-    "squadra_casa": "1. FC Heidenheim",
-    "squadra_ospite": "1. FC Nürnberg",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Heidenheim",
-    "stadio": "Voith-Arena",
     "stato": "Futura"
   },
   {
@@ -5176,7 +5176,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Spiesen-Elversberg",
-    "stadio": "Waldstadion Kaiserlinde",
+    "stadio": "Ursapharm-Arena an der Kaiserlinde",
     "stato": "Futura"
   },
   {
@@ -18000,7 +18000,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Kerkrade",
-    "stadio": "Parkstad Limburg Stadion",
+    "stadio": "Parkstad Limburg",
     "stato": "Futura"
   },
   {
@@ -18042,7 +18042,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Helmond",
-    "stadio": "GS Staalwerken Stadion",
+    "stadio": "Lavans Stadion",
     "stato": "Futura"
   },
   {
@@ -29732,7 +29732,7 @@
     "gol_casa": "2",
     "gol_ospite": "2",
     "citta": "Heverlee",
-    "stadio": "The King Power AT Den Dreef Stadium",
+    "stadio": "Den Dreef",
     "stato": "Giocata"
   },
   {
@@ -29787,8 +29787,8 @@
     "risultato": "3–2",
     "gol_casa": "3",
     "gol_ospite": "2",
-    "citta": "Bruges",
-    "stadio": "Jan Breydel Stadium",
+    "citta": "Brugge",
+    "stadio": "Jan Breydel Stadion",
     "stato": "Giocata"
   },
   {
@@ -37418,7 +37418,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Villarreal",
-    "stadio": "Estadio de la Ceramica",
+    "stadio": "Estadio de la Cerámica",
     "stato": "Futura"
   },
   {
@@ -46924,7 +46924,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Laval",
-    "stadio": "Stade Francis Le Basser",
+    "stadio": "Stade Francis-Le Basser",
     "stato": "Futura"
   },
   {
@@ -46938,7 +46938,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Rodez",
-    "stadio": "Stade Paul-Lignon",
+    "stadio": "Stade Paul Lignon",
     "stato": "Futura"
   },
   {
@@ -56359,8 +56359,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Rio Maior",
-    "stadio": "",
+    "citta": "Rio Mayor",
+    "stadio": "Estadio Municipal de Rio Maior",
     "stato": "Futura"
   },
   {
@@ -69880,12 +69880,12 @@
     "giornata": "9",
     "squadra_casa": "Sassuolo",
     "squadra_ospite": "Lazio",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–6",
+    "gol_casa": "2",
+    "gol_ospite": "6",
     "citta": "Reggio Emilia",
     "stadio": "Mapei Stadium – Città del Tricolore",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie A",
@@ -69894,12 +69894,12 @@
     "giornata": "9",
     "squadra_casa": "AS Roma",
     "squadra_ospite": "Cagliari",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "4–2",
+    "gol_casa": "4",
+    "gol_ospite": "2",
     "citta": "Rome",
     "stadio": "Stadio Olimpico",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie A",
@@ -69908,12 +69908,12 @@
     "giornata": "9",
     "squadra_casa": "Torino",
     "squadra_ospite": "como",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–3",
+    "gol_casa": "1",
+    "gol_ospite": "3",
     "citta": "Turin",
     "stadio": "Stadio Olimpico Grande Torino",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie A",
@@ -75200,12 +75200,12 @@
     "giornata": "9",
     "squadra_casa": "Benevento",
     "squadra_ospite": "Catanzaro",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Benevento",
     "stadio": "Stadio Ciro Vigorito",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie B",
@@ -75214,12 +75214,12 @@
     "giornata": "9",
     "squadra_casa": "Ascoli",
     "squadra_ospite": "Sampdoria",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Ascoli Piceno",
     "stadio": "Cino e Lillo Del Duca",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie B",
@@ -75228,12 +75228,12 @@
     "giornata": "9",
     "squadra_casa": "Cesena",
     "squadra_ospite": "Empoli",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Cesena",
     "stadio": "Dino Manuzzi",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie B",
@@ -75242,12 +75242,12 @@
     "giornata": "9",
     "squadra_casa": "Virtus Entella",
     "squadra_ospite": "Avellino",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–1",
+    "gol_casa": "1",
+    "gol_ospite": "1",
     "citta": "Chiavari",
     "stadio": "Stadio Comunale",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie B",
@@ -75256,12 +75256,12 @@
     "giornata": "9",
     "squadra_casa": "Padova",
     "squadra_ospite": "Sudtirol",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–0",
+    "gol_casa": "2",
+    "gol_ospite": "0",
     "citta": "Padua",
     "stadio": "Stadio Comunale Euganeo",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie B",
@@ -75270,12 +75270,12 @@
     "giornata": "9",
     "squadra_casa": "Vicenza",
     "squadra_ospite": "Modena",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "1–2",
+    "gol_casa": "1",
+    "gol_ospite": "2",
     "citta": "Vicenza",
     "stadio": "Stadio Romeo Menti",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie B",
@@ -75284,12 +75284,12 @@
     "giornata": "9",
     "squadra_casa": "Mantova",
     "squadra_ospite": "Cremonese",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "0–2",
+    "gol_casa": "0",
+    "gol_ospite": "2",
     "citta": "Mantova",
     "stadio": "Stadio Danilo Martelli",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie B",
@@ -80817,8 +80817,8 @@
     "risultato": "1–2",
     "gol_casa": "1",
     "gol_ospite": "2",
-    "citta": "Sesto San Giovanni",
-    "stadio": "Stadio Ernesto Breda",
+    "citta": "Seregno",
+    "stadio": "Stadio Ferruccio",
     "stato": "Giocata"
   },
   {
@@ -81083,8 +81083,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Sesto San Giovanni",
-    "stadio": "Stadio Ernesto Breda",
+    "citta": "Seregno",
+    "stadio": "Stadio Ferruccio",
     "stato": "Futura"
   },
   {
@@ -91566,12 +91566,12 @@
     "giornata": "8",
     "squadra_casa": "Inter U23",
     "squadra_ospite": "Scafatese",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–1",
+    "gol_casa": "2",
+    "gol_ospite": "1",
     "citta": "Sesto San Giovanni",
     "stadio": "Stadio Ernesto Breda",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie C - Girone C",
@@ -96385,7 +96385,7 @@
     "risultato": "0–1",
     "gol_casa": "0",
     "gol_ospite": "1",
-    "citta": "Istanbul",
+    "citta": "Esenyurt",
     "stadio": "Esenyurt Necmi Kadioglu Stadi",
     "stato": "Giocata"
   },
