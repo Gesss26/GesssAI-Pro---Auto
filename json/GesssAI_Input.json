@@ -1255,7 +1255,7 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Hamburg",
+    "citta": "St. Pauli Burger",
     "stadio": "Millerntor-Stadion",
     "stato": "Futura"
   },
@@ -1584,6 +1584,20 @@
   {
     "campionato": "2. Bundesliga",
     "data": "28/11/2026",
+    "ora": "19:30",
+    "giornata": "13",
+    "squadra_casa": "VfL Osnabrück",
+    "squadra_ospite": "Hannover 96",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "",
+    "stadio": "",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "2. Bundesliga",
+    "data": "29/11/2026",
     "ora": "12:30",
     "giornata": "13",
     "squadra_casa": "Greuther Fürth",
@@ -1597,7 +1611,7 @@
   },
   {
     "campionato": "2. Bundesliga",
-    "data": "28/11/2026",
+    "data": "29/11/2026",
     "ora": "12:30",
     "giornata": "13",
     "squadra_casa": "Magdeburg",
@@ -1611,7 +1625,7 @@
   },
   {
     "campionato": "2. Bundesliga",
-    "data": "28/11/2026",
+    "data": "29/11/2026",
     "ora": "12:30",
     "giornata": "13",
     "squadra_casa": "Eintracht Braunschweig",
@@ -1621,20 +1635,6 @@
     "gol_ospite": "",
     "citta": "Braunschweig",
     "stadio": "Eintracht-Stadion",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "2. Bundesliga",
-    "data": "28/11/2026",
-    "ora": "19:30",
-    "giornata": "13",
-    "squadra_casa": "VfL Osnabrück",
-    "squadra_ospite": "Hannover 96",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "",
-    "stadio": "",
     "stato": "Futura"
   },
   {
@@ -5274,7 +5274,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Berlin",
-    "stadio": "",
+    "stadio": "An der Alten Försterei",
     "stato": "Futura"
   },
   {
@@ -17980,20 +17980,6 @@
     "data": "30/10/2026",
     "ora": "19:00",
     "giornata": "13",
-    "squadra_casa": "FC Emmen",
-    "squadra_ospite": "FC Den Bosch",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Emmen",
-    "stadio": "De Oude Meerdijk",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Eerste Divisie",
-    "data": "30/10/2026",
-    "ora": "19:00",
-    "giornata": "13",
     "squadra_casa": "Roda",
     "squadra_ospite": "Jong AZ",
     "risultato": "",
@@ -18057,6 +18043,20 @@
     "gol_ospite": "",
     "citta": "Maastricht",
     "stadio": "De Geusselt",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Eerste Divisie",
+    "data": "01/11/2026",
+    "ora": "13:30",
+    "giornata": "13",
+    "squadra_casa": "FC Emmen",
+    "squadra_ospite": "FC Den Bosch",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Emmen",
+    "stadio": "De Oude Meerdijk",
     "stato": "Futura"
   },
   {
@@ -22956,7 +22956,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Zwolle",
-    "stadio": "",
+    "stadio": "MAC³PARK Stadion",
     "stato": "Futura"
   },
   {
@@ -22970,7 +22970,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Rotterdam",
-    "stadio": "Stadion Woudestein",
+    "stadio": "Van Donge & De Roo Stadion",
     "stato": "Futura"
   },
   {
@@ -22983,8 +22983,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Velsen-Zuid",
-    "stadio": "BUKO Stadion",
+    "citta": "Felsen",
+    "stadio": "Sportpark Schoonenberg",
     "stato": "Futura"
   },
   {
@@ -22998,7 +22998,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Groningen",
-    "stadio": "Euroborg",
+    "stadio": "Hitachi Capital Mobility Stadion",
     "stato": "Futura"
   },
   {
@@ -36064,6 +36064,34 @@
     "stato": "Futura"
   },
   {
+    "campionato": "K League 1",
+    "data": "29/11/2026",
+    "ora": "05:00",
+    "giornata": "37",
+    "squadra_casa": "Ulsan Hyundai FC",
+    "squadra_ospite": "Jeonbuk Motors",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Ulsan",
+    "stadio": "Ulsan Munsu Football Stadium",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "K League 1",
+    "data": "29/11/2026",
+    "ora": "07:30",
+    "giornata": "37",
+    "squadra_casa": "Incheon United",
+    "squadra_ospite": "Gangwon FC",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Incheon",
+    "stadio": "Sungui Arena Park",
+    "stato": "Futura"
+  },
+  {
     "campionato": "La Liga",
     "data": "15/08/2026",
     "ora": "17:30",
@@ -37544,7 +37572,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Getafe",
-    "stadio": "Coliseum",
+    "stadio": "Coliseum Alfonso Pérez",
     "stato": "Futura"
   },
   {
@@ -37558,7 +37586,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Santander",
-    "stadio": "Estadio El Sardinero",
+    "stadio": "El Sardinero",
     "stato": "Futura"
   },
   {
@@ -42438,20 +42466,6 @@
     "data": "31/10/2026",
     "ora": "19:45",
     "giornata": "9",
-    "squadra_casa": "Lyon",
-    "squadra_ospite": "Angers",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
-    "citta": "Lyon",
-    "stadio": "Parc Olympique Lyonnais",
-    "stato": "Futura"
-  },
-  {
-    "campionato": "Ligue 1",
-    "data": "31/10/2026",
-    "ora": "19:45",
-    "giornata": "9",
     "squadra_casa": "Lorient",
     "squadra_ospite": "Brest",
     "risultato": "",
@@ -42494,12 +42508,26 @@
     "data": "01/11/2026",
     "ora": "16:15",
     "giornata": "9",
+    "squadra_casa": "Lyon",
+    "squadra_ospite": "Angers",
+    "risultato": "",
+    "gol_casa": "",
+    "gol_ospite": "",
+    "citta": "Lyon",
+    "stadio": "Groupama Stadium",
+    "stato": "Futura"
+  },
+  {
+    "campionato": "Ligue 1",
+    "data": "01/11/2026",
+    "ora": "16:15",
+    "giornata": "9",
     "squadra_casa": "Paris FC",
     "squadra_ospite": "Monaco",
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Paris",
+    "citta": "Isilemulino",
     "stadio": "Stade Jean Bouin",
     "stato": "Futura"
   },
@@ -42878,7 +42906,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Toulouse",
-    "stadio": "Stadium Municipal",
+    "stadio": "Stadium de Toulouse",
     "stato": "Futura"
   },
   {
@@ -42892,7 +42920,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Lyon",
-    "stadio": "Groupama Stadium",
+    "stadio": "Parc Olympique Lyonnais",
     "stato": "Futura"
   },
   {
@@ -56317,8 +56345,8 @@
     "risultato": "0–1",
     "gol_casa": "0",
     "gol_ospite": "1",
-    "citta": "Alverkaduribajo",
-    "stadio": "Complexo Desportivo FC Alverca",
+    "citta": "Alverca do Ribatejo",
+    "stadio": "FC Alverca Sports Complex",
     "stato": "Giocata"
   },
   {
@@ -56345,8 +56373,8 @@
     "risultato": "1–3",
     "gol_casa": "1",
     "gol_ospite": "3",
-    "citta": "Cascais",
-    "stadio": "Estádio António Coimbra da Mota",
+    "citta": "Estoril",
+    "stadio": "Estadio Antonio Coimbra da Mota",
     "stato": "Giocata"
   },
   {
@@ -56373,7 +56401,7 @@
     "risultato": "0–4",
     "gol_casa": "0",
     "gol_ospite": "4",
-    "citta": "Condi Town",
+    "citta": "Vila do Conde",
     "stadio": "Estádio dos Arcos",
     "stato": "Giocata"
   },
@@ -56457,8 +56485,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Arouca",
-    "stadio": "",
+    "citta": "Aruca",
+    "stadio": "Estádio Municipal de Arouca",
     "stato": "Futura"
   },
   {
@@ -56472,7 +56500,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Funchal",
-    "stadio": "",
+    "stadio": "Estádio do Marítimo",
     "stato": "Futura"
   },
   {
@@ -56486,7 +56514,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Viseu",
-    "stadio": "",
+    "stadio": "Estadio do Fontelo",
     "stato": "Futura"
   },
   {
@@ -56500,7 +56528,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Braga",
-    "stadio": "",
+    "stadio": "Estádio Municipal de Braga",
     "stato": "Futura"
   },
   {
@@ -64101,8 +64129,8 @@
     "risultato": "",
     "gol_casa": "",
     "gol_ospite": "",
-    "citta": "Elda",
-    "stadio": "Estadio Nuevo Pepico Amat",
+    "citta": "Alicante",
+    "stadio": "Nuevo Pepico Amat",
     "stato": "Futura"
   },
   {
@@ -64130,7 +64158,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Burgos",
-    "stadio": "",
+    "stadio": "Municipal El Plantio",
     "stato": "Futura"
   },
   {
@@ -64144,7 +64172,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Santa Cruz de Tenerife",
-    "stadio": "",
+    "stadio": "Heliodoro Rodríguez López",
     "stato": "Futura"
   },
   {
@@ -70048,12 +70076,12 @@
     "giornata": "9",
     "squadra_casa": "Frosinone",
     "squadra_ospite": "Lecce",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "5–1",
+    "gol_casa": "5",
+    "gol_ospite": "1",
     "citta": "Frosinone",
     "stadio": "PSC Arena",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie A",
@@ -70062,12 +70090,12 @@
     "giornata": "9",
     "squadra_casa": "Fiorentina",
     "squadra_ospite": "Atalanta",
-    "risultato": "",
-    "gol_casa": "",
-    "gol_ospite": "",
+    "risultato": "2–2",
+    "gol_casa": "2",
+    "gol_ospite": "2",
     "citta": "Florence",
     "stadio": "Stadio Artemio Franchi",
-    "stato": "Futura"
+    "stato": "Giocata"
   },
   {
     "campionato": "Serie A",
@@ -70150,7 +70178,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Frosinone",
-    "stadio": "Stadio Benito Stirpe",
+    "stadio": "PSC Arena",
     "stato": "Futura"
   },
   {
@@ -75470,7 +75498,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Empoli",
-    "stadio": "Stadio Carlo Castellani",
+    "stadio": "Carlo Castellani",
     "stato": "Futura"
   },
   {
@@ -75484,7 +75512,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Avellino",
-    "stadio": "Stadio Partenio-Adriano Lombardi",
+    "stadio": "Partenio-Adriano Lombardi",
     "stato": "Futura"
   },
   {
@@ -75498,7 +75526,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Arezzo",
-    "stadio": "Citta di Arezzo",
+    "stadio": "Stadio Città di Arezzo",
     "stato": "Futura"
   },
   {
@@ -75512,7 +75540,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Verona",
-    "stadio": "",
+    "stadio": "Marc'Antonio Bentegodi",
     "stato": "Futura"
   },
   {
@@ -75526,7 +75554,7 @@
     "gol_casa": "",
     "gol_ospite": "",
     "citta": "Palermo",
-    "stadio": "Stadio Renzo Barbera",
+    "stadio": "Renzo Barbera",
     "stato": "Futura"
   },
   {
@@ -81538,7 +81566,7 @@
   {
     "campionato": "Serie C - Girone A",
     "data": "23/11/2026",
-    "ora": "19:30",
+    "ora": "19:45",
     "giornata": "15",
     "squadra_casa": "Lecco",
     "squadra_ospite": "Lumezzane",
@@ -86718,7 +86746,7 @@
   {
     "campionato": "Serie C - Girone B",
     "data": "16/11/2026",
-    "ora": "19:30",
+    "ora": "19:45",
     "giornata": "14",
     "squadra_casa": "Perugia",
     "squadra_ospite": "Torres",
@@ -96428,7 +96456,7 @@
     "gol_casa": "1",
     "gol_ospite": "2",
     "citta": "Alanya",
-    "stadio": "Bahcesehir Okullari Stadium",
+    "stadio": "Alanya Oba Stadium",
     "stato": "Giocata"
   },
   {
@@ -96441,7 +96469,7 @@
     "risultato": "0–1",
     "gol_casa": "0",
     "gol_ospite": "1",
-    "citta": "Esenyurt",
+    "citta": "Istanbul",
     "stadio": "Esenyurt Necmi Kadioglu Stadi",
     "stato": "Giocata"
   },
@@ -96484,7 +96512,7 @@
     "gol_casa": "2",
     "gol_ospite": "0",
     "citta": "Konya",
-    "stadio": "Medas Konya Büyüksehir Belediyesi Stadium",
+    "stadio": "Konya Buyuksehir Belediye Stadium",
     "stato": "Giocata"
   },
   {
@@ -96512,7 +96540,7 @@
     "gol_casa": "2",
     "gol_ospite": "0",
     "citta": "Istanbul",
-    "stadio": "Tüpraş Stadyumu",
+    "stadio": "Tupras Stadium",
     "stato": "Giocata"
   },
   {
@@ -96540,7 +96568,7 @@
     "gol_casa": "2",
     "gol_ospite": "1",
     "citta": "Istanbul",
-    "stadio": "Rams Park Stadyumu",
+    "stadio": "Rams Park",
     "stato": "Giocata"
   },
   {
