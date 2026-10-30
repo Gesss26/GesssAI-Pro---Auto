@@ -1,265 +1,19 @@
 {
-  "aggiornato": "2026-10-27",
+  "aggiornato": "2026-10-30",
   "squadre": {
-    "Sassuolo": [
-      {
-        "nome": "Idzes",
-        "ruolo": "",
-        "motivo": "lesione di grado moderato al quadricipite della gamba sinistra, rientro da fine ottobre",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Boloca",
-        "ruolo": "",
-        "motivo": "problema al ginocchio, da valutare rientro da fine ottobre",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Konè I.",
-        "ruolo": "",
-        "motivo": "rottura di tibia e perone gamba sinistra, rientro da dicembre",
-        "importanza": "chiave",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Leysen F.",
-        "ruolo": "",
-        "motivo": "lesione crociato anteriore del ginocchio sinistro, ipotesi rientro da aprile",
-        "importanza": "chiave",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      }
-    ],
-    "Lazio": [
-      {
-        "nome": "Marusic",
-        "ruolo": "",
-        "motivo": "problema muscolare alla coscia destra, rientro da fine ottobre",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Rovella",
-        "ruolo": "",
-        "motivo": "problema muscolare al polpaccio, rientro da fine ottobre",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Gudmundsson A.",
-        "ruolo": "",
-        "motivo": "problema alla spalla destra, rientro da metà novembre",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      }
-    ],
-    "Roma": [
-      {
-        "nome": "Svilar",
-        "ruolo": "",
-        "motivo": "frattura a un dito del piede, rientro inizio novembre",
-        "importanza": "chiave",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Konè M.",
-        "ruolo": "",
-        "motivo": "lesione di primo grado al bicipite femorale destro, tentativo di rientro dalla prima metà di novembre",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Pellegrini Lo.",
-        "ruolo": "",
-        "motivo": "lesione di alto grado in corrispondenza della giunzione muscolo - tendinea distale del muscolo semitendinoso della coscia destra, ipotesi rientro dalla fine di dicembre",
-        "importanza": "chiave",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      }
-    ],
-    "Cagliari": [
-      {
-        "nome": "Idrissi R.",
-        "ruolo": "",
-        "motivo": "rottura del legamento crociato, rientro da metà novembre",
-        "importanza": "chiave",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Winks",
-        "ruolo": "",
-        "motivo": "lombalgia, out a Roma",
-        "importanza": "marginale",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Felici",
-        "ruolo": "",
-        "motivo": "rottura del legamento crociato anteriore, ipotesi rientro da marzo",
-        "importanza": "chiave",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      }
-    ],
-    "Torino": [
-      {
-        "nome": "Ilkhan",
-        "ruolo": "",
-        "motivo": "noie muscolari, out contro il Como",
-        "importanza": "marginale",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Fortini",
-        "ruolo": "",
-        "motivo": "affaticamento muscolare all'adduttore, da valutare convocazione contro il Como",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Mandragora",
-        "ruolo": "",
-        "motivo": "problema muscolare al flessore della coscia sinistra, out contro il Como",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Rodriguez R.",
-        "ruolo": "",
-        "motivo": "lesione tendinea di basso grado ai muscoli flessori della coscia sinistra, rientro dalla prima metà di novembre",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      }
-    ],
-    "Como": [
-      {
-        "nome": "Liberali",
-        "ruolo": "",
-        "motivo": "fastidio alla gamba, rientro fine ottobre",
-        "importanza": "marginale",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Rodriguez Je.",
-        "ruolo": "",
-        "motivo": "problema fisico, ipotesi rientro metà dicembre",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Diao",
-        "ruolo": "",
-        "motivo": "lesione muscolare al flessore della gamba, rientro dalla metà di novembre",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Chalobah T.",
-        "ruolo": "",
-        "motivo": "problema muscolare alla gamba, rientro da inizio novembre",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Kean",
-        "ruolo": "",
-        "motivo": "fastidio alla tibia, rientro da fine ottobre",
-        "importanza": "marginale",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      }
-    ],
-    "Milan": [
-      {
-        "nome": "Gabbia",
-        "ruolo": "",
-        "motivo": "lesione del flessore della coscia sinistra con parziale interessamento tendineo, ipotesi rientro da fine febbraio",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Gila",
-        "ruolo": "",
-        "motivo": "sovraccarico alla caviglia sinistra, da valutare contro il Bologna",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Saelemaekers",
-        "ruolo": "",
-        "motivo": "problema alla caviglia destra, ipotesi rientro da febbraio",
-        "importanza": "chiave",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Loftus-Cheek",
-        "ruolo": "",
-        "motivo": "lesione muscolare al flessore, rientro dalla seconda metà di novembre",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Rabiot",
-        "ruolo": "",
-        "motivo": "affaticamento muscolare al polpaccio destro, rientro da fine ottobre",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Chukwueze",
-        "ruolo": "",
-        "motivo": "problema all'anca sinistra, contro il Bologna",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Moreira",
-        "ruolo": "",
-        "motivo": "affaticamento muscolare al flessore sinistro, da valutare contro il Bologna",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      }
-    ],
     "Bologna": [
+      {
+        "nome": "De Silvestri",
+        "ruolo": "",
+        "motivo": "risentimento muscolare ai flessori della coscia destra, out contro il Monza",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
       {
         "nome": "Holm",
         "ruolo": "",
         "motivo": "problema al tendine della coscia destra, ipotesi rientro da fine febbraio",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Orsolini",
-        "ruolo": "",
-        "motivo": "lesione di primo grado al bicipite femorale della coscia destra, rientro dalla prima metà di novembre",
         "importanza": "rotazione",
         "tipo": "injureds",
         "rientro": "N/D"
@@ -271,29 +25,45 @@
         "importanza": "rotazione",
         "tipo": "injureds",
         "rientro": "N/D"
+      },
+      {
+        "nome": "Enem",
+        "ruolo": "",
+        "motivo": "lieve affaticamento muscolare, out contro il Monza",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
       }
     ],
-    "Parma": [
+    "Monza": [
       {
-        "nome": "Nicolussi Caviglia",
+        "nome": "Pessina",
         "ruolo": "",
-        "motivo": "lesione di medio grado alla coscia destra, rientro da inizio novembre",
+        "motivo": "lussazione della rotula del ginocchio destro, rientro da metà novembre",
         "importanza": "rotazione",
         "tipo": "injureds",
         "rientro": "N/D"
       },
       {
-        "nome": "Almqvist",
+        "nome": "Maye",
         "ruolo": "",
-        "motivo": "lesione muscolare polpaccio sinistro, rientro da fine ottobre",
-        "importanza": "rotazione",
+        "motivo": "noie fisiche, da valutare contro il Bologna",
+        "importanza": "marginale",
         "tipo": "injureds",
         "rientro": "N/D"
       },
       {
-        "nome": "Elphege",
+        "nome": "Folorunsho",
         "ruolo": "",
-        "motivo": "appendicite acuta, out contro l'Udinese",
+        "motivo": "noie muscolari al polpaccio, da valutare per Bologna",
+        "importanza": "marginale",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Ziolkowski",
+        "ruolo": "",
+        "motivo": "fascite plantare, rientro da metà novembre",
         "importanza": "marginale",
         "tipo": "injureds",
         "rientro": "N/D"
@@ -341,6 +111,174 @@
         "rientro": "N/D"
       }
     ],
+    "Roma": [
+      {
+        "nome": "Svilar",
+        "ruolo": "",
+        "motivo": "frattura a un dito del piede, rientro inizio novembre",
+        "importanza": "chiave",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Konè M.",
+        "ruolo": "",
+        "motivo": "lesione di primo grado al bicipite femorale destro, tentativo di rientro dalla prima metà di novembre",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Dybala",
+        "ruolo": "",
+        "motivo": "fastidio muscolare al polpaccio, rientro da fine ottobre",
+        "importanza": "marginale",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Pellegrini Lo.",
+        "ruolo": "",
+        "motivo": "lesione di alto grado in corrispondenza della giunzione muscolo - tendinea distale del muscolo semitendinoso della coscia destra, ipotesi rientro dalla fine di dicembre",
+        "importanza": "chiave",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      }
+    ],
+    "Milan": [
+      {
+        "nome": "Gabbia",
+        "ruolo": "",
+        "motivo": "lesione del flessore della coscia sinistra con parziale interessamento tendineo, ipotesi rientro da fine febbraio",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Gila",
+        "ruolo": "",
+        "motivo": "sovraccarico alla caviglia sinistra, out contro il Bologna",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Saelemaekers",
+        "ruolo": "",
+        "motivo": "problema alla caviglia destra, ipotesi rientro da febbraio",
+        "importanza": "chiave",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Loftus-Cheek",
+        "ruolo": "",
+        "motivo": "lesione muscolare al flessore, rientro dalla seconda metà di novembre",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Rabiot",
+        "ruolo": "",
+        "motivo": "affaticamento muscolare al polpaccio destro, rientro da fine ottobre",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Chukwueze",
+        "ruolo": "",
+        "motivo": "problema all'anca sinistra, contro il Bologna",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Moreira",
+        "ruolo": "",
+        "motivo": "affaticamento muscolare al flessore sinistro, out contro il Bologna",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      }
+    ],
+    "Inter": [
+      {
+        "nome": "Stones",
+        "ruolo": "",
+        "motivo": "risentimento ai flessori della coscia sinistra, da valutare rientro da fine ottobre",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Pavard",
+        "ruolo": "",
+        "motivo": "risentimento agli adduttori della coscia destra, rientro fine di ottobre",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Luis Henrique",
+        "ruolo": "",
+        "motivo": "risentimento all'adduttore lungo della coscia sinistra, ipotesi rientro da metà novembre",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Jones C.",
+        "ruolo": "",
+        "motivo": "risentimento miofasciale agli adduttori della coscia destra, tentativo rientro dalla fine di ottobre",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      }
+    ],
+    "Como": [
+      {
+        "nome": "Liberali",
+        "ruolo": "",
+        "motivo": "fastidio alla gamba, rientro fine ottobre",
+        "importanza": "marginale",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Rodriguez Je.",
+        "ruolo": "",
+        "motivo": "problema fisico, ipotesi rientro metà dicembre",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Diao",
+        "ruolo": "",
+        "motivo": "lesione muscolare al flessore della gamba, rientro dalla metà di novembre",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Chalobah T.",
+        "ruolo": "",
+        "motivo": "problema muscolare alla gamba, rientro da inizio novembre",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Kean",
+        "ruolo": "",
+        "motivo": "fastidio alla tibia, rientro da fine ottobre",
+        "importanza": "marginale",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      }
+    ],
     "Venezia": [
       {
         "nome": "Sverko",
@@ -375,37 +313,141 @@
         "rientro": "N/D"
       }
     ],
-    "Inter": [
+    "Frosinone": [
       {
-        "nome": "Stones",
+        "nome": "Grillitsch",
         "ruolo": "",
-        "motivo": "risentimento ai flessori della coscia sinistra, da valutare convocazione a Venezia",
+        "motivo": "sindrome retto-adduttoria, rientro da metà novembre",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      }
+    ],
+    "Torino": [
+      {
+        "nome": "Fortini",
+        "ruolo": "",
+        "motivo": "affaticamento muscolare all'adduttore, out contro il Como",
         "importanza": "rotazione",
         "tipo": "injureds",
         "rientro": "N/D"
       },
       {
-        "nome": "Pavard",
+        "nome": "Mandragora",
         "ruolo": "",
-        "motivo": "risentimento agli adduttori della coscia destra, rientro fine di ottobre",
+        "motivo": "problema muscolare al flessore della coscia sinistra, out contro il Como",
         "importanza": "rotazione",
         "tipo": "injureds",
         "rientro": "N/D"
       },
       {
-        "nome": "Luis Henrique",
+        "nome": "Rodriguez R.",
         "ruolo": "",
-        "motivo": "risentimento all'adduttore lungo della coscia sinistra, ipotesi rientro da metà novembre",
+        "motivo": "lesione tendinea di basso grado ai muscoli flessori della coscia sinistra, rientro dalla prima metà di novembre",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      }
+    ],
+    "Lazio": [
+      {
+        "nome": "Marusic",
+        "ruolo": "",
+        "motivo": "problema muscolare alla coscia destra, rientro da fine ottobre",
         "importanza": "rotazione",
         "tipo": "injureds",
         "rientro": "N/D"
       },
       {
-        "nome": "Jones C.",
+        "nome": "Rovella",
         "ruolo": "",
-        "motivo": "risentimento miofasciale agli adduttori della coscia destra, tentativo rientro dalla fine di ottobre",
+        "motivo": "problema muscolare al polpaccio, rientro da fine ottobre",
         "importanza": "rotazione",
         "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Gudmundsson A.",
+        "ruolo": "",
+        "motivo": "problema alla spalla destra, rientro da metà novembre",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      }
+    ],
+    "Cagliari": [
+      {
+        "nome": "Idrissi R.",
+        "ruolo": "",
+        "motivo": "rottura del legamento crociato, rientro da metà novembre",
+        "importanza": "chiave",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Winks",
+        "ruolo": "",
+        "motivo": "lombalgia, out a Roma",
+        "importanza": "marginale",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Felici",
+        "ruolo": "",
+        "motivo": "rottura del legamento crociato anteriore, ipotesi rientro da marzo",
+        "importanza": "chiave",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      }
+    ],
+    "Lecce": [
+      {
+        "nome": "Coulibaly L.",
+        "ruolo": "",
+        "motivo": "lesione muscolare al bicipite femorale della coscia destra, rientro dall'inizio di novembre",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Berisha M.",
+        "ruolo": "",
+        "motivo": "sovraccarico muscolare alla gamba, rientro da inizio novembre",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Pierotti",
+        "ruolo": "",
+        "motivo": "frattura composta del malleolo mediale della caviglia destra, ipotesi rientro da gennaio",
+        "importanza": "chiave",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Geubbels",
+        "ruolo": "",
+        "motivo": "noie muscolari all'adduttore, da valutare",
+        "importanza": "marginale",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Ilic",
+        "ruolo": "",
+        "motivo": "lesione miotendinea del retto femorale sinistro con lesione parziale del tendine, rientro da aprile",
+        "importanza": "chiave",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
+        "nome": "Gaspar K.",
+        "ruolo": "",
+        "motivo": "squalificato",
+        "importanza": "marginale",
+        "tipo": "suspendeds",
         "rientro": "N/D"
       }
     ],
@@ -413,7 +455,7 @@
       {
         "nome": "Venturino",
         "ruolo": "",
-        "motivo": "problema al tendine rotuleo, rientro inizio novembre",
+        "motivo": "problema al tendine rotuleo, rientro metà novembre",
         "importanza": "rotazione",
         "tipo": "injureds",
         "rientro": "N/D"
@@ -423,22 +465,6 @@
         "ruolo": "",
         "motivo": "problema alla caviglia, rientro dall'inizio di novembre",
         "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Sow",
-        "ruolo": "",
-        "motivo": "distrazione muscolare al bicipite femorale della coscia sinistra, rientro da inizio novembre",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Ehizibue",
-        "ruolo": "",
-        "motivo": "noie fisiche, da valutare contro l'Inter",
-        "importanza": "marginale",
         "tipo": "injureds",
         "rientro": "N/D"
       }
@@ -509,32 +535,6 @@
         "rientro": "N/D"
       }
     ],
-    "Monza": [
-      {
-        "nome": "Pessina",
-        "ruolo": "",
-        "motivo": "lussazione della rotula del ginocchio destro, rientro da metà novembre",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Maye",
-        "ruolo": "",
-        "motivo": "noie fisiche, da valutare contro il Napoli",
-        "importanza": "marginale",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Ziolkowski",
-        "ruolo": "",
-        "motivo": "fascite plantare, rientro da metà novembre",
-        "importanza": "marginale",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      }
-    ],
     "Napoli": [
       {
         "nome": "Buongiorno",
@@ -585,51 +585,33 @@
         "rientro": "N/D"
       }
     ],
-    "Frosinone": [
+    "Sassuolo": [
       {
-        "nome": "Grillitsch",
+        "nome": "Boloca",
         "ruolo": "",
-        "motivo": "sindrome retto-adduttoria, rientro da metà novembre",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      }
-    ],
-    "Lecce": [
-      {
-        "nome": "Coulibaly L.",
-        "ruolo": "",
-        "motivo": "lesione muscolare al bicipite femorale della coscia destra, rientro dall'inizio di novembre",
+        "motivo": "problema al ginocchio, da valutare rientro da metà novembre",
         "importanza": "rotazione",
         "tipo": "injureds",
         "rientro": "N/D"
       },
       {
-        "nome": "Berisha M.",
+        "nome": "Konè I.",
         "ruolo": "",
-        "motivo": "sovraccarico muscolare alla gamba, rientro da inizio novembre",
-        "importanza": "rotazione",
-        "tipo": "injureds",
-        "rientro": "N/D"
-      },
-      {
-        "nome": "Pierotti",
-        "ruolo": "",
-        "motivo": "frattura composta del malleolo mediale della caviglia destra, ipotesi rientro da gennaio",
+        "motivo": "rottura di tibia e perone gamba sinistra, rientro da dicembre",
         "importanza": "chiave",
         "tipo": "injureds",
         "rientro": "N/D"
       },
       {
-        "nome": "Ilic",
+        "nome": "Leysen F.",
         "ruolo": "",
-        "motivo": "lesione miotendinea del retto femorale sinistro con lesione parziale del tendine, rientro da fine marzo",
-        "importanza": "rotazione",
+        "motivo": "lesione crociato anteriore del ginocchio sinistro, ipotesi rientro da aprile",
+        "importanza": "chiave",
         "tipo": "injureds",
         "rientro": "N/D"
       },
       {
-        "nome": "Gaspar K.",
+        "nome": "Thorstvedt",
         "ruolo": "",
         "motivo": "squalificato",
         "importanza": "marginale",
@@ -641,7 +623,7 @@
       {
         "nome": "Pongracic",
         "ruolo": "",
-        "motivo": "problema al bicipite femorale della coscia destra, da valutare",
+        "motivo": "lesione mio-fasciale a carico del capo lungo del bicipite femorale della coscia destra, rientro dalla seconda metà di novembre",
         "importanza": "rotazione",
         "tipo": "injureds",
         "rientro": "N/D"
@@ -657,7 +639,7 @@
       {
         "nome": "Atta",
         "ruolo": "",
-        "motivo": "sovraccarico funzionale dell'addome, out contro l'Atalanta",
+        "motivo": "sovraccarico funzionale dell'addome, tentativo rientro da inizio novembre",
         "importanza": "rotazione",
         "tipo": "injureds",
         "rientro": "N/D"
@@ -691,7 +673,7 @@
       {
         "nome": "Bellanova",
         "ruolo": "",
-        "motivo": "risentimento muscolare all'inguine, out a Firenze",
+        "motivo": "distrazione di basso grado dell'adduttore lungo dell’arto sinistro, rientro da metà novembre",
         "importanza": "rotazione",
         "tipo": "injureds",
         "rientro": "N/D"
@@ -705,9 +687,17 @@
         "rientro": "N/D"
       },
       {
+        "nome": "Scamacca",
+        "ruolo": "",
+        "motivo": "risentimento ai muscoli flessori della coscia destra, tentativo rientro da inizio novembre",
+        "importanza": "rotazione",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      },
+      {
         "nome": "Kessiè",
         "ruolo": "",
-        "motivo": "distrazione di basso grado al polpaccio della gamba destra, da valutare convocazione per Firenze",
+        "motivo": "distrazione di basso grado al polpaccio della gamba destra, tentativo rientro da inizio novembre",
         "importanza": "rotazione",
         "tipo": "injureds",
         "rientro": "N/D"
@@ -717,6 +707,16 @@
         "ruolo": "",
         "motivo": "frattura della falange della mano destra, out contro la Fiorentina",
         "importanza": "chiave",
+        "tipo": "injureds",
+        "rientro": "N/D"
+      }
+    ],
+    "Parma": [
+      {
+        "nome": "Elphege",
+        "ruolo": "",
+        "motivo": "appendicite acuta, out contro l'Udinese",
+        "importanza": "marginale",
         "tipo": "injureds",
         "rientro": "N/D"
       }

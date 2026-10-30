@@ -1,134 +1,134 @@
 {
   "giornata": null,
-  "aggiornato": "2026-10-27",
+  "aggiornato": "2026-10-30",
   "formazioni": {
-    "Sassuolo": {
-      "modulo": "4-3-3",
+    "Bologna": {
+      "modulo": "3-4-2-1",
       "titolari": [
         {
-          "nome": "Muric",
-          "ruolo": "",
-          "Mv": 5.43,
-          "Fm": 3.43,
-          "Pv": 7,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Muric"
-        },
-        {
-          "nome": "Cinquegrano",
-          "ruolo": "",
-          "Mv": 5.9,
-          "Fm": 6.1,
-          "Pv": 5,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Cinquegrano"
-        },
-        {
-          "nome": "Caleta-Car",
-          "ruolo": "",
-          "Mv": 5.25,
-          "Fm": 5.25,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Caleta-Car"
-        },
-        {
-          "nome": "Odenthal",
-          "ruolo": "",
-          "Mv": 6.33,
-          "Fm": 8.33,
-          "Pv": 3,
-          "Gf": 2,
-          "Ass": 0,
-          "nome_excel": "Odenthal"
-        },
-        {
-          "nome": "Doig",
-          "ruolo": "",
-          "Mv": 5.94,
-          "Fm": 6.31,
-          "Pv": 8,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Doig"
-        },
-        {
-          "nome": "Thorstvedt",
+          "nome": "Skorupski",
           "ruolo": "",
           "Mv": 5.86,
-          "Fm": 6.21,
-          "Pv": 7,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Thorstvedt"
-        },
-        {
-          "nome": "Matic",
-          "ruolo": "",
-          "Mv": 6.25,
-          "Fm": 6.31,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Matic"
-        },
-        {
-          "nome": "Bakola",
-          "ruolo": "",
-          "Mv": 6.07,
-          "Fm": 6.36,
+          "Fm": 4.43,
           "Pv": 7,
           "Gf": 0,
-          "Ass": 2,
-          "nome_excel": "Bakola"
-        },
-        {
-          "nome": "Berardi",
-          "ruolo": "",
-          "Mv": 6.07,
-          "Fm": 6.79,
-          "Pv": 7,
-          "Gf": 2,
           "Ass": 0,
-          "nome_excel": "Berardi"
+          "nome_excel": "Skorupski"
         },
         {
-          "nome": "Esposito Se.",
+          "nome": "Darmian",
           "ruolo": "",
-          "Mv": 6.5,
-          "Fm": 7.5,
+          "Mv": 5.88,
+          "Fm": 5.88,
           "Pv": 4,
-          "Gf": 1,
-          "Ass": 1,
-          "nome_excel": "Esposito Se."
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Darmian"
         },
         {
-          "nome": "Laurientè",
+          "nome": "Casale",
           "ruolo": "",
           "Mv": 6.12,
-          "Fm": 6.19,
-          "Pv": 8,
+          "Fm": 6.88,
+          "Pv": 4,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Casale"
+        },
+        {
+          "nome": "Theate",
+          "ruolo": "",
+          "Mv": 5.83,
+          "Fm": 5.75,
+          "Pv": 6,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Theate"
+        },
+        {
+          "nome": "Zortea",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.14,
+          "Pv": 7,
           "Gf": 0,
           "Ass": 1,
-          "nome_excel": "Laurientè"
+          "nome_excel": "Zortea"
+        },
+        {
+          "nome": "Pobega",
+          "ruolo": "",
+          "Mv": 6.31,
+          "Fm": 6.56,
+          "Pv": 8,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Pobega"
+        },
+        {
+          "nome": "Ferguson",
+          "ruolo": "",
+          "Mv": 6.17,
+          "Fm": 6.17,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Ferguson"
+        },
+        {
+          "nome": "Miranda J.",
+          "ruolo": "",
+          "Mv": 6.38,
+          "Fm": 6.81,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 4,
+          "nome_excel": "Miranda J."
+        },
+        {
+          "nome": "Bernardeschi",
+          "ruolo": "",
+          "Mv": 6.38,
+          "Fm": 7.0,
+          "Pv": 8,
+          "Gf": 2,
+          "Ass": 0,
+          "nome_excel": "Bernardeschi"
+        },
+        {
+          "nome": "Mbangula",
+          "ruolo": "",
+          "Mv": 9.0,
+          "Fm": 18.0,
+          "Pv": 1,
+          "Gf": 3,
+          "Ass": 0,
+          "nome_excel": "Mbangula"
+        },
+        {
+          "nome": "Odgaard",
+          "ruolo": "",
+          "Mv": 5.71,
+          "Fm": 5.79,
+          "Pv": 7,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Odgaard"
         }
       ],
       "panchina": [
         {
-          "nome": "Turati",
+          "nome": "Pessina Mas.",
           "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 4.0,
-          "Pv": 1,
+          "Mv": 5.5,
+          "Fm": 4.5,
+          "Pv": 2,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": "Turati"
+          "nome_excel": "Pessina Mas."
         },
         {
-          "nome": "Satalino",
+          "nome": "Happonen",
           "ruolo": "",
           "Mv": 0.0,
           "Fm": 0.0,
@@ -138,157 +138,125 @@
           "nome_excel": null
         },
         {
-          "nome": "Van Der Brempt",
+          "nome": "Alhassane",
           "ruolo": "",
-          "Mv": 5.33,
-          "Fm": 5.17,
-          "Pv": 3,
+          "Mv": 5.75,
+          "Fm": 5.75,
+          "Pv": 4,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": "Van Der Brempt"
+          "nome_excel": "Alhassane"
         },
         {
-          "nome": "Obrador",
+          "nome": "Helland",
           "ruolo": "",
           "Mv": 6.0,
           "Fm": 6.0,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Obrador"
-        },
-        {
-          "nome": "Candè",
-          "ruolo": "",
-          "Mv": 5.0,
-          "Fm": 5.0,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Candè"
-        },
-        {
-          "nome": "Pieragnolo",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Walukiewicz",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Adzic",
-          "ruolo": "",
-          "Mv": 6.36,
-          "Fm": 7.79,
-          "Pv": 7,
-          "Gf": 3,
-          "Ass": 1,
-          "nome_excel": "Adzic"
-        },
-        {
-          "nome": "Lipani",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 5.8,
           "Pv": 5,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": "Lipani"
+          "nome_excel": "Helland"
         },
         {
-          "nome": "Ghion",
+          "nome": "Heggem",
           "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
+          "Mv": 5.71,
+          "Fm": 5.5,
+          "Pv": 7,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": null
+          "nome_excel": "Heggem"
         },
         {
-          "nome": "Sulemana I.",
+          "nome": "Vitik",
           "ruolo": "",
           "Mv": 6.0,
           "Fm": 6.0,
           "Pv": 1,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": "Sulemana I."
+          "nome_excel": "Vitik"
         },
         {
-          "nome": "Volpato",
+          "nome": "Moro N.",
           "ruolo": "",
-          "Mv": 6.5,
-          "Fm": 7.12,
+          "Mv": 5.75,
+          "Fm": 5.75,
+          "Pv": 4,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Moro N."
+        },
+        {
+          "nome": "El Azzouzi O.",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.0,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "El Azzouzi O."
+        },
+        {
+          "nome": "Amondarain",
+          "ruolo": "",
+          "Mv": 5.67,
+          "Fm": 5.5,
+          "Pv": 3,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Amondarain"
+        },
+        {
+          "nome": "Libra",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.5,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Libra"
+        },
+        {
+          "nome": "Cambiaghi",
+          "ruolo": "",
+          "Mv": 6.17,
+          "Fm": 6.33,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 2,
+          "nome_excel": "Cambiaghi"
+        },
+        {
+          "nome": "Orsolini",
+          "ruolo": "",
+          "Mv": 6.25,
+          "Fm": 7.0,
           "Pv": 4,
           "Gf": 1,
           "Ass": 0,
-          "nome_excel": "Volpato"
+          "nome_excel": "Orsolini"
         },
         {
-          "nome": "Dominguez B.",
+          "nome": "Dovbyk",
           "ruolo": "",
-          "Mv": 5.92,
-          "Fm": 5.92,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Dominguez B."
-        },
-        {
-          "nome": "Bowie",
-          "ruolo": "",
-          "Mv": 5.94,
-          "Fm": 6.25,
-          "Pv": 8,
+          "Mv": 5.75,
+          "Fm": 6.38,
+          "Pv": 4,
           "Gf": 1,
           "Ass": 0,
-          "nome_excel": "Bowie"
-        },
-        {
-          "nome": "Skjellerup",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
+          "nome_excel": "Dovbyk"
         }
       ],
       "ballottaggi": [
         {
           "giocatori": [
             {
-              "nome": "Cinquegrano",
-              "percentuale": "55%"
-            },
-            {
-              "nome": "Van Der Brempt",
-              "percentuale": "45%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Doig",
+              "nome": "Casale",
               "percentuale": "60%"
             },
             {
-              "nome": "Obrador",
+              "nome": "Heggem",
               "percentuale": "40%"
             }
           ]
@@ -296,16 +264,2177 @@
         {
           "giocatori": [
             {
-              "nome": "Bakola",
+              "nome": "Ferguson",
               "percentuale": "55%"
             },
             {
-              "nome": "Adzic",
+              "nome": "Moro N.",
               "percentuale": "45%"
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Odgaard",
+              "percentuale": "60%"
+            },
+            {
+              "nome": "Dovbyk",
+              "percentuale": "40%"
             }
           ]
         }
       ]
+    },
+    "Monza": {
+      "modulo": "3-4-2-1",
+      "titolari": [
+        {
+          "nome": "Tornqvist",
+          "ruolo": "",
+          "Mv": 6.4,
+          "Fm": 4.2,
+          "Pv": 5,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Tornqvist"
+        },
+        {
+          "nome": "Kouadio",
+          "ruolo": "",
+          "Mv": 5.94,
+          "Fm": 6.19,
+          "Pv": 8,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Kouadio"
+        },
+        {
+          "nome": "Goglichidze",
+          "ruolo": "",
+          "Mv": 6.25,
+          "Fm": 6.88,
+          "Pv": 4,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Goglichidze"
+        },
+        {
+          "nome": "Lucchesi",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.25,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Lucchesi"
+        },
+        {
+          "nome": "Birindelli",
+          "ruolo": "",
+          "Mv": 5.83,
+          "Fm": 5.94,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 2,
+          "nome_excel": "Birindelli"
+        },
+        {
+          "nome": "Foe Ondoa",
+          "ruolo": "",
+          "Mv": 5.75,
+          "Fm": 5.83,
+          "Pv": 6,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Foe Ondoa"
+        },
+        {
+          "nome": "Akinsanmiro",
+          "ruolo": "",
+          "Mv": 5.88,
+          "Fm": 6.0,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Akinsanmiro"
+        },
+        {
+          "nome": "Mangas",
+          "ruolo": "",
+          "Mv": 6.11,
+          "Fm": 6.67,
+          "Pv": 9,
+          "Gf": 1,
+          "Ass": 2,
+          "nome_excel": "Mangas"
+        },
+        {
+          "nome": "Ngonge",
+          "ruolo": "",
+          "Mv": 5.83,
+          "Fm": 5.83,
+          "Pv": 3,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Ngonge"
+        },
+        {
+          "nome": "Robinson J.",
+          "ruolo": "",
+          "Mv": 6.5,
+          "Fm": 7.67,
+          "Pv": 6,
+          "Gf": 2,
+          "Ass": 1,
+          "nome_excel": "Robinson J."
+        },
+        {
+          "nome": "Varela G.",
+          "ruolo": "",
+          "Mv": 7.0,
+          "Fm": 10.06,
+          "Pv": 8,
+          "Gf": 8,
+          "Ass": 1,
+          "nome_excel": "Varela G."
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Thiam",
+          "ruolo": "",
+          "Mv": 5.17,
+          "Fm": 2.83,
+          "Pv": 3,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Thiam"
+        },
+        {
+          "nome": "Strajnar",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Bakoune",
+          "ruolo": "",
+          "Mv": 5.8,
+          "Fm": 5.8,
+          "Pv": 5,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Bakoune"
+        },
+        {
+          "nome": "Carboni A.",
+          "ruolo": "",
+          "Mv": 5.72,
+          "Fm": 5.67,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Carboni A."
+        },
+        {
+          "nome": "Antov",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.0,
+          "Pv": 1,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Antov"
+        },
+        {
+          "nome": "Colombo L.",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.0,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Colombo L."
+        },
+        {
+          "nome": "Mout",
+          "ruolo": "",
+          "Mv": 5.0,
+          "Fm": 5.0,
+          "Pv": 1,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Mout"
+        },
+        {
+          "nome": "Colpani",
+          "ruolo": "",
+          "Mv": 5.83,
+          "Fm": 6.33,
+          "Pv": 6,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Colpani"
+        },
+        {
+          "nome": "Tourè I.",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Ciurria",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Forson O.",
+          "ruolo": "",
+          "Mv": 5.83,
+          "Fm": 5.83,
+          "Pv": 3,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Forson O."
+        },
+        {
+          "nome": "Cutrone",
+          "ruolo": "",
+          "Mv": 5.88,
+          "Fm": 5.88,
+          "Pv": 4,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Cutrone"
+        },
+        {
+          "nome": "Mota",
+          "ruolo": "",
+          "Mv": 6.3,
+          "Fm": 6.7,
+          "Pv": 5,
+          "Gf": 0,
+          "Ass": 2,
+          "nome_excel": "Mota"
+        },
+        {
+          "nome": "Zeballos",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 7.0,
+          "Pv": 3,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Zeballos"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Kouadio",
+              "percentuale": "60%"
+            },
+            {
+              "nome": "Carboni A.",
+              "percentuale": "40%"
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Ngonge",
+              "percentuale": "55%"
+            },
+            {
+              "nome": "Cutrone",
+              "percentuale": "45%"
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Robinson J.",
+              "percentuale": "60%"
+            },
+            {
+              "nome": "Mota",
+              "percentuale": "40%"
+            }
+          ]
+        }
+      ]
+    },
+    "Udinese": {
+      "modulo": "3-4-2-1",
+      "titolari": [
+        {
+          "nome": "Okoye",
+          "ruolo": "",
+          "Mv": 6.06,
+          "Fm": 4.39,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Okoye"
+        },
+        {
+          "nome": "Abankwah",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.31,
+          "Pv": 8,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Abankwah"
+        },
+        {
+          "nome": "Kabasele",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.5,
+          "Pv": 5,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Kabasele"
+        },
+        {
+          "nome": "Palma",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.0,
+          "Pv": 4,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Palma"
+        },
+        {
+          "nome": "Bertola",
+          "ruolo": "",
+          "Mv": 5.88,
+          "Fm": 5.75,
+          "Pv": 4,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Bertola"
+        },
+        {
+          "nome": "Karlstrom",
+          "ruolo": "",
+          "Mv": 5.89,
+          "Fm": 6.0,
+          "Pv": 9,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Karlstrom"
+        },
+        {
+          "nome": "Chakvetadze",
+          "ruolo": "",
+          "Mv": 5.58,
+          "Fm": 5.58,
+          "Pv": 6,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Chakvetadze"
+        },
+        {
+          "nome": "Kamara H.",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.61,
+          "Pv": 9,
+          "Gf": 2,
+          "Ass": 0,
+          "nome_excel": "Kamara H."
+        },
+        {
+          "nome": "Zaniolo",
+          "ruolo": "",
+          "Mv": 5.88,
+          "Fm": 5.62,
+          "Pv": 4,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Zaniolo"
+        },
+        {
+          "nome": "Ekkelenkamp",
+          "ruolo": "",
+          "Mv": 6.11,
+          "Fm": 7.22,
+          "Pv": 9,
+          "Gf": 3,
+          "Ass": 1,
+          "nome_excel": "Ekkelenkamp"
+        },
+        {
+          "nome": "Davis K.",
+          "ruolo": "",
+          "Mv": 5.88,
+          "Fm": 6.06,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 2,
+          "nome_excel": "Davis K."
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Mrozek",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Padelli",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Vojvoda",
+          "ruolo": "",
+          "Mv": 5.61,
+          "Fm": 5.61,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Vojvoda"
+        },
+        {
+          "nome": "Ebosse",
+          "ruolo": "",
+          "Mv": 5.62,
+          "Fm": 5.62,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Ebosse"
+        },
+        {
+          "nome": "Arizala",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.5,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Arizala"
+        },
+        {
+          "nome": "Miller L.",
+          "ruolo": "",
+          "Mv": 5.75,
+          "Fm": 5.67,
+          "Pv": 6,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Miller L."
+        },
+        {
+          "nome": "Lovric",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Zarraga",
+          "ruolo": "",
+          "Mv": 5.75,
+          "Fm": 5.75,
+          "Pv": 4,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Zarraga"
+        },
+        {
+          "nome": "Jovanovic",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.5,
+          "Pv": 1,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Jovanovic"
+        },
+        {
+          "nome": "Piotrowski",
+          "ruolo": "",
+          "Mv": 5.9,
+          "Fm": 6.4,
+          "Pv": 5,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Piotrowski"
+        },
+        {
+          "nome": "Unai Gomez",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.67,
+          "Pv": 6,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Unai Gomez"
+        },
+        {
+          "nome": "Vinciati",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        }
+      ],
+      "ballottaggi": []
+    },
+    "Roma": {
+      "modulo": "3-4-2-1",
+      "titolari": [
+        {
+          "nome": "Gollini",
+          "ruolo": "",
+          "Mv": 6.5,
+          "Fm": 5.25,
+          "Pv": 4,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Gollini"
+        },
+        {
+          "nome": "Mancini",
+          "ruolo": "",
+          "Mv": 6.06,
+          "Fm": 6.19,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Mancini"
+        },
+        {
+          "nome": "N'Dicka",
+          "ruolo": "",
+          "Mv": 5.93,
+          "Fm": 5.86,
+          "Pv": 7,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "N'Dicka"
+        },
+        {
+          "nome": "Koulierakis",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.0,
+          "Pv": 3,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Koulierakis"
+        },
+        {
+          "nome": "Lulli",
+          "ruolo": "",
+          "Mv": 6.58,
+          "Fm": 7.75,
+          "Pv": 6,
+          "Gf": 2,
+          "Ass": 1,
+          "nome_excel": "Lulli"
+        },
+        {
+          "nome": "De Roon",
+          "ruolo": "",
+          "Mv": 6.2,
+          "Fm": 6.0,
+          "Pv": 5,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "De Roon"
+        },
+        {
+          "nome": "Pisilli",
+          "ruolo": "",
+          "Mv": 6.21,
+          "Fm": 7.36,
+          "Pv": 7,
+          "Gf": 3,
+          "Ass": 0,
+          "nome_excel": "Pisilli"
+        },
+        {
+          "nome": "Molina N.",
+          "ruolo": "",
+          "Mv": 6.21,
+          "Fm": 6.5,
+          "Pv": 7,
+          "Gf": 0,
+          "Ass": 2,
+          "nome_excel": "Molina N."
+        },
+        {
+          "nome": "Soulè",
+          "ruolo": "",
+          "Mv": 6.5,
+          "Fm": 7.5,
+          "Pv": 9,
+          "Gf": 3,
+          "Ass": 1,
+          "nome_excel": "Soulè"
+        },
+        {
+          "nome": "Cristante",
+          "ruolo": "",
+          "Mv": 6.21,
+          "Fm": 6.14,
+          "Pv": 7,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Cristante"
+        },
+        {
+          "nome": "Castro S.",
+          "ruolo": "",
+          "Mv": 6.14,
+          "Fm": 6.57,
+          "Pv": 7,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Castro S."
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "De Marzi",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Vasquez D.",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Hermoso",
+          "ruolo": "",
+          "Mv": 6.19,
+          "Fm": 6.44,
+          "Pv": 8,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Hermoso"
+        },
+        {
+          "nome": "Balerdi",
+          "ruolo": "",
+          "Mv": 6.75,
+          "Fm": 7.67,
+          "Pv": 6,
+          "Gf": 2,
+          "Ass": 0,
+          "nome_excel": "Balerdi"
+        },
+        {
+          "nome": "Ghilardi",
+          "ruolo": "",
+          "Mv": 6.25,
+          "Fm": 6.38,
+          "Pv": 4,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Ghilardi"
+        },
+        {
+          "nome": "Wesley",
+          "ruolo": "",
+          "Mv": 6.36,
+          "Fm": 6.64,
+          "Pv": 7,
+          "Gf": 0,
+          "Ass": 2,
+          "nome_excel": "Wesley"
+        },
+        {
+          "nome": "Rensch",
+          "ruolo": "",
+          "Mv": 5.6,
+          "Fm": 5.5,
+          "Pv": 5,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Rensch"
+        },
+        {
+          "nome": "Mora",
+          "ruolo": "",
+          "Mv": 6.43,
+          "Fm": 7.29,
+          "Pv": 7,
+          "Gf": 2,
+          "Ass": 0,
+          "nome_excel": "Mora"
+        },
+        {
+          "nome": "Malen",
+          "ruolo": "",
+          "Mv": 6.56,
+          "Fm": 9.12,
+          "Pv": 8,
+          "Gf": 7,
+          "Ass": 1,
+          "nome_excel": "Malen"
+        }
+      ],
+      "ballottaggi": []
+    },
+    "Milan": {
+      "modulo": "4-4-1-1",
+      "titolari": [
+        {
+          "nome": "Maignan",
+          "ruolo": "",
+          "Mv": 6.17,
+          "Fm": 4.94,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Maignan"
+        },
+        {
+          "nome": "Tomori",
+          "ruolo": "",
+          "Mv": 6.5,
+          "Fm": 7.0,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Tomori"
+        },
+        {
+          "nome": "De Winter",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 5.89,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "De Winter"
+        },
+        {
+          "nome": "Pavlovic",
+          "ruolo": "",
+          "Mv": 6.06,
+          "Fm": 6.0,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Pavlovic"
+        },
+        {
+          "nome": "Estupinan",
+          "ruolo": "",
+          "Mv": 5.71,
+          "Fm": 5.57,
+          "Pv": 7,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Estupinan"
+        },
+        {
+          "nome": "Hutchinson",
+          "ruolo": "",
+          "Mv": 6.17,
+          "Fm": 7.17,
+          "Pv": 3,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Hutchinson"
+        },
+        {
+          "nome": "Musah",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.0,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Musah"
+        },
+        {
+          "nome": "Jashari",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.0,
+          "Pv": 5,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Jashari"
+        },
+        {
+          "nome": "Bartesaghi",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 5.5,
+          "Pv": 4,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Bartesaghi"
+        },
+        {
+          "nome": "Cissè A.",
+          "ruolo": "",
+          "Mv": 6.5,
+          "Fm": 8.8,
+          "Pv": 5,
+          "Gf": 4,
+          "Ass": 0,
+          "nome_excel": "Cissè A."
+        },
+        {
+          "nome": "Ramos G.",
+          "ruolo": "",
+          "Mv": 5.94,
+          "Fm": 6.28,
+          "Pv": 9,
+          "Gf": 2,
+          "Ass": 1,
+          "nome_excel": "Ramos G."
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Torriani",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Terracciano F.",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Diawara S.",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.5,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Diawara S."
+        },
+        {
+          "nome": "Modric",
+          "ruolo": "",
+          "Mv": 6.17,
+          "Fm": 6.33,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 2,
+          "nome_excel": "Modric"
+        },
+        {
+          "nome": "Comotto",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Pulisic",
+          "ruolo": "",
+          "Mv": 6.33,
+          "Fm": 7.42,
+          "Pv": 6,
+          "Gf": 2,
+          "Ass": 1,
+          "nome_excel": "Pulisic"
+        },
+        {
+          "nome": "Camarda",
+          "ruolo": "",
+          "Mv": 5.0,
+          "Fm": 5.0,
+          "Pv": 1,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Camarda"
+        }
+      ],
+      "ballottaggi": []
+    },
+    "Inter": {
+      "modulo": "3-5-2",
+      "titolari": [
+        {
+          "nome": "Provedel",
+          "ruolo": "",
+          "Mv": 6.25,
+          "Fm": 5.75,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Provedel"
+        },
+        {
+          "nome": "Bisseck",
+          "ruolo": "",
+          "Mv": 6.06,
+          "Fm": 6.44,
+          "Pv": 8,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Bisseck"
+        },
+        {
+          "nome": "Bastoni",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 5.88,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Bastoni"
+        },
+        {
+          "nome": "Carlos Augusto",
+          "ruolo": "",
+          "Mv": 6.79,
+          "Fm": 7.86,
+          "Pv": 7,
+          "Gf": 2,
+          "Ass": 2,
+          "nome_excel": "Carlos Augusto"
+        },
+        {
+          "nome": "Diouf",
+          "ruolo": "",
+          "Mv": 6.31,
+          "Fm": 6.81,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 4,
+          "nome_excel": "Diouf"
+        },
+        {
+          "nome": "Sucic P.",
+          "ruolo": "",
+          "Mv": 6.19,
+          "Fm": 6.56,
+          "Pv": 8,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Sucic P."
+        },
+        {
+          "nome": "Stankovic A.",
+          "ruolo": "",
+          "Mv": 5.75,
+          "Fm": 5.75,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Stankovic A."
+        },
+        {
+          "nome": "Zielinski",
+          "ruolo": "",
+          "Mv": 6.5,
+          "Fm": 7.5,
+          "Pv": 8,
+          "Gf": 2,
+          "Ass": 2,
+          "nome_excel": "Zielinski"
+        },
+        {
+          "nome": "Dimarco",
+          "ruolo": "",
+          "Mv": 6.06,
+          "Fm": 6.17,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Dimarco"
+        },
+        {
+          "nome": "Thuram",
+          "ruolo": "",
+          "Mv": 6.81,
+          "Fm": 8.88,
+          "Pv": 8,
+          "Gf": 5,
+          "Ass": 2,
+          "nome_excel": "Thuram"
+        },
+        {
+          "nome": "Bonny",
+          "ruolo": "",
+          "Mv": 6.25,
+          "Fm": 7.25,
+          "Pv": 6,
+          "Gf": 2,
+          "Ass": 0,
+          "nome_excel": "Bonny"
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Martinez Jo.",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 4.71,
+          "Pv": 7,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Martinez Jo."
+        },
+        {
+          "nome": "Di Gennaro",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Akanji",
+          "ruolo": "",
+          "Mv": 5.94,
+          "Fm": 5.94,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Akanji"
+        },
+        {
+          "nome": "Spence",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.0,
+          "Pv": 1,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Spence"
+        },
+        {
+          "nome": "Calhanoglu",
+          "ruolo": "",
+          "Mv": 6.5,
+          "Fm": 7.71,
+          "Pv": 7,
+          "Gf": 3,
+          "Ass": 0,
+          "nome_excel": "Calhanoglu"
+        },
+        {
+          "nome": "Mkhitaryan",
+          "ruolo": "",
+          "Mv": 6.12,
+          "Fm": 6.25,
+          "Pv": 4,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Mkhitaryan"
+        },
+        {
+          "nome": "Barella",
+          "ruolo": "",
+          "Mv": 6.25,
+          "Fm": 6.75,
+          "Pv": 8,
+          "Gf": 1,
+          "Ass": 2,
+          "nome_excel": "Barella"
+        },
+        {
+          "nome": "Esposito F.P.",
+          "ruolo": "",
+          "Mv": 6.38,
+          "Fm": 7.19,
+          "Pv": 8,
+          "Gf": 2,
+          "Ass": 1,
+          "nome_excel": "Esposito F.P."
+        },
+        {
+          "nome": "Lavelli",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        }
+      ],
+      "ballottaggi": []
+    },
+    "Como": {
+      "modulo": "4-2-3-1",
+      "titolari": [
+        {
+          "nome": "Sanchez Ro.",
+          "ruolo": "",
+          "Mv": 6.5,
+          "Fm": 5.5,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Sanchez Ro."
+        },
+        {
+          "nome": "Couto",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.12,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 2,
+          "nome_excel": "Couto"
+        },
+        {
+          "nome": "Kempf",
+          "ruolo": "",
+          "Mv": 6.3,
+          "Fm": 6.3,
+          "Pv": 5,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Kempf"
+        },
+        {
+          "nome": "Ramon",
+          "ruolo": "",
+          "Mv": 6.39,
+          "Fm": 7.0,
+          "Pv": 9,
+          "Gf": 2,
+          "Ass": 0,
+          "nome_excel": "Ramon"
+        },
+        {
+          "nome": "Valle",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.25,
+          "Pv": 6,
+          "Gf": 0,
+          "Ass": 2,
+          "nome_excel": "Valle"
+        },
+        {
+          "nome": "Perrone",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.0,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Perrone"
+        },
+        {
+          "nome": "Milla",
+          "ruolo": "",
+          "Mv": 6.42,
+          "Fm": 6.33,
+          "Pv": 6,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Milla"
+        },
+        {
+          "nome": "Da Cunha",
+          "ruolo": "",
+          "Mv": 6.22,
+          "Fm": 6.22,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Da Cunha"
+        },
+        {
+          "nome": "Paz N.",
+          "ruolo": "",
+          "Mv": 6.5,
+          "Fm": 7.94,
+          "Pv": 8,
+          "Gf": 3,
+          "Ass": 3,
+          "nome_excel": "Paz N."
+        },
+        {
+          "nome": "Caqueret",
+          "ruolo": "",
+          "Mv": 6.21,
+          "Fm": 6.43,
+          "Pv": 7,
+          "Gf": 0,
+          "Ass": 2,
+          "nome_excel": "Caqueret"
+        },
+        {
+          "nome": "Douvikas",
+          "ruolo": "",
+          "Mv": 6.28,
+          "Fm": 7.94,
+          "Pv": 9,
+          "Gf": 5,
+          "Ass": 0,
+          "nome_excel": "Douvikas"
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Butez",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 5.14,
+          "Pv": 7,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Butez"
+        },
+        {
+          "nome": "Vigorito",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Smolcic I.",
+          "ruolo": "",
+          "Mv": 5.83,
+          "Fm": 5.83,
+          "Pv": 3,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Smolcic I."
+        },
+        {
+          "nome": "Goldaniga",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Kaiki",
+          "ruolo": "",
+          "Mv": 6.42,
+          "Fm": 7.08,
+          "Pv": 6,
+          "Gf": 1,
+          "Ass": 1,
+          "nome_excel": "Kaiki"
+        },
+        {
+          "nome": "Kambwala",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.0,
+          "Pv": 1,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Kambwala"
+        },
+        {
+          "nome": "Dossena",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Baturina",
+          "ruolo": "",
+          "Mv": 6.19,
+          "Fm": 7.19,
+          "Pv": 8,
+          "Gf": 3,
+          "Ass": 0,
+          "nome_excel": "Baturina"
+        },
+        {
+          "nome": "Ricci S.",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.5,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Ricci S."
+        },
+        {
+          "nome": "Lahdo",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Addai",
+          "ruolo": "",
+          "Mv": 6.25,
+          "Fm": 6.25,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Addai"
+        }
+      ],
+      "ballottaggi": []
+    },
+    "Venezia": {
+      "modulo": "3-5-2",
+      "titolari": [
+        {
+          "nome": "Stankovic F.",
+          "ruolo": "",
+          "Mv": 6.28,
+          "Fm": 4.5,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Stankovic F."
+        },
+        {
+          "nome": "Halhal",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 4.75,
+          "Pv": 6,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Halhal"
+        },
+        {
+          "nome": "Moreno M.",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.0,
+          "Pv": 7,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Moreno M."
+        },
+        {
+          "nome": "Juan Jesus",
+          "ruolo": "",
+          "Mv": 5.83,
+          "Fm": 5.67,
+          "Pv": 6,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Juan Jesus"
+        },
+        {
+          "nome": "Hainaut",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.78,
+          "Pv": 9,
+          "Gf": 2,
+          "Ass": 1,
+          "nome_excel": "Hainaut"
+        },
+        {
+          "nome": "Perez K.",
+          "ruolo": "",
+          "Mv": 5.94,
+          "Fm": 5.78,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Perez K."
+        },
+        {
+          "nome": "Helgason",
+          "ruolo": "",
+          "Mv": 5.88,
+          "Fm": 5.88,
+          "Pv": 4,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Helgason"
+        },
+        {
+          "nome": "Sohm",
+          "ruolo": "",
+          "Mv": 5.69,
+          "Fm": 5.69,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Sohm"
+        },
+        {
+          "nome": "Mazzocchi",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.0,
+          "Pv": 3,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Mazzocchi"
+        },
+        {
+          "nome": "Lauberbach",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.0,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Lauberbach"
+        },
+        {
+          "nome": "Adams A.",
+          "ruolo": "",
+          "Mv": 5.83,
+          "Fm": 6.5,
+          "Pv": 9,
+          "Gf": 2,
+          "Ass": 0,
+          "nome_excel": "Adams A."
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Montipò",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Grandi",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Schingtienne",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.25,
+          "Pv": 6,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Schingtienne"
+        },
+        {
+          "nome": "Gomes",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Sagrado",
+          "ruolo": "",
+          "Mv": 6.17,
+          "Fm": 7.5,
+          "Pv": 3,
+          "Gf": 1,
+          "Ass": 1,
+          "nome_excel": "Sagrado"
+        },
+        {
+          "nome": "Haps",
+          "ruolo": "",
+          "Mv": 5.64,
+          "Fm": 5.71,
+          "Pv": 7,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Haps"
+        },
+        {
+          "nome": "Bella-Kotchap",
+          "ruolo": "",
+          "Mv": 5.0,
+          "Fm": 5.0,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Bella-Kotchap"
+        },
+        {
+          "nome": "Busio",
+          "ruolo": "",
+          "Mv": 5.9,
+          "Fm": 6.2,
+          "Pv": 5,
+          "Gf": 0,
+          "Ass": 2,
+          "nome_excel": "Busio"
+        },
+        {
+          "nome": "Dagasso",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.25,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Dagasso"
+        },
+        {
+          "nome": "Basic",
+          "ruolo": "",
+          "Mv": 5.83,
+          "Fm": 5.75,
+          "Pv": 6,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Basic"
+        },
+        {
+          "nome": "Fernandez T.",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.0,
+          "Pv": 1,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Fernandez T."
+        },
+        {
+          "nome": "Duncan",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Yeboah J.",
+          "ruolo": "",
+          "Mv": 5.94,
+          "Fm": 5.94,
+          "Pv": 9,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Yeboah J."
+        },
+        {
+          "nome": "Rrahmani Al.",
+          "ruolo": "",
+          "Mv": 5.67,
+          "Fm": 5.67,
+          "Pv": 3,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Rrahmani Al."
+        },
+        {
+          "nome": "Lisman",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        }
+      ],
+      "ballottaggi": []
+    },
+    "Frosinone": {
+      "modulo": "4-2-3-1",
+      "titolari": [
+        {
+          "nome": "Palmisani",
+          "ruolo": "",
+          "Mv": 6.56,
+          "Fm": 5.0,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Palmisani"
+        },
+        {
+          "nome": "Oyono A.",
+          "ruolo": "",
+          "Mv": 6.39,
+          "Fm": 6.44,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Oyono A."
+        },
+        {
+          "nome": "Calvani",
+          "ruolo": "",
+          "Mv": 6.19,
+          "Fm": 6.06,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Calvani"
+        },
+        {
+          "nome": "Monterisi",
+          "ruolo": "",
+          "Mv": 5.93,
+          "Fm": 5.93,
+          "Pv": 7,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Monterisi"
+        },
+        {
+          "nome": "Terzic",
+          "ruolo": "",
+          "Mv": 6.2,
+          "Fm": 6.7,
+          "Pv": 5,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Terzic"
+        },
+        {
+          "nome": "Calò",
+          "ruolo": "",
+          "Mv": 6.78,
+          "Fm": 8.33,
+          "Pv": 9,
+          "Gf": 4,
+          "Ass": 2,
+          "nome_excel": "Calò"
+        },
+        {
+          "nome": "Cichella",
+          "ruolo": "",
+          "Mv": 6.12,
+          "Fm": 6.88,
+          "Pv": 4,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Cichella"
+        },
+        {
+          "nome": "Ghedjemis",
+          "ruolo": "",
+          "Mv": 6.57,
+          "Fm": 7.14,
+          "Pv": 7,
+          "Gf": 0,
+          "Ass": 4,
+          "nome_excel": "Ghedjemis"
+        },
+        {
+          "nome": "Schmid",
+          "ruolo": "",
+          "Mv": 6.56,
+          "Fm": 7.56,
+          "Pv": 9,
+          "Gf": 2,
+          "Ass": 4,
+          "nome_excel": "Schmid"
+        },
+        {
+          "nome": "Kvernadze",
+          "ruolo": "",
+          "Mv": 6.83,
+          "Fm": 8.06,
+          "Pv": 9,
+          "Gf": 3,
+          "Ass": 3,
+          "nome_excel": "Kvernadze"
+        },
+        {
+          "nome": "Raimondo",
+          "ruolo": "",
+          "Mv": 6.61,
+          "Fm": 9.11,
+          "Pv": 9,
+          "Gf": 8,
+          "Ass": 0,
+          "nome_excel": "Raimondo"
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Desplanches",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Pisseri",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Cittadini",
+          "ruolo": "",
+          "Mv": 5.69,
+          "Fm": 5.62,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Cittadini"
+        },
+        {
+          "nome": "Tchato",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Bracaglia",
+          "ruolo": "",
+          "Mv": 6.19,
+          "Fm": 6.44,
+          "Pv": 8,
+          "Gf": 1,
+          "Ass": 1,
+          "nome_excel": "Bracaglia"
+        },
+        {
+          "nome": "Omar Fayed",
+          "ruolo": "",
+          "Mv": 5.75,
+          "Fm": 5.75,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Omar Fayed"
+        },
+        {
+          "nome": "Amey",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Akpoguma",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Masini",
+          "ruolo": "",
+          "Mv": 6.19,
+          "Fm": 6.31,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Masini"
+        },
+        {
+          "nome": "Fini",
+          "ruolo": "",
+          "Mv": 6.08,
+          "Fm": 6.08,
+          "Pv": 6,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Fini"
+        },
+        {
+          "nome": "Hasa",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.0,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Hasa"
+        },
+        {
+          "nome": "El Azzouzi A.",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Zerbin",
+          "ruolo": "",
+          "Mv": 6.12,
+          "Fm": 6.12,
+          "Pv": 4,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Zerbin"
+        },
+        {
+          "nome": "Birligea",
+          "ruolo": "",
+          "Mv": 7.5,
+          "Fm": 13.5,
+          "Pv": 1,
+          "Gf": 2,
+          "Ass": 0,
+          "nome_excel": "Birligea"
+        },
+        {
+          "nome": "Bobcek",
+          "ruolo": "",
+          "Mv": 5.75,
+          "Fm": 5.75,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Bobcek"
+        }
+      ],
+      "ballottaggi": []
+    },
+    "Torino": {
+      "modulo": "4-4-2",
+      "titolari": [
+        {
+          "nome": "Perri",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 4.57,
+          "Pv": 7,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Perri"
+        },
+        {
+          "nome": "Belghali",
+          "ruolo": "",
+          "Mv": 6.29,
+          "Fm": 7.0,
+          "Pv": 7,
+          "Gf": 1,
+          "Ass": 3,
+          "nome_excel": "Belghali"
+        },
+        {
+          "nome": "Coco",
+          "ruolo": "",
+          "Mv": 5.94,
+          "Fm": 5.94,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Coco"
+        },
+        {
+          "nome": "Ismajli",
+          "ruolo": "",
+          "Mv": 5.88,
+          "Fm": 5.75,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Ismajli"
+        },
+        {
+          "nome": "Comuzzo",
+          "ruolo": "",
+          "Mv": 5.81,
+          "Fm": 6.12,
+          "Pv": 8,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Comuzzo"
+        },
+        {
+          "nome": "Vlasic",
+          "ruolo": "",
+          "Mv": 5.83,
+          "Fm": 6.17,
+          "Pv": 9,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Vlasic"
+        },
+        {
+          "nome": "Braganca",
+          "ruolo": "",
+          "Mv": 6.21,
+          "Fm": 6.57,
+          "Pv": 7,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Braganca"
+        },
+        {
+          "nome": "Fitz-Jim",
+          "ruolo": "",
+          "Mv": 6.21,
+          "Fm": 6.79,
+          "Pv": 7,
+          "Gf": 1,
+          "Ass": 1,
+          "nome_excel": "Fitz-Jim"
+        },
+        {
+          "nome": "Cacciamani",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.11,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Cacciamani"
+        },
+        {
+          "nome": "Adams C.",
+          "ruolo": "",
+          "Mv": 6.64,
+          "Fm": 8.36,
+          "Pv": 7,
+          "Gf": 4,
+          "Ass": 0,
+          "nome_excel": "Adams C."
+        },
+        {
+          "nome": "Simeone",
+          "ruolo": "",
+          "Mv": 6.17,
+          "Fm": 6.94,
+          "Pv": 9,
+          "Gf": 2,
+          "Ass": 1,
+          "nome_excel": "Simeone"
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Mascardi",
+          "ruolo": "",
+          "Mv": 5.75,
+          "Fm": 3.75,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Mascardi"
+        },
+        {
+          "nome": "Siviero",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Comert",
+          "ruolo": "",
+          "Mv": 5.88,
+          "Fm": 6.12,
+          "Pv": 4,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Comert"
+        },
+        {
+          "nome": "Patterson",
+          "ruolo": "",
+          "Mv": 5.62,
+          "Fm": 5.0,
+          "Pv": 4,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Patterson"
+        },
+        {
+          "nome": "Biraghi",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Oristanio",
+          "ruolo": "",
+          "Mv": 5.75,
+          "Fm": 5.75,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Oristanio"
+        },
+        {
+          "nome": "Casadei",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.5,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Casadei"
+        },
+        {
+          "nome": "Gineitis",
+          "ruolo": "",
+          "Mv": 5.79,
+          "Fm": 6.0,
+          "Pv": 7,
+          "Gf": 0,
+          "Ass": 2,
+          "nome_excel": "Gineitis"
+        },
+        {
+          "nome": "Aboukhlal",
+          "ruolo": "",
+          "Mv": 5.67,
+          "Fm": 5.67,
+          "Pv": 3,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Aboukhlal"
+        },
+        {
+          "nome": "Ilkhan",
+          "ruolo": "",
+          "Mv": 5.75,
+          "Fm": 5.75,
+          "Pv": 4,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Ilkhan"
+        },
+        {
+          "nome": "Zapata D.",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.5,
+          "Pv": 1,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Zapata D."
+        },
+        {
+          "nome": "Pellegri",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Kulenovic",
+          "ruolo": "",
+          "Mv": 6.08,
+          "Fm": 7.08,
+          "Pv": 6,
+          "Gf": 2,
+          "Ass": 0,
+          "nome_excel": "Kulenovic"
+        }
+      ],
+      "ballottaggi": []
     },
     "Lazio": {
       "modulo": "4-3-3",
@@ -313,9 +2442,9 @@
         {
           "nome": "Mandas",
           "ruolo": "",
-          "Mv": 6.5,
-          "Fm": 6.25,
-          "Pv": 8,
+          "Mv": 6.44,
+          "Fm": 6.0,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Mandas"
@@ -323,19 +2452,19 @@
         {
           "nome": "Floriani Mussolini",
           "ruolo": "",
-          "Mv": 5.88,
-          "Fm": 5.81,
-          "Pv": 8,
-          "Gf": 0,
+          "Mv": 6.0,
+          "Fm": 6.28,
+          "Pv": 9,
+          "Gf": 1,
           "Ass": 0,
           "nome_excel": "Floriani Mussolini"
         },
         {
           "nome": "Sutalo J.",
           "ruolo": "",
-          "Mv": 6.1,
-          "Fm": 6.1,
-          "Pv": 5,
+          "Mv": 6.0,
+          "Fm": 5.67,
+          "Pv": 6,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Sutalo J."
@@ -343,9 +2472,9 @@
         {
           "nome": "Leite",
           "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 5.75,
-          "Pv": 2,
+          "Mv": 5.83,
+          "Fm": 5.67,
+          "Pv": 3,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Leite"
@@ -353,9 +2482,9 @@
         {
           "nome": "Tavares N.",
           "ruolo": "",
-          "Mv": 6.57,
-          "Fm": 7.43,
-          "Pv": 7,
+          "Mv": 6.56,
+          "Fm": 7.31,
+          "Pv": 8,
           "Gf": 1,
           "Ass": 3,
           "nome_excel": "Tavares N."
@@ -363,9 +2492,9 @@
         {
           "nome": "Frattesi",
           "ruolo": "",
-          "Mv": 6.44,
-          "Fm": 7.56,
-          "Pv": 8,
+          "Mv": 6.39,
+          "Fm": 7.06,
+          "Pv": 9,
           "Gf": 3,
           "Ass": 0,
           "nome_excel": "Frattesi"
@@ -373,9 +2502,9 @@
         {
           "nome": "Belahyane",
           "ruolo": "",
-          "Mv": 6.36,
-          "Fm": 6.29,
-          "Pv": 7,
+          "Mv": 6.44,
+          "Fm": 6.38,
+          "Pv": 8,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Belahyane"
@@ -383,41 +2512,41 @@
         {
           "nome": "Taylor K.",
           "ruolo": "",
-          "Mv": 6.31,
-          "Fm": 6.62,
-          "Pv": 8,
-          "Gf": 1,
-          "Ass": 0,
+          "Mv": 6.44,
+          "Fm": 7.11,
+          "Pv": 9,
+          "Gf": 2,
+          "Ass": 1,
           "nome_excel": "Taylor K."
         },
         {
           "nome": "Isaksen",
           "ruolo": "",
-          "Mv": 6.21,
-          "Fm": 7.0,
-          "Pv": 7,
-          "Gf": 2,
-          "Ass": 0,
+          "Mv": 6.44,
+          "Fm": 7.62,
+          "Pv": 8,
+          "Gf": 3,
+          "Ass": 1,
           "nome_excel": "Isaksen"
         },
         {
           "nome": "Noslin",
           "ruolo": "",
-          "Mv": 6.42,
-          "Fm": 7.75,
-          "Pv": 6,
-          "Gf": 2,
+          "Mv": 6.64,
+          "Fm": 8.64,
+          "Pv": 7,
+          "Gf": 4,
           "Ass": 2,
           "nome_excel": "Noslin"
         },
         {
           "nome": "Zaccagni",
           "ruolo": "",
-          "Mv": 6.31,
-          "Fm": 6.88,
-          "Pv": 8,
-          "Gf": 1,
-          "Ass": 3,
+          "Mv": 6.44,
+          "Fm": 7.17,
+          "Pv": 9,
+          "Gf": 2,
+          "Ass": 5,
           "nome_excel": "Zaccagni"
         }
       ],
@@ -445,9 +2574,9 @@
         {
           "nome": "Pedraza",
           "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 6.38,
-          "Pv": 4,
+          "Mv": 6.1,
+          "Fm": 6.3,
+          "Pv": 5,
           "Gf": 0,
           "Ass": 1,
           "nome_excel": "Pedraza"
@@ -477,7 +2606,7 @@
           "ruolo": "",
           "Mv": 6.0,
           "Fm": 6.0,
-          "Pv": 1,
+          "Pv": 2,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Lazzari"
@@ -515,19 +2644,19 @@
         {
           "nome": "Dele-Bashiru",
           "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 6.88,
-          "Pv": 4,
+          "Mv": 6.2,
+          "Fm": 7.0,
+          "Pv": 5,
           "Gf": 1,
-          "Ass": 0,
+          "Ass": 1,
           "nome_excel": "Dele-Bashiru"
         },
         {
           "nome": "Cancellieri",
           "ruolo": "",
-          "Mv": 6.2,
-          "Fm": 6.7,
-          "Pv": 5,
+          "Mv": 6.17,
+          "Fm": 6.58,
+          "Pv": 6,
           "Gf": 1,
           "Ass": 0,
           "nome_excel": "Cancellieri"
@@ -535,317 +2664,25 @@
         {
           "nome": "Pinamonti",
           "ruolo": "",
-          "Mv": 5.88,
-          "Fm": 6.88,
-          "Pv": 4,
+          "Mv": 5.9,
+          "Fm": 6.7,
+          "Pv": 5,
           "Gf": 1,
           "Ass": 1,
           "nome_excel": "Pinamonti"
         }
       ],
-      "ballottaggi": [
-        {
-          "giocatori": [
-            {
-              "nome": "Sutalo J.",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Doekhi",
-              "percentuale": "40%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Tavares N.",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Pedraza",
-              "percentuale": "40%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Taylor K.",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Dele-Bashiru",
-              "percentuale": "40%"
-            }
-          ]
-        }
-      ]
-    },
-    "Roma": {
-      "modulo": "3-4-2-1",
-      "titolari": [
-        {
-          "nome": "Gollini",
-          "ruolo": "",
-          "Mv": 6.33,
-          "Fm": 5.33,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Gollini"
-        },
-        {
-          "nome": "Mancini",
-          "ruolo": "",
-          "Mv": 6.14,
-          "Fm": 6.29,
-          "Pv": 7,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Mancini"
-        },
-        {
-          "nome": "Balerdi",
-          "ruolo": "",
-          "Mv": 6.75,
-          "Fm": 7.67,
-          "Pv": 6,
-          "Gf": 2,
-          "Ass": 0,
-          "nome_excel": "Balerdi"
-        },
-        {
-          "nome": "Hermoso",
-          "ruolo": "",
-          "Mv": 6.19,
-          "Fm": 6.44,
-          "Pv": 8,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Hermoso"
-        },
-        {
-          "nome": "Lulli",
-          "ruolo": "",
-          "Mv": 6.4,
-          "Fm": 7.0,
-          "Pv": 5,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Lulli"
-        },
-        {
-          "nome": "Cristante",
-          "ruolo": "",
-          "Mv": 6.25,
-          "Fm": 6.17,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Cristante"
-        },
-        {
-          "nome": "Pisilli",
-          "ruolo": "",
-          "Mv": 6.17,
-          "Fm": 7.0,
-          "Pv": 6,
-          "Gf": 2,
-          "Ass": 0,
-          "nome_excel": "Pisilli"
-        },
-        {
-          "nome": "Molina N.",
-          "ruolo": "",
-          "Mv": 6.17,
-          "Fm": 6.33,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Molina N."
-        },
-        {
-          "nome": "Soulè",
-          "ruolo": "",
-          "Mv": 6.56,
-          "Fm": 7.69,
-          "Pv": 8,
-          "Gf": 3,
-          "Ass": 1,
-          "nome_excel": "Soulè"
-        },
-        {
-          "nome": "Mora",
-          "ruolo": "",
-          "Mv": 6.25,
-          "Fm": 6.75,
-          "Pv": 6,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Mora"
-        },
-        {
-          "nome": "Malen",
-          "ruolo": "",
-          "Mv": 6.5,
-          "Fm": 9.0,
-          "Pv": 7,
-          "Gf": 6,
-          "Ass": 1,
-          "nome_excel": "Malen"
-        }
-      ],
-      "panchina": [
-        {
-          "nome": "De Marzi",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Vasquez D.",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "N'Dicka",
-          "ruolo": "",
-          "Mv": 5.92,
-          "Fm": 5.83,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "N'Dicka"
-        },
-        {
-          "nome": "Koulierakis",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.0,
-          "Pv": 2,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Koulierakis"
-        },
-        {
-          "nome": "Wesley",
-          "ruolo": "",
-          "Mv": 6.42,
-          "Fm": 6.75,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 2,
-          "nome_excel": "Wesley"
-        },
-        {
-          "nome": "Rensch",
-          "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 5.62,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Rensch"
-        },
-        {
-          "nome": "Ghilardi",
-          "ruolo": "",
-          "Mv": 6.17,
-          "Fm": 6.0,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Ghilardi"
-        },
-        {
-          "nome": "De Roon",
-          "ruolo": "",
-          "Mv": 6.25,
-          "Fm": 6.0,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "De Roon"
-        },
-        {
-          "nome": "Castro S.",
-          "ruolo": "",
-          "Mv": 6.25,
-          "Fm": 6.75,
-          "Pv": 6,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Castro S."
-        },
-        {
-          "nome": "Dybala",
-          "ruolo": "",
-          "Mv": 6.92,
-          "Fm": 7.58,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 4,
-          "nome_excel": "Dybala"
-        }
-      ],
-      "ballottaggi": [
-        {
-          "giocatori": [
-            {
-              "nome": "Mancini",
-              "percentuale": "55%"
-            },
-            {
-              "nome": "Ghilardi",
-              "percentuale": "45%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Hermoso",
-              "percentuale": "55%"
-            },
-            {
-              "nome": "N'Dicka",
-              "percentuale": "45%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Cristante",
-              "percentuale": "55%"
-            },
-            {
-              "nome": "De Roon",
-              "percentuale": "45%"
-            }
-          ]
-        }
-      ]
+      "ballottaggi": []
     },
     "Cagliari": {
-      "modulo": "4-4-2",
+      "modulo": "3-5-2",
       "titolari": [
         {
           "nome": "Caprile",
           "ruolo": "",
-          "Mv": 6.38,
-          "Fm": 5.25,
-          "Pv": 8,
+          "Mv": 6.39,
+          "Fm": 4.94,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Caprile"
@@ -853,9 +2690,9 @@
         {
           "nome": "Zè Pedro",
           "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 5.88,
-          "Pv": 8,
+          "Mv": 5.89,
+          "Fm": 5.78,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Zè Pedro"
@@ -863,9 +2700,9 @@
         {
           "nome": "Mina",
           "ruolo": "",
-          "Mv": 5.83,
-          "Fm": 5.83,
-          "Pv": 3,
+          "Mv": 5.62,
+          "Fm": 5.62,
+          "Pv": 4,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Mina"
@@ -873,82 +2710,82 @@
         {
           "nome": "Rodriguez Ju.",
           "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 5.69,
-          "Pv": 8,
+          "Mv": 5.72,
+          "Fm": 5.61,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Rodriguez Ju."
         },
         {
-          "nome": "Obert",
+          "nome": "Sugawara",
           "ruolo": "",
-          "Mv": 5.56,
-          "Fm": 5.56,
-          "Pv": 8,
+          "Mv": 5.58,
+          "Fm": 5.58,
+          "Pv": 6,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": "Obert"
+          "nome_excel": "Sugawara"
         },
         {
           "nome": "Adopo",
           "ruolo": "",
-          "Mv": 5.88,
-          "Fm": 6.12,
-          "Pv": 8,
+          "Mv": 5.83,
+          "Fm": 6.06,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 2,
           "nome_excel": "Adopo"
         },
         {
-          "nome": "Gagliardini",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.25,
-          "Pv": 2,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Gagliardini"
-        },
-        {
           "nome": "Romano",
           "ruolo": "",
-          "Mv": 6.25,
-          "Fm": 6.62,
-          "Pv": 8,
+          "Mv": 6.17,
+          "Fm": 6.5,
+          "Pv": 9,
           "Gf": 1,
           "Ass": 0,
           "nome_excel": "Romano"
         },
         {
+          "nome": "Deiola",
+          "ruolo": "",
+          "Mv": 5.88,
+          "Fm": 5.62,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Deiola"
+        },
+        {
+          "nome": "Obert",
+          "ruolo": "",
+          "Mv": 5.56,
+          "Fm": 5.67,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Obert"
+        },
+        {
           "nome": "Fadera",
           "ruolo": "",
-          "Mv": 5.83,
-          "Fm": 5.75,
-          "Pv": 6,
+          "Mv": 5.79,
+          "Fm": 5.71,
+          "Pv": 7,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Fadera"
         },
         {
-          "nome": "Maldini",
+          "nome": "Nzola",
           "ruolo": "",
-          "Mv": 6.19,
-          "Fm": 7.69,
-          "Pv": 8,
-          "Gf": 4,
+          "Mv": 6.0,
+          "Fm": 7.0,
+          "Pv": 3,
+          "Gf": 1,
           "Ass": 0,
-          "nome_excel": "Maldini"
-        },
-        {
-          "nome": "Kevin Carlos",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.38,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Kevin Carlos"
+          "nome_excel": "Nzola"
         }
       ],
       "panchina": [
@@ -983,16 +2820,6 @@
           "nome_excel": null
         },
         {
-          "nome": "Sugawara",
-          "ruolo": "",
-          "Mv": 5.8,
-          "Fm": 5.8,
-          "Pv": 5,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Sugawara"
-        },
-        {
           "nome": "Kofler",
           "ruolo": "",
           "Mv": 6.0,
@@ -1003,14 +2830,14 @@
           "nome_excel": "Kofler"
         },
         {
-          "nome": "Deiola",
+          "nome": "Gagliardini",
           "ruolo": "",
-          "Mv": 5.86,
-          "Fm": 5.57,
-          "Pv": 7,
+          "Mv": 5.5,
+          "Fm": 5.25,
+          "Pv": 2,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": "Deiola"
+          "nome_excel": "Gagliardini"
         },
         {
           "nome": "Ciervo",
@@ -1073,722 +2900,155 @@
           "nome_excel": null
         },
         {
-          "nome": "Nzola",
+          "nome": "Maldini",
+          "ruolo": "",
+          "Mv": 6.28,
+          "Fm": 7.94,
+          "Pv": 9,
+          "Gf": 5,
+          "Ass": 0,
+          "nome_excel": "Maldini"
+        },
+        {
+          "nome": "Kevin Carlos",
           "ruolo": "",
           "Mv": 5.5,
-          "Fm": 5.5,
-          "Pv": 2,
+          "Fm": 5.38,
+          "Pv": 4,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": "Nzola"
+          "nome_excel": "Kevin Carlos"
         },
         {
           "nome": "Mendy P.",
           "ruolo": "",
-          "Mv": 6.19,
-          "Fm": 6.69,
-          "Pv": 8,
+          "Mv": 6.17,
+          "Fm": 6.61,
+          "Pv": 9,
           "Gf": 1,
           "Ass": 1,
           "nome_excel": "Mendy P."
         }
       ],
-      "ballottaggi": [
-        {
-          "giocatori": [
-            {
-              "nome": "Zè Pedro",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Sugawara",
-              "percentuale": "40%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Rodriguez Ju.",
-              "percentuale": "55%"
-            },
-            {
-              "nome": "Deiola",
-              "percentuale": "45%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Maldini",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Mendy P.",
-              "percentuale": "40%"
-            }
-          ]
-        }
-      ]
+      "ballottaggi": []
     },
-    "Torino": {
-      "modulo": "4-4-2",
+    "Lecce": {
+      "modulo": "4-3-3",
       "titolari": [
         {
-          "nome": "Perri",
+          "nome": "Falcone",
           "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 4.83,
-          "Pv": 6,
+          "Mv": 6.11,
+          "Fm": 3.94,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": "Perri"
+          "nome_excel": "Falcone"
         },
         {
-          "nome": "Belghali",
+          "nome": "Veiga D.",
           "ruolo": "",
-          "Mv": 6.25,
-          "Fm": 7.17,
-          "Pv": 6,
-          "Gf": 1,
+          "Mv": 5.78,
+          "Fm": 5.94,
+          "Pv": 9,
+          "Gf": 0,
           "Ass": 3,
-          "nome_excel": "Belghali"
+          "nome_excel": "Veiga D."
         },
         {
-          "nome": "Coco",
+          "nome": "Siebert",
           "ruolo": "",
-          "Mv": 6.06,
-          "Fm": 6.06,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Coco"
-        },
-        {
-          "nome": "Ismajli",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 5.86,
-          "Pv": 7,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Ismajli"
-        },
-        {
-          "nome": "Comuzzo",
-          "ruolo": "",
-          "Mv": 5.86,
-          "Fm": 6.21,
-          "Pv": 7,
+          "Mv": 5.61,
+          "Fm": 5.83,
+          "Pv": 9,
           "Gf": 1,
           "Ass": 0,
-          "nome_excel": "Comuzzo"
+          "nome_excel": "Siebert"
         },
         {
-          "nome": "Vlasic",
+          "nome": "Tiago Gabriel",
           "ruolo": "",
           "Mv": 5.88,
-          "Fm": 6.25,
+          "Fm": 6.56,
           "Pv": 8,
-          "Gf": 1,
+          "Gf": 2,
           "Ass": 0,
-          "nome_excel": "Vlasic"
+          "nome_excel": "Tiago Gabriel"
         },
         {
-          "nome": "Gineitis",
+          "nome": "Gallo",
           "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 6.0,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 2,
-          "nome_excel": "Gineitis"
-        },
-        {
-          "nome": "Fitz-Jim",
-          "ruolo": "",
-          "Mv": 6.17,
-          "Fm": 6.67,
-          "Pv": 6,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Fitz-Jim"
-        },
-        {
-          "nome": "Cacciamani",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.12,
+          "Mv": 5.81,
+          "Fm": 5.94,
           "Pv": 8,
           "Gf": 0,
           "Ass": 1,
-          "nome_excel": "Cacciamani"
+          "nome_excel": "Gallo"
         },
         {
-          "nome": "Adams C.",
-          "ruolo": "",
-          "Mv": 6.58,
-          "Fm": 8.08,
-          "Pv": 6,
-          "Gf": 3,
-          "Ass": 0,
-          "nome_excel": "Adams C."
-        },
-        {
-          "nome": "Simeone",
-          "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 7.0,
-          "Pv": 8,
-          "Gf": 2,
-          "Ass": 1,
-          "nome_excel": "Simeone"
-        }
-      ],
-      "panchina": [
-        {
-          "nome": "Mascardi",
-          "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 3.75,
-          "Pv": 2,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Mascardi"
-        },
-        {
-          "nome": "Siviero",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Comert",
-          "ruolo": "",
-          "Mv": 5.88,
-          "Fm": 6.12,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Comert"
-        },
-        {
-          "nome": "Patterson",
-          "ruolo": "",
-          "Mv": 5.83,
-          "Fm": 5.0,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Patterson"
-        },
-        {
-          "nome": "Biraghi",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Braganca",
-          "ruolo": "",
-          "Mv": 6.33,
-          "Fm": 6.75,
-          "Pv": 6,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Braganca"
-        },
-        {
-          "nome": "Oristanio",
-          "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 5.75,
-          "Pv": 2,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Oristanio"
-        },
-        {
-          "nome": "Casadei",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.5,
-          "Pv": 2,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Casadei"
-        },
-        {
-          "nome": "Aboukhlal",
-          "ruolo": "",
-          "Mv": 5.67,
-          "Fm": 5.67,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Aboukhlal"
-        },
-        {
-          "nome": "Zapata D.",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.5,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Zapata D."
-        },
-        {
-          "nome": "Pellegri",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Kulenovic",
-          "ruolo": "",
-          "Mv": 6.2,
-          "Fm": 7.4,
-          "Pv": 5,
-          "Gf": 2,
-          "Ass": 0,
-          "nome_excel": "Kulenovic"
-        }
-      ],
-      "ballottaggi": [
-        {
-          "giocatori": [
-            {
-              "nome": "Ismajli",
-              "percentuale": "55%"
-            },
-            {
-              "nome": "Comert",
-              "percentuale": "45%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Adams C.",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Kulenovic",
-              "percentuale": "40%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Cacciamani",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Patterson",
-              "percentuale": "40%"
-            }
-          ]
-        }
-      ]
-    },
-    "Como": {
-      "modulo": "4-2-3-1",
-      "titolari": [
-        {
-          "nome": "Butez",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 5.14,
-          "Pv": 7,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Butez"
-        },
-        {
-          "nome": "Couto",
-          "ruolo": "",
-          "Mv": 5.93,
-          "Fm": 5.93,
-          "Pv": 7,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Couto"
-        },
-        {
-          "nome": "Kempf",
-          "ruolo": "",
-          "Mv": 6.38,
-          "Fm": 6.38,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Kempf"
-        },
-        {
-          "nome": "Ramon",
-          "ruolo": "",
-          "Mv": 6.38,
-          "Fm": 6.69,
-          "Pv": 8,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Ramon"
-        },
-        {
-          "nome": "Valle",
-          "ruolo": "",
-          "Mv": 6.1,
-          "Fm": 6.4,
-          "Pv": 5,
-          "Gf": 0,
-          "Ass": 2,
-          "nome_excel": "Valle"
-        },
-        {
-          "nome": "Da Cunha",
-          "ruolo": "",
-          "Mv": 6.19,
-          "Fm": 6.19,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Da Cunha"
-        },
-        {
-          "nome": "Milla",
-          "ruolo": "",
-          "Mv": 6.4,
-          "Fm": 6.3,
-          "Pv": 5,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Milla"
-        },
-        {
-          "nome": "Caqueret",
-          "ruolo": "",
-          "Mv": 6.25,
-          "Fm": 6.5,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 2,
-          "nome_excel": "Caqueret"
-        },
-        {
-          "nome": "Paz N.",
-          "ruolo": "",
-          "Mv": 6.36,
-          "Fm": 7.43,
-          "Pv": 7,
-          "Gf": 2,
-          "Ass": 2,
-          "nome_excel": "Paz N."
-        },
-        {
-          "nome": "Baturina",
-          "ruolo": "",
-          "Mv": 6.07,
-          "Fm": 6.79,
-          "Pv": 7,
-          "Gf": 2,
-          "Ass": 0,
-          "nome_excel": "Baturina"
-        },
-        {
-          "nome": "Douvikas",
-          "ruolo": "",
-          "Mv": 6.38,
-          "Fm": 8.25,
-          "Pv": 8,
-          "Gf": 5,
-          "Ass": 0,
-          "nome_excel": "Douvikas"
-        }
-      ],
-      "panchina": [
-        {
-          "nome": "Sanchez Ro.",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 5.0,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Sanchez Ro."
-        },
-        {
-          "nome": "Vigorito",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Smolcic I.",
+          "nome": "Kaba",
           "ruolo": "",
           "Mv": 5.83,
           "Fm": 5.83,
           "Pv": 3,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": "Smolcic I."
+          "nome_excel": "Kaba"
         },
         {
-          "nome": "Goldaniga",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Kaiki",
-          "ruolo": "",
-          "Mv": 6.4,
-          "Fm": 7.2,
-          "Pv": 5,
-          "Gf": 1,
-          "Ass": 1,
-          "nome_excel": "Kaiki"
-        },
-        {
-          "nome": "Kambwala",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.0,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Kambwala"
-        },
-        {
-          "nome": "Dossena",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Perrone",
-          "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 6.12,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Perrone"
-        },
-        {
-          "nome": "Ricci S.",
+          "nome": "Ngom",
           "ruolo": "",
           "Mv": 5.5,
-          "Fm": 5.5,
-          "Pv": 2,
+          "Fm": 5.39,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": "Ricci S."
+          "nome_excel": "Ngom"
         },
         {
-          "nome": "Lahdo",
+          "nome": "Maleh",
           "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
+          "Mv": 5.78,
+          "Fm": 5.72,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": null
+          "nome_excel": "Maleh"
         },
         {
-          "nome": "Addai",
+          "nome": "N'Dri",
           "ruolo": "",
-          "Mv": 6.5,
-          "Fm": 6.5,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Addai"
-        }
-      ],
-      "ballottaggi": [
-        {
-          "giocatori": [
-            {
-              "nome": "Couto",
-              "percentuale": "55%"
-            },
-            {
-              "nome": "Smolcic I.",
-              "percentuale": "45%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Da Cunha",
-              "percentuale": "55%"
-            },
-            {
-              "nome": "Perrone",
-              "percentuale": "45%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Douvikas",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Addai",
-              "percentuale": "40%"
-            }
-          ]
-        }
-      ]
-    },
-    "Milan": {
-      "modulo": "4-4-1-1",
-      "titolari": [
-        {
-          "nome": "Maignan",
-          "ruolo": "",
-          "Mv": 6.19,
-          "Fm": 5.31,
+          "Mv": 5.94,
+          "Fm": 6.25,
           "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Maignan"
-        },
-        {
-          "nome": "Tomori",
-          "ruolo": "",
-          "Mv": 6.5,
-          "Fm": 6.5,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Tomori"
-        },
-        {
-          "nome": "De Winter",
-          "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 6.0,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "De Winter"
-        },
-        {
-          "nome": "Pavlovic",
-          "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 6.06,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Pavlovic"
-        },
-        {
-          "nome": "Bartesaghi",
-          "ruolo": "",
-          "Mv": 6.33,
-          "Fm": 6.33,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Bartesaghi"
-        },
-        {
-          "nome": "Hutchinson",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 7.5,
-          "Pv": 2,
           "Gf": 1,
           "Ass": 0,
-          "nome_excel": "Hutchinson"
+          "nome_excel": "N'Dri"
         },
         {
-          "nome": "Musah",
+          "nome": "Esteban",
           "ruolo": "",
-          "Mv": 6.07,
-          "Fm": 6.07,
-          "Pv": 7,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Musah"
-        },
-        {
-          "nome": "Jashari",
-          "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 6.12,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Jashari"
-        },
-        {
-          "nome": "Estupinan",
-          "ruolo": "",
-          "Mv": 5.75,
+          "Mv": 5.67,
           "Fm": 5.58,
           "Pv": 6,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": "Estupinan"
+          "nome_excel": "Esteban"
         },
         {
-          "nome": "Cissè A.",
+          "nome": "Fatah",
           "ruolo": "",
-          "Mv": 6.25,
-          "Fm": 7.62,
-          "Pv": 4,
-          "Gf": 2,
-          "Ass": 0,
-          "nome_excel": "Cissè A."
-        },
-        {
-          "nome": "Ramos G.",
-          "ruolo": "",
-          "Mv": 6.06,
-          "Fm": 6.44,
+          "Mv": 5.81,
+          "Fm": 6.19,
           "Pv": 8,
-          "Gf": 2,
-          "Ass": 1,
-          "nome_excel": "Ramos G."
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Fatah"
         }
       ],
       "panchina": [
         {
-          "nome": "Torriani",
+          "nome": "Bleve",
           "ruolo": "",
           "Mv": 0.0,
           "Fm": 0.0,
@@ -1798,7 +3058,7 @@
           "nome_excel": null
         },
         {
-          "nome": "Terracciano F.",
+          "nome": "Borbei",
           "ruolo": "",
           "Mv": 0.0,
           "Fm": 0.0,
@@ -1808,300 +3068,67 @@
           "nome_excel": null
         },
         {
-          "nome": "Diawara S.",
+          "nome": "Ndaba",
+          "ruolo": "",
+          "Mv": 5.62,
+          "Fm": 5.62,
+          "Pv": 4,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Ndaba"
+        },
+        {
+          "nome": "Dembelè A.",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Jean",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Gorter",
           "ruolo": "",
           "Mv": 6.0,
-          "Fm": 6.0,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Diawara S."
-        },
-        {
-          "nome": "Modric",
-          "ruolo": "",
-          "Mv": 6.25,
-          "Fm": 6.44,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 2,
-          "nome_excel": "Modric"
-        },
-        {
-          "nome": "Comotto",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Pulisic",
-          "ruolo": "",
-          "Mv": 6.6,
-          "Fm": 7.9,
-          "Pv": 5,
-          "Gf": 2,
-          "Ass": 1,
-          "nome_excel": "Pulisic"
-        },
-        {
-          "nome": "Camarda",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        }
-      ],
-      "ballottaggi": [
-        {
-          "giocatori": [
-            {
-              "nome": "Bartesaghi",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Diawara S.",
-              "percentuale": "40%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Cissè A.",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Pulisic",
-              "percentuale": "40%"
-            }
-          ]
-        }
-      ]
-    },
-    "Bologna": {
-      "modulo": "3-4-2-1",
-      "titolari": [
-        {
-          "nome": "Skorupski",
-          "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 4.42,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Skorupski"
-        },
-        {
-          "nome": "Darmian",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.0,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Darmian"
-        },
-        {
-          "nome": "Casale",
-          "ruolo": "",
-          "Mv": 6.33,
           "Fm": 7.33,
           "Pv": 3,
           "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Casale"
+          "Ass": 1,
+          "nome_excel": "Gorter"
         },
         {
-          "nome": "Theate",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 5.9,
-          "Pv": 5,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Theate"
-        },
-        {
-          "nome": "Zortea",
-          "ruolo": "",
-          "Mv": 5.92,
-          "Fm": 5.92,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Zortea"
-        },
-        {
-          "nome": "Pobega",
-          "ruolo": "",
-          "Mv": 6.29,
-          "Fm": 6.64,
-          "Pv": 7,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Pobega"
-        },
-        {
-          "nome": "Ferguson",
-          "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 6.12,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Ferguson"
-        },
-        {
-          "nome": "Miranda J.",
-          "ruolo": "",
-          "Mv": 6.29,
-          "Fm": 6.64,
-          "Pv": 7,
-          "Gf": 0,
-          "Ass": 3,
-          "nome_excel": "Miranda J."
-        },
-        {
-          "nome": "Bernardeschi",
-          "ruolo": "",
-          "Mv": 6.43,
-          "Fm": 7.14,
-          "Pv": 7,
-          "Gf": 2,
-          "Ass": 0,
-          "nome_excel": "Bernardeschi"
-        },
-        {
-          "nome": "Cambiaghi",
-          "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 6.31,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 2,
-          "nome_excel": "Cambiaghi"
-        },
-        {
-          "nome": "Odgaard",
-          "ruolo": "",
-          "Mv": 5.58,
-          "Fm": 5.5,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Odgaard"
-        }
-      ],
-      "panchina": [
-        {
-          "nome": "Pessina Mas.",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 4.5,
-          "Pv": 2,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Pessina Mas."
-        },
-        {
-          "nome": "Happonen",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Alhassane",
-          "ruolo": "",
-          "Mv": 5.83,
-          "Fm": 5.83,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Alhassane"
-        },
-        {
-          "nome": "Helland",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.0,
-          "Pv": 5,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Helland"
-        },
-        {
-          "nome": "Heggem",
-          "ruolo": "",
-          "Mv": 5.67,
-          "Fm": 5.5,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Heggem"
-        },
-        {
-          "nome": "Vitik",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "De Silvestri",
+          "nome": "Gandelman",
           "ruolo": "",
           "Mv": 5.5,
           "Fm": 5.5,
           "Pv": 1,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": "De Silvestri"
+          "nome_excel": "Gandelman"
         },
         {
-          "nome": "Moro N.",
+          "nome": "Monteiro J.",
           "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 5.75,
-          "Pv": 4,
-          "Gf": 0,
+          "Mv": 5.6,
+          "Fm": 6.2,
+          "Pv": 5,
+          "Gf": 1,
           "Ass": 0,
-          "nome_excel": "Moro N."
+          "nome_excel": "Monteiro J."
         },
         {
-          "nome": "Amondarain",
-          "ruolo": "",
-          "Mv": 5.67,
-          "Fm": 5.5,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Amondarain"
-        },
-        {
-          "nome": "El Azzouzi O.",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.0,
-          "Pv": 2,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "El Azzouzi O."
-        },
-        {
-          "nome": "Mbangula",
+          "nome": "Fofana Sa.",
           "ruolo": "",
           "Mv": 0.0,
           "Fm": 0.0,
@@ -2111,330 +3138,25 @@
           "nome_excel": null
         },
         {
-          "nome": "Libra",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.5,
-          "Pv": 2,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Libra"
-        },
-        {
-          "nome": "Enem",
-          "ruolo": "",
-          "Mv": 6.25,
-          "Fm": 7.75,
-          "Pv": 2,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Enem"
-        },
-        {
-          "nome": "Dovbyk",
-          "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 6.38,
-          "Pv": 4,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Dovbyk"
-        }
-      ],
-      "ballottaggi": [
-        {
-          "giocatori": [
-            {
-              "nome": "Theate",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Heggem",
-              "percentuale": "40%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Ferguson",
-              "percentuale": "55%"
-            },
-            {
-              "nome": "Moro N.",
-              "percentuale": "45%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Bernardeschi",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Mbangula",
-              "percentuale": "40%"
-            }
-          ]
-        }
-      ]
-    },
-    "Parma": {
-      "modulo": "3-5-2",
-      "titolari": [
-        {
-          "nome": "Corvi",
-          "ruolo": "",
-          "Mv": 5.94,
-          "Fm": 4.06,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Corvi"
-        },
-        {
-          "nome": "Delprato",
-          "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 5.62,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Delprato"
-        },
-        {
-          "nome": "Troilo",
-          "ruolo": "",
-          "Mv": 5.56,
-          "Fm": 5.38,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Troilo"
-        },
-        {
-          "nome": "Diego Carlos",
+          "nome": "Stulic",
           "ruolo": "",
           "Mv": 5.42,
-          "Fm": 5.0,
+          "Fm": 5.42,
           "Pv": 6,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": "Diego Carlos"
-        },
-        {
-          "nome": "Britschgi",
-          "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 5.62,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Britschgi"
-        },
-        {
-          "nome": "Bernabè",
-          "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 5.75,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Bernabè"
-        },
-        {
-          "nome": "Sierro",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.38,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Sierro"
-        },
-        {
-          "nome": "Keita M.",
-          "ruolo": "",
-          "Mv": 5.69,
-          "Fm": 5.62,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Keita M."
-        },
-        {
-          "nome": "Valeri",
-          "ruolo": "",
-          "Mv": 5.88,
-          "Fm": 5.88,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Valeri"
-        },
-        {
-          "nome": "Tourè E.",
-          "ruolo": "",
-          "Mv": 5.69,
-          "Fm": 5.81,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Tourè E."
-        },
-        {
-          "nome": "Romero D.",
-          "ruolo": "",
-          "Mv": 6.29,
-          "Fm": 7.14,
-          "Pv": 7,
-          "Gf": 2,
-          "Ass": 0,
-          "nome_excel": "Romero D."
-        }
-      ],
-      "panchina": [
-        {
-          "nome": "Daffara",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Ghidotti",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Drobnic",
-          "ruolo": "",
-          "Mv": 5.62,
-          "Fm": 5.5,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Drobnic"
-        },
-        {
-          "nome": "Carboni F.",
-          "ruolo": "",
-          "Mv": 5.0,
-          "Fm": 5.0,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Carboni F."
-        },
-        {
-          "nome": "Ndiaye",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.0,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Ndiaye"
-        },
-        {
-          "nome": "Ordonez C.",
-          "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 5.75,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Ordonez C."
-        },
-        {
-          "nome": "Fabbian",
-          "ruolo": "",
-          "Mv": 5.6,
-          "Fm": 5.8,
-          "Pv": 5,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Fabbian"
-        },
-        {
-          "nome": "Cremaschi",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.5,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Cremaschi"
-        },
-        {
-          "nome": "Konate A.",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Diallo O.",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.0,
-          "Pv": 2,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Diallo O."
-        },
-        {
-          "nome": "Lontani",
-          "ruolo": "",
-          "Mv": 6.06,
-          "Fm": 6.81,
-          "Pv": 8,
-          "Gf": 2,
-          "Ass": 0,
-          "nome_excel": "Lontani"
-        },
-        {
-          "nome": "De Martis",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Frigan",
-          "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 5.75,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Frigan"
+          "nome_excel": "Stulic"
         }
       ],
       "ballottaggi": [
         {
           "giocatori": [
             {
-              "nome": "Sierro",
+              "nome": "Maleh",
               "percentuale": "60%"
             },
             {
-              "nome": "Fabbian",
+              "nome": "Gandelman",
               "percentuale": "40%"
             }
           ]
@@ -2442,11 +3164,11 @@
         {
           "giocatori": [
             {
-              "nome": "Romero D.",
+              "nome": "N'Dri",
               "percentuale": "55%"
             },
             {
-              "nome": "Lontani",
+              "nome": "Monteiro J.",
               "percentuale": "45%"
             }
           ]
@@ -2454,836 +3176,11 @@
         {
           "giocatori": [
             {
-              "nome": "Britschgi",
+              "nome": "Esteban",
               "percentuale": "60%"
             },
             {
-              "nome": "Drobnic",
-              "percentuale": "40%"
-            }
-          ]
-        }
-      ]
-    },
-    "Udinese": {
-      "modulo": "3-4-2-1",
-      "titolari": [
-        {
-          "nome": "Okoye",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 3.75,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Okoye"
-        },
-        {
-          "nome": "Abankwah",
-          "ruolo": "",
-          "Mv": 6.07,
-          "Fm": 6.43,
-          "Pv": 7,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Abankwah"
-        },
-        {
-          "nome": "Kabasele",
-          "ruolo": "",
-          "Mv": 5.25,
-          "Fm": 5.25,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Kabasele"
-        },
-        {
-          "nome": "Palma",
-          "ruolo": "",
-          "Mv": 5.83,
-          "Fm": 5.83,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Palma"
-        },
-        {
-          "nome": "Vojvoda",
-          "ruolo": "",
-          "Mv": 5.56,
-          "Fm": 5.56,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Vojvoda"
-        },
-        {
-          "nome": "Karlstrom",
-          "ruolo": "",
-          "Mv": 5.94,
-          "Fm": 6.12,
-          "Pv": 8,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Karlstrom"
-        },
-        {
-          "nome": "Miller L.",
-          "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 5.67,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Miller L."
-        },
-        {
-          "nome": "Kamara H.",
-          "ruolo": "",
-          "Mv": 6.06,
-          "Fm": 6.75,
-          "Pv": 8,
-          "Gf": 2,
-          "Ass": 0,
-          "nome_excel": "Kamara H."
-        },
-        {
-          "nome": "Ekkelenkamp",
-          "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 7.38,
-          "Pv": 8,
-          "Gf": 3,
-          "Ass": 1,
-          "nome_excel": "Ekkelenkamp"
-        },
-        {
-          "nome": "Chakvetadze",
-          "ruolo": "",
-          "Mv": 5.6,
-          "Fm": 5.6,
-          "Pv": 5,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Chakvetadze"
-        },
-        {
-          "nome": "Davis K.",
-          "ruolo": "",
-          "Mv": 5.93,
-          "Fm": 6.14,
-          "Pv": 7,
-          "Gf": 0,
-          "Ass": 2,
-          "nome_excel": "Davis K."
-        }
-      ],
-      "panchina": [
-        {
-          "nome": "Mrozek",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Padelli",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Ebosse",
-          "ruolo": "",
-          "Mv": 5.57,
-          "Fm": 5.57,
-          "Pv": 7,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Ebosse"
-        },
-        {
-          "nome": "Bertola",
-          "ruolo": "",
-          "Mv": 5.83,
-          "Fm": 5.67,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Bertola"
-        },
-        {
-          "nome": "Arizala",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.5,
-          "Pv": 2,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Arizala"
-        },
-        {
-          "nome": "Lovric",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Zarraga",
-          "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 5.75,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Zarraga"
-        },
-        {
-          "nome": "Jovanovic",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.5,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Jovanovic"
-        },
-        {
-          "nome": "Piotrowski",
-          "ruolo": "",
-          "Mv": 5.88,
-          "Fm": 6.5,
-          "Pv": 4,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Piotrowski"
-        },
-        {
-          "nome": "Unai Gomez",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.67,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Unai Gomez"
-        },
-        {
-          "nome": "Zaniolo",
-          "ruolo": "",
-          "Mv": 5.83,
-          "Fm": 5.67,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Zaniolo"
-        },
-        {
-          "nome": "Vinciati",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        }
-      ],
-      "ballottaggi": [
-        {
-          "giocatori": [
-            {
-              "nome": "Palma",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Ebosse",
-              "percentuale": "40%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Kamara H.",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Arizala",
-              "percentuale": "40%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Miller L.",
-              "percentuale": "55%"
-            },
-            {
-              "nome": "Piotrowski",
-              "percentuale": "45%"
-            }
-          ]
-        }
-      ]
-    },
-    "Venezia": {
-      "modulo": "3-5-2",
-      "titolari": [
-        {
-          "nome": "Stankovic F.",
-          "ruolo": "",
-          "Mv": 6.31,
-          "Fm": 4.56,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Stankovic F."
-        },
-        {
-          "nome": "Schingtienne",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.25,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Schingtienne"
-        },
-        {
-          "nome": "Halhal",
-          "ruolo": "",
-          "Mv": 5.4,
-          "Fm": 4.9,
-          "Pv": 5,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Halhal"
-        },
-        {
-          "nome": "Moreno M.",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.25,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Moreno M."
-        },
-        {
-          "nome": "Mazzocchi",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.0,
-          "Pv": 2,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Mazzocchi"
-        },
-        {
-          "nome": "Perez K.",
-          "ruolo": "",
-          "Mv": 5.88,
-          "Fm": 5.69,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Perez K."
-        },
-        {
-          "nome": "Sohm",
-          "ruolo": "",
-          "Mv": 5.71,
-          "Fm": 5.71,
-          "Pv": 7,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Sohm"
-        },
-        {
-          "nome": "Helgason",
-          "ruolo": "",
-          "Mv": 5.67,
-          "Fm": 5.67,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Helgason"
-        },
-        {
-          "nome": "Hainaut",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.88,
-          "Pv": 8,
-          "Gf": 2,
-          "Ass": 1,
-          "nome_excel": "Hainaut"
-        },
-        {
-          "nome": "Yeboah J.",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.0,
-          "Pv": 8,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Yeboah J."
-        },
-        {
-          "nome": "Adams A.",
-          "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 6.5,
-          "Pv": 8,
-          "Gf": 2,
-          "Ass": 0,
-          "nome_excel": "Adams A."
-        }
-      ],
-      "panchina": [
-        {
-          "nome": "Montipò",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Grandi",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Juan Jesus",
-          "ruolo": "",
-          "Mv": 5.8,
-          "Fm": 5.6,
-          "Pv": 5,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Juan Jesus"
-        },
-        {
-          "nome": "Gomes",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Sagrado",
-          "ruolo": "",
-          "Mv": 6.17,
-          "Fm": 7.5,
-          "Pv": 3,
-          "Gf": 1,
-          "Ass": 1,
-          "nome_excel": "Sagrado"
-        },
-        {
-          "nome": "Haps",
-          "ruolo": "",
-          "Mv": 5.67,
-          "Fm": 5.75,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Haps"
-        },
-        {
-          "nome": "Bella-Kotchap",
-          "ruolo": "",
-          "Mv": 5.0,
-          "Fm": 5.0,
-          "Pv": 2,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Bella-Kotchap"
-        },
-        {
-          "nome": "Busio",
-          "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 6.5,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 2,
-          "nome_excel": "Busio"
-        },
-        {
-          "nome": "Dagasso",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.25,
-          "Pv": 2,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Dagasso"
-        },
-        {
-          "nome": "Basic",
-          "ruolo": "",
-          "Mv": 5.8,
-          "Fm": 5.7,
-          "Pv": 5,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Basic"
-        },
-        {
-          "nome": "Fanne",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Fernandez T.",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.0,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Fernandez T."
-        },
-        {
-          "nome": "Rrahmani Al.",
-          "ruolo": "",
-          "Mv": 5.67,
-          "Fm": 5.67,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Rrahmani Al."
-        },
-        {
-          "nome": "Lauberbach",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.5,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Lauberbach"
-        },
-        {
-          "nome": "Lisman",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        }
-      ],
-      "ballottaggi": [
-        {
-          "giocatori": [
-            {
-              "nome": "Halhal",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Bella-Kotchap",
-              "percentuale": "40%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Hainaut",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Haps",
-              "percentuale": "40%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Yeboah J.",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Rrahmani Al.",
-              "percentuale": "40%"
-            }
-          ]
-        }
-      ]
-    },
-    "Inter": {
-      "modulo": "3-5-2",
-      "titolari": [
-        {
-          "nome": "Provedel",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 4.5,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Provedel"
-        },
-        {
-          "nome": "Carlos Augusto",
-          "ruolo": "",
-          "Mv": 6.83,
-          "Fm": 8.08,
-          "Pv": 6,
-          "Gf": 2,
-          "Ass": 2,
-          "nome_excel": "Carlos Augusto"
-        },
-        {
-          "nome": "Bisseck",
-          "ruolo": "",
-          "Mv": 6.14,
-          "Fm": 6.57,
-          "Pv": 7,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Bisseck"
-        },
-        {
-          "nome": "Bastoni",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 5.93,
-          "Pv": 7,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Bastoni"
-        },
-        {
-          "nome": "Spence",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.0,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Spence"
-        },
-        {
-          "nome": "Sucic P.",
-          "ruolo": "",
-          "Mv": 6.21,
-          "Fm": 6.64,
-          "Pv": 7,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Sucic P."
-        },
-        {
-          "nome": "Stankovic A.",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.0,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Stankovic A."
-        },
-        {
-          "nome": "Zielinski",
-          "ruolo": "",
-          "Mv": 6.57,
-          "Fm": 7.71,
-          "Pv": 7,
-          "Gf": 2,
-          "Ass": 2,
-          "nome_excel": "Zielinski"
-        },
-        {
-          "nome": "Dimarco",
-          "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 6.25,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Dimarco"
-        },
-        {
-          "nome": "Esposito F.P.",
-          "ruolo": "",
-          "Mv": 6.43,
-          "Fm": 7.36,
-          "Pv": 7,
-          "Gf": 2,
-          "Ass": 1,
-          "nome_excel": "Esposito F.P."
-        },
-        {
-          "nome": "Bonny",
-          "ruolo": "",
-          "Mv": 6.4,
-          "Fm": 7.6,
-          "Pv": 5,
-          "Gf": 2,
-          "Ass": 0,
-          "nome_excel": "Bonny"
-        }
-      ],
-      "panchina": [
-        {
-          "nome": "Martinez Jo.",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 4.71,
-          "Pv": 7,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Martinez Jo."
-        },
-        {
-          "nome": "Di Gennaro",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Akanji",
-          "ruolo": "",
-          "Mv": 5.93,
-          "Fm": 5.93,
-          "Pv": 7,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Akanji"
-        },
-        {
-          "nome": "Diouf",
-          "ruolo": "",
-          "Mv": 6.36,
-          "Fm": 6.93,
-          "Pv": 7,
-          "Gf": 0,
-          "Ass": 4,
-          "nome_excel": "Diouf"
-        },
-        {
-          "nome": "Calhanoglu",
-          "ruolo": "",
-          "Mv": 6.5,
-          "Fm": 7.92,
-          "Pv": 6,
-          "Gf": 3,
-          "Ass": 0,
-          "nome_excel": "Calhanoglu"
-        },
-        {
-          "nome": "Mkhitaryan",
-          "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 6.25,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Mkhitaryan"
-        },
-        {
-          "nome": "Barella",
-          "ruolo": "",
-          "Mv": 6.29,
-          "Fm": 6.93,
-          "Pv": 7,
-          "Gf": 1,
-          "Ass": 2,
-          "nome_excel": "Barella"
-        },
-        {
-          "nome": "Thuram",
-          "ruolo": "",
-          "Mv": 6.86,
-          "Fm": 9.21,
-          "Pv": 7,
-          "Gf": 5,
-          "Ass": 2,
-          "nome_excel": "Thuram"
-        },
-        {
-          "nome": "Lavelli",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        }
-      ],
-      "ballottaggi": [
-        {
-          "giocatori": [
-            {
-              "nome": "Bastoni",
-              "percentuale": "55%"
-            },
-            {
-              "nome": "Akanji",
-              "percentuale": "45%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Stankovic A.",
-              "percentuale": "55%"
-            },
-            {
-              "nome": "Barella",
-              "percentuale": "45%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Esposito F.P.",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Thuram",
+              "nome": "Stulic",
               "percentuale": "40%"
             }
           ]
@@ -3291,14 +3188,14 @@
       ]
     },
     "Genoa": {
-      "modulo": "3-5-2",
+      "modulo": "3-4-2-1",
       "titolari": [
         {
           "nome": "Bijlow",
           "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 4.38,
-          "Pv": 8,
+          "Mv": 6.06,
+          "Fm": 4.61,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Bijlow"
@@ -3306,9 +3203,9 @@
         {
           "nome": "Marcandalli",
           "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.44,
-          "Pv": 8,
+          "Mv": 5.56,
+          "Fm": 5.5,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Marcandalli"
@@ -3316,9 +3213,9 @@
         {
           "nome": "Ostigard",
           "ruolo": "",
-          "Mv": 5.88,
-          "Fm": 5.62,
-          "Pv": 8,
+          "Mv": 5.94,
+          "Fm": 5.72,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Ostigard"
@@ -3326,39 +3223,29 @@
         {
           "nome": "Vasquez",
           "ruolo": "",
-          "Mv": 5.64,
-          "Fm": 5.5,
-          "Pv": 7,
+          "Mv": 5.75,
+          "Fm": 5.62,
+          "Pv": 8,
           "Gf": 1,
           "Ass": 0,
           "nome_excel": "Vasquez"
         },
         {
-          "nome": "Ellertsson",
+          "nome": "Ehizibue",
           "ruolo": "",
-          "Mv": 5.88,
-          "Fm": 6.12,
-          "Pv": 8,
+          "Mv": 5.9,
+          "Fm": 6.4,
+          "Pv": 5,
           "Gf": 1,
           "Ass": 0,
-          "nome_excel": "Ellertsson"
-        },
-        {
-          "nome": "Messias",
-          "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 6.5,
-          "Pv": 8,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Messias"
+          "nome_excel": "Ehizibue"
         },
         {
           "nome": "Frendrup",
           "ruolo": "",
-          "Mv": 5.81,
-          "Fm": 5.81,
-          "Pv": 8,
+          "Mv": 5.89,
+          "Fm": 5.89,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Frendrup"
@@ -3374,34 +3261,44 @@
           "nome_excel": "Traorè Hj."
         },
         {
-          "nome": "Puczka",
+          "nome": "Mitaj",
           "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.5,
+          "Mv": 6.0,
+          "Fm": 6.0,
           "Pv": 2,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": "Puczka"
+          "nome_excel": "Mitaj"
+        },
+        {
+          "nome": "Baldanzi",
+          "ruolo": "",
+          "Mv": 6.08,
+          "Fm": 6.75,
+          "Pv": 6,
+          "Gf": 1,
+          "Ass": 1,
+          "nome_excel": "Baldanzi"
+        },
+        {
+          "nome": "El Shaarawy",
+          "ruolo": "",
+          "Mv": 6.2,
+          "Fm": 6.4,
+          "Pv": 5,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "El Shaarawy"
         },
         {
           "nome": "Osmajic",
           "ruolo": "",
-          "Mv": 6.14,
-          "Fm": 7.57,
-          "Pv": 7,
+          "Mv": 6.19,
+          "Fm": 7.44,
+          "Pv": 8,
           "Gf": 3,
           "Ass": 1,
           "nome_excel": "Osmajic"
-        },
-        {
-          "nome": "Colombo",
-          "ruolo": "",
-          "Mv": 5.92,
-          "Fm": 5.75,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 2,
-          "nome_excel": "Colombo"
         }
       ],
       "panchina": [
@@ -3436,16 +3333,6 @@
           "nome_excel": "Otoa"
         },
         {
-          "nome": "Mitaj",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.0,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Mitaj"
-        },
-        {
           "nome": "Sabelli",
           "ruolo": "",
           "Mv": 5.0,
@@ -3454,6 +3341,16 @@
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Sabelli"
+        },
+        {
+          "nome": "Puczka",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.5,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Puczka"
         },
         {
           "nome": "Drameh",
@@ -3466,6 +3363,26 @@
           "nome_excel": null
         },
         {
+          "nome": "Messias",
+          "ruolo": "",
+          "Mv": 6.11,
+          "Fm": 6.44,
+          "Pv": 9,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Messias"
+        },
+        {
+          "nome": "Amorim",
+          "ruolo": "",
+          "Mv": 6.33,
+          "Fm": 6.33,
+          "Pv": 3,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Amorim"
+        },
+        {
           "nome": "Wiafe",
           "ruolo": "",
           "Mv": 5.83,
@@ -3476,44 +3393,54 @@
           "nome_excel": "Wiafe"
         },
         {
-          "nome": "Baldanzi",
+          "nome": "Ellertsson",
           "ruolo": "",
-          "Mv": 5.8,
-          "Fm": 5.8,
-          "Pv": 5,
-          "Gf": 0,
+          "Mv": 5.94,
+          "Fm": 6.17,
+          "Pv": 9,
+          "Gf": 1,
           "Ass": 0,
-          "nome_excel": "Baldanzi"
-        },
-        {
-          "nome": "Amorim",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.0,
-          "Pv": 2,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Amorim"
+          "nome_excel": "Ellertsson"
         },
         {
           "nome": "Meichtry",
           "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.5,
-          "Pv": 2,
+          "Mv": 5.67,
+          "Fm": 5.67,
+          "Pv": 3,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Meichtry"
         },
         {
-          "nome": "El Shaarawy",
+          "nome": "Sow",
           "ruolo": "",
-          "Mv": 6.2,
-          "Fm": 6.4,
+          "Mv": 5.7,
+          "Fm": 5.8,
           "Pv": 5,
           "Gf": 0,
           "Ass": 1,
-          "nome_excel": "El Shaarawy"
+          "nome_excel": "Sow"
+        },
+        {
+          "nome": "Vitinha O.",
+          "ruolo": "",
+          "Mv": 5.71,
+          "Fm": 5.64,
+          "Pv": 7,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Vitinha O."
+        },
+        {
+          "nome": "Colombo",
+          "ruolo": "",
+          "Mv": 5.92,
+          "Fm": 5.75,
+          "Pv": 6,
+          "Gf": 0,
+          "Ass": 2,
+          "nome_excel": "Colombo"
         },
         {
           "nome": "Robinho Junior",
@@ -3524,31 +3451,9 @@
           "Gf": 0,
           "Ass": 0,
           "nome_excel": null
-        },
-        {
-          "nome": "Vitinha O.",
-          "ruolo": "",
-          "Mv": 5.58,
-          "Fm": 5.5,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Vitinha O."
         }
       ],
       "ballottaggi": [
-        {
-          "giocatori": [
-            {
-              "nome": "Messias",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Wiafe",
-              "percentuale": "40%"
-            }
-          ]
-        },
         {
           "giocatori": [
             {
@@ -3556,7 +3461,7 @@
               "percentuale": "55%"
             },
             {
-              "nome": "Amorim",
+              "nome": "Wiafe",
               "percentuale": "45%"
             }
           ]
@@ -3564,12 +3469,24 @@
         {
           "giocatori": [
             {
-              "nome": "Colombo",
+              "nome": "Mitaj",
               "percentuale": "55%"
             },
             {
-              "nome": "Vitinha O.",
+              "nome": "Puczka",
               "percentuale": "45%"
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Baldanzi",
+              "percentuale": "60%"
+            },
+            {
+              "nome": "Messias",
+              "percentuale": "40%"
             }
           ]
         }
@@ -3581,9 +3498,9 @@
         {
           "nome": "Vicario",
           "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 5.12,
-          "Pv": 8,
+          "Mv": 6.11,
+          "Fm": 5.0,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Vicario"
@@ -3591,9 +3508,9 @@
         {
           "nome": "Gatti",
           "ruolo": "",
-          "Mv": 7.0,
-          "Fm": 8.75,
-          "Pv": 2,
+          "Mv": 6.5,
+          "Fm": 7.67,
+          "Pv": 3,
           "Gf": 1,
           "Ass": 1,
           "nome_excel": "Gatti"
@@ -3601,9 +3518,9 @@
         {
           "nome": "Bremer",
           "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 6.88,
-          "Pv": 8,
+          "Mv": 6.0,
+          "Fm": 6.67,
+          "Pv": 9,
           "Gf": 2,
           "Ass": 0,
           "nome_excel": "Bremer"
@@ -3611,9 +3528,9 @@
         {
           "nome": "Lucumì",
           "ruolo": "",
-          "Mv": 5.93,
-          "Fm": 5.79,
-          "Pv": 7,
+          "Mv": 5.88,
+          "Fm": 5.75,
+          "Pv": 8,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Lucumì"
@@ -3621,9 +3538,9 @@
         {
           "nome": "Kalulu",
           "ruolo": "",
-          "Mv": 6.06,
-          "Fm": 6.06,
-          "Pv": 8,
+          "Mv": 5.89,
+          "Fm": 5.89,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Kalulu"
@@ -3631,9 +3548,9 @@
         {
           "nome": "McKennie",
           "ruolo": "",
-          "Mv": 6.1,
-          "Fm": 6.6,
-          "Pv": 5,
+          "Mv": 6.0,
+          "Fm": 6.42,
+          "Pv": 6,
           "Gf": 1,
           "Ass": 0,
           "nome_excel": "McKennie"
@@ -3641,9 +3558,9 @@
         {
           "nome": "Douglas Luiz",
           "ruolo": "",
-          "Mv": 5.81,
-          "Fm": 6.25,
-          "Pv": 8,
+          "Mv": 5.72,
+          "Fm": 6.11,
+          "Pv": 9,
           "Gf": 1,
           "Ass": 1,
           "nome_excel": "Douglas Luiz"
@@ -3651,9 +3568,9 @@
         {
           "nome": "Sarr P.",
           "ruolo": "",
-          "Mv": 5.62,
-          "Fm": 5.62,
-          "Pv": 4,
+          "Mv": 5.5,
+          "Fm": 5.5,
+          "Pv": 5,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Sarr P."
@@ -3661,29 +3578,29 @@
         {
           "nome": "Cambiaso",
           "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 5.62,
-          "Pv": 4,
+          "Mv": 5.4,
+          "Fm": 5.3,
+          "Pv": 5,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Cambiaso"
         },
         {
-          "nome": "Woltemade",
+          "nome": "Alajbegovic",
           "ruolo": "",
-          "Mv": 5.7,
-          "Fm": 5.7,
-          "Pv": 5,
+          "Mv": 6.0,
+          "Fm": 6.14,
+          "Pv": 7,
           "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Woltemade"
+          "Ass": 1,
+          "nome_excel": "Alajbegovic"
         },
         {
           "nome": "Kolo Muani",
           "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 6.0,
-          "Pv": 8,
+          "Mv": 5.44,
+          "Fm": 5.89,
+          "Pv": 9,
           "Gf": 1,
           "Ass": 1,
           "nome_excel": "Kolo Muani"
@@ -3725,7 +3642,7 @@
           "ruolo": "",
           "Mv": 6.0,
           "Fm": 6.0,
-          "Pv": 1,
+          "Pv": 2,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Cabal"
@@ -3743,9 +3660,9 @@
         {
           "nome": "Koopmeiners",
           "ruolo": "",
-          "Mv": 6.3,
-          "Fm": 7.1,
-          "Pv": 5,
+          "Mv": 6.25,
+          "Fm": 6.92,
+          "Pv": 6,
           "Gf": 1,
           "Ass": 1,
           "nome_excel": "Koopmeiners"
@@ -3753,377 +3670,35 @@
         {
           "nome": "Zhegrova",
           "ruolo": "",
-          "Mv": 6.3,
-          "Fm": 7.7,
-          "Pv": 5,
+          "Mv": 6.17,
+          "Fm": 7.25,
+          "Pv": 6,
           "Gf": 2,
           "Ass": 1,
           "nome_excel": "Zhegrova"
         },
         {
-          "nome": "Alajbegovic",
+          "nome": "Woltemade",
           "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.17,
+          "Mv": 5.67,
+          "Fm": 5.67,
           "Pv": 6,
           "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Alajbegovic"
+          "Ass": 0,
+          "nome_excel": "Woltemade"
         },
         {
           "nome": "Boga",
           "ruolo": "",
-          "Mv": 5.88,
-          "Fm": 5.88,
-          "Pv": 4,
+          "Mv": 5.8,
+          "Fm": 5.8,
+          "Pv": 5,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Boga"
         }
       ],
-      "ballottaggi": [
-        {
-          "giocatori": [
-            {
-              "nome": "Bremer",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Kelly L.",
-              "percentuale": "40%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "McKennie",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Koopmeiners",
-              "percentuale": "40%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Cambiaso",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Cabal",
-              "percentuale": "40%"
-            }
-          ]
-        }
-      ]
-    },
-    "Monza": {
-      "modulo": "3-4-2-1",
-      "titolari": [
-        {
-          "nome": "Tornqvist",
-          "ruolo": "",
-          "Mv": 6.38,
-          "Fm": 4.62,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Tornqvist"
-        },
-        {
-          "nome": "Kouadio",
-          "ruolo": "",
-          "Mv": 5.94,
-          "Fm": 6.19,
-          "Pv": 8,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Kouadio"
-        },
-        {
-          "nome": "Lucchesi",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.21,
-          "Pv": 7,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Lucchesi"
-        },
-        {
-          "nome": "Carboni A.",
-          "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 5.69,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Carboni A."
-        },
-        {
-          "nome": "Birindelli",
-          "ruolo": "",
-          "Mv": 5.94,
-          "Fm": 6.06,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 2,
-          "nome_excel": "Birindelli"
-        },
-        {
-          "nome": "Akinsanmiro",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.14,
-          "Pv": 7,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Akinsanmiro"
-        },
-        {
-          "nome": "Foe Ondoa",
-          "ruolo": "",
-          "Mv": 5.8,
-          "Fm": 6.0,
-          "Pv": 5,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Foe Ondoa"
-        },
-        {
-          "nome": "Mangas",
-          "ruolo": "",
-          "Mv": 6.25,
-          "Fm": 6.88,
-          "Pv": 8,
-          "Gf": 1,
-          "Ass": 2,
-          "nome_excel": "Mangas"
-        },
-        {
-          "nome": "Mota",
-          "ruolo": "",
-          "Mv": 6.3,
-          "Fm": 6.7,
-          "Pv": 5,
-          "Gf": 0,
-          "Ass": 2,
-          "nome_excel": "Mota"
-        },
-        {
-          "nome": "Robinson J.",
-          "ruolo": "",
-          "Mv": 6.6,
-          "Fm": 7.8,
-          "Pv": 5,
-          "Gf": 2,
-          "Ass": 0,
-          "nome_excel": "Robinson J."
-        },
-        {
-          "nome": "Varela G.",
-          "ruolo": "",
-          "Mv": 7.0,
-          "Fm": 10.07,
-          "Pv": 7,
-          "Gf": 7,
-          "Ass": 1,
-          "nome_excel": "Varela G."
-        }
-      ],
-      "panchina": [
-        {
-          "nome": "Thiam",
-          "ruolo": "",
-          "Mv": 5.17,
-          "Fm": 2.83,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Thiam"
-        },
-        {
-          "nome": "Strajnar",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Goglichidze",
-          "ruolo": "",
-          "Mv": 6.67,
-          "Fm": 7.67,
-          "Pv": 3,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Goglichidze"
-        },
-        {
-          "nome": "Bakoune",
-          "ruolo": "",
-          "Mv": 5.88,
-          "Fm": 5.88,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Bakoune"
-        },
-        {
-          "nome": "Antov",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Folorunsho",
-          "ruolo": "",
-          "Mv": 5.58,
-          "Fm": 5.42,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Folorunsho"
-        },
-        {
-          "nome": "Colombo L.",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.0,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Colombo L."
-        },
-        {
-          "nome": "Mout",
-          "ruolo": "",
-          "Mv": 5.0,
-          "Fm": 5.0,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Mout"
-        },
-        {
-          "nome": "Colpani",
-          "ruolo": "",
-          "Mv": 5.9,
-          "Fm": 6.5,
-          "Pv": 5,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Colpani"
-        },
-        {
-          "nome": "Tourè I.",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Ciurria",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Forson O.",
-          "ruolo": "",
-          "Mv": 5.83,
-          "Fm": 5.83,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Forson O."
-        },
-        {
-          "nome": "Cutrone",
-          "ruolo": "",
-          "Mv": 5.88,
-          "Fm": 5.88,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Cutrone"
-        },
-        {
-          "nome": "Ngonge",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.0,
-          "Pv": 2,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Ngonge"
-        },
-        {
-          "nome": "Zeballos",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 7.5,
-          "Pv": 2,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Zeballos"
-        }
-      ],
-      "ballottaggi": [
-        {
-          "giocatori": [
-            {
-              "nome": "Lucchesi",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Goglichidze",
-              "percentuale": "40%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Foe Ondoa",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Folorunsho",
-              "percentuale": "40%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Robinson J.",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Ngonge",
-              "percentuale": "40%"
-            }
-          ]
-        }
-      ]
+      "ballottaggi": []
     },
     "Napoli": {
       "modulo": "4-3-3",
@@ -4131,9 +3706,9 @@
         {
           "nome": "Milinkovic-Savic V.",
           "ruolo": "",
-          "Mv": 6.5,
+          "Mv": 6.67,
           "Fm": 6.0,
-          "Pv": 2,
+          "Pv": 3,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Milinkovic-Savic V."
@@ -4142,18 +3717,18 @@
           "nome": "Di Lorenzo",
           "ruolo": "",
           "Mv": 6.06,
-          "Fm": 6.12,
-          "Pv": 8,
+          "Fm": 6.22,
+          "Pv": 9,
           "Gf": 0,
-          "Ass": 1,
+          "Ass": 2,
           "nome_excel": "Di Lorenzo"
         },
         {
           "nome": "Rrahmani",
           "ruolo": "",
-          "Mv": 6.07,
-          "Fm": 6.14,
-          "Pv": 7,
+          "Mv": 6.06,
+          "Fm": 6.12,
+          "Pv": 8,
           "Gf": 0,
           "Ass": 1,
           "nome_excel": "Rrahmani"
@@ -4161,32 +3736,32 @@
         {
           "nome": "Marin R.",
           "ruolo": "",
-          "Mv": 5.71,
-          "Fm": 5.57,
-          "Pv": 7,
-          "Gf": 0,
+          "Mv": 5.81,
+          "Fm": 6.06,
+          "Pv": 8,
+          "Gf": 1,
           "Ass": 0,
           "nome_excel": "Marin R."
         },
         {
           "nome": "Olivera",
           "ruolo": "",
-          "Mv": 5.67,
+          "Mv": 5.75,
           "Fm": 6.0,
-          "Pv": 3,
+          "Pv": 4,
           "Gf": 0,
           "Ass": 1,
           "nome_excel": "Olivera"
         },
         {
-          "nome": "De Bruyne",
+          "nome": "Zambo Anguissa",
           "ruolo": "",
-          "Mv": 6.38,
-          "Fm": 7.25,
-          "Pv": 8,
-          "Gf": 3,
-          "Ass": 1,
-          "nome_excel": "De Bruyne"
+          "Mv": 5.8,
+          "Fm": 6.4,
+          "Pv": 5,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Zambo Anguissa"
         },
         {
           "nome": "Lobotka",
@@ -4201,9 +3776,9 @@
         {
           "nome": "McTominay",
           "ruolo": "",
-          "Mv": 6.1,
-          "Fm": 7.3,
-          "Pv": 5,
+          "Mv": 6.17,
+          "Fm": 7.17,
+          "Pv": 6,
           "Gf": 2,
           "Ass": 0,
           "nome_excel": "McTominay"
@@ -4211,31 +3786,31 @@
         {
           "nome": "Politano",
           "ruolo": "",
-          "Mv": 6.07,
-          "Fm": 6.71,
-          "Pv": 7,
-          "Gf": 1,
-          "Ass": 2,
+          "Mv": 6.19,
+          "Fm": 7.25,
+          "Pv": 8,
+          "Gf": 2,
+          "Ass": 3,
           "nome_excel": "Politano"
         },
         {
           "nome": "Hojlund",
           "ruolo": "",
-          "Mv": 6.19,
-          "Fm": 6.94,
-          "Pv": 8,
-          "Gf": 2,
+          "Mv": 6.28,
+          "Fm": 7.28,
+          "Pv": 9,
+          "Gf": 3,
           "Ass": 0,
           "nome_excel": "Hojlund"
         },
         {
           "nome": "Lang",
           "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.5,
-          "Pv": 6,
+          "Mv": 6.14,
+          "Fm": 6.71,
+          "Pv": 7,
           "Gf": 1,
-          "Ass": 0,
+          "Ass": 1,
           "nome_excel": "Lang"
         }
       ],
@@ -4263,12 +3838,12 @@
         {
           "nome": "Marianucci",
           "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
+          "Mv": 6.0,
+          "Fm": 6.0,
+          "Pv": 1,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": null
+          "nome_excel": "Marianucci"
         },
         {
           "nome": "Beukema",
@@ -4281,21 +3856,21 @@
           "nome_excel": "Beukema"
         },
         {
-          "nome": "Zambo Anguissa",
+          "nome": "De Bruyne",
           "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 6.5,
-          "Pv": 4,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Zambo Anguissa"
+          "Mv": 6.44,
+          "Fm": 7.56,
+          "Pv": 9,
+          "Gf": 4,
+          "Ass": 1,
+          "nome_excel": "De Bruyne"
         },
         {
           "nome": "Gilmour",
           "ruolo": "",
-          "Mv": 6.25,
-          "Fm": 7.0,
-          "Pv": 4,
+          "Mv": 6.3,
+          "Fm": 6.9,
+          "Pv": 5,
           "Gf": 1,
           "Ass": 0,
           "nome_excel": "Gilmour"
@@ -4303,9 +3878,9 @@
         {
           "nome": "Vergara",
           "ruolo": "",
-          "Mv": 6.25,
-          "Fm": 7.12,
-          "Pv": 4,
+          "Mv": 6.2,
+          "Fm": 6.9,
+          "Pv": 5,
           "Gf": 1,
           "Ass": 1,
           "nome_excel": "Vergara"
@@ -4331,174 +3906,245 @@
           "nome_excel": "Lucca"
         }
       ],
-      "ballottaggi": [
-        {
-          "giocatori": [
-            {
-              "nome": "De Bruyne",
-              "percentuale": "55%"
-            },
-            {
-              "nome": "Zambo Anguissa",
-              "percentuale": "45%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Hojlund",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Lucca",
-              "percentuale": "40%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Lang",
-              "percentuale": "55%"
-            },
-            {
-              "nome": "Giovane",
-              "percentuale": "45%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Di Lorenzo",
-              "percentuale": "55%"
-            },
-            {
-              "nome": "Beukema",
-              "percentuale": "45%"
-            }
-          ]
-        }
-      ]
+      "ballottaggi": []
     },
-    "Frosinone": {
-      "modulo": "4-2-3-1",
+    "Sassuolo": {
+      "modulo": "4-3-3",
       "titolari": [
         {
-          "nome": "Palmisani",
+          "nome": "Turati",
           "ruolo": "",
-          "Mv": 6.56,
-          "Fm": 4.94,
-          "Pv": 8,
+          "Mv": 6.5,
+          "Fm": 5.5,
+          "Pv": 2,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": "Palmisani"
+          "nome_excel": "Turati"
         },
         {
-          "nome": "Oyono A.",
+          "nome": "Cinquegrano",
           "ruolo": "",
-          "Mv": 6.38,
-          "Fm": 6.44,
+          "Mv": 5.75,
+          "Fm": 6.08,
+          "Pv": 6,
+          "Gf": 0,
+          "Ass": 2,
+          "nome_excel": "Cinquegrano"
+        },
+        {
+          "nome": "Caleta-Car",
+          "ruolo": "",
+          "Mv": 4.9,
+          "Fm": 4.9,
+          "Pv": 5,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Caleta-Car"
+        },
+        {
+          "nome": "Odenthal",
+          "ruolo": "",
+          "Mv": 5.75,
+          "Fm": 7.25,
+          "Pv": 4,
+          "Gf": 2,
+          "Ass": 0,
+          "nome_excel": "Odenthal"
+        },
+        {
+          "nome": "Doig",
+          "ruolo": "",
+          "Mv": 5.89,
+          "Fm": 6.22,
+          "Pv": 9,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Doig"
+        },
+        {
+          "nome": "Adzic",
+          "ruolo": "",
+          "Mv": 6.36,
+          "Fm": 7.79,
+          "Pv": 7,
+          "Gf": 3,
+          "Ass": 1,
+          "nome_excel": "Adzic"
+        },
+        {
+          "nome": "Matic",
+          "ruolo": "",
+          "Mv": 6.25,
+          "Fm": 6.31,
           "Pv": 8,
           "Gf": 0,
           "Ass": 1,
-          "nome_excel": "Oyono A."
+          "nome_excel": "Matic"
         },
         {
-          "nome": "Calvani",
+          "nome": "Bakola",
           "ruolo": "",
-          "Mv": 6.21,
-          "Fm": 6.07,
+          "Mv": 6.0,
+          "Fm": 6.25,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 2,
+          "nome_excel": "Bakola"
+        },
+        {
+          "nome": "Berardi",
+          "ruolo": "",
+          "Mv": 5.94,
+          "Fm": 6.5,
+          "Pv": 8,
+          "Gf": 2,
+          "Ass": 0,
+          "nome_excel": "Berardi"
+        },
+        {
+          "nome": "Esposito Se.",
+          "ruolo": "",
+          "Mv": 6.6,
+          "Fm": 8.0,
+          "Pv": 5,
+          "Gf": 2,
+          "Ass": 1,
+          "nome_excel": "Esposito Se."
+        },
+        {
+          "nome": "Laurientè",
+          "ruolo": "",
+          "Mv": 6.06,
+          "Fm": 6.11,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Laurientè"
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Muric",
+          "ruolo": "",
+          "Mv": 5.43,
+          "Fm": 3.43,
           "Pv": 7,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": "Calvani"
+          "nome_excel": "Muric"
         },
         {
-          "nome": "Monterisi",
+          "nome": "Satalino",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Van Der Brempt",
+          "ruolo": "",
+          "Mv": 5.33,
+          "Fm": 5.17,
+          "Pv": 3,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Van Der Brempt"
+        },
+        {
+          "nome": "Obrador",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.0,
+          "Pv": 3,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Obrador"
+        },
+        {
+          "nome": "Candè",
+          "ruolo": "",
+          "Mv": 5.25,
+          "Fm": 5.25,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Candè"
+        },
+        {
+          "nome": "Idzes",
+          "ruolo": "",
+          "Mv": 6.17,
+          "Fm": 6.0,
+          "Pv": 3,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Idzes"
+        },
+        {
+          "nome": "Walukiewicz",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Ghion",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Lipani",
+          "ruolo": "",
+          "Mv": 5.67,
+          "Fm": 5.5,
+          "Pv": 6,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Lipani"
+        },
+        {
+          "nome": "Sulemana I.",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.5,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Sulemana I."
+        },
+        {
+          "nome": "Volpato",
+          "ruolo": "",
+          "Mv": 6.5,
+          "Fm": 7.12,
+          "Pv": 4,
+          "Gf": 1,
+          "Ass": 0,
+          "nome_excel": "Volpato"
+        },
+        {
+          "nome": "Dominguez B.",
           "ruolo": "",
           "Mv": 5.92,
           "Fm": 5.92,
           "Pv": 6,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": "Monterisi"
+          "nome_excel": "Dominguez B."
         },
         {
-          "nome": "Bracaglia",
-          "ruolo": "",
-          "Mv": 6.19,
-          "Fm": 6.44,
-          "Pv": 8,
-          "Gf": 1,
-          "Ass": 1,
-          "nome_excel": "Bracaglia"
-        },
-        {
-          "nome": "Calò",
-          "ruolo": "",
-          "Mv": 6.69,
-          "Fm": 8.06,
-          "Pv": 8,
-          "Gf": 3,
-          "Ass": 2,
-          "nome_excel": "Calò"
-        },
-        {
-          "nome": "Masini",
-          "ruolo": "",
-          "Mv": 6.19,
-          "Fm": 6.31,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Masini"
-        },
-        {
-          "nome": "Ghedjemis",
-          "ruolo": "",
-          "Mv": 6.58,
-          "Fm": 7.08,
-          "Pv": 6,
-          "Gf": 0,
-          "Ass": 3,
-          "nome_excel": "Ghedjemis"
-        },
-        {
-          "nome": "Schmid",
-          "ruolo": "",
-          "Mv": 6.5,
-          "Fm": 7.5,
-          "Pv": 8,
-          "Gf": 2,
-          "Ass": 3,
-          "nome_excel": "Schmid"
-        },
-        {
-          "nome": "Kvernadze",
-          "ruolo": "",
-          "Mv": 6.69,
-          "Fm": 7.81,
-          "Pv": 8,
-          "Gf": 3,
-          "Ass": 1,
-          "nome_excel": "Kvernadze"
-        },
-        {
-          "nome": "Raimondo",
-          "ruolo": "",
-          "Mv": 6.56,
-          "Fm": 9.0,
-          "Pv": 8,
-          "Gf": 7,
-          "Ass": 0,
-          "nome_excel": "Raimondo"
-        }
-      ],
-      "panchina": [
-        {
-          "nome": "Desplanches",
+          "nome": "Pierini",
           "ruolo": "",
           "Mv": 0.0,
           "Fm": 0.0,
@@ -4508,408 +4154,37 @@
           "nome_excel": null
         },
         {
-          "nome": "Pisseri",
+          "nome": "Bowie",
           "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Cittadini",
-          "ruolo": "",
-          "Mv": 5.69,
-          "Fm": 5.62,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Cittadini"
-        },
-        {
-          "nome": "Tchato",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Omar Fayed",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.0,
-          "Pv": 1,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Omar Fayed"
-        },
-        {
-          "nome": "Amey",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Terzic",
-          "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 6.75,
-          "Pv": 4,
+          "Mv": 5.89,
+          "Fm": 6.17,
+          "Pv": 9,
           "Gf": 1,
           "Ass": 0,
-          "nome_excel": "Terzic"
-        },
-        {
-          "nome": "Akpoguma",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Fini",
-          "ruolo": "",
-          "Mv": 6.1,
-          "Fm": 6.1,
-          "Pv": 5,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Fini"
-        },
-        {
-          "nome": "Cichella",
-          "ruolo": "",
-          "Mv": 5.83,
-          "Fm": 5.83,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Cichella"
-        },
-        {
-          "nome": "Hasa",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.0,
-          "Pv": 2,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Hasa"
-        },
-        {
-          "nome": "El Azzouzi A.",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Zerbin",
-          "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 6.12,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Zerbin"
-        },
-        {
-          "nome": "Birligea",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Bobcek",
-          "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 5.75,
-          "Pv": 2,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Bobcek"
+          "nome_excel": "Bowie"
         }
       ],
       "ballottaggi": [
         {
           "giocatori": [
             {
-              "nome": "Calvani",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Cittadini",
-              "percentuale": "40%"
-            }
-          ]
-        },
-        {
-          "giocatori": [
-            {
-              "nome": "Bracaglia",
+              "nome": "Cinquegrano",
               "percentuale": "55%"
             },
             {
-              "nome": "Terzic",
+              "nome": "Van Der Brempt",
               "percentuale": "45%"
             }
           ]
-        }
-      ]
-    },
-    "Lecce": {
-      "modulo": "4-3-3",
-      "titolari": [
-        {
-          "nome": "Falcone",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 4.19,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Falcone"
         },
-        {
-          "nome": "Veiga D.",
-          "ruolo": "",
-          "Mv": 5.88,
-          "Fm": 6.06,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 3,
-          "nome_excel": "Veiga D."
-        },
-        {
-          "nome": "Siebert",
-          "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 6.06,
-          "Pv": 8,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Siebert"
-        },
-        {
-          "nome": "Ndaba",
-          "ruolo": "",
-          "Mv": 5.67,
-          "Fm": 5.67,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Ndaba"
-        },
-        {
-          "nome": "Gallo",
-          "ruolo": "",
-          "Mv": 5.93,
-          "Fm": 6.07,
-          "Pv": 7,
-          "Gf": 0,
-          "Ass": 1,
-          "nome_excel": "Gallo"
-        },
-        {
-          "nome": "Kaba",
-          "ruolo": "",
-          "Mv": 5.83,
-          "Fm": 5.83,
-          "Pv": 3,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Kaba"
-        },
-        {
-          "nome": "Ngom",
-          "ruolo": "",
-          "Mv": 5.56,
-          "Fm": 5.5,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Ngom"
-        },
-        {
-          "nome": "Maleh",
-          "ruolo": "",
-          "Mv": 5.81,
-          "Fm": 5.75,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Maleh"
-        },
-        {
-          "nome": "N'Dri",
-          "ruolo": "",
-          "Mv": 6.07,
-          "Fm": 6.43,
-          "Pv": 7,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "N'Dri"
-        },
-        {
-          "nome": "Geubbels",
-          "ruolo": "",
-          "Mv": 5.2,
-          "Fm": 5.2,
-          "Pv": 5,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Geubbels"
-        },
-        {
-          "nome": "Fatah",
-          "ruolo": "",
-          "Mv": 5.86,
-          "Fm": 6.29,
-          "Pv": 7,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Fatah"
-        }
-      ],
-      "panchina": [
-        {
-          "nome": "Bleve",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Borbei",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Tiago Gabriel",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.86,
-          "Pv": 7,
-          "Gf": 2,
-          "Ass": 0,
-          "nome_excel": "Tiago Gabriel"
-        },
-        {
-          "nome": "Dembelè A.",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Jean",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Gandelman",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Gorter",
-          "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 7.5,
-          "Pv": 2,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Gorter"
-        },
-        {
-          "nome": "Fofana Sa.",
-          "ruolo": "",
-          "Mv": 0.0,
-          "Fm": 0.0,
-          "Pv": 0,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": null
-        },
-        {
-          "nome": "Monteiro J.",
-          "ruolo": "",
-          "Mv": 5.38,
-          "Fm": 5.38,
-          "Pv": 4,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Monteiro J."
-        },
-        {
-          "nome": "Stulic",
-          "ruolo": "",
-          "Mv": 5.5,
-          "Fm": 5.5,
-          "Pv": 5,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Stulic"
-        },
-        {
-          "nome": "Esteban",
-          "ruolo": "",
-          "Mv": 5.8,
-          "Fm": 5.7,
-          "Pv": 5,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Esteban"
-        }
-      ],
-      "ballottaggi": [
         {
           "giocatori": [
             {
-              "nome": "Kaba",
+              "nome": "Doig",
               "percentuale": "60%"
             },
             {
-              "nome": "Gorter",
+              "nome": "Obrador",
               "percentuale": "40%"
             }
           ]
@@ -4917,11 +4192,11 @@
         {
           "giocatori": [
             {
-              "nome": "Geubbels",
+              "nome": "Berardi",
               "percentuale": "60%"
             },
             {
-              "nome": "Esteban",
+              "nome": "Volpato",
               "percentuale": "40%"
             }
           ]
@@ -4934,9 +4209,9 @@
         {
           "nome": "De Gea",
           "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 3.56,
-          "Pv": 8,
+          "Mv": 6.06,
+          "Fm": 3.67,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "De Gea"
@@ -4944,19 +4219,19 @@
         {
           "nome": "Jimenez A.",
           "ruolo": "",
-          "Mv": 6.0,
-          "Fm": 6.93,
-          "Pv": 7,
+          "Mv": 6.06,
+          "Fm": 7.0,
+          "Pv": 8,
           "Gf": 2,
-          "Ass": 1,
+          "Ass": 2,
           "nome_excel": "Jimenez A."
         },
         {
           "nome": "Dragusin",
           "ruolo": "",
-          "Mv": 5.38,
-          "Fm": 5.44,
-          "Pv": 8,
+          "Mv": 5.44,
+          "Fm": 5.5,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 1,
           "nome_excel": "Dragusin"
@@ -4964,29 +4239,29 @@
         {
           "nome": "Viery",
           "ruolo": "",
-          "Mv": 5.36,
-          "Fm": 5.21,
-          "Pv": 7,
+          "Mv": 5.5,
+          "Fm": 5.31,
+          "Pv": 8,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Viery"
         },
         {
-          "nome": "Valdepenas",
+          "nome": "Joao Mario",
           "ruolo": "",
-          "Mv": 5.33,
-          "Fm": 5.25,
-          "Pv": 6,
-          "Gf": 0,
+          "Mv": 5.83,
+          "Fm": 6.83,
+          "Pv": 3,
+          "Gf": 1,
           "Ass": 0,
-          "nome_excel": "Valdepenas"
+          "nome_excel": "Joao Mario"
         },
         {
           "nome": "Ndour",
           "ruolo": "",
-          "Mv": 5.69,
-          "Fm": 5.75,
-          "Pv": 8,
+          "Mv": 5.67,
+          "Fm": 5.72,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 1,
           "nome_excel": "Ndour"
@@ -4994,9 +4269,9 @@
         {
           "nome": "Fagioli",
           "ruolo": "",
-          "Mv": 5.88,
-          "Fm": 6.06,
-          "Pv": 8,
+          "Mv": 5.78,
+          "Fm": 5.94,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 2,
           "nome_excel": "Fagioli"
@@ -5004,9 +4279,9 @@
         {
           "nome": "Brescianini",
           "ruolo": "",
-          "Mv": 5.8,
-          "Fm": 5.8,
-          "Pv": 5,
+          "Mv": 5.75,
+          "Fm": 5.75,
+          "Pv": 6,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Brescianini"
@@ -5014,9 +4289,9 @@
         {
           "nome": "Mastantuono",
           "ruolo": "",
-          "Mv": 6.12,
-          "Fm": 7.12,
-          "Pv": 8,
+          "Mv": 6.17,
+          "Fm": 7.06,
+          "Pv": 9,
           "Gf": 3,
           "Ass": 0,
           "nome_excel": "Mastantuono"
@@ -5024,22 +4299,22 @@
         {
           "nome": "Njie",
           "ruolo": "",
-          "Mv": 5.86,
-          "Fm": 5.79,
-          "Pv": 7,
-          "Gf": 0,
-          "Ass": 0,
+          "Mv": 6.06,
+          "Fm": 6.5,
+          "Pv": 8,
+          "Gf": 1,
+          "Ass": 1,
           "nome_excel": "Njie"
         },
         {
-          "nome": "Beto",
+          "nome": "Pellegrino M.",
           "ruolo": "",
-          "Mv": 5.62,
-          "Fm": 5.62,
-          "Pv": 4,
-          "Gf": 0,
+          "Mv": 5.56,
+          "Fm": 6.11,
+          "Pv": 9,
+          "Gf": 2,
           "Ass": 0,
-          "nome_excel": "Beto"
+          "nome_excel": "Pellegrino M."
         }
       ],
       "panchina": [
@@ -5064,14 +4339,14 @@
           "nome_excel": null
         },
         {
-          "nome": "Joao Mario",
+          "nome": "Valdepenas",
           "ruolo": "",
-          "Mv": 5.25,
+          "Mv": 5.33,
           "Fm": 5.25,
-          "Pv": 2,
+          "Pv": 6,
           "Gf": 0,
           "Ass": 0,
-          "nome_excel": "Joao Mario"
+          "nome_excel": "Valdepenas"
         },
         {
           "nome": "Dodò",
@@ -5096,9 +4371,9 @@
         {
           "nome": "Oulai",
           "ruolo": "",
-          "Mv": 5.62,
-          "Fm": 5.5,
-          "Pv": 4,
+          "Mv": 5.7,
+          "Fm": 5.6,
+          "Pv": 5,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Oulai"
@@ -5114,36 +4389,36 @@
           "nome_excel": "Goncalves P."
         },
         {
+          "nome": "Beto",
+          "ruolo": "",
+          "Mv": 5.62,
+          "Fm": 5.62,
+          "Pv": 4,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Beto"
+        },
+        {
           "nome": "Gnonto",
           "ruolo": "",
-          "Mv": 5.6,
-          "Fm": 5.6,
-          "Pv": 5,
+          "Mv": 5.58,
+          "Fm": 5.5,
+          "Pv": 6,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Gnonto"
-        },
-        {
-          "nome": "Pellegrino M.",
-          "ruolo": "",
-          "Mv": 5.62,
-          "Fm": 6.31,
-          "Pv": 8,
-          "Gf": 2,
-          "Ass": 0,
-          "nome_excel": "Pellegrino M."
         }
       ],
       "ballottaggi": [
         {
           "giocatori": [
             {
-              "nome": "Jimenez A.",
-              "percentuale": "60%"
+              "nome": "Joao Mario",
+              "percentuale": "55%"
             },
             {
-              "nome": "Dodò",
-              "percentuale": "40%"
+              "nome": "Valdepenas",
+              "percentuale": "45%"
             }
           ]
         },
@@ -5162,12 +4437,12 @@
         {
           "giocatori": [
             {
-              "nome": "Beto",
-              "percentuale": "55%"
+              "nome": "Pellegrino M.",
+              "percentuale": "60%"
             },
             {
-              "nome": "Pellegrino M.",
-              "percentuale": "45%"
+              "nome": "Beto",
+              "percentuale": "40%"
             }
           ]
         }
@@ -5179,9 +4454,9 @@
         {
           "nome": "Carnesecchi",
           "ruolo": "",
-          "Mv": 6.5,
-          "Fm": 5.12,
-          "Pv": 8,
+          "Mv": 6.44,
+          "Fm": 5.0,
+          "Pv": 9,
           "Gf": 0,
           "Ass": 1,
           "nome_excel": "Carnesecchi"
@@ -5189,9 +4464,9 @@
         {
           "nome": "Zappacosta",
           "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 5.92,
-          "Pv": 6,
+          "Mv": 5.71,
+          "Fm": 5.86,
+          "Pv": 7,
           "Gf": 0,
           "Ass": 1,
           "nome_excel": "Zappacosta"
@@ -5209,9 +4484,9 @@
         {
           "nome": "Obric",
           "ruolo": "",
-          "Mv": 4.75,
-          "Fm": 4.5,
-          "Pv": 2,
+          "Mv": 5.0,
+          "Fm": 4.67,
+          "Pv": 3,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Obric"
@@ -5221,7 +4496,7 @@
           "ruolo": "",
           "Mv": 5.5,
           "Fm": 5.5,
-          "Pv": 6,
+          "Pv": 7,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Bernasconi"
@@ -5229,9 +4504,9 @@
         {
           "nome": "Gaetano",
           "ruolo": "",
-          "Mv": 5.83,
-          "Fm": 6.33,
-          "Pv": 6,
+          "Mv": 5.93,
+          "Fm": 6.36,
+          "Pv": 7,
           "Gf": 1,
           "Ass": 1,
           "nome_excel": "Gaetano"
@@ -5239,9 +4514,9 @@
         {
           "nome": "Ederson D.S.",
           "ruolo": "",
-          "Mv": 5.75,
-          "Fm": 6.38,
-          "Pv": 8,
+          "Mv": 5.67,
+          "Fm": 6.22,
+          "Pv": 9,
           "Gf": 2,
           "Ass": 0,
           "nome_excel": "Ederson D.S."
@@ -5249,9 +4524,9 @@
         {
           "nome": "Elmas",
           "ruolo": "",
-          "Mv": 5.88,
-          "Fm": 6.62,
-          "Pv": 4,
+          "Mv": 5.8,
+          "Fm": 6.3,
+          "Pv": 5,
           "Gf": 1,
           "Ass": 1,
           "nome_excel": "Elmas"
@@ -5259,29 +4534,29 @@
         {
           "nome": "De Ketelaere",
           "ruolo": "",
-          "Mv": 5.81,
-          "Fm": 5.94,
-          "Pv": 8,
-          "Gf": 0,
-          "Ass": 1,
+          "Mv": 6.0,
+          "Fm": 6.56,
+          "Pv": 9,
+          "Gf": 1,
+          "Ass": 2,
           "nome_excel": "De Ketelaere"
         },
         {
-          "nome": "Rowe",
+          "nome": "Zalewski",
           "ruolo": "",
-          "Mv": 5.58,
-          "Fm": 5.58,
+          "Mv": 6.33,
+          "Fm": 7.33,
           "Pv": 6,
-          "Gf": 0,
-          "Ass": 0,
-          "nome_excel": "Rowe"
+          "Gf": 1,
+          "Ass": 3,
+          "nome_excel": "Zalewski"
         },
         {
           "nome": "Krstovic",
           "ruolo": "",
-          "Mv": 6.38,
-          "Fm": 8.81,
-          "Pv": 8,
+          "Mv": 6.28,
+          "Fm": 8.44,
+          "Pv": 9,
           "Gf": 6,
           "Ass": 2,
           "nome_excel": "Krstovic"
@@ -5301,9 +4576,9 @@
         {
           "nome": "Scalvini",
           "ruolo": "",
-          "Mv": 5.83,
-          "Fm": 5.83,
-          "Pv": 6,
+          "Mv": 5.79,
+          "Fm": 5.79,
+          "Pv": 7,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Scalvini"
@@ -5313,7 +4588,7 @@
           "ruolo": "",
           "Mv": 5.5,
           "Fm": 5.5,
-          "Pv": 5,
+          "Pv": 6,
           "Gf": 0,
           "Ass": 0,
           "nome_excel": "Pasalic"
@@ -5329,14 +4604,14 @@
           "nome_excel": "Samardzic"
         },
         {
-          "nome": "Zalewski",
+          "nome": "Rowe",
           "ruolo": "",
-          "Mv": 6.1,
-          "Fm": 6.5,
-          "Pv": 5,
+          "Mv": 5.57,
+          "Fm": 5.57,
+          "Pv": 7,
           "Gf": 0,
-          "Ass": 2,
-          "nome_excel": "Zalewski"
+          "Ass": 0,
+          "nome_excel": "Rowe"
         },
         {
           "nome": "Sulemana K.",
@@ -5347,56 +4622,277 @@
           "Gf": 0,
           "Ass": 0,
           "nome_excel": null
-        },
-        {
-          "nome": "Scamacca",
-          "ruolo": "",
-          "Mv": 5.93,
-          "Fm": 6.36,
-          "Pv": 7,
-          "Gf": 1,
-          "Ass": 0,
-          "nome_excel": "Scamacca"
         }
       ],
-      "ballottaggi": [
+      "ballottaggi": []
+    },
+    "Parma": {
+      "modulo": "3-5-2",
+      "titolari": [
         {
-          "giocatori": [
-            {
-              "nome": "Gaetano",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Pasalic",
-              "percentuale": "40%"
-            }
-          ]
+          "nome": "Daffara",
+          "ruolo": "",
+          "Mv": 6.5,
+          "Fm": 6.5,
+          "Pv": 1,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Daffara"
         },
         {
-          "giocatori": [
-            {
-              "nome": "Rowe",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Zalewski",
-              "percentuale": "40%"
-            }
-          ]
+          "nome": "Delprato",
+          "ruolo": "",
+          "Mv": 5.83,
+          "Fm": 5.72,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Delprato"
         },
         {
-          "giocatori": [
-            {
-              "nome": "Krstovic",
-              "percentuale": "60%"
-            },
-            {
-              "nome": "Scamacca",
-              "percentuale": "40%"
-            }
-          ]
+          "nome": "Troilo",
+          "ruolo": "",
+          "Mv": 5.78,
+          "Fm": 5.61,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Troilo"
+        },
+        {
+          "nome": "Drobnic",
+          "ruolo": "",
+          "Mv": 5.7,
+          "Fm": 5.6,
+          "Pv": 5,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Drobnic"
+        },
+        {
+          "nome": "Britschgi",
+          "ruolo": "",
+          "Mv": 5.7,
+          "Fm": 5.6,
+          "Pv": 5,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Britschgi"
+        },
+        {
+          "nome": "Bernabè",
+          "ruolo": "",
+          "Mv": 5.64,
+          "Fm": 5.21,
+          "Pv": 7,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Bernabè"
+        },
+        {
+          "nome": "Sierro",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.4,
+          "Pv": 5,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Sierro"
+        },
+        {
+          "nome": "Keita M.",
+          "ruolo": "",
+          "Mv": 5.78,
+          "Fm": 5.72,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Keita M."
+        },
+        {
+          "nome": "Carboni F.",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.5,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Carboni F."
+        },
+        {
+          "nome": "Tourè E.",
+          "ruolo": "",
+          "Mv": 5.61,
+          "Fm": 5.72,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Tourè E."
+        },
+        {
+          "nome": "Romero D.",
+          "ruolo": "",
+          "Mv": 6.19,
+          "Fm": 6.94,
+          "Pv": 8,
+          "Gf": 2,
+          "Ass": 0,
+          "nome_excel": "Romero D."
         }
-      ]
+      ],
+      "panchina": [
+        {
+          "nome": "Corvi",
+          "ruolo": "",
+          "Mv": 5.94,
+          "Fm": 4.06,
+          "Pv": 8,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Corvi"
+        },
+        {
+          "nome": "Ghidotti",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Diego Carlos",
+          "ruolo": "",
+          "Mv": 5.42,
+          "Fm": 5.0,
+          "Pv": 6,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Diego Carlos"
+        },
+        {
+          "nome": "Valeri",
+          "ruolo": "",
+          "Mv": 5.89,
+          "Fm": 5.89,
+          "Pv": 9,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Valeri"
+        },
+        {
+          "nome": "Ndiaye",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.0,
+          "Pv": 1,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Ndiaye"
+        },
+        {
+          "nome": "Ordonez C.",
+          "ruolo": "",
+          "Mv": 5.75,
+          "Fm": 5.75,
+          "Pv": 4,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Ordonez C."
+        },
+        {
+          "nome": "Fabbian",
+          "ruolo": "",
+          "Mv": 5.58,
+          "Fm": 5.75,
+          "Pv": 6,
+          "Gf": 0,
+          "Ass": 1,
+          "nome_excel": "Fabbian"
+        },
+        {
+          "nome": "Cremaschi",
+          "ruolo": "",
+          "Mv": 5.5,
+          "Fm": 5.5,
+          "Pv": 1,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Cremaschi"
+        },
+        {
+          "nome": "Konate A.",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Nicolussi Caviglia",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Almqvist",
+          "ruolo": "",
+          "Mv": 6.25,
+          "Fm": 7.12,
+          "Pv": 4,
+          "Gf": 1,
+          "Ass": 1,
+          "nome_excel": "Almqvist"
+        },
+        {
+          "nome": "Diallo O.",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.0,
+          "Pv": 2,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Diallo O."
+        },
+        {
+          "nome": "Lontani",
+          "ruolo": "",
+          "Mv": 6.0,
+          "Fm": 6.61,
+          "Pv": 9,
+          "Gf": 2,
+          "Ass": 0,
+          "nome_excel": "Lontani"
+        },
+        {
+          "nome": "De Martis",
+          "ruolo": "",
+          "Mv": 0.0,
+          "Fm": 0.0,
+          "Pv": 0,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": null
+        },
+        {
+          "nome": "Frigan",
+          "ruolo": "",
+          "Mv": 5.7,
+          "Fm": 5.7,
+          "Pv": 5,
+          "Gf": 0,
+          "Ass": 0,
+          "nome_excel": "Frigan"
+        }
+      ],
+      "ballottaggi": []
     }
   }
 }
