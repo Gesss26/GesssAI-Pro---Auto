@@ -47,7 +47,9 @@
 <script type="text/babel" src="schedina.js"></script>
 <script type="text/babel" src="home.js"></script>
 <script type="text/babel" src="impostazioni.js"></script>
+<script src="pronostici-db.js"></script>
 <script type="text/babel" src="statistiche.js"></script>
+<script type="text/babel" src="statistiche-pronostici.js"></script>
 <script type="text/babel" src="storico.js"></script>
 
 <!-- CSS -->
@@ -1348,6 +1350,13 @@
         if (typeof window.clearStatsCache === 'function') {
           try { window.clearStatsCache(); } catch (e) {}
         }
+        // ⭐ Verifica pronostici man mano che arrivano i risultati
+        if (window.PronosticiDB && Array.isArray(matches) && matches.length > 0) {
+          try {
+            const n = window.PronosticiDB.verificaTutti(matches);
+            if (n > 0) console.log(`🎯 Pronostici verificati: ${n}`);
+          } catch (e) { console.warn('Errore verifica pronostici:', e); }
+        }
       }, [matches]);
 
       useEffect(() => {
@@ -1536,6 +1545,10 @@
                 scrollToMatchId={palinsestoScrollToId}
                 onScrollDone={() => setPalinsestoScrollToId(null)}
               />
+            )}
+
+            {tab === 'StatistichePronostici' && window.StatistichePronosticiComponent && (
+              <window.StatistichePronosticiComponent matches={matches} />
             )}
 
             {tab === 'Statistiche' && window.StatisticheComponent && (

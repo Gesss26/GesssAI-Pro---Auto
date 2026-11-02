@@ -1,7 +1,6 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto
-// v21: + scrollToMatchId + onScrollDone + data-match-id sulle card
-//      + highlight pulse dopo ritorno da Statistiche
+// v22: + hook registrazione pronostici in MatchTab
 // ============================================================
 
 (function () {
@@ -405,6 +404,20 @@
           return { ...g, pctDixon: hasDixon ? pctDixon : 0 };
         });
     }, [bestStoricoPerFamiglia, match.id, allMatches.length, stats.error]);
+
+    // ⭐ REGISTRAZIONE PRONOSTICI (solo al primo mount per partita)
+    useEffect(() => {
+      if (stats.error) return;
+      if (!window.PronosticiDB) return;
+      righeDaMostrare.forEach(g => {
+        window.PronosticiDB.registra(match, g.familyId, g.giocata, {
+          pctStorico: g.pct,
+          pctDixon: g.pctDixon || null,
+          fonte: g.pctDixon ? 'entrambi' : 'storico',
+        });
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [match.id]);
 
     const topTripla = useMemo(() => {
       if (stats.error) return [];
@@ -829,7 +842,6 @@
       });
     }, [matches, campionatiAttivi, giorni, normalizeDate, getTodayStr, addDaysToDateStr]);
 
-    // ⭐ Scroll automatico alla partita selezionata
     useEffect(() => {
       if (!scrollToMatchId) return;
 
@@ -847,7 +859,6 @@
             setTimeout(() => onScrollDone(), 300);
           }
         } else {
-          // Fallback: mostra un alert leggero se la card non è tra quelle visibili
           if (typeof window !== 'undefined' && window.matches) {
             const match = window.matches.find(m => m.id === scrollToMatchId);
             if (match) {
@@ -958,6 +969,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto v21 caricato — scroll-to-match + highlight');
+  console.log('✅ Modulo Palinsesto v22 caricato — con registrazione pronostici');
 
 })();

@@ -1,10 +1,11 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v29)
+// statistiche.js - Modulo Statistiche (v30)
 // - FormazionePanel: legge voti da formazioni_con_voti.json O da AssenzeDB
 // - Mostra MEDIA TITOLARI in alto, con ruolo colorato prima del nome
 // - Design: Colonna, colori reparto, ruolo prima del nome
 // - FIX v28: AssenzePanel esclude chiunque sia tra titolari o panchina
 // - FIX v29: scroll in alto ad ogni cambio sub-tab
+// - FIX v30: registrazione pronostici Dixon in TutteLeFamigliePanelDixon
 // ============================================================
 
 (function () {
@@ -744,7 +745,6 @@
 
   // ============================================================
   // PANNELLO ASSENZE E INFORTUNI (con Motivo) — FIX v28
-  // Esclude chiunque sia tra titolari o panchina della formazione
   // ============================================================
   const AssenzePanel = ({ squadra, teamColor }) => {
     const [, setVersion] = useState(0);
@@ -764,7 +764,6 @@
     const indisponibiliForm = formazione && Array.isArray(formazione.indisponibili) ? formazione.indisponibili : [];
     const squalificati = formazione && Array.isArray(formazione.squalificati) ? formazione.squalificati : [];
 
-    // ─── FIX v28: normalizzazione nomi + set di schierati ───
     const _normNome = (s) => (s || '')
       .toString()
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -806,7 +805,6 @@
       return false;
     };
 
-    // Unisci assenze manuali + indisponibili da formazione, escludendo chi è schierato
     const tutteAssenze = [];
     const nomiGia = new Set();
 
@@ -959,9 +957,6 @@
 
   // ============================================================
   // PANNELLO FORMAZIONI (v27)
-  // - Ruolo colorato prima del nome
-  // - Voti da formazioni_con_voti.json o fallback AssenzeDB
-  // - MEDIA TITOLARI in alto a destra
   // ============================================================
   const FormazionePanel = ({ nomeSquadra, formazione, colore }) => {
     if (!formazione) {
@@ -976,7 +971,6 @@
     const panchina = formazione?.panchina || [];
     const mod = formazione?.modulo;
 
-    // Normalizza nome per lookup robusto
     const _norm = (s) => (s || '')
       .toString()
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -986,7 +980,6 @@
       .replace(/\s+/g, ' ')
       .trim();
 
-    // Cerca in AssenzeDB._mappa con fallback
     const _cercaInMappa = (nome) => {
       if (!window.AssenzeDB) return null;
       if (typeof window.AssenzeDB.getGiocatore === 'function') {
@@ -1011,7 +1004,6 @@
       return null;
     };
 
-    // Estrae stats (nome, mv, fm, ruolo) da stringa o oggetto
     const getStats = (g) => {
       let nome = '', mv = 0, fm = 0, ruolo = '?';
 
@@ -1020,7 +1012,6 @@
         mv = parseFloat(g.Mv) || 0;
         fm = parseFloat(g.Fm) || 0;
         ruolo = (g.ruolo || '?').toUpperCase();
-        // Se manca Mv, prova a recuperarlo da AssenzeDB
         if (mv <= 0) {
           const info = _cercaInMappa(nome);
           if (info) {
@@ -1286,7 +1277,7 @@
   };
 
   // ============================================================
-  // TUTTE LE FAMIGLIE PANEL
+  // TUTTE LE FAMIGLIE PANEL (Storico)
   // ============================================================
   const TutteLeFamigliePanel = ({ match, allMatches }) => {
     const getPercentualeClasse = window.getPercentualeClasse;
@@ -1372,6 +1363,7 @@
 
   // ============================================================
   // TUTTE LE FAMIGLIE PANEL DIXON
+  // ⭐ v30: registrazione pronostici Dixon best-per-family
   // ============================================================
   const TutteLeFamigliePanelDixon = ({ match, allMatches }) => {
     const getPercentualeClasse = window.getPercentualeClasse;
@@ -1390,6 +1382,28 @@
         mcCache = null;
       }
     }
+
+    // ⭐ REGISTRAZIONE PRONOSTICI DIXON (solo al primo mount per partita)
+    useEffect(() => {
+      if (!mcCache) return;
+      if (!window.PronosticiDB) return;
+      const FAMIGLIE_LOCAL = window.FAMIGLIE_GIOCATE;
+      Object.keys(FAMIGLIE_LOCAL).forEach(fid => {
+        let bestOpt = null, bestPct = -1;
+        FAMIGLIE_LOCAL[fid].options.forEach(opt => {
+          const pct = calcolaPctGiocata(fid, opt, mcCache, null);
+          if (pct > bestPct) { bestPct = pct; bestOpt = opt; }
+        });
+        if (bestOpt && bestPct > 0) {
+          window.PronosticiDB.registra(match, fid, bestOpt, {
+            pctStorico: null,
+            pctDixon: bestPct,
+            fonte: 'dixon',
+          });
+        }
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [match.id, !!mcCache]);
 
     if (!mcCache) {
       return (
@@ -1965,7 +1979,7 @@
       window.FiltriCampionati.useFiltroCampionati();
 
     const matchesFiltrati = useMemo(
-      () => window.FiltriCampionati.filtraPartitePerCampionato(matches),
+      () => window.FiltriCampionati.filraPartitePerCampionato(matches),
       [matches, filtroCampionati]
     );
 
@@ -1973,7 +1987,6 @@
       clearStatsCache();
     }, [matchesFiltrati.length]);
 
-    // ⭐ Scroll in alto ad ogni cambio sub-tab
     useEffect(() => {
       window.scrollTo(0, 0);
       document.documentElement.scrollTop = 0;
@@ -2111,7 +2124,6 @@
                   </span>
                 </div>
 
-                {/* ─── Formazioni titolari / panchina con Voti e Ruoli ─── */}
                 {(() => {
                   const fHome = window.AssenzeDB?.getFormazione(selectedMatch.casa);
                   const fAway = window.AssenzeDB?.getFormazione(selectedMatch.ospiti);
@@ -2142,7 +2154,6 @@
                   );
                 })()}
 
-                {/* ─── Pannelli assenze esistenti (con Motivo) ─── */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <AssenzePanel squadra={selectedMatch.casa} teamColor={getChampColor(selectedMatch.campionato)} />
                   <AssenzePanel squadra={selectedMatch.ospiti} teamColor={getChampColor(selectedMatch.campionato)} />
@@ -2239,5 +2250,5 @@
   window.simulateMatches = simulateMatches;
   window.clearStatsCache = clearStatsCache;
 
-  console.log('✅ statistiche.js v29 - scroll in alto ad ogni cambio sub-tab');
+  console.log('✅ statistiche.js v30 - registrazione pronostici Dixon');
 })();

@@ -1,8 +1,6 @@
 // ============================================================
 // home.js - Modulo Home con MENU PRINCIPALE a griglia di card
-// v11: Menu hub con EMOJI + preset campionati con loghi reali
-//      + griglia 5×5 unificata "Campionati Attivi" in Home
-//      + sottomenu Info e Utilità + lista mobile compatta
+// v12: aggiunta voce "Statistiche Pronostici" nel menu principale
 // ============================================================
 
 (function () {
@@ -389,6 +387,13 @@
       action: { type: 'mainTab', value: 'Storico' },
     },
     {
+      id: 'statistiche-pronostici',
+      title: 'Statistiche Pronostici',
+      desc: 'Vinti e persi',
+      emoji: '📊',
+      action: { type: 'mainTab', value: 'StatistichePronostici' },
+    },
+    {
       id: 'schedina',
       title: 'Crea Schedina',
       desc: 'Costruisci giocate',
@@ -508,7 +513,7 @@
   };
 
   // ============================================================
-  // COMPONENTE: Menu Home (emoji + preset + griglia 5x5 campionati)
+  // COMPONENTE: Menu Home (emoji + preset + griglia campionati)
   // ============================================================
   const MenuHomeComponent = ({ onSelect, onApplyPreset, presetAttivo, matches, championships }) => {
     const isMobile = useIsMobile();
@@ -640,7 +645,6 @@
             <span>Seleziona Campionati</span>
           </div>
 
-          {/* RIGA 1: Preset rapidi con loghi */}
           <div className="menu-home-section-grid">
             {PRESET_CAMPIONATI.map(preset => {
               const isActive = presetAttivo === preset.id;
@@ -662,7 +666,6 @@
             })}
           </div>
 
-          {/* RIGA 2: Griglia 5×5 completa */}
           <div style={{
             marginTop: '16px',
             paddingTop: '14px',
@@ -2314,5 +2317,5 @@
     TOP_5_MAGGIORI, TOP_5_MINORI, TOP_COPPE, PRESET_CAMPIONATI,
   };
 
-  console.log('✅ Modulo Home v11 caricato — Menu hub con EMOJI + preset loghi + griglia 5×5 unificata');
+  console.log('✅ Modulo Home v12 caricato — aggiunta voce "Statistiche Pronostici"');
 })();
