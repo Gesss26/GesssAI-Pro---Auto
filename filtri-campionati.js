@@ -3,10 +3,12 @@
 // Sistema centralizzato di filtro campionati + giorni + modalità giocate.
 // Il PALINSESTO è la fonte di verità: scrive la selezione.
 // Tutti gli altri tab la leggono e si sincronizzano.
-// ⭐ v3: FIX switch Scelte/Calcolate
+// ⭐ v3.1: FIX switch Scelte/Calcolate + alias retrocompatibile
 //        - valori allineati a 'scelte' | 'calcolate'
 //        - retrocompatibile con 'tutte' salvato in passato
 //        - setMode ora dispatcha correttamente l'evento
+//        - ⭐ alias filraPartitePerCampionato → filtraPartitePerCampionato
+//          (typo storico usato in statistiche.js e altri moduli)
 // ============================================================
 
 (function () {
@@ -315,5 +317,14 @@
     useVisualizzaGiocateMode,
   };
 
-  console.log('✅ FiltriCampionati v3 — FIX switch Scelte/Calcolate');
+  // ============================================================
+  // ⭐ ALIAS RETROCOMPATIBILI (typo storici)
+  // ============================================================
+  // Alcuni moduli (es. statistiche.js) chiamano "filraPartitePerCampionato"
+  // senza la "t". Teniamo l'alias per non romperli, evitando di dover
+  // modificare ogni chiamante sparso nel codice.
+  window.FiltriCampionati.filraPartitePerCampionato =
+    window.FiltriCampionati.filtraPartitePerCampionato;
+
+  console.log('✅ FiltriCampionati v3.1 — FIX switch Scelte/Calcolate + alias filraPartitePerCampionato');
 })();
