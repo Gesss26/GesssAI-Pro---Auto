@@ -1,6 +1,6 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto
-// v22: + hook registrazione pronostici in MatchTab
+// v23: + registrazione pronostici Dixon indipendente in MatchTab
 // ============================================================
 
 (function () {
@@ -405,15 +405,45 @@
         });
     }, [bestStoricoPerFamiglia, match.id, allMatches.length, stats.error]);
 
-    // ⭐ REGISTRAZIONE PRONOSTICI (solo al primo mount per partita)
+    // ⭐ REGISTRAZIONE PRONOSTICI STORICO (solo al primo mount per partita)
     useEffect(() => {
       if (stats.error) return;
       if (!window.PronosticiDB) return;
       righeDaMostrare.forEach(g => {
         window.PronosticiDB.registra(match, g.familyId, g.giocata, {
           pctStorico: g.pct,
-          pctDixon: g.pctDixon || null,
-          fonte: g.pctDixon ? 'entrambi' : 'storico',
+          fonte: 'storico',
+        });
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [match.id]);
+
+    // ⭐ REGISTRAZIONE PRONOSTICI DIXON (solo al primo mount per partita)
+    useEffect(() => {
+      if (!getDixonPct) return;
+      if (stats.error) return;
+      if (!window.PronosticiDB) return;
+
+      const bestDixonFamiglie = famiglieDaAnalizzare.map(familyId => {
+        const family = FAMIGLIE_GIOCATE[familyId];
+        if (!family) return null;
+        let bestOpt = null, bestPct = -1;
+        family.options.forEach(opt => {
+          const pct = getDixonPct(familyId, opt, match, allMatches);
+          if (pct > bestPct) { bestPct = pct; bestOpt = opt; }
+        });
+        if (bestOpt && bestPct > 0) {
+          return { familyId, giocata: bestOpt, pct: bestPct };
+        }
+        return null;
+      }).filter(Boolean);
+
+      const top3Dixon = bestDixonFamiglie.sort((a, b) => b.pct - a.pct).slice(0, 3);
+
+      top3Dixon.forEach(g => {
+        window.PronosticiDB.registra(match, g.familyId, g.giocata, {
+          pctDixon: g.pct,
+          fonte: 'dixon',
         });
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -969,6 +999,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto v22 caricato — con registrazione pronostici');
+  console.log('✅ Modulo Palinsesto v23 caricato — registrazione pronostici Storico e Dixon separati');
 
 })();
