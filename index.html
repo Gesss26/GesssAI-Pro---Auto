@@ -516,11 +516,9 @@
     // ============================================================
     const TeamLogo = ({ teamName, championship, size = 60, className = '' }) => {
       const [finalError, setFinalError] = useState(false);
-      const [attemptIndex, setAttemptIndex] = useState(0);
 
       useEffect(() => {
         setFinalError(false);
-        setAttemptIndex(0);
       }, [teamName, championship]);
 
       const isCampionatoScuro = (champ) => {
@@ -622,7 +620,26 @@
         return words.map(w => w[0]).join('').substring(0, 3).toUpperCase();
       };
 
-      const renderFallback = () => {
+      // Fallback: logo della coppa/campionato su sfondo bianco
+      const renderChampFallback = () => {
+        const champName = championship && championship !== 'Tutti' ? championship : '';
+        const ChampLogoComp = window.ChampLogo;
+
+        if (champName && ChampLogoComp) {
+          return (
+            <div style={{
+              width: size, height: size, maxWidth: size, maxHeight: size,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0, borderRadius: '6px',
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              padding: '3px', boxSizing: 'border-box',
+            }}>
+              <ChampLogoComp campionato={champName} size={size - 6} />
+            </div>
+          );
+        }
+
+        // Ultimo fallback: iniziali
         const initials = getInitials(teamName);
         return (
           <div className={`team-logo-fallback ${className}`} style={{
@@ -638,7 +655,7 @@
       };
 
       if (!championship || championship === 'Tutti' || finalError) {
-        return renderFallback();
+        return renderChampFallback();
       }
 
       const buildPaths = () => {
@@ -647,12 +664,11 @@
         const overrideName = LOGO_OVERRIDES[teamName];
         const p1 = overrideName ? `${baseFolder}${overrideName.replace(/\s+/g, '%20')}.png` : null;
         const p2 = `${baseFolder}${teamName.replace(/\s+/g, '%20')}.png`;
-        const p3 = `${baseFolder}${teamName.replace(/\s+/g, '%20').toLowerCase()}.png`;
-        return [p1, p2, p3].filter(Boolean);
+        return [p1, p2].filter(Boolean);
       };
 
       const paths = buildPaths();
-      const currentSrc = paths[Math.min(attemptIndex, paths.length - 1)];
+      const currentSrc = paths[0];
       const needsLightBg = isCampionatoScuro(championship);
 
       return (
@@ -672,11 +688,9 @@
             style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
             className={`team-logo ${className}`}
             onError={() => {
-              if (attemptIndex + 1 < paths.length) {
-                setAttemptIndex(attemptIndex + 1);
-              } else {
-                setFinalError(true);
-              }
+              // Fallback immediato al logo del campionato dopo il primo fallimento
+              // (evita di tentare tutti i path in sequenza → niente 404 a raffica)
+              setFinalError(true);
             }}
           />
         </div>
