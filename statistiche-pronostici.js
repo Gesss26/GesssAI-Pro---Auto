@@ -1,6 +1,8 @@
 // ============================================================
 // statistiche-pronostici.js - Pannello "Statistiche Pronostici"
 // Card partite con ✅/❌ + tabella riepilogo per campionato
+// v2: giocate divise in 2 colonne (Storico / Dixon-Coles)
+//     bordo verde/rosso sui singoli box in base all'esito
 // ============================================================
 
 (function () {
@@ -91,12 +93,59 @@
 
     const FAMIGLIE = window.FAMIGLIE_GIOCATE || {};
 
+    // ---- Helper: render singola giocata ----
+    const renderGiocata = (r, i, fonteColonna) => {
+      const esitoOk = r.esito === 'vinto';
+      const esitoKo = r.esito === 'perso';
+      const borderCol = esitoOk ? 'var(--neon-green)' : esitoKo ? 'var(--neon-red)' : 'var(--border)';
+      const bgCol = esitoOk ? 'rgba(0,255,136,0.12)' : esitoKo ? 'rgba(255,51,102,0.12)' : 'var(--surface)';
+      const icon = esitoOk ? '✅' : esitoKo ? '❌' : '⏳';
+      const fam = FAMIGLIE[r.familyId];
+
+      // percentuale da mostrare: solo quella della colonna di appartenenza
+      const pctDaMostrare = fonteColonna === 'storico' ? r.pctStorico : r.pctDixon;
+      const pctLabel = fonteColonna === 'storico' ? '📊' : '🧮';
+      const pctColor = fonteColonna === 'storico' ? 'var(--neon-cyan)' : 'var(--neon-magenta)';
+
+      return (
+        <div
+          key={`${fonteColonna}-${i}`}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '6px',
+            padding: '5px 8px', borderRadius: '6px',
+            background: bgCol,
+            border: `2px solid ${borderCol}`,
+            fontSize: '11px',
+          }}
+        >
+          <span style={{ fontSize: '14px', flexShrink: 0 }}>{icon}</span>
+          <span style={{ flex: 1, fontWeight: 'bold', color: 'var(--text)' }}>
+            {formatGiocataLabel(r.familyId, r.giocata)}
+          </span>
+          <span style={{ fontSize: '9px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>
+            {fam ? `${fam.icon} ${fam.label}` : r.familyId}
+          </span>
+          {pctDaMostrare != null && (
+            <span
+              title={fonteColonna === 'storico' ? 'Storico' : 'Dixon'}
+              style={{ fontSize: '10px', color: pctColor, fontWeight: 700 }}
+            >
+              {pctLabel}{pctDaMostrare}%
+            </span>
+          )}
+        </div>
+      );
+    };
+
     // ---- Card partita ----
     const PronosticoCard = ({ partita }) => {
       const champColor = getChampColor(partita.campionato);
       const risultato = (partita.golCasa != null && partita.golOspite != null)
         ? `${partita.golCasa}-${partita.golOspite}`
         : null;
+
+      const giocateStorico = partita.giocate.filter(r => r.pctStorico != null);
+      const giocateDixon = partita.giocate.filter(r => r.pctDixon != null);
 
       return (
         <div className="match-tab" style={{
@@ -110,7 +159,11 @@
               <span>{partita.campionato || 'N/D'}</span>
             </div>
             {partita.round && (
-              <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--neon-cyan)', background: 'var(--bg-elevated)', padding: '3px 8px', borderRadius: '6px', border: '1px solid var(--border)' }}>
+              <span style={{
+                fontSize: '10px', fontWeight: 700, color: 'var(--neon-cyan)',
+                background: 'var(--bg-elevated)', padding: '3px 8px',
+                borderRadius: '6px', border: '1px solid var(--border)',
+              }}>
                 G.{partita.round}
               </span>
             )}
@@ -146,43 +199,39 @@
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '10px' }}>
-            {partita.giocate.map((r, i) => {
-              const esitoOk = r.esito === 'vinto';
-              const esitoKo = r.esito === 'perso';
-              const borderCol = esitoOk ? 'var(--neon-green)' : esitoKo ? 'var(--neon-red)' : 'var(--border)';
-              const bgCol = esitoOk ? 'rgba(0,255,136,0.12)' : esitoKo ? 'rgba(255,51,102,0.12)' : 'var(--surface)';
-              const icon = esitoOk ? '✅' : esitoKo ? '❌' : '⏳';
-              const fam = FAMIGLIE[r.familyId];
+          {/* === DUE COLONNE: STORICO | DIXON === */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
+            {/* COLONNA STORICO */}
+            <div>
+              <div style={{
+                fontSize: '10px', fontWeight: 900, color: 'var(--neon-cyan)',
+                textTransform: 'uppercase', letterSpacing: '0.5px',
+                marginBottom: '4px', textAlign: 'center',
+              }}>
+                📊 Storico
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {giocateStorico.length > 0
+                  ? giocateStorico.map((r, i) => renderGiocata(r, i, 'storico'))
+                  : <div style={{ fontSize: '11px', color: 'var(--text-dim)', textAlign: 'center', padding: '8px 0' }}>—</div>}
+              </div>
+            </div>
 
-              return (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', gap: '6px',
-                  padding: '5px 8px', borderRadius: '6px',
-                  background: bgCol,
-                  borderLeft: `3px solid ${borderCol}`,
-                  fontSize: '11px',
-                }}>
-                  <span style={{ fontSize: '14px', flexShrink: 0 }}>{icon}</span>
-                  <span style={{ flex: 1, fontWeight: 'bold', color: 'var(--text)' }}>
-                    {formatGiocataLabel(r.familyId, r.giocata)}
-                  </span>
-                  <span style={{ fontSize: '9px', color: 'var(--text-dim)', textTransform: 'uppercase' }}>
-                    {fam ? `${fam.icon} ${fam.label}` : r.familyId}
-                  </span>
-                  {r.pctStorico != null && (
-                    <span title="Storico" style={{ fontSize: '10px', color: 'var(--neon-cyan)', fontWeight: 700 }}>
-                      📊{r.pctStorico}%
-                    </span>
-                  )}
-                  {r.pctDixon != null && (
-                    <span title="Dixon" style={{ fontSize: '10px', color: 'var(--neon-magenta)', fontWeight: 700 }}>
-                      🧮{r.pctDixon}%
-                    </span>
-                  )}
-                </div>
-              );
-            })}
+            {/* COLONNA DIXON */}
+            <div>
+              <div style={{
+                fontSize: '10px', fontWeight: 900, color: 'var(--neon-magenta)',
+                textTransform: 'uppercase', letterSpacing: '0.5px',
+                marginBottom: '4px', textAlign: 'center',
+              }}>
+                🧮 Dixon-Coles
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {giocateDixon.length > 0
+                  ? giocateDixon.map((r, i) => renderGiocata(r, i, 'dixon'))
+                  : <div style={{ fontSize: '11px', color: 'var(--text-dim)', textAlign: 'center', padding: '8px 0' }}>—</div>}
+              </div>
+            </div>
           </div>
         </div>
       );
@@ -219,7 +268,14 @@
                     <td style={{ padding: '8px 10px', textAlign: 'center', color: 'var(--neon-green)', fontWeight: 900 }}>{c.vinti}</td>
                     <td style={{ padding: '8px 10px', textAlign: 'center', color: 'var(--neon-red)', fontWeight: 900 }}>{c.persi}</td>
                     <td style={{ padding: '8px 10px', textAlign: 'center', color: 'var(--text-dim)' }}>{c.inAttesa}</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'center', fontFamily: 'Orbitron, sans-serif', fontWeight: 900, color: c.hitRate == null ? 'var(--text-dim)' : c.hitRate >= 66 ? 'var(--neon-green)' : c.hitRate >= 50 ? 'var(--neon-gold)' : 'var(--neon-red)' }}>
+                    <td style={{
+                      padding: '8px 10px', textAlign: 'center',
+                      fontFamily: 'Orbitron, sans-serif', fontWeight: 900,
+                      color: c.hitRate == null ? 'var(--text-dim)'
+                        : c.hitRate >= 66 ? 'var(--neon-green)'
+                        : c.hitRate >= 50 ? 'var(--neon-gold)'
+                        : 'var(--neon-red)',
+                    }}>
                       {c.hitRate == null ? '—' : `${c.hitRate}%`}
                     </td>
                   </tr>
@@ -239,7 +295,11 @@
         { label: '✅ Vinti', value: t.vinti, color: 'var(--neon-green)' },
         { label: '❌ Persi', value: t.persi, color: 'var(--neon-red)' },
         { label: '⏳ In attesa', value: t.inAttesa, color: 'var(--text-dim)' },
-        { label: '🎯 Hit Rate', value: t.hitRate == null ? '—' : `${t.hitRate}%`, color: t.hitRate >= 66 ? 'var(--neon-green)' : t.hitRate >= 50 ? 'var(--neon-gold)' : 'var(--neon-red)' },
+        {
+          label: '🎯 Hit Rate',
+          value: t.hitRate == null ? '—' : `${t.hitRate}%`,
+          color: t.hitRate >= 66 ? 'var(--neon-green)' : t.hitRate >= 50 ? 'var(--neon-gold)' : 'var(--neon-red)',
+        },
       ];
       return (
         <div style={{
@@ -346,5 +406,5 @@
   }
 
   window.StatistichePronosticiComponent = StatistichePronosticiComponent;
-  console.log('✅ statistiche-pronostici.js caricato');
+  console.log('✅ statistiche-pronostici.js v2 caricato — 2 colonne Storico/Dixon + bordo esito');
 })();
