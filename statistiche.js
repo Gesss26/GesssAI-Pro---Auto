@@ -1,11 +1,12 @@
 // ============================================================
-// statistiche.js - Modulo Statistiche (v30)
+// statistiche.js - Modulo Statistiche (v31)
 // - FormazionePanel: legge voti da formazioni_con_voti.json O da AssenzeDB
 // - Mostra MEDIA TITOLARI in alto, con ruolo colorato prima del nome
 // - Design: Colonna, colori reparto, ruolo prima del nome
 // - FIX v28: AssenzePanel esclude chiunque sia tra titolari o panchina
 // - FIX v29: scroll in alto ad ogni cambio sub-tab
 // - FIX v30: registrazione pronostici Dixon in TutteLeFamigliePanelDixon
+// - FIX v31: aggiunti badge percentuali di titolarità nel FormazionePanel
 // ============================================================
 
 (function () {
@@ -956,7 +957,8 @@
   };
 
   // ============================================================
-  // PANNELLO FORMAZIONI (v27)
+  // PANNELLO FORMAZIONI (v31)
+  // ⭐ v31: aggiunta percentuale di titolarità accanto al ruolo
   // ============================================================
   const FormazionePanel = ({ nomeSquadra, formazione, colore }) => {
     if (!formazione) {
@@ -1005,13 +1007,17 @@
     };
 
     const getStats = (g) => {
-      let nome = '', mv = 0, fm = 0, ruolo = '?';
+      let nome = '', mv = 0, fm = 0, ruolo = '?', probabilità = 100;
 
       if (typeof g === 'object' && g !== null) {
         nome = g.nome || '';
         mv = parseFloat(g.Mv) || 0;
         fm = parseFloat(g.Fm) || 0;
         ruolo = (g.ruolo || '?').toUpperCase();
+        // ⭐ v31: legge la probabilità di titolarità
+        probabilità = (typeof g.probabilità === 'number') ? g.probabilità :
+                      (typeof g.probabilita === 'number') ? g.probabilita : 100;
+
         if (mv <= 0) {
           const info = _cercaInMappa(nome);
           if (info) {
@@ -1035,6 +1041,7 @@
         mv: mv > 0 ? mv : null,
         fm: fm > 0 ? fm : null,
         ruolo: ruolo || '?',
+        probabilità
       };
     };
 
@@ -1057,9 +1064,9 @@
     const raggruppa = (lista) => {
       const gruppi = { P: [], D: [], C: [], A: [], '?': [] };
       lista.forEach(g => {
-        const { nome, mv, fm, ruolo } = getStats(g);
-        let r = ['P','D','C','A'].includes(ruolo) ? ruolo : '?';
-        gruppi[r].push({ nome, mv, fm, ruolo: r });
+        const stats = getStats(g);
+        let r = ['P','D','C','A'].includes(stats.ruolo) ? stats.ruolo : '?';
+        gruppi[r].push(stats);
       });
       return gruppi;
     };
@@ -1072,6 +1079,47 @@
       C: { color: '#2ecc71', bg: 'rgba(46, 204, 113, 0.15)', border: '#2ecc71' },
       A: { color: '#e74c3c', bg: 'rgba(231, 76, 60, 0.15)', border: '#e74c3c' },
       '?': { color: '#95a5a6', bg: 'rgba(149, 165, 166, 0.1)', border: '#95a5a6' }
+    };
+
+    // ⭐ v31: Badge colorato per la percentuale di titolarità
+    const renderBadgeProb = (prob) => {
+      if (prob === undefined || prob === null) return null;
+      
+      let bgColor = 'rgba(255, 255, 255, 0.1)';
+      let txtColor = 'var(--text)';
+      let icon = '';
+
+      if (prob >= 90) {
+        bgColor = 'rgba(46, 204, 113, 0.2)'; // verde
+        txtColor = '#2ecc71';
+      } else if (prob >= 66) {
+        bgColor = 'rgba(241, 196, 15, 0.2)'; // giallo
+        txtColor = '#f1c40f';
+        icon = ' ⚖️';
+      } else if (prob > 0) {
+        bgColor = 'rgba(231, 76, 60, 0.2)'; // rosso
+        txtColor = '#e74c3c';
+        icon = ' ⚠️';
+      } else {
+        return null;
+      }
+
+      return (
+        <span style={{
+          background: bgColor,
+          color: txtColor,
+          fontSize: '10px',
+          fontWeight: 'bold',
+          padding: '1px 4px',
+          borderRadius: '4px',
+          marginLeft: '4px',
+          display: 'inline-flex',
+          alignItems: 'center',
+          border: `1px solid ${txtColor}40`
+        }}>
+          {prob}%{icon}
+        </span>
+      );
     };
 
     const renderSezioneRuolo = (ruoloKey, lista) => {
@@ -1087,11 +1135,13 @@
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
             {lista.map((item, i) => (
               <div key={i} style={{ padding: '4px 8px', background: stile.bg, borderLeft: `3px solid ${stile.border}`, borderRadius: '4px', fontSize: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ fontSize: '9px', fontWeight: 'bold', background: stile.border, color: '#000', padding: '1px 4px', borderRadius: '3px', minWidth: '24px', textAlign: 'center' }}>
                     {getRuoloLabel(item.ruolo)}
                   </span>
                   <span style={{ color: 'var(--text)' }}>{item.nome}</span>
+                  {/* ⭐ v31: Badge percentuale titolarità */}
+                  {renderBadgeProb(item.probabilità)}
                 </div>
                 <span style={{ fontSize: '11px', color: '#4ade80', fontWeight: 'bold' }}>
                   {item.mv !== null ? `(V: ${fmtMv(item.mv)})` : '(V: —)'}
@@ -2250,5 +2300,5 @@
   window.simulateMatches = simulateMatches;
   window.clearStatsCache = clearStatsCache;
 
-  console.log('✅ statistiche.js v30 - registrazione pronostici Dixon');
+  console.log('✅ statistiche.js v31 - badge percentuali titolarità in FormazionePanel');
 })();
