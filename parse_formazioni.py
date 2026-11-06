@@ -1,4 +1,4 @@
-# parse_formazioni.py - v2: estrazione con percentuali di titolarità
+# parse_formazioni.py - v3: estrazione completa con percentuali e ballottaggi
 import sys
 import json
 import os
@@ -8,27 +8,21 @@ from bs4 import BeautifulSoup
 FILE_DEFAULT = "Probabili formazioni Serie A.html"
 FILE_OUTPUT = "data/probabili_formazioni.json"
 
-
 def pulisci(testo):
     if not testo:
         return ""
     return re.sub(r"\s+", " ", testo).strip()
 
-
 def estrai_pct(li):
     """Estrae la percentuale di titolarità dal progress-value (es. '90%' -> 90)."""
     pct_el = li.select_one(".progress-value")
     if not pct_el:
-        return 100  # default: titolare certo
+        return 100  # Se non c'è la barra, è titolare certo
     testo = pulisci(pct_el.get_text())
     match = re.search(r"(\d+)", testo)
-    if match:
-        return int(match.group(1))
-    return 100
-
+    return int(match.group(1)) if match else 100
 
 def estrai_giocatori_da_lista(ul):
-    """Estrae [{nome, ruolo, probabilità}] da una lista <li.player-item>."""
     out = []
     if ul is None:
         return out
@@ -37,19 +31,19 @@ def estrai_giocatori_da_lista(ul):
         ruolo_raw = (ruolo_el.get("data-value", "") if ruolo_el else "").upper()
         mappa = {"P": "P", "D": "D", "C": "C", "A": "A"}
         ruolo = mappa.get(ruolo_raw, "?")
+        
         nome_el = li.select_one(".player-name span") or li.select_one(".player-name")
         nome = pulisci(nome_el.get_text()) if nome_el else ""
+        
         if nome:
             out.append({
-                "nome": nome,
-                "ruolo": ruolo,
-                "probabilità": estrai_pct(li),
+                "nome": nome, 
+                "ruolo": ruolo, 
+                "probabilità": estrai_pct(li)
             })
     return out
 
-
 def estrai_indisponibili_da_section(section, tipo):
-    """Estrae [{nome, motivo, stato}] da una sezione (injureds/suspendeds/dubts)."""
     risultato = [[], []]
     if section is None:
         return risultato
@@ -74,9 +68,7 @@ def estrai_indisponibili_da_section(section, tipo):
             })
     return risultato
 
-
 def estrai_ballottaggi(li):
-    """Estrae i ballottaggi con nome+percentuale di ogni giocatore."""
     ballottaggi = {"casa": [], "trasferta": []}
     for idx, (lato, content) in enumerate(zip(["casa", "trasferta"], li.select("section.ballots > div.content")[:2])):
         for ballot_div in content.select("div.ballot"):
@@ -96,7 +88,6 @@ def estrai_ballottaggi(li):
                 ballottaggi[lato].append({"giocatori": giocatori})
     return ballottaggi
 
-
 def estrai_squadre(li):
     h2 = li.find("h2")
     if h2:
@@ -105,9 +96,7 @@ def estrai_squadre(li):
             return nomi[0], nomi[1]
     return None, None
 
-
 def estrai_formazione_team(li, lato):
-    """Estrae modulo + lista giocatori (con probabilità)."""
     team_div = li.select_one(f'div.pitch > div.team.team-{lato}')
     if team_div is None:
         return None, [], []
@@ -119,29 +108,30 @@ def estrai_formazione_team(li, lato):
         return modulo, [], []
     starters_ul = card.select_one("ul.player-list.starters")
     reserves_ul = card.select_one("ul.player-list.reserves")
-    titolari = estrai_giocatori_da_lista(starters_ul)
+    
+    # Ora estrae anche la percentuale
+    titolari = estrai_giocatori_da_lista(starters_ul) 
     panchina = estrai_giocatori_da_lista(reserves_ul)
     return modulo, titolari, panchina
-
 
 def estrai_partite(html):
     soup = BeautifulSoup(html, "html.parser")
     partite = soup.select("ul.match-list > li.match-item")
     formazioni = {}
-
+    
     for li in partite:
         casa, trasferta = estrai_squadre(li)
         if not casa or not trasferta:
             continue
-
+            
         mod_h, tit_h, pan_h = estrai_formazione_team(li, "home")
         mod_a, tit_a, pan_a = estrai_formazione_team(li, "away")
-
+        
         inj = estrai_indisponibili_da_section(li.select_one("section.injureds"), "injureds")
         dub = estrai_indisponibili_da_section(li.select_one("section.dubts"), "dubts")
         squ = estrai_indisponibili_da_section(li.select_one("section.suspendeds"), "suspendeds")
         bal = estrai_ballottaggi(li)
-
+        
         for i, (squadra, mod, tit, pan) in enumerate([
             (casa, mod_h, tit_h, pan_h),
             (trasferta, mod_a, tit_a, pan_a),
@@ -154,32 +144,28 @@ def estrai_partite(html):
                 "panchina": pan,
                 "indisponibili": indisponibili,
                 "ballottaggi": bal[lato],
-                "aggiornato": None,  # verrà riempito dallo script Fase 2
             }
-
     return formazioni
-
 
 if __name__ == "__main__":
     html_path = sys.argv[1] if len(sys.argv) >= 2 else FILE_DEFAULT
-
     if not os.path.exists(html_path):
         print(f"ERRORE - File non trovato: {html_path}")
         sys.exit(1)
-
+        
     os.makedirs("data", exist_ok=True)
-
+    
     print(f"Lettura di: {html_path}")
     with open(html_path, "r", encoding="utf-8", errors="replace") as f:
         html = f.read()
-
+        
     formazioni = estrai_partite(html)
-
+    
     if not formazioni:
         print("ATTENZIONE - Nessuna formazione trovata.")
         sys.exit(1)
-
+        
     with open(FILE_OUTPUT, "w", encoding="utf-8") as f:
         json.dump({"formazioni": formazioni}, f, ensure_ascii=False, indent=2)
-
+        
     print(f"OK - Generato {FILE_OUTPUT} con {len(formazioni)} squadre.")
