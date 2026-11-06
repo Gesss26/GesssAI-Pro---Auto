@@ -6,7 +6,8 @@
 // - Alert se PDF non aggiornato
 // - Hook React useQuote() per accedere alle quote
 // - BannerAlertPDF componente per avvisi
-// + FIX v3: forceRefresh() per notifica globale reattiva
+//
+// + v4: cache ridotta a 2 min + auto-download forzato all'avvio
 // ============================================================
 
 (function () {
@@ -25,7 +26,8 @@
     'quote/marathonbet-2.pdf',
   ];
 
-  const CACHE_DURATION_MS = 30 * 60 * 1000;
+  // ⭐ v4: cache ridotta da 30 min a 2 min
+  const CACHE_DURATION_MS = 2 * 60 * 1000;
   const CACHE_KEY = 'ft_quote_last_download';
 
   const DEBUG = true;
@@ -152,6 +154,7 @@
         }
       }
 
+      // Se nessun file è andato a buon fine MA avevamo quote vecchie, ripristina
       if (totalePartite === 0 && avevaQuoteVecchie) {
         console.warn('⚠️ Download fallito, ripristino quote precedenti');
         try {
@@ -199,7 +202,7 @@
 
       notifyListeners(payload);
 
-      // ⭐ FIX: forza il refresh globale dopo il download
+      // ⭐ Forza refresh globale
       forceRefresh();
 
       if (DEBUG) console.log('✅ Quote aggiornate: ' + totalePartite + ' partite totali da ' + PDF_FILES.length + ' file');
@@ -228,7 +231,6 @@
       dataMaxPDF: meta ? meta.dataMaxPDF : null,
       meta: meta,
     });
-    // Dispatch esplicito per i componenti che ascoltano window events
     window.dispatchEvent(new CustomEvent('quote-updated', {
       detail: {
         numPartite: meta ? meta.numPartite : 0,
@@ -376,6 +378,7 @@
 
   // ============================================================
   // AUTO-DOWNLOAD
+  // ⭐ v4: forza SEMPRE il download all'avvio (ignora cache)
   // ============================================================
 
   const initAutoDownload = () => {
@@ -386,8 +389,9 @@
         return;
       }
 
-      if (DEBUG) console.log('🚀 QuoteManager: avvio auto-download multi-file');
-      scaricaEAggiorna(false).then(function (result) {
+      // ⭐ v4: scaricaEAggiorna(true) = forza download ad ogni avvio
+      if (DEBUG) console.log('🚀 QuoteManager: avvio auto-download multi-file (forzato)');
+      scaricaEAggiorna(true).then(function (result) {
         if (result.ok) {
           if (DEBUG) console.log('✅ Auto-download completato');
         } else if (result.motivo === 'cache') {
@@ -558,6 +562,6 @@
     DEBUG: DEBUG,
   };
 
-  console.log('✅ QuoteManager caricato v3 (MULTI-FILE) - file configurati: ' + PDF_FILES.length + ' + forceRefresh');
+  console.log('✅ QuoteManager caricato v4 (MULTI-FILE) - cache 2min + auto-download forzato');
 
 })();

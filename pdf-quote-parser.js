@@ -1,11 +1,16 @@
 // ============================================================
-// pdf-quote-parser.js — v3 (fix definitivo)
+// pdf-quote-parser.js — v4 (fix definitivo + anti-falso-positivo fuzzy)
 // Fix principali:
 // - isRigaData: logica stagione calcistica corretta (Lug-Dic / Gen-Giu)
 // - PREFISSI_SQUADRA: rimossi u23/u21/u19 (identificatori squadra, non prefissi)
 // - parseMarathonbetPDF: campionato estratto anche a fine riga
 // - TRADUZIONI: Juventus Next Gen → juventus, aggiunte diverse squadre
 // - normalizzaNome: log diagnostico in DEBUG
+//
+// ⭐ v4: FIX FALSI POSITIVI FUZZY MATCH
+// - Soglia fuzzy alzata da 0.55 a 0.60
+// - Controllo OBBLIGATORIO della data (±1 giorno) nel fuzzy matching
+// - Il fuzzy match scarta se la data del PDF è troppo diversa
 // ============================================================
 
 (function () {
@@ -22,7 +27,10 @@
 
   const STORAGE_KEY = 'ft_quote_pdf';
   const STORAGE_META_KEY = 'ft_quote_pdf_meta';
-  const SOGLIA_MATCH = 0.55;
+  // ⭐ v4: soglia alzata da 0.55 a 0.60 (0.55 era troppo permissiva)
+  const SOGLIA_MATCH = 0.60;
+  // ⭐ v4: tolleranza data per il fuzzy match (in giorni)
+  const TOLLERANZA_GIORNI_DATA = 1;
   const GIORNI_SCADENZA = 7;
 
   // ============================================================
@@ -1075,6 +1083,7 @@
 
   // ============================================================
   // TROVA QUOTA PER GIOCATA
+  // ⭐ v4: fuzzy matching con CONTROLLO DATA obbligatorio
   // ============================================================
   const trovaQuotaPerGiocata = (match, familyId, giocata) => {
     const quote = leggiQuote();
@@ -1112,16 +1121,44 @@
     }
 
     // 4. Fuzzy
+    // ⭐ v4: con CONTROLLO DATA obbligatorio per evitare falsi positivi
+    //         (es. "Helmond Sport vs FC Volendam" → "Helmond Sport vs Fc Eindhoven" con score 0.63)
     if (!entry) {
       let bestMatch = null, bestScore = 0;
+      let bestDataDiff = null;
+
       for (const [, val] of Object.entries(quote)) {
         const scoreCasa = similarita(casaNorm, normalizzaNome(val.casa));
         const scoreOspiti = similarita(ospitiNorm, normalizzaNome(val.ospiti));
         const score = (scoreCasa + scoreOspiti) / 2;
-        if (score > bestScore && score > SOGLIA_MATCH) {
-          bestScore = score; bestMatch = val;
+
+        if (score <= bestScore || score <= SOGLIA_MATCH) continue;
+
+        // ⭐ v4: controllo data — il match fuzzy deve essere sulla stessa data (±1 giorno)
+        const dataPDF = normalizzaDataISO(val.dataISO || val.data);
+        let dataDiff = 0;
+        if (dataMatch && dataPDF && /^\d{4}-\d{2}-\d{2}$/.test(dataMatch) && /^\d{4}-\d{2}-\d{2}$/.test(dataPDF)) {
+          const d1 = new Date(dataMatch + 'T00:00:00');
+          const d2 = new Date(dataPDF + 'T00:00:00');
+          dataDiff = Math.abs(d1 - d2) / 86400000;
+          if (dataDiff > TOLLERANZA_GIORNI_DATA) {
+            // Scarta: data troppo diversa, sarebbe un falso positivo
+            if (window.QuoteManager && window.QuoteManager.DEBUG) {
+              console.warn(
+                `⛔ Fuzzy scartato per data (${dataDiff.toFixed(0)}gg): ` +
+                `${match.casa} vs ${match.ospiti} (${dataMatch}) ` +
+                `→ ${val.casa} vs ${val.ospiti} (${dataPDF}) [score ${score.toFixed(2)}]`
+              );
+            }
+            continue;
+          }
         }
+
+        bestMatch = val;
+        bestScore = score;
+        bestDataDiff = dataDiff;
       }
+
       if (bestMatch) {
         entry = bestMatch;
         matchedBy = `fuzzy(${bestScore.toFixed(2)})`;
@@ -1224,9 +1261,9 @@
     trovaQuotaPerGiocata, analizzaGiocataConQuota, mappaGiocataAQuota,
     checkAggiornamentoPDF, debugPartita,
     CAMPIONATI_RICONOSCIBILI, TRADUZIONI_SQUADRE, PREFISSI_SQUADRA,
-    SOGLIA_MATCH, STORAGE_KEY, STORAGE_META_KEY, GIORNI_SCADENZA,
+    SOGLIA_MATCH, TOLLERANZA_GIORNI_DATA, STORAGE_KEY, STORAGE_META_KEY, GIORNI_SCADENZA,
   };
 
-  console.log('✅ PDFQuoteParser v3 caricato — fix stagione calcistica + u23 + campionato in coda');
+  console.log('✅ PDFQuoteParser v4 caricato — fuzzy anti-falso-positivo con controllo data');
 
 })();

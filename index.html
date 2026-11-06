@@ -35,6 +35,9 @@
 <!-- Modulo Assenze e Infortuni -->
 <script src="assenze.js"></script>
 
+<!-- ⭐ v5: Parser Formazioni (probabilità + ballottaggi) -->
+<script src="parser-formazioni.js"></script>
+
 <!-- Moduli esterni (ordine importante) -->
 <script type="text/javascript" src="meteo.js"></script>
 <script src="filtri-campionati.js"></script>
@@ -330,6 +333,21 @@
       }
     }
 
+    // ⭐ v5: carica probabili_formazioni.json nel ParserFormazioni
+    async function loadFormazioniProbabili() {
+      if (!window.ParserFormazioni || typeof window.ParserFormazioni.caricaProbabiliFormazioni !== 'function') {
+        console.warn('⚠️ ParserFormazioni non disponibile');
+        return false;
+      }
+      try {
+        const result = await window.ParserFormazioni.caricaProbabiliFormazioni();
+        return !!result;
+      } catch (e) {
+        console.warn('⚠️ Errore caricamento formazioni probabili:', e.message);
+        return false;
+      }
+    }
+
     // ============================================================
     // COSTANTI
     // ============================================================
@@ -620,7 +638,6 @@
         return words.map(w => w[0]).join('').substring(0, 3).toUpperCase();
       };
 
-      // Fallback: logo della coppa/campionato su sfondo bianco
       const renderChampFallback = () => {
         const champName = championship && championship !== 'Tutti' ? championship : '';
         const ChampLogoComp = window.ChampLogo;
@@ -639,7 +656,6 @@
           );
         }
 
-        // Ultimo fallback: iniziali
         const initials = getInitials(teamName);
         return (
           <div className={`team-logo-fallback ${className}`} style={{
@@ -688,8 +704,6 @@
             style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
             className={`team-logo ${className}`}
             onError={() => {
-              // Fallback immediato al logo del campionato dopo il primo fallimento
-              // (evita di tentare tutti i path in sequenza → niente 404 a raffica)
               setFinalError(true);
             }}
           />
@@ -1260,6 +1274,11 @@
 
       const ricarica = (e) => {
         e.stopPropagation();
+        try {
+          localStorage.removeItem('ft_quote_last_download');
+          localStorage.removeItem('ft_quote_pdf');
+          localStorage.removeItem('ft_quote_pdf_meta');
+        } catch (err) { /* ignore */ }
         if (window.QuoteManager && typeof window.QuoteManager.scaricaEAggiorna === 'function') {
           window.QuoteManager.scaricaEAggiorna(true);
         }
@@ -1304,7 +1323,7 @@
               cursor: inCorso ? 'wait' : 'pointer',
               opacity: inCorso ? 0.5 : 1,
             }}
-            title="Ricarica le quote dal repository GitHub"
+            title="Svuota la cache e riscarica i PDF da GitHub"
           >
             {inCorso ? '⏳' : '🔄'} Ricarica
           </button>
@@ -1346,7 +1365,6 @@
         return saved ? parseInt(saved) : 100;
       });
 
-      // ⭐ Stato per il bottone "Torna Su"
       const [showBackToTop, setShowBackToTop] = useState(false);
 
       const hasLoadedRef = useRef(false);
@@ -1364,7 +1382,6 @@
         if (typeof window.clearStatsCache === 'function') {
           try { window.clearStatsCache(); } catch (e) {}
         }
-        // ⭐ Verifica pronostici man mano che arrivano i risultati
         if (window.PronosticiDB && Array.isArray(matches) && matches.length > 0) {
           try {
             const n = window.PronosticiDB.verificaTutti(matches);
@@ -1379,21 +1396,18 @@
         }
       }, []);
 
-      // ⭐ Scroll in alto ad ogni cambio tab
       useEffect(() => {
         window.scrollTo(0, 0);
         document.documentElement.scrollTop = 0;
         document.body.scrollTop = 0;
       }, [tab]);
 
-      // ⭐ Mostra/nascondi il bottone "Torna Su" in base allo scroll
       useEffect(() => {
         const onScroll = () => {
           const y = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
           setShowBackToTop(y > 300);
         };
         window.addEventListener('scroll', onScroll, { passive: true });
-        // Controllo iniziale
         onScroll();
         return () => window.removeEventListener('scroll', onScroll);
       }, []);
@@ -1405,11 +1419,21 @@
         console.log('📂 Carico dati al mount di App...');
         const loadData = async () => {
           try {
+            // ⭐ v5: carica TUTTO in parallelo:
+            //   - assenze.json + formazioni_con_voti.json + stats (via AssenzeDB.carica)
+            //   - stats Excel (fallback)
+            //   - probabili_formazioni.json (via ParserFormazioni)
             Promise.all([
               window.AssenzeDB && window.AssenzeDB.carica ? window.AssenzeDB.carica() : Promise.resolve(false),
               loadStatisticheGiocatori(),
+              loadFormazioniProbabili(),  // ⭐ v5
             ]).then(() => {
-              console.log('✅ Assenze + stats giocatori pronti');
+              console.log('✅ Assenze + stats giocatori + formazioni probabili pronti');
+              // Ricostruisci indice dopo che tutto è caricato (le formazioni probabili
+              // sono ora in AssenzeDB e vanno indicizzate)
+              if (window.AssenzeDB && typeof window.AssenzeDB._costruisciIndice === 'function') {
+                window.AssenzeDB._costruisciIndice();
+              }
             });
 
             const data = await loadScrapedData();
@@ -1478,13 +1502,11 @@
         setTab('Statistiche');
       };
 
-      // ⭐ Torna al Menu principale da qualsiasi tab
       const backToMainMenu = () => {
         setTab('Home');
         setHomeResetKey(k => k + 1);
       };
 
-      // ⭐ Torna al Palinsesto e scrolla alla partita selezionata
       const backToPalinsesto = () => {
         if (selectedMatchId) {
           setPalinsestoScrollToId(selectedMatchId);
@@ -1492,7 +1514,6 @@
         setTab('Palinsesto');
       };
 
-      // ⭐ Torna su (smooth scroll)
       const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       };
@@ -1534,7 +1555,6 @@
             {message && <div className={`alert alert-${message.type}`}>{message.text}</div>}
             {loading && <div className="alert alert-info">⏳ Elaborazione in corso...</div>}
 
-            {/* Spazio per i bottoni flottanti */}
             {tab !== 'Home' && <div className="floating-nav-spacer"></div>}
 
             {tab === 'Home' && window.HomeComponent && (
@@ -1634,7 +1654,6 @@
             </div>
           </div>
 
-          {/* ⭐ Bottone "Torna Su" - visibile solo dopo aver scrollato */}
           {showBackToTop && (
             <button
               className="home-btn-overlay"
