@@ -1,0 +1,3589 @@
+{
+  "formazioni": {
+    "Venezia": {
+      "modulo": "3-5-2",
+      "titolari": [
+        {
+          "nome": "Stankovic F.",
+          "ruolo": "P",
+          "probabilità": 90
+        },
+        {
+          "nome": "Halhal",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Moreno M.",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Juan Jesus",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Hainaut",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Sohm",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Basic",
+          "ruolo": "C",
+          "probabilità": 80
+        },
+        {
+          "nome": "Perez K.",
+          "ruolo": "C",
+          "probabilità": 80
+        },
+        {
+          "nome": "Mazzocchi",
+          "ruolo": "D",
+          "probabilità": 80
+        },
+        {
+          "nome": "Yeboah J.",
+          "ruolo": "A",
+          "probabilità": 90
+        },
+        {
+          "nome": "Adams A.",
+          "ruolo": "A",
+          "probabilità": 90
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Montipò",
+          "ruolo": "P",
+          "probabilità": 5
+        },
+        {
+          "nome": "Schingtienne",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Sagrado",
+          "ruolo": "D",
+          "probabilità": 40
+        },
+        {
+          "nome": "Bella-Kotchap",
+          "ruolo": "D",
+          "probabilità": 40
+        },
+        {
+          "nome": "Haps",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Correia T.",
+          "ruolo": "D",
+          "probabilità": 40
+        },
+        {
+          "nome": "Helgason",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Busio",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Dagasso",
+          "ruolo": "C",
+          "probabilità": 25
+        },
+        {
+          "nome": "Fernandez T.",
+          "ruolo": "C",
+          "probabilità": 30
+        },
+        {
+          "nome": "Duncan",
+          "ruolo": "C",
+          "probabilità": 15
+        },
+        {
+          "nome": "Fanne",
+          "ruolo": "C",
+          "probabilità": 20
+        },
+        {
+          "nome": "Lauberbach",
+          "ruolo": "A",
+          "probabilità": 60
+        },
+        {
+          "nome": "Rrahmani Al.",
+          "ruolo": "A",
+          "probabilità": 50
+        },
+        {
+          "nome": "Lisman",
+          "ruolo": "A",
+          "probabilità": 25
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "Sverko",
+          "motivo": "problema all'anca, rientro metà novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Franjic",
+          "motivo": "problema alla spalla, rientro dalla metà di dicembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Adorante",
+          "motivo": "problema alla schiena, rientro dalla metà di novembre",
+          "stato": "injureds"
+        }
+      ],
+      "ballottaggi": []
+    },
+    "Udinese": {
+      "modulo": "3-4-2-1",
+      "titolari": [
+        {
+          "nome": "Okoye",
+          "ruolo": "P",
+          "probabilità": 90
+        },
+        {
+          "nome": "Abankwah",
+          "ruolo": "D",
+          "probabilità": 85
+        },
+        {
+          "nome": "Solet",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Palma",
+          "ruolo": "D",
+          "probabilità": 85
+        },
+        {
+          "nome": "Vojvoda",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Karlstrom",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Piotrowski",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Kamara H.",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Zaniolo",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Ekkelenkamp",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Davis K.",
+          "ruolo": "A",
+          "probabilità": 65
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Mrozek",
+          "ruolo": "P",
+          "probabilità": 5
+        },
+        {
+          "nome": "Padelli",
+          "ruolo": "P",
+          "probabilità": 1
+        },
+        {
+          "nome": "Kabasele",
+          "ruolo": "D",
+          "probabilità": 35
+        },
+        {
+          "nome": "Bertola",
+          "ruolo": "D",
+          "probabilità": 40
+        },
+        {
+          "nome": "Ebosse",
+          "ruolo": "D",
+          "probabilità": 30
+        },
+        {
+          "nome": "Arizala",
+          "ruolo": "D",
+          "probabilità": 55
+        },
+        {
+          "nome": "Chakvetadze",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Lovric",
+          "ruolo": "C",
+          "probabilità": 50
+        },
+        {
+          "nome": "Jovanovic",
+          "ruolo": "C",
+          "probabilità": 20
+        },
+        {
+          "nome": "Miller L.",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Zarraga",
+          "ruolo": "C",
+          "probabilità": 40
+        },
+        {
+          "nome": "Unai Gomez",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Bayo V.",
+          "ruolo": "A",
+          "probabilità": 50
+        },
+        {
+          "nome": "Vinciati",
+          "ruolo": "A",
+          "probabilità": 20
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "Zanoli",
+          "motivo": "problema muscolare, rientro da metà novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Gueye",
+          "motivo": "problema alla caviglia, rientro da fine gennaio",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Alaba",
+          "motivo": "risentimento muscolare al polpaccio destro, rientro da metà novembre",
+          "stato": "injureds"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Solet",
+              "percentuale": 60
+            },
+            {
+              "nome": "Kabasele",
+              "percentuale": 40
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Piotrowski",
+              "percentuale": 60
+            },
+            {
+              "nome": "Miller L.",
+              "percentuale": 40
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Davis K.",
+              "percentuale": 65
+            },
+            {
+              "nome": "Unai Gomez",
+              "percentuale": 35
+            }
+          ]
+        }
+      ]
+    },
+    "Cagliari": {
+      "modulo": "4-4-2",
+      "titolari": [
+        {
+          "nome": "Caprile",
+          "ruolo": "P",
+          "probabilità": 90
+        },
+        {
+          "nome": "Zè Pedro",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Kofler",
+          "ruolo": "D",
+          "probabilità": 80
+        },
+        {
+          "nome": "Deiola",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Rodriguez Ju.",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Adopo",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Winks",
+          "ruolo": "C",
+          "probabilità": 80
+        },
+        {
+          "nome": "Romano",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Fazzini",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Maldini",
+          "ruolo": "A",
+          "probabilità": 90
+        },
+        {
+          "nome": "Mendy P.",
+          "ruolo": "A",
+          "probabilità": 60
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Radunovic",
+          "ruolo": "P",
+          "probabilità": 5
+        },
+        {
+          "nome": "Sherri",
+          "ruolo": "P",
+          "probabilità": 1
+        },
+        {
+          "nome": "Sugawara",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Ciervo",
+          "ruolo": "C",
+          "probabilità": 25
+        },
+        {
+          "nome": "Massolin",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Gagliardini",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Liteta",
+          "ruolo": "C",
+          "probabilità": 35
+        },
+        {
+          "nome": "Sulev",
+          "ruolo": "C",
+          "probabilità": 15
+        },
+        {
+          "nome": "Sugamele",
+          "ruolo": "A",
+          "probabilità": 10
+        },
+        {
+          "nome": "Trepy",
+          "ruolo": "A",
+          "probabilità": 55
+        },
+        {
+          "nome": "Kevin Carlos",
+          "ruolo": "A",
+          "probabilità": 60
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "Mina",
+          "motivo": "microlesione muscolare al bicipite femorale, out contro il Frosinone",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Idrissi R.",
+          "motivo": "rottura del legamento crociato, rientro da metà novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Felici",
+          "motivo": "rottura del legamento crociato anteriore, ipotesi rientro da marzo",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Aurelio",
+          "motivo": "affaticamento al soleo della gamba sinistra, out contro il Frosinone",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Fadera",
+          "motivo": "lesione muscolare al bicipite femorale, rientro dalla seconda metà di novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Nzola",
+          "motivo": "distrazione muscolare ai flessori della coscia destra, rientro dalla seconda metà di novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Obert",
+          "motivo": "squalificato",
+          "stato": "suspendeds"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Fazzini",
+              "percentuale": 55
+            },
+            {
+              "nome": "Massolin",
+              "percentuale": 45
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Mendy P.",
+              "percentuale": 60
+            },
+            {
+              "nome": "Kevin Carlos",
+              "percentuale": 40
+            }
+          ]
+        }
+      ]
+    },
+    "Frosinone": {
+      "modulo": "4-2-3-1",
+      "titolari": [
+        {
+          "nome": "Palmisani",
+          "ruolo": "P",
+          "probabilità": 90
+        },
+        {
+          "nome": "Oyono A.",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Calvani",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Monterisi",
+          "ruolo": "D",
+          "probabilità": 55
+        },
+        {
+          "nome": "Bracaglia",
+          "ruolo": "D",
+          "probabilità": 80
+        },
+        {
+          "nome": "Calò",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Masini",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Ghedjemis",
+          "ruolo": "A",
+          "probabilità": 90
+        },
+        {
+          "nome": "Schmid",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Kvernadze",
+          "ruolo": "A",
+          "probabilità": 90
+        },
+        {
+          "nome": "Birligea",
+          "ruolo": "A",
+          "probabilità": 55
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Desplanches",
+          "ruolo": "P",
+          "probabilità": 5
+        },
+        {
+          "nome": "Pisseri",
+          "ruolo": "P",
+          "probabilità": 1
+        },
+        {
+          "nome": "Terzic",
+          "ruolo": "D",
+          "probabilità": 55
+        },
+        {
+          "nome": "Tchato",
+          "ruolo": "D",
+          "probabilità": 40
+        },
+        {
+          "nome": "Cittadini",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Omar Fayed",
+          "ruolo": "D",
+          "probabilità": 20
+        },
+        {
+          "nome": "Amey",
+          "ruolo": "D",
+          "probabilità": 40
+        },
+        {
+          "nome": "Akpoguma",
+          "ruolo": "D",
+          "probabilità": 20
+        },
+        {
+          "nome": "Cichella",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Fini",
+          "ruolo": "C",
+          "probabilità": 35
+        },
+        {
+          "nome": "Hasa",
+          "ruolo": "C",
+          "probabilità": 40
+        },
+        {
+          "nome": "El Azzouzi A.",
+          "ruolo": "C",
+          "probabilità": 20
+        },
+        {
+          "nome": "Zerbin",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Bobcek",
+          "ruolo": "A",
+          "probabilità": 60
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "Raimondo",
+          "motivo": "lesione multilegamentosa contusivo-distorsiva della caviglia sinistra, tentativo rientro da metà dicembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Grillitsch",
+          "motivo": "sindrome retto-adduttoria, rientro da metà novembre",
+          "stato": "injureds"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Oyono A.",
+              "percentuale": 60
+            },
+            {
+              "nome": "Tchato",
+              "percentuale": 40
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Monterisi",
+              "percentuale": 55
+            },
+            {
+              "nome": "Cittadini",
+              "percentuale": 45
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Birligea",
+              "percentuale": 55
+            },
+            {
+              "nome": "Bobcek",
+              "percentuale": 45
+            }
+          ]
+        }
+      ]
+    },
+    "Torino": {
+      "modulo": "3-5-2",
+      "titolari": [
+        {
+          "nome": "Perri",
+          "ruolo": "P",
+          "probabilità": 90
+        },
+        {
+          "nome": "Coco",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Ismajli",
+          "ruolo": "D",
+          "probabilità": 80
+        },
+        {
+          "nome": "Comuzzo",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Belghali",
+          "ruolo": "D",
+          "probabilità": 65
+        },
+        {
+          "nome": "Vlasic",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Fitz-Jim",
+          "ruolo": "C",
+          "probabilità": 95
+        },
+        {
+          "nome": "Braganca",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Cacciamani",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Adams C.",
+          "ruolo": "A",
+          "probabilità": 80
+        },
+        {
+          "nome": "Simeone",
+          "ruolo": "A",
+          "probabilità": 90
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Mascardi",
+          "ruolo": "P",
+          "probabilità": 5
+        },
+        {
+          "nome": "Siviero",
+          "ruolo": "P",
+          "probabilità": 1
+        },
+        {
+          "nome": "Comert",
+          "ruolo": "D",
+          "probabilità": 35
+        },
+        {
+          "nome": "Biraghi",
+          "ruolo": "D",
+          "probabilità": 15
+        },
+        {
+          "nome": "Patterson",
+          "ruolo": "D",
+          "probabilità": 40
+        },
+        {
+          "nome": "Oristanio",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Casadei",
+          "ruolo": "C",
+          "probabilità": 40
+        },
+        {
+          "nome": "Aboukhlal",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Mandragora",
+          "ruolo": "C",
+          "probabilità": 50
+        },
+        {
+          "nome": "Gineitis",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Ilkhan",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Zapata D.",
+          "ruolo": "A",
+          "probabilità": 30
+        },
+        {
+          "nome": "Pellegri",
+          "ruolo": "A",
+          "probabilità": 15
+        },
+        {
+          "nome": "Kulenovic",
+          "ruolo": "A",
+          "probabilità": 60
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "Fortini",
+          "motivo": "affaticamento muscolare all'adduttore, rientro dalla seconda metà di novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Rodriguez R.",
+          "motivo": "lesione tendinea di basso grado ai muscoli flessori della coscia sinistra, rientro dalla metà di novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Mandragora",
+          "motivo": "problema muscolare al flessore della coscia sinistra, da valutare convocazione contro il Lecce",
+          "stato": "dubts"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Belghali",
+              "percentuale": 65
+            },
+            {
+              "nome": "Patterson",
+              "percentuale": 35
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Braganca",
+              "percentuale": 55
+            },
+            {
+              "nome": "Ilkhan",
+              "percentuale": 45
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Cacciamani",
+              "percentuale": 55
+            },
+            {
+              "nome": "Aboukhlal",
+              "percentuale": 45
+            }
+          ]
+        }
+      ]
+    },
+    "Lecce": {
+      "modulo": "4-3-3",
+      "titolari": [
+        {
+          "nome": "Falcone",
+          "ruolo": "P",
+          "probabilità": 90
+        },
+        {
+          "nome": "Veiga D.",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Siebert",
+          "ruolo": "D",
+          "probabilità": 55
+        },
+        {
+          "nome": "Tiago Gabriel",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Gallo",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Coulibaly L.",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Ngom",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Maleh",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "N'Dri",
+          "ruolo": "A",
+          "probabilità": 90
+        },
+        {
+          "nome": "Stulic",
+          "ruolo": "A",
+          "probabilità": 60
+        },
+        {
+          "nome": "Fatah",
+          "ruolo": "A",
+          "probabilità": 90
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Bleve",
+          "ruolo": "P",
+          "probabilità": 5
+        },
+        {
+          "nome": "Borbei",
+          "ruolo": "P",
+          "probabilità": 1
+        },
+        {
+          "nome": "Gaspar K.",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Ndaba",
+          "ruolo": "D",
+          "probabilità": 35
+        },
+        {
+          "nome": "Dembelè A.",
+          "ruolo": "D",
+          "probabilità": 40
+        },
+        {
+          "nome": "Jean",
+          "ruolo": "D",
+          "probabilità": 25
+        },
+        {
+          "nome": "Kaba",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Gorter",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Gandelman",
+          "ruolo": "C",
+          "probabilità": 50
+        },
+        {
+          "nome": "Fofana Sa.",
+          "ruolo": "C",
+          "probabilità": 25
+        },
+        {
+          "nome": "Esteban",
+          "ruolo": "A",
+          "probabilità": 60
+        },
+        {
+          "nome": "Geubbels",
+          "ruolo": "A",
+          "probabilità": 55
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "Berisha M.",
+          "motivo": "sovraccarico muscolare alla gamba, rientro da metà novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Pierotti",
+          "motivo": "frattura composta del malleolo mediale della caviglia destra, ipotesi rientro da gennaio",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Ilic",
+          "motivo": "lesione miotendinea del retto femorale sinistro con lesione parziale del tendine, rientro da aprile",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Monteiro J.",
+          "motivo": "lesione di primo grado al polpaccio sinistro, rientro dall'inizio di dicembre",
+          "stato": "injureds"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Siebert",
+              "percentuale": 55
+            },
+            {
+              "nome": "Gaspar K.",
+              "percentuale": 45
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Coulibaly L.",
+              "percentuale": 60
+            },
+            {
+              "nome": "Kaba",
+              "percentuale": 40
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Stulic",
+              "percentuale": 60
+            },
+            {
+              "nome": "Esteban",
+              "percentuale": 40
+            }
+          ]
+        }
+      ]
+    },
+    "Parma": {
+      "modulo": "3-5-2",
+      "titolari": [
+        {
+          "nome": "Daffara",
+          "ruolo": "P",
+          "probabilità": 90
+        },
+        {
+          "nome": "Delprato",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Troilo",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Ndiaye",
+          "ruolo": "D",
+          "probabilità": 55
+        },
+        {
+          "nome": "Britschgi",
+          "ruolo": "D",
+          "probabilità": 80
+        },
+        {
+          "nome": "Fabbian",
+          "ruolo": "C",
+          "probabilità": 85
+        },
+        {
+          "nome": "Sierro",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Keita M.",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Valeri",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Tourè E.",
+          "ruolo": "A",
+          "probabilità": 90
+        },
+        {
+          "nome": "Lontani",
+          "ruolo": "A",
+          "probabilità": 90
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Corvi",
+          "ruolo": "P",
+          "probabilità": 5
+        },
+        {
+          "nome": "Ghidotti",
+          "ruolo": "P",
+          "probabilità": 1
+        },
+        {
+          "nome": "Diego Carlos",
+          "ruolo": "D",
+          "probabilità": 55
+        },
+        {
+          "nome": "Carboni F.",
+          "ruolo": "D",
+          "probabilità": 40
+        },
+        {
+          "nome": "Drobnic",
+          "ruolo": "D",
+          "probabilità": 20
+        },
+        {
+          "nome": "Ordonez C.",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Cremaschi",
+          "ruolo": "C",
+          "probabilità": 30
+        },
+        {
+          "nome": "Konate A.",
+          "ruolo": "C",
+          "probabilità": 25
+        },
+        {
+          "nome": "Nicolussi Caviglia",
+          "ruolo": "C",
+          "probabilità": 40
+        },
+        {
+          "nome": "Almqvist",
+          "ruolo": "C",
+          "probabilità": 40
+        },
+        {
+          "nome": "Diallo O.",
+          "ruolo": "C",
+          "probabilità": 30
+        },
+        {
+          "nome": "Romero D.",
+          "ruolo": "A",
+          "probabilità": 55
+        },
+        {
+          "nome": "De Martis",
+          "ruolo": "A",
+          "probabilità": 10
+        },
+        {
+          "nome": "Elphege",
+          "ruolo": "A",
+          "probabilità": 60
+        },
+        {
+          "nome": "Frigan",
+          "ruolo": "A",
+          "probabilità": 60
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "Bernabè",
+          "motivo": "distrazione muscolare al retto femorale della coscia sinistra, rientro dalla seconda metà di novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Drobnic",
+          "motivo": "problema al piede sinistro, in dubbio contro Bologna",
+          "stato": "dubts"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Ndiaye",
+              "percentuale": 55
+            },
+            {
+              "nome": "Diego Carlos",
+              "percentuale": 45
+            }
+          ]
+        }
+      ]
+    },
+    "Bologna": {
+      "modulo": "3-4-2-1",
+      "titolari": [
+        {
+          "nome": "Skorupski",
+          "ruolo": "P",
+          "probabilità": 90
+        },
+        {
+          "nome": "Darmian",
+          "ruolo": "D",
+          "probabilità": 85
+        },
+        {
+          "nome": "Casale",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Theate",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Zortea",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Pobega",
+          "ruolo": "C",
+          "probabilità": 85
+        },
+        {
+          "nome": "Ferguson",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Miranda J.",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Bernardeschi",
+          "ruolo": "C",
+          "probabilità": 65
+        },
+        {
+          "nome": "Cambiaghi",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Piccoli",
+          "ruolo": "A",
+          "probabilità": 55
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Pessina Mas.",
+          "ruolo": "P",
+          "probabilità": 5
+        },
+        {
+          "nome": "Happonen",
+          "ruolo": "P",
+          "probabilità": 1
+        },
+        {
+          "nome": "Alhassane",
+          "ruolo": "D",
+          "probabilità": 35
+        },
+        {
+          "nome": "Vitik",
+          "ruolo": "D",
+          "probabilità": 40
+        },
+        {
+          "nome": "Helland",
+          "ruolo": "D",
+          "probabilità": 50
+        },
+        {
+          "nome": "Heggem",
+          "ruolo": "D",
+          "probabilità": 35
+        },
+        {
+          "nome": "Moro N.",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "El Azzouzi O.",
+          "ruolo": "C",
+          "probabilità": 40
+        },
+        {
+          "nome": "Amondarain",
+          "ruolo": "C",
+          "probabilità": 35
+        },
+        {
+          "nome": "Mbangula",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Libra",
+          "ruolo": "C",
+          "probabilità": 30
+        },
+        {
+          "nome": "Orsolini",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Odgaard",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Dovbyk",
+          "ruolo": "A",
+          "probabilità": 55
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "De Silvestri",
+          "motivo": "risentimento muscolare ai flessori della coscia destra, out contro il Parma",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Holm",
+          "motivo": "problema al tendine della coscia destra, ipotesi rientro da fine febbraio",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Enem",
+          "motivo": "lieve affaticamento muscolare, out contro il Parma",
+          "stato": "injureds"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Bernardeschi",
+              "percentuale": 65
+            },
+            {
+              "nome": "Orsolini",
+              "percentuale": 35
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Cambiaghi",
+              "percentuale": 60
+            },
+            {
+              "nome": "Orsolini",
+              "percentuale": 40
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Piccoli",
+              "percentuale": 55
+            },
+            {
+              "nome": "Odgaard",
+              "percentuale": 45
+            }
+          ]
+        }
+      ]
+    },
+    "Roma": {
+      "modulo": "3-4-2-1",
+      "titolari": [
+        {
+          "nome": "Gollini",
+          "ruolo": "P",
+          "probabilità": 55
+        },
+        {
+          "nome": "Mancini",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "N'Dicka",
+          "ruolo": "D",
+          "probabilità": 80
+        },
+        {
+          "nome": "Hermoso",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Molina N.",
+          "ruolo": "D",
+          "probabilità": 55
+        },
+        {
+          "nome": "Cristante",
+          "ruolo": "C",
+          "probabilità": 80
+        },
+        {
+          "nome": "Pisilli",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Wesley",
+          "ruolo": "D",
+          "probabilità": 80
+        },
+        {
+          "nome": "Soulè",
+          "ruolo": "A",
+          "probabilità": 85
+        },
+        {
+          "nome": "Mora",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Malen",
+          "ruolo": "A",
+          "probabilità": 90
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Vasquez D.",
+          "ruolo": "P",
+          "probabilità": 45
+        },
+        {
+          "nome": "De Marzi",
+          "ruolo": "P",
+          "probabilità": 1
+        },
+        {
+          "nome": "Koulierakis",
+          "ruolo": "D",
+          "probabilità": 40
+        },
+        {
+          "nome": "Ghilardi",
+          "ruolo": "D",
+          "probabilità": 50
+        },
+        {
+          "nome": "Lulli",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Balerdi",
+          "ruolo": "D",
+          "probabilità": 55
+        },
+        {
+          "nome": "De Roon",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Di Nunzio",
+          "ruolo": "C",
+          "probabilità": 20
+        },
+        {
+          "nome": "Castro S.",
+          "ruolo": "A",
+          "probabilità": 60
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "Svilar",
+          "motivo": "frattura a un dito del piede, rientro metà novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Rensch",
+          "motivo": "lesione di primo grado dell'adduttore lungo di destra, rientro dalla seconda metà di novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Konè M.",
+          "motivo": "lesione di primo grado al bicipite femorale destro, da valutare convocazione contro Sassuolo",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Dybala",
+          "motivo": "fastidio muscolare al polpaccio, da valutare convocazione contro Sassuolo",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Pellegrini Lo.",
+          "motivo": "lesione di alto grado in corrispondenza della giunzione muscolo - tendinea distale del muscolo semitendinoso della coscia destra, ipotesi rientro dalla fine di dicembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Gollini",
+          "motivo": "fastidio alla schiena, in dubbio dal 1' contro Sassuolo",
+          "stato": "dubts"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Gollini",
+              "percentuale": 55
+            },
+            {
+              "nome": "Vasquez D.",
+              "percentuale": 45
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Hermoso",
+              "percentuale": 60
+            },
+            {
+              "nome": "Balerdi",
+              "percentuale": 40
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Molina N.",
+              "percentuale": 55
+            },
+            {
+              "nome": "Lulli",
+              "percentuale": 45
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Mora",
+              "percentuale": 60
+            },
+            {
+              "nome": "De Roon",
+              "percentuale": 40
+            }
+          ]
+        }
+      ]
+    },
+    "Sassuolo": {
+      "modulo": "4-3-3",
+      "titolari": [
+        {
+          "nome": "Turati",
+          "ruolo": "P",
+          "probabilità": 80
+        },
+        {
+          "nome": "Walukiewicz",
+          "ruolo": "D",
+          "probabilità": 55
+        },
+        {
+          "nome": "Idzes",
+          "ruolo": "D",
+          "probabilità": 80
+        },
+        {
+          "nome": "Candè",
+          "ruolo": "D",
+          "probabilità": 80
+        },
+        {
+          "nome": "Doig",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Thorstvedt",
+          "ruolo": "C",
+          "probabilità": 85
+        },
+        {
+          "nome": "Matic",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Bakola",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Dominguez B.",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Esposito Se.",
+          "ruolo": "A",
+          "probabilità": 90
+        },
+        {
+          "nome": "Laurientè",
+          "ruolo": "A",
+          "probabilità": 90
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Muric",
+          "ruolo": "P",
+          "probabilità": 5
+        },
+        {
+          "nome": "Satalino",
+          "ruolo": "P",
+          "probabilità": 1
+        },
+        {
+          "nome": "Cinquegrano",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Caleta-Car",
+          "ruolo": "D",
+          "probabilità": 35
+        },
+        {
+          "nome": "Odenthal",
+          "ruolo": "D",
+          "probabilità": 30
+        },
+        {
+          "nome": "Van Der Brempt",
+          "ruolo": "D",
+          "probabilità": 55
+        },
+        {
+          "nome": "Obrador",
+          "ruolo": "D",
+          "probabilità": 40
+        },
+        {
+          "nome": "Pieragnolo",
+          "ruolo": "D",
+          "probabilità": 15
+        },
+        {
+          "nome": "Sulemana I.",
+          "ruolo": "C",
+          "probabilità": 40
+        },
+        {
+          "nome": "Ghion",
+          "ruolo": "C",
+          "probabilità": 25
+        },
+        {
+          "nome": "Adzic",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Lipani",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Pierini",
+          "ruolo": "A",
+          "probabilità": 15
+        },
+        {
+          "nome": "Bowie",
+          "ruolo": "A",
+          "probabilità": 60
+        },
+        {
+          "nome": "Kulla",
+          "ruolo": "A",
+          "probabilità": 10
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "Boloca",
+          "motivo": "problema al ginocchio, da valutare rientro da metà novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Konè I.",
+          "motivo": "rottura di tibia e perone gamba sinistra, rientro da dicembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Volpato",
+          "motivo": "problema muscolare alla gamba, out contro la Roma",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Berardi",
+          "motivo": "noie fisiche, out contro la Roma",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Leysen F.",
+          "motivo": "lesione crociato anteriore del ginocchio sinistro, ipotesi rientro da aprile",
+          "stato": "injureds"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Walukiewicz",
+              "percentuale": 55
+            },
+            {
+              "nome": "Cinquegrano",
+              "percentuale": 45
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Bakola",
+              "percentuale": 60
+            },
+            {
+              "nome": "Adzic",
+              "percentuale": 40
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Dominguez B.",
+              "percentuale": 55
+            },
+            {
+              "nome": "Van Der Brempt",
+              "percentuale": 45
+            }
+          ]
+        }
+      ]
+    },
+    "Napoli": {
+      "modulo": "3-5-2",
+      "titolari": [
+        {
+          "nome": "Meret",
+          "ruolo": "P",
+          "probabilità": 90
+        },
+        {
+          "nome": "Rrahmani",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Marin R.",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Beukema",
+          "ruolo": "D",
+          "probabilità": 85
+        },
+        {
+          "nome": "Politano",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Zambo Anguissa",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "De Bruyne",
+          "ruolo": "C",
+          "probabilità": 85
+        },
+        {
+          "nome": "McTominay",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Lang",
+          "ruolo": "A",
+          "probabilità": 60
+        },
+        {
+          "nome": "Giovane",
+          "ruolo": "A",
+          "probabilità": 60
+        },
+        {
+          "nome": "Hojlund",
+          "ruolo": "A",
+          "probabilità": 90
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Milinkovic-Savic V.",
+          "ruolo": "P",
+          "probabilità": 5
+        },
+        {
+          "nome": "Contini",
+          "ruolo": "P",
+          "probabilità": 1
+        },
+        {
+          "nome": "Lieto",
+          "ruolo": "D",
+          "probabilità": 25
+        },
+        {
+          "nome": "Melnyk",
+          "ruolo": "D",
+          "probabilità": 30
+        },
+        {
+          "nome": "Olivera",
+          "ruolo": "D",
+          "probabilità": 15
+        },
+        {
+          "nome": "Vergara",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Gilmour",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Pereyra M.",
+          "ruolo": "A",
+          "probabilità": 30
+        },
+        {
+          "nome": "Lucca",
+          "ruolo": "A",
+          "probabilità": 60
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "Buongiorno",
+          "motivo": "problema al menisco del ginocchio destro, rientro da fine dicembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Di Lorenzo",
+          "motivo": "risentimento muscolare all'adduttore, tentativo rientro dalla seconda metà di novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Spinazzola",
+          "motivo": "lesione di basso grado del bicipite femorale della coscia destra, rientro dalla metà di novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Lobotka",
+          "motivo": "problema alla caviglia sinistra, recuperabile da metà dicembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Santos A.",
+          "motivo": "lesione distrattiva di medio grado del bicipite femorale sinistro, rientro da inizio dicembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Neres",
+          "motivo": "lesione di basso grado al muscolo semimembranoso della coscia destra, rientro dalla metà di novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Favasuli",
+          "motivo": "lesione muscolare al retto femorale, rientro da metà novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Badiashile",
+          "motivo": "lesione distrattiva di medio grado del retto femorale destro, rientro dalla fine di novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Olivera",
+          "motivo": "problema muscolare alla gamba, da valutare convocazione contro la Lazio",
+          "stato": "dubts"
+        },
+        {
+          "nome": "Marianucci",
+          "motivo": "squalificato",
+          "stato": "suspendeds"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Lang",
+              "percentuale": 60
+            },
+            {
+              "nome": "Vergara",
+              "percentuale": 40
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Giovane",
+              "percentuale": 60
+            },
+            {
+              "nome": "Gilmour",
+              "percentuale": 40
+            }
+          ]
+        }
+      ]
+    },
+    "Lazio": {
+      "modulo": "4-3-3",
+      "titolari": [
+        {
+          "nome": "Mandas",
+          "ruolo": "P",
+          "probabilità": 90
+        },
+        {
+          "nome": "Floriani Mussolini",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Sutalo J.",
+          "ruolo": "D",
+          "probabilità": 80
+        },
+        {
+          "nome": "Provstgaard",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Tavares N.",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Frattesi",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Belahyane",
+          "ruolo": "C",
+          "probabilità": 85
+        },
+        {
+          "nome": "Taylor K.",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Isaksen",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Pinamonti",
+          "ruolo": "A",
+          "probabilità": 60
+        },
+        {
+          "nome": "Noslin",
+          "ruolo": "A",
+          "probabilità": 85
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Motta",
+          "ruolo": "P",
+          "probabilità": 5
+        },
+        {
+          "nome": "Renzetti",
+          "ruolo": "P",
+          "probabilità": 1
+        },
+        {
+          "nome": "Pedraza",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Marusic",
+          "ruolo": "D",
+          "probabilità": 35
+        },
+        {
+          "nome": "Doekhi",
+          "ruolo": "D",
+          "probabilità": 35
+        },
+        {
+          "nome": "Leite",
+          "ruolo": "D",
+          "probabilità": 50
+        },
+        {
+          "nome": "Lazzari",
+          "ruolo": "D",
+          "probabilità": 40
+        },
+        {
+          "nome": "Pellegrini Lu.",
+          "ruolo": "D",
+          "probabilità": 15
+        },
+        {
+          "nome": "Rovella",
+          "ruolo": "C",
+          "probabilità": 30
+        },
+        {
+          "nome": "Cataldi",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Przyborek",
+          "ruolo": "C",
+          "probabilità": 15
+        },
+        {
+          "nome": "Dele-Bashiru",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Cancellieri",
+          "ruolo": "C",
+          "probabilità": 60
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "Zaccagni",
+          "motivo": "lesione del quadricipite femorale sinistro, tentativo rientro da fine novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Gudmundsson A.",
+          "motivo": "problema alla spalla destra, rientro dalla seconda metà novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Tavares N.",
+          "motivo": "Iieve affaticamento muscolare al flessore, in leggero dubbio dal 1' a Napoli",
+          "stato": "dubts"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Tavares N.",
+              "percentuale": 60
+            },
+            {
+              "nome": "Pedraza",
+              "percentuale": 40
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Pinamonti",
+              "percentuale": 60
+            },
+            {
+              "nome": "Cancellieri",
+              "percentuale": 40
+            }
+          ]
+        }
+      ]
+    },
+    "Genoa": {
+      "modulo": "3-4-2-1",
+      "titolari": [
+        {
+          "nome": "Bijlow",
+          "ruolo": "P",
+          "probabilità": 90
+        },
+        {
+          "nome": "Marcandalli",
+          "ruolo": "D",
+          "probabilità": 80
+        },
+        {
+          "nome": "Ostigard",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Vasquez",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Ehizibue",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Frendrup",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Traorè Hj.",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Ellertsson",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Messias",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "El Shaarawy",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Osmajic",
+          "ruolo": "A",
+          "probabilità": 90
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Stolz",
+          "ruolo": "P",
+          "probabilità": 5
+        },
+        {
+          "nome": "Sommariva",
+          "ruolo": "P",
+          "probabilità": 1
+        },
+        {
+          "nome": "Otoa",
+          "ruolo": "D",
+          "probabilità": 35
+        },
+        {
+          "nome": "Sabelli",
+          "ruolo": "D",
+          "probabilità": 30
+        },
+        {
+          "nome": "Mitaj",
+          "ruolo": "D",
+          "probabilità": 40
+        },
+        {
+          "nome": "Puczka",
+          "ruolo": "D",
+          "probabilità": 55
+        },
+        {
+          "nome": "Wiafe",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Baldanzi",
+          "ruolo": "C",
+          "probabilità": 50
+        },
+        {
+          "nome": "Amorim",
+          "ruolo": "C",
+          "probabilità": 40
+        },
+        {
+          "nome": "Meichtry",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Sow",
+          "ruolo": "C",
+          "probabilità": 35
+        },
+        {
+          "nome": "Vitinha O.",
+          "ruolo": "A",
+          "probabilità": 60
+        },
+        {
+          "nome": "Robinho Junior",
+          "ruolo": "A",
+          "probabilità": 15
+        },
+        {
+          "nome": "Havel",
+          "ruolo": "A",
+          "probabilità": 30
+        },
+        {
+          "nome": "Colombo",
+          "ruolo": "A",
+          "probabilità": 55
+        }
+      ],
+      "indisponibili": [],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Ehizibue",
+              "percentuale": 60
+            },
+            {
+              "nome": "Puczka",
+              "percentuale": 40
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Traorè Hj.",
+              "percentuale": 60
+            },
+            {
+              "nome": "Wiafe",
+              "percentuale": 40
+            }
+          ]
+        }
+      ]
+    },
+    "Milan": {
+      "modulo": "4-4-1-1",
+      "titolari": [
+        {
+          "nome": "Maignan",
+          "ruolo": "P",
+          "probabilità": 90
+        },
+        {
+          "nome": "Gila",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "De Winter",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Pavlovic",
+          "ruolo": "D",
+          "probabilità": 65
+        },
+        {
+          "nome": "Diawara S.",
+          "ruolo": "D",
+          "probabilità": 55
+        },
+        {
+          "nome": "Moreira",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Musah",
+          "ruolo": "C",
+          "probabilità": 80
+        },
+        {
+          "nome": "Modric",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Pulisic",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Rabiot",
+          "ruolo": "C",
+          "probabilità": 80
+        },
+        {
+          "nome": "Ramos G.",
+          "ruolo": "A",
+          "probabilità": 90
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Torriani",
+          "ruolo": "P",
+          "probabilità": 5
+        },
+        {
+          "nome": "Bartesaghi",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Estupinan",
+          "ruolo": "D",
+          "probabilità": 55
+        },
+        {
+          "nome": "Terracciano F.",
+          "ruolo": "D",
+          "probabilità": 25
+        },
+        {
+          "nome": "Jashari",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Comotto",
+          "ruolo": "C",
+          "probabilità": 25
+        },
+        {
+          "nome": "Hutchinson",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Cissè A.",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Camarda",
+          "ruolo": "A",
+          "probabilità": 40
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "Terracciano",
+          "motivo": "noie fisiche, out contro Genoa",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Gabbia",
+          "motivo": "lesione del flessore della coscia sinistra con parziale interessamento tendineo, ipotesi rientro da fine febbraio",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Tomori",
+          "motivo": "lesione a carico del muscolo flessore mediale della coscia destra, rientro dalla seconda metà di novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Saelemaekers",
+          "motivo": "problema alla caviglia destra, ipotesi rientro da febbraio",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Loftus-Cheek",
+          "motivo": "lesione muscolare al flessore, rientro dalla seconda metà di novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Chukwueze",
+          "motivo": "rottura del tendine del muscolo tensore della fascia lata dell'anca sinistra, ipotesi rientro da aprile",
+          "stato": "injureds"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Diawara S.",
+              "percentuale": 55
+            },
+            {
+              "nome": "Bartesaghi",
+              "percentuale": 45
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Pavlovic",
+              "percentuale": 65
+            },
+            {
+              "nome": "Terracciano F.",
+              "percentuale": 35
+            }
+          ]
+        }
+      ]
+    },
+    "Monza": {
+      "modulo": "3-4-2-1",
+      "titolari": [
+        {
+          "nome": "Tornqvist",
+          "ruolo": "P",
+          "probabilità": 90
+        },
+        {
+          "nome": "Kouadio",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Goglichidze",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Lucchesi",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Birindelli",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Akinsanmiro",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Foe Ondoa",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Mangas",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Mota",
+          "ruolo": "A",
+          "probabilità": 75
+        },
+        {
+          "nome": "Zeballos",
+          "ruolo": "A",
+          "probabilità": 55
+        },
+        {
+          "nome": "Varela G.",
+          "ruolo": "A",
+          "probabilità": 90
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Thiam",
+          "ruolo": "P",
+          "probabilità": 5
+        },
+        {
+          "nome": "Strajnar",
+          "ruolo": "P",
+          "probabilità": 1
+        },
+        {
+          "nome": "Bakoune",
+          "ruolo": "D",
+          "probabilità": 35
+        },
+        {
+          "nome": "Carboni A.",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Antov",
+          "ruolo": "D",
+          "probabilità": 25
+        },
+        {
+          "nome": "Colombo L.",
+          "ruolo": "C",
+          "probabilità": 40
+        },
+        {
+          "nome": "Mout",
+          "ruolo": "C",
+          "probabilità": 30
+        },
+        {
+          "nome": "Colpani",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Tourè I.",
+          "ruolo": "C",
+          "probabilità": 35
+        },
+        {
+          "nome": "Ciurria",
+          "ruolo": "C",
+          "probabilità": 25
+        },
+        {
+          "nome": "Forson O.",
+          "ruolo": "C",
+          "probabilità": 40
+        },
+        {
+          "nome": "Ngonge",
+          "ruolo": "A",
+          "probabilità": 55
+        },
+        {
+          "nome": "Robinson J.",
+          "ruolo": "A",
+          "probabilità": 60
+        },
+        {
+          "nome": "Cutrone",
+          "ruolo": "A",
+          "probabilità": 60
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "Pessina",
+          "motivo": "lussazione della rotula del ginocchio destro, rientro da metà novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Maye",
+          "motivo": "noie fisiche, out contro l'Atalanta",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Folorunsho",
+          "motivo": "noie muscolari al polpaccio, da valutare contro Atalanta",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Ziolkowski",
+          "motivo": "fascite plantare, rientro da metà novembre",
+          "stato": "injureds"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Goglichidze",
+              "percentuale": 60
+            },
+            {
+              "nome": "Carboni A.",
+              "percentuale": 40
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Akinsanmiro",
+              "percentuale": 60
+            },
+            {
+              "nome": "Colombo L.",
+              "percentuale": 40
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Zeballos",
+              "percentuale": 55
+            },
+            {
+              "nome": "Robinson J.",
+              "percentuale": 45
+            }
+          ]
+        }
+      ]
+    },
+    "Atalanta": {
+      "modulo": "4-2-3-1",
+      "titolari": [
+        {
+          "nome": "Carnesecchi",
+          "ruolo": "P",
+          "probabilità": 90
+        },
+        {
+          "nome": "Zappacosta",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Scalvini",
+          "ruolo": "D",
+          "probabilità": 85
+        },
+        {
+          "nome": "Obric",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Bernasconi",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Kessiè",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Ederson D.S.",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Elmas",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "De Ketelaere",
+          "ruolo": "A",
+          "probabilità": 90
+        },
+        {
+          "nome": "Rowe",
+          "ruolo": "C",
+          "probabilità": 80
+        },
+        {
+          "nome": "Krstovic",
+          "ruolo": "A",
+          "probabilità": 90
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Sportiello",
+          "ruolo": "P",
+          "probabilità": 5
+        },
+        {
+          "nome": "Sonzogni",
+          "ruolo": "P",
+          "probabilità": 1
+        },
+        {
+          "nome": "Idele",
+          "ruolo": "D",
+          "probabilità": 30
+        },
+        {
+          "nome": "Plaia",
+          "ruolo": "D",
+          "probabilità": 30
+        },
+        {
+          "nome": "Kolasinac",
+          "ruolo": "D",
+          "probabilità": 40
+        },
+        {
+          "nome": "Samardzic",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Zalewski",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Pasalic",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Sulemana K.",
+          "ruolo": "A",
+          "probabilità": 55
+        },
+        {
+          "nome": "Scamacca",
+          "ruolo": "A",
+          "probabilità": 60
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "Hien",
+          "motivo": "lesione del tendine prossimale del muscolo semimembranoso della coscia sinistra, rientro da metà novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Kossounou",
+          "motivo": "lesione muscolare di medio-alto grado del bicipite femorale della coscia sinistra, rientro dalla seconda metà di novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Bellanova",
+          "motivo": "distrazione di basso grado dell'adduttore lungo dell’arto sinistro, rientro da metà novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Gaetano",
+          "motivo": "distrazione di medio grado ai muscoli adduttori della coscia destra, rientro fine novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Raspadori",
+          "motivo": "distrazione muscolare di basso grado al bicipite femorale della coscia destra, rientro metà novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Kristensen T.",
+          "motivo": "distrazione di basso grado ai muscoli flessori della coscia sinistra, rientro dalla seconda metà di novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Pompei",
+          "motivo": "frattura della falange della mano destra, rientro da dicembre",
+          "stato": "injureds"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Bernasconi",
+              "percentuale": 60
+            },
+            {
+              "nome": "Kolasinac",
+              "percentuale": 40
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Kessiè",
+              "percentuale": 55
+            },
+            {
+              "nome": "Pasalic",
+              "percentuale": 45
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Elmas",
+              "percentuale": 60
+            },
+            {
+              "nome": "Zalewski",
+              "percentuale": 40
+            }
+          ]
+        }
+      ]
+    },
+    "Inter": {
+      "modulo": "3-5-2",
+      "titolari": [
+        {
+          "nome": "Martinez Jo.",
+          "ruolo": "P",
+          "probabilità": 80
+        },
+        {
+          "nome": "Bisseck",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Akanji",
+          "ruolo": "D",
+          "probabilità": 80
+        },
+        {
+          "nome": "Bastoni",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Diouf",
+          "ruolo": "C",
+          "probabilità": 65
+        },
+        {
+          "nome": "Barella",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Calhanoglu",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Zielinski",
+          "ruolo": "C",
+          "probabilità": 80
+        },
+        {
+          "nome": "Dimarco",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Esposito F.P.",
+          "ruolo": "A",
+          "probabilità": 60
+        },
+        {
+          "nome": "Thuram",
+          "ruolo": "A",
+          "probabilità": 90
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Provedel",
+          "ruolo": "P",
+          "probabilità": 5
+        },
+        {
+          "nome": "Di Gennaro",
+          "ruolo": "P",
+          "probabilità": 1
+        },
+        {
+          "nome": "Carlos Augusto",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Pavard",
+          "ruolo": "D",
+          "probabilità": 35
+        },
+        {
+          "nome": "Spence",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Stones",
+          "ruolo": "D",
+          "probabilità": 25
+        },
+        {
+          "nome": "Mkhitaryan",
+          "ruolo": "C",
+          "probabilità": 40
+        },
+        {
+          "nome": "Stankovic A.",
+          "ruolo": "C",
+          "probabilità": 30
+        },
+        {
+          "nome": "Jones C.",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Sucic P.",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Lavelli",
+          "ruolo": "A",
+          "probabilità": 10
+        },
+        {
+          "nome": "Bonny",
+          "ruolo": "A",
+          "probabilità": 60
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "Luis Henrique",
+          "motivo": "risentimento all'adduttore lungo della coscia sinistra, ipotesi rientro da metà novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Martinez L.",
+          "motivo": "risentimento muscolare ai flessori della coscia sinistra, rientro da metà novembre",
+          "stato": "injureds"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Diouf",
+              "percentuale": 65
+            },
+            {
+              "nome": "Spence",
+              "percentuale": 35
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Dimarco",
+              "percentuale": 60
+            },
+            {
+              "nome": "Carlos Augusto",
+              "percentuale": 40
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Esposito F.P.",
+              "percentuale": 60
+            },
+            {
+              "nome": "Bonny",
+              "percentuale": 40
+            }
+          ]
+        }
+      ]
+    },
+    "Como": {
+      "modulo": "4-2-3-1",
+      "titolari": [
+        {
+          "nome": "Butez",
+          "ruolo": "P",
+          "probabilità": 55
+        },
+        {
+          "nome": "Couto",
+          "ruolo": "D",
+          "probabilità": 80
+        },
+        {
+          "nome": "Ramon",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Kempf",
+          "ruolo": "D",
+          "probabilità": 80
+        },
+        {
+          "nome": "Kaiki",
+          "ruolo": "D",
+          "probabilità": 55
+        },
+        {
+          "nome": "Perrone",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Da Cunha",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Liberali",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Paz N.",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Baturina",
+          "ruolo": "C",
+          "probabilità": 85
+        },
+        {
+          "nome": "Douvikas",
+          "ruolo": "A",
+          "probabilità": 75
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Sanchez Ro.",
+          "ruolo": "P",
+          "probabilità": 45
+        },
+        {
+          "nome": "Vigorito",
+          "ruolo": "P",
+          "probabilità": 1
+        },
+        {
+          "nome": "Valle",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Smolcic I.",
+          "ruolo": "D",
+          "probabilità": 55
+        },
+        {
+          "nome": "Goldaniga",
+          "ruolo": "D",
+          "probabilità": 30
+        },
+        {
+          "nome": "Kambwala",
+          "ruolo": "D",
+          "probabilità": 40
+        },
+        {
+          "nome": "Dossena",
+          "ruolo": "D",
+          "probabilità": 20
+        },
+        {
+          "nome": "Caqueret",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Ricci S.",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Milla",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Lahdo",
+          "ruolo": "C",
+          "probabilità": 10
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "Addai",
+          "motivo": "problema muscolare, out contro l'Inter",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Rodriguez Je.",
+          "motivo": "problema fisico, ipotesi rientro metà dicembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Diao",
+          "motivo": "lesione muscolare al flessore della gamba, rientro dalla metà di novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Chalobah T.",
+          "motivo": "problema muscolare alla gamba, da valutare convocazione contro Inter",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Kean",
+          "motivo": "fastidio alla tibia, rientro da inizio dicembre",
+          "stato": "injureds"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Butez",
+              "percentuale": 55
+            },
+            {
+              "nome": "Sanchez Ro.",
+              "percentuale": 45
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Kaiki",
+              "percentuale": 55
+            },
+            {
+              "nome": "Valle",
+              "percentuale": 45
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Da Cunha",
+              "percentuale": 60
+            },
+            {
+              "nome": "Caqueret",
+              "percentuale": 40
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Liberali",
+              "percentuale": 55
+            },
+            {
+              "nome": "Smolcic I.",
+              "percentuale": 45
+            }
+          ]
+        }
+      ]
+    },
+    "Fiorentina": {
+      "modulo": "4-3-2-1",
+      "titolari": [
+        {
+          "nome": "De Gea",
+          "ruolo": "P",
+          "probabilità": 90
+        },
+        {
+          "nome": "Jimenez A.",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Dragusin",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Viery",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Joao Mario",
+          "ruolo": "D",
+          "probabilità": 80
+        },
+        {
+          "nome": "Ndour",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Fagioli",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Oulai",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Mastantuono",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Njie",
+          "ruolo": "C",
+          "probabilità": 80
+        },
+        {
+          "nome": "Pellegrino M.",
+          "ruolo": "A",
+          "probabilità": 65
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Christensen O.",
+          "ruolo": "P",
+          "probabilità": 5
+        },
+        {
+          "nome": "Lezzerini",
+          "ruolo": "P",
+          "probabilità": 1
+        },
+        {
+          "nome": "Valdepenas",
+          "ruolo": "D",
+          "probabilità": 50
+        },
+        {
+          "nome": "Dodò",
+          "ruolo": "D",
+          "probabilità": 40
+        },
+        {
+          "nome": "Brescianini",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Goncalves P.",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Beto",
+          "ruolo": "A",
+          "probabilità": 55
+        },
+        {
+          "nome": "Gnonto",
+          "ruolo": "A",
+          "probabilità": 60
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "Pongracic",
+          "motivo": "lesione mio-fasciale a carico del capo lungo del bicipite femorale della coscia destra, rientro dalla seconda metà di novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Ranieri L.",
+          "motivo": "schiacciamento di un nervo al piede, da valutare contro la Juve",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Parisi",
+          "motivo": "infortunio al legamento crociato, rientro da dicembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Atta",
+          "motivo": "sovraccarico funzionale dell'addome, rientro dalla metà di novembre",
+          "stato": "injureds"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Oulai",
+              "percentuale": 60
+            },
+            {
+              "nome": "Brescianini",
+              "percentuale": 40
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Pellegrino M.",
+              "percentuale": 65
+            },
+            {
+              "nome": "Beto",
+              "percentuale": 35
+            }
+          ]
+        }
+      ]
+    },
+    "Juventus": {
+      "modulo": "4-4-2",
+      "titolari": [
+        {
+          "nome": "Vicario",
+          "ruolo": "P",
+          "probabilità": 90
+        },
+        {
+          "nome": "Kalulu",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Bremer",
+          "ruolo": "D",
+          "probabilità": 90
+        },
+        {
+          "nome": "Lucumì",
+          "ruolo": "D",
+          "probabilità": 80
+        },
+        {
+          "nome": "Cabal",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "McKennie",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Koopmeiners",
+          "ruolo": "C",
+          "probabilità": 80
+        },
+        {
+          "nome": "Douglas Luiz",
+          "ruolo": "C",
+          "probabilità": 90
+        },
+        {
+          "nome": "Alajbegovic",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Woltemade",
+          "ruolo": "A",
+          "probabilità": 80
+        },
+        {
+          "nome": "Kolo Muani",
+          "ruolo": "A",
+          "probabilità": 90
+        }
+      ],
+      "panchina": [
+        {
+          "nome": "Neto",
+          "ruolo": "P",
+          "probabilità": 5
+        },
+        {
+          "nome": "Pinsoglio",
+          "ruolo": "P",
+          "probabilità": 1
+        },
+        {
+          "nome": "Gatti",
+          "ruolo": "D",
+          "probabilità": 50
+        },
+        {
+          "nome": "Rugani",
+          "ruolo": "D",
+          "probabilità": 30
+        },
+        {
+          "nome": "Cambiaso",
+          "ruolo": "D",
+          "probabilità": 60
+        },
+        {
+          "nome": "Kelly L.",
+          "ruolo": "D",
+          "probabilità": 40
+        },
+        {
+          "nome": "Sarr P.",
+          "ruolo": "C",
+          "probabilità": 60
+        },
+        {
+          "nome": "Zhegrova",
+          "ruolo": "C",
+          "probabilità": 55
+        },
+        {
+          "nome": "Boga",
+          "ruolo": "A",
+          "probabilità": 60
+        },
+        {
+          "nome": "Ekhator",
+          "ruolo": "A",
+          "probabilità": 30
+        }
+      ],
+      "indisponibili": [
+        {
+          "nome": "Celik",
+          "motivo": "lesione di basso grado del bicipite femorale sinistro, recuperabile da metà novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Locatelli",
+          "motivo": "rottura del menisco esterno del ginocchio, rientro in campo da febbraio",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Thuram K.",
+          "motivo": "sindrome femoro-rotulea, ipotesi rientro da gennaio",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Conceicao",
+          "motivo": "lussazione alla spalla sinistra, rientro dalla metà di novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Yildiz",
+          "motivo": "frattura metatarso piede sinistro, rientro dalla prima metà di dicembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Grabara",
+          "motivo": "lesione al crociato anteriore del ginocchio destro, rientro da aprile",
+          "stato": "injureds"
+        },
+        {
+          "nome": "Gonzalez N.",
+          "motivo": "lesione di basso grado del soleo destro, rientro metà novembre",
+          "stato": "injureds"
+        },
+        {
+          "nome": "McKennie",
+          "motivo": "lieve affaticamento muscolare alla gamba, in leggero dubbio dal 1' contro la Fiorentina",
+          "stato": "dubts"
+        }
+      ],
+      "ballottaggi": [
+        {
+          "giocatori": [
+            {
+              "nome": "Cabal",
+              "percentuale": 60
+            },
+            {
+              "nome": "Cambiaso",
+              "percentuale": 40
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "McKennie",
+              "percentuale": 55
+            },
+            {
+              "nome": "Zhegrova",
+              "percentuale": 45
+            }
+          ]
+        },
+        {
+          "giocatori": [
+            {
+              "nome": "Alajbegovic",
+              "percentuale": 60
+            },
+            {
+              "nome": "Boga",
+              "percentuale": 40
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
