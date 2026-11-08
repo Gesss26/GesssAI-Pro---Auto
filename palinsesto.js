@@ -1,6 +1,6 @@
 // ============================================================
 // palinsesto.js - Modulo Palinsesto
-// v23: + registrazione pronostici Dixon indipendente in MatchTab
+// v24: "Campionati Italiani" al posto di Top 5 Minori nello switch
 // ============================================================
 
 (function () {
@@ -96,7 +96,13 @@
   };
 
   const TOP_5_MAGGIORI = ['Serie A', 'Ligue 1', 'La Liga', 'Bundesliga', 'Premier League'];
-  const TOP_5_MINORI = ['Serie B', '2. Bundesliga', 'Ligue 2', 'Segunda División', 'EFL Championship'];
+  const CAMPIONATI_ITALIANI = [
+    'Serie A',
+    'Serie B',
+    'Serie C - Girone A',
+    'Serie C - Girone B',
+    'Serie C - Girone C',
+  ];
   const TOP_COPPE = ['UEFA Champions League', 'UEFA Europa League', 'UEFA Europa Conference'];
 
   const matchCampionato = (nomeDb, nomeTarget) => {
@@ -683,8 +689,8 @@
   const VisualizzaGiocateSwitch = ({
     mode, setMode,
     selectedFamiglie,
-    onTop5Maggiori, onTop5Minori, onTop5Tutti,
-    isTop5MaggioriAttivo, isTop5MinoriAttivo, isTop5TuttiAttivo,
+    onTop5Maggiori, onCampionatiItaliani, onTop5Tutti,
+    isTop5MaggioriAttivo, isCampionatiItalianiAttivo, isTop5TuttiAttivo,
     onTopCoppe, isTopCoppeAttivo,
   }) => {
     const countScelte = (selectedFamiglie || []).length;
@@ -733,9 +739,9 @@
           🏆 Top 5
         </span>
         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          <button onClick={onCampionatiItaliani} style={btnTopStyle(isCampionatiItalianiAttivo, 'var(--neon-cyan)')} title="Serie A, Serie B, Serie C - Girone A, B, C">🇮🇹 Italiani</button>
           <button onClick={onTop5Maggiori} style={btnTopStyle(isTop5MaggioriAttivo, 'var(--neon-gold)')} title="Serie A, Ligue 1, La Liga, Bundesliga, Premier League">⭐ Maggiori</button>
-          <button onClick={onTop5Minori} style={btnTopStyle(isTop5MinoriAttivo, 'var(--neon-cyan)')} title="Serie B, 2. Bundesliga, Ligue 2, Segunda División, EFL Championship">🔹 Minori</button>
-          <button onClick={onTop5Tutti} style={btnTopStyle(isTop5TuttiAttivo, 'var(--neon-magenta)')} title="Maggiori + Minori (10 campionati)">💎 Maggiori + Minori</button>
+          <button onClick={onTop5Tutti} style={btnTopStyle(isTop5TuttiAttivo, 'var(--neon-magenta)')} title="Maggiori + Italiani (10 campionati)">💎 Maggiori + Italiani</button>
           <button onClick={onTopCoppe} style={btnTopStyle(isTopCoppeAttivo, '#1a1aff')} title="UEFA Champions League, Europa League, Conference League">🏆 Coppe</button>
         </div>
 
@@ -822,8 +828,8 @@
     }, [setFiltro, tuttiNomiCampionati]);
 
     const handleTop5Maggiori = useCallback(() => selezionaSoloCampionati(TOP_5_MAGGIORI), [selezionaSoloCampionati]);
-    const handleTop5Minori = useCallback(() => selezionaSoloCampionati(TOP_5_MINORI), [selezionaSoloCampionati]);
-    const handleTop5Tutti = useCallback(() => selezionaSoloCampionati([...TOP_5_MAGGIORI, ...TOP_5_MINORI]), [selezionaSoloCampionati]);
+    const handleCampionatiItaliani = useCallback(() => selezionaSoloCampionati(CAMPIONATI_ITALIANI), [selezionaSoloCampionati]);
+    const handleTop5Tutti = useCallback(() => selezionaSoloCampionati([...TOP_5_MAGGIORI, ...CAMPIONATI_ITALIANI]), [selezionaSoloCampionati]);
     const handleTopCoppe = useCallback(() => selezionaSoloCampionati(TOP_COPPE), [selezionaSoloCampionati]);
 
     const isSelezioneUgualeA = useCallback((targetList) => {
@@ -835,8 +841,8 @@
     }, [campionatiAttivi, tuttiNomiCampionati]);
 
     const isTop5MaggioriAttivo = useMemo(() => isSelezioneUgualeA(TOP_5_MAGGIORI), [isSelezioneUgualeA]);
-    const isTop5MinoriAttivo = useMemo(() => isSelezioneUgualeA(TOP_5_MINORI), [isSelezioneUgualeA]);
-    const isTop5TuttiAttivo = useMemo(() => isSelezioneUgualeA([...TOP_5_MAGGIORI, ...TOP_5_MINORI]), [isSelezioneUgualeA]);
+    const isCampionatiItalianiAttivo = useMemo(() => isSelezioneUgualeA(CAMPIONATI_ITALIANI), [isSelezioneUgualeA]);
+    const isTop5TuttiAttivo = useMemo(() => isSelezioneUgualeA([...TOP_5_MAGGIORI, ...CAMPIONATI_ITALIANI]), [isSelezioneUgualeA]);
     const isTopCoppeAttivo = useMemo(() => isSelezioneUgualeA(TOP_COPPE), [isSelezioneUgualeA]);
 
     const partiteOggi = useMemo(() => {
@@ -924,10 +930,10 @@
             setMode={setVisualizzaMode}
             selectedFamiglie={selectedFamiglie}
             onTop5Maggiori={handleTop5Maggiori}
-            onTop5Minori={handleTop5Minori}
+            onCampionatiItaliani={handleCampionatiItaliani}
             onTop5Tutti={handleTop5Tutti}
             isTop5MaggioriAttivo={isTop5MaggioriAttivo}
-            isTop5MinoriAttivo={isTop5MinoriAttivo}
+            isCampionatiItalianiAttivo={isCampionatiItalianiAttivo}
             isTop5TuttiAttivo={isTop5TuttiAttivo}
             onTopCoppe={handleTopCoppe}
             isTopCoppeAttivo={isTopCoppeAttivo}
@@ -970,10 +976,10 @@
           setMode={setVisualizzaMode}
           selectedFamiglie={selectedFamiglie}
           onTop5Maggiori={handleTop5Maggiori}
-          onTop5Minori={handleTop5Minori}
+          onCampionatiItaliani={handleCampionatiItaliani}
           onTop5Tutti={handleTop5Tutti}
           isTop5MaggioriAttivo={isTop5MaggioriAttivo}
-          isTop5MinoriAttivo={isTop5MinoriAttivo}
+          isCampionatiItalianiAttivo={isCampionatiItalianiAttivo}
           isTop5TuttiAttivo={isTop5TuttiAttivo}
           onTopCoppe={handleTopCoppe}
           isTopCoppeAttivo={isTopCoppeAttivo}
@@ -999,6 +1005,6 @@
 
   window.PalinsestoComponent = PalinsestoComponent;
   window.ChampLogo = ChampLogo;
-  console.log('✅ Modulo Palinsesto v23 caricato — registrazione pronostici Storico e Dixon separati');
+  console.log('✅ Modulo Palinsesto v24 caricato — "Campionati Italiani" nello switch');
 
 })();

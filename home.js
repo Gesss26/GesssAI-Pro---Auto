@@ -1,6 +1,6 @@
 // ============================================================
 // home.js - Modulo Home con MENU PRINCIPALE a griglia di card
-// v12: aggiunta voce "Statistiche Pronostici" nel menu principale
+// v13: "Campionati Italiani" come primo preset (sostituisce Top 5 Minori)
 // ============================================================
 
 (function () {
@@ -434,10 +434,23 @@
   ];
 
   const TOP_5_MAGGIORI = ['Serie A', 'Ligue 1', 'La Liga', 'Bundesliga', 'Premier League'];
-  const TOP_5_MINORI = ['Serie B', '2. Bundesliga', 'Ligue 2', 'Segunda División', 'EFL Championship'];
+  const CAMPIONATI_ITALIANI = [
+    'Serie A',
+    'Serie B',
+    'Serie C - Girone A',
+    'Serie C - Girone B',
+    'Serie C - Girone C',
+  ];
   const TOP_COPPE = ['UEFA Champions League', 'UEFA Europa League', 'UEFA Europa Conference', 'UEFA Nations League'];
 
   const PRESET_CAMPIONATI = [
+    {
+      id: 'campionati-italiani',
+      label: '🇮🇹 Campionati Italiani',
+      sub: 'Serie A · B · C (Gir. A, B, C)',
+      className: 'btn-minori',
+      campionati: CAMPIONATI_ITALIANI,
+    },
     {
       id: 'top5-maggiori',
       label: '🏆 Top 5 Maggiori',
@@ -446,18 +459,11 @@
       campionati: TOP_5_MAGGIORI,
     },
     {
-      id: 'top5-minori',
-      label: '🔹 Top 5 Minori',
-      sub: 'Serie B · 2. Bundes · Ligue 2 · Segunda · EFL',
-      className: 'btn-minori',
-      campionati: TOP_5_MINORI,
-    },
-    {
-      id: 'maggiori-minori',
-      label: '💎 Maggiori + Minori',
-      sub: '10 campionati top',
+      id: 'maggiori-italiani',
+      label: '💎 Maggiori + Italiani',
+      sub: 'Maggiori top 5 + Italiani',
       className: 'btn-tutti',
-      campionati: [...TOP_5_MAGGIORI, ...TOP_5_MINORI],
+      campionati: [...TOP_5_MAGGIORI, ...CAMPIONATI_ITALIANI],
     },
     {
       id: 'coppe',
@@ -2314,8 +2320,8 @@
     leggiSelezioniSchedina, scriviSelezioniSchedina, toggleSelezioneSchedina,
     normalizeMatches, normalizeCampionato, CHINESE_TEAMS,
     leggiFamiglieSelezionate, GIOCATE_SELEZIONATE_KEY, FAMIGLIE_SELEZIONATE_KEY,
-    TOP_5_MAGGIORI, TOP_5_MINORI, TOP_COPPE, PRESET_CAMPIONATI,
+    TOP_5_MAGGIORI, CAMPIONATI_ITALIANI, TOP_COPPE, PRESET_CAMPIONATI,
   };
 
-  console.log('✅ Modulo Home v12 caricato — aggiunta voce "Statistiche Pronostici"');
+  console.log('✅ Modulo Home v13 caricato — "Campionati Italiani" come primo preset');
 })();
