@@ -1,6 +1,6 @@
 // ============================================================
 // home.js - Modulo Home con MENU PRINCIPALE a griglia di card
-// v13: "Campionati Italiani" come primo preset (sostituisce Top 5 Minori)
+// v14: "Campionati Italiani" come primo preset (Maggiori + Minori invariato)
 // ============================================================
 
 (function () {
@@ -434,6 +434,7 @@
   ];
 
   const TOP_5_MAGGIORI = ['Serie A', 'Ligue 1', 'La Liga', 'Bundesliga', 'Premier League'];
+  const TOP_5_MINORI = ['Serie B', '2. Bundesliga', 'Ligue 2', 'Segunda División', 'EFL Championship'];
   const CAMPIONATI_ITALIANI = [
     'Serie A',
     'Serie B',
@@ -459,11 +460,11 @@
       campionati: TOP_5_MAGGIORI,
     },
     {
-      id: 'maggiori-italiani',
-      label: '💎 Maggiori + Italiani',
-      sub: 'Maggiori top 5 + Italiani',
+      id: 'maggiori-minori',
+      label: '💎 Maggiori + Minori',
+      sub: '10 campionati top',
       className: 'btn-tutti',
-      campionati: [...TOP_5_MAGGIORI, ...CAMPIONATI_ITALIANI],
+      campionati: [...TOP_5_MAGGIORI, ...TOP_5_MINORI],
     },
     {
       id: 'coppe',
@@ -2320,8 +2321,8 @@
     leggiSelezioniSchedina, scriviSelezioniSchedina, toggleSelezioneSchedina,
     normalizeMatches, normalizeCampionato, CHINESE_TEAMS,
     leggiFamiglieSelezionate, GIOCATE_SELEZIONATE_KEY, FAMIGLIE_SELEZIONATE_KEY,
-    TOP_5_MAGGIORI, CAMPIONATI_ITALIANI, TOP_COPPE, PRESET_CAMPIONATI,
+    TOP_5_MAGGIORI, TOP_5_MINORI, CAMPIONATI_ITALIANI, TOP_COPPE, PRESET_CAMPIONATI,
   };
 
-  console.log('✅ Modulo Home v13 caricato — "Campionati Italiani" come primo preset');
+  console.log('✅ Modulo Home v14 caricato — "Campionati Italiani" primo preset, Maggiori + Minori invariato');
 })();
